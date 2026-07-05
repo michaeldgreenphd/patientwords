@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PatientWords — clinical vs. patient language in medical AI circuits</title>
+<meta name="description" content="Attribution-graph comparisons of clinical vs. colloquial patient language in gemma-2-2b, built on Neuronpedia and circuit-tracer.">
+<style>
+  html,body{background:#fff;margin:0;padding:0}
+  body{font-family:-apple-system,'Helvetica Neue',Helvetica,Arial,sans-serif;color:#111827;line-height:1.55}
+  main{max-width:960px;margin:0 auto;padding:56px 20px 40px}
+  .kicker{font-size:13px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#2563eb;margin:0 0 14px}
+  h1{font-size:34px;line-height:1.2;font-weight:700;margin:0 0 10px;max-width:34ch}
+  h1 .accent{color:#f97316}
+  p.lede{font-size:16px;color:#374151;max-width:62ch;margin:0 0 8px}
+  p.note{font-size:12.5px;color:#9aa3af;max-width:70ch;margin:14px 0 0}
+  .rule{height:1px;background:#e5e7eb;margin:36px 0}
+  h2{font-size:15px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#6b7280;margin:0 0 22px}
+  .card{display:flex;gap:26px;align-items:flex-start;margin:0 0 40px;text-decoration:none;color:inherit}
+  .card img{width:340px;max-width:38vw;height:auto;border:1px solid #e5e7eb;border-radius:6px;flex-shrink:0}
+  .card h3{font-size:18px;font-weight:650;margin:2px 0 6px}
+  .card h3 .mode{font-family:ui-monospace,Menlo,monospace;font-size:12px;font-weight:500;color:#6b7280;
+    background:#f3f4f6;border-radius:4px;padding:2px 7px;margin-left:10px;vertical-align:2px}
+  .card p{font-size:14px;color:#374151;margin:0 0 10px;max-width:52ch}
+  .stat{font-family:ui-monospace,Menlo,monospace;font-size:13px;font-weight:600}
+  .stat.penalty{color:#d1584d}.stat.recovery{color:#2f7d52}
+  .open{display:inline-block;margin-top:10px;font-size:13.5px;font-weight:600;color:#2563eb}
+  .card:hover .open{text-decoration:underline}
+  .card:hover img{border-color:#c3c9d2}
+  footer{font-size:12.5px;color:#9aa3af;margin-top:8px}
+  footer a{color:#6b7280}
+  @media (max-width:720px){.card{flex-direction:column}.card img{width:100%;max-width:100%}}
+</style>
+</head>
+<body>
+<main>
+  <p class="kicker">PatientWords · mechanistic interpretability of medical language</p>
+  <h1>Patients don’t speak like doctors.<br>Medical AI <span class="accent">must be ready</span> to interpret them.</h1>
+  <p class="lede">
+    We trace how gemma-2-2b processes standard clinical terminology versus the colloquial
+    language patients actually use — feature-by-feature, layer-by-layer — using attribution
+    graphs built on Gemma&nbsp;Scope transcoders. Saying <em>“I’ve got the blues”</em> instead of
+    <em>“I have depression”</em> reroutes the model’s internal circuit and collapses the
+    probability of the correct clinical continuation. Translating patient language back into
+    clinical terms restores it.
+  </p>
+  <p class="lede">
+    Each page below is a standalone, interactive render: hover any node for its feature
+    identity, category, attribution mass, and autointerp description. Blue features are
+    clinical, orange are off-target, gray are structural; node size tracks attribution mass
+    and the predictive spread at the logit layer shows the model’s competing next-token
+    predictions.
+  </p>
+
+  <div class="rule"></div>
+  <h2>Three comparison engines</h2>
+
+  <a class="card" href="modes/2panel/">
+    <img src="modes/2panel/preview.png" alt="Two stacked attribution graphs comparing clinical and patient wording">
+    <div>
+      <h3>Direct Lexical Swap<span class="mode">2panel</span></h3>
+      <p>A word-for-word substitution — “depression” vs. “the blues” — mapped as two stacked
+         circuit traces. The clinical wording drives prob(therapist) = 0.86; the patient
+         idiom collapses it to 0.35 and hands the top prediction to a bare article.</p>
+      <span class="stat penalty">Language Penalty: −51% probability (0.86 → 0.35)</span><br>
+      <span class="open">Open the interactive comparison →</span>
+    </div>
+  </a>
+
+  <a class="card" href="modes/4quadrant/">
+    <img src="modes/4quadrant/preview.png" alt="Four-quadrant matrix factorizing vocabulary and syntax effects">
+    <div>
+      <h3>Syntax × Terminology Matrix<span class="mode">4quadrant</span></h3>
+      <p>A 2×2 factorization crossing the core medical keyword with the surrounding frame
+         syntax. Vocabulary choice costs −42% probability in either frame; colloquial framing
+         alone costs another −9% — even when the patient knows the clinical word
+         (Box&nbsp;C).</p>
+      <span class="stat penalty">Vocabulary Δ: −42% · Syntax Δ: −9%</span><br>
+      <span class="open">Open the interactive matrix →</span>
+    </div>
+  </a>
+
+  <a class="card" href="modes/translation/">
+    <img src="modes/translation/preview.png" alt="Translation mitigation chain restoring the clinical circuit">
+    <div>
+      <h3>Translation Mitigation<span class="mode">translation</span></h3>
+      <p>The organic fix: an LLM translates the patient sentence into standard terminology and
+         the raw output is traced natively. The clinical circuit — and the correct
+         prediction — comes back.</p>
+      <span class="stat recovery">Recovered target probability: +51% (0.35 → 0.86)</span><br>
+      <span class="open">Open the mitigation chain →</span>
+    </div>
+  </a>
+
+  <div class="rule"></div>
+  <p class="note">
+    The renders on this page are demonstration outputs generated from synthetic sample graphs
+    to validate the visualization pipeline end-to-end; traces from live gemma-2-2b runs will
+    replace them as the study progresses.
+  </p>
+  <footer>
+    Built with the <a href="https://github.com/michaeldgreenphd/neuronpedia">medlang-circuits</a>
+    pipeline on <a href="https://neuronpedia.org">Neuronpedia</a> ·
+    attribution graphs by <a href="https://github.com/safety-research/circuit-tracer">circuit-tracer</a> ·
+    features from <a href="https://huggingface.co/google/gemma-scope-2b-pt-transcoders">Gemma Scope</a> transcoders
+  </footer>
+</main>
+</body>
+</html>
