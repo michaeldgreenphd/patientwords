@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>404 — PatientWords</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#faf9f5">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23faf9f5'/%3E%3Crect x='9' y='9' width='30' height='30' fill='%23111827'/%3E%3Crect x='25' y='25' width='30' height='30' fill='%2315803d'/%3E%3C/svg%3E">
+<style>
+  :root{
+    --paper:#faf9f5; --ink:#1c1c19; --patient:#111827; --clinical:#15803d;
+    --muted:#75746d; --hairline:#dcdad2;
+    --serif:'Iowan Old Style','Palatino Linotype',Palatino,'Book Antiqua',Georgia,serif;
+    --mono:ui-monospace,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace;
+  }
+  html{background:var(--paper)}
+  body{margin:0;padding:0;background:var(--paper);color:var(--ink);
+    font-family:var(--serif);font-size:17px;line-height:1.62;
+    -webkit-font-smoothing:antialiased}
+  main{max-width:760px;margin:0 auto;padding:0 22px 56px}
+  a{color:inherit}
+  a:focus-visible{outline:2px solid var(--clinical);outline-offset:3px;border-radius:1px}
+
+  .masthead{max-width:760px;margin:0 auto;padding:20px 22px 0}
+  .masthead-row{display:flex;align-items:baseline;justify-content:space-between;
+    flex-wrap:wrap;gap:8px 24px;padding:10px 0 12px}
+  .wordmark{font-family:var(--serif);font-size:19px;font-weight:600;letter-spacing:.02em;
+    text-decoration:none}
+  .wordmark .pw-p{color:var(--patient)}
+  .wordmark .pw-w{color:var(--clinical)}
+  .masthead nav{display:flex;gap:22px}
+  .masthead nav a{font-family:var(--mono);font-size:11px;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--muted);text-decoration:none;padding:2px 0}
+  .masthead nav a:hover{color:var(--ink);text-decoration:underline;text-underline-offset:4px}
+  .rule-heavy{border:0;border-top:2px solid var(--ink);margin:0}
+  .rule-fine{border:0;border-top:1px solid var(--hairline);margin:3px 0 0}
+
+  .dateline{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--muted);margin:56px 0 18px}
+  h1{font-size:clamp(30px,5vw,42px);line-height:1.16;font-weight:600;
+    letter-spacing:-.006em;margin:0 0 18px;max-width:22ch}
+  h1 .err{color:#b4483d}
+  p{max-width:56ch;margin:0 0 14px;font-size:17px}
+  .note{font-family:var(--mono);font-size:12.5px;color:var(--muted);line-height:1.8;
+    border-top:1px solid var(--hairline);margin-top:30px;padding-top:14px;max-width:64ch}
+  .back{display:inline-block;margin-top:18px;font-family:var(--mono);font-size:12px;
+    letter-spacing:.1em;text-transform:uppercase;color:var(--ink);text-decoration:none;
+    border-bottom:1px solid var(--ink);padding-bottom:2px}
+  .back:hover{color:var(--clinical);border-bottom-color:var(--clinical)}
+</style>
+</head>
+<body>
+<header class="masthead">
+  <hr class="rule-heavy"><hr class="rule-fine">
+  <div class="masthead-row">
+    <a class="wordmark" href="/patientwords/"><span class="pw-p">Patient</span><span class="pw-w">Words</span></a>
+    <nav aria-label="Site">
+      <a href="/patientwords/">Gallery</a>
+      <a href="/patientwords/methods.html">Methods</a>
+      <a href="https://github.com/michaeldgreenphd/patientwords">GitHub</a>
+    </nav>
+  </div>
+  <hr class="rule-fine">
+</header>
+<main>
+  <p class="dateline">Error · <span style="color:#b4483d">HTTP 404</span></p>
+  <h1>This page isn’t in the trace.<br><span class="err">Attribution mass: zero.</span></h1>
+  <p>
+    The address you followed doesn’t resolve to any figure, method, or render on this site.
+    It may have been moved when the gallery was regenerated, or the link may simply be
+    misspelled.
+  </p>
+  <p class="note">
+    Everything published here is reachable from the gallery: three interactive
+    comparison engines (2panel, 4quadrant, translation) and the methods page.
+  </p>
+  <a class="back" href="/patientwords/">Back to the gallery →</a>
+</main>
+</body>
+</html>

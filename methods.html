@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Methods — PatientWords</title>
+<meta name="description" content="How PatientWords works: gemma-2-2b with Gemma Scope transcoders, circuit-tracer attribution graphs via Neuronpedia, feature tagging, and three comparison engines.">
+<link rel="canonical" href="https://michaeldgreenphd.github.io/patientwords/methods.html">
+<meta name="theme-color" content="#faf9f5">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="PatientWords">
+<meta property="og:title" content="Methods — PatientWords">
+<meta property="og:description" content="How the pipeline works: gemma-2-2b + Gemma Scope transcoders → circuit-tracer attribution graphs via Neuronpedia → feature tagging → three comparison engines.">
+<meta property="og:url" content="https://michaeldgreenphd.github.io/patientwords/methods.html">
+<meta property="og:image" content="https://michaeldgreenphd.github.io/patientwords/modes/2panel/preview.png">
+<meta property="og:image:width" content="1690">
+<meta property="og:image:height" content="1929">
+<meta property="og:image:alt" content="Two stacked attribution graphs comparing clinical and patient wording in gemma-2-2b">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Methods — PatientWords">
+<meta name="twitter:description" content="How the PatientWords attribution-graph pipeline works, in plain language.">
+<meta name="twitter:image" content="https://michaeldgreenphd.github.io/patientwords/modes/2panel/preview.png">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23faf9f5'/%3E%3Crect x='9' y='9' width='30' height='30' fill='%23111827'/%3E%3Crect x='25' y='25' width='30' height='30' fill='%2315803d'/%3E%3C/svg%3E">
+<style>
+  :root{
+    --paper:#faf9f5; --ink:#1c1c19; --patient:#111827; --clinical:#15803d;
+    --penalty:#b4483d; --muted:#75746d; --structural:#c3c9d2; --hairline:#dcdad2;
+    --serif:'Iowan Old Style','Palatino Linotype',Palatino,'Book Antiqua',Georgia,serif;
+    --mono:ui-monospace,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace;
+  }
+  html{background:var(--paper)}
+  body{margin:0;padding:0;background:var(--paper);color:var(--ink);
+    font-family:var(--serif);font-size:17px;line-height:1.62;
+    -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+  main{max-width:760px;margin:0 auto;padding:0 22px 56px}
+  a{color:inherit}
+  a:focus-visible{outline:2px solid var(--clinical);outline-offset:3px;border-radius:1px}
+  ::selection{background:#dbe9df}
+
+  .masthead{max-width:760px;margin:0 auto;padding:20px 22px 0}
+  .masthead-row{display:flex;align-items:baseline;justify-content:space-between;
+    flex-wrap:wrap;gap:8px 24px;padding:10px 0 12px}
+  .wordmark{font-family:var(--serif);font-size:19px;font-weight:600;letter-spacing:.02em;
+    text-decoration:none}
+  .wordmark .pw-p{color:var(--patient)}
+  .wordmark .pw-w{color:var(--clinical)}
+  .masthead nav{display:flex;gap:22px}
+  .masthead nav a{font-family:var(--mono);font-size:11px;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--muted);text-decoration:none;padding:2px 0}
+  .masthead nav a:hover{color:var(--ink);text-decoration:underline;text-underline-offset:4px}
+  .masthead nav a[aria-current=page]{color:var(--ink);border-bottom:1px solid var(--ink)}
+  .rule-heavy{border:0;border-top:2px solid var(--ink);margin:0}
+  .rule-fine{border:0;border-top:1px solid var(--hairline);margin:3px 0 0}
+
+  .dateline{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--muted);margin:34px 0 18px}
+  h1{font-size:clamp(28px,4.6vw,38px);line-height:1.16;font-weight:600;
+    letter-spacing:-.006em;margin:0 0 20px;max-width:24ch}
+  p.lede{font-size:18px;line-height:1.66;max-width:62ch;margin:0 0 16px}
+
+  section{border-top:1px solid var(--ink);margin-top:40px;padding-top:12px}
+  .step-no{font-family:var(--mono);font-size:11.5px;letter-spacing:.18em;text-transform:uppercase;
+    color:var(--clinical);font-weight:600;margin:0 0 8px}
+  h2{font-size:23px;font-weight:600;line-height:1.24;margin:0 0 12px;letter-spacing:-.004em}
+  section p{max-width:62ch;margin:0 0 14px;font-size:16px;line-height:1.66}
+  code{font-family:var(--mono);font-size:.85em;background:#f1efe9;
+    border:1px solid var(--hairline);padding:1px 5px}
+  .tags{list-style:none;margin:6px 0 14px;padding:0;max-width:62ch}
+  .tags li{margin:0 0 10px;padding-left:22px;position:relative;font-size:16px;line-height:1.6}
+  .tags li::before{content:"";position:absolute;left:2px;top:.52em;width:9px;height:9px}
+  .tags li.t-clinical::before{background:var(--clinical)}
+  .tags li.t-offtarget::before{background:var(--penalty)}
+  .tags li.t-structural::before{background:var(--structural)}
+  .tags b{font-weight:600}
+  .engines{margin:6px 0 14px;padding:0;list-style:none;max-width:62ch}
+  .engines li{border-bottom:1px solid var(--hairline);padding:12px 0}
+  .engines li:last-child{border-bottom:0}
+  .engines .eng-name{font-weight:600}
+  .engines .eng-mode{font-family:var(--mono);font-size:11.5px;color:var(--muted);
+    letter-spacing:.06em;margin-left:8px}
+  .engines p{margin:4px 0 0;font-size:15.5px}
+  .engines a{text-underline-offset:4px;text-decoration-thickness:1px}
+  .engines a:hover{color:var(--clinical)}
+  .back{display:inline-block;margin-top:26px;font-family:var(--mono);font-size:12px;
+    letter-spacing:.1em;text-transform:uppercase;color:var(--ink);text-decoration:none;
+    border-bottom:1px solid var(--ink);padding-bottom:2px}
+  .back:hover{color:var(--clinical);border-bottom-color:var(--clinical)}
+
+  .endnote{border-top:1px solid var(--ink);margin-top:46px;padding-top:14px}
+  .endnote p{font-family:var(--mono);font-size:12px;line-height:1.8;color:var(--muted);
+    max-width:76ch;margin:0 0 14px}
+  footer{font-family:var(--mono);font-size:12px;line-height:1.9;color:var(--muted)}
+  footer a{color:var(--muted);text-underline-offset:3px}
+  footer a:hover{color:var(--ink)}
+
+  @media (max-width:760px){
+    body{font-size:16px}
+    .masthead{padding-top:12px}
+    p.lede{font-size:17px}
+  }
+  @media print{
+    html,body{background:#fff;color:#000}
+    .masthead nav,.back{display:none}
+    a{text-decoration:none;color:inherit}
+    section{break-inside:avoid;border-top-color:#999}
+    code{background:none}
+    .dateline,.endnote p,footer{color:#444}
+  }
+</style>
+</head>
+<body>
+<header class="masthead">
+  <hr class="rule-heavy"><hr class="rule-fine">
+  <div class="masthead-row">
+    <a class="wordmark" href="./"><span class="pw-p">Patient</span><span class="pw-w">Words</span></a>
+    <nav aria-label="Site">
+      <a href="./">Gallery</a>
+      <a href="methods.html" aria-current="page">Methods</a>
+      <a href="https://github.com/michaeldgreenphd/patientwords">GitHub</a>
+    </nav>
+  </div>
+  <hr class="rule-fine">
+</header>
+<main>
+  <p class="dateline">Methods · how the pipeline works</p>
+  <h1>From a sentence to a circuit, in four steps.</h1>
+  <p class="lede">
+    Every figure in the gallery starts as two (or four) plain sentences — one phrased the way
+    a clinician would write it, one the way a patient would say it — and ends as an interactive
+    map of the computation gemma-2-2b performs on each. Here is what happens in between,
+    in plain language.
+  </p>
+
+  <section>
+    <p class="step-no">Step 1 · Model &amp; features</p>
+    <h2>gemma-2-2b, read through Gemma Scope transcoders</h2>
+    <p>
+      The subject of the study is <code>gemma-2-2b</code>, an open-weights language model.
+      On its own, its internal activity is millions of undifferentiated numbers. Google
+      DeepMind’s <a href="https://huggingface.co/google/gemma-scope-2b-pt-transcoders">Gemma
+      Scope</a> transcoders re-express that activity as a sparse set of <em>features</em> —
+      individually meaningful units that tend to fire for one recognizable thing, such as
+      mentions of mental-health treatment, first-person symptom talk, or the syntax of a
+      quoted sentence.
+    </p>
+  </section>
+
+  <section>
+    <p class="step-no">Step 2 · Attribution</p>
+    <h2>Tracing the circuit with circuit-tracer, via Neuronpedia</h2>
+    <p>
+      For each prompt we run <a href="https://github.com/safety-research/circuit-tracer">circuit-tracer</a>
+      through <a href="https://neuronpedia.org">Neuronpedia</a> to build an
+      <em>attribution graph</em>: a causal map of which features, at which layers and token
+      positions, actually pushed the model toward its next-token prediction. Edges carry
+      attribution mass — how much one feature’s firing contributed to another’s, and
+      ultimately to the final logits. The result is not a summary of what the model
+      <em>could</em> represent but a trace of what it <em>did</em> on this exact sentence.
+    </p>
+  </section>
+
+  <section>
+    <p class="step-no">Step 3 · Tagging</p>
+    <h2>Sorting features into clinical, off-target, and structural</h2>
+    <p>
+      Each feature in a graph is tagged by what it responds to, using its autointerp
+      description and activation profile:
+    </p>
+    <ul class="tags">
+      <li class="t-clinical"><b>Clinical</b> — features that belong to the medical
+        computation we want: the concept of depression, therapy, diagnosis, treatment.</li>
+      <li class="t-offtarget"><b>Off-target</b> — features dragged in by the colloquial
+        wording: idiom, mood-as-weather metaphors, music senses of “the blues.” These are
+        the mechanism of the language penalty.</li>
+      <li class="t-structural"><b>Structural</b> — scaffolding features for syntax,
+        position, and punctuation that appear in every trace and carry no medical content.</li>
+    </ul>
+    <p>
+      This three-way split is what makes two graphs comparable: when the wording changes,
+      you can see clinical mass drain away and off-target mass take its place.
+    </p>
+  </section>
+
+  <section>
+    <p class="step-no">Step 4 · Comparison</p>
+    <h2>Three engines for putting graphs side by side</h2>
+    <p>
+      The tagged graphs feed three rendering engines, each answering a different question:
+    </p>
+    <ul class="engines">
+      <li>
+        <span class="eng-name"><a href="modes/2panel/">Direct Lexical Swap</a></span>
+        <span class="eng-mode">2panel · Fig. 1</span>
+        <p>What does one word cost? Two stacked traces of the same sentence, differing only
+           in “depression” vs. “the blues.”</p>
+      </li>
+      <li>
+        <span class="eng-name"><a href="modes/4quadrant/">Syntax × Terminology Matrix</a></span>
+        <span class="eng-mode">4quadrant · Fig. 2</span>
+        <p>Which part of patient language does the damage? A 2×2 grid crossing the medical
+           keyword with the surrounding frame, separating the vocabulary effect from the
+           syntax effect.</p>
+      </li>
+      <li>
+        <span class="eng-name"><a href="modes/translation/">Translation Mitigation</a></span>
+        <span class="eng-mode">translation · Fig. 3</span>
+        <p>Can the penalty be undone? An LLM translates the patient sentence into clinical
+           terms, and the translated output is traced natively to show the circuit —
+           and the prediction — recovering.</p>
+      </li>
+    </ul>
+    <p>
+      Every render is a single self-contained HTML file: hover any node for its feature
+      identity, category, attribution mass, and autointerp description.
+    </p>
+    <a class="back" href="./">Back to the gallery →</a>
+  </section>
+
+  <div class="endnote">
+    <p>
+      The renders currently in the gallery are demonstration outputs generated from synthetic
+      sample graphs to validate the visualization pipeline end-to-end; traces from live
+      gemma-2-2b runs will replace them as the study progresses.
+    </p>
+    <footer>
+      Built with the <a href="https://github.com/michaeldgreenphd/neuronpedia">medlang-circuits</a>
+      pipeline on <a href="https://neuronpedia.org">Neuronpedia</a> ·
+      attribution graphs by <a href="https://github.com/safety-research/circuit-tracer">circuit-tracer</a> ·
+      features from <a href="https://huggingface.co/google/gemma-scope-2b-pt-transcoders">Gemma Scope</a> transcoders
+    </footer>
+  </div>
+</main>
+</body>
+</html>
