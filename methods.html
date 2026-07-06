@@ -44,7 +44,7 @@
     text-decoration:none}
   .wordmark .pw-p{color:var(--patient)}
   .wordmark .pw-w{color:var(--clinical)}
-  .masthead nav{display:flex;gap:22px}
+  .masthead nav{display:flex;flex-wrap:wrap;gap:6px 20px}
   .masthead nav a{font-family:var(--mono);font-size:11px;letter-spacing:.16em;
     text-transform:uppercase;color:var(--muted);text-decoration:none;padding:2px 0}
   .masthead nav a:hover{color:var(--ink);text-decoration:underline;text-underline-offset:4px}
@@ -115,6 +115,9 @@
     <a class="wordmark" href="./"><span class="pw-p">Patient</span><span class="pw-w">Words</span></a>
     <nav aria-label="Site">
       <a href="./">Gallery</a>
+      <a href="word-differences/">Word Differences</a>
+      <a href="syntax-differences/">Syntax Differences</a>
+      <a href="translation/">Translation</a>
       <a href="methods.html" aria-current="page">Methods</a>
       <a href="https://github.com/michaeldgreenphd/patientwords">GitHub</a>
     </nav>
@@ -189,20 +192,20 @@
     </p>
     <ul class="engines">
       <li>
-        <span class="eng-name"><a href="modes/2panel/">Direct Lexical Swap</a></span>
+        <span class="eng-name"><a href="word-differences/">Word Differences</a></span>
         <span class="eng-mode">2panel · Fig. 1</span>
         <p>What does one word cost? Two stacked traces of the same sentence, differing only
            in “depression” vs. “the blues.”</p>
       </li>
       <li>
-        <span class="eng-name"><a href="modes/4quadrant/">Syntax × Terminology Matrix</a></span>
+        <span class="eng-name"><a href="syntax-differences/">Syntax Differences</a></span>
         <span class="eng-mode">4quadrant · Fig. 2</span>
         <p>Which part of patient language does the damage? A 2×2 grid crossing the medical
            keyword with the surrounding frame, separating the vocabulary effect from the
            syntax effect.</p>
       </li>
       <li>
-        <span class="eng-name"><a href="modes/translation/">Translation Mitigation</a></span>
+        <span class="eng-name"><a href="translation/">Translation</a></span>
         <span class="eng-mode">translation · Fig. 3</span>
         <p>Can the penalty be undone? An LLM translates the patient sentence into clinical
            terms, and the translated output is traced natively to show the circuit —

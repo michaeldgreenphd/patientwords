@@ -45,7 +45,7 @@
     text-decoration:none}
   .wordmark .pw-p{color:var(--patient)}
   .wordmark .pw-w{color:var(--clinical)}
-  .masthead nav{display:flex;gap:22px}
+  .masthead nav{display:flex;flex-wrap:wrap;gap:6px 20px}
   .masthead nav a{font-family:var(--mono);font-size:11px;letter-spacing:.16em;
     text-transform:uppercase;color:var(--muted);text-decoration:none;padding:2px 0}
   .masthead nav a:hover{color:var(--ink);text-decoration:underline;text-underline-offset:4px}
@@ -75,15 +75,21 @@
   .section-head .count{font-family:var(--mono);font-size:12px;color:var(--muted)}
 
   /* Figures */
-  .fig{display:grid;grid-template-columns:340px 1fr;gap:16px 34px;align-items:start;
+  .fig{display:grid;grid-template-columns:400px 1fr;gap:16px 34px;align-items:start;
     padding:30px 0 34px;border-bottom:1px solid var(--hairline);
     text-decoration:none;color:inherit}
   .fig:last-of-type{border-bottom:0}
-  .fig-media{margin:0}
-  .fig-media img{display:block;width:100%;height:auto;border:1px solid var(--hairline);
-    box-sizing:border-box;background:#fff;transition:border-color .15s ease}
+  .fig-media{margin:0;min-width:0}
   .fig-media figcaption{font-family:var(--mono);font-size:11px;color:var(--muted);
     letter-spacing:.04em;margin-top:8px}
+  .embed{border:1px solid var(--hairline);background:#fff;overflow:hidden;
+    transition:border-color .15s ease}
+  .embed iframe{width:100%;border:0;display:block}
+  .preview{width:100%;height:469px}
+  .preview.wide{height:245px}
+  .preview .frame{width:1180px;transform:scale(.339);transform-origin:top left}
+  .preview.wide .frame{width:2424px;transform:scale(.165)}
+  .preview iframe{pointer-events:none}
   .fig-no{font-family:var(--mono);font-size:11.5px;letter-spacing:.18em;text-transform:uppercase;
     color:var(--clinical);font-weight:600;margin:2px 0 8px}
   .fig-no .mode{color:var(--muted);font-weight:400;letter-spacing:.06em;text-transform:none}
@@ -96,7 +102,7 @@
     letter-spacing:.1em;text-transform:uppercase;color:var(--ink);
     border-bottom:1px solid var(--ink);padding-bottom:2px}
   .fig:hover .open,.fig:focus-visible .open{color:var(--clinical);border-bottom-color:var(--clinical)}
-  .fig:hover .fig-media img,.fig:focus-visible .fig-media img{border-color:var(--ink)}
+  .fig:hover .embed,.fig:focus-visible .embed{border-color:var(--ink)}
   .fig:hover h3{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:5px;
     text-decoration-color:var(--structural)}
 
@@ -112,7 +118,7 @@
     body{font-size:16px}
     .masthead{padding-top:12px}
     .masthead-row{padding-bottom:10px}
-    .fig{grid-template-columns:1fr;gap:14px}
+    .fig{grid-template-columns:minmax(0,1fr);gap:14px}
     .fig-media{order:2}
     .fig-body{order:1}
     .fig p{max-width:none}
@@ -123,7 +129,7 @@
     .masthead nav,.open{display:none}
     a{text-decoration:none;color:inherit}
     .fig{break-inside:avoid;border-bottom:1px solid #999}
-    .fig-media img{border-color:#999}
+    .embed{border-color:#999}
     .keyline,.dateline,.endnote p,footer{color:#444}
   }
 </style>
@@ -135,6 +141,9 @@
     <a class="wordmark" href="./"><span class="pw-p">Patient</span><span class="pw-w">Words</span></a>
     <nav aria-label="Site">
       <a href="./" aria-current="page">Gallery</a>
+      <a href="word-differences/">Word Differences</a>
+      <a href="syntax-differences/">Syntax Differences</a>
+      <a href="translation/">Translation</a>
       <a href="methods.html">Methods</a>
       <a href="https://github.com/michaeldgreenphd/patientwords">GitHub</a>
     </nav>
@@ -153,11 +162,12 @@
     clinical terms restores it.
   </p>
   <p class="lede">
-    Each figure below opens a standalone, interactive render: hover any node for its feature
-    identity, category, attribution mass, and autointerp description. Node color encodes the
-    feature’s category — clinical, off-target, or structural — node size tracks attribution
-    mass, and the predictive spread at the logit layer shows the model’s competing next-token
-    predictions.
+    Each figure below is a live view of the interactive render itself — what you see is the
+    current output of the pipeline, not a snapshot. Open a figure and hover any node for its
+    feature identity, category, attribution mass, and autointerp description. Node color
+    encodes the feature’s category — clinical, off-target, or structural — node size tracks
+    attribution mass, and the predictive spread at the logit layer shows the model’s
+    competing next-token predictions.
   </p>
   <p class="keyline">
     <span class="swatch" style="background:#15803d"></span>clinical / recovery &nbsp;&nbsp;
@@ -171,50 +181,56 @@
     <span class="count">Figs. 1–3</span>
   </div>
 
-  <a class="fig" href="modes/2panel/">
+  <a class="fig" href="word-differences/">
     <figure class="fig-media">
-      <img src="modes/2panel/preview.png" width="1690" height="1929"
-           alt="Two stacked attribution graphs comparing clinical and patient wording">
-      <figcaption>modes/2panel · interactive render</figcaption>
+      <div class="embed preview"><div class="frame">
+        <iframe class="live" src="modes/2panel/index.html" loading="lazy"
+                title="Live preview: two stacked attribution graphs comparing clinical and patient wording" tabindex="-1"></iframe>
+      </div></div>
+      <figcaption>modes/2panel · live render</figcaption>
     </figure>
     <div class="fig-body">
       <p class="fig-no">Fig. 1 <span class="mode">· 2panel</span></p>
-      <h3>Direct Lexical Swap</h3>
+      <h3>Word Differences</h3>
       <p>A word-for-word substitution — “depression” vs. “the blues” — mapped as two stacked
          circuit traces. The clinical wording drives prob(therapist) = 0.86; the patient
          idiom collapses it to 0.35 and hands the top prediction to a bare article.</p>
       <span class="stat penalty">Language Penalty: −51% probability (0.86 → 0.35)</span><br>
-      <span class="open">Open the interactive comparison →</span>
+      <span class="open">Open the comparison →</span>
     </div>
   </a>
 
-  <a class="fig" href="modes/4quadrant/">
+  <a class="fig" href="syntax-differences/">
     <figure class="fig-media">
-      <img src="modes/4quadrant/preview.png" width="3120" height="1941"
-           alt="Four-quadrant matrix factorizing vocabulary and syntax effects">
-      <figcaption>modes/4quadrant · interactive render</figcaption>
+      <div class="embed preview wide"><div class="frame">
+        <iframe class="live" src="modes/4quadrant/index.html" loading="lazy"
+                title="Live preview: four-quadrant matrix factorizing vocabulary and syntax effects" tabindex="-1"></iframe>
+      </div></div>
+      <figcaption>modes/4quadrant · live render</figcaption>
     </figure>
     <div class="fig-body">
       <p class="fig-no">Fig. 2 <span class="mode">· 4quadrant</span></p>
-      <h3>Syntax × Terminology Matrix</h3>
+      <h3>Syntax Differences</h3>
       <p>A 2×2 factorization crossing the core medical keyword with the surrounding frame
          syntax. Vocabulary choice costs −42% probability in either frame; colloquial framing
          alone costs another −9% — even when the patient knows the clinical word
          (Box&nbsp;C).</p>
       <span class="stat penalty">Vocabulary Δ: −42% · Syntax Δ: −9%</span><br>
-      <span class="open">Open the interactive matrix →</span>
+      <span class="open">Open the matrix →</span>
     </div>
   </a>
 
-  <a class="fig" href="modes/translation/">
+  <a class="fig" href="translation/">
     <figure class="fig-media">
-      <img src="modes/translation/preview.png" width="1690" height="1929"
-           alt="Translation mitigation chain restoring the clinical circuit">
-      <figcaption>modes/translation · interactive render</figcaption>
+      <div class="embed preview"><div class="frame">
+        <iframe class="live" src="modes/translation/index.html" loading="lazy"
+                title="Live preview: translation mitigation chain restoring the clinical circuit" tabindex="-1"></iframe>
+      </div></div>
+      <figcaption>modes/translation · live render</figcaption>
     </figure>
     <div class="fig-body">
       <p class="fig-no">Fig. 3 <span class="mode">· translation</span></p>
-      <h3>Translation Mitigation</h3>
+      <h3>Translation</h3>
       <p>The organic fix: an LLM translates the patient sentence into standard terminology and
          the raw output is traced natively. The clinical circuit — and the correct
          prediction — comes back.</p>
@@ -238,5 +254,33 @@
     </footer>
   </div>
 </main>
+<script>
+(function(){
+  function fitAll(){
+    document.querySelectorAll('iframe.live').forEach(function(f){
+      try{
+        var d=f.contentDocument;
+        if(!d||!d.documentElement)return;
+        var h=d.documentElement.scrollHeight;
+        if(!h)return;
+        f.style.height=h+'px';
+        var pv=f.closest('.preview');
+        if(pv){
+          var fr=f.closest('.frame');
+          var s=pv.clientWidth/fr.offsetWidth;
+          fr.style.transform='scale('+s+')';
+          pv.style.height=(h*s)+'px';
+        }
+      }catch(e){}
+    });
+  }
+  document.querySelectorAll('iframe.live').forEach(function(f){
+    f.addEventListener('load',fitAll);
+  });
+  window.addEventListener('resize',fitAll);
+  setTimeout(fitAll,300);
+  setTimeout(fitAll,1200);
+})();
+</script>
 </body>
 </html>
