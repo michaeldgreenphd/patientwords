@@ -54,10 +54,10 @@
     color:var(--clinical);font-weight:600;margin:34px 0 14px}
   .dateline .mode{color:var(--muted);font-weight:400;letter-spacing:.06em;text-transform:none}
   h1{font-size:clamp(30px,4.8vw,42px);line-height:1.14;font-weight:600;
-    letter-spacing:-.006em;margin:0 0 10px;max-width:24ch}
+    letter-spacing:-.006em;margin:0 0 10px}
   .subtitle{font-style:italic;font-size:20px;line-height:1.5;color:var(--muted);
-    margin:0 0 20px;max-width:52ch}
-  .explainer{font-size:17px;line-height:1.66;max-width:62ch;margin:0 0 14px}
+    margin:0 0 20px}
+  .explainer{font-size:17px;line-height:1.66;margin:0 0 14px}
   .stat{font-family:var(--mono);font-size:13px;font-weight:600;letter-spacing:.01em}
   .stat.penalty{color:var(--penalty)}
   .stat.recovery{color:var(--clinical)}
@@ -143,7 +143,7 @@
   .sim-flip.flipped{color:var(--penalty)}
   .sim-flip.held{color:var(--clinical)}
   .sim-rationale{border-left:2px solid var(--hairline);padding:2px 0 2px 14px;
-    max-width:66ch;margin:12px 0 6px}
+    ;margin:12px 0 6px}
   .sim-rationale .sim-side{margin-bottom:4px}
   .sim-rationale p{font-style:italic;font-size:15px;line-height:1.6;color:var(--muted);margin:0}
 
@@ -166,7 +166,7 @@
 
   .endnote{border-top:1px solid var(--ink);margin-top:42px;padding-top:14px}
   .endnote p{font-family:var(--mono);font-size:12px;line-height:1.8;color:var(--muted);
-    max-width:76ch;margin:0 0 14px}
+    ;margin:0 0 14px}
   footer{font-family:var(--mono);font-size:12px;line-height:1.9;color:var(--muted)}
   footer a{color:var(--muted);text-underline-offset:3px}
   footer a:hover{color:var(--ink)}
@@ -250,7 +250,7 @@
     </div>
     <p class="sum-caption">click a Sim number to jump to its full trace ·
       glyph: ● clinical → ○ patient target probability on a shared 0–1 axis (dashed = patient below the traced spread) ·
-      * intended target fell below the traced spread — measurement anchored on the clinical top prediction</p>
+      * intended target fell below the traced spread — measurement anchored on the clinical top prediction · screened-out rows kept their clinical trace but failed the measurement screen (see each card)</p>
   </section>
 
   <div id="sim-list"></div>
@@ -434,11 +434,16 @@
         tr.appendChild(pen);
         tr.appendChild(slopeCell(s));
         var flip=el('td','mono');
+        var screened=s.screening&&s.screening.status==='screened_out';
         var tc=s.top_clinical?s.top_clinical[0]:'—';
         var tp=s.top_patient?s.top_patient[0]:'—';
-        flip.appendChild(s.flipped
-          ?el('span','stat penalty',tc+' → '+tp+' (flipped)')
-          :el('span',null,tc+' (unchanged)'));
+        if(screened){
+          flip.appendChild(el('span','stat neutral','screened out — unmeasurable'));
+        }else{
+          flip.appendChild(s.flipped
+            ?el('span','stat penalty',tc+' → '+tp+' (flipped)')
+            :el('span',null,tc+' (unchanged)'));
+        }
         tr.appendChild(flip);
         sumBody.appendChild(tr);
       });
@@ -478,15 +483,21 @@
         card.appendChild(grid);
 
         var statline=el('p');
-        if(typeof s.language_penalty==='number'){
+        if(s.screening&&s.screening.status==='screened_out'){
+          statline.appendChild(el('span','stat neutral',
+            'screened out of measurement — '+(s.screening.reason||'intended target unmeasurable')
+            +' (clinical trace and spread retained; fed back to the generator)'));
+        }else if(typeof s.language_penalty==='number'){
           statline.appendChild(el('span','stat '+(s.language_penalty<0?'penalty':'recovery'),
             'Language Penalty: '+pct(s.language_penalty)+' probability ('
             +p2(s.prob_clinical)+' → '+p2(s.prob_patient)+')'));
         }else{
           statline.appendChild(el('span','stat neutral','Language Penalty: —'));
         }
-        statline.appendChild(el('span','sim-flip '+(s.flipped?'flipped':'held'),
-          s.flipped?'top prediction flipped':'top prediction unchanged'));
+        if(!(s.screening&&s.screening.status==='screened_out')){
+          statline.appendChild(el('span','sim-flip '+(s.flipped?'flipped':'held'),
+            s.flipped?'top prediction flipped':'top prediction unchanged'));
+        }
         card.appendChild(statline);
 
         if(s.rationale){
