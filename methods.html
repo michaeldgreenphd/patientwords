@@ -132,8 +132,8 @@
   <p class="dateline">Methods · how the pipeline works</p>
   <h1>From a sentence to a circuit, in four steps.</h1>
   <p class="lede">
-    Every figure in the gallery starts as two (or four) plain sentences — one phrased the way
-    a clinician would write it, one the way a patient would say it — and ends as an interactive
+    Every figure in the gallery starts as two (or four) plain sentences, one phrased the way
+    a clinician would write it and one the way a patient would say it, and ends as an interactive
     map of the computation gemma-2-2b performs on each. Here is what happens in between,
     in plain language.
   </p>
@@ -145,7 +145,7 @@
       The subject of the study is <code>gemma-2-2b</code>, an open-weights language model.
       On its own, its internal activity is millions of undifferentiated numbers. Google
       DeepMind’s <a href="https://huggingface.co/google/gemma-scope-2b-pt-transcoders">Gemma
-      Scope</a> transcoders re-express that activity as a sparse set of <em>features</em> —
+      Scope</a> transcoders re-express that activity as a sparse set of <em>features</em>:
       individually meaningful units that tend to fire for one recognizable thing, such as
       mentions of mental-health treatment, first-person symptom talk, or the syntax of a
       quoted sentence.
@@ -160,9 +160,9 @@
       through <a href="https://neuronpedia.org">Neuronpedia</a> to build an
       <em>attribution graph</em>: a causal map of which features, at which layers and token
       positions, actually pushed the model toward its next-token prediction. Edges carry
-      attribution mass — how much one feature’s firing contributed to another’s, and
-      ultimately to the final logits. The result is not a summary of what the model
-      <em>could</em> represent but a trace of what it <em>did</em> on this exact sentence.
+      attribution mass, the amount one feature’s firing contributed to another’s and
+      ultimately to the final logits. The graph records what the model actually did on
+      this exact sentence, at every layer and every token position of the run.
     </p>
   </section>
 
@@ -174,12 +174,12 @@
       description and activation profile:
     </p>
     <ul class="tags">
-      <li class="t-clinical"><b>Clinical</b> — features that belong to the medical
+      <li class="t-clinical"><b>Clinical</b>: features that belong to the medical
         computation we want: the concept of depression, therapy, diagnosis, treatment.</li>
-      <li class="t-offtarget"><b>Off-target</b> — features dragged in by the colloquial
+      <li class="t-offtarget"><b>Off-target</b>: features dragged in by the colloquial
         wording: idiom, mood-as-weather metaphors, music senses of “the blues.” These are
         the mechanism of the language penalty.</li>
-      <li class="t-structural"><b>Structural</b> — scaffolding features for syntax,
+      <li class="t-structural"><b>Structural</b>: scaffolding features for syntax,
         position, and punctuation that appear in every trace and carry no medical content.</li>
     </ul>
     <p>
@@ -210,7 +210,7 @@
       </li>
       <li>
         <span class="eng-name"><a href="dialect-differences/">Dialect Differences</a></span>
-        <span class="eng-mode">dialect · Fig. 3 · traces pending</span>
+        <span class="eng-mode">dialect · Fig. 3</span>
         <p>Which communities pay the framing tax? The clinical term is held fixed while the
            surrounding syntax is re-traced across dialect and register variants, extending
            the single syntax delta into a distribution across dialects.</p>
@@ -219,8 +219,8 @@
         <span class="eng-name"><a href="translation/">Translation</a></span>
         <span class="eng-mode">translation · Fig. 4</span>
         <p>Can the penalty be undone? An LLM translates the patient sentence into clinical
-           terms, and the translated output is traced natively to show the circuit —
-           and the prediction — recovering.</p>
+           terms, and the translated output is traced natively to show the circuit and
+           the prediction recovering together.</p>
       </li>
     </ul>
     <p>
@@ -232,9 +232,10 @@
 
   <div class="endnote">
     <p>
-      The renders currently in the gallery are demonstration outputs generated from synthetic
-      sample graphs to validate the visualization pipeline end-to-end; traces from live
-      gemma-2-2b runs will replace them as the study progresses.
+      Figs. 2 and 3, the simulated scenarios, and the phrase-dataset measurements are live
+      gemma-2-2b traces. Figs. 1 and 4 remain demonstration renders generated from synthetic
+      sample graphs to validate the visualization pipeline; live traces will replace them as
+      the study progresses.
     </p>
     <footer>
       Built with the <a href="https://github.com/michaeldgreenphd/neuronpedia">medlang-circuits</a>

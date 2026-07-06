@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Simulated scenarios — PatientWords</title>
-<meta name="description" content="Claude-generated patient-vs-clinical stress scenarios, programmatically validated and traced live on gemma-2-2b — kept apart from the hand-measured dataset.">
+<meta name="description" content="Claude-generated patient-vs-clinical stress scenarios, programmatically validated and traced live on gemma-2-2b, kept apart from the hand-measured dataset.">
 <link rel="canonical" href="https://michaeldgreenphd.github.io/patientwords/simulated-scenarios/">
 <meta name="theme-color" content="#faf9f5">
 <meta property="og:type" content="article">
@@ -233,13 +233,13 @@
 <main>
   <p class="dateline">Simulated series <span class="mode">· modes/simulated · live renders · simulated data</span></p>
   <h1>Simulated scenarios</h1>
-  <p class="subtitle">Stress scenarios authored by an LLM, validated by machine, traced for real —
+  <p class="subtitle">Stress scenarios authored by an LLM, validated by machine, traced for real,
      and kept apart from the hand-measured set.</p>
   <p class="explainer">
     The <a href="../#phrase-dataset">phrase dataset</a> is hand-built and hand-measured. This
     section widens it with <em>simulated</em> scenarios: Claude authors new
-    patient-vs-clinical sentence pairs in the same format — one contiguous term swap inside an
-    identical frame, ending at a next-token probe boundary — and each candidate must pass
+    patient-vs-clinical sentence pairs in the same format (one contiguous term swap inside an
+    identical frame, ending at a next-token probe boundary), and each candidate must pass
     programmatic validators (single-span swap, probe-boundary ending, term-verbatim check,
     dedupe against the measured set) before it is accepted. Every accepted pair is then traced
     live on gemma-2-2b, exactly like the hand-measured examples.
@@ -259,7 +259,7 @@
   <section id="sim-summary" hidden>
     <div class="sum-controls">
       <input id="sim-filter" type="search"
-             placeholder="filter rows — try a condition or token: reflux, insomnia, tissues…"
+             placeholder="filter rows by condition or token: reflux, insomnia, tissues…"
              aria-label="Filter scenarios">
       <span class="sum-dl">download current view:
         <a id="sim-csv" href="#">CSV</a> ·
@@ -273,7 +273,7 @@
           <th scope="col">Target</th>
           <th scope="col" class="num" data-key="clin" title="sort">prob clinical</th>
           <th scope="col" class="num" data-key="pat" title="sort">prob patient</th>
-          <th scope="col" class="num" data-key="penalty" title="sort by |penalty| — biggest language effects first">Penalty</th>
+          <th scope="col" class="num" data-key="penalty" title="sort by |penalty|, biggest language effects first">Penalty</th>
           <th scope="col">clin → pat</th>
           <th scope="col" data-key="mass" title="sort by clinical-side medical-circuit share">Med circuit</th>
           <th scope="col" data-key="flip" title="sort: flips first">Top prediction</th>
@@ -283,20 +283,20 @@
     </div>
     <p class="sum-caption">click a Sim number to jump to its full trace ·
       glyph: ● clinical → ○ patient target probability on a shared 0–1 axis (dashed = patient below the traced spread) ·
-      * intended target fell below the traced spread — measurement anchored on the clinical top prediction · screened-out rows kept their clinical trace but failed the measurement screen (open a Sim page for details)</p>
+      * intended target fell below the traced spread; measurement anchored on the clinical top prediction · screened-out rows kept their clinical trace but failed the measurement screen (open a Sim page for details)</p>
     <nav class="sum-pages" id="sim-pages" aria-label="Scenario pages"></nav>
   </section>
 
 
   <div class="pending-note" id="sim-pending" hidden>
-    <span class="pending-mark"></span>traces pending — simulated series
+    <span class="pending-mark"></span>traces pending · simulated series
   </div>
 
   <a class="back" href="../">← Back home</a>
 
   <div class="endnote">
     <p id="sim-endnote">
-      SIMULATED DATA — these phrasings were authored by an LLM
+      SIMULATED DATA · these phrasings were authored by an LLM
       (see the provenance strip above) and accepted by the programmatic validators in the
       engine's scenario generator; they are not statements from patients and contain no real
       personal or clinical data. The traces themselves are live gemma-2-2b runs via the
@@ -459,7 +459,7 @@
         var tc=s.top_clinical?s.top_clinical[0]:'—';
         var tp=s.top_patient?s.top_patient[0]:'—';
         if(screened){
-          flip.appendChild(el('span','stat neutral','screened out — unmeasurable'));
+          flip.appendChild(el('span','stat neutral','screened out · unmeasurable'));
         }else{
           flip.appendChild(s.flipped
             ?el('span','stat penalty',tc+' → '+tp+' (flipped)')
@@ -525,7 +525,7 @@
         });
         if(!list.length){
           var tr=document.createElement('tr');
-          var td=el('td','sum-empty','no scenarios match — clear the filter');
+          var td=el('td','sum-empty','no scenarios match; clear the filter');
           td.colSpan=9;
           tr.appendChild(td);
           sumBody.appendChild(tr);

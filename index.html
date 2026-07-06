@@ -226,19 +226,21 @@
   <h1><span class="patient">Patients</span> don’t speak like doctors.<br><span class="clinical">Medical&nbsp;AI</span> must be ready to interpret them.</h1>
   <p class="lede">
     We trace how gemma-2-2b processes standard clinical terminology versus the colloquial
-    language patients actually use — feature-by-feature, layer-by-layer — using attribution
+    language patients actually use, feature by feature and layer by layer, with attribution
     graphs built on Gemma&nbsp;Scope transcoders. Saying <em>“I’ve got the blues”</em> instead of
     <em>“I have depression”</em> reroutes the model’s internal circuit and collapses the
     probability of the correct clinical continuation. Translating patient language back into
     clinical terms restores it.
   </p>
   <p class="lede">
-    Each figure below is a live view of the interactive render itself — what you see is the
-    current output of the pipeline, not a snapshot. Open a figure and hover any node for its
-    feature identity, category, attribution mass, and autointerp description. Node color
-    encodes the feature’s category — clinical, off-target, or structural — node size tracks
-    attribution mass, and the predictive spread at the logit layer shows the model’s
-    competing next-token predictions.
+    Each figure below embeds the interactive render itself, so the page always shows the
+    pipeline’s current output. Every graph reads the same way. Each column is one word of
+    the prompt, in order; height is depth in the model, and the predicted next word sits at
+    the top. Each node is a feature that fired at that word and layer: its size shows how
+    much it contributed to the prediction, and its color gives its category (clinical,
+    off-target, or structural). The curves between nodes are paths of influence, and the
+    spread at the logit layer shows the model’s competing next-token predictions. Hover any
+    node for its feature identity, category, attribution mass, and autointerp description.
   </p>
   <p class="keyline">
     <span class="swatch" style="background:#15803d"></span>clinical / recovery &nbsp;&nbsp;
@@ -263,13 +265,13 @@
     <div class="fig-body">
       <p class="fig-no">Fig. 1 <span class="mode">· 2panel</span></p>
       <h3>Word Differences</h3>
-      <p>A word-for-word substitution — “depression” vs. “the blues” — mapped as two stacked
+      <p>A word-for-word substitution (“depression” vs. “the blues”) mapped as two stacked
          circuit traces. The clinical wording drives prob(therapist) = 0.86; the patient
          idiom collapses it to 0.35 and hands the top prediction to a bare article.</p>
       <span class="stat penalty">Language Penalty: −51% probability (0.86 → 0.35)</span>
       <p class="traced" data-mode="2panel" data-traced="gemma-2-2b">
         <span class="tm"><b>traced model:</b> gemma-2-2b · gemma scope transcoders</span>
-        <span class="tp">gemma-3-4b-it · qwen3-4b · qwen3-1.7b — traces pending</span>
+        <span class="tp">gemma-3-4b-it · qwen3-4b · qwen3-1.7b · traces pending</span>
       </p>
       <span class="open">Open the comparison →</span>
     </div>
@@ -289,12 +291,12 @@
       <p>A 2×2 factorization crossing the phrasing (patient-derived language vs. medical
          lexicon) with the surrounding morphosyntax (standard vs. nonstandard). In the first
          live-traced simulated item, both shifts push the model toward the everyday
-         continuation — the variety shift alone adds +11–13%, even when the speaker uses
+         continuation; the variety shift alone adds +11–13%, even when the speaker uses
          the medical word (Box&nbsp;B).</p>
       <span class="stat penalty">Variety shift Δ: +12% toward the everyday continuation · Register shift Δ: +5%</span>
       <p class="traced" data-mode="4quadrant" data-traced="gemma-2-2b">
         <span class="tm"><b>traced model:</b> gemma-2-2b · gemma scope transcoders</span>
-        <span class="tp">gemma-3-4b-it · qwen3-4b · qwen3-1.7b — traces pending</span>
+        <span class="tp">gemma-3-4b-it · qwen3-4b · qwen3-1.7b · traces pending</span>
       </p>
       <span class="open">Open the matrix →</span>
     </div>
@@ -304,7 +306,7 @@
     <figure class="fig-media">
       <div class="embed preview pending" data-live-src="modes/dialect/index.html"
            data-live-title="Live preview: dialect-mode attribution graphs">
-        <div class="pending-inner"><span class="pending-mark"></span>loading — dialect mode</div>
+        <div class="pending-inner"><span class="pending-mark"></span>loading · dialect mode</div>
       </div>
       <figcaption>modes/dialect · live render · traced 2026-07-06</figcaption>
     </figure>
@@ -337,12 +339,12 @@
       <p class="fig-no">Fig. 4 <span class="mode">· translation</span></p>
       <h3>Translation</h3>
       <p>The organic fix: an LLM translates the patient sentence into standard terminology and
-         the raw output is traced natively. The clinical circuit — and the correct
-         prediction — comes back.</p>
+         the raw output is traced natively. The clinical circuit comes back, and the
+         correct prediction with it.</p>
       <span class="stat recovery">Recovered target probability: +51% (0.35 → 0.86)</span>
       <p class="traced" data-mode="translation" data-traced="gemma-2-2b">
         <span class="tm"><b>traced model:</b> gemma-2-2b · gemma scope transcoders</span>
-        <span class="tp">gemma-3-4b-it · qwen3-4b · qwen3-1.7b — traces pending</span>
+        <span class="tp">gemma-3-4b-it · qwen3-4b · qwen3-1.7b · traces pending</span>
       </p>
       <span class="open">Open the mitigation chain →</span>
     </div>
@@ -357,7 +359,7 @@
     <figure class="fig-media">
       <div class="embed preview pending" data-live-src="modes/simulated/preview.html"
            data-live-title="Live preview: simulated scenario traced as two stacked attribution graphs">
-        <div class="pending-inner"><span class="pending-mark"></span>traces pending — simulated series</div>
+        <div class="pending-inner"><span class="pending-mark"></span>traces pending · simulated series</div>
       </div>
       <figcaption>modes/simulated · live renders · simulated data</figcaption>
     </figure>
@@ -365,14 +367,14 @@
       <p class="fig-no">Sim series <span class="mode">· 2panel · simulated data</span></p>
       <h3>Simulated Scenarios</h3>
       <p>Claude authors new patient-vs-clinical stress pairs in the hand-built dataset’s
-         format — everyday condition areas, one contiguous term swap per pair — and
+         format (everyday condition areas, one contiguous term swap per pair), and
          programmatic validators accept or reject each candidate. Every accepted pair is
          traced live on gemma-2-2b, with the generator’s rationale and the batch’s cost
          sidecar carried alongside. Kept separate from the hand-measured set.</p>
       <span class="stat penalty" id="sim-stat" hidden></span>
       <p class="traced" data-mode="simulated" data-traced="gemma-2-2b">
         <span class="tm"><b>traced model:</b> gemma-2-2b · gemma scope transcoders</span>
-        <span class="tp">simulated data — generating model + cost in the per-batch sidecar</span>
+        <span class="tp">simulated data · generating model and cost in the per-batch sidecar</span>
       </p>
       <span class="open">Open the simulated series →</span>
     </div>
@@ -401,7 +403,7 @@
       Hand-measured on gemma-2-2b (Gemma Scope transcoders) via the Neuronpedia circuit
       tracer; next-token probabilities as observed at measurement time.
     </p>
-    <p class="sp-foot">preview — observed-token flips and biggest probability gaps first · <a href="phrase-dataset/">full dataset (all pairs) →</a></p>
+    <p class="sp-foot">preview: observed-token flips and biggest probability gaps first · <a href="phrase-dataset/">full dataset (all pairs) →</a></p>
   </section>
 
   <section id="model-evaluations" hidden>
@@ -411,7 +413,7 @@
     </div>
     <p class="traced">
       <span class="tm"><b>model under test:</b> listed per row</span>
-      <span class="tp">accuracy on the same extraction task, before and after translation — not a circuit trace</span>
+      <span class="tp">accuracy on the same extraction task before and after translation (behavioral scores; the figures above trace circuits)</span>
     </p>
     <div class="me-scroll">
       <table class="me-table">
@@ -428,7 +430,7 @@
     <p class="me-caption">
       Each model extracts clinical concepts from raw patient phrasing, an LLM translates that
       phrasing into clinician language, and the identical task is re-scored on the same
-      expected terms — so Δ isolates the effect of phrasing alone.
+      expected terms, so Δ isolates the effect of phrasing alone.
     </p>
     <p class="me-foot" id="me-foot"></p>
   </section>
@@ -620,7 +622,7 @@
         var tr=document.createElement('tr');
         var pending=m.status==='pending';
         tr.title=pending
-          ?'evaluation pending — awaiting backend export'
+          ?'evaluation pending · awaiting backend export'
           :'mitigated: '+(m.mitigated==null?'—':m.mitigated)
             +' · regressions: '+(m.regressions==null?'—':m.regressions)
             +(m.cost_usd==null?'':' · cost: $'+m.cost_usd);

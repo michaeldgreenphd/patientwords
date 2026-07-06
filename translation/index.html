@@ -125,19 +125,24 @@
   <h1>Translation</h1>
   <p class="subtitle">There is a way to translate this.</p>
   <p class="explainer">The organic fix: an LLM translates the patient sentence into standard
-     terminology and the raw output is traced natively. The clinical circuit — and the
-     correct prediction — comes back.</p>
+     terminology and the raw output is traced natively. The clinical circuit comes back,
+     and the correct prediction with it.</p>
   <span class="stat recovery">Recovered target probability: +51% (0.35 → 0.86)</span>
   <p class="traced" data-mode="translation" data-traced="gemma-2-2b">
     <span class="tm"><b>traced model:</b> gemma-2-2b · gemma scope transcoders</span>
-    <span class="tp">gemma-3-4b-it · qwen3-4b · qwen3-1.7b — traces pending</span>
+    <span class="tp">gemma-3-4b-it · qwen3-4b · qwen3-1.7b · traces pending</span>
   </p>
 
   <div class="embed">
     <iframe class="live" src="../modes/translation/index.html" loading="lazy"
             title="Interactive translation mitigation chain restoring the clinical circuit"></iframe>
   </div>
-  <p class="embed-caption">Hover any node for its feature id, category, attribution mass, and autointerp description.</p>
+  <p class="embed-caption">How to read it: the panels follow the mitigation chain, the raw
+     patient sentence first and its LLM translation after it, both traced the same way. Columns
+     are the words of each prompt; height is depth in the model; the predicted next word sits at
+     the top. In the translated panel the green clinical stack reappears above the restored
+     terminology and the target probability recovers. Hover any node for its feature id,
+     category, attribution mass, and autointerp description.</p>
 
   <a class="back" href="../">← Back home</a>
 

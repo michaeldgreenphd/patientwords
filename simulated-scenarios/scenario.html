@@ -161,12 +161,12 @@
   </div>
 
   <div id="sim-card"></div>
-  <div class="pending-note" id="sim-missing" hidden>scenario not found — <a href="./">back to the series</a></div>
+  <div class="pending-note" id="sim-missing" hidden>scenario not found · <a href="./">back to the series</a></div>
 
   <div class="endnote">
     <p>
-      SIMULATED DATA — this phrasing pair was authored by an LLM and accepted by the engine's
-      programmatic validators; it is not a patient statement and contains no real personal or
+      SIMULATED DATA · this phrasing pair was authored by an LLM and accepted by the engine's
+      programmatic validators. The wording is synthetic and contains no real personal or
       clinical data. The traces are live gemma-2-2b runs via the Neuronpedia circuit tracer.
     </p>
     <footer>
@@ -290,7 +290,7 @@
       var tgtNote='';
       if(intent&&intent!==tgt){
         tgtNote=s.anchor_fallback
-          ?' — intended “'+intent+'” fell below the traced spread; anchored on the clinical top prediction'
+          ?' · intended “'+intent+'” fell below the traced spread; anchored on the clinical top prediction'
           :' (first piece of “'+intent+'”)';
       }
       var no=el('p','sim-no','Sim '+pad(s.index)+' ');
@@ -317,7 +317,7 @@
       var statline=el('p');
       if(s.screening&&s.screening.status==='screened_out'){
         statline.appendChild(el('span','stat neutral',
-          'screened out of measurement — '+(s.screening.reason||'intended target unmeasurable')
+          'screened out of measurement: '+(s.screening.reason||'intended target unmeasurable')
           +' (clinical trace and spread retained; fed back to the generator)'));
       }else{
         if(typeof s.language_penalty==='number'){
@@ -340,7 +340,7 @@
       }
 
       if(s.diff_html){
-        var vh=el('p','view-head','Circuit diff — what the swap changed');
+        var vh=el('p','view-head','Circuit diff: what the swap changed');
         card.appendChild(vh);
         var vs=el('p','view-sub','features present under BOTH phrasings are dimmed to context'
           +(s.circuit_diff?(' · '+s.circuit_diff.shared_features+' shared · '
@@ -349,12 +349,12 @@
         embedBlock(card,s.diff_html,'Circuit diff: shared features dimmed; full-ink nodes are what the term swap added or removed.');
       }
       if(s.html){
-        card.appendChild(el('p','view-head','Full comparison — every traced feature'));
+        card.appendChild(el('p','view-head','Full comparison: every traced feature'));
         embedBlock(card,s.html,'Hover any node for its feature id, category, attribution mass, and autointerp description.');
       }
       if(!s.html&&!s.diff_html){
         var pn=el('div','pending-note');
-        pn.textContent='no renders for this scenario — it was screened out before the patient-side trace';
+        pn.textContent='no renders for this scenario; it was screened out before the patient-side trace';
         card.appendChild(pn);
       }
       setTimeout(fitAll,300);
