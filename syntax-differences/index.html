@@ -85,6 +85,13 @@
     line-height:1.9;margin:0}
   .qm-note code{font-family:var(--mono);color:var(--ink)}
 
+  .view-head{font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--ink);border-top:1px solid var(--ink);
+    margin:34px 0 0;padding-top:10px}
+  .view-sub{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.03em;
+    line-height:1.9;margin:4px 0 0}
+  .edge-head{font-family:var(--mono);font-size:11.5px;color:var(--ink);letter-spacing:.03em;
+    line-height:1.8;margin:22px 0 0}
   .embed{border:1px solid var(--hairline);background:#fff;margin:26px 0 10px;
     overflow-x:auto;overflow-y:hidden}
   .embed iframe{width:100%;min-width:1400px;border:0;display:block;min-height:400px}
@@ -184,6 +191,30 @@
      The engine generates these with <code>medlang-generate quadrants</code> (frames × terms,
      validated) and traces them with <code>--mode 4quadrant</code>.</p>
 
+  <p class="view-head">The four edges, one swap at a time</p>
+  <p class="view-sub">each comparison below isolates ONE cell swap of the matrix — features present
+     in both cells are dimmed to background context, so the full-ink circuitry is exactly what that
+     single swap changed. The morphosyntax (variety) swaps rewire more of the circuit
+     (217–277 features unique per side) than the lexicon (register) swaps (164–191) — matching
+     their larger probability shifts.</p>
+
+  <p class="edge-head">Register shift, standard row — A → C (“insomnia” → “trouble sleeping”) · Δ +5% on “it” · 164 features only in A, 191 only in C</p>
+  <div class="embed"><iframe class="live" src="../modes/4quadrant/edge_register_standard.html" loading="lazy"
+       title="Register shift within the standard-morphosyntax row, shared circuit dimmed"></iframe></div>
+
+  <p class="edge-head">Register shift, nonstandard row — B → D · Δ +4% · 176 only in B, 178 only in D</p>
+  <div class="embed"><iframe class="live" src="../modes/4quadrant/edge_register_nonstandard.html" loading="lazy"
+       title="Register shift within the nonstandard-morphosyntax row, shared circuit dimmed"></iframe></div>
+
+  <p class="edge-head">Variety shift, medical column — A → B (“I've had … I'll” → “I been having … I'ma”) · Δ +13% · 217 only in A, 277 only in B</p>
+  <div class="embed"><iframe class="live" src="../modes/4quadrant/edge_variety_medical.html" loading="lazy"
+       title="Morphosyntax shift within the medical-lexicon column, shared circuit dimmed"></iframe></div>
+
+  <p class="edge-head">Variety shift, patient column — C → D · Δ +11% · 220 only in C, 255 only in D</p>
+  <div class="embed"><iframe class="live" src="../modes/4quadrant/edge_variety_patient.html" loading="lazy"
+       title="Morphosyntax shift within the patient-language column, shared circuit dimmed"></iframe></div>
+
+  <p class="view-head">The full matrix — all four cells at once</p>
   <div class="embed">
     <iframe class="live" src="../modes/4quadrant/index.html" loading="lazy"
             title="Interactive four-quadrant matrix factorizing vocabulary and syntax effects"></iframe>

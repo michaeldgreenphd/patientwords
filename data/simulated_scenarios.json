@@ -1,24 +1,50 @@
 {
-  "batch": "pairs_20260706T175614Z",
-  "generated": {
-    "model": "claude-opus-4-8",
-    "run_timestamp": "2026-07-06T17:56:54.001287+00:00",
-    "cost_usd": 0.123785,
-    "max_spend_usd": 3.0,
-    "accepted": 10,
-    "rejected": 2,
-    "rejection_reasons": [
-      "prompts do not differ by a single contiguous term span"
-    ],
-    "topics": [
-      "sleep problems and insomnia",
-      "heartburn and acid reflux",
-      "migraine and everyday headaches",
-      "seasonal allergies and hay fever"
-    ],
-    "language_register": "general_patient_language",
-    "sidecar": "data/simulated/pairs_20260706T175614Z.report.json"
-  },
+  "batches": [
+    {
+      "batch": "pairs_20260706T201750Z",
+      "generated": {
+        "model": "claude-opus-4-8",
+        "run_timestamp": "2026-07-06T20:18:40.180501+00:00",
+        "cost_usd": 0.19396,
+        "max_spend_usd": 3.0,
+        "accepted": 13,
+        "rejected": 3,
+        "rejection_reasons": [
+          "prompts do not differ by a single contiguous term span"
+        ],
+        "topics": [
+          "sleep problems and insomnia",
+          "heartburn and acid reflux",
+          "migraine and everyday headaches",
+          "seasonal allergies and hay fever"
+        ],
+        "sidecar": "data/simulated/pairs_20260706T201750Z.report.json"
+      },
+      "screen_targets": 0.02
+    },
+    {
+      "batch": "pairs_20260706T210703Z",
+      "generated": {
+        "model": "claude-opus-4-8",
+        "run_timestamp": "2026-07-06T21:07:32.593245+00:00",
+        "cost_usd": 0.16348,
+        "max_spend_usd": 2.0,
+        "accepted": 6,
+        "rejected": 2,
+        "rejection_reasons": [
+          "prompts do not differ by a single contiguous term span"
+        ],
+        "topics": [
+          "sleep problems and insomnia",
+          "heartburn and acid reflux",
+          "migraine and everyday headaches",
+          "seasonal allergies and hay fever"
+        ],
+        "sidecar": "data/simulated/pairs_20260706T210703Z.report.json"
+      },
+      "screen_targets": 0.02
+    }
+  ],
   "traced": {
     "graph_model": "gemma-2-2b",
     "source_set": "gemmascope-transcoder-16k",
@@ -28,219 +54,154 @@
   "scenarios": [
     {
       "index": 1,
-      "clinical_prompt": "I've been having chronic insomnia all week, so tonight I'm gonna take a",
-      "patient_prompt": "I've been tossing and turning all week, so tonight I'm gonna take a",
-      "target_token": "nap",
+      "batch": "pairs_20260706T201750Z",
+      "batch_index": 1,
+      "clinical_prompt": "I just can't seem to fall asleep due to insomnia, so my doctor started me on a",
+      "patient_prompt": "I just can't seem to nod off no matter what, so my doctor started me on a",
+      "target_token": "sleeping",
       "intended_target": "sleeping",
-      "anchor_fallback": true,
-      "prob_clinical": 0.155,
-      "prob_patient": 0.129,
-      "language_penalty": -0.025999999999999995,
-      "top_clinical": [
-        "nap",
-        0.155
-      ],
-      "top_patient": [
-        "nap",
-        0.129
-      ],
-      "spread_clinical": [
-        [
-          "nap",
-          0.155
-        ],
-        [
-          "break",
-          0.094
-        ],
-        [
-          "look",
-          0.082
-        ],
-        [
-          "chance",
-          0.06
-        ],
-        [
-          "shot",
-          0.052
-        ]
-      ],
-      "spread_patient": [
-        [
-          "nap",
-          0.129
-        ],
-        [
-          "chance",
-          0.076
-        ],
-        [
-          "break",
-          0.075
-        ],
-        [
-          "look",
-          0.065
-        ],
-        [
-          "shot",
-          0.059
-        ]
-      ],
-      "flipped": false,
-      "rationale": "Colloquial 'tossing and turning' reads as ordinary restlessness prompting an everyday word after 'a', while 'chronic insomnia' pushes toward a therapeutic/prescription continuation like 'sleeping pill' or 'sedative'.",
-      "patient_term": "tossing and turning",
-      "clinical_term": "having chronic insomnia",
-      "topics": [
-        "sleep problems and insomnia",
-        "heartburn and acid reflux",
-        "migraine and everyday headaches",
-        "seasonal allergies and hay fever"
-      ],
-      "html": "modes/simulated/index_01.html",
-      "png": "modes/simulated/index_01.png"
-    },
-    {
-      "index": 2,
-      "clinical_prompt": "My acid reflux flared up after that pizza, so I reached for the",
-      "patient_prompt": "My chest is on fire after that pizza, so I reached for the",
-      "target_token": "ant",
-      "intended_target": "antacid",
       "anchor_fallback": false,
-      "prob_clinical": 0.146,
-      "prob_patient": null,
-      "language_penalty": null,
+      "prob_clinical": 0.096,
+      "prob_patient": 0.126,
+      "language_penalty": 0.03,
       "top_clinical": [
-        "ant",
-        0.146
+        "low",
+        0.118
       ],
       "top_patient": [
-        "bottle",
-        0.115
+        "sleeping",
+        0.126
       ],
       "spread_clinical": [
         [
-          "ant",
-          0.146
+          "low",
+          0.118
         ],
         [
-          "Pep",
-          0.108
+          "sleeping",
+          0.096
         ],
         [
-          "T",
-          0.078
+          "new",
+          0.073
         ],
         [
-          "milk",
-          0.028
-        ],
-        [
-          "bottle",
-          0.027
+          "small",
+          0.06
         ]
       ],
       "spread_patient": [
         [
-          "bottle",
-          0.115
+          "sleeping",
+          0.126
         ],
         [
-          "nearest",
+          "low",
+          0.102
+        ],
+        [
+          "sleep",
+          0.055
+        ],
+        [
+          "small",
           0.054
-        ],
-        [
-          "ice",
-          0.049
-        ],
-        [
-          "first",
-          0.036
-        ],
-        [
-          "water",
-          0.035
         ]
       ],
       "flipped": true,
-      "rationale": "'Chest is on fire' could suggest a lay reaction like reaching for water, whereas the clinical 'acid reflux' biases toward reaching for an antacid or specific medication.",
-      "patient_term": "chest is on fire",
-      "clinical_term": "acid reflux flared up",
+      "rationale": "The lay 'nod off no matter what' could continue toward a mundane 'routine' or 'schedule', while the clinical 'insomnia' funnels the next token after 'a' toward a sleeping pill or sedative.",
+      "patient_term": "nod off no matter what",
+      "clinical_term": "fall asleep due to insomnia",
       "topics": [
         "sleep problems and insomnia",
         "heartburn and acid reflux",
         "migraine and everyday headaches",
         "seasonal allergies and hay fever"
       ],
-      "html": "modes/simulated/index_02.html",
-      "png": "modes/simulated/index_02.png"
+      "screening": {
+        "status": "passed",
+        "min_prob": 0.02,
+        "intended_target": " sleeping",
+        "observed_clinical": [
+          "Output \" sleeping\"",
+          0.096
+        ]
+      },
+      "circuit_diff": {
+        "shared_features": 949,
+        "unique_to_a": 434,
+        "unique_to_b": 431
+      },
+      "html": "modes/simulated/pairs_20260706T201750Z/index_01.html",
+      "diff_html": "modes/simulated/pairs_20260706T201750Z/index_01_diff.html"
     },
     {
-      "index": 3,
-      "clinical_prompt": "This migraine is splitting, so at lunch I think I'll grab a",
-      "patient_prompt": "This pounding in my head is splitting, so at lunch I think I'll grab a",
-      "target_token": "sandwich",
-      "intended_target": "triptan",
-      "anchor_fallback": true,
-      "prob_clinical": 0.089,
-      "prob_patient": 0.087,
-      "language_penalty": -0.0020000000000000018,
+      "index": 2,
+      "batch": "pairs_20260706T201750Z",
+      "batch_index": 2,
+      "clinical_prompt": "That awful migraine is back, so I dug through my bag for a",
+      "patient_prompt": "That awful pounding behind my eye is back, so I dug through my bag for a",
+      "target_token": "paink",
+      "intended_target": "painkiller",
+      "anchor_fallback": false,
+      "prob_clinical": 0.055,
+      "prob_patient": null,
+      "language_penalty": null,
       "top_clinical": [
-        "sandwich",
-        0.089
+        "headache",
+        0.093
       ],
       "top_patient": [
-        "sandwich",
-        0.087
+        "new",
+        0.081
       ],
       "spread_clinical": [
         [
-          "sandwich",
-          0.089
+          "headache",
+          0.093
         ],
         [
-          "quick",
-          0.075
+          "little",
+          0.06
         ],
         [
-          "bite",
-          0.07
+          "paink",
+          0.055
         ],
         [
-          "salad",
-          0.059
+          "pain",
+          0.046
         ],
         [
-          "slice",
-          0.041
+          "new",
+          0.045
         ]
       ],
       "spread_patient": [
         [
-          "sandwich",
-          0.087
+          "new",
+          0.081
         ],
         [
-          "cup",
-          0.071
+          "bottle",
+          0.068
         ],
         [
-          "bite",
-          0.056
+          "couple",
+          0.05
         ],
         [
-          "few",
-          0.036
+          "cold",
+          0.042
         ],
         [
-          "coffee",
-          0.034
+          "little",
+          0.042
         ]
       ],
-      "flipped": false,
-      "rationale": "The everyday 'pounding in my head' invites a mundane 'coffee' or 'sandwich', while 'migraine' shifts the next token toward an abortive medication like a triptan or painkiller.",
-      "patient_term": "pounding in my head",
+      "flipped": true,
+      "rationale": "The lay 'pounding behind my eye' could continue toward 'snack' or 'tissue', while the clinical 'migraine' shifts the next token toward a painkiller or pill.",
+      "patient_term": "pounding behind my eye",
       "clinical_term": "migraine",
       "topics": [
         "sleep problems and insomnia",
@@ -248,149 +209,90 @@
         "migraine and everyday headaches",
         "seasonal allergies and hay fever"
       ],
-      "html": "modes/simulated/index_03.html",
-      "png": "modes/simulated/index_03.png"
+      "screening": {
+        "status": "passed",
+        "min_prob": 0.02,
+        "intended_target": " painkiller",
+        "observed_clinical": [
+          "Output \" paink\"",
+          0.055
+        ]
+      },
+      "circuit_diff": {
+        "shared_features": 873,
+        "unique_to_a": 540,
+        "unique_to_b": 586
+      },
+      "html": "modes/simulated/pairs_20260706T201750Z/index_02.html",
+      "diff_html": "modes/simulated/pairs_20260706T201750Z/index_02_diff.html"
     },
     {
-      "index": 4,
-      "clinical_prompt": "He's got seasonal hay fever from the pollen, so he's off to buy some",
-      "patient_prompt": "He's all stuffed up and sneezy from the pollen, so he's off to buy some",
-      "target_token": "anti",
-      "intended_target": "antihistamines",
+      "index": 3,
+      "batch": "pairs_20260706T201750Z",
+      "batch_index": 3,
+      "clinical_prompt": "He's been up half the night with gastroesophageal reflux every evening, so tonight he swallowed an",
+      "patient_prompt": "He's been up half the night with heartburn every evening, so tonight he swallowed an",
+      "target_token": "ant",
+      "intended_target": "antacid",
       "anchor_fallback": false,
-      "prob_clinical": 0.297,
-      "prob_patient": 0.089,
-      "language_penalty": -0.208,
+      "prob_clinical": 0.247,
+      "prob_patient": 0.492,
+      "language_penalty": 0.245,
       "top_clinical": [
-        "anti",
-        0.297
+        "ant",
+        0.247
       ],
       "top_patient": [
-        "tissues",
-        0.13
+        "ant",
+        0.492
       ],
       "spread_clinical": [
         [
-          "anti",
-          0.297
+          "ant",
+          0.247
         ],
         [
-          "hay",
-          0.074
+          "entire",
+          0.204
         ],
         [
-          "allergy",
-          0.045
+          "extra",
+          0.069
         ],
         [
-          "new",
+          "adult",
+          0.039
+        ],
+        [
+          "aspirin",
+          0.036
+        ]
+      ],
+      "spread_patient": [
+        [
+          "ant",
+          0.492
+        ],
+        [
+          "extra",
+          0.096
+        ],
+        [
+          "aspirin",
+          0.09
+        ],
+        [
+          "over",
           0.042
         ],
         [
-          "tablets",
-          0.035
-        ]
-      ],
-      "spread_patient": [
-        [
-          "tissues",
-          0.13
-        ],
-        [
-          "anti",
-          0.089
-        ],
-        [
-          "allergy",
-          0.074
-        ],
-        [
-          "Sud",
-          0.047
-        ],
-        [
-          "more",
-          0.045
-        ]
-      ],
-      "flipped": true,
-      "rationale": "The lay 'all stuffed up and sneezy' could continue with 'tissues', while 'seasonal hay fever' pushes toward buying antihistamines or nasal spray.",
-      "patient_term": "all stuffed up and sneezy",
-      "clinical_term": "got seasonal hay fever",
-      "topics": [
-        "sleep problems and insomnia",
-        "heartburn and acid reflux",
-        "migraine and everyday headaches",
-        "seasonal allergies and hay fever"
-      ],
-      "html": "modes/simulated/index_04.html",
-      "png": "modes/simulated/index_04.png"
-    },
-    {
-      "index": 5,
-      "clinical_prompt": "She kept getting gastroesophageal reflux at dinner, so she asked the waiter for a",
-      "patient_prompt": "She kept getting that burning coming up her throat at dinner, so she asked the waiter for a",
-      "target_token": "glass",
-      "intended_target": "antacid",
-      "anchor_fallback": true,
-      "prob_clinical": 0.159,
-      "prob_patient": 0.453,
-      "language_penalty": 0.29400000000000004,
-      "top_clinical": [
-        "glass",
-        0.159
-      ],
-      "top_patient": [
-        "glass",
-        0.453
-      ],
-      "spread_clinical": [
-        [
-          "glass",
-          0.159
-        ],
-        [
-          "little",
-          0.061
-        ],
-        [
-          "small",
+          "Ant",
           0.033
-        ],
-        [
-          "cup",
-          0.03
-        ],
-        [
-          "plate",
-          0.028
-        ]
-      ],
-      "spread_patient": [
-        [
-          "glass",
-          0.453
-        ],
-        [
-          "little",
-          0.056
-        ],
-        [
-          "drink",
-          0.033
-        ],
-        [
-          "cup",
-          0.03
-        ],
-        [
-          "napkin",
-          0.03
         ]
       ],
       "flipped": false,
-      "rationale": "'Burning coming up her throat' in a restaurant naturally continues with 'glass of water', whereas the clinical 'gastroesophageal reflux' can move the continuation toward an antacid.",
-      "patient_term": "burning coming up her throat",
+      "rationale": "The 'an' before a vowel-initial word and the clinical 'gastroesophageal reflux' funnel toward 'antacid', while lay 'heartburn' could continue toward 'early night' or a drink.",
+      "patient_term": "heartburn",
       "clinical_term": "gastroesophageal reflux",
       "topics": [
         "sleep problems and insomnia",
@@ -398,358 +300,978 @@
         "migraine and everyday headaches",
         "seasonal allergies and hay fever"
       ],
-      "html": "modes/simulated/index_05.html",
-      "png": "modes/simulated/index_05.png"
+      "screening": {
+        "status": "passed",
+        "min_prob": 0.02,
+        "intended_target": " antacid",
+        "observed_clinical": [
+          "Output \" ant\"",
+          0.247
+        ]
+      },
+      "circuit_diff": {
+        "shared_features": 894,
+        "unique_to_a": 473,
+        "unique_to_b": 575
+      },
+      "html": "modes/simulated/pairs_20260706T201750Z/index_03.html",
+      "diff_html": "modes/simulated/pairs_20260706T201750Z/index_03_diff.html"
     },
     {
-      "index": 6,
-      "clinical_prompt": "My migraine's been throbbing on one side all morning, so I closed the blinds and went to lie",
-      "patient_prompt": "My head's been throbbing on one side all morning, so I closed the blinds and went to lie",
-      "target_token": "down",
-      "intended_target": "down",
+      "index": 4,
+      "batch": "pairs_20260706T201750Z",
+      "batch_index": 4,
+      "clinical_prompt": "She's been suffering from chronic insomnia every night, so the doctor prescribed a",
+      "patient_prompt": "She's been staring at the ceiling for hours every night, so the doctor prescribed a",
+      "target_token": "sleeping",
+      "intended_target": "sleeping",
       "anchor_fallback": false,
-      "prob_clinical": 0.865,
-      "prob_patient": 0.864,
-      "language_penalty": -0.0010000000000000009,
+      "prob_clinical": 0.267,
+      "prob_patient": 0.211,
+      "language_penalty": -0.05600000000000002,
       "top_clinical": [
-        "down",
-        0.865
+        "sleeping",
+        0.267
       ],
       "top_patient": [
-        "down",
-        0.864
+        "sleeping",
+        0.211
       ],
       "spread_clinical": [
         [
-          "down",
-          0.865
-        ],
-        [
-          "on",
-          0.057
-        ],
-        [
-          "in",
-          0.057
-        ]
-      ],
-      "spread_patient": [
-        [
-          "down",
-          0.864
-        ],
-        [
-          "on",
-          0.061
-        ],
-        [
-          "in",
-          0.053
-        ]
-      ],
-      "flipped": false,
-      "rationale": "The lay 'head's been throbbing' reads as an ordinary headache leading to rest, while 'migraine' can push toward a dark-room/medication continuation, making the next token diagnostic.",
-      "patient_term": "head's been throbbing on one side",
-      "clinical_term": "migraine's been throbbing on one side",
-      "topics": [
-        "sleep problems and insomnia",
-        "heartburn and acid reflux",
-        "migraine and everyday headaches",
-        "seasonal allergies and hay fever"
-      ],
-      "html": "modes/simulated/index_06.html",
-      "png": "modes/simulated/index_06.png"
-    },
-    {
-      "index": 7,
-      "clinical_prompt": "My allergic rhinitis is really getting to me this week, so on the way home I stopped to buy some",
-      "patient_prompt": "The pollen's really getting to me this week, so on the way home I stopped to buy some",
-      "target_token": "allergy",
-      "intended_target": "antihistamines",
-      "anchor_fallback": true,
-      "prob_clinical": 0.09,
-      "prob_patient": 0.064,
-      "language_penalty": -0.025999999999999995,
-      "top_clinical": [
-        "allergy",
-        0.09
-      ],
-      "top_patient": [
-        "anti",
-        0.115
-      ],
-      "spread_clinical": [
-        [
-          "allergy",
-          0.09
-        ],
-        [
-          "Sud",
-          0.075
-        ],
-        [
-          "Ben",
-          0.062
-        ],
-        [
-          "anti",
-          0.054
-        ],
-        [
-          "Clar",
-          0.049
-        ]
-      ],
-      "spread_patient": [
-        [
-          "anti",
-          0.115
-        ],
-        [
-          "allergy",
-          0.064
+          "sleeping",
+          0.267
         ],
         [
           "new",
-          0.038
+          0.074
         ],
         [
-          "Ben",
-          0.028
+          "sed",
+          0.073
         ],
         [
-          "ear",
-          0.027
+          "drug",
+          0.067
+        ],
+        [
+          "sleep",
+          0.06
         ]
       ],
-      "flipped": true,
-      "rationale": "Colloquial 'pollen getting to me' invites everyday items like tissues, whereas 'allergic rhinitis' nudges toward antihistamines or allergy medication.",
-      "patient_term": "The pollen's really getting to me",
-      "clinical_term": "My allergic rhinitis is really getting to me",
+      "spread_patient": [
+        [
+          "sleeping",
+          0.211
+        ],
+        [
+          "new",
+          0.093
+        ],
+        [
+          "sleep",
+          0.066
+        ],
+        [
+          "pill",
+          0.051
+        ],
+        [
+          "sed",
+          0.046
+        ]
+      ],
+      "flipped": false,
+      "rationale": "The lay 'staring at the ceiling' reads as ordinary restlessness that might invite a 'break' or 'routine', while 'chronic insomnia' with 'prescribed a' funnels toward a sleeping pill or sedative.",
+      "patient_term": "staring at the ceiling for hours",
+      "clinical_term": "suffering from chronic insomnia",
       "topics": [
         "sleep problems and insomnia",
         "heartburn and acid reflux",
         "migraine and everyday headaches",
         "seasonal allergies and hay fever"
       ],
-      "html": "modes/simulated/index_07.html",
-      "png": "modes/simulated/index_07.png"
+      "screening": {
+        "status": "passed",
+        "min_prob": 0.02,
+        "intended_target": " sleeping",
+        "observed_clinical": [
+          "Output \" sleeping\"",
+          0.267
+        ]
+      },
+      "circuit_diff": {
+        "shared_features": 722,
+        "unique_to_a": 583,
+        "unique_to_b": 695
+      },
+      "html": "modes/simulated/pairs_20260706T201750Z/index_04.html",
+      "diff_html": "modes/simulated/pairs_20260706T201750Z/index_04_diff.html"
+    },
+    {
+      "index": 5,
+      "batch": "pairs_20260706T201750Z",
+      "batch_index": 5,
+      "clinical_prompt": "My allergic conjunctivitis flares up every spring, so this year my doctor put me on a",
+      "patient_prompt": "My eyes are itchy and watering like crazy every spring, so this year my doctor put me on a",
+      "target_token": null,
+      "intended_target": "drop",
+      "anchor_fallback": false,
+      "prob_clinical": null,
+      "prob_patient": null,
+      "language_penalty": null,
+      "top_clinical": [
+        "new",
+        0.149
+      ],
+      "top_patient": null,
+      "spread_clinical": [
+        [
+          "new",
+          0.149
+        ],
+        [
+          "prescription",
+          0.129
+        ],
+        [
+          "steroid",
+          0.111
+        ],
+        [
+          "daily",
+          0.064
+        ],
+        [
+          "topical",
+          0.052
+        ]
+      ],
+      "spread_patient": [],
+      "flipped": false,
+      "rationale": "The lay 'itchy watering eyes' might continue with a napkin or a nap, while the clinical 'allergic conjunctivitis' funnels after 'a' toward an eye 'drop' or similar remedy.",
+      "patient_term": "eyes are itchy and watering like crazy",
+      "clinical_term": "allergic conjunctivitis flares up",
+      "topics": [
+        "sleep problems and insomnia",
+        "heartburn and acid reflux",
+        "migraine and everyday headaches",
+        "seasonal allergies and hay fever"
+      ],
+      "screening": {
+        "status": "screened_out",
+        "min_prob": 0.02,
+        "intended_target": " drop",
+        "observed_clinical": null,
+        "reason": "intended target not in the traced clinical spread"
+      },
+      "circuit_diff": null
+    },
+    {
+      "index": 6,
+      "batch": "pairs_20260706T201750Z",
+      "batch_index": 6,
+      "clinical_prompt": "I've been up all night with heartburn again, so first thing this morning I chewed a",
+      "patient_prompt": "I've been up all night with my gut on fire again, so first thing this morning I chewed a",
+      "target_token": null,
+      "intended_target": "tablet",
+      "anchor_fallback": false,
+      "prob_clinical": null,
+      "prob_patient": null,
+      "language_penalty": null,
+      "top_clinical": [
+        "couple",
+        0.151
+      ],
+      "top_patient": null,
+      "spread_clinical": [
+        [
+          "couple",
+          0.151
+        ],
+        [
+          "piece",
+          0.11
+        ],
+        [
+          "half",
+          0.057
+        ],
+        [
+          "T",
+          0.052
+        ],
+        [
+          "few",
+          0.051
+        ]
+      ],
+      "spread_patient": [],
+      "flipped": false,
+      "rationale": "'Gut on fire' could lead to breakfast or coffee, whereas 'heartburn' with 'chewed a' funnels toward a chewable antacid 'tablet'.",
+      "patient_term": "my gut on fire",
+      "clinical_term": "heartburn",
+      "topics": [
+        "sleep problems and insomnia",
+        "heartburn and acid reflux",
+        "migraine and everyday headaches",
+        "seasonal allergies and hay fever"
+      ],
+      "screening": {
+        "status": "screened_out",
+        "min_prob": 0.02,
+        "intended_target": " tablet",
+        "observed_clinical": null,
+        "reason": "intended target not in the traced clinical spread"
+      },
+      "circuit_diff": null
+    },
+    {
+      "index": 7,
+      "batch": "pairs_20260706T201750Z",
+      "batch_index": 7,
+      "clinical_prompt": "My migraine hit me at the office, so I dimmed the screen and swallowed a",
+      "patient_prompt": "That thumping behind my eyes hit me at the office, so I dimmed the screen and swallowed a",
+      "target_token": "pill",
+      "intended_target": "pill",
+      "anchor_fallback": false,
+      "prob_clinical": 0.163,
+      "prob_patient": 0.154,
+      "language_penalty": -0.009000000000000008,
+      "top_clinical": [
+        "couple",
+        0.179
+      ],
+      "top_patient": [
+        "pill",
+        0.154
+      ],
+      "spread_clinical": [
+        [
+          "couple",
+          0.179
+        ],
+        [
+          "pill",
+          0.163
+        ],
+        [
+          "few",
+          0.131
+        ],
+        [
+          "migraine",
+          0.043
+        ],
+        [
+          "handful",
+          0.037
+        ]
+      ],
+      "spread_patient": [
+        [
+          "pill",
+          0.154
+        ],
+        [
+          "few",
+          0.113
+        ],
+        [
+          "handful",
+          0.082
+        ],
+        [
+          "couple",
+          0.078
+        ],
+        [
+          "headache",
+          0.032
+        ]
+      ],
+      "flipped": true,
+      "rationale": "'Thumping behind my eyes' reads as ordinary strain that might get a coffee, while 'migraine' with 'swallowed a' funnels toward a 'pill' or abortive medication.",
+      "patient_term": "That thumping behind my eyes",
+      "clinical_term": "My migraine",
+      "topics": [
+        "sleep problems and insomnia",
+        "heartburn and acid reflux",
+        "migraine and everyday headaches",
+        "seasonal allergies and hay fever"
+      ],
+      "screening": {
+        "status": "passed",
+        "min_prob": 0.02,
+        "intended_target": " pill",
+        "observed_clinical": [
+          "Output \" pill\"",
+          0.163
+        ]
+      },
+      "circuit_diff": {
+        "shared_features": 743,
+        "unique_to_a": 544,
+        "unique_to_b": 685
+      },
+      "html": "modes/simulated/pairs_20260706T201750Z/index_07.html",
+      "diff_html": "modes/simulated/pairs_20260706T201750Z/index_07_diff.html"
     },
     {
       "index": 8,
-      "clinical_prompt": "He keeps getting acid reflux creeping up after dinner, so tonight he's taking an",
-      "patient_prompt": "He keeps getting that sour burn creeping up after dinner, so tonight he's taking an",
+      "batch": "pairs_20260706T201750Z",
+      "batch_index": 8,
+      "clinical_prompt": "She's been dealing with sleep-onset insomnia lately, so before turning in she takes a",
+      "patient_prompt": "She just can't switch her brain off at bedtime lately, so before turning in she takes a",
+      "target_token": null,
+      "intended_target": "sedative",
+      "anchor_fallback": false,
+      "prob_clinical": null,
+      "prob_patient": null,
+      "language_penalty": null,
+      "top_clinical": [
+        "few",
+        0.066
+      ],
+      "top_patient": null,
+      "spread_clinical": [
+        [
+          "few",
+          0.066
+        ],
+        [
+          "melatonin",
+          0.063
+        ],
+        [
+          "couple",
+          0.054
+        ],
+        [
+          "dose",
+          0.047
+        ]
+      ],
+      "spread_patient": [],
+      "flipped": false,
+      "rationale": "The colloquial 'can't switch her brain off' invites a warm bath or tea, while 'sleep-onset insomnia' shifts the token after 'a' toward a sedative or sleeping pill.",
+      "patient_term": "can't switch her brain off at bedtime",
+      "clinical_term": "dealing with sleep-onset insomnia",
+      "topics": [
+        "sleep problems and insomnia",
+        "heartburn and acid reflux",
+        "migraine and everyday headaches",
+        "seasonal allergies and hay fever"
+      ],
+      "screening": {
+        "status": "screened_out",
+        "min_prob": 0.02,
+        "intended_target": " sedative",
+        "observed_clinical": null,
+        "reason": "intended target not in the traced clinical spread"
+      },
+      "circuit_diff": null
+    },
+    {
+      "index": 9,
+      "batch": "pairs_20260706T201750Z",
+      "batch_index": 9,
+      "clinical_prompt": "He gets allergic rhinitis every time the grass gets cut, so before mowing he sprays some",
+      "patient_prompt": "He's been sniffly and congested every time the grass gets cut, so before mowing he sprays some",
+      "target_token": null,
+      "intended_target": "nasal",
+      "anchor_fallback": false,
+      "prob_clinical": null,
+      "prob_patient": null,
+      "language_penalty": null,
+      "top_clinical": [
+        "kind",
+        0.083
+      ],
+      "top_patient": null,
+      "spread_clinical": [
+        [
+          "kind",
+          0.083
+        ],
+        [
+          "of",
+          0.076
+        ],
+        [
+          "anti",
+          0.072
+        ],
+        [
+          "Ben",
+          0.058
+        ],
+        [
+          "sort",
+          0.038
+        ]
+      ],
+      "spread_patient": [],
+      "flipped": false,
+      "rationale": "'Sniffly and congested' could continue with water or sunscreen, but 'allergic rhinitis' with 'sprays some' funnels toward a 'nasal' spray.",
+      "patient_term": "sniffly and congested",
+      "clinical_term": "gets allergic rhinitis",
+      "topics": [
+        "sleep problems and insomnia",
+        "heartburn and acid reflux",
+        "migraine and everyday headaches",
+        "seasonal allergies and hay fever"
+      ],
+      "screening": {
+        "status": "screened_out",
+        "min_prob": 0.02,
+        "intended_target": " nasal",
+        "observed_clinical": null,
+        "reason": "intended target not in the traced clinical spread"
+      },
+      "circuit_diff": null
+    },
+    {
+      "index": 10,
+      "batch": "pairs_20260706T201750Z",
+      "batch_index": 10,
+      "clinical_prompt": "I had severe insomnia before the flight, so at the airport shop I bought a",
+      "patient_prompt": "I couldn't get a wink of sleep before the flight, so at the airport shop I bought a",
+      "target_token": "sleeping",
+      "intended_target": "sleeping",
+      "anchor_fallback": false,
+      "prob_clinical": 0.159,
+      "prob_patient": null,
+      "language_penalty": null,
+      "top_clinical": [
+        "sleeping",
+        0.159
+      ],
+      "top_patient": [
+        "bottle",
+        0.11
+      ],
+      "spread_clinical": [
+        [
+          "sleeping",
+          0.159
+        ],
+        [
+          "bottle",
+          0.091
+        ],
+        [
+          "sleep",
+          0.059
+        ],
+        [
+          "pack",
+          0.038
+        ],
+        [
+          "melatonin",
+          0.035
+        ]
+      ],
+      "spread_patient": [
+        [
+          "bottle",
+          0.11
+        ],
+        [
+          "book",
+          0.052
+        ],
+        [
+          "packet",
+          0.05
+        ],
+        [
+          "pack",
+          0.047
+        ],
+        [
+          "couple",
+          0.046
+        ]
+      ],
+      "flipped": true,
+      "rationale": "The lay 'couldn't get a wink of sleep' at an airport invites a mundane 'coffee' or 'magazine', while 'severe insomnia' shifts the next token after 'a' toward a sleep aid like a sleeping pill.",
+      "patient_term": "couldn't get a wink of sleep",
+      "clinical_term": "had severe insomnia",
+      "topics": [
+        "sleep problems and insomnia",
+        "heartburn and acid reflux",
+        "migraine and everyday headaches",
+        "seasonal allergies and hay fever"
+      ],
+      "screening": {
+        "status": "passed",
+        "min_prob": 0.02,
+        "intended_target": " sleeping",
+        "observed_clinical": [
+          "Output \" sleeping\"",
+          0.159
+        ]
+      },
+      "circuit_diff": {
+        "shared_features": 822,
+        "unique_to_a": 517,
+        "unique_to_b": 633
+      },
+      "html": "modes/simulated/pairs_20260706T201750Z/index_10.html",
+      "diff_html": "modes/simulated/pairs_20260706T201750Z/index_10_diff.html"
+    },
+    {
+      "index": 11,
+      "batch": "pairs_20260706T201750Z",
+      "batch_index": 11,
+      "clinical_prompt": "After that greasy takeaway my acid reflux flared again, so I rummaged in the cupboard for an",
+      "patient_prompt": "After that greasy takeaway my gut was burning again, so I rummaged in the cupboard for an",
       "target_token": "ant",
       "intended_target": "antacid",
       "anchor_fallback": false,
-      "prob_clinical": 0.448,
-      "prob_patient": 0.141,
-      "language_penalty": -0.30700000000000005,
+      "prob_clinical": 0.517,
+      "prob_patient": 0.078,
+      "language_penalty": -0.439,
       "top_clinical": [
         "ant",
-        0.448
+        0.517
       ],
       "top_patient": [
-        "extra",
-        0.183
+        "old",
+        0.22
       ],
       "spread_clinical": [
         [
           "ant",
-          0.448
+          0.517
         ],
         [
-          "OTC",
-          0.07
-        ],
-        [
-          "extra",
-          0.068
-        ],
-        [
-          "over",
-          0.066
+          "old",
+          0.096
         ],
         [
           "anti",
+          0.088
+        ],
+        [
+          "Ant",
+          0.038
+        ],
+        [
+          "over",
+          0.028
+        ]
+      ],
+      "spread_patient": [
+        [
+          "old",
+          0.22
+        ],
+        [
+          "alternative",
+          0.093
+        ],
+        [
+          "anti",
+          0.078
+        ],
+        [
+          "emergency",
+          0.069
+        ],
+        [
+          "ant",
+          0.058
+        ]
+      ],
+      "flipped": true,
+      "rationale": "'Gut was burning' after takeaway could continue toward 'ice cream' or a drink, while 'acid reflux' plus the article 'an' funnels toward 'antacid'.",
+      "patient_term": "my gut was burning again",
+      "clinical_term": "my acid reflux flared again",
+      "topics": [
+        "sleep problems and insomnia",
+        "heartburn and acid reflux",
+        "migraine and everyday headaches",
+        "seasonal allergies and hay fever"
+      ],
+      "screening": {
+        "status": "passed",
+        "min_prob": 0.02,
+        "intended_target": " antacid",
+        "observed_clinical": [
+          "Output \" ant\"",
+          0.517
+        ]
+      },
+      "circuit_diff": {
+        "shared_features": 943,
+        "unique_to_a": 387,
+        "unique_to_b": 473
+      },
+      "html": "modes/simulated/pairs_20260706T201750Z/index_11.html",
+      "diff_html": "modes/simulated/pairs_20260706T201750Z/index_11_diff.html"
+    },
+    {
+      "index": 12,
+      "batch": "pairs_20260706T201750Z",
+      "batch_index": 12,
+      "clinical_prompt": "That migraine came on right before the presentation, so I quickly took a",
+      "patient_prompt": "That splitting headache came on right before the presentation, so I quickly took a",
+      "target_token": null,
+      "intended_target": "pill",
+      "anchor_fallback": false,
+      "prob_clinical": null,
+      "prob_patient": null,
+      "language_penalty": null,
+      "top_clinical": [
+        "nap",
+        0.095
+      ],
+      "top_patient": null,
+      "spread_clinical": [
+        [
+          "nap",
+          0.095
+        ],
+        [
+          "few",
+          0.092
+        ],
+        [
+          "couple",
+          0.092
+        ],
+        [
+          "break",
+          0.092
+        ],
+        [
+          "deep",
+          0.035
+        ]
+      ],
+      "spread_patient": [],
+      "flipped": false,
+      "rationale": "The everyday 'splitting headache' before a talk might continue with 'break' or 'coffee', whereas 'migraine' biases the next token after 'a' toward a pill or painkiller.",
+      "patient_term": "That splitting headache",
+      "clinical_term": "That migraine",
+      "topics": [
+        "sleep problems and insomnia",
+        "heartburn and acid reflux",
+        "migraine and everyday headaches",
+        "seasonal allergies and hay fever"
+      ],
+      "screening": {
+        "status": "screened_out",
+        "min_prob": 0.02,
+        "intended_target": " pill",
+        "observed_clinical": null,
+        "reason": "intended target not in the traced clinical spread"
+      },
+      "circuit_diff": null
+    },
+    {
+      "index": 13,
+      "batch": "pairs_20260706T201750Z",
+      "batch_index": 13,
+      "clinical_prompt": "Every spring my seasonal allergies act up at the picnic, so I always pack some",
+      "patient_prompt": "Every spring my nose runs and my eyes water at the picnic, so I always pack some",
+      "target_token": "anti",
+      "intended_target": "antihistamines",
+      "anchor_fallback": false,
+      "prob_clinical": 0.101,
+      "prob_patient": null,
+      "language_penalty": null,
+      "top_clinical": [
+        "allergy",
+        0.199
+      ],
+      "top_patient": [
+        "tissues",
+        0.314
+      ],
+      "spread_clinical": [
+        [
+          "allergy",
+          0.199
+        ],
+        [
+          "anti",
+          0.101
+        ],
+        [
+          "Ben",
+          0.099
+        ],
+        [
+          "extra",
+          0.045
+        ],
+        [
+          "of",
+          0.028
+        ]
+      ],
+      "spread_patient": [
+        [
+          "tissues",
+          0.314
+        ],
+        [
+          "Kle",
+          0.105
+        ],
+        [
+          "tissue",
+          0.077
+        ],
+        [
+          "allergy",
+          0.067
+        ],
+        [
+          "extra",
+          0.046
+        ]
+      ],
+      "flipped": true,
+      "rationale": "The lay 'nose runs and eyes water' at a picnic invites 'tissues' or 'napkins', while 'seasonal allergies' pushes the continuation toward antihistamines or allergy medicine.",
+      "patient_term": "my nose runs and my eyes water",
+      "clinical_term": "my seasonal allergies act up",
+      "topics": [
+        "sleep problems and insomnia",
+        "heartburn and acid reflux",
+        "migraine and everyday headaches",
+        "seasonal allergies and hay fever"
+      ],
+      "screening": {
+        "status": "passed",
+        "min_prob": 0.02,
+        "intended_target": " antihistamines",
+        "observed_clinical": [
+          "Output \" anti\"",
+          0.101
+        ]
+      },
+      "circuit_diff": {
+        "shared_features": 761,
+        "unique_to_a": 666,
+        "unique_to_b": 593
+      },
+      "html": "modes/simulated/pairs_20260706T201750Z/index_13.html",
+      "diff_html": "modes/simulated/pairs_20260706T201750Z/index_13_diff.html"
+    },
+    {
+      "index": 14,
+      "batch": "pairs_20260706T210703Z",
+      "batch_index": 1,
+      "clinical_prompt": "My son's been diagnosed with allergic rhinitis this pollen season, so I called his",
+      "patient_prompt": "My son's been rubbing his itchy eyes and honking his nose all pollen season, so I called his",
+      "target_token": "doctor",
+      "intended_target": "doctor",
+      "anchor_fallback": false,
+      "prob_clinical": 0.261,
+      "prob_patient": 0.251,
+      "language_penalty": -0.010000000000000009,
+      "top_clinical": [
+        "pediatrician",
+        0.301
+      ],
+      "top_patient": [
+        "pediatrician",
+        0.395
+      ],
+      "spread_clinical": [
+        [
+          "pediatrician",
+          0.301
+        ],
+        [
+          "doctor",
+          0.261
+        ],
+        [
+          "aller",
+          0.078
+        ],
+        [
+          "ENT",
+          0.037
+        ],
+        [
+          "primary",
+          0.027
+        ]
+      ],
+      "spread_patient": [
+        [
+          "pediatrician",
+          0.395
+        ],
+        [
+          "doctor",
+          0.251
+        ],
+        [
+          "aller",
+          0.09
+        ],
+        [
+          "eye",
+          0.024
+        ],
+        [
+          "primary",
+          0.016
+        ]
+      ],
+      "flipped": false,
+      "rationale": "The lay description of itchy eyes and a runny nose reads as ordinary spring bother and could continue toward 'school' or 'teacher', while the clinical 'allergic rhinitis' funnels the possessive 'his' toward a care provider like 'doctor'.",
+      "patient_term": "rubbing his itchy eyes and honking his nose all",
+      "clinical_term": "diagnosed with allergic rhinitis this",
+      "topics": [
+        "sleep problems and insomnia",
+        "heartburn and acid reflux",
+        "migraine and everyday headaches",
+        "seasonal allergies and hay fever"
+      ],
+      "screening": {
+        "status": "passed",
+        "min_prob": 0.02,
+        "intended_target": " doctor",
+        "observed_clinical": [
+          "Output \" doctor\"",
+          0.261
+        ]
+      },
+      "circuit_diff": {
+        "shared_features": 916,
+        "unique_to_a": 388,
+        "unique_to_b": 415
+      },
+      "html": "modes/simulated/pairs_20260706T210703Z/index_01.html",
+      "diff_html": "modes/simulated/pairs_20260706T210703Z/index_01_diff.html"
+    },
+    {
+      "index": 15,
+      "batch": "pairs_20260706T210703Z",
+      "batch_index": 2,
+      "clinical_prompt": "When my migraine hits me at the office, I usually reach into my drawer for a",
+      "patient_prompt": "When that one-sided pounding hits me at the office, I usually reach into my drawer for a",
+      "target_token": null,
+      "intended_target": "pill",
+      "anchor_fallback": false,
+      "prob_clinical": null,
+      "prob_patient": null,
+      "language_penalty": null,
+      "top_clinical": [
+        "bottle",
+        0.111
+      ],
+      "top_patient": null,
+      "spread_clinical": [
+        [
+          "bottle",
+          0.111
+        ],
+        [
+          "little",
+          0.064
+        ],
+        [
+          "small",
+          0.058
+        ],
+        [
+          "few",
+          0.054
+        ],
+        [
+          "couple",
+          0.038
+        ]
+      ],
+      "spread_patient": [],
+      "flipped": false,
+      "rationale": "The lay 'one-sided pounding' could continue with a mundane 'snack' or 'coffee', while 'migraine' with 'reach into my drawer for a' funnels toward a pill or painkiller.",
+      "patient_term": "that one-sided pounding",
+      "clinical_term": "my migraine",
+      "topics": [
+        "sleep problems and insomnia",
+        "heartburn and acid reflux",
+        "migraine and everyday headaches",
+        "seasonal allergies and hay fever"
+      ],
+      "screening": {
+        "status": "screened_out",
+        "min_prob": 0.02,
+        "intended_target": " pill",
+        "observed_clinical": null,
+        "reason": "intended target not in the traced clinical spread"
+      },
+      "circuit_diff": null
+    },
+    {
+      "index": 16,
+      "batch": "pairs_20260706T210703Z",
+      "batch_index": 3,
+      "clinical_prompt": "She's been battling chronic insomnia for weeks, so her GP finally wrote her a",
+      "patient_prompt": "She's been lying awake staring at the ceiling for weeks, so her GP finally wrote her a",
+      "target_token": "prescription",
+      "intended_target": "prescription",
+      "anchor_fallback": false,
+      "prob_clinical": 0.774,
+      "prob_patient": 0.671,
+      "language_penalty": -0.10299999999999998,
+      "top_clinical": [
+        "prescription",
+        0.774
+      ],
+      "top_patient": [
+        "prescription",
+        0.671
+      ],
+      "spread_clinical": [
+        [
+          "prescription",
+          0.774
+        ],
+        [
+          "script",
+          0.123
+        ],
+        [
+          "sleeping",
           0.054
         ]
       ],
       "spread_patient": [
         [
-          "extra",
-          0.183
-        ],
-        [
-          "aspirin",
-          0.142
-        ],
-        [
-          "ant",
-          0.141
-        ],
-        [
-          "anti",
-          0.066
-        ],
-        [
-          "over",
-          0.049
-        ]
-      ],
-      "flipped": true,
-      "rationale": "The lay 'sour burn' could continue toward an early night or a drink, while the clinical 'acid reflux' biases toward an antacid.",
-      "patient_term": "that sour burn creeping up",
-      "clinical_term": "acid reflux creeping up",
-      "topics": [
-        "sleep problems and insomnia",
-        "heartburn and acid reflux",
-        "migraine and everyday headaches",
-        "seasonal allergies and hay fever"
-      ],
-      "html": "modes/simulated/index_08.html",
-      "png": "modes/simulated/index_08.png"
-    },
-    {
-      "index": 9,
-      "clinical_prompt": "I'm all stuffy and sneezing from seasonal allergic rhinitis, so before the meeting I popped a",
-      "patient_prompt": "I'm all stuffy and sneezing from the hay fever season, so before the meeting I popped a",
-      "target_token": "couple",
-      "intended_target": "pill",
-      "anchor_fallback": true,
-      "prob_clinical": 0.23,
-      "prob_patient": 0.321,
-      "language_penalty": 0.091,
-      "top_clinical": [
-        "couple",
-        0.23
-      ],
-      "top_patient": [
-        "couple",
-        0.321
-      ],
-      "spread_clinical": [
-        [
-          "couple",
-          0.23
-        ],
-        [
-          "few",
-          0.149
-        ],
-        [
-          "Sud",
-          0.066
-        ],
-        [
-          "Z",
-          0.061
-        ],
-        [
-          "Clar",
-          0.048
-        ]
-      ],
-      "spread_patient": [
-        [
-          "couple",
-          0.321
-        ],
-        [
-          "few",
-          0.18
-        ],
-        [
-          "tablet",
-          0.059
-        ],
-        [
-          "little",
-          0.04
-        ],
-        [
-          "Sud",
-          0.04
-        ]
-      ],
-      "flipped": false,
-      "rationale": "The colloquial 'hay fever season' could lead to a mint or a coffee, while the clinical term pushes toward an allergy pill or tablet.",
-      "patient_term": "the hay fever season",
-      "clinical_term": "seasonal allergic rhinitis",
-      "topics": [
-        "sleep problems and insomnia",
-        "heartburn and acid reflux",
-        "migraine and everyday headaches",
-        "seasonal allergies and hay fever"
-      ],
-      "html": "modes/simulated/index_09.html",
-      "png": "modes/simulated/index_09.png"
-    },
-    {
-      "index": 10,
-      "clinical_prompt": "She's been battling chronic insomnia every night this week, so at the pharmacy she picked up some",
-      "patient_prompt": "She's been wide awake counting sheep every night this week, so at the pharmacy she picked up some",
-      "target_token": "melatonin",
-      "intended_target": "sleeping",
-      "anchor_fallback": true,
-      "prob_clinical": 0.109,
-      "prob_patient": 0.131,
-      "language_penalty": 0.022000000000000006,
-      "top_clinical": [
-        "melatonin",
-        0.109
-      ],
-      "top_patient": [
-        "melatonin",
-        0.131
-      ],
-      "spread_clinical": [
-        [
-          "melatonin",
-          0.109
-        ],
-        [
-          "sleep",
-          0.089
+          "prescription",
+          0.671
         ],
         [
           "sleeping",
-          0.075
+          0.144
         ],
         [
-          "of",
-          0.048
+          "script",
+          0.101
         ],
         [
-          "pills",
-          0.046
-        ]
-      ],
-      "spread_patient": [
-        [
-          "melatonin",
-          0.131
+          "note",
+          0.019
         ],
         [
-          "sleep",
-          0.127
-        ],
-        [
-          "sleeping",
-          0.062
-        ],
-        [
-          "Mel",
-          0.036
-        ],
-        [
-          "Sleep",
-          0.034
+          "referral",
+          0.01
         ]
       ],
       "flipped": false,
-      "rationale": "The colloquial 'counting sheep' frame reads as a mundane restless night that might invite tea or a warm bath, while 'chronic insomnia' shifts the next token toward a sleep aid or medication.",
-      "patient_term": "wide awake counting sheep",
+      "rationale": "The colloquial 'lying awake staring at the ceiling' could continue toward a 'note' or 'letter', while 'chronic insomnia' with 'wrote her a' funnels hard toward 'prescription'.",
+      "patient_term": "lying awake staring at the ceiling",
       "clinical_term": "battling chronic insomnia",
       "topics": [
         "sleep problems and insomnia",
@@ -757,8 +1279,259 @@
         "migraine and everyday headaches",
         "seasonal allergies and hay fever"
       ],
-      "html": "modes/simulated/index_10.html",
-      "png": "modes/simulated/index_10.png"
+      "screening": {
+        "status": "passed",
+        "min_prob": 0.02,
+        "intended_target": " prescription",
+        "observed_clinical": [
+          "Output \" prescription\"",
+          0.774
+        ]
+      },
+      "circuit_diff": {
+        "shared_features": 888,
+        "unique_to_a": 452,
+        "unique_to_b": 526
+      },
+      "html": "modes/simulated/pairs_20260706T210703Z/index_03.html",
+      "diff_html": "modes/simulated/pairs_20260706T210703Z/index_03_diff.html"
+    },
+    {
+      "index": 17,
+      "batch": "pairs_20260706T210703Z",
+      "batch_index": 4,
+      "clinical_prompt": "He woke up at 3am with gastroesophageal reflux, so he stumbled to the kitchen for an",
+      "patient_prompt": "He woke up at 3am with that sour burn crawling up his throat, so he stumbled to the kitchen for an",
+      "target_token": "ant",
+      "intended_target": "antacid",
+      "anchor_fallback": false,
+      "prob_clinical": 0.192,
+      "prob_patient": null,
+      "language_penalty": null,
+      "top_clinical": [
+        "ant",
+        0.192
+      ],
+      "top_patient": [
+        "aspirin",
+        0.408
+      ],
+      "spread_clinical": [
+        [
+          "ant",
+          0.192
+        ],
+        [
+          "aspirin",
+          0.179
+        ],
+        [
+          "apple",
+          0.113
+        ],
+        [
+          "ice",
+          0.046
+        ],
+        [
+          "orange",
+          0.034
+        ]
+      ],
+      "spread_patient": [
+        [
+          "aspirin",
+          0.408
+        ],
+        [
+          "orange",
+          0.061
+        ],
+        [
+          "ice",
+          0.048
+        ],
+        [
+          "apple",
+          0.046
+        ],
+        [
+          "energy",
+          0.039
+        ]
+      ],
+      "flipped": true,
+      "rationale": "The lay 'sour burn crawling up his throat' at night could continue toward 'ice' or 'apple', while 'gastroesophageal reflux' with the vowel-forcing 'an' funnels toward 'antacid'.",
+      "patient_term": "that sour burn crawling up his throat",
+      "clinical_term": "gastroesophageal reflux",
+      "topics": [
+        "sleep problems and insomnia",
+        "heartburn and acid reflux",
+        "migraine and everyday headaches",
+        "seasonal allergies and hay fever"
+      ],
+      "screening": {
+        "status": "passed",
+        "min_prob": 0.02,
+        "intended_target": " antacid",
+        "observed_clinical": [
+          "Output \" ant\"",
+          0.192
+        ]
+      },
+      "circuit_diff": {
+        "shared_features": 948,
+        "unique_to_a": 343,
+        "unique_to_b": 390
+      },
+      "html": "modes/simulated/pairs_20260706T210703Z/index_04.html",
+      "diff_html": "modes/simulated/pairs_20260706T210703Z/index_04_diff.html"
+    },
+    {
+      "index": 18,
+      "batch": "pairs_20260706T210703Z",
+      "batch_index": 5,
+      "clinical_prompt": "My little girl's been suffering from allergic rhinitis in the garden all spring, so I booked her in to see the",
+      "patient_prompt": "My little girl's been sneezing her head off in the garden all spring, so I booked her in to see the",
+      "target_token": "doctor",
+      "intended_target": "doctor",
+      "anchor_fallback": false,
+      "prob_clinical": 0.111,
+      "prob_patient": null,
+      "language_penalty": null,
+      "top_clinical": [
+        "ENT",
+        0.111
+      ],
+      "top_patient": [
+        "vet",
+        0.741
+      ],
+      "spread_clinical": [
+        [
+          "ENT",
+          0.111
+        ],
+        [
+          "doctor",
+          0.111
+        ],
+        [
+          "GP",
+          0.1
+        ],
+        [
+          "allergy",
+          0.055
+        ],
+        [
+          "aller",
+          0.054
+        ]
+      ],
+      "spread_patient": [
+        [
+          "vet",
+          0.741
+        ],
+        [
+          "vets",
+          0.08
+        ],
+        [
+          "Vet",
+          0.032
+        ],
+        [
+          "local",
+          0.025
+        ],
+        [
+          "GP",
+          0.014
+        ]
+      ],
+      "flipped": true,
+      "rationale": "The lay 'sneezing her head off' reads as ordinary garden fun that might continue toward 'neighbours' or 'flowers', while 'allergic rhinitis' after 'see the' funnels the next token toward a care-provider like 'doctor'.",
+      "patient_term": "sneezing her head off",
+      "clinical_term": "suffering from allergic rhinitis",
+      "topics": [
+        "sleep problems and insomnia",
+        "heartburn and acid reflux",
+        "migraine and everyday headaches",
+        "seasonal allergies and hay fever"
+      ],
+      "screening": {
+        "status": "passed",
+        "min_prob": 0.02,
+        "intended_target": " doctor",
+        "observed_clinical": [
+          "Output \" doctor\"",
+          0.111
+        ]
+      },
+      "circuit_diff": {
+        "shared_features": 893,
+        "unique_to_a": 534,
+        "unique_to_b": 437
+      },
+      "html": "modes/simulated/pairs_20260706T210703Z/index_05.html",
+      "diff_html": "modes/simulated/pairs_20260706T210703Z/index_05_diff.html"
+    },
+    {
+      "index": 19,
+      "batch": "pairs_20260706T210703Z",
+      "batch_index": 6,
+      "clinical_prompt": "Whenever my acid reflux creeps up after a big meal, I lean on my nightstand and grab my",
+      "patient_prompt": "Whenever that sour burn creeps up after a big meal, I lean on my nightstand and grab my",
+      "target_token": null,
+      "intended_target": "antacid",
+      "anchor_fallback": false,
+      "prob_clinical": null,
+      "prob_patient": null,
+      "language_penalty": null,
+      "top_clinical": [
+        "trusty",
+        0.208
+      ],
+      "top_patient": null,
+      "spread_clinical": [
+        [
+          "trusty",
+          0.208
+        ],
+        [
+          "bottle",
+          0.086
+        ],
+        [
+          "phone",
+          0.04
+        ],
+        [
+          "favorite",
+          0.036
+        ]
+      ],
+      "spread_patient": [],
+      "flipped": false,
+      "rationale": "'Sour burn' with 'grab my' from a nightstand could continue toward 'water' or 'phone', whereas the clinical 'acid reflux' shifts the possessive continuation toward 'antacid' or 'medication'.",
+      "patient_term": "that sour burn",
+      "clinical_term": "my acid reflux",
+      "topics": [
+        "sleep problems and insomnia",
+        "heartburn and acid reflux",
+        "migraine and everyday headaches",
+        "seasonal allergies and hay fever"
+      ],
+      "screening": {
+        "status": "screened_out",
+        "min_prob": 0.02,
+        "intended_target": " antacid",
+        "observed_clinical": null,
+        "reason": "intended target not in the traced clinical spread"
+      },
+      "circuit_diff": null
     }
   ]
 }
