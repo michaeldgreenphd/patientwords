@@ -93,6 +93,19 @@
   .sum-swap{max-width:36ch}
   .sum-caption{font-family:var(--mono);font-size:11px;color:var(--muted);
     letter-spacing:.04em;margin:6px 0 0}
+  .sum-controls{display:flex;justify-content:space-between;align-items:baseline;gap:16px;
+    flex-wrap:wrap;margin:22px 0 0}
+  .sum-controls input{font-family:var(--mono);font-size:12px;color:var(--ink);
+    background:#fff;border:1px solid var(--hairline);padding:7px 10px;min-width:34ch}
+  .sum-controls input:focus{outline:none;border-color:var(--clinical)}
+  .sum-dl{font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--muted)}
+  .sum-dl a{color:var(--ink)}
+  .sum-dl a:hover{color:var(--clinical)}
+  .sum-table th[data-key]{cursor:pointer}
+  .sum-table th[data-key]:hover{color:var(--ink)}
+  .sum-table th[data-key].sorted::after{content:" ▾";color:var(--clinical)}
+  .sum-table th[data-key].sorted.asc::after{content:" ▴"}
+  .sum-empty{font-family:var(--mono);font-size:12px;color:var(--muted);padding:14px 0}
   .sum-pages{font-family:var(--mono);font-size:12px;margin:14px 0 0;display:flex;gap:8px;flex-wrap:wrap}
   .sum-pages a{color:var(--muted);text-decoration:none;border:1px solid var(--hairline);
     padding:3px 9px}
@@ -244,18 +257,26 @@
   <div class="provenance" id="sim-provenance" hidden></div>
 
   <section id="sim-summary" hidden>
+    <div class="sum-controls">
+      <input id="sim-filter" type="search"
+             placeholder="filter rows — try a condition or token: reflux, insomnia, tissues…"
+             aria-label="Filter scenarios">
+      <span class="sum-dl">download current view:
+        <a id="sim-csv" href="#">CSV</a> ·
+        <a href="../data/simulated_scenarios.json" download="simulated_scenarios.json">full JSON</a></span>
+    </div>
     <div class="sum-scroll">
       <table class="sum-table">
         <thead><tr>
-          <th scope="col">Sim</th>
+          <th scope="col" data-key="index" title="sort">Sim</th>
           <th scope="col">Swap (patient → medical)</th>
           <th scope="col">Target</th>
-          <th scope="col" class="num">prob clinical</th>
-          <th scope="col" class="num">prob patient</th>
-          <th scope="col" class="num">Penalty</th>
+          <th scope="col" class="num" data-key="clin" title="sort">prob clinical</th>
+          <th scope="col" class="num" data-key="pat" title="sort">prob patient</th>
+          <th scope="col" class="num" data-key="penalty" title="sort by |penalty| — biggest language effects first">Penalty</th>
           <th scope="col">clin → pat</th>
-          <th scope="col">Med circuit</th>
-          <th scope="col">Top prediction</th>
+          <th scope="col" data-key="mass" title="sort by clinical-side medical-circuit share">Med circuit</th>
+          <th scope="col" data-key="flip" title="sort: flips first">Top prediction</th>
         </tr></thead>
         <tbody id="sim-sum-body"></tbody>
       </table>
@@ -271,7 +292,7 @@
     <span class="pending-mark"></span>traces pending — simulated series
   </div>
 
-  <a class="back" href="../">← Back to the gallery</a>
+  <a class="back" href="../">← Back home</a>
 
   <div class="endnote">
     <p id="sim-endnote">
@@ -409,9 +430,11 @@
       prov.hidden=false;
 
       var sumBody=document.getElementById('sim-sum-body');
-      scenarios.forEach(function(s,i){
+      var pages=document.getElementById('sim-pages');
+      var sortKey=null,sortDir=-1,filterText='';
+
+      function rowFor(s){
         var tr=document.createElement('tr');
-        tr.setAttribute('data-page',String(Math.floor(i/PAGE_SIZE)+1));
         var idx=el('td','sum-idx');
         var jump=el('a',null,'Sim '+pad(s.index)+' →');
         jump.href='scenario.html?sim='+s.index;
@@ -443,11 +466,45 @@
             :el('span',null,tc+' (unchanged)'));
         }
         tr.appendChild(flip);
-        sumBody.appendChild(tr);
-      });
+        return tr;
+      }
 
-      var pageCount=Math.ceil(scenarios.length/PAGE_SIZE);
-      var pages=document.getElementById('sim-pages');
+      function sortVal(s){
+        switch(sortKey){
+          case 'index':return s.index;
+          case 'clin':return typeof s.prob_clinical==='number'?s.prob_clinical:null;
+          case 'pat':return typeof s.prob_patient==='number'?s.prob_patient:null;
+          case 'penalty':return typeof s.language_penalty==='number'?Math.abs(s.language_penalty):null;
+          case 'mass':return (s.clinical_mass&&typeof s.clinical_mass.clinical==='number')?s.clinical_mass.clinical:null;
+          case 'flip':
+            if(s.screening&&s.screening.status==='screened_out')return -1;
+            return s.flipped?1:0;
+        }
+        return null;
+      }
+      function visibleScenarios(){
+        var list=scenarios.slice();
+        if(filterText){
+          var q=filterText.toLowerCase();
+          list=list.filter(function(s){
+            return [s.clinical_prompt,s.patient_prompt,s.patient_term,s.clinical_term,
+                    s.target_token,s.intended_target,
+                    s.top_clinical&&s.top_clinical[0],s.top_patient&&s.top_patient[0],
+                    (s.topics||[]).join(' '),s.rationale]
+              .join(' ').toLowerCase().indexOf(q)>=0;
+          });
+        }
+        if(sortKey){
+          list.sort(function(a,b){
+            var va=sortVal(a),vb=sortVal(b);
+            if(va===null&&vb===null)return 0;
+            if(va===null)return 1;   // unmeasured rows sink regardless of direction
+            if(vb===null)return -1;
+            return (va<vb?-1:va>vb?1:0)*sortDir;
+          });
+        }
+        return list;
+      }
       function showPage(n){
         sumBody.querySelectorAll('tr').forEach(function(tr){
           tr.style.display=tr.getAttribute('data-page')===String(n)?'':'none';
@@ -457,17 +514,91 @@
           else a.removeAttribute('aria-current');
         });
       }
-      if(pageCount>1){
-        for(var n=1;n<=pageCount;n++){
-          (function(n){
-            var a=el('a',null,String(n));
-            a.href='#sim-summary';
-            a.addEventListener('click',function(ev){ev.preventDefault();showPage(n);});
-            pages.appendChild(a);
-          })(n);
+      function renderTable(){
+        var list=visibleScenarios();
+        sumBody.textContent='';
+        pages.textContent='';
+        list.forEach(function(s,i){
+          var tr=rowFor(s);
+          tr.setAttribute('data-page',String(Math.floor(i/PAGE_SIZE)+1));
+          sumBody.appendChild(tr);
+        });
+        if(!list.length){
+          var tr=document.createElement('tr');
+          var td=el('td','sum-empty','no scenarios match — clear the filter');
+          td.colSpan=9;
+          tr.appendChild(td);
+          sumBody.appendChild(tr);
+          return;
+        }
+        var pageCount=Math.ceil(list.length/PAGE_SIZE);
+        if(pageCount>1){
+          for(var n=1;n<=pageCount;n++){
+            (function(n){
+              var a=el('a',null,String(n));
+              a.href='#sim-summary';
+              a.addEventListener('click',function(ev){ev.preventDefault();showPage(n);});
+              pages.appendChild(a);
+            })(n);
+          }
         }
         showPage(1);
       }
+      renderTable();
+
+      document.querySelectorAll('.sum-table th[data-key]').forEach(function(th){
+        th.addEventListener('click',function(){
+          var key=th.getAttribute('data-key');
+          if(sortKey===key){sortDir=-sortDir;}
+          else{sortKey=key;sortDir=-1;}  // first click: biggest/most interesting first
+          document.querySelectorAll('.sum-table th[data-key]').forEach(function(other){
+            other.classList.remove('sorted','asc');
+          });
+          th.classList.add('sorted');
+          if(sortDir===1)th.classList.add('asc');
+          renderTable();
+        });
+      });
+      var filterBox=document.getElementById('sim-filter');
+      if(filterBox)filterBox.addEventListener('input',function(){
+        filterText=filterBox.value.trim();
+        renderTable();
+      });
+
+      var csvLink=document.getElementById('sim-csv');
+      if(csvLink)csvLink.addEventListener('click',function(ev){
+        ev.preventDefault();
+        var cols=['index','batch','batch_index','clinical_prompt','patient_prompt',
+                  'patient_term','clinical_term','intended_target','target_token',
+                  'prob_clinical','prob_patient','language_penalty','flipped',
+                  'screening_status','probe_extension','clinical_mass_clinical',
+                  'clinical_mass_patient','rationale'];
+        function cell(v){
+          if(v===null||v===undefined)return '';
+          v=String(v);
+          return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;
+        }
+        var lines=[cols.join(',')];
+        visibleScenarios().forEach(function(s){
+          var m=s.clinical_mass||{},sc=s.screening||{};
+          var flat={index:s.index,batch:s.batch,batch_index:s.batch_index,
+            clinical_prompt:s.clinical_prompt,patient_prompt:s.patient_prompt,
+            patient_term:s.patient_term,clinical_term:s.clinical_term,
+            intended_target:s.intended_target,target_token:s.target_token,
+            prob_clinical:s.prob_clinical,prob_patient:s.prob_patient,
+            language_penalty:s.language_penalty,flipped:s.flipped,
+            screening_status:sc.status,probe_extension:sc.probe_extension,
+            clinical_mass_clinical:m.clinical,clinical_mass_patient:m.patient,
+            rationale:s.rationale};
+          lines.push(cols.map(function(c){return cell(flat[c]);}).join(','));
+        });
+        var blob=new Blob([lines.join('\n')],{type:'text/csv'});
+        var a=document.createElement('a');
+        a.href=URL.createObjectURL(blob);
+        a.download='simulated_scenarios.csv';
+        a.click();
+        URL.revokeObjectURL(a.href);
+      });
       document.getElementById('sim-summary').hidden=false;
 
       var accepted=batches.reduce(function(a,b){
