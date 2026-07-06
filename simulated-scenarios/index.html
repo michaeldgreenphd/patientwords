@@ -1,0 +1,542 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Simulated scenarios — PatientWords</title>
+<meta name="description" content="Claude-generated patient-vs-clinical stress scenarios, programmatically validated and traced live on gemma-2-2b — kept apart from the hand-measured dataset.">
+<link rel="canonical" href="https://michaeldgreenphd.github.io/patientwords/simulated-scenarios/">
+<meta name="theme-color" content="#faf9f5">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="PatientWords">
+<meta property="og:title" content="Simulated scenarios — PatientWords">
+<meta property="og:description" content="LLM-authored stress scenarios widen the phrase dataset: everyday condition areas, validated single-span swaps, live gemma-2-2b circuit traces.">
+<meta property="og:url" content="https://michaeldgreenphd.github.io/patientwords/simulated-scenarios/">
+<meta property="og:image" content="https://michaeldgreenphd.github.io/patientwords/modes/simulated/index_01.png">
+<meta property="og:image:alt" content="Two stacked attribution graphs comparing clinical and simulated patient wording in gemma-2-2b">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Simulated scenarios — PatientWords">
+<meta name="twitter:description" content="LLM-authored stress scenarios, validated programmatically, traced live on gemma-2-2b.">
+<meta name="twitter:image" content="https://michaeldgreenphd.github.io/patientwords/modes/simulated/index_01.png">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23faf9f5'/%3E%3Crect x='9' y='9' width='30' height='30' fill='%23111827'/%3E%3Crect x='25' y='25' width='30' height='30' fill='%2315803d'/%3E%3C/svg%3E">
+<style>
+  :root{
+    --paper:#faf9f5; --ink:#1c1c19; --patient:#111827; --clinical:#15803d;
+    --penalty:#b4483d; --muted:#75746d; --structural:#c3c9d2; --hairline:#dcdad2;
+    --serif:'Iowan Old Style','Palatino Linotype',Palatino,'Book Antiqua',Georgia,serif;
+    --mono:ui-monospace,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace;
+  }
+  html{background:var(--paper)}
+  body{margin:0;padding:0;background:var(--paper);color:var(--ink);
+    font-family:var(--serif);font-size:17px;line-height:1.62;
+    -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+  main{max-width:1240px;margin:0 auto;padding:0 22px 56px}
+  a{color:inherit}
+  a:focus-visible{outline:2px solid var(--clinical);outline-offset:3px;border-radius:1px}
+  ::selection{background:#dbe9df}
+
+  .masthead{max-width:1240px;margin:0 auto;padding:20px 22px 0}
+  .masthead-row{display:flex;align-items:baseline;justify-content:space-between;
+    flex-wrap:wrap;gap:8px 24px;padding:10px 0 12px}
+  .wordmark{font-family:var(--serif);font-size:19px;font-weight:600;letter-spacing:.02em;
+    text-decoration:none}
+  .wordmark .pw-p{color:var(--patient)}
+  .wordmark .pw-w{color:var(--clinical)}
+  .masthead nav{display:flex;flex-wrap:wrap;gap:6px 20px}
+  .masthead nav a{font-family:var(--mono);font-size:11px;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--muted);text-decoration:none;padding:2px 0}
+  .masthead nav a:hover{color:var(--ink);text-decoration:underline;text-underline-offset:4px}
+  .masthead nav a[aria-current=page]{color:var(--ink);border-bottom:1px solid var(--ink)}
+  .rule-heavy{border:0;border-top:2px solid var(--ink);margin:0}
+  .rule-fine{border:0;border-top:1px solid var(--hairline);margin:3px 0 0}
+
+  .dateline{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--clinical);font-weight:600;margin:34px 0 14px}
+  .dateline .mode{color:var(--muted);font-weight:400;letter-spacing:.06em;text-transform:none}
+  h1{font-size:clamp(30px,4.8vw,42px);line-height:1.14;font-weight:600;
+    letter-spacing:-.006em;margin:0 0 10px;max-width:24ch}
+  .subtitle{font-style:italic;font-size:20px;line-height:1.5;color:var(--muted);
+    margin:0 0 20px;max-width:52ch}
+  .explainer{font-size:17px;line-height:1.66;max-width:62ch;margin:0 0 14px}
+  .stat{font-family:var(--mono);font-size:13px;font-weight:600;letter-spacing:.01em}
+  .stat.penalty{color:var(--penalty)}
+  .stat.recovery{color:var(--clinical)}
+  .stat.neutral{color:var(--muted);font-weight:400}
+
+  .traced{margin:12px 0 0;font-family:var(--mono);font-size:11px;letter-spacing:.03em;
+    line-height:1.9;font-weight:400}
+  .traced .tm{color:var(--ink)}
+  .traced .tm b{color:var(--clinical);font-weight:600}
+  .traced .tp{color:var(--muted)}
+
+  /* provenance strip (from the generation sidecar) */
+  .provenance{border:1px solid var(--hairline);background:#fff;margin:22px 0 8px;
+    padding:12px 16px;font-family:var(--mono);font-size:11.5px;line-height:1.9;color:var(--muted)}
+  .provenance b{color:var(--ink);font-weight:600}
+  .provenance .pv-cost{color:var(--clinical);font-weight:600}
+
+  /* concise summary table (one row per scenario, rows jump to the full card) */
+  .sum-scroll{overflow-x:auto;margin:26px 0 0}
+  .sum-table{width:100%;min-width:760px;border-collapse:collapse}
+  .sum-table th{font-family:var(--mono);font-size:10.5px;font-weight:600;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--muted);text-align:left;
+    padding:0 16px 8px 0;border-bottom:1px solid var(--ink)}
+  .sum-table th.num{text-align:right}
+  .sum-table td{padding:9px 16px 9px 0;border-bottom:1px solid var(--hairline);
+    font-size:14.5px;line-height:1.45;vertical-align:top}
+  .sum-table td.num{text-align:right;font-family:var(--mono);font-size:12.5px;white-space:nowrap}
+  .sum-table td.mono{font-family:var(--mono);font-size:12.5px}
+  .sum-table tr:last-child td{border-bottom:1px solid var(--ink)}
+  .sum-idx a{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--clinical);
+    text-decoration:none;white-space:nowrap}
+  .sum-idx a:hover{text-decoration:underline;text-underline-offset:3px}
+  .sum-swap{max-width:36ch}
+  .sum-caption{font-family:var(--mono);font-size:11px;color:var(--muted);
+    letter-spacing:.04em;margin:6px 0 0}
+  .sum-slope svg{display:block}
+  .sum-slope .axis{stroke:var(--hairline);stroke-width:1}
+  .sum-slope .seg{stroke-width:1.5;fill:none}
+  .sum-slope .seg.down{stroke:var(--penalty)}
+  .sum-slope .seg.up{stroke:var(--clinical)}
+  .sum-slope .seg.flat{stroke:var(--muted)}
+  .sum-slope .dot-c{fill:var(--clinical)}
+  .sum-slope .dot-p{fill:none;stroke:var(--ink);stroke-width:1.2}
+
+  /* scenario cards */
+  .sim{border-top:1px solid var(--ink);margin-top:40px;padding-top:12px}
+  .sim-no{font-family:var(--mono);font-size:11.5px;letter-spacing:.18em;text-transform:uppercase;
+    color:var(--clinical);font-weight:600;margin:2px 0 10px}
+  .sim-no .mode{color:var(--muted);font-weight:400;letter-spacing:.06em;text-transform:none}
+  .sim-prompts{display:grid;grid-template-columns:1fr 1fr;gap:0 26px;max-width:1000px}
+  .sim-side{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--muted);display:block;margin-bottom:2px}
+  .sim-prompt{font-size:16.5px;line-height:1.5;margin:0 0 10px}
+  .sim-prompt.sim-c{color:var(--clinical)}
+  .sim-probs{font-family:var(--mono);font-size:12px;color:var(--muted);margin:2px 0 10px}
+  .sim-probs b{color:var(--ink)}
+
+  /* next-token candidate spread: click the measured line to expand.
+     Tufte: bars are pure data-ink on a shared 0-1 scale, labeled directly,
+     no frame, no grid; the target token carries the only accent color. */
+  .spread{margin:2px 0 10px}
+  .spread summary{font-family:var(--mono);font-size:12px;color:var(--muted);
+    cursor:pointer;list-style:none;padding:0}
+  .spread summary::-webkit-details-marker{display:none}
+  .spread summary b{color:var(--ink)}
+  .spread summary .aff{color:var(--structural);margin-left:6px;transition:color .15s}
+  .spread summary:hover .aff{color:var(--muted)}
+  .spread[open] summary .aff-closed{display:none}
+  .spread:not([open]) summary .aff-open{display:none}
+  .spread ol{list-style:none;margin:8px 0 2px;padding:0;max-width:340px}
+  .spread li{display:grid;grid-template-columns:9ch 1fr 5ch;gap:0 10px;
+    align-items:center;padding:1.5px 0;font-family:var(--mono);font-size:11.5px;
+    color:var(--muted)}
+  .spread li .tok{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:right}
+  .spread li .bar{height:4px;background:var(--structural)}
+  .spread li .p{text-align:right}
+  .spread li.is-target{color:var(--ink)}
+  .spread li.is-target .bar{background:var(--clinical)}
+  .spread li.is-target .tok{font-weight:600}
+  .spread .spread-note{font-family:var(--mono);font-size:10px;color:var(--muted);
+    letter-spacing:.03em;margin:4px 0 0}
+  .sim-flip{font-family:var(--mono);font-size:12px;font-weight:600;margin-left:14px}
+  .sim-flip.flipped{color:var(--penalty)}
+  .sim-flip.held{color:var(--clinical)}
+  .sim-rationale{border-left:2px solid var(--hairline);padding:2px 0 2px 14px;
+    max-width:66ch;margin:12px 0 6px}
+  .sim-rationale .sim-side{margin-bottom:4px}
+  .sim-rationale p{font-style:italic;font-size:15px;line-height:1.6;color:var(--muted);margin:0}
+
+  .embed{border:1px solid var(--hairline);background:#fff;overflow:hidden;margin:18px 0 8px}
+  .embed iframe{width:100%;border:0;display:block;min-height:400px}
+  .embed-caption{font-family:var(--mono);font-size:11px;color:var(--muted);
+    letter-spacing:.04em;margin:0 0 8px}
+  .embed-caption a{color:var(--muted)}
+  .embed-caption a:hover{color:var(--ink)}
+
+  .back{display:inline-block;margin-top:8px;font-family:var(--mono);font-size:12px;
+    letter-spacing:.1em;text-transform:uppercase;color:var(--ink);text-decoration:none;
+    border-bottom:1px solid var(--ink);padding-bottom:2px}
+  .back:hover{color:var(--clinical);border-bottom-color:var(--clinical)}
+
+  .pending-note{border:1px solid var(--hairline);background:var(--paper);margin:26px 0;
+    padding:26px;text-align:center;font-family:var(--mono);font-size:11px;
+    letter-spacing:.16em;text-transform:uppercase;color:var(--muted);line-height:2}
+  .pending-mark{display:block;width:9px;height:9px;background:var(--structural);margin:0 auto 10px}
+
+  .endnote{border-top:1px solid var(--ink);margin-top:42px;padding-top:14px}
+  .endnote p{font-family:var(--mono);font-size:12px;line-height:1.8;color:var(--muted);
+    max-width:76ch;margin:0 0 14px}
+  footer{font-family:var(--mono);font-size:12px;line-height:1.9;color:var(--muted)}
+  footer a{color:var(--muted);text-underline-offset:3px}
+  footer a:hover{color:var(--ink)}
+
+  @media (max-width:760px){
+    body{font-size:16px}
+    .masthead{padding-top:12px}
+    .subtitle{font-size:18px}
+    .sim-prompts{grid-template-columns:1fr}
+  }
+  @media print{
+    html,body{background:#fff;color:#000}
+    .masthead nav,.back{display:none}
+    a{text-decoration:none;color:inherit}
+    .embed{border-color:#999;break-inside:avoid}
+    .dateline,.endnote p,footer{color:#444}
+  }
+</style>
+</head>
+<body>
+<header class="masthead">
+  <hr class="rule-heavy"><hr class="rule-fine">
+  <div class="masthead-row">
+    <a class="wordmark" href="../"><span class="pw-p">Patient</span><span class="pw-w">Words</span></a>
+    <nav aria-label="Site">
+      <a href="../methods.html">Methods</a>
+      <a href="../">Gallery</a>
+      <a href="../word-differences/">Word Differences</a>
+      <a href="../syntax-differences/">Syntax Differences</a>
+      <a href="../dialect-differences/">Dialect Differences</a>
+      <a href="../translation/">Translation</a>
+      <a href="./" aria-current="page">Simulated Scenarios</a>
+      <a href="../#phrase-dataset">Phrase Dataset</a>
+      <a href="../#model-evaluations">Model Evaluations</a>
+      <a href="https://github.com/michaeldgreenphd/patientwords">GitHub</a>
+    </nav>
+  </div>
+  <hr class="rule-fine">
+</header>
+<main>
+  <p class="dateline">Simulated series <span class="mode">· modes/simulated · live renders · simulated data</span></p>
+  <h1>Simulated scenarios</h1>
+  <p class="subtitle">Stress scenarios authored by an LLM, validated by machine, traced for real —
+     and kept apart from the hand-measured set.</p>
+  <p class="explainer">
+    The <a href="../#phrase-dataset">phrase dataset</a> is hand-built and hand-measured. This
+    section widens it with <em>simulated</em> scenarios: Claude authors new
+    patient-vs-clinical sentence pairs in the same format — one contiguous term swap inside an
+    identical frame, ending at a next-token probe boundary — and each candidate must pass
+    programmatic validators (single-span swap, probe-boundary ending, term-verbatim check,
+    dedupe against the measured set) before it is accepted. Every accepted pair is then traced
+    live on gemma-2-2b, exactly like the hand-measured examples.
+  </p>
+  <p class="explainer">
+    Each scenario below shows the two phrasings, the traced next-token probabilities with the
+    Language Penalty, the generator's own rationale for why the swap should be diagnostic, and
+    the full interactive circuit comparison.
+  </p>
+  <p class="traced" id="sim-traced" hidden>
+    <span class="tm"><b>traced model:</b> <span id="sim-traced-model">gemma-2-2b · gemma scope transcoders</span></span>
+    <span class="tp">→ prob = target-token probability read from the live trace · penalty = patient − clinical</span>
+  </p>
+
+  <div class="provenance" id="sim-provenance" hidden></div>
+
+  <section id="sim-summary" hidden>
+    <div class="sum-scroll">
+      <table class="sum-table">
+        <thead><tr>
+          <th scope="col">Sim</th>
+          <th scope="col">Swap (patient → medical)</th>
+          <th scope="col">Target</th>
+          <th scope="col" class="num">prob clinical</th>
+          <th scope="col" class="num">prob patient</th>
+          <th scope="col" class="num">Penalty</th>
+          <th scope="col">clin → pat</th>
+          <th scope="col">Top prediction</th>
+        </tr></thead>
+        <tbody id="sim-sum-body"></tbody>
+      </table>
+    </div>
+    <p class="sum-caption">click a Sim number to jump to its full trace ·
+      glyph: ● clinical → ○ patient target probability on a shared 0–1 axis (dashed = patient below the traced spread) ·
+      * intended target fell below the traced spread — measurement anchored on the clinical top prediction</p>
+  </section>
+
+  <div id="sim-list"></div>
+
+  <div class="pending-note" id="sim-pending" hidden>
+    <span class="pending-mark"></span>traces pending — simulated series
+  </div>
+
+  <a class="back" href="../">← Back to the gallery</a>
+
+  <div class="endnote">
+    <p id="sim-endnote">
+      SIMULATED DATA — these phrasings were authored by an LLM
+      (see the provenance strip above) and accepted by the programmatic validators in the
+      engine's scenario generator; they are not statements from patients and contain no real
+      personal or clinical data. The traces themselves are live gemma-2-2b runs via the
+      Neuronpedia circuit tracer. The hand-measured dataset lives separately under
+      <a href="../#phrase-dataset">Phrase Dataset</a>.
+    </p>
+    <footer>
+      Built with the patientwords-engine pipeline
+      on <a href="https://neuronpedia.org">Neuronpedia</a> ·
+      attribution graphs by <a href="https://github.com/safety-research/circuit-tracer">circuit-tracer</a> ·
+      features from <a href="https://huggingface.co/google/gemma-scope-2b-pt-transcoders">Gemma Scope</a> transcoders ·
+      <a href="../methods.html">how the pipeline works</a>
+    </footer>
+  </div>
+</main>
+<script>
+(function(){
+  function fitAll(){
+    document.querySelectorAll('iframe.live').forEach(function(f){
+      try{
+        var d=f.contentDocument;
+        if(!d||!d.documentElement)return;
+        var h=d.documentElement.scrollHeight;
+        if(!h)return;
+        f.style.height=h+'px';
+      }catch(e){}
+    });
+  }
+  window.addEventListener('resize',fitAll);
+
+  function el(tag,cls,text){
+    var e=document.createElement(tag);
+    if(cls)e.className=cls;
+    if(text!=null)e.textContent=text;
+    return e;
+  }
+  function pct(x){return (x>0?'+':'−')+Math.round(Math.abs(x)*100)+'%';}
+  function p2(x){return typeof x==='number'?x.toFixed(2):'—';}
+
+  // Measured line for one phrasing; when the candidate spread is present the
+  // line becomes a <details> toggle revealing every traced next-token option
+  // as direct-labeled bars on a fixed 0-1 scale (same scale in both columns).
+  function spreadDetails(label,prob,topEntry,spread,target){
+    var head=function(parent){
+      parent.appendChild(el('span',null,label+' = '));
+      parent.appendChild(el('b',null,p2(prob)));
+      if(topEntry)parent.appendChild(el('span',null,' · top prediction: '+topEntry[0]+' ('+p2(topEntry[1])+')'));
+    };
+    if(!spread||!spread.length){
+      var p=el('p','sim-probs');
+      head(p);
+      return p;
+    }
+    var d=document.createElement('details');
+    d.className='spread';
+    var su=document.createElement('summary');
+    head(su);
+    su.appendChild(el('span','aff aff-closed','▸ all '+spread.length+' traced candidates'));
+    su.appendChild(el('span','aff aff-open','▾ traced candidates'));
+    d.appendChild(su);
+    var ol=document.createElement('ol');
+    spread.forEach(function(e){
+      var li=document.createElement('li');
+      if(target&&e[0]===target)li.className='is-target';
+      li.appendChild(el('span','tok',e[0]));
+      var bar=el('span','bar');
+      bar.style.width=Math.max(0.5,(e[1]||0)*100)+'%';
+      li.appendChild(bar);
+      li.appendChild(el('span','p',p2(e[1])));
+      ol.appendChild(li);
+    });
+    d.appendChild(ol);
+    d.appendChild(el('p','spread-note','bar length = next-token probability, fixed 0–1 scale shared by both phrasings'));
+    return d;
+  }
+
+  // Summary-table glyph: clinical (●) and patient (○) target probability on
+  // one shared 0-1 axis - the drop is readable before the numbers are.
+  function slopeCell(s){
+    var td=el('td','sum-slope');
+    var NS='http://www.w3.org/2000/svg';
+    var svg=document.createElementNS(NS,'svg');
+    svg.setAttribute('width','96');svg.setAttribute('height','12');
+    svg.setAttribute('viewBox','0 0 96 12');
+    function x(p){return 1+Math.max(0,Math.min(1,p))*94;}
+    var axis=document.createElementNS(NS,'line');
+    axis.setAttribute('x1','1');axis.setAttribute('x2','95');
+    axis.setAttribute('y1','6');axis.setAttribute('y2','6');
+    axis.setAttribute('class','axis');
+    svg.appendChild(axis);
+    var pc=s.prob_clinical,pp=s.prob_patient;
+    if(typeof pc==='number'){
+      var known=typeof pp==='number';
+      var xa=x(pc),xb=x(known?pp:0);
+      var seg=document.createElementNS(NS,'line');
+      seg.setAttribute('x1',xa);seg.setAttribute('x2',xb);
+      seg.setAttribute('y1','6');seg.setAttribute('y2','6');
+      var dir=(!known||pp<pc-0.005)?'down':(pp>pc+0.005?'up':'flat');
+      seg.setAttribute('class','seg '+dir);
+      if(!known)seg.setAttribute('stroke-dasharray','2 3');
+      svg.appendChild(seg);
+      var d1=document.createElementNS(NS,'circle');
+      d1.setAttribute('cx',xa);d1.setAttribute('cy','6');d1.setAttribute('r','2.5');
+      d1.setAttribute('class','dot-c');
+      svg.appendChild(d1);
+      var d2=document.createElementNS(NS,'circle');
+      d2.setAttribute('cx',xb);d2.setAttribute('cy','6');d2.setAttribute('r','2.5');
+      d2.setAttribute('class','dot-p');
+      svg.appendChild(d2);
+      var t=document.createElementNS(NS,'title');
+      t.textContent='prob('+((s.target_token||'')+'').trim()+'): clinical '+p2(pc)
+        +' → patient '+(known?p2(pp):'below the traced spread');
+      svg.appendChild(t);
+    }
+    td.appendChild(svg);
+    return td;
+  }
+
+  fetch('../data/simulated_scenarios.json',{cache:'no-cache'})
+    .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
+    .then(function(data){
+      var gen=data.generated||{};
+      var traced=data.traced||{};
+      var scenarios=data.scenarios||[];
+      if(!scenarios.length)throw new Error('empty');
+
+      if(traced.graph_model){
+        document.getElementById('sim-traced-model').textContent=
+          traced.graph_model+(traced.source_set?' · '+traced.source_set:' · gemma scope transcoders');
+      }
+      document.getElementById('sim-traced').hidden=false;
+
+      var prov=document.getElementById('sim-provenance');
+      var when=(gen.run_timestamp||'').slice(0,10);
+      prov.appendChild(el('span',null,'generated by '));
+      prov.appendChild(el('b',null,gen.model||'—'));
+      prov.appendChild(el('span',null,(when?' on '+when:'')+' · '));
+      var cost=el('span','pv-cost','$'+(typeof gen.cost_usd==='number'?gen.cost_usd.toFixed(4):'—')
+        +' spent of the $'+(typeof gen.max_spend_usd==='number'?gen.max_spend_usd.toFixed(2):'—')+' ceiling');
+      prov.appendChild(cost);
+      prov.appendChild(el('span',null,' · '+(gen.accepted!=null?gen.accepted:'—')+' accepted, '
+        +(gen.rejected!=null?gen.rejected:'—')+' rejected by the validators'
+        +(gen.topics&&gen.topics.length?' · topics: '+gen.topics.join(' · '):'')
+        +' · batch '+(data.batch||'—')+' + .report.json sidecar in the engine repo’s data/simulated/'));
+      prov.hidden=false;
+
+      var sumBody=document.getElementById('sim-sum-body');
+      scenarios.forEach(function(s){
+        var id='sim-'+String(s.index).padStart(2,'0');
+        var tr=document.createElement('tr');
+        var idx=el('td','sum-idx');
+        var jump=el('a',null,'Sim '+String(s.index).padStart(2,'0')+' ↓');
+        jump.href='#'+id;
+        idx.appendChild(jump);
+        tr.appendChild(idx);
+        var swap=el('td','sum-swap','“'+(s.patient_term||'—')+'” → “'+(s.clinical_term||'—')+'”');
+        tr.appendChild(swap);
+        tr.appendChild(el('td','mono','“'+(s.target_token||'—')+'”'+(s.anchor_fallback?' *':'')));
+        tr.appendChild(el('td','num',p2(s.prob_clinical)));
+        tr.appendChild(el('td','num',p2(s.prob_patient)));
+        var pen=el('td','num');
+        if(typeof s.language_penalty==='number'){
+          pen.appendChild(el('span','stat '+(s.language_penalty<0?'penalty':'recovery'),
+            pct(s.language_penalty)));
+        }else{
+          pen.textContent='—';
+        }
+        tr.appendChild(pen);
+        tr.appendChild(slopeCell(s));
+        var flip=el('td','mono');
+        var tc=s.top_clinical?s.top_clinical[0]:'—';
+        var tp=s.top_patient?s.top_patient[0]:'—';
+        flip.appendChild(s.flipped
+          ?el('span','stat penalty',tc+' → '+tp+' (flipped)')
+          :el('span',null,tc+' (unchanged)'));
+        tr.appendChild(flip);
+        sumBody.appendChild(tr);
+      });
+      document.getElementById('sim-summary').hidden=false;
+
+      var list=document.getElementById('sim-list');
+      scenarios.forEach(function(s){
+        var card=el('section','sim');
+        card.id='sim-'+String(s.index).padStart(2,'0');
+
+        var no=el('p','sim-no','Sim '+String(s.index).padStart(2,'0')+' ');
+        var tgt=s.target_token||'';
+        var intent=(s.intended_target||'').trim();
+        var tgtNote='';
+        if(intent&&intent!==tgt){
+          tgtNote=s.anchor_fallback
+            ?' \u2014 intended \u201c'+intent+'\u201d fell below the traced spread; anchored on the clinical top prediction'
+            :' (first piece of \u201c'+intent+'\u201d)';
+        }
+        var modebit=el('span','mode','· target “'+tgt+'”'+tgtNote
+          +' · swap “'+(s.patient_term||'—')+'” → “'+(s.clinical_term||'—')+'”');
+        no.appendChild(modebit);
+        card.appendChild(no);
+
+        var grid=el('div','sim-prompts');
+        var pc=el('div');
+        pc.appendChild(el('span','sim-side','clinical phrasing'));
+        pc.appendChild(el('p','sim-prompt sim-c',s.clinical_prompt));
+        pc.appendChild(spreadDetails('prob('+(s.target_token||'').trim()+')',
+          s.prob_clinical, s.top_clinical, s.spread_clinical, s.target_token));
+        var pp=el('div');
+        pp.appendChild(el('span','sim-side','patient phrasing (simulated)'));
+        pp.appendChild(el('p','sim-prompt sim-p',s.patient_prompt));
+        pp.appendChild(spreadDetails('prob('+(s.target_token||'').trim()+')',
+          s.prob_patient, s.top_patient, s.spread_patient, s.target_token));
+        grid.appendChild(pc);grid.appendChild(pp);
+        card.appendChild(grid);
+
+        var statline=el('p');
+        if(typeof s.language_penalty==='number'){
+          statline.appendChild(el('span','stat '+(s.language_penalty<0?'penalty':'recovery'),
+            'Language Penalty: '+pct(s.language_penalty)+' probability ('
+            +p2(s.prob_clinical)+' → '+p2(s.prob_patient)+')'));
+        }else{
+          statline.appendChild(el('span','stat neutral','Language Penalty: —'));
+        }
+        statline.appendChild(el('span','sim-flip '+(s.flipped?'flipped':'held'),
+          s.flipped?'top prediction flipped':'top prediction unchanged'));
+        card.appendChild(statline);
+
+        if(s.rationale){
+          var ra=el('div','sim-rationale');
+          ra.appendChild(el('span','sim-side','generator’s rationale (simulated-data provenance)'));
+          ra.appendChild(el('p',null,s.rationale));
+          card.appendChild(ra);
+        }
+
+        if(s.html){
+          var box=el('div','embed');
+          var f=document.createElement('iframe');
+          f.className='live';f.src='../'+s.html;f.loading='lazy';
+          f.title='Interactive attribution-graph comparison, simulated scenario '+s.index;
+          f.addEventListener('load',fitAll);
+          box.appendChild(f);
+          card.appendChild(box);
+          var cap=el('p','embed-caption');
+          cap.appendChild(el('span',null,'Hover any node for its feature id, category, attribution mass, and autointerp description. '));
+          var open=el('a',null,'open standalone ↗');
+          open.href='../'+s.html;open.target='_blank';open.rel='noopener';
+          cap.appendChild(open);
+          if(s.png){
+            cap.appendChild(el('span',null,' · '));
+            var png=el('a',null,'png');
+            png.href='../'+s.png;png.target='_blank';png.rel='noopener';
+            cap.appendChild(png);
+          }
+          cap.appendChild(el('span',null,' · '));
+          var up=el('a',null,'back to summary ↑');
+          up.href='#sim-summary';
+          cap.appendChild(up);
+          card.appendChild(cap);
+        }
+        list.appendChild(card);
+      });
+
+      var done=scenarios.length, total=(gen.accepted!=null?gen.accepted:scenarios.length);
+      if(done<total){
+        var pend=document.getElementById('sim-pending');
+        pend.hidden=false;
+        pend.appendChild(document.createTextNode(' '+(total-done)+' of '+total+' scenarios still tracing'));
+      }
+      setTimeout(fitAll,300);
+      setTimeout(fitAll,1200);
+    })
+    .catch(function(){
+      document.getElementById('sim-pending').hidden=false;
+    });
+})();
+</script>
+</body>
+</html>

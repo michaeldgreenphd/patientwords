@@ -4,17 +4,17 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Syntax differences — PatientWords</title>
-<meta name="description" content="A 2×2 matrix crossing the core medical keyword with the surrounding frame syntax in gemma-2-2b. Vocabulary Δ: −42% · Syntax Δ: −9%.">
+<meta name="description" content="The generic 2×2: patient-derived language vs. medical lexicon crossed with standard vs. nonstandard morphosyntax, live-traced on gemma-2-2b.">
 <link rel="canonical" href="https://michaeldgreenphd.github.io/patientwords/syntax-differences/">
 <meta name="theme-color" content="#faf9f5">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="PatientWords">
 <meta property="og:title" content="Syntax differences — PatientWords">
-<meta property="og:description" content="The words surrounding clinical words can be the same. Vocabulary choice costs −42% probability; colloquial framing alone costs another −9%.">
+<meta property="og:description" content="The words surrounding clinical words can be the same. Register and variety shifts, factorized in one live-traced 2×2 matrix.">
 <meta property="og:url" content="https://michaeldgreenphd.github.io/patientwords/syntax-differences/">
 <meta property="og:image" content="https://michaeldgreenphd.github.io/patientwords/modes/4quadrant/preview.png">
-<meta property="og:image:width" content="3120">
-<meta property="og:image:height" content="1941">
+<meta property="og:image:width" content="5280">
+<meta property="og:image:height" content="5566">
 <meta property="og:image:alt" content="Four-quadrant matrix factorizing vocabulary and syntax effects in gemma-2-2b">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Syntax differences — PatientWords">
@@ -70,6 +70,21 @@
   .traced .tm b{color:var(--clinical);font-weight:600}
   .traced .tp{color:var(--muted)}
 
+  .qm-scroll{overflow-x:auto;margin:24px 0 6px}
+  .qm-table{border-collapse:collapse;min-width:560px}
+  .qm-table th{font-family:var(--mono);font-size:10.5px;font-weight:600;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--muted);text-align:left;padding:8px 22px 8px 0}
+  .qm-table thead th{border-bottom:1px solid var(--ink)}
+  .qm-table tbody th{border-bottom:1px solid var(--hairline)}
+  .qm-table td{border-bottom:1px solid var(--hairline);padding:10px 22px 10px 0;
+    font-size:15.5px;line-height:1.5;vertical-align:top}
+  .qm-table b{font-family:var(--mono);font-size:12.5px}
+  .qm-table .qm-m{color:var(--clinical)}
+  .qm-table .qm-p{color:var(--patient)}
+  .qm-note{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.04em;
+    line-height:1.9;margin:0;max-width:100ch}
+  .qm-note code{font-family:var(--mono);color:var(--ink)}
+
   .embed{border:1px solid var(--hairline);background:#fff;margin:26px 0 10px;
     overflow-x:auto;overflow-y:hidden}
   .embed iframe{width:100%;min-width:1400px;border:0;display:block;min-height:400px}
@@ -107,46 +122,82 @@
   <div class="masthead-row">
     <a class="wordmark" href="../"><span class="pw-p">Patient</span><span class="pw-w">Words</span></a>
     <nav aria-label="Site">
+      <a href="../methods.html">Methods</a>
       <a href="../">Gallery</a>
       <a href="../word-differences/">Word Differences</a>
       <a href="./" aria-current="page">Syntax Differences</a>
       <a href="../dialect-differences/">Dialect Differences</a>
       <a href="../translation/">Translation</a>
+      <a href="../simulated-scenarios/">Simulated Scenarios</a>
       <a href="../#phrase-dataset">Phrase Dataset</a>
       <a href="../#model-evaluations">Model Evaluations</a>
-      <a href="../methods.html">Methods</a>
       <a href="https://github.com/michaeldgreenphd/patientwords">GitHub</a>
     </nav>
   </div>
   <hr class="rule-fine">
 </header>
 <main>
-  <p class="dateline">Fig. 2 <span class="mode">· modes/4quadrant · live render</span></p>
+  <p class="dateline">Fig. 2 <span class="mode">· modes/4quadrant · live render · simulated scenario</span></p>
   <h1>Syntax differences</h1>
   <p class="subtitle">The words surrounding clinical words can be the same.</p>
-  <p class="explainer">A 2×2 factorization crossing the core medical keyword with the
-     surrounding frame syntax. Vocabulary choice costs −42% probability in either frame;
-     colloquial framing alone costs another −9% — even when the patient knows the clinical
-     word (Box&nbsp;C).</p>
-  <span class="stat penalty">Vocabulary Δ: −42% · Syntax Δ: −9%</span>
+  <p class="explainer">A 2×2 factorization crossing the <em>phrasing</em> (patient-derived
+     language vs. medical lexicon, the columns) with the surrounding <em>morphosyntax</em>
+     (standard vs. nonstandard, the rows). The first live-traced item — a simulated
+     insomnia scenario, “insomnia” ↔ “trouble sleeping” crossed with “I've had … I'll
+     finally call” ↔ “I been having … I'ma finally call” — anchors on the prestige box's
+     top prediction “it” (as in <em>call it a night</em>), because the intended target
+     “my doctor” fell below the traced spread. Both shifts push probability toward that
+     everyday reading and away from care-seeking continuations: the variety shift alone
+     adds +11–13% to “it”, the register shift another +4–5%.</p>
+  <span class="stat penalty">Variety shift Δ: +12% toward the everyday continuation · Register shift Δ: +5% (measured on “it”)</span>
   <p class="traced" data-mode="4quadrant" data-traced="gemma-2-2b">
     <span class="tm"><b>traced model:</b> gemma-2-2b · gemma scope transcoders</span>
     <span class="tp">gemma-3-4b-it · qwen3-4b · qwen3-1.7b — traces pending</span>
   </p>
 
+  <div class="qm-scroll">
+    <table class="qm-table">
+      <thead><tr>
+        <th scope="col">2 × 2 matrix (generic)</th>
+        <th scope="col">Patient derived language</th>
+        <th scope="col">Medical lexicon</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <th scope="row">Standard morphosyntax</th>
+          <td><b class="qm-p">C</b> — register shift only</td>
+          <td><b class="qm-m">A</b> — prestige form</td>
+        </tr>
+        <tr>
+          <th scope="row">Nonstandard morphosyntax</th>
+          <td><b class="qm-p">D</b> — both axes shifted</td>
+          <td><b class="qm-m">B</b> — variety shift only</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="qm-note">rows show the syntax, columns show the phrasing — e.g.
+     A&nbsp;“I have diabetes, my blood glucose has been over 400 … I should go to&nbsp;__” ·
+     C&nbsp;“I have the sugar, my blood sugar has been over 400 …” ·
+     B&nbsp;“I been had diabetes, my blood glucose been over 400 …” ·
+     D&nbsp;“I been had the sugar, my blood sugar been over 400 …”.
+     The engine generates these with <code>medlang-generate quadrants</code> (frames × terms,
+     validated) and traces them with <code>--mode 4quadrant</code>.</p>
+
   <div class="embed">
     <iframe class="live" src="../modes/4quadrant/index.html" loading="lazy"
             title="Interactive four-quadrant matrix factorizing vocabulary and syntax effects"></iframe>
   </div>
-  <p class="embed-caption">The matrix is wider than the page by design — scroll it sideways to compare all four boxes. Hover any node for its feature id, category, attribution mass, and autointerp description.</p>
+  <p class="embed-caption">The matrix is wider than the page by design — scroll it sideways to compare all four boxes. Hover any node for its feature id, category, attribution mass, and autointerp description. Live gemma-2-2b trace of a simulated quadrant scenario (batch quadrants_20260706T191617Z, generated by claude-opus-4-8 for $0.0254 — sidecar in the engine repo).</p>
 
   <a class="back" href="../">← Back to the gallery</a>
 
   <div class="endnote">
     <p>
-      This render is a demonstration output generated from synthetic sample graphs to validate
-      the visualization pipeline end-to-end; traces from live gemma-2-2b runs will replace it
-      as the study progresses.
+      SIMULATED DATA — the four phrasings in this render were authored by an LLM
+      (medlang-generate quadrants) and accepted by the engine's programmatic validators;
+      they are not patient statements and contain no real personal or clinical data.
+      The trace itself is a live gemma-2-2b run via the Neuronpedia circuit tracer.
     </p>
     <footer>
       Built with the <a href="https://github.com/michaeldgreenphd/neuronpedia">medlang-circuits</a>
