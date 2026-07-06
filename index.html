@@ -207,8 +207,8 @@
   <div class="masthead-row">
     <a class="wordmark" href="./"><span class="pw-p">Patient</span><span class="pw-w">Words</span></a>
     <nav aria-label="Site">
+      <a href="./" aria-current="page">Home</a>
       <a href="methods.html">Methods</a>
-      <a href="./" aria-current="page">Gallery</a>
       <a href="word-differences/">Word Differences</a>
       <a href="syntax-differences/">Syntax Differences</a>
       <a href="dialect-differences/">Dialect Differences</a>
@@ -351,7 +351,7 @@
 
   <a class="fig" href="simulated-scenarios/">
     <figure class="fig-media">
-      <div class="embed preview pending" data-live-src="modes/simulated/index_01.html"
+      <div class="embed preview pending" data-live-src="modes/simulated/preview.html"
            data-live-title="Live preview: simulated scenario traced as two stacked attribution graphs">
         <div class="pending-inner"><span class="pending-mark"></span>traces pending — simulated series</div>
       </div>
@@ -639,7 +639,10 @@
   fetch('data/simulated_scenarios.json',{cache:'no-cache'})
     .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
     .then(function(data){
-      var gen=data.generated||{};
+      var batches=data.batches||[];
+      var accepted=batches.reduce(function(a,b){
+        return a+((b.generated&&b.generated.accepted)||0);
+      },0);
       var scenarios=data.scenarios||[];
       var scored=scenarios.filter(function(s){
         return typeof s.language_penalty==='number';
@@ -647,7 +650,7 @@
       var screened=scenarios.filter(function(s){
         return s.screening&&s.screening.status==='screened_out';
       }).length;
-      if(count)count.textContent=(gen.accepted!=null?gen.accepted:scenarios.length)
+      if(count)count.textContent=(accepted||scenarios.length)
         +' generated pairs · '+(scenarios.length-screened)+' measured'
         +(screened?' · '+screened+' screened out':'');
       if(!scenarios.length)return;

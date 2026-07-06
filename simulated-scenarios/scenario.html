@@ -1,0 +1,346 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Simulated scenario — PatientWords</title>
+<meta name="description" content="One simulated patient-vs-clinical stress scenario, traced live on gemma-2-2b: probabilities, candidate spreads, rationale, and the interactive circuit comparison.">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#faf9f5">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23faf9f5'/%3E%3Crect x='9' y='9' width='30' height='30' fill='%23111827'/%3E%3Crect x='25' y='25' width='30' height='30' fill='%2315803d'/%3E%3C/svg%3E">
+<style>
+  :root{
+    --paper:#faf9f5; --ink:#1c1c19; --patient:#111827; --clinical:#15803d;
+    --penalty:#b4483d; --muted:#75746d; --structural:#c3c9d2; --hairline:#dcdad2;
+    --serif:'Iowan Old Style','Palatino Linotype',Palatino,'Book Antiqua',Georgia,serif;
+    --mono:ui-monospace,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace;
+  }
+  html{background:var(--paper)}
+  body{margin:0;padding:0;background:var(--paper);color:var(--ink);
+    font-family:var(--serif);font-size:17px;line-height:1.62;
+    -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+  main{max-width:1240px;margin:0 auto;padding:0 22px 56px}
+  a{color:inherit}
+  a:focus-visible{outline:2px solid var(--clinical);outline-offset:3px;border-radius:1px}
+  ::selection{background:#dbe9df}
+
+  .masthead{max-width:1240px;margin:0 auto;padding:20px 22px 0}
+  .masthead-row{display:flex;align-items:baseline;justify-content:space-between;
+    flex-wrap:wrap;gap:8px 24px;padding:10px 0 12px}
+  .wordmark{font-family:var(--serif);font-size:19px;font-weight:600;letter-spacing:.02em;
+    text-decoration:none}
+  .wordmark .pw-p{color:var(--patient)}
+  .wordmark .pw-w{color:var(--clinical)}
+  .masthead nav{display:flex;flex-wrap:wrap;gap:6px 20px}
+  .masthead nav a{font-family:var(--mono);font-size:11px;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--muted);text-decoration:none;padding:2px 0}
+  .masthead nav a:hover{color:var(--ink);text-decoration:underline;text-underline-offset:4px}
+  .masthead nav a[aria-current=page]{color:var(--ink);border-bottom:1px solid var(--ink)}
+  .rule-heavy{border:0;border-top:2px solid var(--ink);margin:0}
+  .rule-fine{border:0;border-top:1px solid var(--hairline);margin:3px 0 0}
+
+  .dateline{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--clinical);font-weight:600;margin:34px 0 14px}
+  .dateline .mode{color:var(--muted);font-weight:400;letter-spacing:.06em;text-transform:none}
+  h1{font-size:clamp(26px,4vw,36px);line-height:1.16;font-weight:600;
+    letter-spacing:-.006em;margin:0 0 10px}
+  .stat{font-family:var(--mono);font-size:13px;font-weight:600;letter-spacing:.01em}
+  .stat.penalty{color:var(--penalty)}
+  .stat.recovery{color:var(--clinical)}
+  .stat.neutral{color:var(--muted);font-weight:400}
+
+  .pager{display:flex;justify-content:space-between;gap:16px;margin:12px 0 0;
+    font-family:var(--mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase}
+  .pager a{color:var(--ink);text-decoration:none;border-bottom:1px solid var(--ink);padding-bottom:2px}
+  .pager a:hover{color:var(--clinical);border-bottom-color:var(--clinical)}
+  .pager .off{color:var(--structural);border-bottom:0}
+
+  .sim-no{font-family:var(--mono);font-size:11.5px;letter-spacing:.18em;text-transform:uppercase;
+    color:var(--clinical);font-weight:600;margin:24px 0 10px}
+  .sim-no .mode{color:var(--muted);font-weight:400;letter-spacing:.06em;text-transform:none}
+  .sim-prompts{display:grid;grid-template-columns:1fr 1fr;gap:0 26px}
+  .sim-side{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--muted);display:block;margin-bottom:2px}
+  .sim-prompt{font-size:16.5px;line-height:1.5;margin:0 0 10px}
+  .sim-prompt.sim-c{color:var(--clinical)}
+  .sim-probs{font-family:var(--mono);font-size:12px;color:var(--muted);margin:2px 0 10px}
+  .sim-probs b{color:var(--ink)}
+  .sim-flip{font-family:var(--mono);font-size:12px;font-weight:600;margin-left:14px}
+  .sim-flip.flipped{color:var(--penalty)}
+  .sim-flip.held{color:var(--clinical)}
+  .sim-rationale{border-left:2px solid var(--hairline);padding:2px 0 2px 14px;margin:12px 0 6px}
+  .sim-rationale .sim-side{margin-bottom:4px}
+  .sim-rationale p{font-style:italic;font-size:15px;line-height:1.6;color:var(--muted);margin:0}
+
+  .spread{margin:2px 0 10px}
+  .spread summary{font-family:var(--mono);font-size:12px;color:var(--muted);
+    cursor:pointer;list-style:none;padding:0}
+  .spread summary::-webkit-details-marker{display:none}
+  .spread summary b{color:var(--ink)}
+  .spread summary .aff{color:var(--structural);margin-left:6px;transition:color .15s}
+  .spread summary:hover .aff{color:var(--muted)}
+  .spread[open] summary .aff-closed{display:none}
+  .spread:not([open]) summary .aff-open{display:none}
+  .spread ol{list-style:none;margin:8px 0 2px;padding:0;max-width:340px}
+  .spread li{display:grid;grid-template-columns:9ch 1fr 5ch;gap:0 10px;
+    align-items:center;padding:1.5px 0;font-family:var(--mono);font-size:11.5px;
+    color:var(--muted)}
+  .spread li .tok{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:right}
+  .spread li .bar{height:4px;background:var(--structural)}
+  .spread li .p{text-align:right}
+  .spread li.is-target{color:var(--ink)}
+  .spread li.is-target .bar{background:var(--clinical)}
+  .spread li.is-target .tok{font-weight:600}
+  .spread .spread-note{font-family:var(--mono);font-size:10px;color:var(--muted);
+    letter-spacing:.03em;margin:4px 0 0}
+
+  .embed{border:1px solid var(--hairline);background:#fff;overflow:hidden;margin:18px 0 8px}
+  .embed iframe{width:100%;border:0;display:block;min-height:400px}
+  .embed-caption{font-family:var(--mono);font-size:11px;color:var(--muted);
+    letter-spacing:.04em;margin:0 0 8px}
+  .embed-caption a{color:var(--muted)}
+  .embed-caption a:hover{color:var(--ink)}
+  .view-head{font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--ink);border-top:1px solid var(--ink);
+    margin:34px 0 0;padding-top:10px}
+  .view-sub{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.03em;margin:4px 0 0}
+
+  .pending-note{border:1px solid var(--hairline);background:var(--paper);margin:26px 0;
+    padding:26px;text-align:center;font-family:var(--mono);font-size:11px;
+    letter-spacing:.16em;text-transform:uppercase;color:var(--muted);line-height:2}
+
+  .back{display:inline-block;margin-top:8px;font-family:var(--mono);font-size:12px;
+    letter-spacing:.1em;text-transform:uppercase;color:var(--ink);text-decoration:none;
+    border-bottom:1px solid var(--ink);padding-bottom:2px}
+  .back:hover{color:var(--clinical);border-bottom-color:var(--clinical)}
+
+  .endnote{border-top:1px solid var(--ink);margin-top:42px;padding-top:14px}
+  .endnote p{font-family:var(--mono);font-size:12px;line-height:1.8;color:var(--muted);margin:0 0 14px}
+  footer{font-family:var(--mono);font-size:12px;line-height:1.9;color:var(--muted)}
+  footer a{color:var(--muted);text-underline-offset:3px}
+
+  @media (max-width:760px){
+    body{font-size:16px}
+    .sim-prompts{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+<header class="masthead">
+  <hr class="rule-heavy"><hr class="rule-fine">
+  <div class="masthead-row">
+    <a class="wordmark" href="../"><span class="pw-p">Patient</span><span class="pw-w">Words</span></a>
+    <nav aria-label="Site">
+      <a href="../">Home</a>
+      <a href="../methods.html">Methods</a>
+      <a href="../word-differences/">Word Differences</a>
+      <a href="../syntax-differences/">Syntax Differences</a>
+      <a href="../dialect-differences/">Dialect Differences</a>
+      <a href="../translation/">Translation</a>
+      <a href="./" aria-current="page">Simulated Scenarios</a>
+      <a href="../#phrase-dataset">Phrase Dataset</a>
+      <a href="../#model-evaluations">Model Evaluations</a>
+      <a href="https://github.com/michaeldgreenphd/patientwords">GitHub</a>
+    </nav>
+  </div>
+  <hr class="rule-fine">
+</header>
+<main>
+  <p class="dateline">Simulated series <span class="mode">· one scenario · live render · simulated data</span></p>
+  <h1 id="sim-title">Simulated scenario</h1>
+  <div class="pager">
+    <a class="back" href="./">← All scenarios</a>
+    <span>
+      <a id="nav-prev" class="off">← previous</a>
+      &nbsp;·&nbsp;
+      <a id="nav-next" class="off">next →</a>
+    </span>
+  </div>
+
+  <div id="sim-card"></div>
+  <div class="pending-note" id="sim-missing" hidden>scenario not found — <a href="./">back to the series</a></div>
+
+  <div class="endnote">
+    <p>
+      SIMULATED DATA — this phrasing pair was authored by an LLM and accepted by the engine's
+      programmatic validators; it is not a patient statement and contains no real personal or
+      clinical data. The traces are live gemma-2-2b runs via the Neuronpedia circuit tracer.
+    </p>
+    <footer>
+      Built with the patientwords-engine pipeline on <a href="https://neuronpedia.org">Neuronpedia</a> ·
+      attribution graphs by <a href="https://github.com/safety-research/circuit-tracer">circuit-tracer</a> ·
+      features from <a href="https://huggingface.co/google/gemma-scope-2b-pt-transcoders">Gemma Scope</a> transcoders ·
+      <a href="../methods.html">how the pipeline works</a>
+    </footer>
+  </div>
+</main>
+<script>
+(function(){
+  function fitAll(){
+    document.querySelectorAll('iframe.live').forEach(function(f){
+      try{
+        var d=f.contentDocument;
+        if(!d||!d.documentElement)return;
+        var h=d.documentElement.scrollHeight;
+        if(!h)return;
+        f.style.height=h+'px';
+      }catch(e){}
+    });
+  }
+  window.addEventListener('resize',fitAll);
+
+  function el(tag,cls,text){
+    var e=document.createElement(tag);
+    if(cls)e.className=cls;
+    if(text!=null)e.textContent=text;
+    return e;
+  }
+  function pct(x){return (x>0?'+':'−')+Math.round(Math.abs(x)*100)+'%';}
+  function p2(x){return typeof x==='number'?x.toFixed(2):'—';}
+  function pad(n){return String(n).padStart(2,'0');}
+
+  function spreadDetails(label,prob,topEntry,spread,target){
+    var head=function(parent){
+      parent.appendChild(el('span',null,label+' = '));
+      parent.appendChild(el('b',null,p2(prob)));
+      if(topEntry)parent.appendChild(el('span',null,' · top prediction: '+topEntry[0]+' ('+p2(topEntry[1])+')'));
+    };
+    if(!spread||!spread.length){
+      var p=el('p','sim-probs');
+      head(p);
+      return p;
+    }
+    var d=document.createElement('details');
+    d.className='spread';
+    var su=document.createElement('summary');
+    head(su);
+    su.appendChild(el('span','aff aff-closed','▸ all '+spread.length+' traced candidates'));
+    su.appendChild(el('span','aff aff-open','▾ traced candidates'));
+    d.appendChild(su);
+    var ol=document.createElement('ol');
+    spread.forEach(function(e){
+      var li=document.createElement('li');
+      if(target&&e[0]===target)li.className='is-target';
+      li.appendChild(el('span','tok',e[0]));
+      var bar=el('span','bar');
+      bar.style.width=Math.max(0.5,(e[1]||0)*100)+'%';
+      li.appendChild(bar);
+      li.appendChild(el('span','p',p2(e[1])));
+      ol.appendChild(li);
+    });
+    d.appendChild(ol);
+    d.appendChild(el('p','spread-note','bar length = next-token probability, fixed 0–1 scale shared by both phrasings'));
+    return d;
+  }
+
+  function embedBlock(card,src,captionText){
+    var box=el('div','embed');
+    var f=document.createElement('iframe');
+    f.className='live';f.src='../'+src;f.loading='lazy';
+    f.title=captionText;
+    f.addEventListener('load',fitAll);
+    box.appendChild(f);
+    card.appendChild(box);
+    var cap=el('p','embed-caption');
+    cap.appendChild(el('span',null,captionText+' '));
+    var open=el('a',null,'open standalone ↗');
+    open.href='../'+src;open.target='_blank';open.rel='noopener';
+    cap.appendChild(open);
+    card.appendChild(cap);
+  }
+
+  var qs=new URLSearchParams(location.search);
+  var want=parseInt(qs.get('sim')||'1',10);
+
+  fetch('../data/simulated_scenarios.json',{cache:'no-cache'})
+    .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
+    .then(function(data){
+      var scenarios=data.scenarios||[];
+      var s=scenarios.filter(function(x){return x.index===want;})[0];
+      if(!s){document.getElementById('sim-missing').hidden=false;return;}
+
+      document.getElementById('sim-title').textContent='Sim '+pad(s.index)
+        +' — “'+(s.patient_term||'—')+'” vs. “'+(s.clinical_term||'—')+'”';
+      document.title='Sim '+pad(s.index)+' — Simulated scenario — PatientWords';
+      var prev=document.getElementById('nav-prev'), next=document.getElementById('nav-next');
+      if(want>1){prev.href='scenario.html?sim='+(want-1);prev.classList.remove('off');}
+      if(want<scenarios.length){next.href='scenario.html?sim='+(want+1);next.classList.remove('off');}
+
+      var card=document.getElementById('sim-card');
+
+      var tgt=s.target_token||'';
+      var intent=(s.intended_target||'').trim();
+      var tgtNote='';
+      if(intent&&intent!==tgt){
+        tgtNote=s.anchor_fallback
+          ?' — intended “'+intent+'” fell below the traced spread; anchored on the clinical top prediction'
+          :' (first piece of “'+intent+'”)';
+      }
+      var no=el('p','sim-no','Sim '+pad(s.index)+' ');
+      no.appendChild(el('span','mode','· '+(s.batch||'')+' #'+(s.batch_index||'')
+        +' · target “'+tgt+'”'+tgtNote));
+      card.appendChild(no);
+
+      var grid=el('div','sim-prompts');
+      var pc=el('div');
+      pc.appendChild(el('span','sim-side','clinical phrasing'));
+      pc.appendChild(el('p','sim-prompt sim-c',s.clinical_prompt));
+      pc.appendChild(spreadDetails('prob('+tgt.trim()+')',s.prob_clinical,s.top_clinical,s.spread_clinical,s.target_token));
+      var pp=el('div');
+      pp.appendChild(el('span','sim-side','patient phrasing (simulated)'));
+      pp.appendChild(el('p','sim-prompt sim-p',s.patient_prompt));
+      pp.appendChild(spreadDetails('prob('+tgt.trim()+')',s.prob_patient,s.top_patient,s.spread_patient,s.target_token));
+      grid.appendChild(pc);grid.appendChild(pp);
+      card.appendChild(grid);
+
+      var statline=el('p');
+      if(s.screening&&s.screening.status==='screened_out'){
+        statline.appendChild(el('span','stat neutral',
+          'screened out of measurement — '+(s.screening.reason||'intended target unmeasurable')
+          +' (clinical trace and spread retained; fed back to the generator)'));
+      }else{
+        if(typeof s.language_penalty==='number'){
+          statline.appendChild(el('span','stat '+(s.language_penalty<0?'penalty':'recovery'),
+            'Language Penalty: '+pct(s.language_penalty)+' probability ('
+            +p2(s.prob_clinical)+' → '+p2(s.prob_patient)+')'));
+        }else{
+          statline.appendChild(el('span','stat neutral','Language Penalty: —'));
+        }
+        statline.appendChild(el('span','sim-flip '+(s.flipped?'flipped':'held'),
+          s.flipped?'top prediction flipped':'top prediction unchanged'));
+      }
+      card.appendChild(statline);
+
+      if(s.rationale){
+        var ra=el('div','sim-rationale');
+        ra.appendChild(el('span','sim-side','generator’s rationale (simulated-data provenance)'));
+        ra.appendChild(el('p',null,s.rationale));
+        card.appendChild(ra);
+      }
+
+      if(s.diff_html){
+        var vh=el('p','view-head','Circuit diff — what the swap changed');
+        card.appendChild(vh);
+        var vs=el('p','view-sub','features present under BOTH phrasings are dimmed to context'
+          +(s.circuit_diff?(' · '+s.circuit_diff.shared_features+' shared · '
+          +s.circuit_diff.unique_to_a+' only clinical · '+s.circuit_diff.unique_to_b+' only patient'):''));
+        card.appendChild(vs);
+        embedBlock(card,s.diff_html,'Circuit diff: shared features dimmed; full-ink nodes are what the term swap added or removed.');
+      }
+      if(s.html){
+        card.appendChild(el('p','view-head','Full comparison — every traced feature'));
+        embedBlock(card,s.html,'Hover any node for its feature id, category, attribution mass, and autointerp description.');
+      }
+      if(!s.html&&!s.diff_html){
+        var pn=el('div','pending-note');
+        pn.textContent='no renders for this scenario — it was screened out before the patient-side trace';
+        card.appendChild(pn);
+      }
+      setTimeout(fitAll,300);
+      setTimeout(fitAll,1200);
+    })
+    .catch(function(){document.getElementById('sim-missing').hidden=false;});
+})();
+</script>
+</body>
+</html>

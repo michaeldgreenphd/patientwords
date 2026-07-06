@@ -93,6 +93,11 @@
   .sum-swap{max-width:36ch}
   .sum-caption{font-family:var(--mono);font-size:11px;color:var(--muted);
     letter-spacing:.04em;margin:6px 0 0}
+  .sum-pages{font-family:var(--mono);font-size:12px;margin:14px 0 0;display:flex;gap:8px;flex-wrap:wrap}
+  .sum-pages a{color:var(--muted);text-decoration:none;border:1px solid var(--hairline);
+    padding:3px 9px}
+  .sum-pages a:hover{color:var(--ink);border-color:var(--ink)}
+  .sum-pages a[aria-current=page]{color:#fff;background:var(--clinical);border-color:var(--clinical)}
   .sum-slope svg{display:block}
   .sum-slope .axis{stroke:var(--hairline);stroke-width:1}
   .sum-slope .seg{stroke-width:1.5;fill:none}
@@ -192,8 +197,8 @@
   <div class="masthead-row">
     <a class="wordmark" href="../"><span class="pw-p">Patient</span><span class="pw-w">Words</span></a>
     <nav aria-label="Site">
+      <a href="../">Home</a>
       <a href="../methods.html">Methods</a>
-      <a href="../">Gallery</a>
       <a href="../word-differences/">Word Differences</a>
       <a href="../syntax-differences/">Syntax Differences</a>
       <a href="../dialect-differences/">Dialect Differences</a>
@@ -250,10 +255,10 @@
     </div>
     <p class="sum-caption">click a Sim number to jump to its full trace ·
       glyph: ● clinical → ○ patient target probability on a shared 0–1 axis (dashed = patient below the traced spread) ·
-      * intended target fell below the traced spread — measurement anchored on the clinical top prediction · screened-out rows kept their clinical trace but failed the measurement screen (see each card)</p>
+      * intended target fell below the traced spread — measurement anchored on the clinical top prediction · screened-out rows kept their clinical trace but failed the measurement screen (open a Sim page for details)</p>
+    <nav class="sum-pages" id="sim-pages" aria-label="Scenario pages"></nav>
   </section>
 
-  <div id="sim-list"></div>
 
   <div class="pending-note" id="sim-pending" hidden>
     <span class="pending-mark"></span>traces pending — simulated series
@@ -281,19 +286,6 @@
 </main>
 <script>
 (function(){
-  function fitAll(){
-    document.querySelectorAll('iframe.live').forEach(function(f){
-      try{
-        var d=f.contentDocument;
-        if(!d||!d.documentElement)return;
-        var h=d.documentElement.scrollHeight;
-        if(!h)return;
-        f.style.height=h+'px';
-      }catch(e){}
-    });
-  }
-  window.addEventListener('resize',fitAll);
-
   function el(tag,cls,text){
     var e=document.createElement(tag);
     if(cls)e.className=cls;
@@ -302,46 +294,9 @@
   }
   function pct(x){return (x>0?'+':'−')+Math.round(Math.abs(x)*100)+'%';}
   function p2(x){return typeof x==='number'?x.toFixed(2):'—';}
+  function pad(n){return String(n).padStart(2,'0');}
+  var PAGE_SIZE=15;
 
-  // Measured line for one phrasing; when the candidate spread is present the
-  // line becomes a <details> toggle revealing every traced next-token option
-  // as direct-labeled bars on a fixed 0-1 scale (same scale in both columns).
-  function spreadDetails(label,prob,topEntry,spread,target){
-    var head=function(parent){
-      parent.appendChild(el('span',null,label+' = '));
-      parent.appendChild(el('b',null,p2(prob)));
-      if(topEntry)parent.appendChild(el('span',null,' · top prediction: '+topEntry[0]+' ('+p2(topEntry[1])+')'));
-    };
-    if(!spread||!spread.length){
-      var p=el('p','sim-probs');
-      head(p);
-      return p;
-    }
-    var d=document.createElement('details');
-    d.className='spread';
-    var su=document.createElement('summary');
-    head(su);
-    su.appendChild(el('span','aff aff-closed','▸ all '+spread.length+' traced candidates'));
-    su.appendChild(el('span','aff aff-open','▾ traced candidates'));
-    d.appendChild(su);
-    var ol=document.createElement('ol');
-    spread.forEach(function(e){
-      var li=document.createElement('li');
-      if(target&&e[0]===target)li.className='is-target';
-      li.appendChild(el('span','tok',e[0]));
-      var bar=el('span','bar');
-      bar.style.width=Math.max(0.5,(e[1]||0)*100)+'%';
-      li.appendChild(bar);
-      li.appendChild(el('span','p',p2(e[1])));
-      ol.appendChild(li);
-    });
-    d.appendChild(ol);
-    d.appendChild(el('p','spread-note','bar length = next-token probability, fixed 0–1 scale shared by both phrasings'));
-    return d;
-  }
-
-  // Summary-table glyph: clinical (●) and patient (○) target probability on
-  // one shared 0-1 axis - the drop is readable before the numbers are.
   function slopeCell(s){
     var td=el('td','sum-slope');
     var NS='http://www.w3.org/2000/svg';
@@ -385,9 +340,9 @@
   fetch('../data/simulated_scenarios.json',{cache:'no-cache'})
     .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
     .then(function(data){
-      var gen=data.generated||{};
-      var traced=data.traced||{};
       var scenarios=data.scenarios||[];
+      var batches=data.batches||[];
+      var traced=data.traced||{};
       if(!scenarios.length)throw new Error('empty');
 
       if(traced.graph_model){
@@ -397,30 +352,33 @@
       document.getElementById('sim-traced').hidden=false;
 
       var prov=document.getElementById('sim-provenance');
-      var when=(gen.run_timestamp||'').slice(0,10);
-      prov.appendChild(el('span',null,'generated by '));
-      prov.appendChild(el('b',null,gen.model||'—'));
-      prov.appendChild(el('span',null,(when?' on '+when:'')+' · '));
-      var cost=el('span','pv-cost','$'+(typeof gen.cost_usd==='number'?gen.cost_usd.toFixed(4):'—')
-        +' spent of the $'+(typeof gen.max_spend_usd==='number'?gen.max_spend_usd.toFixed(2):'—')+' ceiling');
-      prov.appendChild(cost);
-      prov.appendChild(el('span',null,' · '+(gen.accepted!=null?gen.accepted:'—')+' accepted, '
-        +(gen.rejected!=null?gen.rejected:'—')+' rejected by the validators'
-        +(gen.topics&&gen.topics.length?' · topics: '+gen.topics.join(' · '):'')
-        +' · batch '+(data.batch||'—')+' + .report.json sidecar in the engine repo’s data/simulated/'));
+      batches.forEach(function(b,i){
+        var gen=b.generated||{};
+        var line=el('div');
+        var when=(gen.run_timestamp||'').slice(0,10);
+        line.appendChild(el('span',null,(i===0?'':'+ feedback round: ')+'generated by '));
+        line.appendChild(el('b',null,gen.model||'—'));
+        line.appendChild(el('span',null,(when?' on '+when:'')+' · '));
+        line.appendChild(el('span','pv-cost','$'+(typeof gen.cost_usd==='number'?gen.cost_usd.toFixed(4):'—')
+          +' of the $'+(typeof gen.max_spend_usd==='number'?gen.max_spend_usd.toFixed(2):'—')+' ceiling'));
+        line.appendChild(el('span',null,' · '+(gen.accepted!=null?gen.accepted:'—')+' accepted, '
+          +(gen.rejected!=null?gen.rejected:'—')+' rejected by the validators'
+          +(b.screen_targets!=null?' · measurement screen at prob ≥ '+b.screen_targets:'')
+          +' · batch '+(b.batch||'—')+' + sidecar in the engine repo'));
+        prov.appendChild(line);
+      });
       prov.hidden=false;
 
       var sumBody=document.getElementById('sim-sum-body');
-      scenarios.forEach(function(s){
-        var id='sim-'+String(s.index).padStart(2,'0');
+      scenarios.forEach(function(s,i){
         var tr=document.createElement('tr');
+        tr.setAttribute('data-page',String(Math.floor(i/PAGE_SIZE)+1));
         var idx=el('td','sum-idx');
-        var jump=el('a',null,'Sim '+String(s.index).padStart(2,'0')+' ↓');
-        jump.href='#'+id;
+        var jump=el('a',null,'Sim '+pad(s.index)+' →');
+        jump.href='scenario.html?sim='+s.index;
         idx.appendChild(jump);
         tr.appendChild(idx);
-        var swap=el('td','sum-swap','“'+(s.patient_term||'—')+'” → “'+(s.clinical_term||'—')+'”');
-        tr.appendChild(swap);
+        tr.appendChild(el('td','sum-swap','“'+(s.patient_term||'—')+'” → “'+(s.clinical_term||'—')+'”'));
         tr.appendChild(el('td','mono','“'+(s.target_token||'—')+'”'+(s.anchor_fallback?' *':'')));
         tr.appendChild(el('td','num',p2(s.prob_clinical)));
         tr.appendChild(el('td','num',p2(s.prob_patient)));
@@ -447,102 +405,39 @@
         tr.appendChild(flip);
         sumBody.appendChild(tr);
       });
+
+      var pageCount=Math.ceil(scenarios.length/PAGE_SIZE);
+      var pages=document.getElementById('sim-pages');
+      function showPage(n){
+        sumBody.querySelectorAll('tr').forEach(function(tr){
+          tr.style.display=tr.getAttribute('data-page')===String(n)?'':'none';
+        });
+        pages.querySelectorAll('a').forEach(function(a){
+          if(a.textContent===String(n))a.setAttribute('aria-current','page');
+          else a.removeAttribute('aria-current');
+        });
+      }
+      if(pageCount>1){
+        for(var n=1;n<=pageCount;n++){
+          (function(n){
+            var a=el('a',null,String(n));
+            a.href='#sim-summary';
+            a.addEventListener('click',function(ev){ev.preventDefault();showPage(n);});
+            pages.appendChild(a);
+          })(n);
+        }
+        showPage(1);
+      }
       document.getElementById('sim-summary').hidden=false;
 
-      var list=document.getElementById('sim-list');
-      scenarios.forEach(function(s){
-        var card=el('section','sim');
-        card.id='sim-'+String(s.index).padStart(2,'0');
-
-        var no=el('p','sim-no','Sim '+String(s.index).padStart(2,'0')+' ');
-        var tgt=s.target_token||'';
-        var intent=(s.intended_target||'').trim();
-        var tgtNote='';
-        if(intent&&intent!==tgt){
-          tgtNote=s.anchor_fallback
-            ?' \u2014 intended \u201c'+intent+'\u201d fell below the traced spread; anchored on the clinical top prediction'
-            :' (first piece of \u201c'+intent+'\u201d)';
-        }
-        var modebit=el('span','mode','· target “'+tgt+'”'+tgtNote
-          +' · swap “'+(s.patient_term||'—')+'” → “'+(s.clinical_term||'—')+'”');
-        no.appendChild(modebit);
-        card.appendChild(no);
-
-        var grid=el('div','sim-prompts');
-        var pc=el('div');
-        pc.appendChild(el('span','sim-side','clinical phrasing'));
-        pc.appendChild(el('p','sim-prompt sim-c',s.clinical_prompt));
-        pc.appendChild(spreadDetails('prob('+(s.target_token||'').trim()+')',
-          s.prob_clinical, s.top_clinical, s.spread_clinical, s.target_token));
-        var pp=el('div');
-        pp.appendChild(el('span','sim-side','patient phrasing (simulated)'));
-        pp.appendChild(el('p','sim-prompt sim-p',s.patient_prompt));
-        pp.appendChild(spreadDetails('prob('+(s.target_token||'').trim()+')',
-          s.prob_patient, s.top_patient, s.spread_patient, s.target_token));
-        grid.appendChild(pc);grid.appendChild(pp);
-        card.appendChild(grid);
-
-        var statline=el('p');
-        if(s.screening&&s.screening.status==='screened_out'){
-          statline.appendChild(el('span','stat neutral',
-            'screened out of measurement — '+(s.screening.reason||'intended target unmeasurable')
-            +' (clinical trace and spread retained; fed back to the generator)'));
-        }else if(typeof s.language_penalty==='number'){
-          statline.appendChild(el('span','stat '+(s.language_penalty<0?'penalty':'recovery'),
-            'Language Penalty: '+pct(s.language_penalty)+' probability ('
-            +p2(s.prob_clinical)+' → '+p2(s.prob_patient)+')'));
-        }else{
-          statline.appendChild(el('span','stat neutral','Language Penalty: —'));
-        }
-        if(!(s.screening&&s.screening.status==='screened_out')){
-          statline.appendChild(el('span','sim-flip '+(s.flipped?'flipped':'held'),
-            s.flipped?'top prediction flipped':'top prediction unchanged'));
-        }
-        card.appendChild(statline);
-
-        if(s.rationale){
-          var ra=el('div','sim-rationale');
-          ra.appendChild(el('span','sim-side','generator’s rationale (simulated-data provenance)'));
-          ra.appendChild(el('p',null,s.rationale));
-          card.appendChild(ra);
-        }
-
-        if(s.html){
-          var box=el('div','embed');
-          var f=document.createElement('iframe');
-          f.className='live';f.src='../'+s.html;f.loading='lazy';
-          f.title='Interactive attribution-graph comparison, simulated scenario '+s.index;
-          f.addEventListener('load',fitAll);
-          box.appendChild(f);
-          card.appendChild(box);
-          var cap=el('p','embed-caption');
-          cap.appendChild(el('span',null,'Hover any node for its feature id, category, attribution mass, and autointerp description. '));
-          var open=el('a',null,'open standalone ↗');
-          open.href='../'+s.html;open.target='_blank';open.rel='noopener';
-          cap.appendChild(open);
-          if(s.png){
-            cap.appendChild(el('span',null,' · '));
-            var png=el('a',null,'png');
-            png.href='../'+s.png;png.target='_blank';png.rel='noopener';
-            cap.appendChild(png);
-          }
-          cap.appendChild(el('span',null,' · '));
-          var up=el('a',null,'back to summary ↑');
-          up.href='#sim-summary';
-          cap.appendChild(up);
-          card.appendChild(cap);
-        }
-        list.appendChild(card);
-      });
-
-      var done=scenarios.length, total=(gen.accepted!=null?gen.accepted:scenarios.length);
-      if(done<total){
+      var accepted=batches.reduce(function(a,b){
+        return a+((b.generated&&b.generated.accepted)||0);
+      },0);
+      if(accepted>scenarios.length){
         var pend=document.getElementById('sim-pending');
         pend.hidden=false;
-        pend.appendChild(document.createTextNode(' '+(total-done)+' of '+total+' scenarios still tracing'));
+        pend.appendChild(document.createTextNode(' '+(accepted-scenarios.length)+' of '+accepted+' scenarios still tracing'));
       }
-      setTimeout(fitAll,300);
-      setTimeout(fitAll,1200);
     })
     .catch(function(){
       document.getElementById('sim-pending').hidden=false;
