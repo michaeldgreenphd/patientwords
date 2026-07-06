@@ -3,23 +3,23 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Syntax differences — PatientWords</title>
-<meta name="description" content="A 2×2 matrix crossing the core medical keyword with the surrounding frame syntax in gemma-2-2b. Vocabulary Δ: −42% · Syntax Δ: −9%.">
-<link rel="canonical" href="https://michaeldgreenphd.github.io/patientwords/syntax-differences/">
+<title>Dialect differences — PatientWords</title>
+<meta name="description" content="The clinical term is held fixed while the sentence is re-traced across dialect and register variants of the surrounding syntax in gemma-2-2b. Traces pending.">
+<link rel="canonical" href="https://michaeldgreenphd.github.io/patientwords/dialect-differences/">
 <meta name="theme-color" content="#faf9f5">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="PatientWords">
-<meta property="og:title" content="Syntax differences — PatientWords">
-<meta property="og:description" content="The words surrounding clinical words can be the same. Vocabulary choice costs −42% probability; colloquial framing alone costs another −9%.">
-<meta property="og:url" content="https://michaeldgreenphd.github.io/patientwords/syntax-differences/">
-<meta property="og:image" content="https://michaeldgreenphd.github.io/patientwords/modes/4quadrant/preview.png">
-<meta property="og:image:width" content="3120">
-<meta property="og:image:height" content="1941">
-<meta property="og:image:alt" content="Four-quadrant matrix factorizing vocabulary and syntax effects in gemma-2-2b">
+<meta property="og:title" content="Dialect differences — PatientWords">
+<meta property="og:description" content="The same clinical phrase, framed the way different communities actually speak. Dialect-mode attribution traces are pending.">
+<meta property="og:url" content="https://michaeldgreenphd.github.io/patientwords/dialect-differences/">
+<meta property="og:image" content="https://michaeldgreenphd.github.io/patientwords/modes/2panel/preview.png">
+<meta property="og:image:width" content="1690">
+<meta property="og:image:height" content="1929">
+<meta property="og:image:alt" content="Attribution graphs comparing clinical and patient wording in gemma-2-2b">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Syntax differences — PatientWords">
-<meta name="twitter:description" content="The words surrounding clinical words can be the same.">
-<meta name="twitter:image" content="https://michaeldgreenphd.github.io/patientwords/modes/4quadrant/preview.png">
+<meta name="twitter:title" content="Dialect differences — PatientWords">
+<meta name="twitter:description" content="The same clinical phrase, framed the way different communities actually speak.">
+<meta name="twitter:image" content="https://michaeldgreenphd.github.io/patientwords/modes/2panel/preview.png">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23faf9f5'/%3E%3Crect x='9' y='9' width='30' height='30' fill='%23111827'/%3E%3Crect x='25' y='25' width='30' height='30' fill='%2315803d'/%3E%3C/svg%3E">
 <style>
   :root{
@@ -60,9 +60,6 @@
   .subtitle{font-style:italic;font-size:20px;line-height:1.5;color:var(--muted);
     margin:0 0 20px;max-width:52ch}
   .explainer{font-size:17px;line-height:1.66;max-width:62ch;margin:0 0 14px}
-  .stat{font-family:var(--mono);font-size:13px;font-weight:600;letter-spacing:.01em}
-  .stat.penalty{color:var(--penalty)}
-  .stat.recovery{color:var(--clinical)}
 
   .traced{margin:12px 0 0;font-family:var(--mono);font-size:11px;letter-spacing:.03em;
     line-height:1.9;font-weight:400}
@@ -70,9 +67,13 @@
   .traced .tm b{color:var(--clinical);font-weight:600}
   .traced .tp{color:var(--muted)}
 
-  .embed{border:1px solid var(--hairline);background:#fff;margin:26px 0 10px;
-    overflow-x:auto;overflow-y:hidden}
-  .embed iframe{width:100%;min-width:1400px;border:0;display:block;min-height:400px}
+  .embed{border:1px solid var(--hairline);background:#fff;overflow:hidden;margin:26px 0 10px}
+  .embed iframe{width:100%;border:0;display:block;min-height:400px}
+  .embed.pending{background:var(--paper);display:flex;align-items:center;justify-content:center;
+    min-height:420px}
+  .pending-inner{font-family:var(--mono);font-size:11px;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--muted);text-align:center;line-height:2;padding:20px}
+  .pending-mark{display:block;width:9px;height:9px;background:var(--structural);margin:0 auto 10px}
   .embed-caption{font-family:var(--mono);font-size:11px;color:var(--muted);
     letter-spacing:.04em;margin:0 0 26px}
   .back{display:inline-block;margin-top:8px;font-family:var(--mono);font-size:12px;
@@ -109,8 +110,8 @@
     <nav aria-label="Site">
       <a href="../">Gallery</a>
       <a href="../word-differences/">Word Differences</a>
-      <a href="./" aria-current="page">Syntax Differences</a>
-      <a href="../dialect-differences/">Dialect Differences</a>
+      <a href="../syntax-differences/">Syntax Differences</a>
+      <a href="./" aria-current="page">Dialect Differences</a>
       <a href="../translation/">Translation</a>
       <a href="../#phrase-dataset">Phrase Dataset</a>
       <a href="../#model-evaluations">Model Evaluations</a>
@@ -121,36 +122,33 @@
   <hr class="rule-fine">
 </header>
 <main>
-  <p class="dateline">Fig. 2 <span class="mode">· modes/4quadrant · live render</span></p>
-  <h1>Syntax differences</h1>
-  <p class="subtitle">The words surrounding clinical words can be the same.</p>
-  <p class="explainer">A 2×2 factorization crossing the core medical keyword with the
-     surrounding frame syntax. Vocabulary choice costs −42% probability in either frame;
-     colloquial framing alone costs another −9% — even when the patient knows the clinical
-     word (Box&nbsp;C).</p>
-  <span class="stat penalty">Vocabulary Δ: −42% · Syntax Δ: −9%</span>
-  <p class="traced" data-mode="4quadrant" data-traced="gemma-2-2b">
-    <span class="tm"><b>traced model:</b> gemma-2-2b · gemma scope transcoders</span>
-    <span class="tp">gemma-3-4b-it · qwen3-4b · qwen3-1.7b — traces pending</span>
+  <p class="dateline">Fig. 3 <span class="mode">· modes/dialect · traces pending</span></p>
+  <h1>Dialect differences</h1>
+  <p class="subtitle">The same clinical phrase, framed the way different communities actually speak.</p>
+  <p class="explainer">The engine holds the clinical term fixed and re-traces the sentence
+     across dialect and register variants of the surrounding syntax, so any probability
+     shift is attributable to framing alone — extending the single syntax delta of the
+     2×2 matrix into a distribution across dialects.</p>
+  <p class="traced" data-mode="dialect" data-traced="">
+    <span class="tp">traces pending — dialect mode</span>
   </p>
 
-  <div class="embed">
-    <iframe class="live" src="../modes/4quadrant/index.html" loading="lazy"
-            title="Interactive four-quadrant matrix factorizing vocabulary and syntax effects"></iframe>
+  <div class="embed pending" data-live-src="../modes/dialect/index.html">
+    <div class="pending-inner"><span class="pending-mark"></span>traces pending — dialect mode</div>
   </div>
-  <p class="embed-caption">The matrix is wider than the page by design — scroll it sideways to compare all four boxes. Hover any node for its feature id, category, attribution mass, and autointerp description.</p>
+  <p class="embed-caption" id="embed-caption">The dialect engine has not published its first render yet — this page will pick it up automatically once modes/dialect/ lands.</p>
 
   <a class="back" href="../">← Back to the gallery</a>
 
   <div class="endnote">
     <p>
-      This render is a demonstration output generated from synthetic sample graphs to validate
-      the visualization pipeline end-to-end; traces from live gemma-2-2b runs will replace it
-      as the study progresses.
+      Renders on this site are demonstration outputs generated from synthetic sample graphs to
+      validate the visualization pipeline end-to-end; traces from live gemma-2-2b runs will
+      replace them as the study progresses.
     </p>
     <footer>
-      Built with the <a href="https://github.com/michaeldgreenphd/neuronpedia">medlang-circuits</a>
-      pipeline on <a href="https://neuronpedia.org">Neuronpedia</a> ·
+      Built with the patientwords-engine pipeline (engine repo, currently private)
+      on <a href="https://neuronpedia.org">Neuronpedia</a> ·
       attribution graphs by <a href="https://github.com/safety-research/circuit-tracer">circuit-tracer</a> ·
       features from <a href="https://huggingface.co/google/gemma-scope-2b-pt-transcoders">Gemma Scope</a> transcoders
     </footer>
@@ -169,12 +167,26 @@
       }catch(e){}
     });
   }
-  document.querySelectorAll('iframe.live').forEach(function(f){
-    f.addEventListener('load',fitAll);
-  });
   window.addEventListener('resize',fitAll);
-  setTimeout(fitAll,300);
-  setTimeout(fitAll,1200);
+  var box=document.querySelector('.embed[data-live-src]');
+  if(box&&window.fetch){
+    var src=box.getAttribute('data-live-src');
+    fetch(src,{method:'HEAD',cache:'no-cache'}).then(function(r){
+      if(!r.ok)return;
+      box.classList.remove('pending');
+      box.removeAttribute('data-live-src');
+      box.textContent='';
+      var f=document.createElement('iframe');
+      f.className='live';f.src=src;
+      f.title='Interactive dialect-mode attribution graphs';
+      f.addEventListener('load',fitAll);
+      box.appendChild(f);
+      document.getElementById('embed-caption').textContent=
+        'Hover any node for its feature id, category, attribution mass, and autointerp description.';
+      setTimeout(fitAll,300);
+      setTimeout(fitAll,1200);
+    }).catch(function(){});
+  }
 })();
 </script>
 </body>

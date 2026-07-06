@@ -90,6 +90,10 @@
   .preview .frame{width:1180px;transform:scale(.339);transform-origin:top left}
   .preview.wide .frame{width:2424px;transform:scale(.165)}
   .preview iframe{pointer-events:none}
+  .embed.pending{background:var(--paper);display:flex;align-items:center;justify-content:center}
+  .pending-inner{font-family:var(--mono);font-size:11px;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--muted);text-align:center;line-height:2;padding:20px}
+  .pending-mark{display:block;width:9px;height:9px;background:var(--structural);margin:0 auto 10px}
   .fig-no{font-family:var(--mono);font-size:11.5px;letter-spacing:.18em;text-transform:uppercase;
     color:var(--clinical);font-weight:600;margin:2px 0 8px}
   .fig-no .mode{color:var(--muted);font-weight:400;letter-spacing:.06em;text-transform:none}
@@ -103,6 +107,30 @@
   .traced .tm{color:var(--ink)}
   .traced .tm b{color:var(--clinical);font-weight:600}
   .traced .tp{color:var(--muted)}
+
+  /* Phrase dataset */
+  .sp-scroll{overflow-x:auto}
+  .sp-table{width:100%;min-width:640px;border-collapse:collapse;margin:22px 0 12px}
+  .sp-table th{font-family:var(--mono);font-size:10.5px;font-weight:600;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--muted);text-align:left;
+    padding:0 18px 8px 0;border-bottom:1px solid var(--ink)}
+  .sp-table th.sp-w-idx{width:86px}
+  .sp-table td{padding:14px 18px 14px 0;border-bottom:1px solid var(--hairline);vertical-align:top}
+  .sp-table tr:last-child td{border-bottom:1px solid var(--ink)}
+  .sp-idx{font-family:var(--mono);font-size:11px;color:var(--muted);white-space:nowrap}
+  .sp-target{display:block;font-family:var(--mono);font-size:10.5px;color:var(--muted);margin-top:4px}
+  .sp-side{display:none}
+  .sp-prompt{font-size:15.5px;line-height:1.5;margin:0}
+  .sp-p .sp-prompt{color:var(--patient)}
+  .sp-c .sp-prompt{color:var(--clinical)}
+  .sp-obs{font-family:var(--mono);font-size:12px;color:var(--muted);margin-top:6px}
+  .sp-p .sp-obs b{color:var(--patient);font-weight:600}
+  .sp-c .sp-obs b{color:var(--clinical);font-weight:600}
+  .sp-link{font-family:var(--mono);font-size:11px;color:var(--clinical);text-decoration:none;
+    border:1px solid var(--hairline);padding:0 5px;margin-left:8px}
+  .sp-link:hover,.sp-link:focus-visible{border-color:var(--clinical)}
+  .sp-caption{font-size:15.5px;line-height:1.62;max-width:70ch;margin:0 0 10px}
+  .sp-foot{font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--muted);margin:0 0 46px}
 
   /* Model evaluations */
   .me-scroll{overflow-x:auto}
@@ -149,6 +177,15 @@
     .masthead{padding-top:12px}
     .masthead-row{padding-bottom:10px}
     .fig{grid-template-columns:minmax(0,1fr);gap:14px}
+    .sp-scroll{overflow:visible}
+    .sp-table{min-width:0}
+    .sp-table thead{display:none}
+    .sp-table,.sp-table tbody,.sp-table tr,.sp-table td{display:block}
+    .sp-table td{border:0;padding:6px 0}
+    .sp-table tr{border-bottom:1px solid var(--hairline);padding:14px 0}
+    .sp-table tr:last-child{border-bottom:1px solid var(--ink)}
+    .sp-side{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.14em;
+      text-transform:uppercase;color:var(--muted);margin-bottom:2px}
     .fig-media{order:2}
     .fig-body{order:1}
     .fig p{max-width:none}
@@ -173,7 +210,9 @@
       <a href="./" aria-current="page">Gallery</a>
       <a href="word-differences/">Word Differences</a>
       <a href="syntax-differences/">Syntax Differences</a>
+      <a href="dialect-differences/">Dialect Differences</a>
       <a href="translation/">Translation</a>
+      <a href="#phrase-dataset">Phrase Dataset</a>
       <a href="#model-evaluations">Model Evaluations</a>
       <a href="methods.html">Methods</a>
       <a href="https://github.com/michaeldgreenphd/patientwords">GitHub</a>
@@ -208,8 +247,8 @@
   </p>
 
   <div class="section-head">
-    <h2>Three comparison engines</h2>
-    <span class="count">Figs. 1–3</span>
+    <h2>Four comparison engines</h2>
+    <span class="count">Figs. 1–4</span>
   </div>
 
   <a class="fig" href="word-differences/">
@@ -259,6 +298,27 @@
     </div>
   </a>
 
+  <a class="fig" href="dialect-differences/">
+    <figure class="fig-media">
+      <div class="embed preview pending" data-live-src="modes/dialect/index.html">
+        <div class="pending-inner"><span class="pending-mark"></span>traces pending — dialect mode</div>
+      </div>
+      <figcaption>modes/dialect · awaiting first render</figcaption>
+    </figure>
+    <div class="fig-body">
+      <p class="fig-no">Fig. 3 <span class="mode">· dialect</span></p>
+      <h3>Dialect Differences</h3>
+      <p>The engine holds the clinical term fixed and re-traces the sentence across dialect
+         and register variants of the surrounding syntax, so any probability shift is
+         attributable to framing alone — extending the single syntax delta of the 2×2 matrix
+         into a distribution across dialects.</p>
+      <p class="traced" data-mode="dialect" data-traced="">
+        <span class="tp">traces pending — dialect mode</span>
+      </p>
+      <span class="open">Open the dialect study →</span>
+    </div>
+  </a>
+
   <a class="fig" href="translation/">
     <figure class="fig-media">
       <div class="embed preview"><div class="frame">
@@ -268,7 +328,7 @@
       <figcaption>modes/translation · live render</figcaption>
     </figure>
     <div class="fig-body">
-      <p class="fig-no">Fig. 3 <span class="mode">· translation</span></p>
+      <p class="fig-no">Fig. 4 <span class="mode">· translation</span></p>
       <h3>Translation</h3>
       <p>The organic fix: an LLM translates the patient sentence into standard terminology and
          the raw output is traced natively. The clinical circuit — and the correct
@@ -281,6 +341,28 @@
       <span class="open">Open the mitigation chain →</span>
     </div>
   </a>
+
+  <section id="phrase-dataset" hidden>
+    <div class="section-head">
+      <h2>Phrase dataset</h2>
+      <span class="count" id="sp-count"></span>
+    </div>
+    <div class="sp-scroll">
+      <table class="sp-table">
+        <thead><tr>
+          <th scope="col" class="sp-w-idx">Pair</th>
+          <th scope="col">Patient phrasing</th>
+          <th scope="col">Clinical phrasing</th>
+        </tr></thead>
+        <tbody id="sp-body"></tbody>
+      </table>
+    </div>
+    <p class="sp-caption">
+      Hand-measured on gemma-2-2b (Gemma Scope transcoders) via the Neuronpedia circuit
+      tracer; next-token probabilities as observed at measurement time.
+    </p>
+    <p class="sp-foot">source: data/stress_pairs.json · prompts shown verbatim, including intentional misspellings</p>
+  </section>
 
   <section id="model-evaluations" hidden>
     <div class="section-head">
@@ -348,6 +430,93 @@
   window.addEventListener('resize',fitAll);
   setTimeout(fitAll,300);
   setTimeout(fitAll,1200);
+  if(window.fetch){
+    document.querySelectorAll('.embed[data-live-src]').forEach(function(box){
+      var src=box.getAttribute('data-live-src');
+      fetch(src,{method:'HEAD',cache:'no-cache'}).then(function(r){
+        if(!r.ok)return;
+        box.classList.remove('pending');
+        box.removeAttribute('data-live-src');
+        box.textContent='';
+        var f=document.createElement('iframe');
+        f.className='live';f.src=src;f.loading='lazy';f.tabIndex=-1;
+        f.title='Live preview: dialect-mode attribution graphs';
+        if(box.classList.contains('preview')){
+          var fr=document.createElement('div');
+          fr.className='frame';fr.appendChild(f);box.appendChild(fr);
+        }else{box.appendChild(f);}
+        f.addEventListener('load',fitAll);
+      }).catch(function(){});
+    });
+  }
+})();
+(function(){
+  var sec=document.getElementById('phrase-dataset');
+  if(!sec||!window.fetch)return;
+  function obsLine(side,o){
+    var wrap=document.createElement('p');
+    wrap.className='sp-obs';
+    var tok=o?o.observed_next_token:null;
+    var prob=o?o.observed_prob:null;
+    var link=o?o.circuit_link:null;
+    if(tok==null&&prob==null&&link==null){wrap.textContent='—';return wrap;}
+    wrap.appendChild(document.createTextNode('→ '));
+    var b=document.createElement('b');
+    b.textContent=tok==null?'—':tok;
+    wrap.appendChild(b);
+    wrap.appendChild(document.createTextNode(' · p '+(typeof prob==='number'?prob.toFixed(2):'—')));
+    if(typeof link==='string'&&/^https?:\/\//.test(link)){
+      var a=document.createElement('a');
+      a.className='sp-link';a.href=link;a.target='_blank';a.rel='noopener';
+      a.textContent='↗';
+      a.title='open '+side+' circuit trace on neuronpedia.org';
+      a.setAttribute('aria-label','open '+side+' circuit trace on neuronpedia.org');
+      wrap.appendChild(document.createTextNode(' '));
+      wrap.appendChild(a);
+    }
+    return wrap;
+  }
+  function cellFor(cls,label,prompt,side,o){
+    var td=document.createElement('td');
+    td.className=cls;
+    var lab=document.createElement('span');
+    lab.className='sp-side';lab.textContent=label;
+    td.appendChild(lab);
+    var p=document.createElement('p');
+    p.className='sp-prompt';p.textContent=prompt==null?'—':prompt;
+    td.appendChild(p);
+    td.appendChild(obsLine(side,o));
+    return td;
+  }
+  fetch('data/stress_pairs.json',{cache:'no-cache'})
+    .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
+    .then(function(pairs){
+      if(!Array.isArray(pairs)||!pairs.length)throw new Error('empty');
+      var tb=document.getElementById('sp-body');
+      pairs.forEach(function(pr,i){
+        var prov=pr.provenance||{};
+        var tr=document.createElement('tr');
+        if(typeof prov.notes==='string'&&prov.notes)tr.title=prov.notes;
+        var idx=document.createElement('td');
+        var n=document.createElement('span');
+        n.className='sp-idx';
+        n.textContent='#'+(prov.source_row!=null?prov.source_row:(i+1));
+        idx.appendChild(n);
+        if(pr.target_clinical_token!=null){
+          var t=document.createElement('span');
+          t.className='sp-target';
+          t.textContent='target:'+pr.target_clinical_token;
+          idx.appendChild(t);
+        }
+        tr.appendChild(idx);
+        tr.appendChild(cellFor('sp-p','patient phrasing',pr.bottom_prompt,'patient',prov.patient));
+        tr.appendChild(cellFor('sp-c','clinical phrasing',pr.top_prompt,'clinical',prov.clinical));
+        tb.appendChild(tr);
+      });
+      document.getElementById('sp-count').textContent=pairs.length+' hand-measured pairs';
+      sec.hidden=false;
+    })
+    .catch(function(){sec.hidden=true;});
 })();
 (function(){
   var sec=document.getElementById('model-evaluations');
