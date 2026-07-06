@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Phrase dataset — PatientWords</title>
+<meta name="description" content="The hand-built, hand-measured clinical/patient sentence pairs: observed next tokens, probabilities, and links to their Neuronpedia circuit traces.">
+<link rel="canonical" href="https://michaeldgreenphd.github.io/patientwords/phrase-dataset/">
+<meta name="theme-color" content="#faf9f5">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23faf9f5'/%3E%3Crect x='9' y='9' width='30' height='30' fill='%23111827'/%3E%3Crect x='25' y='25' width='30' height='30' fill='%2315803d'/%3E%3C/svg%3E">
+<style>
+  :root{
+    --paper:#faf9f5; --ink:#1c1c19; --patient:#111827; --clinical:#15803d;
+    --penalty:#b4483d; --muted:#75746d; --structural:#c3c9d2; --hairline:#dcdad2;
+    --serif:'Iowan Old Style','Palatino Linotype',Palatino,'Book Antiqua',Georgia,serif;
+    --mono:ui-monospace,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace;
+  }
+  html{background:var(--paper)}
+  body{margin:0;padding:0;background:var(--paper);color:var(--ink);
+    font-family:var(--serif);font-size:17px;line-height:1.62;
+    -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+  main{max-width:1100px;margin:0 auto;padding:0 22px 56px}
+  a{color:inherit}
+  a:focus-visible{outline:2px solid var(--clinical);outline-offset:3px;border-radius:1px}
+  ::selection{background:#dbe9df}
+  .masthead{max-width:1100px;margin:0 auto;padding:20px 22px 0}
+  .masthead-row{display:flex;align-items:baseline;justify-content:space-between;
+    flex-wrap:wrap;gap:8px 24px;padding:10px 0 12px}
+  .wordmark{font-family:var(--serif);font-size:19px;font-weight:600;letter-spacing:.02em;text-decoration:none}
+  .wordmark .pw-p{color:var(--patient)}
+  .wordmark .pw-w{color:var(--clinical)}
+  .masthead nav{display:flex;flex-wrap:wrap;gap:6px 20px}
+  .masthead nav a{font-family:var(--mono);font-size:11px;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--muted);text-decoration:none;padding:2px 0}
+  .masthead nav a:hover{color:var(--ink);text-decoration:underline;text-underline-offset:4px}
+  .masthead nav a[aria-current=page]{color:var(--ink);border-bottom:1px solid var(--ink)}
+  .rule-heavy{border:0;border-top:2px solid var(--ink);margin:0}
+  .rule-fine{border:0;border-top:1px solid var(--hairline);margin:3px 0 0}
+  .dateline{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--clinical);font-weight:600;margin:34px 0 14px}
+  .dateline .mode{color:var(--muted);font-weight:400;letter-spacing:.06em;text-transform:none}
+  h1{font-size:clamp(30px,4.8vw,42px);line-height:1.14;font-weight:600;letter-spacing:-.006em;margin:0 0 10px}
+  .subtitle{font-style:italic;font-size:20px;line-height:1.5;color:var(--muted);margin:0 0 20px}
+  .explainer{font-size:17px;line-height:1.66;margin:0 0 14px}
+  .traced{margin:12px 0 0;font-family:var(--mono);font-size:11px;letter-spacing:.03em;line-height:1.9}
+  .traced .tm{color:var(--ink)}
+  .traced .tm b{color:var(--clinical);font-weight:600}
+  .traced .tp{color:var(--muted)}
+  /* Phrase dataset */
+  .sp-scroll{overflow-x:auto}
+  .sp-table{width:100%;min-width:640px;border-collapse:collapse;margin:22px 0 12px}
+  .sp-table th{font-family:var(--mono);font-size:10.5px;font-weight:600;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--muted);text-align:left;
+    padding:0 18px 8px 0;border-bottom:1px solid var(--ink)}
+  .sp-table th.sp-w-idx{width:86px}
+  .sp-table td{padding:14px 18px 14px 0;border-bottom:1px solid var(--hairline);vertical-align:top}
+  .sp-table tr:last-child td{border-bottom:1px solid var(--ink)}
+  .sp-idx{font-family:var(--mono);font-size:11px;color:var(--muted);white-space:nowrap}
+  .sp-target{display:block;font-family:var(--mono);font-size:10.5px;color:var(--muted);margin-top:4px}
+  .sp-side{display:none}
+  .sp-prompt{font-size:15.5px;line-height:1.5;margin:0}
+  .sp-p .sp-prompt{color:var(--patient)}
+  .sp-c .sp-prompt{color:var(--clinical)}
+  .sp-obs{font-family:var(--mono);font-size:12px;color:var(--muted);margin-top:6px}
+  .sp-p .sp-obs b{color:var(--patient);font-weight:600}
+  .sp-c .sp-obs b{color:var(--clinical);font-weight:600}
+  .sp-link{font-family:var(--mono);font-size:11px;color:var(--clinical);text-decoration:none;
+    border:1px solid var(--hairline);padding:0 5px;margin-left:8px}
+  .sp-link:hover,.sp-link:focus-visible{border-color:var(--clinical)}
+  .sp-caption{font-size:15.5px;line-height:1.62;margin:0 0 10px}
+  .sp-foot{font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--muted);margin:0 0 46px}
+  .back{display:inline-block;margin-top:18px;font-family:var(--mono);font-size:12px;
+    letter-spacing:.1em;text-transform:uppercase;color:var(--ink);text-decoration:none;
+    border-bottom:1px solid var(--ink);padding-bottom:2px}
+  .back:hover{color:var(--clinical);border-bottom-color:var(--clinical)}
+  .endnote{border-top:1px solid var(--ink);margin-top:42px;padding-top:14px}
+  .endnote p{font-family:var(--mono);font-size:12px;line-height:1.8;color:var(--muted);margin:0 0 14px}
+  footer{font-family:var(--mono);font-size:12px;line-height:1.9;color:var(--muted)}
+  footer a{color:var(--muted);text-underline-offset:3px}
+  @media (max-width:760px){body{font-size:16px}}
+</style>
+</head>
+<body>
+<header class="masthead">
+  <hr class="rule-heavy"><hr class="rule-fine">
+  <div class="masthead-row">
+    <a class="wordmark" href="../"><span class="pw-p">Patient</span><span class="pw-w">Words</span></a>
+    <nav aria-label="Site">
+      <a href="../">Home</a>
+      <a href="../methods.html">Methods</a>
+      <a href="../word-differences/">Word Differences</a>
+      <a href="../syntax-differences/">Syntax Differences</a>
+      <a href="../dialect-differences/">Dialect Differences</a>
+      <a href="../translation/">Translation</a>
+      <a href="../simulated-scenarios/">Simulated Scenarios</a>
+      <a href="./" aria-current="page">Phrase Dataset</a>
+      <a href="../#model-evaluations">Model Evaluations</a>
+      <a href="https://github.com/michaeldgreenphd/patientwords">GitHub</a>
+    </nav>
+  </div>
+  <hr class="rule-fine">
+</header>
+<main>
+  <p class="dateline">Hand-measured <span class="mode">· data/stress_pairs.json · the study's ground truth</span></p>
+  <h1>Phrase dataset</h1>
+  <p class="subtitle">Every hand-built sentence pair, with its manual measurements.</p>
+  <p class="explainer">This is the study's hand-measured core: each pair was built by hand and
+     measured on gemma-2-2b via the Neuronpedia circuit tracer — the observed next token, its
+     probability, and (where captured) a link to the live circuit trace. The
+     <a href="../simulated-scenarios/">simulated scenarios</a> extend this set by machine;
+     this table is the human baseline they are held against.</p>
+  <section id="phrase-dataset" hidden>
+    <div class="section-head" style="border-top:1px solid var(--ink);margin-top:26px;padding-top:10px;display:flex;justify-content:space-between;align-items:baseline">
+      <h2 style="font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;margin:0">All pairs</h2>
+      <span class="count" id="sp-count" style="font-family:var(--mono);font-size:12px;color:var(--muted)"></span>
+    </div>
+    <p class="traced">
+      <span class="tm"><b>measured on:</b> <span id="sp-model">gemma-2-2b · gemma scope transcoders</span></span>
+      <span class="tp">→ observed next token · p = observed next-token probability · via the neuronpedia circuit tracer</span>
+    </p>
+    <div class="sp-scroll">
+      <table class="sp-table">
+        <thead><tr>
+          <th scope="col" class="sp-w-idx">Pair</th>
+          <th scope="col">Patient phrasing</th>
+          <th scope="col">Clinical phrasing</th>
+        </tr></thead>
+        <tbody id="sp-body"></tbody>
+      </table>
+    </div>
+    <p class="sp-caption">
+      Hand-measured on gemma-2-2b (Gemma Scope transcoders) via the Neuronpedia circuit
+      tracer; next-token probabilities as observed at measurement time.
+    </p>
+    <p class="sp-foot">source: data/stress_pairs.json · prompts shown verbatim, including intentional misspellings</p>
+  </section>
+  <a class="back" href="../">← Back home</a>
+  <div class="endnote">
+    <footer>
+      Built with the patientwords-engine pipeline on <a href="https://neuronpedia.org">Neuronpedia</a> ·
+      attribution graphs by <a href="https://github.com/safety-research/circuit-tracer">circuit-tracer</a> ·
+      features from <a href="https://huggingface.co/google/gemma-scope-2b-pt-transcoders">Gemma Scope</a> transcoders ·
+      <a href="../methods.html">how the pipeline works</a>
+    </footer>
+  </div>
+</main>
+<script>
+(function(){
+  var sec=document.getElementById('phrase-dataset');
+  if(!sec||!window.fetch)return;
+  var spModel=function(){var el=document.getElementById('sp-model');return el?el.textContent:'';};
+  function obsLine(side,o){
+    var wrap=document.createElement('p');
+    wrap.className='sp-obs';
+    wrap.title='observed next token and probability · '+spModel();
+    var tok=o?o.observed_next_token:null;
+    var prob=o?o.observed_prob:null;
+    var link=o?o.circuit_link:null;
+    if(tok==null&&prob==null&&link==null){wrap.textContent='—';return wrap;}
+    wrap.appendChild(document.createTextNode('→ '));
+    var b=document.createElement('b');
+    b.textContent=tok==null?'—':tok;
+    wrap.appendChild(b);
+    wrap.appendChild(document.createTextNode(' · p '+(typeof prob==='number'?prob.toFixed(2):'—')));
+    if(typeof link==='string'&&/^https?:\/\//.test(link)){
+      var a=document.createElement('a');
+      a.className='sp-link';a.href=link;a.target='_blank';a.rel='noopener';
+      a.textContent='↗';
+      a.title='open '+side+' circuit trace on neuronpedia.org';
+      a.setAttribute('aria-label','open '+side+' circuit trace on neuronpedia.org');
+      wrap.appendChild(document.createTextNode(' '));
+      wrap.appendChild(a);
+    }
+    return wrap;
+  }
+  function cellFor(cls,label,prompt,side,o){
+    var td=document.createElement('td');
+    td.className=cls;
+    var lab=document.createElement('span');
+    lab.className='sp-side';lab.textContent=label;
+    td.appendChild(lab);
+    var p=document.createElement('p');
+    p.className='sp-prompt';p.textContent=prompt==null?'—':prompt;
+    td.appendChild(p);
+    td.appendChild(obsLine(side,o));
+    return td;
+  }
+  fetch('../data/stress_pairs.json',{cache:'no-cache'})
+    .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
+    .then(function(data){
+      var pairs=Array.isArray(data)?data:(data&&Array.isArray(data.pairs)?data.pairs:null);
+      if(!pairs||!pairs.length)throw new Error('empty');
+      if(!Array.isArray(data)&&typeof data.model==='string'&&data.model){
+        document.getElementById('sp-model').textContent=
+          data.model+(typeof data.source_set==='string'&&data.source_set?' · '+data.source_set:'');
+      }
+      var tb=document.getElementById('sp-body');
+      pairs.forEach(function(pr,i){
+        var prov=pr.provenance||{};
+        var tr=document.createElement('tr');
+        if(typeof prov.notes==='string'&&prov.notes)tr.title=prov.notes;
+        var idx=document.createElement('td');
+        var n=document.createElement('span');
+        n.className='sp-idx';
+        n.textContent='#'+(prov.source_row!=null?prov.source_row:(i+1));
+        idx.appendChild(n);
+        if(pr.target_clinical_token!=null){
+          var t=document.createElement('span');
+          t.className='sp-target';
+          t.textContent='target:'+pr.target_clinical_token;
+          idx.appendChild(t);
+        }
+        tr.appendChild(idx);
+        tr.appendChild(cellFor('sp-p','patient phrasing',pr.bottom_prompt,'patient',prov.patient));
+        tr.appendChild(cellFor('sp-c','clinical phrasing',pr.top_prompt,'clinical',prov.clinical));
+        tb.appendChild(tr);
+      });
+      document.getElementById('sp-count').textContent=pairs.length+' hand-measured pairs';
+      sec.hidden=false;
+    })
+    .catch(function(){sec.hidden=true;});
+})();
+</script>
+</body>
+</html>

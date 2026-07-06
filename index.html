@@ -214,7 +214,7 @@
       <a href="dialect-differences/">Dialect Differences</a>
       <a href="translation/">Translation</a>
       <a href="simulated-scenarios/">Simulated Scenarios</a>
-      <a href="#phrase-dataset">Phrase Dataset</a>
+      <a href="phrase-dataset/">Phrase Dataset</a>
       <a href="#model-evaluations">Model Evaluations</a>
       <a href="https://github.com/michaeldgreenphd/patientwords">GitHub</a>
     </nav>
@@ -397,7 +397,7 @@
       Hand-measured on gemma-2-2b (Gemma Scope transcoders) via the Neuronpedia circuit
       tracer; next-token probabilities as observed at measurement time.
     </p>
-    <p class="sp-foot">source: data/stress_pairs.json · prompts shown verbatim, including intentional misspellings</p>
+    <p class="sp-foot">preview — observed-token flips and biggest probability gaps first · <a href="phrase-dataset/">full dataset (all pairs) →</a></p>
   </section>
 
   <section id="model-evaluations" hidden>
@@ -536,6 +536,19 @@
     .then(function(data){
       var pairs=Array.isArray(data)?data:(data&&Array.isArray(data.pairs)?data.pairs:null);
       if(!pairs||!pairs.length)throw new Error('empty');
+      // Home shows the most consequential switches: observed-token flips
+      // first, then the largest observed-probability gaps. Full table on the
+      // Phrase Dataset page.
+      var total=pairs.length;
+      function consequence(pr){
+        var prov=pr.provenance||{},p=prov.patient||{},c=prov.clinical||{};
+        var flip=(p.observed_next_token&&c.observed_next_token
+                  &&p.observed_next_token!==c.observed_next_token)?1:0;
+        var gap=(typeof p.observed_prob==='number'&&typeof c.observed_prob==='number')
+          ?Math.abs(c.observed_prob-p.observed_prob):0;
+        return flip*10+gap;
+      }
+      pairs=pairs.slice().sort(function(a,b){return consequence(b)-consequence(a);}).slice(0,5);
       if(!Array.isArray(data)&&typeof data.model==='string'&&data.model){
         document.getElementById('sp-model').textContent=
           data.model+(typeof data.source_set==='string'&&data.source_set?' · '+data.source_set:'');
@@ -561,7 +574,13 @@
         tr.appendChild(cellFor('sp-c','clinical phrasing',pr.top_prompt,'clinical',prov.clinical));
         tb.appendChild(tr);
       });
-      document.getElementById('sp-count').textContent=pairs.length+' hand-measured pairs';
+      var cnt=document.getElementById('sp-count');
+      cnt.textContent='';
+      cnt.appendChild(document.createTextNode('top '+pairs.length+' of '+total+' by observed effect · '));
+      var all=document.createElement('a');
+      all.href='phrase-dataset/';
+      all.textContent='see all '+total+' →';
+      cnt.appendChild(all);
       sec.hidden=false;
     })
     .catch(function(){sec.hidden=true;});
