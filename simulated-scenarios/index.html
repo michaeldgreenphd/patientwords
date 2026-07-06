@@ -488,7 +488,7 @@
           var q=filterText.toLowerCase();
           list=list.filter(function(s){
             return [s.clinical_prompt,s.patient_prompt,s.patient_term,s.clinical_term,
-                    s.target_token,s.intended_target,
+                    s.target_token,s.intended_target,s.topic,
                     s.top_clinical&&s.top_clinical[0],s.top_patient&&s.top_patient[0],
                     (s.topics||[]).join(' '),s.rationale]
               .join(' ').toLowerCase().indexOf(q)>=0;
