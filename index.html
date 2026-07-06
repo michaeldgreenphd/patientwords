@@ -347,6 +347,10 @@
       <h2>Phrase dataset</h2>
       <span class="count" id="sp-count"></span>
     </div>
+    <p class="traced">
+      <span class="tm"><b>measured on:</b> <span id="sp-model">gemma-2-2b · gemma scope transcoders</span></span>
+      <span class="tp">→ observed next token · p = observed next-token probability · via the neuronpedia circuit tracer</span>
+    </p>
     <div class="sp-scroll">
       <table class="sp-table">
         <thead><tr>
@@ -369,6 +373,10 @@
       <h2>Model evaluations</h2>
       <span class="count" id="me-count"></span>
     </div>
+    <p class="traced">
+      <span class="tm"><b>model under test:</b> listed per row</span>
+      <span class="tp">accuracy on the same extraction task, before and after translation — not a circuit trace</span>
+    </p>
     <div class="me-scroll">
       <table class="me-table">
         <thead><tr>
@@ -453,9 +461,11 @@
 (function(){
   var sec=document.getElementById('phrase-dataset');
   if(!sec||!window.fetch)return;
+  var spModel=function(){var el=document.getElementById('sp-model');return el?el.textContent:'';};
   function obsLine(side,o){
     var wrap=document.createElement('p');
     wrap.className='sp-obs';
+    wrap.title='observed next token and probability · '+spModel();
     var tok=o?o.observed_next_token:null;
     var prob=o?o.observed_prob:null;
     var link=o?o.circuit_link:null;
@@ -490,8 +500,13 @@
   }
   fetch('data/stress_pairs.json',{cache:'no-cache'})
     .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
-    .then(function(pairs){
-      if(!Array.isArray(pairs)||!pairs.length)throw new Error('empty');
+    .then(function(data){
+      var pairs=Array.isArray(data)?data:(data&&Array.isArray(data.pairs)?data.pairs:null);
+      if(!pairs||!pairs.length)throw new Error('empty');
+      if(!Array.isArray(data)&&typeof data.model==='string'&&data.model){
+        document.getElementById('sp-model').textContent=
+          data.model+(typeof data.source_set==='string'&&data.source_set?' · '+data.source_set:'');
+      }
       var tb=document.getElementById('sp-body');
       pairs.forEach(function(pr,i){
         var prov=pr.provenance||{};
