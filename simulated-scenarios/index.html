@@ -98,6 +98,12 @@
     padding:3px 9px}
   .sum-pages a:hover{color:var(--ink);border-color:var(--ink)}
   .sum-pages a[aria-current=page]{color:#fff;background:var(--clinical);border-color:var(--clinical)}
+  .sum-mass{min-width:120px}
+  .mass-line{display:grid;grid-template-columns:3ch 1fr 4ch;gap:0 6px;align-items:center;
+    font-family:var(--mono);font-size:10px;color:var(--muted)}
+  .mass-track{display:block;height:5px;position:relative;min-width:56px}
+  .mass-bar{display:block;height:5px}
+  .mass-val{text-align:right}
   .sum-slope svg{display:block}
   .sum-slope .axis{stroke:var(--hairline);stroke-width:1}
   .sum-slope .seg{stroke-width:1.5;fill:none}
@@ -248,6 +254,7 @@
           <th scope="col" class="num">prob patient</th>
           <th scope="col" class="num">Penalty</th>
           <th scope="col">clin → pat</th>
+          <th scope="col">Med circuit</th>
           <th scope="col">Top prediction</th>
         </tr></thead>
         <tbody id="sim-sum-body"></tbody>
@@ -296,6 +303,38 @@
   function p2(x){return typeof x==='number'?x.toFixed(2):'—';}
   function pad(n){return String(n).padStart(2,'0');}
   var PAGE_SIZE=15;
+
+  // Med-circuit meter: share of feature attribution on clinical-tagged
+  // features, one bar per phrasing on a shared 0-1 scale - the quantitative
+  // "medical wording lights up medical reasoning".
+  function massBar(frac,color){
+    var wrap=el('span','mass-track');
+    if(typeof frac==='number'){
+      var bar=el('span','mass-bar');
+      bar.style.width=Math.max(1,frac*100)+'%';
+      bar.style.background=color;
+      wrap.appendChild(bar);
+    }
+    return wrap;
+  }
+  function massCell(s){
+    var td=el('td','sum-mass');
+    var m=s.clinical_mass||{};
+    if(typeof m.clinical!=='number'&&typeof m.patient!=='number'){
+      td.appendChild(el('span','stat neutral','—'));
+      return td;
+    }
+    var rows=[['clin',m.clinical,'var(--clinical)'],['pat',m.patient,'var(--patient)']];
+    rows.forEach(function(row){
+      var line=el('span','mass-line');
+      line.appendChild(el('span','mass-lab',row[0]));
+      line.appendChild(massBar(row[1],row[2]));
+      line.appendChild(el('span','mass-val',typeof row[1]==='number'?Math.round(row[1]*100)+'%':'—'));
+      td.appendChild(line);
+    });
+    td.title='share of feature attribution mass on clinical-tagged (green) features';
+    return td;
+  }
 
   function slopeCell(s){
     var td=el('td','sum-slope');
@@ -391,6 +430,7 @@
         }
         tr.appendChild(pen);
         tr.appendChild(slopeCell(s));
+        tr.appendChild(massCell(s));
         var flip=el('td','mono');
         var screened=s.screening&&s.screening.status==='screened_out';
         var tc=s.top_clinical?s.top_clinical[0]:'—';
