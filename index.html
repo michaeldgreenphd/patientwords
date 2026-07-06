@@ -98,6 +98,36 @@
   .stat{font-family:var(--mono);font-size:13px;font-weight:600;letter-spacing:.01em}
   .stat.penalty{color:var(--penalty)}
   .stat.recovery{color:var(--clinical)}
+  .traced{margin:12px 0 0;font-family:var(--mono);font-size:11px;letter-spacing:.03em;
+    line-height:1.9;font-weight:400}
+  .traced .tm{color:var(--ink)}
+  .traced .tm b{color:var(--clinical);font-weight:600}
+  .traced .tp{color:var(--muted)}
+
+  /* Model evaluations */
+  .me-scroll{overflow-x:auto}
+  .me-table{width:100%;min-width:560px;border-collapse:collapse;margin:22px 0 12px}
+  .me-table th{font-family:var(--mono);font-size:10.5px;font-weight:600;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--muted);text-align:left;
+    padding:0 18px 8px 0;border-bottom:1px solid var(--ink)}
+  .me-table th.num{text-align:right}
+  .me-table td{padding:11px 18px 11px 0;border-bottom:1px solid var(--hairline);
+    vertical-align:baseline}
+  .me-table td.num{text-align:right}
+  .me-table tr:last-child td{border-bottom:1px solid var(--ink)}
+  .me-model{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--ink)}
+  .me-pending-note{display:block;font-family:var(--mono);font-size:10.5px;
+    letter-spacing:.06em;color:var(--muted);margin-top:2px}
+  .me-num{font-family:var(--mono);font-size:13px;font-weight:600}
+  .me-num.me-null{color:var(--muted);font-weight:400}
+  .me-patient{color:var(--patient)}
+  .me-clin{color:var(--clinical)}
+  .me-delta.pos{color:var(--clinical)}
+  .me-delta.neg{color:var(--penalty)}
+  .me-audit{font-family:var(--mono);font-size:11px;color:var(--muted)}
+  .me-caption{font-size:15.5px;line-height:1.62;max-width:70ch;margin:0 0 10px}
+  .me-foot{font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--muted);margin:0 0 46px}
+
   .open{display:inline-block;margin-top:14px;font-family:var(--mono);font-size:12px;
     letter-spacing:.1em;text-transform:uppercase;color:var(--ink);
     border-bottom:1px solid var(--ink);padding-bottom:2px}
@@ -144,6 +174,7 @@
       <a href="word-differences/">Word Differences</a>
       <a href="syntax-differences/">Syntax Differences</a>
       <a href="translation/">Translation</a>
+      <a href="#model-evaluations">Model Evaluations</a>
       <a href="methods.html">Methods</a>
       <a href="https://github.com/michaeldgreenphd/patientwords">GitHub</a>
     </nav>
@@ -195,7 +226,11 @@
       <p>A word-for-word substitution — “depression” vs. “the blues” — mapped as two stacked
          circuit traces. The clinical wording drives prob(therapist) = 0.86; the patient
          idiom collapses it to 0.35 and hands the top prediction to a bare article.</p>
-      <span class="stat penalty">Language Penalty: −51% probability (0.86 → 0.35)</span><br>
+      <span class="stat penalty">Language Penalty: −51% probability (0.86 → 0.35)</span>
+      <p class="traced" data-mode="2panel" data-traced="gemma-2-2b">
+        <span class="tm"><b>traced model:</b> gemma-2-2b · gemma scope transcoders</span>
+        <span class="tp">gemma-3-4b-it · qwen3-4b · qwen3-1.7b — traces pending</span>
+      </p>
       <span class="open">Open the comparison →</span>
     </div>
   </a>
@@ -215,7 +250,11 @@
          syntax. Vocabulary choice costs −42% probability in either frame; colloquial framing
          alone costs another −9% — even when the patient knows the clinical word
          (Box&nbsp;C).</p>
-      <span class="stat penalty">Vocabulary Δ: −42% · Syntax Δ: −9%</span><br>
+      <span class="stat penalty">Vocabulary Δ: −42% · Syntax Δ: −9%</span>
+      <p class="traced" data-mode="4quadrant" data-traced="gemma-2-2b">
+        <span class="tm"><b>traced model:</b> gemma-2-2b · gemma scope transcoders</span>
+        <span class="tp">gemma-3-4b-it · qwen3-4b · qwen3-1.7b — traces pending</span>
+      </p>
       <span class="open">Open the matrix →</span>
     </div>
   </a>
@@ -234,10 +273,39 @@
       <p>The organic fix: an LLM translates the patient sentence into standard terminology and
          the raw output is traced natively. The clinical circuit — and the correct
          prediction — comes back.</p>
-      <span class="stat recovery">Recovered target probability: +51% (0.35 → 0.86)</span><br>
+      <span class="stat recovery">Recovered target probability: +51% (0.35 → 0.86)</span>
+      <p class="traced" data-mode="translation" data-traced="gemma-2-2b">
+        <span class="tm"><b>traced model:</b> gemma-2-2b · gemma scope transcoders</span>
+        <span class="tp">gemma-3-4b-it · qwen3-4b · qwen3-1.7b — traces pending</span>
+      </p>
       <span class="open">Open the mitigation chain →</span>
     </div>
   </a>
+
+  <section id="model-evaluations" hidden>
+    <div class="section-head">
+      <h2>Model evaluations</h2>
+      <span class="count" id="me-count"></span>
+    </div>
+    <div class="me-scroll">
+      <table class="me-table">
+        <thead><tr>
+          <th scope="col">Model</th>
+          <th scope="col" class="num">Patient phrasing</th>
+          <th scope="col" class="num">Clinician phrasing</th>
+          <th scope="col" class="num">Δ</th>
+          <th scope="col">Audit flags</th>
+        </tr></thead>
+        <tbody id="me-body"></tbody>
+      </table>
+    </div>
+    <p class="me-caption">
+      Each model extracts clinical concepts from raw patient phrasing, an LLM translates that
+      phrasing into clinician language, and the identical task is re-scored on the same
+      expected terms — so Δ isolates the effect of phrasing alone.
+    </p>
+    <p class="me-foot" id="me-foot"></p>
+  </section>
 
   <div class="endnote">
     <p>
@@ -280,6 +348,72 @@
   window.addEventListener('resize',fitAll);
   setTimeout(fitAll,300);
   setTimeout(fitAll,1200);
+})();
+(function(){
+  var sec=document.getElementById('model-evaluations');
+  if(!sec||!window.fetch)return;
+  function fmtPct(v){
+    if(v==null||typeof v!=='number')return null;
+    return (Math.abs(v)<=1?v*100:v).toFixed(1)+'%';
+  }
+  function cell(cls,text,muted){
+    var td=document.createElement('td');
+    var list=cls.split(' ').filter(Boolean);
+    if(list.indexOf('num')>=0){
+      td.className='num';
+      list=list.filter(function(c){return c!=='num';});
+    }
+    if(muted)list.push('me-null');
+    var s=document.createElement('span');
+    s.className=list.join(' ');
+    s.textContent=text;
+    td.appendChild(s);
+    return td;
+  }
+  fetch('data/model_evaluations.json',{cache:'no-cache'})
+    .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
+    .then(function(data){
+      var models=data.models||[];
+      var tb=document.getElementById('me-body');
+      models.forEach(function(m){
+        var tr=document.createElement('tr');
+        var pending=m.status==='pending';
+        tr.title=pending
+          ?'evaluation pending — awaiting backend export'
+          :'mitigated: '+(m.mitigated==null?'—':m.mitigated)
+            +' · regressions: '+(m.regressions==null?'—':m.regressions)
+            +(m.cost_usd==null?'':' · cost: $'+m.cost_usd);
+        var tdm=document.createElement('td');
+        var idspan=document.createElement('span');
+        idspan.className='me-model';
+        idspan.textContent=m.id||'—';
+        tdm.appendChild(idspan);
+        if(pending){
+          var note=document.createElement('span');
+          note.className='me-pending-note';
+          note.textContent='evaluation pending';
+          tdm.appendChild(note);
+        }
+        tr.appendChild(tdm);
+        var pa=fmtPct(m.patient_accuracy), ca=fmtPct(m.clinician_accuracy);
+        tr.appendChild(cell('me-num me-patient num',pa||'—',pa==null));
+        tr.appendChild(cell('me-num me-clin num',ca||'—',ca==null));
+        var d=m.delta, dt=fmtPct(d==null?null:Math.abs(d));
+        var dcls='me-num me-delta num'+(d>0?' pos':(d<0?' neg':''));
+        tr.appendChild(cell(dcls,d==null?'—':((d>0?'+':(d<0?'−':''))+dt),d==null));
+        var audit=(m.mitigated==null&&m.regressions==null)?'—'
+          :('mitigated '+(m.mitigated==null?'—':m.mitigated)
+            +' · regressions '+(m.regressions==null?'—':m.regressions));
+        tr.appendChild(cell('me-audit',audit,false));
+        tb.appendChild(tr);
+      });
+      document.getElementById('me-count').textContent=models.length+' translation models';
+      document.getElementById('me-foot').textContent=
+        'updated '+(data.updated||'—')+' · task: '+(data.task||'—')
+        +' · source: data/model_evaluations.json';
+      sec.hidden=false;
+    })
+    .catch(function(){sec.hidden=true;});
 })();
 </script>
 </body>

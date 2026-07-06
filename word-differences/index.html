@@ -64,6 +64,12 @@
   .stat.penalty{color:var(--penalty)}
   .stat.recovery{color:var(--clinical)}
 
+  .traced{margin:12px 0 0;font-family:var(--mono);font-size:11px;letter-spacing:.03em;
+    line-height:1.9;font-weight:400}
+  .traced .tm{color:var(--ink)}
+  .traced .tm b{color:var(--clinical);font-weight:600}
+  .traced .tp{color:var(--muted)}
+
   .embed{border:1px solid var(--hairline);background:#fff;overflow:hidden;margin:26px 0 10px}
   .embed iframe{width:100%;border:0;display:block;min-height:400px}
   .embed-caption{font-family:var(--mono);font-size:11px;color:var(--muted);
@@ -104,6 +110,7 @@
       <a href="./" aria-current="page">Word Differences</a>
       <a href="../syntax-differences/">Syntax Differences</a>
       <a href="../translation/">Translation</a>
+      <a href="../#model-evaluations">Model Evaluations</a>
       <a href="../methods.html">Methods</a>
       <a href="https://github.com/michaeldgreenphd/patientwords">GitHub</a>
     </nav>
@@ -118,6 +125,10 @@
      two stacked circuit traces. The clinical wording drives prob(therapist) = 0.86; the
      patient idiom collapses it to 0.35 and hands the top prediction to a bare article.</p>
   <span class="stat penalty">Language Penalty: −51% probability (0.86 → 0.35)</span>
+  <p class="traced" data-mode="2panel" data-traced="gemma-2-2b">
+    <span class="tm"><b>traced model:</b> gemma-2-2b · gemma scope transcoders</span>
+    <span class="tp">gemma-3-4b-it · qwen3-4b · qwen3-1.7b — traces pending</span>
+  </p>
 
   <div class="embed">
     <iframe class="live" src="../modes/2panel/index.html" loading="lazy"
