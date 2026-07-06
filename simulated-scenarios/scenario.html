@@ -94,6 +94,9 @@
   .spread .spread-note{font-family:var(--mono);font-size:10px;color:var(--muted);
     letter-spacing:.03em;margin:4px 0 0}
 
+  .mass-track{display:inline-block;height:5px;position:relative;min-width:90px;width:90px;
+    margin-left:8px;vertical-align:middle}
+  .mass-bar{display:block;height:5px;background:var(--clinical)}
   .embed{border:1px solid var(--hairline);background:#fff;overflow:hidden;margin:18px 0 8px}
   .embed iframe{width:100%;border:0;display:block;min-height:400px}
   .embed-caption{font-family:var(--mono);font-size:11px;color:var(--muted);
@@ -196,6 +199,20 @@
     return e;
   }
   function pct(x){return (x>0?'+':'−')+Math.round(Math.abs(x)*100)+'%';}
+  function massLine(frac){
+    if(typeof frac!=='number')return null;
+    var pline=el('p','sim-probs');
+    pline.appendChild(el('span',null,'medical-feature share of circuit: '));
+    var b=el('b',null,Math.round(frac*100)+'%');
+    b.style.color='var(--clinical)';
+    pline.appendChild(b);
+    var track=el('span','mass-track');
+    var bar=el('span','mass-bar');
+    bar.style.width=Math.max(1,frac*100)+'%';
+    track.appendChild(bar);
+    pline.appendChild(track);
+    return pline;
+  }
   function p2(x){return typeof x==='number'?x.toFixed(2):'—';}
   function pad(n){return String(n).padStart(2,'0');}
 
@@ -286,10 +303,14 @@
       pc.appendChild(el('span','sim-side','clinical phrasing'));
       pc.appendChild(el('p','sim-prompt sim-c',s.clinical_prompt));
       pc.appendChild(spreadDetails('prob('+tgt.trim()+')',s.prob_clinical,s.top_clinical,s.spread_clinical,s.target_token));
+      var mc=massLine((s.clinical_mass||{}).clinical);
+      if(mc)pc.appendChild(mc);
       var pp=el('div');
       pp.appendChild(el('span','sim-side','patient phrasing (simulated)'));
       pp.appendChild(el('p','sim-prompt sim-p',s.patient_prompt));
       pp.appendChild(spreadDetails('prob('+tgt.trim()+')',s.prob_patient,s.top_patient,s.spread_patient,s.target_token));
+      var mp=massLine((s.clinical_mass||{}).patient);
+      if(mp)pp.appendChild(mp);
       grid.appendChild(pc);grid.appendChild(pp);
       card.appendChild(grid);
 
