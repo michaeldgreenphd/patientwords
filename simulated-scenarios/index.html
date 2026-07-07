@@ -124,6 +124,9 @@
   .chip-ct{opacity:.7;font-weight:400}
   .chip.on .chip-ct{color:var(--clinical);opacity:.85}
   .sum-table .dir-cli{color:var(--clinical);font-weight:600}
+  .urg-down{color:var(--penalty);font-weight:600;font-family:var(--mono);font-size:11.5px}
+  .urg-up{color:var(--clinical);font-weight:600;font-family:var(--mono);font-size:11.5px}
+  .urg-flat{color:var(--muted);font-family:var(--mono);font-size:11.5px}
   .sum-table .dir-pat{color:var(--patient);font-weight:600}
   .sum-dl{font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--muted)}
   .sum-dl a{color:var(--ink)}
@@ -310,6 +313,7 @@
           <th scope="col" class="num" data-key="pat"><button type="button" title="sort">prob patient</button></th>
           <th scope="col" class="num" data-key="clinStronger"><button type="button" title="clinical wording holds the target more strongly — click to sort by margin">Clinical stronger</button></th>
           <th scope="col" class="num" data-key="patStronger"><button type="button" title="patient wording holds the target more strongly — click to sort by margin">Patient stronger</button></th>
+          <th scope="col" class="num" data-key="urgency"><button type="button" title="care-urgency shift of the top prediction under patient wording (draft tiers) — click to sort">Urgency</button></th>
           <th scope="col">clin → pat</th>
           <th scope="col" data-key="mass"><button type="button" title="sort by the clinical phrasing’s clinical-circuit share">Clinical circuit</button></th>
           <th scope="col" data-key="flip"><button type="button" title="sort: flips first">Top prediction</button></th>
@@ -434,9 +438,19 @@
     return td;
   }
 
-  fetch('../data/simulated_scenarios.json',{cache:'no-cache'})
-    .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
-    .then(function(data){
+  Promise.all([
+    fetch('../data/simulated_scenarios.json',{cache:'no-cache'})
+      .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();}),
+    fetch('../data/urgency_shift.json',{cache:'no-cache'})
+      .then(function(r){return r.ok?r.json():null;}).catch(function(){return null;})
+  ]).then(function(loaded){
+      var data=loaded[0], urg=loaded[1];
+      // urgency rows join on (batch, in-batch index, model); tiers are DRAFT
+      var urgMap={};
+      if(urg&&urg.rows)urg.rows.forEach(function(u){
+        urgMap[u.batch+'#'+u.index+'#'+u.model]=u;
+      });
+      function urgFor(s){return urgMap[s.batch+'#'+s.batch_index+'#'+currentModel]||null;}
       var scenarios=data.scenarios||[];
       var batches=data.batches||[];
       var traced=data.traced||{};
@@ -464,6 +478,16 @@
             : '.'));
         prov.appendChild(line);
       });
+      if(urg&&urg.summary){
+        var fc=urg.summary.flip_classes||{};
+        var uline=el('div');
+        uline.appendChild(el('span',null,'Urgency view — '));
+        uline.appendChild(el('b',null,(fc.downgrade||0)+' downgrade flips vs '+(fc.upgrade||0)+' upgrades'));
+        uline.appendChild(el('span',null,' across models. Care-urgency tiers are a '));
+        uline.appendChild(el('b',null,'draft pending domain review'));
+        uline.appendChild(el('span',null,'; the Urgency column reads from data/urgency_shift.json.'));
+        prov.appendChild(uline);
+      }
       prov.hidden=false;
 
       var sumBody=document.getElementById('sim-sum-body');
@@ -524,6 +548,21 @@
         else patC.textContent='—';
         tr.appendChild(clinC);
         tr.appendChild(patC);
+        var uc=el('td','num');
+        var u=urgFor(s);
+        if(u&&u.flip_class==='downgrade'){
+          uc.appendChild(el('span','urg-down','t'+u.tier_top_clinical+'→t'+u.tier_top_patient+' ↓'));
+          uc.title='top prediction moves to a lower care-urgency tier (draft tiers)';
+        }else if(u&&u.flip_class==='upgrade'){
+          uc.appendChild(el('span','urg-up','t'+u.tier_top_clinical+'→t'+u.tier_top_patient+' ↑'));
+          uc.title='top prediction moves to a higher care-urgency tier (draft tiers)';
+        }else if(u&&typeof u.tier_shift==='number'){
+          uc.appendChild(el('span','urg-flat',(u.tier_shift>0?'+':'')+u.tier_shift.toFixed(2)));
+          uc.title='expected care-urgency shift, probability-weighted (draft tiers)';
+        }else{
+          uc.textContent='—';
+        }
+        tr.appendChild(uc);
         tr.appendChild(slopeCell(m));
         tr.appendChild(massCell(m));
         var flip=el('td','mono');
@@ -553,6 +592,12 @@
           case 'pat':return typeof m.prob_patient==='number'?m.prob_patient:null;
           case 'clinStronger':return (typeof m.language_penalty==='number'&&m.language_penalty<0)?-m.language_penalty:null;
           case 'patStronger':return (typeof m.language_penalty==='number'&&m.language_penalty>0)?m.language_penalty:null;
+          case 'urgency':{var u=urgFor(s);
+            // descending (first click) = most safety-relevant first:
+            // downgrade flips, biggest tier drop, then most-negative shifts
+            if(u&&u.flip_class==='downgrade')return 2+(u.tier_top_clinical-u.tier_top_patient);
+            if(u&&typeof u.tier_shift==='number')return -u.tier_shift;
+            return null;}
           case 'mass':return (m.clinical_mass&&typeof m.clinical_mass.clinical==='number')?m.clinical_mass.clinical:null;
           case 'flip':
             if(!hasModel(s))return null;
@@ -619,7 +664,7 @@
         if(!list.length){
           var tr=document.createElement('tr');
           var td=el('td','sum-empty','no scenarios match; clear the filters');
-          td.colSpan=10;
+          td.colSpan=11;
           tr.appendChild(td);
           sumBody.appendChild(tr);
           return;
