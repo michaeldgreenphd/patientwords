@@ -24,7 +24,7 @@
 <style>
   :root{
     --paper:#faf9f5; --ink:#1c1c19; --patient:#111827; --clinical:#15803d;
-    --penalty:#b4483d; --muted:#75746d; --structural:#c3c9d2; --hairline:#dcdad2;
+    --penalty:#b4483d; --muted:#6d6c66; --structural:#c3c9d2; --hairline:#dcdad2;
     --serif:'Iowan Old Style','Palatino Linotype',Palatino,'Book Antiqua',Georgia,serif;
     --mono:ui-monospace,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace;
   }
@@ -36,6 +36,9 @@
   a{color:inherit}
   a:focus-visible{outline:2px solid var(--clinical);outline-offset:3px;border-radius:1px}
   ::selection{background:#dbe9df}
+  .skip{position:absolute;left:-9999px;top:0;background:var(--paper);color:var(--ink);
+    padding:8px 14px;border:1px solid var(--ink);z-index:10}
+  .skip:focus{left:8px}
 
   .masthead{max-width:1240px;margin:0 auto;padding:20px 22px 0}
   .masthead-row{display:flex;align-items:baseline;justify-content:space-between;
@@ -167,6 +170,7 @@
 </style>
 </head>
 <body>
+<a class="skip" href="#main">Skip to content</a>
 <header class="masthead">
   <hr class="rule-heavy"><hr class="rule-fine">
   <div class="masthead-row">
@@ -186,27 +190,27 @@
   </div>
   <hr class="rule-fine">
 </header>
-<main>
+<main id="main">
   <p class="dateline">Fig. 3 <span class="mode">· dialect & register sweep · live render · traced July 7, 2026</span></p>
   <h1>Dialect differences</h1>
-  <p class="subtitle">The same clinical phrase, framed the way different communities actually speak.</p>
+  <p class="subtitle">The clinical term held fixed while the surrounding sentence shifts across six dialect and register framings.</p>
   <p class="explainer">The engine holds the clinical term fixed and re-traces the sentence
-     across dialect and register variants of the surrounding syntax, so any probability
-     shift is attributable to framing alone, extending the single syntax delta of the
+     across dialect and register variants of the surrounding syntax; any probability
+     shift is therefore attributable to framing. This extends the single syntax delta of the
      2×2 matrix into a distribution across dialects. The sweep below holds eight
      clinical terms from the hand-measured dataset fixed, one per row, and re-traces each
-     across six framings: 48 sentences, every one containing its clinical term verbatim.
+     across six framings: 48 sentences.
      Most framings move the model's top prediction; the featured term
-     <em>clinical depression</em> loses its
-     <span style="font-family:var(--mono)">&nbsp;therapist</span> referral under three of six.</p>
+     <em>clinical depression</em> loses
+     <span style="font-family:var(--mono)">&nbsp;therapist</span> as top prediction under three of six framings.</p>
   <p class="traced" data-mode="dialect" data-traced="2026-07-07">
     <span class="tm"><b>model:</b> gemma-2-2b · <b>features:</b> Gemma Scope transcoders (16k) · <b>graphs:</b> 56 (8 baselines + 48 framings)</span><br>
     <span class="tm"><b>held fixed:</b> 8 clinical terms from the hand-measured dataset · <b>framings:</b> 6 per term</span><br>
-    <span class="tp">framings authored by claude-opus-4-8 ($0.083, 48/48 accepted) · traced via Neuronpedia · batch dialects_20260707T000923Z</span>
+    <span class="tp">framings authored by claude-opus-4-8 ($0.083, 48/48 accepted) · traced via Neuronpedia · batch dialects_20260707T000923Z · sidecar published at <a href="../data/provenance.json">data/provenance.json</a></span>
   </p>
 
   <section id="dl-matrix" hidden>
-    <p class="view-head">The framing tax, across conditions</p>
+    <p class="view-head">Change in p(target), by term and framing</p>
     <p class="view-sub" id="dl-matrix-sub"></p>
     <div class="dl-scroll">
       <table class="dl dlm">
@@ -215,9 +219,9 @@
       </table>
     </div>
     <p class="dl-caption">Each cell is the change in p(target) when that framing replaces
-       standard English, with the clinical term held verbatim. A red
+       standard English. A red
        <span class="flipmark">&#9679;</span> marks a framing that also flips the model&rsquo;s top
-       prediction away from the baseline target; hover a cell for the new top pick. Rows link
+       prediction away from the baseline target; hover a cell for the new top prediction. Rows link
        to each term&rsquo;s standalone render.</p>
   </section>
 
@@ -231,7 +235,7 @@
           <th scope="col">Prompt as traced</th>
           <th scope="col" class="num">p(target)</th>
           <th scope="col" class="num">&Delta; vs baseline</th>
-          <th scope="col">Model&rsquo;s top pick</th>
+          <th scope="col">Model&rsquo;s top prediction</th>
         </tr></thead>
         <tbody id="dlf-body"></tbody>
       </table>
@@ -256,7 +260,7 @@
     </div>
     <p class="dl-caption">The featured term&rsquo;s strongest baseline clinical features, ranked by
        normalized attribution mass. &ldquo;Survives&rdquo; counts the framings whose trace still
-       contains the feature; 6/6 features are the representation no dialect shift touches.
+       contains the feature; features surviving 6/6 framings are the dialect-invariant core.
        Computed from the committed renders, no re-tracing.</p>
   </section>
 
@@ -316,14 +320,15 @@
       var dialects=Object.keys(freq).sort(function(a,b){return freq[b]-freq[a];});
       var head=document.getElementById('dlm-head');
       var tr=el('tr');
-      tr.appendChild(el('th',null,'Term (target)'));
-      var thb=el('th','num','baseline p');tr.appendChild(thb);
-      dialects.forEach(function(d){var th=el('th','num',shortName(d));
+      function hth(cls,txt){var t=el('th',cls,txt);t.setAttribute('scope','col');return t;}
+      tr.appendChild(hth(null,'Term (target)'));
+      var thb=hth('num','baseline p');tr.appendChild(thb);
+      dialects.forEach(function(d){var th=hth('num',shortName(d));
         th.title=d;tr.appendChild(th);});
-      var thc=el('th','num','core');
+      var thc=hth('num','core');
       thc.title='clinical features surviving every framing / clinical features in the baseline trace';
       tr.appendChild(thc);
-      tr.appendChild(el('th',null,''));
+      tr.appendChild(hth(null,''));
       head.appendChild(tr);
       var body=document.getElementById('dlm-body');
       var flips=0,cells=0;
@@ -347,6 +352,8 @@
           c.title=v.prompt+' '+String.fromCharCode(8594)+' top: '+(v.top_token||'?')+
             (v.top_p!=null?' ('+v.top_p.toFixed(2)+')':'');
           if(v.flip){flips++;var fm=el('span','flipmark',String.fromCharCode(9679));c.appendChild(fm);}
+          c.setAttribute('aria-label',fmtD(v.delta)+(v.flip?' (flips top prediction)':'')+
+            ' '+String.fromCharCode(183)+' '+c.title);
           row.appendChild(c);
         });
         var cc=el('td','num');

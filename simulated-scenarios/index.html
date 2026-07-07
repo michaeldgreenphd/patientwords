@@ -22,7 +22,7 @@
 <style>
   :root{
     --paper:#faf9f5; --ink:#1c1c19; --patient:#111827; --clinical:#15803d;
-    --penalty:#b4483d; --muted:#75746d; --structural:#c3c9d2; --hairline:#dcdad2;
+    --penalty:#b4483d; --muted:#6d6c66; --structural:#c3c9d2; --hairline:#dcdad2;
     --serif:'Iowan Old Style','Palatino Linotype',Palatino,'Book Antiqua',Georgia,serif;
     --mono:ui-monospace,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace;
   }
@@ -34,6 +34,9 @@
   a{color:inherit}
   a:focus-visible{outline:2px solid var(--clinical);outline-offset:3px;border-radius:1px}
   ::selection{background:#dbe9df}
+  .skip{position:absolute;left:-9999px;top:0;background:var(--paper);color:var(--ink);
+    padding:8px 14px;border:1px solid var(--ink);z-index:10}
+  .skip:focus{left:8px}
 
   .masthead{max-width:1240px;margin:0 auto;padding:20px 22px 0}
   .masthead-row{display:flex;align-items:baseline;justify-content:space-between;
@@ -106,7 +109,8 @@
     flex-wrap:wrap;margin:22px 0 0}
   .sum-controls input{font-family:var(--mono);font-size:12px;color:var(--ink);
     background:#fff;border:1px solid var(--hairline);padding:7px 10px;min-width:34ch}
-  .sum-controls input:focus{outline:none;border-color:var(--clinical)}
+  .sum-controls input:focus{border-color:var(--clinical)}
+  .sum-controls input:focus-visible{outline:2px solid var(--clinical);outline-offset:2px}
   .sum-chips{display:flex;flex-direction:column;gap:8px;margin:22px 0 0}
   .chip-g{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
   .chip-lbl{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;
@@ -126,6 +130,8 @@
   .sum-dl a:hover{color:var(--clinical)}
   .sum-table th[data-key]{cursor:pointer}
   .sum-table th[data-key]:hover{color:var(--ink)}
+  .sum-table th[data-key] button{all:unset;cursor:pointer;display:inline}
+  .sum-table th[data-key] button:focus-visible{outline:2px solid var(--clinical);outline-offset:2px}
   .sum-table th[data-key].sorted::after{content:" ▾";color:var(--clinical)}
   .sum-table th[data-key].sorted.asc::after{content:" ▴"}
   .sum-empty{font-family:var(--mono);font-size:12px;color:var(--muted);padding:14px 0}
@@ -237,6 +243,7 @@
 </style>
 </head>
 <body>
+<a class="skip" href="#main">Skip to content</a>
 <header class="masthead">
   <hr class="rule-heavy"><hr class="rule-fine">
   <div class="masthead-row">
@@ -256,25 +263,25 @@
   </div>
   <hr class="rule-fine">
 </header>
-<main>
+<main id="main">
   <p class="dateline">Simulated series <span class="mode">· generated stress pairs · live renders · simulated data</span></p>
   <h1>Simulated scenarios</h1>
-  <p class="subtitle">Stress scenarios authored by an LLM, validated by machine, traced for real,
+  <p class="subtitle">Stress scenarios authored by an LLM, programmatically validated, traced live on gemma-2-2b,
      and kept apart from the hand-measured set.</p>
   <p class="explainer">
-    The <a href="../#phrase-dataset">phrase dataset</a> is hand-built and hand-measured. This
-    section widens it with <em>simulated</em> scenarios: Claude authors new
-    patient-vs-clinical sentence pairs in the same format (one contiguous term swap inside an
-    identical frame, ending at a next-token probe boundary), and each candidate must pass
-    programmatic validators (single-span swap, probe-boundary ending, term-verbatim check,
-    dedupe against the measured set) before it is accepted. Every accepted pair is then traced
-    live on gemma-2-2b, exactly like the hand-measured examples.
+    This section widens the hand-measured <a href="../#phrase-dataset">phrase dataset</a> with
+    <em>simulated</em> scenarios. Claude authors new patient-vs-clinical sentence pairs in the
+    same format: one contiguous term swap inside an identical frame, ending at a next-token
+    probe boundary. Each candidate must pass programmatic validators (single-span swap,
+    probe-boundary ending, term-verbatim check, dedupe against the measured set) before it is
+    accepted. Accepted pairs are then traced live on gemma-2-2b, like the hand-measured pairs.
   </p>
   <p class="explainer">
     Each scenario below shows the two phrasings, the traced next-token probabilities with the
-    Language Penalty, and the generator's own rationale for why the swap should be diagnostic.
-    This is a demonstration set: the most consequential scenarios also carry their full
-    interactive circuit comparison; every scenario's measurements are downloadable above.
+    Language Penalty, and the generator's rationale for why the swap should be diagnostic.
+    This is a demonstration set: the 25 largest-effect scenarios (prediction flips first, then
+    largest language penalty) include their full interactive circuit comparison; every
+    scenario's measurements are downloadable below.
   </p>
   <p class="traced" id="sim-traced" hidden>
     <span class="tm"><b>traced model:</b> <span id="sim-traced-model">gemma-2-2b · gemma scope transcoders</span></span>
@@ -296,16 +303,16 @@
     <div class="sum-scroll">
       <table class="sum-table">
         <thead><tr>
-          <th scope="col" data-key="index" title="sort">Sim</th>
-          <th scope="col">Swap (patient → medical)</th>
+          <th scope="col" data-key="index"><button type="button" title="sort">Sim</button></th>
+          <th scope="col">Swap (patient → clinical)</th>
           <th scope="col">Target</th>
-          <th scope="col" class="num" data-key="clin" title="sort">prob clinical</th>
-          <th scope="col" class="num" data-key="pat" title="sort">prob patient</th>
-          <th scope="col" class="num" data-key="clinStronger" title="clinical wording holds the target more strongly — click to sort by margin">Clinical stronger</th>
-          <th scope="col" class="num" data-key="patStronger" title="patient wording holds the target more strongly — click to sort by margin">Patient stronger</th>
+          <th scope="col" class="num" data-key="clin"><button type="button" title="sort">prob clinical</button></th>
+          <th scope="col" class="num" data-key="pat"><button type="button" title="sort">prob patient</button></th>
+          <th scope="col" class="num" data-key="clinStronger"><button type="button" title="clinical wording holds the target more strongly — click to sort by margin">Clinical stronger</button></th>
+          <th scope="col" class="num" data-key="patStronger"><button type="button" title="patient wording holds the target more strongly — click to sort by margin">Patient stronger</button></th>
           <th scope="col">clin → pat</th>
-          <th scope="col" data-key="mass" title="sort by clinical-side medical-circuit share">Med circuit</th>
-          <th scope="col" data-key="flip" title="sort: flips first">Top prediction</th>
+          <th scope="col" data-key="mass"><button type="button" title="sort by the clinical phrasing’s clinical-circuit share">Clinical circuit</button></th>
+          <th scope="col" data-key="flip"><button type="button" title="sort: flips first">Top prediction</button></th>
         </tr></thead>
         <tbody id="sim-sum-body"></tbody>
       </table>
@@ -639,11 +646,14 @@
         var wrap=document.getElementById('sim-chips');
         if(!wrap||modelList.length<2)return;
         var g=el('div','chip-g');
+        g.setAttribute('role','group');
+        g.setAttribute('aria-label','select model');
         g.appendChild(el('span','chip-lbl','model'));
         modelsMeta.forEach(function(mm){
           var n=mm.n_traced||0;
           var c=el('button','chip'+(mm.id===currentModel?' on':''),mm.label||mm.id);
           c.type='button';
+          c.setAttribute('aria-pressed',mm.id===currentModel?'true':'false');
           if(n)c.appendChild(el('span','chip-ct',' · '+n));
           if(!n||mm.available===false){c.disabled=true;c.title='not traced on this model yet';}
           else c.title=n+' phrases traced on '+mm.id
@@ -652,8 +662,10 @@
           c.addEventListener('click',function(){
             if(c.disabled)return;
             currentModel=mm.id;
-            g.querySelectorAll('.chip').forEach(function(x){x.classList.remove('on');});
+            g.querySelectorAll('.chip').forEach(function(x){
+              x.classList.remove('on');x.setAttribute('aria-pressed','false');});
             c.classList.add('on');
+            c.setAttribute('aria-pressed','true');
             setTracedLabel();
             renderTable();
           });
@@ -670,14 +682,19 @@
         topics.sort();
         function group(label,items,get,set){
           var g=el('div','chip-g');
+          g.setAttribute('role','group');
+          g.setAttribute('aria-label','filter by '+label);
           g.appendChild(el('span','chip-lbl',label));
           items.forEach(function(it){
             var c=el('button','chip'+(it.val===get()?' on':''),it.name);
             c.type='button';
+            c.setAttribute('aria-pressed',it.val===get()?'true':'false');
             c.addEventListener('click',function(){
               set(it.val);
-              g.querySelectorAll('.chip').forEach(function(x){x.classList.remove('on');});
+              g.querySelectorAll('.chip').forEach(function(x){
+                x.classList.remove('on');x.setAttribute('aria-pressed','false');});
               c.classList.add('on');
+              c.setAttribute('aria-pressed','true');
               renderTable();
             });
             g.appendChild(c);
@@ -695,15 +712,19 @@
       })();
 
       document.querySelectorAll('.sum-table th[data-key]').forEach(function(th){
-        th.addEventListener('click',function(){
+        var btn=th.querySelector('button');
+        if(!btn)return;
+        btn.addEventListener('click',function(){
           var key=th.getAttribute('data-key');
           if(sortKey===key){sortDir=-sortDir;}
           else{sortKey=key;sortDir=-1;}  // first click: biggest/most interesting first
           document.querySelectorAll('.sum-table th[data-key]').forEach(function(other){
             other.classList.remove('sorted','asc');
+            other.removeAttribute('aria-sort');
           });
           th.classList.add('sorted');
           if(sortDir===1)th.classList.add('asc');
+          th.setAttribute('aria-sort',sortDir===1?'ascending':'descending');
           renderTable();
         });
       });

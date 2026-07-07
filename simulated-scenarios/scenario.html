@@ -11,7 +11,7 @@
 <style>
   :root{
     --paper:#faf9f5; --ink:#1c1c19; --patient:#111827; --clinical:#15803d;
-    --penalty:#b4483d; --muted:#75746d; --structural:#c3c9d2; --hairline:#dcdad2;
+    --penalty:#b4483d; --muted:#6d6c66; --structural:#c3c9d2; --hairline:#dcdad2;
     --serif:'Iowan Old Style','Palatino Linotype',Palatino,'Book Antiqua',Georgia,serif;
     --mono:ui-monospace,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace;
   }
@@ -23,6 +23,9 @@
   a{color:inherit}
   a:focus-visible{outline:2px solid var(--clinical);outline-offset:3px;border-radius:1px}
   ::selection{background:#dbe9df}
+  .skip{position:absolute;left:-9999px;top:0;background:var(--paper);color:var(--ink);
+    padding:8px 14px;border:1px solid var(--ink);z-index:10}
+  .skip:focus{left:8px}
 
   .masthead{max-width:1240px;margin:0 auto;padding:20px 22px 0}
   .masthead-row{display:flex;align-items:baseline;justify-content:space-between;
@@ -156,6 +159,7 @@
 </style>
 </head>
 <body>
+<a class="skip" href="#main">Skip to content</a>
 <header class="masthead">
   <hr class="rule-heavy"><hr class="rule-fine">
   <div class="masthead-row">
@@ -175,7 +179,7 @@
   </div>
   <hr class="rule-fine">
 </header>
-<main>
+<main id="main">
   <p class="dateline">Simulated series <span class="mode">· one scenario · live render · simulated data</span></p>
   <h1 id="sim-title">Simulated scenario</h1>
   <div class="pager">
@@ -390,11 +394,14 @@
         var wrap=document.getElementById('sim-model-row');
         if(!wrap||modelList.length<2)return;
         var g=el('div','chip-g');
+        g.setAttribute('role','group');
+        g.setAttribute('aria-label','select model');
         g.appendChild(el('span','chip-lbl','model'));
         modelsMeta.forEach(function(mm){
           var avail=hasModelFor(mm.id);
           var c=el('button','chip'+(mm.id===currentModel?' on':''),mm.label||mm.id);
           c.type='button';
+          c.setAttribute('aria-pressed',mm.id===currentModel?'true':'false');
           if(!avail){c.disabled=true;c.title='this phrase was not traced on '+mm.id;}
           else c.title=(mm.features===false
             ?'structure only (no clinical-feature meter)'
@@ -402,8 +409,10 @@
           c.addEventListener('click',function(){
             if(c.disabled)return;
             currentModel=mm.id;
-            g.querySelectorAll('.chip').forEach(function(x){x.classList.remove('on');});
+            g.querySelectorAll('.chip').forEach(function(x){
+              x.classList.remove('on');x.setAttribute('aria-pressed','false');});
             c.classList.add('on');
+            c.setAttribute('aria-pressed','true');
             var u=new URL(location);u.searchParams.set('model',mm.id);history.replaceState(null,'',u);
             renderCard();
           });
@@ -494,8 +503,12 @@
           var noGraphs=metaFor(currentModel).graphs===false;
           if(!traced){
             pn.appendChild(document.createTextNode(
-              'this phrase wasn’t traced on '+currentModel+'; pick another model above, '+
-              'or find the full multi-model set in the back-end archive'));
+              'this phrase wasn’t traced on '+currentModel+'; pick another model above. '+
+              'the full render set is not published on this site; the scenario’s complete '+
+              'measurements across traced models are downloadable at '));
+            var mx=el('a',null,'data/simulated_archive.csv');
+            mx.href='../data/simulated_archive.csv';
+            pn.appendChild(mx);
           }else if(m.screening&&m.screening.status==='screened_out'){
             pn.textContent='screened out before the patient-side trace — no interactive render';
           }else if(noGraphs){
@@ -506,8 +519,12 @@
           }else{
             pn.appendChild(document.createTextNode(
               'this scenario’s full circuit render isn’t in the public demonstration set '+
-              '(the site keeps the most consequential 25); its measurements are shown above, '+
-              'and the complete render is in the back-end archive'));
+              '(the site keeps the 25 largest-effect scenarios: prediction flips first, then '+
+              'largest language penalty). the full render set is not published on this site; '+
+              'the scenario’s complete measurements are shown above and downloadable at '));
+            var cx=el('a',null,'data/simulated_archive.csv');
+            cx.href='../data/simulated_archive.csv';
+            pn.appendChild(cx);
           }
           // a graph-less model has nothing to download; only offer the archive
           // link for models whose render exists but was left out of the demo
