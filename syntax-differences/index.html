@@ -13,8 +13,8 @@
 <meta property="og:description" content="The words surrounding clinical words can be the same. Register and variety shifts, factorized in one live-traced 2×2 matrix.">
 <meta property="og:url" content="https://michaeldgreenphd.github.io/patientwords/syntax-differences/">
 <meta property="og:image" content="https://michaeldgreenphd.github.io/patientwords/modes/4quadrant/preview.png">
-<meta property="og:image:width" content="5280">
-<meta property="og:image:height" content="5566">
+<meta property="og:image:width" content="2343">
+<meta property="og:image:height" content="2643">
 <meta property="og:image:alt" content="Four-quadrant matrix factorizing vocabulary and syntax effects in gemma-2-2b">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Syntax differences — PatientWords">
@@ -24,7 +24,7 @@
 <style>
   :root{
     --paper:#faf9f5; --ink:#1c1c19; --patient:#111827; --clinical:#15803d;
-    --penalty:#b4483d; --muted:#75746d; --structural:#c3c9d2; --hairline:#dcdad2;
+    --penalty:#b4483d; --muted:#6d6c66; --structural:#c3c9d2; --hairline:#dcdad2;
     --serif:'Iowan Old Style','Palatino Linotype',Palatino,'Book Antiqua',Georgia,serif;
     --mono:ui-monospace,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace;
   }
@@ -35,6 +35,8 @@
   main{max-width:1240px;margin:0 auto;padding:0 22px 56px}
   a{color:inherit}
   a:focus-visible{outline:2px solid var(--clinical);outline-offset:3px;border-radius:1px}
+  .skip{position:absolute;left:-9999px;top:0;background:var(--paper);color:var(--ink);padding:8px 14px;border:1px solid var(--ink);z-index:10}
+  .skip:focus{left:8px}
   ::selection{background:#dbe9df}
 
   .masthead{max-width:1240px;margin:0 auto;padding:20px 22px 0}
@@ -141,6 +143,7 @@
 </style>
 </head>
 <body>
+<a class="skip" href="#main">Skip to content</a>
 <header class="masthead">
   <hr class="rule-heavy"><hr class="rule-fine">
   <div class="masthead-row">
@@ -160,20 +163,20 @@
   </div>
   <hr class="rule-fine">
 </header>
-<main>
+<main id="main">
   <p class="dateline">Fig. 2 <span class="mode">· syntax × lexicon matrix · live render · simulated scenario</span></p>
   <h1>Syntax differences</h1>
-  <p class="subtitle">The words surrounding clinical words can be the same.</p>
+  <p class="subtitle">The medical word can stay fixed; the surrounding syntax still moves the prediction.</p>
   <p class="explainer">A 2×2 factorization crossing the <em>phrasing</em> (patient-derived
      language vs. medical lexicon, the columns) with the surrounding <em>morphosyntax</em>
-     (standard vs. nonstandard, the rows). The first live-traced item, a simulated
-     insomnia scenario (“insomnia” ↔ “trouble sleeping” crossed with “I've had … I'll
-     finally call” ↔ “I been having … I'ma finally call”), anchors on the prestige box's
-     top prediction “it” (as in <em>call it a night</em>), because the intended target
+     (standard vs. nonstandard, the rows). The first live-traced item is a simulated
+     insomnia scenario: “insomnia” ↔ “trouble sleeping”, crossed with “I've had … I'll
+     finally call” ↔ “I been having … I'ma finally call”. It anchors on the prestige box's
+     top prediction “it” (as in <em>call it a night</em>) because the intended target
      “my doctor” fell below the traced spread. Both shifts push probability toward that
      everyday reading and away from care-seeking continuations: the variety shift alone
      adds +11–13% to “it”, the register shift another +4–5%.</p>
-  <span class="stat penalty">Variety shift Δ: +12% toward the everyday continuation · Register shift Δ: +5% (measured on “it”)</span>
+  <span class="stat penalty">Variety shift Δ: +11% (C → D, 0.26 → 0.37) and +13% (A → B, 0.21 → 0.34) toward the everyday continuation · Register shift Δ: +4–5% (measured on “it”)</span>
   <p class="traced" data-mode="4quadrant" data-traced="gemma-2-2b">
     <span class="tm"><b>traced model:</b> gemma-2-2b · gemma scope transcoders</span>
     <span class="tp">hosted circuit-tracer via Neuronpedia</span>
@@ -208,7 +211,7 @@
      The engine generates these with <code>medlang-generate quadrants</code> (frames × terms,
      validated) and traces them with <code>--mode 4quadrant</code>.</p>
 
-  <p class="view-head">The four edges, one swap at a time</p>
+  <h2 class="view-head">The four edges, one swap at a time</h2>
   <p class="view-sub">each comparison below isolates ONE cell swap of the matrix. Features present
      in both cells are dimmed to faint gray, so whatever remains at full ink is exactly the
      circuitry that the single swap changed. The morphosyntax (variety) swaps rewire more of the
@@ -231,17 +234,16 @@
   <div class="embed"><iframe class="live" src="../modes/4quadrant/edge_variety_patient.html" loading="lazy"
        title="Morphosyntax shift within the patient-language column, shared circuit dimmed"></iframe></div>
 
-  <p class="view-head">The full matrix: all four cells at once</p>
+  <h2 class="view-head">The full matrix: all four cells at once</h2>
   <div class="embed">
     <iframe class="live" src="../modes/4quadrant/index.html" loading="lazy"
             title="Interactive four-quadrant matrix factorizing vocabulary and syntax effects"></iframe>
   </div>
   <p class="embed-caption">The matrix is scaled to fit the page; open it full screen (button, top-right) to
-     compare all four boxes at full detail. Each box traces one cell’s prompt: columns are that sentence’s words
-     in order, height is depth in the model, and the predicted next word sits at the top. Hover
-     any node for its feature id, category, attribution mass, and autointerp description. Live
+     compare all four boxes at full detail. Each box traces one cell’s prompt. Live
      gemma-2-2b trace of a simulated quadrant scenario (batch quadrants_20260706T191617Z,
-     generated by claude-opus-4-8 for $0.0254; sidecar in the engine repo).</p>
+     generated by claude-opus-4-8 for $0.025; sidecar published at
+     <a href="../data/provenance.json">data/provenance.json</a>).</p>
 
   <a class="back" href="../">← Back home</a>
 
@@ -303,7 +305,6 @@
     box.parentNode.insertBefore(shell,box);shell.appendChild(box);
     var btn=document.createElement('button');btn.className='zoom-btn';btn.type='button';
     btn.textContent='\u2922 full screen';
-    btn.setAttribute('aria-label','Toggle full screen view');
     btn.addEventListener('click',function(){
       if(document.fullscreenElement){document.exitFullscreen();return;}
       if(shell.classList.contains('fs-fallback')){

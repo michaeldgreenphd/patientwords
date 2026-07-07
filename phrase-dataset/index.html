@@ -11,7 +11,7 @@
 <style>
   :root{
     --paper:#faf9f5; --ink:#1c1c19; --patient:#111827; --clinical:#15803d;
-    --penalty:#b4483d; --muted:#75746d; --structural:#c3c9d2; --hairline:#dcdad2;
+    --penalty:#b4483d; --muted:#6d6c66; --structural:#c3c9d2; --hairline:#dcdad2;
     --serif:'Iowan Old Style','Palatino Linotype',Palatino,'Book Antiqua',Georgia,serif;
     --mono:ui-monospace,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace;
   }
@@ -22,6 +22,8 @@
   main{max-width:1100px;margin:0 auto;padding:0 22px 56px}
   a{color:inherit}
   a:focus-visible{outline:2px solid var(--clinical);outline-offset:3px;border-radius:1px}
+  .skip{position:absolute;left:-9999px;top:0;background:var(--paper);color:var(--ink);padding:8px 14px;border:1px solid var(--ink);z-index:10}
+  .skip:focus{left:8px}
   ::selection{background:#dbe9df}
   .masthead{max-width:1100px;margin:0 auto;padding:20px 22px 0}
   .masthead-row{display:flex;align-items:baseline;justify-content:space-between;
@@ -93,6 +95,7 @@ body{font-size:16px}}
 </style>
 </head>
 <body>
+<a class="skip" href="#main">Skip to content</a>
 <header class="masthead">
   <hr class="rule-heavy"><hr class="rule-fine">
   <div class="masthead-row">
@@ -112,15 +115,14 @@ body{font-size:16px}}
   </div>
   <hr class="rule-fine">
 </header>
-<main>
+<main id="main">
   <p class="dateline">Hand-measured <span class="mode">· data/stress_pairs.json · the study's ground truth</span></p>
   <h1>Phrase dataset</h1>
   <p class="subtitle">Every hand-built sentence pair, with its manual measurements.</p>
-  <p class="explainer">This is the study's hand-measured core: each pair was built by hand and
-     measured on gemma-2-2b via the Neuronpedia circuit tracer: the observed next token, its
-     probability, and (where captured) a link to the live circuit trace. The
-     <a href="../simulated-scenarios/">simulated scenarios</a> extend this set by machine;
-     this table is the human baseline they are held against.</p>
+  <p class="explainer">Each pair was built by hand and measured on gemma-2-2b via the
+     Neuronpedia circuit tracer; the table records the observed next token, its probability,
+     and, where captured, a link to the live circuit trace. The
+     <a href="../simulated-scenarios/">simulated scenarios</a> extend this set by machine.</p>
   <section id="phrase-dataset" hidden>
     <div class="section-head" style="border-top:1px solid var(--ink);margin-top:26px;padding-top:10px;display:flex;justify-content:space-between;align-items:baseline">
       <h2 style="font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;margin:0">All pairs</h2>
@@ -141,8 +143,7 @@ body{font-size:16px}}
       </table>
     </div>
     <p class="sp-caption">
-      Hand-measured on gemma-2-2b (Gemma Scope transcoders) via the Neuronpedia circuit
-      tracer; next-token probabilities as observed at measurement time.
+      Next-token probabilities as observed at measurement time.
     </p>
     <p class="sp-foot">source: data/stress_pairs.json · prompts shown verbatim, including intentional misspellings</p>
   </section>
