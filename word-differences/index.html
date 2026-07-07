@@ -197,30 +197,18 @@
         (shell&&shell.classList&&shell.classList.contains('fs-fallback'));
       var h=d.documentElement.scrollHeight||600;
       if(!h)return;
-      var s;
-      if(expanded){
-        // full screen: fill the width; the container scrolls/pans for detail
-        s=Math.min(1,(box.clientWidth||1)/w);
-        if(window.innerWidth<900)s=Math.max(s,0.7);
-      }else{
-        // inline: fit the WHOLE figure into the viewport so it reads as one
-        // preview with no inner scrollbar. Very tall figures (e.g. the 7-panel
-        // dialect render) won't drop below a floor scale; the top is shown and
-        // full screen reveals the rest.
-        var maxH=Math.max(340,(window.innerHeight||800)*0.82);
-        var fitBoth=Math.min((box.clientWidth||1)/w, maxH/h, 1);
-        s=Math.max(fitBoth,0.3);
-      }
+      // Fill the page width. The figure is as tall as that makes it and the
+      // page scrolls (a single scrollbar - the inner scroll box that caused the
+      // double scrollbar is gone). Full screen scales up and pans for detail.
+      var s=Math.min(1,(box.clientWidth||1)/w);
+      if(expanded&&window.innerWidth<900)s=Math.max(s,0.7);
       f.style.width=w+'px';
       f.style.height=h+'px';
       fr.style.width=w+'px';
       fr.style.transform='scale('+s+')';
       fr.style.marginRight=(w*s-w)+'px';
       fr.style.marginBottom=(h*s-h)+'px';
-      if(!expanded){
-        var maxH2=Math.max(340,(window.innerHeight||800)*0.82);
-        box.style.height=Math.min(h*s,maxH2)+'px';
-      }else{box.style.height='';}
+      box.style.height='';
     }catch(e){}
   }
   function fitAll(){document.querySelectorAll('.embed iframe.live').forEach(fit);}
