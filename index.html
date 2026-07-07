@@ -260,7 +260,7 @@
         <iframe class="live" src="modes/2panel/index.html" loading="lazy"
                 title="Live preview: two stacked attribution graphs comparing clinical and patient wording" tabindex="-1"></iframe>
       </div></div>
-      <figcaption>modes/2panel · live render</figcaption>
+      <figcaption>modes/2panel · demonstration render</figcaption>
     </figure>
     <div class="fig-body">
       <p class="fig-no">Fig. 1 <span class="mode">· 2panel</span></p>
@@ -333,7 +333,7 @@
         <iframe class="live" src="modes/translation/index.html" loading="lazy"
                 title="Live preview: translation mitigation chain restoring the clinical circuit" tabindex="-1"></iframe>
       </div></div>
-      <figcaption>modes/translation · live render</figcaption>
+      <figcaption>modes/translation · demonstration render</figcaption>
     </figure>
     <div class="fig-body">
       <p class="fig-no">Fig. 4 <span class="mode">· translation</span></p>
@@ -589,6 +589,7 @@
       all.textContent='see all '+total+' →';
       cnt.appendChild(all);
       sec.hidden=false;
+      if(location.hash==='#'+sec.id)sec.scrollIntoView();
     })
     .catch(function(){sec.hidden=true;});
 })();
@@ -655,6 +656,7 @@
         'updated '+(data.updated||'—')+' · task: '+(data.task||'—')
         +' · source: data/model_evaluations.json';
       sec.hidden=false;
+      if(location.hash==='#'+sec.id)sec.scrollIntoView();
     })
     .catch(function(){sec.hidden=true;});
 })();
