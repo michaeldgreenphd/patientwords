@@ -94,6 +94,16 @@
   .dl .stay{color:var(--muted)}
   .dl-caption{font-family:var(--mono);font-size:11px;color:var(--muted);
     letter-spacing:.04em;margin:0 0 8px}
+  .view-head{font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.18em;
+    text-transform:uppercase;margin:34px 0 0;border-top:1px solid var(--ink);padding-top:10px}
+  .view-sub{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.03em;
+    margin:4px 0 10px}
+  .dlm th,.dlm td{white-space:nowrap}
+  .dlm .term{font-weight:600}
+  .dlm .tgt{display:block;color:var(--muted);font-weight:400;font-size:10.5px}
+  .dlm .flipmark{color:var(--penalty);margin-left:3px}
+  .dlm a{font-size:10.5px;color:var(--muted)}
+  .dlm a:hover{color:var(--ink)}
 
   .embed{border:1px solid var(--hairline);background:#fff;overflow:hidden;margin:26px 0 10px}
   .embed iframe{width:100%;border:0;display:block;min-height:400px}
@@ -176,71 +186,40 @@
     <span class="tp">framings authored by claude-opus-4-8 ($0.0099, 6/6 accepted) · traced via Neuronpedia · batch dialects_20260706T232102Z</span>
   </p>
 
-  <div class="dl-scroll">
-    <table class="dl">
-      <thead><tr>
-        <th scope="col">Framing</th>
-        <th scope="col">Prompt as traced</th>
-        <th scope="col" class="num">p(“&nbsp;therapist”)</th>
-        <th scope="col" class="num">Δ vs baseline</th>
-        <th scope="col">Model’s top pick</th>
-      </tr></thead>
-      <tbody>
-        <tr class="base">
-          <td class="framing">Standard English</td>
-          <td class="prompt">I've got <span class="kept">clinical depression</span>, so I need to talk to a</td>
-          <td class="num">0.260<span class="pbar"><i style="width:26%"></i></span></td>
-          <td class="num">baseline</td>
-          <td><span class="stay">therapist · 0.260</span></td>
-        </tr>
-        <tr>
-          <td class="framing">Texting / informal</td>
-          <td class="prompt">ngl i got <span class="kept">clinical depression</span> so i really gotta talk to a</td>
-          <td class="num">0.384<span class="pbar"><i style="width:38.4%"></i><b style="left:26%"></b></span></td>
-          <td class="num dpos">+0.124</td>
-          <td><span class="stay">therapist · 0.384</span></td>
-        </tr>
-        <tr>
-          <td class="framing">AAVE</td>
-          <td class="prompt">Look, I got <span class="kept">clinical depression</span>, so I really need to be talkin to a</td>
-          <td class="num">0.206<span class="pbar"><i style="width:20.6%"></i><b style="left:26%"></b></span></td>
-          <td class="num dneg">−0.054</td>
-          <td><span class="stay">therapist · 0.206</span></td>
-        </tr>
-        <tr>
-          <td class="framing">Irish English</td>
-          <td class="prompt">Ah sure, I've got <span class="kept">clinical depression</span>, so I'm needing to have a chat with a</td>
-          <td class="num">0.132<span class="pbar"><i style="width:13.2%"></i><b style="left:26%"></b></span></td>
-          <td class="num dneg">−0.128</td>
-          <td><span class="stay">therapist · 0.132</span></td>
-        </tr>
-        <tr>
-          <td class="framing">Caribbean English</td>
-          <td class="prompt">Me have <span class="kept">clinical depression</span>, so me need fi talk to a</td>
-          <td class="num">0.081<span class="pbar"><i style="width:8.1%"></i><b style="left:26%"></b></span></td>
-          <td class="num dneg">−0.179</td>
-          <td><span class="flip">doctor · 0.215 ← flip</span></td>
-        </tr>
-        <tr>
-          <td class="framing">British English</td>
-          <td class="prompt">The thing is, I've got <span class="kept">clinical depression</span>, so I really ought to have a word with a</td>
-          <td class="num">0.074<span class="pbar"><i style="width:7.4%"></i><b style="left:26%"></b></span></td>
-          <td class="num dneg">−0.186</td>
-          <td><span class="flip">doctor · 0.421 ← flip</span></td>
-        </tr>
-        <tr>
-          <td class="framing">Southern US</td>
-          <td class="prompt">Well, I reckon I've got <span class="kept">clinical depression</span>, so I've been fixin' to sit down and talk with a</td>
-          <td class="num">0.068<span class="pbar"><i style="width:6.8%"></i><b style="left:26%"></b></span></td>
-          <td class="num dneg">−0.192</td>
-          <td><span class="flip">shrink · 0.169 ← flip</span></td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-  <p class="dl-caption">Bars share a fixed 0–1 probability scale; the thin green tick marks the
-     0.26 standard-English baseline. Next-token probabilities as observed at trace time; rows
-     sorted by p, baseline first.</p>
+  <section id="dl-matrix" hidden>
+    <p class="view-head">The framing tax, across conditions</p>
+    <p class="view-sub" id="dl-matrix-sub"></p>
+    <div class="dl-scroll">
+      <table class="dl dlm">
+        <thead id="dlm-head"></thead>
+        <tbody id="dlm-body"></tbody>
+      </table>
+    </div>
+    <p class="dl-caption">Each cell is the change in p(target) when that framing replaces
+       standard English, with the clinical term held verbatim. A red
+       <span class="flipmark">&#9679;</span> marks a framing that also flips the model&rsquo;s top
+       prediction away from the baseline target; hover a cell for the new top pick. Rows link
+       to each term&rsquo;s standalone render.</p>
+  </section>
+
+  <section id="dl-featured" hidden>
+    <p class="view-head" id="dlf-head">Featured term</p>
+    <p class="view-sub" id="dlf-sub"></p>
+    <div class="dl-scroll">
+      <table class="dl">
+        <thead><tr>
+          <th scope="col">Framing</th>
+          <th scope="col">Prompt as traced</th>
+          <th scope="col" class="num">p(target)</th>
+          <th scope="col" class="num">&Delta; vs baseline</th>
+          <th scope="col">Model&rsquo;s top pick</th>
+        </tr></thead>
+        <tbody id="dlf-body"></tbody>
+      </table>
+    </div>
+    <p class="dl-caption">Bars share a fixed 0&ndash;1 probability scale; the thin green tick marks
+       the standard-English baseline. Rows sorted by p, baseline first.</p>
+  </section>
 
   <div class="embed">
     <iframe class="live" src="../modes/dialect/index.html"
@@ -271,6 +250,126 @@
     </footer>
   </div>
 </main>
+<script>
+(function(){
+  if(!window.fetch)return;
+  function el(tag,cls,txt){var e=document.createElement(tag);if(cls)e.className=cls;
+    if(txt!=null)e.textContent=txt;return e;}
+  function shortName(d){
+    if(/african american/i.test(d))return 'AAVE';
+    if(/texting/i.test(d))return 'texting';
+    return d.replace(/ English$/,'');
+  }
+  function fmtD(x){if(x==null)return String.fromCharCode(8212);
+    var s=(Math.abs(x)).toFixed(2).replace(/^0/,'');
+    return (x>0?'+':(x<0?String.fromCharCode(8722):''))+s;}
+  fetch('../data/dialects.json',{cache:'no-cache'})
+    .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
+    .then(function(data){
+      var items=data.items||[];if(!items.length)return;
+      var dialects=items[0].variants.map(function(v){return v.dialect;});
+      var head=document.getElementById('dlm-head');
+      var tr=el('tr');
+      tr.appendChild(el('th',null,'Term (target)'));
+      var thb=el('th','num','baseline p');thb.className='num';tr.appendChild(thb);
+      dialects.forEach(function(d){var th=el('th','num',shortName(d));th.className='num';
+        th.title=d;tr.appendChild(th);});
+      tr.appendChild(el('th',null,''));
+      head.appendChild(tr);
+      var body=document.getElementById('dlm-body');
+      var flips=0,cells=0;
+      items.forEach(function(it){
+        var row=el('tr');
+        var td=el('td');
+        var tspan=el('span','term',it.term);
+        td.appendChild(tspan);
+        td.appendChild(el('span','tgt',String.fromCharCode(8594)+' '+(it.target_token||'?')));
+        row.appendChild(td);
+        var bp=el('td','num',it.baseline_p==null?String.fromCharCode(8212):it.baseline_p.toFixed(2));
+        bp.className='num';row.appendChild(bp);
+        dialects.forEach(function(d){
+          var v=null;
+          for(var i=0;i<it.variants.length;i++){if(it.variants[i].dialect===d){v=it.variants[i];break;}}
+          var c=el('td','num');c.className='num';
+          if(!v){c.textContent=String.fromCharCode(8212);row.appendChild(c);return;}
+          cells++;
+          var s=el('span',v.delta>0?'dpos':(v.delta<0?'dneg':null),fmtD(v.delta));
+          c.appendChild(s);
+          c.title=v.prompt+' '+String.fromCharCode(8594)+' top: '+(v.top_token||'?')+
+            (v.top_p!=null?' ('+v.top_p.toFixed(2)+')':'');
+          if(v.flip){flips++;var fm=el('span','flipmark',String.fromCharCode(9679));c.appendChild(fm);}
+          row.appendChild(c);
+        });
+        var lk=el('td');
+        if(it.render){var a=el('a',null,'render '+String.fromCharCode(8594));
+          a.href='../modes/dialect/sweep/'+it.render;lk.appendChild(a);}
+        row.appendChild(lk);
+        body.appendChild(row);
+      });
+      document.getElementById('dl-matrix-sub').textContent=
+        items.length+' clinical terms '+String.fromCharCode(215)+' '+dialects.length+
+        ' framings = '+cells+' re-traced sentences '+String.fromCharCode(183)+' '+flips+
+        ' top-pick flips '+String.fromCharCode(183)+' batch '+(data.batch||'')+
+        ' '+String.fromCharCode(183)+' '+(data.graph_model||'');
+      document.getElementById('dl-matrix').hidden=false;
+
+      var feat=null;
+      for(var i=0;i<items.length;i++){
+        if(/clinical depression/i.test(items[i].term)){feat=items[i];break;}
+      }
+      feat=feat||items[0];
+      document.getElementById('dlf-head').textContent='Featured term: '+String.fromCharCode(8220)+feat.term+String.fromCharCode(8221);
+      document.getElementById('dlf-sub').textContent=
+        'baseline '+String.fromCharCode(8220)+feat.baseline_prompt+String.fromCharCode(8221)+
+        ' '+String.fromCharCode(8594)+' '+String.fromCharCode(8220)+(feat.target_token||'?')+
+        String.fromCharCode(8221)+' at p='+(feat.baseline_p!=null?feat.baseline_p.toFixed(2):'?');
+      var fb=document.getElementById('dlf-body');
+      function promptCell(txt,term){
+        var td=el('td','prompt');
+        var idx=term?txt.indexOf(term):-1;
+        if(idx<0){td.textContent=txt;return td;}
+        td.appendChild(document.createTextNode(txt.slice(0,idx)));
+        td.appendChild(el('span','kept',term));
+        td.appendChild(document.createTextNode(txt.slice(idx+term.length)));
+        return td;
+      }
+      function barCell(p,base){
+        var td=el('td','num');td.className='num';
+        td.appendChild(document.createTextNode(p==null?String.fromCharCode(8212):p.toFixed(3)));
+        var bar=el('span','pbar');
+        var fill=el('i');fill.style.width=((p||0)*100)+'%';bar.appendChild(fill);
+        if(base!=null){var tick=el('b');tick.style.left=(base*100)+'%';bar.appendChild(tick);}
+        td.appendChild(bar);
+        return td;
+      }
+      var baseRow=el('tr','base');
+      baseRow.appendChild(el('td','framing','Standard English'));
+      baseRow.appendChild(promptCell(feat.baseline_prompt,feat.term));
+      baseRow.appendChild(barCell(feat.baseline_p,null));
+      var bd=el('td','num','baseline');bd.className='num';baseRow.appendChild(bd);
+      var bt=el('td');bt.appendChild(el('span','stay',(feat.target_token||'?')+' '+String.fromCharCode(183)+' '+(feat.baseline_p!=null?feat.baseline_p.toFixed(3):'?')));
+      baseRow.appendChild(bt);
+      fb.appendChild(baseRow);
+      feat.variants.slice().sort(function(a,b){return (b.p||0)-(a.p||0);}).forEach(function(v){
+        var row=el('tr');
+        row.appendChild(el('td','framing',shortName(v.dialect)));
+        row.appendChild(promptCell(v.prompt,feat.term));
+        row.appendChild(barCell(v.p,feat.baseline_p));
+        var dd=el('td','num');dd.className='num';
+        dd.appendChild(el('span',v.delta>0?'dpos':'dneg',fmtD(v.delta)));
+        row.appendChild(dd);
+        var tp=el('td');
+        tp.appendChild(el('span',v.flip?'flip':'stay',
+          (v.top_token||'?')+' '+String.fromCharCode(183)+' '+(v.top_p!=null?v.top_p.toFixed(3):'?')+
+          (v.flip?' '+String.fromCharCode(8592)+' flip':'')));
+        row.appendChild(tp);
+        fb.appendChild(row);
+      });
+      document.getElementById('dl-featured').hidden=false;
+    })
+    .catch(function(){});
+})();
+</script>
 <script>
 (function(){
   function fit(f){
