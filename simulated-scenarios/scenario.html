@@ -427,9 +427,21 @@
       if(!s.html&&!s.diff_html){
         var pn=el('div','pending-note');
         var screened=s.screening&&s.screening.status==='screened_out';
-        pn.textContent=screened
-          ? 'screened out before the patient-side trace — no interactive render'
-          : 'this scenario’s full circuit render isn’t in the public demonstration set (the site keeps the most consequential 25); its measurements are shown above, and the complete render is in the back-end archive';
+        if(screened){
+          pn.textContent='screened out before the patient-side trace — no interactive render';
+        }else{
+          pn.appendChild(document.createTextNode(
+            'this scenario’s full circuit render isn’t in the public demonstration set '+
+            '(the site keeps the most consequential 25); its measurements are shown above, '+
+            'and the complete render is in the back-end archive'));
+          var arc=data.archive&&data.archive.release_url;
+          if(arc){
+            pn.appendChild(document.createTextNode(' — '));
+            var a=el('a',null,'download the full render set');
+            a.href=arc;a.target='_blank';a.rel='noopener';
+            pn.appendChild(a);
+          }
+        }
         card.appendChild(pn);
       }
       setTimeout(fitAll,300);
