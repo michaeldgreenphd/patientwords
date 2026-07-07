@@ -66,6 +66,13 @@ structural grey `#c3c9d2`, penalty red `#b4483d`, paper `#faf9f5`, muted `#6d6c6
   probability) vs. *redirects* (top prediction changes); a redirect that drops a
   care-urgency tier is a *downgrade*.
 
+## Figure style (standing preference)
+
+Tufte: simple and readable. Maximum data-ink, hairline structure, direct labeling over
+legends, muted context so the semantic colors carry the finding, no chartjunk. Applies to
+any inline SVG/chart built on pages (the engine renders modes/ figures to the same
+standard).
+
 ## Verifying changes
 
 Serve and drive the real pages — the scenario tables are JS-heavy:
