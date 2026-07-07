@@ -647,7 +647,8 @@
           if(n)c.appendChild(el('span','chip-ct',' · '+n));
           if(!n||mm.available===false){c.disabled=true;c.title='not traced on this model yet';}
           else c.title=n+' phrases traced on '+mm.id
-            +(mm.features===false?' · structure only (no clinical-feature meter)':'');
+            +(mm.graphs===false?' · next-token behavior only (no circuit graph)'
+              :(mm.features===false?' · structure only (no clinical-feature meter)':''));
           c.addEventListener('click',function(){
             if(c.disabled)return;
             currentModel=mm.id;

@@ -491,19 +491,27 @@
         }
         if(!m.html&&!m.diff_html){
           var pn=el('div','pending-note');
+          var noGraphs=metaFor(currentModel).graphs===false;
           if(!traced){
             pn.appendChild(document.createTextNode(
               'this phrase wasn’t traced on '+currentModel+'; pick another model above, '+
               'or find the full multi-model set in the back-end archive'));
           }else if(m.screening&&m.screening.status==='screened_out'){
             pn.textContent='screened out before the patient-side trace — no interactive render';
+          }else if(noGraphs){
+            pn.appendChild(document.createTextNode(
+              currentModel+' is measured by next-token probability only — Neuronpedia doesn’t '+
+              'host its transcoders, so there is no attribution graph. The probabilities above '+
+              'are its cross-model comparison for this phrase.'));
           }else{
             pn.appendChild(document.createTextNode(
               'this scenario’s full circuit render isn’t in the public demonstration set '+
               '(the site keeps the most consequential 25); its measurements are shown above, '+
               'and the complete render is in the back-end archive'));
           }
-          var arc=archiveUrlFor();
+          // a graph-less model has nothing to download; only offer the archive
+          // link for models whose render exists but was left out of the demo
+          var arc=(!noGraphs&&traced)?archiveUrlFor():null;
           if(arc){
             pn.appendChild(document.createTextNode(' — '));
             var a=el('a',null,'download the full render set');
