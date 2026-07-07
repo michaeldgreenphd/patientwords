@@ -223,6 +223,26 @@
        the standard-English baseline. Rows sorted by p, baseline first.</p>
   </section>
 
+  <section id="dl-core" hidden>
+    <p class="view-head">The dialect-invariant clinical core</p>
+    <p class="view-sub" id="dlc-sub"></p>
+    <div class="dl-scroll">
+      <table class="dl">
+        <thead><tr>
+          <th scope="col">Feature</th>
+          <th scope="col">What it responds to</th>
+          <th scope="col" class="num">baseline mass</th>
+          <th scope="col" class="num">survives</th>
+        </tr></thead>
+        <tbody id="dlc-body"></tbody>
+      </table>
+    </div>
+    <p class="dl-caption">The featured term&rsquo;s strongest baseline clinical features, ranked by
+       normalized attribution mass. &ldquo;Survives&rdquo; counts the framings whose trace still
+       contains the feature; 6/6 features are the representation no dialect shift touches.
+       Computed from the committed renders, no re-tracing.</p>
+  </section>
+
   <div class="embed">
     <iframe class="live" src="../modes/dialect/index.html"
       title="Interactive dialect-mode attribution graphs"></iframe>
@@ -279,6 +299,9 @@
       var thb=el('th','num','baseline p');thb.className='num';tr.appendChild(thb);
       dialects.forEach(function(d){var th=el('th','num',shortName(d));th.className='num';
         th.title=d;tr.appendChild(th);});
+      var thc=el('th','num','core');thc.className='num';
+      thc.title='clinical features surviving every framing / clinical features in the baseline trace';
+      tr.appendChild(thc);
       tr.appendChild(el('th',null,''));
       head.appendChild(tr);
       var body=document.getElementById('dlm-body');
@@ -305,6 +328,13 @@
           if(v.flip){flips++;var fm=el('span','flipmark',String.fromCharCode(9679));c.appendChild(fm);}
           row.appendChild(c);
         });
+        var cc=el('td','num');cc.className='num';
+        if(it.core){
+          cc.textContent=it.core.invariant+'/'+it.core.baseline_clinical;
+          cc.title=it.core.invariant+' of '+it.core.baseline_clinical+
+            ' baseline clinical features survive all '+it.core.framings+' framings';
+        }else{cc.textContent=String.fromCharCode(8212);}
+        row.appendChild(cc);
         var lk=el('td');
         if(it.render){var a=el('a',null,'render '+String.fromCharCode(8594));
           a.href='../modes/dialect/sweep/'+it.render;lk.appendChild(a);}
@@ -371,6 +401,25 @@
         fb.appendChild(row);
       });
       document.getElementById('dl-featured').hidden=false;
+      if(feat.core&&feat.core.top&&feat.core.top.length){
+        document.getElementById('dlc-sub').textContent=
+          feat.term+': '+feat.core.invariant+' of '+feat.core.baseline_clinical+
+          ' baseline clinical features survive all '+feat.core.framings+' framings';
+        var cb=document.getElementById('dlc-body');
+        feat.core.top.forEach(function(c){
+          var row=el('tr');
+          var tf=el('td');tf.appendChild(el('span','term',c.feature));row.appendChild(tf);
+          var td=el('td','prompt',c.desc||String.fromCharCode(8212));row.appendChild(td);
+          var tm=el('td','num',(c.norm_mass!=null?c.norm_mass.toFixed(2):String.fromCharCode(8212)));
+          tm.className='num';row.appendChild(tm);
+          var full=c.survives&&c.survives.split('/')[0]===c.survives.split('/')[1];
+          var ts=el('td','num');ts.className='num';
+          ts.appendChild(el('span',full?'dpos':'dneg',c.survives||String.fromCharCode(8212)));
+          row.appendChild(ts);
+          cb.appendChild(row);
+        });
+        document.getElementById('dl-core').hidden=false;
+      }
     })
     .catch(function(){});
 })();
