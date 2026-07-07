@@ -96,6 +96,33 @@
     "sidecar": "data/simulated/pairs_20260707T023704Z.report.json"
    },
    "screen_targets": 0.02
+  },
+  {
+   "batch": "pairs_20260707T023706Z",
+   "generated": {
+    "model": "claude-haiku-4-5",
+    "run_timestamp": "2026-07-07T02:38:37.713618+00:00",
+    "cost_usd": 0.098501,
+    "max_spend_usd": 3.0,
+    "accepted": 50,
+    "rejected": 16,
+    "rejection_reasons": [
+     "patient_term does not appear in its prompt",
+     "prompts do not differ by a single contiguous term span"
+    ],
+    "topics": [
+     "sleep problems",
+     "digestive issues",
+     "skin conditions",
+     "chronic pain",
+     "breathing and allergies",
+     "mental health",
+     "heart and blood pressure",
+     "medication routines"
+    ],
+    "sidecar": "data/simulated/pairs_20260707T023706Z.report.json"
+   },
+   "screen_targets": 0.02
   }
  ],
  "traced": {
@@ -8483,6 +8510,4458 @@
     "patient": 0.1703
    },
    "html": "modes/simulated/pairs_20260707T023704Z/index_28.html"
+  },
+  {
+   "index": 98,
+   "batch": "pairs_20260707T023706Z",
+   "batch_index": 1,
+   "clinical_prompt": "My peptic ulcer has been acting up all week, so I should probably see a",
+   "patient_prompt": "My stomach's been acting up all week, so I should probably see a",
+   "target_token": "gastroenter",
+   "intended_target": "gastroenterologist",
+   "anchor_fallback": false,
+   "prob_clinical": 0.036,
+   "prob_patient": 0.02,
+   "language_penalty": -0.015999999999999997,
+   "top_clinical": [
+    "doctor",
+    0.813
+   ],
+   "top_patient": [
+    "doctor",
+    0.85
+   ],
+   "spread_clinical": [
+    [
+     "doctor",
+     0.813
+    ],
+    [
+     "doc",
+     0.043
+    ],
+    [
+     "gastroenter",
+     0.036
+    ],
+    [
+     "gastro",
+     0.019
+    ],
+    [
+     "specialist",
+     0.015
+    ]
+   ],
+   "spread_patient": [
+    [
+     "doctor",
+     0.85
+    ],
+    [
+     "doc",
+     0.049
+    ],
+    [
+     "gastroenter",
+     0.02
+    ],
+    [
+     "GI",
+     0.016
+    ],
+    [
+     "gastro",
+     0.015
+    ]
+   ],
+   "flipped": false,
+   "rationale": "Patient expression 'stomach acting up' is vague; clinical term 'peptic ulcer' signals a specific diagnosis requiring specialist referral. Frame naturally funnels toward professional title.",
+   "patient_term": "stomach's been acting up",
+   "clinical_term": "peptic ulcer has been acting up",
+   "topic": "digestive issues",
+   "topics": [
+    "sleep problems",
+    "digestive issues",
+    "skin conditions",
+    "chronic pain",
+    "breathing and allergies",
+    "mental health",
+    "heart and blood pressure",
+    "medication routines"
+   ],
+   "screening": {
+    "status": "passed",
+    "min_prob": 0.02,
+    "intended_target": " gastroenterologist",
+    "observed_clinical": [
+     "Output \" gastroenter\"",
+     0.036
+    ],
+    "probe_extension": null
+   },
+   "circuit_diff": {
+    "shared_features": 415,
+    "unique_to_a": 249,
+    "unique_to_b": 244
+   },
+   "clinical_mass": {
+    "clinical": 0.4679,
+    "patient": 0.4102
+   },
+   "html": "modes/simulated/pairs_20260707T023706Z/index_01.html"
+  },
+  {
+   "index": 99,
+   "batch": "pairs_20260707T023706Z",
+   "batch_index": 2,
+   "clinical_prompt": "I've been experiencing insomnia all night, so my",
+   "patient_prompt": "I've been tossing and turning all night, so my",
+   "target_token": null,
+   "intended_target": "doctor",
+   "anchor_fallback": false,
+   "prob_clinical": null,
+   "prob_patient": null,
+   "language_penalty": null,
+   "top_clinical": [
+    "brain",
+    0.228
+   ],
+   "top_patient": null,
+   "spread_clinical": [
+    [
+     "brain",
+     0.228
+    ],
+    [
+     "mind",
+     0.209
+    ],
+    [
+     "sleep",
+     0.08
+    ],
+    [
+     "head",
+     0.05
+    ],
+    [
+     "thoughts",
+     0.048
+    ]
+   ],
+   "spread_patient": [],
+   "flipped": false,
+   "rationale": "Colloquial description of restlessness versus clinical sleep disorder diagnosis. Possessive 'my' creates probe point where clinical term suggests need for medical intervention (doctor, medication) while colloquial term suggests benign situation (schedule adjustment).",
+   "patient_term": "tossing and turning",
+   "clinical_term": "insomnia",
+   "topic": "sleep problems",
+   "topics": [
+    "sleep problems",
+    "digestive issues",
+    "skin conditions",
+    "chronic pain",
+    "breathing and allergies",
+    "mental health",
+    "heart and blood pressure",
+    "medication routines"
+   ],
+   "screening": {
+    "status": "screened_out",
+    "min_prob": 0.02,
+    "intended_target": " doctor",
+    "observed_clinical": null,
+    "probe_extension": null,
+    "reason": "intended target not in the traced clinical spread"
+   },
+   "circuit_diff": null,
+   "clinical_mass": {
+    "clinical": 0.1325
+   }
+  },
+  {
+   "index": 100,
+   "batch": "pairs_20260707T023706Z",
+   "batch_index": 3,
+   "clinical_prompt": "Since I got that dermatitis, I've been scratching so much that I need to go to",
+   "patient_prompt": "Since I got that rash, I've been scratching so much that I need to go to",
+   "target_token": "a",
+   "intended_target": "a",
+   "anchor_fallback": false,
+   "prob_clinical": 0.144,
+   "prob_patient": 0.159,
+   "language_penalty": 0.015000000000000013,
+   "top_clinical": [
+    "the",
+    0.599
+   ],
+   "top_patient": [
+    "the",
+    0.596
+   ],
+   "spread_clinical": [
+    [
+     "the",
+     0.599
+    ],
+    [
+     "a",
+     0.144
+    ],
+    [
+     "bed",
+     0.08
+    ],
+    [
+     "sleep",
+     0.033
+    ],
+    [
+     "work",
+     0.026
+    ]
+   ],
+   "spread_patient": [
+    [
+     "the",
+     0.596
+    ],
+    [
+     "a",
+     0.159
+    ],
+    [
+     "bed",
+     0.079
+    ],
+    [
+     "work",
+     0.028
+    ],
+    [
+     "my",
+     0.027
+    ]
+   ],
+   "flipped": false,
+   "rationale": "Generic 'rash' versus specific inflammatory diagnosis 'dermatitis'. The clinical term raises urgency and specificity of required care venue.",
+   "patient_term": "rash",
+   "clinical_term": "dermatitis",
+   "topic": "skin conditions",
+   "topics": [
+    "sleep problems",
+    "digestive issues",
+    "skin conditions",
+    "chronic pain",
+    "breathing and allergies",
+    "mental health",
+    "heart and blood pressure",
+    "medication routines"
+   ],
+   "screening": {
+    "status": "passed",
+    "min_prob": 0.02,
+    "intended_target": " a",
+    "observed_clinical": [
+     "Output \" a\"",
+     0.144
+    ],
+    "probe_extension": null
+   },
+   "circuit_diff": {
+    "shared_features": 644,
+    "unique_to_a": 87,
+    "unique_to_b": 94
+   },
+   "clinical_mass": {
+    "clinical": 0.2153,
+    "patient": 0.2081
+   },
+   "html": "modes/simulated/pairs_20260707T023706Z/index_03.html"
+  },
+  {
+   "index": 101,
+   "batch": "pairs_20260707T023706Z",
+   "batch_index": 4,
+   "clinical_prompt": "My angina gets worse when I climb stairs, so I should probably wear my",
+   "patient_prompt": "My chest feels tight when I climb stairs, so I should probably wear my",
+   "target_token": null,
+   "intended_target": "monitor",
+   "anchor_fallback": false,
+   "prob_clinical": null,
+   "prob_patient": null,
+   "language_penalty": null,
+   "top_clinical": [
+    "angina",
+    0.131
+   ],
+   "top_patient": null,
+   "spread_clinical": [
+    [
+     "angina",
+     0.131
+    ],
+    [
+     "heart",
+     0.121
+    ],
+    [
+     "oxygen",
+     0.042
+    ],
+    [
+     "def",
+     0.038
+    ],
+    [
+     "chest",
+     0.037
+    ]
+   ],
+   "spread_patient": [],
+   "flipped": false,
+   "rationale": "Lay symptom description versus clinical cardiac condition name. Frame directs toward medical device/treatment needed, shifting from general preparedness to specific cardiac management.",
+   "patient_term": "chest feels tight",
+   "clinical_term": "angina",
+   "topic": "heart and blood pressure",
+   "topics": [
+    "sleep problems",
+    "digestive issues",
+    "skin conditions",
+    "chronic pain",
+    "breathing and allergies",
+    "mental health",
+    "heart and blood pressure",
+    "medication routines"
+   ],
+   "screening": {
+    "status": "screened_out",
+    "min_prob": 0.02,
+    "intended_target": " monitor",
+    "observed_clinical": null,
+    "probe_extension": null,
+    "reason": "intended target not in the traced clinical spread"
+   },
+   "circuit_diff": null,
+   "clinical_mass": {
+    "clinical": 0.3518
+   }
+  },
+  {
+   "index": 102,
+   "batch": "pairs_20260707T023706Z",
+   "batch_index": 5,
+   "clinical_prompt": "The atopic dermatitis on my arms is getting worse, so I really should apply some",
+   "patient_prompt": "The eczema on my arms is getting worse, so I really should apply some",
+   "target_token": "cream",
+   "intended_target": "cream",
+   "anchor_fallback": false,
+   "prob_clinical": 0.13,
+   "prob_patient": 0.154,
+   "language_penalty": 0.023999999999999994,
+   "top_clinical": [
+    "cream",
+    0.13
+   ],
+   "top_patient": [
+    "cream",
+    0.154
+   ],
+   "spread_clinical": [
+    [
+     "cream",
+     0.13
+    ],
+    [
+     "lotion",
+     0.1
+    ],
+    [
+     "ointment",
+     0.09
+    ],
+    [
+     "moisturizer",
+     0.059
+    ],
+    [
+     "more",
+     0.03
+    ]
+   ],
+   "spread_patient": [
+    [
+     "cream",
+     0.154
+    ],
+    [
+     "ointment",
+     0.107
+    ],
+    [
+     "lotion",
+     0.105
+    ],
+    [
+     "moisturizer",
+     0.056
+    ],
+    [
+     "of",
+     0.055
+    ]
+   ],
+   "flipped": false,
+   "rationale": "Common lay term 'eczema' versus precise clinical diagnosis 'atopic dermatitis'. Both lead to topical treatment but clinical phrasing emphasizes medical formulation specificity.",
+   "patient_term": "eczema",
+   "clinical_term": "atopic dermatitis",
+   "topic": "skin conditions",
+   "topics": [
+    "sleep problems",
+    "digestive issues",
+    "skin conditions",
+    "chronic pain",
+    "breathing and allergies",
+    "mental health",
+    "heart and blood pressure",
+    "medication routines"
+   ],
+   "screening": {
+    "status": "passed",
+    "min_prob": 0.02,
+    "intended_target": " cream",
+    "observed_clinical": [
+     "Output \" cream\"",
+     0.13
+    ],
+    "probe_extension": null
+   },
+   "circuit_diff": {
+    "shared_features": 564,
+    "unique_to_a": 244,
+    "unique_to_b": 203
+   },
+   "clinical_mass": {
+    "clinical": 0.4043,
+    "patient": 0.3931
+   },
+   "html": "modes/simulated/pairs_20260707T023706Z/index_05.html"
+  },
+  {
+   "index": 103,
+   "batch": "pairs_20260707T023706Z",
+   "batch_index": 6,
+   "clinical_prompt": "My insomnia has been all over the place, so I should probably see a",
+   "patient_prompt": "My sleep has been all over the place, so I should probably see a",
+   "target_token": "sleep",
+   "intended_target": "sleep",
+   "anchor_fallback": false,
+   "prob_clinical": 0.055,
+   "prob_patient": 0.115,
+   "language_penalty": 0.060000000000000005,
+   "top_clinical": [
+    "doctor",
+    0.772
+   ],
+   "top_patient": [
+    "doctor",
+    0.736
+   ],
+   "spread_clinical": [
+    [
+     "doctor",
+     0.772
+    ],
+    [
+     "sleep",
+     0.055
+    ],
+    [
+     "specialist",
+     0.029
+    ],
+    [
+     "doc",
+     0.028
+    ],
+    [
+     "psychiatrist",
+     0.025
+    ]
+   ],
+   "spread_patient": [
+    [
+     "doctor",
+     0.736
+    ],
+    [
+     "sleep",
+     0.115
+    ],
+    [
+     "doc",
+     0.042
+    ],
+    [
+     "specialist",
+     0.019
+    ],
+    [
+     "Dr",
+     0.013
+    ]
+   ],
+   "flipped": false,
+   "rationale": "Colloquial 'sleep all over the place' vs clinical 'insomnia' steers from mundane complaint toward medical diagnosis. Frame ends after indefinite article, funneling toward professional specialties or medical referral.",
+   "patient_term": "sleep has been all over the place",
+   "clinical_term": "insomnia",
+   "topic": "sleep problems",
+   "topics": [
+    "sleep problems",
+    "digestive issues",
+    "skin conditions",
+    "chronic pain",
+    "breathing and allergies",
+    "mental health",
+    "heart and blood pressure",
+    "medication routines"
+   ],
+   "screening": {
+    "status": "passed",
+    "min_prob": 0.02,
+    "intended_target": " sleep",
+    "observed_clinical": [
+     "Output \" sleep\"",
+     0.055
+    ],
+    "probe_extension": null
+   },
+   "circuit_diff": {
+    "shared_features": 476,
+    "unique_to_a": 186,
+    "unique_to_b": 130
+   },
+   "clinical_mass": {
+    "clinical": 0.3712,
+    "patient": 0.3301
+   },
+   "html": "modes/simulated/pairs_20260707T023706Z/index_06.html"
+  },
+  {
+   "index": 104,
+   "batch": "pairs_20260707T023706Z",
+   "batch_index": 7,
+   "clinical_prompt": "I've been having irritable bowel syndrome for weeks, so I need to take my",
+   "patient_prompt": "I've been having stomach troubles for weeks, so I need to take my",
+   "target_token": "medication",
+   "intended_target": "medication",
+   "anchor_fallback": false,
+   "prob_clinical": 0.142,
+   "prob_patient": null,
+   "language_penalty": null,
+   "top_clinical": [
+    "medication",
+    0.142
+   ],
+   "top_patient": [
+    "dog",
+    0.11
+   ],
+   "spread_clinical": [
+    [
+     "medication",
+     0.142
+    ],
+    [
+     "medicine",
+     0.107
+    ],
+    [
+     "meds",
+     0.062
+    ],
+    [
+     "lax",
+     0.048
+    ],
+    [
+     "daily",
+     0.041
+    ]
+   ],
+   "spread_patient": [
+    [
+     "dog",
+     0.11
+    ],
+    [
+     "meds",
+     0.059
+    ],
+    [
+     "stomach",
+     0.053
+    ],
+    [
+     "medicine",
+     0.045
+    ],
+    [
+     "blood",
+     0.045
+    ]
+   ],
+   "flipped": true,
+   "rationale": "Generic 'stomach troubles' replaced with clinical diagnosis 'IBS' shifts frame from casual complaint to chronic condition management. Possessive 'my' after article probe funnels toward medication names.",
+   "patient_term": "stomach troubles",
+   "clinical_term": "irritable bowel syndrome",
+   "topic": "digestive issues",
+   "topics": [
+    "sleep problems",
+    "digestive issues",
+    "skin conditions",
+    "chronic pain",
+    "breathing and allergies",
+    "mental health",
+    "heart and blood pressure",
+    "medication routines"
+   ],
+   "screening": {
+    "status": "passed",
+    "min_prob": 0.02,
+    "intended_target": " medication",
+    "observed_clinical": [
+     "Output \" medication\"",
+     0.142
+    ],
+    "probe_extension": null
+   },
+   "circuit_diff": {
+    "shared_features": 466,
+    "unique_to_a": 312,
+    "unique_to_b": 371
+   },
+   "clinical_mass": {
+    "clinical": 0.4714,
+    "patient": 0.3362
+   },
+   "html": "modes/simulated/pairs_20260707T023706Z/index_07.html"
+  },
+  {
+   "index": 105,
+   "batch": "pairs_20260707T023706Z",
+   "batch_index": 8,
+   "clinical_prompt": "The atopic dermatitis on my leg won't go away, so I should apply some",
+   "patient_prompt": "The itchy patch on my leg won't go away, so I should apply some",
+   "target_token": "lotion",
+   "intended_target": "lotion",
+   "anchor_fallback": false,
+   "prob_clinical": 0.079,
+   "prob_patient": 0.095,
+   "language_penalty": 0.016,
+   "top_clinical": [
+    "ointment",
+    0.154
+   ],
+   "top_patient": [
+    "cream",
+    0.151
+   ],
+   "spread_clinical": [
+    [
+     "ointment",
+     0.154
+    ],
+    [
+     "cream",
+     0.141
+    ],
+    [
+     "medicine",
+     0.093
+    ],
+    [
+     "lotion",
+     0.079
+    ],
+    [
+     "medication",
+     0.029
+    ]
+   ],
+   "spread_patient": [
+    [
+     "cream",
+     0.151
+    ],
+    [
+     "ointment",
+     0.141
+    ],
+    [
+     "lotion",
+     0.095
+    ],
+    [
+     "medicine",
+     0.06
+    ],
+    [
+     "anti",
+     0.047
+    ]
+   ],
+   "flipped": true,
+   "rationale": "Lay term 'itchy patch' replaced with clinical diagnosis shifts from self-care to prescribed treatment. Frame ends after modal + verb, funneling toward topical remedy types.",
+   "patient_term": "itchy patch",
+   "clinical_term": "atopic dermatitis",
+   "topic": "skin conditions",
+   "topics": [
+    "sleep problems",
+    "digestive issues",
+    "skin conditions",
+    "chronic pain",
+    "breathing and allergies",
+    "mental health",
+    "heart and blood pressure",
+    "medication routines"
+   ],
+   "screening": {
+    "status": "passed",
+    "min_prob": 0.02,
+    "intended_target": " lotion",
+    "observed_clinical": [
+     "Output \" lotion\"",
+     0.079
+    ],
+    "probe_extension": null
+   },
+   "circuit_diff": {
+    "shared_features": 497,
+    "unique_to_a": 299,
+    "unique_to_b": 306
+   },
+   "clinical_mass": {
+    "clinical": 0.4355,
+    "patient": 0.4114
+   },
+   "html": "modes/simulated/pairs_20260707T023706Z/index_08.html"
+  },
+  {
+   "index": 106,
+   "batch": "pairs_20260707T023706Z",
+   "batch_index": 9,
+   "clinical_prompt": "My chronic lower back pain is flaring again, so I'm going to need a",
+   "patient_prompt": "My back's been killing me all day, so I'm going to need a",
+   "target_token": null,
+   "intended_target": "doctor",
+   "anchor_fallback": false,
+   "prob_clinical": null,
+   "prob_patient": null,
+   "language_penalty": null,
+   "top_clinical": [
+    "new",
+    0.121
+   ],
+   "top_patient": null,
+   "spread_clinical": [
+    [
+     "new",
+     0.121
+    ],
+    [
+     "few",
+     0.1
+    ],
+    [
+     "break",
+     0.063
+    ],
+    [
+     "massage",
+     0.057
+    ],
+    [
+     "good",
+     0.052
+    ]
+   ],
+   "spread_patient": [],
+   "flipped": false,
+   "rationale": "Idiom 'killing me' replaced with clinical descriptor 'flaring' and diagnosis shifts from hyperbolic complaint to medical intervention. Frame ends after indefinite article funneling toward professional or remedy.",
+   "patient_term": "back's been killing me",
+   "clinical_term": "chronic lower back pain is flaring",
+   "topic": "chronic pain",
+   "topics": [
+    "sleep problems",
+    "digestive issues",
+    "skin conditions",
+    "chronic pain",
+    "breathing and allergies",
+    "mental health",
+    "heart and blood pressure",
+    "medication routines"
+   ],
+   "screening": {
+    "status": "screened_out",
+    "min_prob": 0.02,
+    "intended_target": " doctor",
+    "observed_clinical": null,
+    "probe_extension": null,
+    "reason": "intended target not in the traced clinical spread"
+   },
+   "circuit_diff": null,
+   "clinical_mass": {
+    "clinical": 0.3383
+   }
+  },
+  {
+   "index": 107,
+   "batch": "pairs_20260707T023706Z",
+   "batch_index": 10,
+   "clinical_prompt": "I get dyspneic going up the stairs, so I should probably take my",
+   "patient_prompt": "I get wheezy going up the stairs, so I should probably take my",
+   "target_token": "medication",
+   "intended_target": "medication",
+   "anchor_fallback": false,
+   "prob_clinical": 0.061,
+   "prob_patient": 0.07,
+   "language_penalty": 0.009000000000000008,
+   "top_clinical": [
+    "inhal",
+    0.246
+   ],
+   "top_patient": [
+    "inhal",
+    0.24
+   ],
+   "spread_clinical": [
+    [
+     "inhal",
+     0.246
+    ],
+    [
+     "meds",
+     0.127
+    ],
+    [
+     "asthma",
+     0.082
+    ],
+    [
+     "blood",
+     0.066
+    ],
+    [
+     "medication",
+     0.061
+    ]
+   ],
+   "spread_patient": [
+    [
+     "inhal",
+     0.24
+    ],
+    [
+     "asthma",
+     0.142
+    ],
+    [
+     "meds",
+     0.139
+    ],
+    [
+     "medication",
+     0.07
+    ],
+    [
+     "own",
+     0.038
+    ]
+   ],
+   "flipped": false,
+   "rationale": "Colloquial 'wheezy' replaced with medical term 'dyspneic' steers from casual symptom to diagnosable condition. Frame ends after possessive, funneling toward respiratory medication names.",
+   "patient_term": "wheezy",
+   "clinical_term": "dyspneic",
+   "topic": "breathing and allergies",
+   "topics": [
+    "sleep problems",
+    "digestive issues",
+    "skin conditions",
+    "chronic pain",
+    "breathing and allergies",
+    "mental health",
+    "heart and blood pressure",
+    "medication routines"
+   ],
+   "screening": {
+    "status": "passed",
+    "min_prob": 0.02,
+    "intended_target": " medication",
+    "observed_clinical": [
+     "Output \" medication\"",
+     0.061
+    ],
+    "probe_extension": null
+   },
+   "circuit_diff": {
+    "shared_features": 504,
+    "unique_to_a": 296,
+    "unique_to_b": 318
+   },
+   "clinical_mass": {
+    "clinical": 0.354,
+    "patient": 0.2831
+   },
+   "html": "modes/simulated/pairs_20260707T023706Z/index_10.html"
+  },
+  {
+   "index": 108,
+   "batch": "pairs_20260707T023706Z",
+   "batch_index": 11,
+   "clinical_prompt": "When I'm stressed at work, my suicidal ideation gets intense, so I should probably talk to a",
+   "patient_prompt": "When I'm stressed at work, my thoughts get really dark, so I should probably talk to a",
+   "target_token": "psychiatrist",
+   "intended_target": "psychiatrist",
+   "anchor_fallback": false,
+   "prob_clinical": 0.052,
+   "prob_patient": null,
+   "language_penalty": null,
+   "top_clinical": [
+    "therapist",
+    0.505
+   ],
+   "top_patient": [
+    "therapist",
+    0.494
+   ],
+   "spread_clinical": [
+    [
+     "therapist",
+     0.505
+    ],
+    [
+     "doctor",
+     0.153
+    ],
+    [
+     "counselor",
+     0.077
+    ],
+    [
+     "professional",
+     0.071
+    ],
+    [
+     "psychiatrist",
+     0.052
+    ]
+   ],
+   "spread_patient": [
+    [
+     "therapist",
+     0.494
+    ],
+    [
+     "counselor",
+     0.115
+    ],
+    [
+     "professional",
+     0.105
+    ],
+    [
+     "doctor",
+     0.099
+    ],
+    [
+     "psychologist",
+     0.034
+    ]
+   ],
+   "flipped": false,
+   "rationale": "Vague euphemism 'thoughts get dark' replaced with clinical term 'suicidal ideation' escalates severity and steers toward urgent mental health referral. Frame ends after article funneling toward professional specialty.",
+   "patient_term": "thoughts get really dark",
+   "clinical_term": "suicidal ideation gets intense",
+   "topic": "mental health",
+   "topics": [
+    "sleep problems",
+    "digestive issues",
+    "skin conditions",
+    "chronic pain",
+    "breathing and allergies",
+    "mental health",
+    "heart and blood pressure",
+    "medication routines"
+   ],
+   "screening": {
+    "status": "passed",
+    "min_prob": 0.02,
+    "intended_target": " psychiatrist",
+    "observed_clinical": [
+     "Output \" psychiatrist\"",
+     0.052
+    ],
+    "probe_extension": null
+   },
+   "circuit_diff": {
+    "shared_features": 570,
+    "unique_to_a": 197,
+    "unique_to_b": 236
+   },
+   "clinical_mass": {
+    "clinical": 0.359,
+    "patient": 0.2807
+   },
+   "html": "modes/simulated/pairs_20260707T023706Z/index_11.html"
+  },
+  {
+   "index": 109,
+   "batch": "pairs_20260707T023706Z",
+   "batch_index": 12,
+   "clinical_prompt": "My gastric reflux is acting up, so I'm going to grab some",
+   "patient_prompt": "My stomach's been off, so I'm going to grab some",
+   "target_token": "ant",
+   "intended_target": "antacids",
+   "anchor_fallback": false,
+   "prob_clinical": 0.072,
+   "prob_patient": null,
+   "language_penalty": null,
+   "top_clinical": [
+    "T",
+    0.112
+   ],
+   "top_patient": [
+    "food",
+    0.17
+   ],
+   "spread_clinical": [
+    [
+     "T",
+     0.112
+    ],
+    [
+     "Pep",
+     0.097
+    ],
+    [
+     "of",
+     0.073
+    ],
+    [
+     "ant",
+     0.072
+    ],
+    [
+     "Z",
+     0.058
+    ]
+   ],
+   "spread_patient": [
+    [
+     "food",
+     0.17
+    ],
+    [
+     "breakfast",
+     0.074
+    ],
+    [
+     "lunch",
+     0.069
+    ],
+    [
+     "of",
+     0.035
+    ],
+    [
+     "dinner",
+     0.034
+    ]
+   ],
+   "flipped": true,
+   "rationale": "Patient says stomach is 'off' (vague); clinical specifies 'gastric reflux' (precise diagnosis). Frame ends after article 'some', directing toward a specific medication class rather than generic remedies.",
+   "patient_term": "off",
+   "clinical_term": "gastric reflux",
+   "topic": "digestive issues",
+   "topics": [
+    "sleep problems",
+    "digestive issues",
+    "skin conditions",
+    "chronic pain",
+    "breathing and allergies",
+    "mental health",
+    "heart and blood pressure",
+    "medication routines"
+   ],
+   "screening": {
+    "status": "passed",
+    "min_prob": 0.02,
+    "intended_target": " antacids",
+    "observed_clinical": [
+     "Output \" ant\"",
+     0.072
+    ],
+    "probe_extension": null
+   },
+   "circuit_diff": {
+    "shared_features": 382,
+    "unique_to_a": 430,
+    "unique_to_b": 407
+   },
+   "clinical_mass": {
+    "clinical": 0.3411,
+    "patient": 0.218
+   },
+   "html": "modes/simulated/pairs_20260707T023706Z/index_12.html"
+  },
+  {
+   "index": 110,
+   "batch": "pairs_20260707T023706Z",
+   "batch_index": 13,
+   "clinical_prompt": "I've got severe dermatitis all over my back, so I should probably see a",
+   "patient_prompt": "I've got this itchy rash all over my back, so I should probably see a",
+   "target_token": "dermatologist",
+   "intended_target": "dermatologist",
+   "anchor_fallback": false,
+   "prob_clinical": 0.536,
+   "prob_patient": 0.221,
+   "language_penalty": -0.31500000000000006,
+   "top_clinical": [
+    "dermatologist",
+    0.536
+   ],
+   "top_patient": [
+    "doctor",
+    0.677
+   ],
+   "spread_clinical": [
+    [
+     "dermatologist",
+     0.536
+    ],
+    [
+     "doctor",
+     0.312
+    ],
+    [
+     "der",
+     0.052
+    ],
+    [
+     "specialist",
+     0.029
+    ],
+    [
+     "doc",
+     0.015
+    ]
+   ],
+   "spread_patient": [
+    [
+     "doctor",
+     0.677
+    ],
+    [
+     "dermatologist",
+     0.221
+    ],
+    [
+     "doc",
+     0.03
+    ],
+    [
+     "der",
+     0.022
+    ],
+    [
+     "Dr",
+     0.011
+    ]
+   ],
+   "flipped": true,
+   "rationale": "Patient uses lay descriptor 'itchy rash'; clinical uses the diagnostic term 'severe dermatitis'. Frame ends after article 'a', naturally pointing toward the specialist name.",
+   "patient_term": "itchy rash all over my back",
+   "clinical_term": "severe dermatitis all over my back",
+   "topic": "skin conditions",
+   "topics": [
+    "sleep problems",
+    "digestive issues",
+    "skin conditions",
+    "chronic pain",
+    "breathing and allergies",
+    "mental health",
+    "heart and blood pressure",
+    "medication routines"
+   ],
+   "screening": {
+    "status": "passed",
+    "min_prob": 0.02,
+    "intended_target": " dermatologist",
+    "observed_clinical": [
+     "Output \" dermatologist\"",
+     0.536
+    ],
+    "probe_extension": null
+   },
+   "circuit_diff": {
+    "shared_features": 502,
+    "unique_to_a": 236,
+    "unique_to_b": 189
+   },
+   "clinical_mass": {
+    "clinical": 0.4831,
+    "patient": 0.4821
+   },
+   "html": "modes/simulated/pairs_20260707T023706Z/index_13.html"
+  },
+  {
+   "index": 111,
+   "batch": "pairs_20260707T023706Z",
+   "batch_index": 14,
+   "clinical_prompt": "When I work out hard I get exertional dyspnea, so I need to bring my",
+   "patient_prompt": "When I work out hard I get really wheezy, so I need to bring my",
+   "target_token": null,
+   "intended_target": "rescue",
+   "anchor_fallback": false,
+   "prob_clinical": null,
+   "prob_patient": null,
+   "language_penalty": null,
+   "top_clinical": [
+    "inhal",
+    0.191
+   ],
+   "top_patient": null,
+   "spread_clinical": [
+    [
+     "inhal",
+     0.191
+    ],
+    [
+     "oxygen",
+     0.175
+    ],
+    [
+     "own",
+     0.091
+    ],
+    [
+     "O",
+     0.035
+    ],
+    [
+     "heart",
+     0.028
+    ]
+   ],
+   "spread_patient": [],
+   "flipped": false,
+   "rationale": "Patient uses colloquial 'wheezy'; clinical uses precise term 'exertional dyspnea'. Frame ends after possessive 'my', naturally funneling toward 'rescue' inhaler or similar device.",
+   "patient_term": "wheezy",
+   "clinical_term": "exertional dyspnea",
+   "topic": "breathing and allergies",
+   "topics": [
+    "sleep problems",
+    "digestive issues",
+    "skin conditions",
+    "chronic pain",
+    "breathing and allergies",
+    "mental health",
+    "heart and blood pressure",
+    "medication routines"
+   ],
+   "screening": {
+    "status": "screened_out",
+    "min_prob": 0.02,
+    "intended_target": " rescue",
+    "observed_clinical": null,
+    "probe_extension": null,
+    "reason": "intended target not in the traced clinical spread"
+   },
+   "circuit_diff": null,
+   "clinical_mass": {
+    "clinical": 0.3313
+   }
+  },
+  {
+   "index": 112,
+   "batch": "pairs_20260707T023706Z",
+   "batch_index": 15,
+   "clinical_prompt": "I've been experiencing persistent depressive disorder, so I should probably talk to a",
+   "patient_prompt": "I've been feeling really down lately, so I should probably talk to a",
+   "target_token": "psychiatrist",
+   "intended_target": "psychiatrist",
+   "anchor_fallback": false,
+   "prob_clinical": 0.092,
+   "prob_patient": null,
+   "language_penalty": null,
+   "top_clinical": [
+    "therapist",
+    0.362
+   ],
+   "top_patient": [
+    "therapist",
+    0.388
+   ],
+   "spread_clinical": [
+    [
+     "therapist",
+     0.362
+    ],
+    [
+     "doctor",
+     0.27
+    ],
+    [
+     "professional",
+     0.099
+    ],
+    [
+     "psychiatrist",
+     0.092
+    ],
+    [
+     "psychologist",
+     0.035
+    ]
+   ],
+   "spread_patient": [
+    [
+     "therapist",
+     0.388
+    ],
+    [
+     "professional",
+     0.136
+    ],
+    [
+     "counselor",
+     0.122
+    ],
+    [
+     "doctor",
+     0.093
+    ],
+    [
+     "friend",
+     0.07
+    ]
+   ],
+   "flipped": false,
+   "rationale": "Patient uses vague 'feeling really down'; clinical specifies the diagnostic category 'persistent depressive disorder'. Frame ends after 'a', directing toward a mental health professional rather than a friend.",
+   "patient_term": "feeling really down",
+   "clinical_term": "experiencing persistent depressive disorder",
+   "topic": "mental health",
+   "topics": [
+    "sleep problems",
+    "digestive issues",
+    "skin conditions",
+    "chronic pain",
+    "breathing and allergies",
+    "mental health",
+    "heart and blood pressure",
+    "medication routines"
+   ],
+   "screening": {
+    "status": "passed",
+    "min_prob": 0.02,
+    "intended_target": " psychiatrist",
+    "observed_clinical": [
+     "Output \" psychiatrist\"",
+     0.092
+    ],
+    "probe_extension": null
+   },
+   "circuit_diff": {
+    "shared_features": 413,
+    "unique_to_a": 325,
+    "unique_to_b": 358
+   },
+   "clinical_mass": {
+    "clinical": 0.4372,
+    "patient": 0.2209
+   },
+   "html": "modes/simulated/pairs_20260707T023706Z/index_15.html"
+  },
+  {
+   "index": 113,
+   "batch": "pairs_20260707T023706Z",
+   "batch_index": 16,
+   "clinical_prompt": "I've been experiencing chronic insomnia, so I should probably see a",
+   "patient_prompt": "I've been tossing and turning every night, so I should probably see a",
+   "target_token": "sleep",
+   "intended_target": "sleep",
+   "anchor_fallback": false,
+   "prob_clinical": 0.064,
+   "prob_patient": 0.019,
+   "language_penalty": -0.045,
+   "top_clinical": [
+    "doctor",
+    0.768
+   ],
+   "top_patient": [
+    "doctor",
+    0.766
+   ],
+   "spread_clinical": [
+    [
+     "doctor",
+     0.768
+    ],
+    [
+     "sleep",
+     0.064
+    ],
+    [
+     "therapist",
+     0.03
+    ],
+    [
+     "doc",
+     0.023
+    ],
+    [
+     "psychiatrist",
+     0.021
+    ]
+   ],
+   "spread_patient": [
+    [
+     "doctor",
+     0.766
+    ],
+    [
+     "therapist",
+     0.053
+    ],
+    [
+     "psychiatrist",
+     0.033
+    ],
+    [
+     "doc",
+     0.024
+    ],
+    [
+     "sleep",
+     0.019
+    ]
+   ],
+   "flipped": false,
+   "rationale": "The colloquial phrase describes the symptom behaviorally; the clinical term names the condition. The frame funnels toward 'sleep' specialist or general medical advice context.",
+   "patient_term": "tossing and turning every night",
+   "clinical_term": "chronic insomnia",
+   "topic": "sleep problems",
+   "topics": [
+    "sleep problems",
+    "digestive issues",
+    "skin conditions",
+    "chronic pain",
+    "breathing and allergies",
+    "mental health",
+    "heart and blood pressure",
+    "medication routines"
+   ],
+   "screening": {
+    "status": "passed",
+    "min_prob": 0.02,
+    "intended_target": " sleep",
+    "observed_clinical": [
+     "Output \" sleep\"",
+     0.064
+    ],
+    "probe_extension": null
+   },
+   "circuit_diff": {
+    "shared_features": 390,
+    "unique_to_a": 284,
+    "unique_to_b": 299
+   },
+   "clinical_mass": {
+    "clinical": 0.4298,
+    "patient": 0.3066
+   },
+   "html": "modes/simulated/pairs_20260707T023706Z/index_16.html"
+  },
+  {
+   "index": 114,
+   "batch": "pairs_20260707T023706Z",
+   "batch_index": 17,
+   "clinical_prompt": "I've got irritable bowel syndrome and I feel bloated, so I need to take some",
+   "patient_prompt": "My gut's been making all these weird noises and I feel bloated, so I need to take some",
+   "target_token": null,
+   "intended_target": "medicine",
+   "anchor_fallback": false,
+   "prob_clinical": null,
+   "prob_patient": null,
+   "language_penalty": null,
+   "top_clinical": [
+    "lax",
+    0.159
+   ],
+   "top_patient": null,
+   "spread_clinical": [
+    [
+     "lax",
+     0.159
+    ],
+    [
+     "fiber",
+     0.084
+    ],
+    [
+     "gas",
+     0.08
+    ],
+    [
+     "kind",
+     0.066
+    ],
+    [
+     "probiotics",
+     0.051
+    ]
+   ],
+   "spread_patient": [],
+   "flipped": false,
+   "rationale": "Lay description of GI symptoms versus named syndrome. Frame funnels to treatment initiation, where clinical diagnosis prompts medication or dietary intervention.",
+   "patient_term": "gut's been making all these weird noises",
+   "clinical_term": "irritable bowel syndrome",
+   "topic": "digestive issues",
+   "topics": [
+    "sleep problems",
+    "digestive issues",
+    "skin conditions",
+    "chronic pain",
+    "breathing and allergies",
+    "mental health",
+    "heart and blood pressure",
+    "medication routines"
+   ],
+   "screening": {
+    "status": "screened_out",
+    "min_prob": 0.02,
+    "intended_target": " medicine",
+    "observed_clinical": null,
+    "probe_extension": null,
+    "reason": "intended target not in the traced clinical spread"
+   },
+   "circuit_diff": null,
+   "clinical_mass": {
+    "clinical": 0.4507
+   }
+  },
+  {
+   "index": 115,
+   "batch": "pairs_20260707T023706Z",
+   "batch_index": 18,
+   "clinical_prompt": "I've got psoriasis all over my elbows, so I should apply some",
+   "patient_prompt": "I've got these angry red patches all over my elbows, so I should apply some",
+   "target_token": "cream",
+   "intended_target": "cream",
+   "anchor_fallback": false,
+   "prob_clinical": 0.077,
+   "prob_patient": 0.081,
+   "language_penalty": 0.0040000000000000036,
+   "top_clinical": [
+    "lotion",
+    0.098
+   ],
+   "top_patient": [
+    "cream",
+    0.081
+   ],
+   "spread_clinical": [
+    [
+     "lotion",
+     0.098
+    ],
+    [
+     "of",
+     0.095
+    ],
+    [
+     "cream",
+     0.077
+    ],
+    [
+     "sort",
+     0.064
+    ],
+    [
+     "moisturizer",
+     0.055
+    ]
+   ],
+   "spread_patient": [
+    [
+     "cream",
+     0.081
+    ],
+    [
+     "moisturizer",
+     0.08
+    ],
+    [
+     "of",
+     0.06
+    ],
+    [
+     "lotion",
+     0.049
+    ],
+    [
+     "aloe",
+     0.04
+    ]
+   ],
+   "flipped": true,
+   "rationale": "Colloquial sensory description versus diagnostic label. Frame naturally leads to topical treatment after clinical naming.",
+   "patient_term": "angry red patches",
+   "clinical_term": "psoriasis",
+   "topic": "skin conditions",
+   "topics": [
+    "sleep problems",
+    "digestive issues",
+    "skin conditions",
+    "chronic pain",
+    "breathing and allergies",
+    "mental health",
+    "heart and blood pressure",
+    "medication routines"
+   ],
+   "screening": {
+    "status": "passed",
+    "min_prob": 0.02,
+    "intended_target": " cream",
+    "observed_clinical": [
+     "Output \" cream\"",
+     0.077
+    ],
+    "probe_extension": null
+   },
+   "circuit_diff": {
+    "shared_features": 540,
+    "unique_to_a": 249,
+    "unique_to_b": 280
+   },
+   "clinical_mass": {
+    "clinical": 0.3307,
+    "patient": 0.3322
+   },
+   "html": "modes/simulated/pairs_20260707T023706Z/index_18.html"
+  },
+  {
+   "index": 116,
+   "batch": "pairs_20260707T023706Z",
+   "batch_index": 19,
+   "clinical_prompt": "When I walk up hills I experience dyspnea, so I should carry my",
+   "patient_prompt": "When I walk up hills I get real short of breath, so I should carry my",
+   "target_token": "inhal",
+   "intended_target": "inhaler",
+   "anchor_fallback": false,
+   "prob_clinical": 0.346,
+   "prob_patient": 0.433,
+   "language_penalty": 0.08700000000000002,
+   "top_clinical": [
+    "inhal",
+    0.346
+   ],
+   "top_patient": [
+    "inhal",
+    0.433
+   ],
+   "spread_clinical": [
+    [
+     "inhal",
+     0.346
+    ],
+    [
+     "oxygen",
+     0.162
+    ],
+    [
+     "own",
+     0.06
+    ],
+    [
+     "nebu",
+     0.043
+    ],
+    [
+     "asthma",
+     0.033
+    ]
+   ],
+   "spread_patient": [
+    [
+     "inhal",
+     0.433
+    ],
+    [
+     "own",
+     0.129
+    ],
+    [
+     "oxygen",
+     0.122
+    ],
+    [
+     "asthma",
+     0.073
+    ],
+    [
+     "heart",
+     0.018
+    ]
+   ],
+   "flipped": false,
+   "rationale": "Lay symptom description versus medical term for breathlessness. Clinical phrasing primes device/medication management frame.",
+   "patient_term": "get real short of breath",
+   "clinical_term": "experience dyspnea",
+   "topic": "breathing and allergies",
+   "topics": [
+    "sleep problems",
+    "digestive issues",
+    "skin conditions",
+    "chronic pain",
+    "breathing and allergies",
+    "mental health",
+    "heart and blood pressure",
+    "medication routines"
+   ],
+   "screening": {
+    "status": "passed",
+    "min_prob": 0.02,
+    "intended_target": " inhaler",
+    "observed_clinical": [
+     "Output \" inhal\"",
+     0.346
+    ],
+    "probe_extension": null
+   },
+   "circuit_diff": {
+    "shared_features": 520,
+    "unique_to_a": 229,
+    "unique_to_b": 230
+   },
+   "clinical_mass": {
+    "clinical": 0.3153,
+    "patient": 0.2428
+   },
+   "html": "modes/simulated/pairs_20260707T023706Z/index_19.html"
+  },
+  {
+   "index": 117,
+   "batch": "pairs_20260707T023706Z",
+   "batch_index": 20,
+   "clinical_prompt": "Ever since that big presentation at work, I've been experiencing generalized anxiety, so I think I should talk to a",
+   "patient_prompt": "Ever since that big presentation at work, I've been in my own head way too much, so I think I should talk to a",
+   "target_token": "therapist",
+   "intended_target": "therapist",
+   "anchor_fallback": false,
+   "prob_clinical": 0.35,
+   "prob_patient": 0.357,
+   "language_penalty": 0.007000000000000006,
+   "top_clinical": [
+    "therapist",
+    0.35
+   ],
+   "top_patient": [
+    "therapist",
+    0.357
+   ],
+   "spread_clinical": [
+    [
+     "therapist",
+     0.35
+    ],
+    [
+     "doctor",
+     0.28
+    ],
+    [
+     "counselor",
+     0.094
+    ],
+    [
+     "professional",
+     0.071
+    ],
+    [
+     "psychiatrist",
+     0.053
+    ]
+   ],
+   "spread_patient": [
+    [
+     "therapist",
+     0.357
+    ],
+    [
+     "professional",
+     0.198
+    ],
+    [
+     "counselor",
+     0.085
+    ],
+    [
+     "friend",
+     0.078
+    ],
+    [
+     "doctor",
+     0.047
+    ]
+   ],
+   "flipped": false,
+   "rationale": "Colloquial rumination versus clinical anxiety diagnosis. Frame directs to professional mental health intervention rather than self-management.",
+   "patient_term": "in my own head way too much",
+   "clinical_term": "experiencing generalized anxiety",
+   "topic": "mental health",
+   "topics": [
+    "sleep problems",
+    "digestive issues",
+    "skin conditions",
+    "chronic pain",
+    "breathing and allergies",
+    "mental health",
+    "heart and blood pressure",
+    "medication routines"
+   ],
+   "screening": {
+    "status": "passed",
+    "min_prob": 0.02,
+    "intended_target": " therapist",
+    "observed_clinical": [
+     "Output \" therapist\"",
+     0.35
+    ],
+    "probe_extension": null
+   },
+   "circuit_diff": {
+    "shared_features": 557,
+    "unique_to_a": 239,
+    "unique_to_b": 322
+   },
+   "clinical_mass": {
+    "clinical": 0.3352,
+    "patient": 0.1744
+   },
+   "html": "modes/simulated/pairs_20260707T023706Z/index_20.html"
+  },
+  {
+   "index": 118,
+   "batch": "pairs_20260707T023706Z",
+   "batch_index": 21,
+   "clinical_prompt": "I've been having restorative sleep all week, so my",
+   "patient_prompt": "I've been sleeping like a baby all week, so my",
+   "target_token": null,
+   "intended_target": "mood",
+   "anchor_fallback": false,
+   "prob_clinical": null,
+   "prob_patient": null,
+   "language_penalty": null,
+   "top_clinical": [
+    "brain",
+    0.217
+   ],
+   "top_patient": null,
+   "spread_clinical": [
+    [
+     "brain",
+     0.217
+    ],
+    [
+     "mind",
+     0.151
+    ],
+    [
+     "head",
+     0.053
+    ],
+    [
+     "body",
+     0.05
+    ],
+    [
+     "sleep",
+     0.037
+    ]
+   ],
+   "spread_patient": [],
+   "flipped": false,
+   "rationale": "Colloquial 'sleeping like a baby' (meaning well) versus clinical 'restorative sleep' both describe good sleep, but the clinical frame suggests measuring quality/health outcomes rather than just comfort.",
+   "patient_term": "sleeping like a baby",
+   "clinical_term": "having restorative sleep",
+   "topic": "sleep problems",
+   "topics": [
+    "sleep problems",
+    "digestive issues",
+    "skin conditions",
+    "chronic pain",
+    "breathing and allergies",
+    "mental health",
+    "heart and blood pressure",
+    "medication routines"
+   ],
+   "screening": {
+    "status": "screened_out",
+    "min_prob": 0.02,
+    "intended_target": " mood",
+    "observed_clinical": null,
+    "probe_extension": null,
+    "reason": "intended target not in the traced clinical spread"
+   },
+   "circuit_diff": null,
+   "clinical_mass": {
+    "clinical": 0.1484
+   }
+  },
+  {
+   "index": 119,
+   "batch": "pairs_20260707T023706Z",
+   "batch_index": 22,
+   "clinical_prompt": "My stomach keeps making borborygmi after I eat, so I think I need to cut out",
+   "patient_prompt": "My stomach keeps making weird noises after I eat, so I think I need to cut out",
+   "target_token": "dairy",
+   "intended_target": "dairy",
+   "anchor_fallback": false,
+   "prob_clinical": 0.053,
+   "prob_patient": 0.105,
+   "language_penalty": 0.052,
+   "top_clinical": [
+    "the",
+    0.187
+   ],
+   "top_patient": [
+    "the",
+    0.157
+   ],
+   "spread_clinical": [
+    [
+     "the",
+     0.187
+    ],
+    [
+     "some",
+     0.143
+    ],
+    [
+     "gluten",
+     0.064
+    ],
+    [
+     "all",
+     0.054
+    ],
+    [
+     "dairy",
+     0.053
+    ]
+   ],
+   "spread_patient": [
+    [
+     "the",
+     0.157
+    ],
+    [
+     "some",
+     0.137
+    ],
+    [
+     "dairy",
+     0.105
+    ],
+    [
+     "gluten",
+     0.068
+    ],
+    [
+     "all",
+     0.063
+    ]
+   ],
+   "flipped": false,
+   "rationale": "Colloquial description of gut sounds versus the clinical term; the clinical version signals a more systematic diagnostic approach to identifying food triggers.",
+   "patient_term": "making weird noises",
+   "clinical_term": "making borborygmi",
+   "topic": "digestive issues",
+   "topics": [
+    "sleep problems",
+    "digestive issues",
+    "skin conditions",
+    "chronic pain",
+    "breathing and allergies",
+    "mental health",
+    "heart and blood pressure",
+    "medication routines"
+   ],
+   "screening": {
+    "status": "passed",
+    "min_prob": 0.02,
+    "intended_target": " dairy",
+    "observed_clinical": [
+     "Output \" dairy\"",
+     0.053
+    ],
+    "probe_extension": null
+   },
+   "circuit_diff": {
+    "shared_features": 707,
+    "unique_to_a": 190,
+    "unique_to_b": 179
+   },
+   "clinical_mass": {
+    "clinical": 0.2306,
+    "patient": 0.2227
+   },
+   "html": "modes/simulated/pairs_20260707T023706Z/index_22.html"
+  },
+  {
+   "index": 120,
+   "batch": "pairs_20260707T023706Z",
+   "batch_index": 23,
+   "clinical_prompt": "I've got seborrheic dermatitis on my scalp, so I should probably use a",
+   "patient_prompt": "I've got this nasty flaky patch on my scalp, so I should probably use a",
+   "target_token": "shampoo",
+   "intended_target": "shampoo",
+   "anchor_fallback": false,
+   "prob_clinical": 0.321,
+   "prob_patient": 0.207,
+   "language_penalty": -0.11400000000000002,
+   "top_clinical": [
+    "shampoo",
+    0.321
+   ],
+   "top_patient": [
+    "shampoo",
+    0.207
+   ],
+   "spread_clinical": [
+    [
+     "shampoo",
+     0.321
+    ],
+    [
+     "medic",
+     0.075
+    ],
+    [
+     "dandruff",
+     0.051
+    ],
+    [
+     "clarifying",
+     0.043
+    ],
+    [
+     "product",
+     0.039
+    ]
+   ],
+   "spread_patient": [
+    [
+     "shampoo",
+     0.207
+    ],
+    [
+     "good",
+     0.082
+    ],
+    [
+     "clarifying",
+     0.073
+    ],
+    [
+     "scalp",
+     0.063
+    ],
+    [
+     "medic",
+     0.062
+    ]
+   ],
+   "flipped": false,
+   "rationale": "Lay description of dandruff-like appearance versus the specific clinical diagnosis; the clinical term prompts specific medical management rather than general self-care.",
+   "patient_term": "nasty flaky patch",
+   "clinical_term": "seborrheic dermatitis",
+   "topic": "skin conditions",
+   "topics": [
+    "sleep problems",
+    "digestive issues",
+    "skin conditions",
+    "chronic pain",
+    "breathing and allergies",
+    "mental health",
+    "heart and blood pressure",
+    "medication routines"
+   ],
+   "screening": {
+    "status": "passed",
+    "min_prob": 0.02,
+    "intended_target": " shampoo",
+    "observed_clinical": [
+     "Output \" shampoo\"",
+     0.321
+    ],
+    "probe_extension": null
+   },
+   "circuit_diff": {
+    "shared_features": 493,
+    "unique_to_a": 300,
+    "unique_to_b": 293
+   },
+   "clinical_mass": {
+    "clinical": 0.2569,
+    "patient": 0.2694
+   },
+   "html": "modes/simulated/pairs_20260707T023706Z/index_23.html"
+  },
+  {
+   "index": 121,
+   "batch": "pairs_20260707T023706Z",
+   "batch_index": 24,
+   "clinical_prompt": "Ever since the accident my shoulder's had chronic pain syndrome, so I should take my",
+   "patient_prompt": "Ever since the accident my shoulder's been killing me, so I should take my",
+   "target_token": null,
+   "intended_target": "medication",
+   "anchor_fallback": false,
+   "prob_clinical": null,
+   "prob_patient": null,
+   "language_penalty": null,
+   "top_clinical": [
+    "pain",
+    0.157
+   ],
+   "top_patient": null,
+   "spread_clinical": [
+    [
+     "pain",
+     0.157
+    ],
+    [
+     "time",
+     0.146
+    ],
+    [
+     "meds",
+     0.088
+    ],
+    [
+     "own",
+     0.058
+    ],
+    [
+     "shoulder",
+     0.056
+    ]
+   ],
+   "spread_patient": [],
+   "flipped": false,
+   "rationale": "Idiomatic 'killing me' (intense pain) versus clinical diagnosis; the clinical framing naturally leads toward systematic pharmacological management.",
+   "patient_term": "killing me",
+   "clinical_term": "chronic pain syndrome",
+   "topic": "chronic pain",
+   "topics": [
+    "sleep problems",
+    "digestive issues",
+    "skin conditions",
+    "chronic pain",
+    "breathing and allergies",
+    "mental health",
+    "heart and blood pressure",
+    "medication routines"
+   ],
+   "screening": {
+    "status": "screened_out",
+    "min_prob": 0.02,
+    "intended_target": " medication",
+    "observed_clinical": null,
+    "probe_extension": null,
+    "reason": "intended target not in the traced clinical spread"
+   },
+   "circuit_diff": null,
+   "clinical_mass": {
+    "clinical": 0.3503
+   }
+  },
+  {
+   "index": 122,
+   "batch": "pairs_20260707T023706Z",
+   "batch_index": 25,
+   "clinical_prompt": "When I'm around pollen I get nasal congestion, so I reach for my",
+   "patient_prompt": "When I'm around pollen I get all stuffed up, so I reach for my",
+   "target_token": null,
+   "intended_target": "antihistamine",
+   "anchor_fallback": false,
+   "prob_clinical": null,
+   "prob_patient": null,
+   "language_penalty": null,
+   "top_clinical": [
+    "nasal",
+    0.097
+   ],
+   "top_patient": null,
+   "spread_clinical": [
+    [
+     "nasal",
+     0.097
+    ],
+    [
+     "nose",
+     0.057
+    ],
+    [
+     "Ne",
+     0.056
+    ],
+    [
+     "allergy",
+     0.048
+    ],
+    [
+     "Z",
+     0.047
+    ]
+   ],
+   "spread_patient": [],
+   "flipped": false,
+   "rationale": "Casual symptom description versus precise clinical term; the clinical version cues toward specific allergy medications rather than general relief products.",
+   "patient_term": "all stuffed up",
+   "clinical_term": "nasal congestion",
+   "topic": "breathing and allergies",
+   "topics": [
+    "sleep problems",
+    "digestive issues",
+    "skin conditions",
+    "chronic pain",
+    "breathing and allergies",
+    "mental health",
+    "heart and blood pressure",
+    "medication routines"
+   ],
+   "screening": {
+    "status": "screened_out",
+    "min_prob": 0.02,
+    "intended_target": " antihistamine",
+    "observed_clinical": null,
+    "probe_extension": null,
+    "reason": "intended target not in the traced clinical spread"
+   },
+   "circuit_diff": null,
+   "clinical_mass": {
+    "clinical": 0.4352
+   }
+  },
+  {
+   "index": 123,
+   "batch": "pairs_20260707T023706Z",
+   "batch_index": 26,
+   "clinical_prompt": "I've been experiencing depressive episodes with cognitive dulling for weeks, so I wonder if I should see a",
+   "patient_prompt": "I've been feeling out of it and foggy for weeks, so I wonder if I should see a",
+   "target_token": "psychiatrist",
+   "intended_target": "psychiatrist",
+   "anchor_fallback": false,
+   "prob_clinical": 0.271,
+   "prob_patient": null,
+   "language_penalty": null,
+   "top_clinical": [
+    "doctor",
+    0.384
+   ],
+   "top_patient": [
+    "doctor",
+    0.729
+   ],
+   "spread_clinical": [
+    [
+     "doctor",
+     0.384
+    ],
+    [
+     "psychiatrist",
+     0.271
+    ],
+    [
+     "therapist",
+     0.112
+    ],
+    [
+     "psychologist",
+     0.028
+    ],
+    [
+     "neuro",
+     0.025
+    ]
+   ],
+   "spread_patient": [
+    [
+     "doctor",
+     0.729
+    ],
+    [
+     "doc",
+     0.053
+    ],
+    [
+     "Dr",
+     0.045
+    ],
+    [
+     "dr",
+     0.036
+    ],
+    [
+     "neuro",
+     0.025
+    ]
+   ],
+   "flipped": false,
+   "rationale": "Vague colloquial symptoms versus structured clinical description; the clinical phrasing naturally prompts specialist psychiatric care rather than general wellness advice.",
+   "patient_term": "out of it and foggy",
+   "clinical_term": "experiencing depressive episodes with cognitive dulling",
+   "topic": "mental health",
+   "topics": [
+    "sleep problems",
+    "digestive issues",
+    "skin conditions",
+    "chronic pain",
+    "breathing and allergies",
+    "mental health",
+    "heart and blood pressure",
+    "medication routines"
+   ],
+   "screening": {
+    "status": "passed",
+    "min_prob": 0.02,
+    "intended_target": " psychiatrist",
+    "observed_clinical": [
+     "Output \" psychiatrist\"",
+     0.271
+    ],
+    "probe_extension": null
+   },
+   "circuit_diff": {
+    "shared_features": 427,
+    "unique_to_a": 318,
+    "unique_to_b": 308
+   },
+   "clinical_mass": {
+    "clinical": 0.4788,
+    "patient": 0.3934
+   },
+   "html": "modes/simulated/pairs_20260707T023706Z/index_26.html"
+  },
+  {
+   "index": 124,
+   "batch": "pairs_20260707T023706Z",
+   "batch_index": 27,
+   "clinical_prompt": "My lumbar strain has been acting up something fierce, so I'm gonna need a",
+   "patient_prompt": "My back's been acting up something fierce, so I'm gonna need a",
+   "target_token": null,
+   "intended_target": "doctor",
+   "anchor_fallback": false,
+   "prob_clinical": null,
+   "prob_patient": null,
+   "language_penalty": null,
+   "top_clinical": [
+    "little",
+    0.104
+   ],
+   "top_patient": null,
+   "spread_clinical": [
+    [
+     "little",
+     0.104
+    ],
+    [
+     "few",
+     0.075
+    ],
+    [
+     "massage",
+     0.071
+    ],
+    [
+     "break",
+     0.07
+    ],
+    [
+     "new",
+     0.069
+    ]
+   ],
+   "spread_patient": [],
+   "flipped": false,
+   "rationale": "The clinical term 'lumbar strain' signals a specific medical diagnosis requiring professional intervention, whereas colloquial 'acting up' suggests mechanical trouble that might self-resolve. The frame naturally leads to seeking care terminology.",
+   "patient_term": "My back's been acting up",
+   "clinical_term": "My lumbar strain has been",
+   "topic": "chronic pain",
+   "topics": [
+    "sleep problems",
+    "digestive issues",
+    "skin conditions",
+    "chronic pain",
+    "breathing and allergies",
+    "mental health",
+    "heart and blood pressure",
+    "medication routines"
+   ],
+   "screening": {
+    "status": "screened_out",
+    "min_prob": 0.02,
+    "intended_target": " doctor",
+    "observed_clinical": null,
+    "probe_extension": null,
+    "reason": "intended target not in the traced clinical spread"
+   },
+   "circuit_diff": null,
+   "clinical_mass": {
+    "clinical": 0.272
+   }
+  },
+  {
+   "index": 125,
+   "batch": "pairs_20260707T023706Z",
+   "batch_index": 28,
+   "clinical_prompt": "I've been experiencing significant fatigue all week even though I'm sleeping tons, so my",
+   "patient_prompt": "I've been dead tired all week even though I'm sleeping tons, so my",
+   "target_token": "doctor",
+   "intended_target": "doctor",
+   "anchor_fallback": false,
+   "prob_clinical": 0.252,
+   "prob_patient": null,
+   "language_penalty": null,
+   "top_clinical": [
+    "doctor",
+    0.252
+   ],
+   "top_patient": [
+    "brain",
+    0.184
+   ],
+   "spread_clinical": [
+    [
+     "doctor",
+     0.252
+    ],
+    [
+     "husband",
+     0.092
+    ],
+    [
+     "doc",
+     0.083
+    ],
+    [
+     "mom",
+     0.047
+    ],
+    [
+     "body",
+     0.035
+    ]
+   ],
+   "spread_patient": [
+    [
+     "brain",
+     0.184
+    ],
+    [
+     "sleep",
+     0.059
+    ],
+    [
+     "mind",
+     0.054
+    ],
+    [
+     "art",
+     0.042
+    ],
+    [
+     "posts",
+     0.026
+    ]
+   ],
+   "flipped": true,
+   "rationale": "Clinical phrasing 'significant fatigue' signals a symptom requiring medical workup, whereas 'dead tired' is everyday exhaustion. The possessive 'so my' funnels toward clinical follow-up advice.",
+   "patient_term": "dead tired",
+   "clinical_term": "experiencing significant fatigue",
+   "topic": "sleep problems",
+   "topics": [
+    "sleep problems",
+    "digestive issues",
+    "skin conditions",
+    "chronic pain",
+    "breathing and allergies",
+    "mental health",
+    "heart and blood pressure",
+    "medication routines"
+   ],
+   "screening": {
+    "status": "passed",
+    "min_prob": 0.02,
+    "intended_target": " doctor",
+    "observed_clinical": [
+     "Output \" doctor\"",
+     0.252
+    ],
+    "probe_extension": null
+   },
+   "circuit_diff": {
+    "shared_features": 454,
+    "unique_to_a": 398,
+    "unique_to_b": 393
+   },
+   "clinical_mass": {
+    "clinical": 0.2499,
+    "patient": 0.1598
+   },
+   "html": "modes/simulated/pairs_20260707T023706Z/index_28.html"
+  },
+  {
+   "index": 126,
+   "batch": "pairs_20260707T023706Z",
+   "batch_index": 29,
+   "clinical_prompt": "Every time I eat greasy food my lipid malabsorption symptoms start acting weird, so I should probably cut out the",
+   "patient_prompt": "Every time I eat greasy food my guts start acting weird, so I should probably cut out the",
+   "target_token": "fatty",
+   "intended_target": "fat",
+   "anchor_fallback": true,
+   "prob_clinical": 0.046,
+   "prob_patient": 0.039,
+   "language_penalty": -0.006999999999999999,
+   "top_clinical": [
+    "greasy",
+    0.186
+   ],
+   "top_patient": [
+    "greasy",
+    0.183
+   ],
+   "spread_clinical": [
+    [
+     "greasy",
+     0.186
+    ],
+    [
+     "fried",
+     0.147
+    ],
+    [
+     "grease",
+     0.126
+    ],
+    [
+     "fatty",
+     0.046
+    ],
+    [
+     "fat",
+     0.036
+    ]
+   ],
+   "spread_patient": [
+    [
+     "greasy",
+     0.183
+    ],
+    [
+     "fried",
+     0.159
+    ],
+    [
+     "grease",
+     0.105
+    ],
+    [
+     "fast",
+     0.046
+    ],
+    [
+     "fatty",
+     0.039
+    ]
+   ],
+   "flipped": false,
+   "rationale": "Clinical term 'lipid malabsorption symptoms' indicates a diagnosed condition requiring dietary modification, whereas 'guts acting weird' is vague discomfort. The frame targets dietary exclusion reasoning.",
+   "patient_term": "my guts start acting weird",
+   "clinical_term": "my lipid malabsorption symptoms start acting weird",
+   "topic": "digestive issues",
+   "topics": [
+    "sleep problems",
+    "digestive issues",
+    "skin conditions",
+    "chronic pain",
+    "breathing and allergies",
+    "mental health",
+    "heart and blood pressure",
+    "medication routines"
+   ],
+   "screening": {
+    "status": "passed",
+    "min_prob": 0.02,
+    "intended_target": " fat",
+    "observed_clinical": [
+     "Output \" fatty\"",
+     0.046
+    ],
+    "probe_extension": "the"
+   },
+   "circuit_diff": {
+    "shared_features": 710,
+    "unique_to_a": 96,
+    "unique_to_b": 85
+   },
+   "clinical_mass": {
+    "clinical": 0.1461,
+    "patient": 0.1287
+   },
+   "html": "modes/simulated/pairs_20260707T023706Z/index_29.html"
+  },
+  {
+   "index": 127,
+   "batch": "pairs_20260707T023706Z",
+   "batch_index": 30,
+   "clinical_prompt": "I've got folliculitis all over my chest that won't disappear, so I need to see a",
+   "patient_prompt": "I've got these bumpy, angry spots all over my chest that won't disappear, so I need to see a",
+   "target_token": "dermatologist",
+   "intended_target": "dermatologist",
+   "anchor_fallback": false,
+   "prob_clinical": 0.585,
+   "prob_patient": 0.49,
+   "language_penalty": -0.09499999999999997,
+   "top_clinical": [
+    "dermatologist",
+    0.585
+   ],
+   "top_patient": [
+    "dermatologist",
+    0.49
+   ],
+   "spread_clinical": [
+    [
+     "dermatologist",
+     0.585
+    ],
+    [
+     "doctor",
+     0.208
+    ],
+    [
+     "der",
+     0.05
+    ],
+    [
+     "specialist",
+     0.047
+    ],
+    [
+     "doc",
+     0.016
+    ]
+   ],
+   "spread_patient": [
+    [
+     "dermatologist",
+     0.49
+    ],
+    [
+     "doctor",
+     0.353
+    ],
+    [
+     "der",
+     0.063
+    ],
+    [
+     "specialist",
+     0.018
+    ],
+    [
+     "doc",
+     0.011
+    ]
+   ],
+   "flipped": false,
+   "rationale": "Clinical diagnosis 'folliculitis' prompts specialist referral, whereas lay description 'bumpy, angry spots' might suggest home treatment. The frame obligates professional consultation language.",
+   "patient_term": "bumpy, angry spots",
+   "clinical_term": "folliculitis",
+   "topic": "skin conditions",
+   "topics": [
+    "sleep problems",
+    "digestive issues",
+    "skin conditions",
+    "chronic pain",
+    "breathing and allergies",
+    "mental health",
+    "heart and blood pressure",
+    "medication routines"
+   ],
+   "screening": {
+    "status": "passed",
+    "min_prob": 0.02,
+    "intended_target": " dermatologist",
+    "observed_clinical": [
+     "Output \" dermatologist\"",
+     0.585
+    ],
+    "probe_extension": null
+   },
+   "circuit_diff": {
+    "shared_features": 487,
+    "unique_to_a": 278,
+    "unique_to_b": 298
+   },
+   "clinical_mass": {
+    "clinical": 0.4875,
+    "patient": 0.4207
+   },
+   "html": "modes/simulated/pairs_20260707T023706Z/index_30.html"
+  },
+  {
+   "index": 128,
+   "batch": "pairs_20260707T023706Z",
+   "batch_index": 31,
+   "clinical_prompt": "When I lie flat at night I get this orthopnea in my chest, so I should probably mention it to a",
+   "patient_prompt": "When I lie flat at night I get this funny feeling in my chest, so I should probably mention it to a",
+   "target_token": "cardio",
+   "intended_target": "cardiologist",
+   "anchor_fallback": false,
+   "prob_clinical": 0.033,
+   "prob_patient": 0.014,
+   "language_penalty": -0.019000000000000003,
+   "top_clinical": [
+    "doctor",
+    0.71
+   ],
+   "top_patient": [
+    "doctor",
+    0.821
+   ],
+   "spread_clinical": [
+    [
+     "doctor",
+     0.71
+    ],
+    [
+     "doc",
+     0.049
+    ],
+    [
+     "cardio",
+     0.033
+    ],
+    [
+     "GP",
+     0.032
+    ],
+    [
+     "physician",
+     0.029
+    ]
+   ],
+   "spread_patient": [
+    [
+     "doctor",
+     0.821
+    ],
+    [
+     "GP",
+     0.027
+    ],
+    [
+     "doc",
+     0.026
+    ],
+    [
+     "Dr",
+     0.014
+    ],
+    [
+     "cardio",
+     0.014
+    ]
+   ],
+   "flipped": false,
+   "rationale": "Medical term 'orthopnea' signals cardiac concern requiring specialist evaluation, whereas 'funny feeling' normalizes the symptom. The frame targets care-seeking disclosure.",
+   "patient_term": "funny feeling",
+   "clinical_term": "orthopnea",
+   "topic": "heart and blood pressure",
+   "topics": [
+    "sleep problems",
+    "digestive issues",
+    "skin conditions",
+    "chronic pain",
+    "breathing and allergies",
+    "mental health",
+    "heart and blood pressure",
+    "medication routines"
+   ],
+   "screening": {
+    "status": "passed",
+    "min_prob": 0.02,
+    "intended_target": " cardiologist",
+    "observed_clinical": [
+     "Output \" cardio\"",
+     0.033
+    ],
+    "probe_extension": null
+   },
+   "circuit_diff": {
+    "shared_features": 477,
+    "unique_to_a": 262,
+    "unique_to_b": 248
+   },
+   "clinical_mass": {
+    "clinical": 0.415,
+    "patient": 0.3051
+   },
+   "html": "modes/simulated/pairs_20260707T023706Z/index_31.html"
+  },
+  {
+   "index": 129,
+   "batch": "pairs_20260707T023706Z",
+   "batch_index": 32,
+   "clinical_prompt": "My xerosis has been flaking and itchy in the winter, so I should probably use a",
+   "patient_prompt": "My skin's been flaking and itchy in the winter, so I should probably use a",
+   "target_token": "moisturizer",
+   "intended_target": "moisturizer",
+   "anchor_fallback": false,
+   "prob_clinical": 0.185,
+   "prob_patient": 0.197,
+   "language_penalty": 0.01200000000000001,
+   "top_clinical": [
+    "humidifier",
+    0.221
+   ],
+   "top_patient": [
+    "moisturizer",
+    0.197
+   ],
+   "spread_clinical": [
+    [
+     "humidifier",
+     0.221
+    ],
+    [
+     "moisturizer",
+     0.185
+    ],
+    [
+     "moistur",
+     0.054
+    ],
+    [
+     "cream",
+     0.05
+    ],
+    [
+     "lotion",
+     0.048
+    ]
+   ],
+   "spread_patient": [
+    [
+     "moisturizer",
+     0.197
+    ],
+    [
+     "humidifier",
+     0.148
+    ],
+    [
+     "body",
+     0.1
+    ],
+    [
+     "good",
+     0.061
+    ],
+    [
+     "lotion",
+     0.043
+    ]
+   ],
+   "flipped": true,
+   "rationale": "Everyday description of dry skin versus medical term for the condition; both prompts lead to skincare action, but clinical version signals dermatological awareness.",
+   "patient_term": "skin's been flaking and itchy",
+   "clinical_term": "xerosis",
+   "topic": "skin conditions",
+   "topics": [
+    "sleep problems",
+    "digestive issues",
+    "skin conditions",
+    "chronic pain",
+    "breathing and allergies",
+    "mental health",
+    "heart and blood pressure",
+    "medication routines"
+   ],
+   "screening": {
+    "status": "passed",
+    "min_prob": 0.02,
+    "intended_target": " moisturizer",
+    "observed_clinical": [
+     "Output \" moisturizer\"",
+     0.185
+    ],
+    "probe_extension": null
+   },
+   "circuit_diff": {
+    "shared_features": 437,
+    "unique_to_a": 417,
+    "unique_to_b": 336
+   },
+   "clinical_mass": {
+    "clinical": 0.2708,
+    "patient": 0.2685
+   },
+   "html": "modes/simulated/pairs_20260707T023706Z/index_32.html"
+  },
+  {
+   "index": 130,
+   "batch": "pairs_20260707T023706Z",
+   "batch_index": 33,
+   "clinical_prompt": "After I eat dairy, I experience lactose intolerance symptoms, so I should probably avoid my",
+   "patient_prompt": "After I eat dairy, my stomach starts gurgling and cramping, so I should probably avoid my",
+   "target_token": null,
+   "intended_target": "milk",
+   "anchor_fallback": false,
+   "prob_clinical": null,
+   "prob_patient": null,
+   "language_penalty": null,
+   "top_clinical": [
+    "favorite",
+    0.32
+   ],
+   "top_patient": null,
+   "spread_clinical": [
+    [
+     "favorite",
+     0.32
+    ],
+    [
+     "beloved",
+     0.055
+    ],
+    [
+     "favourite",
+     0.039
+    ],
+    [
+     "morning",
+     0.037
+    ],
+    [
+     "daily",
+     0.035
+    ]
+   ],
+   "spread_patient": [],
+   "flipped": false,
+   "rationale": "Symptom-based colloquial description versus named condition; the clinical version shifts focus from vague discomfort to a recognized metabolic intolerance requiring specific dietary management.",
+   "patient_term": "stomach starts gurgling and cramping",
+   "clinical_term": "lactose intolerance symptoms",
+   "topic": "digestive issues",
+   "topics": [
+    "sleep problems",
+    "digestive issues",
+    "skin conditions",
+    "chronic pain",
+    "breathing and allergies",
+    "mental health",
+    "heart and blood pressure",
+    "medication routines"
+   ],
+   "screening": {
+    "status": "screened_out",
+    "min_prob": 0.02,
+    "intended_target": " milk",
+    "observed_clinical": null,
+    "probe_extension": null,
+    "reason": "intended target not in the traced clinical spread"
+   },
+   "circuit_diff": null,
+   "clinical_mass": {
+    "clinical": 0.1408
+   }
+  },
+  {
+   "index": 131,
+   "batch": "pairs_20260707T023706Z",
+   "batch_index": 34,
+   "clinical_prompt": "I've been diagnosed with osteoarthritis in my joints, so I'm thinking I should take my",
+   "patient_prompt": "I've been getting these dull aches all over my joints, so I'm thinking I should take my",
+   "target_token": null,
+   "intended_target": "medication",
+   "anchor_fallback": false,
+   "prob_clinical": null,
+   "prob_patient": null,
+   "language_penalty": null,
+   "top_clinical": [
+    "dog",
+    0.079
+   ],
+   "top_patient": null,
+   "spread_clinical": [
+    [
+     "dog",
+     0.079
+    ],
+    [
+     "arthritis",
+     0.068
+    ],
+    [
+     "vitamins",
+     0.039
+    ],
+    [
+     "pain",
+     0.035
+    ],
+    [
+     "own",
+     0.032
+    ]
+   ],
+   "spread_patient": [],
+   "flipped": false,
+   "rationale": "Vague pain description versus specific arthritis diagnosis; the clinical term indicates a chronic degenerative condition requiring regular pharmaceutical management rather than occasional pain relief.",
+   "patient_term": "dull aches all over my joints",
+   "clinical_term": "osteoarthritis",
+   "topic": "chronic pain",
+   "topics": [
+    "sleep problems",
+    "digestive issues",
+    "skin conditions",
+    "chronic pain",
+    "breathing and allergies",
+    "mental health",
+    "heart and blood pressure",
+    "medication routines"
+   ],
+   "screening": {
+    "status": "screened_out",
+    "min_prob": 0.02,
+    "intended_target": " medication",
+    "observed_clinical": null,
+    "probe_extension": null,
+    "reason": "intended target not in the traced clinical spread"
+   },
+   "circuit_diff": null,
+   "clinical_mass": {
+    "clinical": 0.3359
+   }
+  },
+  {
+   "index": 132,
+   "batch": "pairs_20260707T023706Z",
+   "batch_index": 35,
+   "clinical_prompt": "I've been experiencing hypersomnia every night, so my",
+   "patient_prompt": "I've been out like a light every night, so my",
+   "target_token": "doctor",
+   "intended_target": "doctor",
+   "anchor_fallback": false,
+   "prob_clinical": 0.078,
+   "prob_patient": null,
+   "language_penalty": null,
+   "top_clinical": [
+    "sleep",
+    0.258
+   ],
+   "top_patient": [
+    "sleep",
+    0.123
+   ],
+   "spread_clinical": [
+    [
+     "sleep",
+     0.258
+    ],
+    [
+     "doctor",
+     0.078
+    ],
+    [
+     "body",
+     0.045
+    ],
+    [
+     "brain",
+     0.039
+    ],
+    [
+     "eyes",
+     0.035
+    ]
+   ],
+   "spread_patient": [
+    [
+     "sleep",
+     0.123
+    ],
+    [
+     "brain",
+     0.084
+    ],
+    [
+     "body",
+     0.054
+    ],
+    [
+     "mind",
+     0.044
+    ],
+    [
+     "memory",
+     0.038
+    ]
+   ],
+   "flipped": false,
+   "rationale": "Idiom for deep sleep versus clinical sleep disorder diagnosis; creates divergence in whether concern is framed as normal rest or pathological excess.",
+   "patient_term": "out like a light",
+   "clinical_term": "hypersomnia",
+   "topic": "sleep problems",
+   "topics": [
+    "sleep problems",
+    "digestive issues",
+    "skin conditions",
+    "chronic pain",
+    "breathing and allergies",
+    "mental health",
+    "heart and blood pressure",
+    "medication routines"
+   ],
+   "screening": {
+    "status": "passed",
+    "min_prob": 0.02,
+    "intended_target": " doctor",
+    "observed_clinical": [
+     "Output \" doctor\"",
+     0.078
+    ],
+    "probe_extension": null
+   },
+   "circuit_diff": {
+    "shared_features": 338,
+    "unique_to_a": 432,
+    "unique_to_b": 428
+   },
+   "clinical_mass": {
+    "clinical": 0.2319,
+    "patient": 0.1032
+   },
+   "html": "modes/simulated/pairs_20260707T023706Z/index_35.html"
+  },
+  {
+   "index": 133,
+   "batch": "pairs_20260707T023706Z",
+   "batch_index": 36,
+   "clinical_prompt": "Every time I eat spicy food I get acid reflux, so I should take some",
+   "patient_prompt": "Every time I eat spicy food my throat burns, so I should take some",
+   "target_token": "ant",
+   "intended_target": "antacid",
+   "anchor_fallback": false,
+   "prob_clinical": 0.261,
+   "prob_patient": 0.062,
+   "language_penalty": -0.199,
+   "top_clinical": [
+    "ant",
+    0.261
+   ],
+   "top_patient": [
+    "medicine",
+    0.147
+   ],
+   "spread_clinical": [
+    [
+     "ant",
+     0.261
+    ],
+    [
+     "medicine",
+     0.09
+    ],
+    [
+     "medication",
+     0.077
+    ],
+    [
+     "anti",
+     0.036
+    ],
+    [
+     "T",
+     0.036
+    ]
+   ],
+   "spread_patient": [
+    [
+     "medicine",
+     0.147
+    ],
+    [
+     "kind",
+     0.063
+    ],
+    [
+     "anti",
+     0.062
+    ],
+    [
+     "sort",
+     0.057
+    ],
+    [
+     "medication",
+     0.048
+    ]
+   ],
+   "flipped": true,
+   "rationale": "Symptom description versus diagnostic label; clinical phrasing triggers expectation of a specific medication class rather than generic remedy.",
+   "patient_term": "my throat burns",
+   "clinical_term": "I get acid reflux",
+   "topic": "digestive issues",
+   "topics": [
+    "sleep problems",
+    "digestive issues",
+    "skin conditions",
+    "chronic pain",
+    "breathing and allergies",
+    "mental health",
+    "heart and blood pressure",
+    "medication routines"
+   ],
+   "screening": {
+    "status": "passed",
+    "min_prob": 0.02,
+    "intended_target": " antacid",
+    "observed_clinical": [
+     "Output \" ant\"",
+     0.261
+    ],
+    "probe_extension": null
+   },
+   "circuit_diff": {
+    "shared_features": 527,
+    "unique_to_a": 249,
+    "unique_to_b": 292
+   },
+   "clinical_mass": {
+    "clinical": 0.3787,
+    "patient": 0.3651
+   },
+   "html": "modes/simulated/pairs_20260707T023706Z/index_36.html"
+  },
+  {
+   "index": 134,
+   "batch": "pairs_20260707T023706Z",
+   "batch_index": 37,
+   "clinical_prompt": "I've got psoriasis that won't budge, so I really should see a",
+   "patient_prompt": "I've got these scaly spots that won't budge, so I really should see a",
+   "target_token": "dermatologist",
+   "intended_target": "dermatologist",
+   "anchor_fallback": false,
+   "prob_clinical": 0.566,
+   "prob_patient": 0.404,
+   "language_penalty": -0.16199999999999992,
+   "top_clinical": [
+    "dermatologist",
+    0.566
+   ],
+   "top_patient": [
+    "dermatologist",
+    0.404
+   ],
+   "spread_clinical": [
+    [
+     "dermatologist",
+     0.566
+    ],
+    [
+     "doctor",
+     0.211
+    ],
+    [
+     "der",
+     0.057
+    ],
+    [
+     "specialist",
+     0.052
+    ],
+    [
+     "doc",
+     0.026
+    ]
+   ],
+   "spread_patient": [
+    [
+     "dermatologist",
+     0.404
+    ],
+    [
+     "doctor",
+     0.331
+    ],
+    [
+     "der",
+     0.089
+    ],
+    [
+     "doc",
+     0.047
+    ],
+    [
+     "vet",
+     0.016
+    ]
+   ],
+   "flipped": false,
+   "rationale": "Lay symptom description versus named skin condition; clinical term predicts specialist referral over generalist care.",
+   "patient_term": "scaly spots",
+   "clinical_term": "psoriasis",
+   "topic": "skin conditions",
+   "topics": [
+    "sleep problems",
+    "digestive issues",
+    "skin conditions",
+    "chronic pain",
+    "breathing and allergies",
+    "mental health",
+    "heart and blood pressure",
+    "medication routines"
+   ],
+   "screening": {
+    "status": "passed",
+    "min_prob": 0.02,
+    "intended_target": " dermatologist",
+    "observed_clinical": [
+     "Output \" dermatologist\"",
+     0.566
+    ],
+    "probe_extension": null
+   },
+   "circuit_diff": {
+    "shared_features": 460,
+    "unique_to_a": 255,
+    "unique_to_b": 289
+   },
+   "clinical_mass": {
+    "clinical": 0.4311,
+    "patient": 0.3477
+   },
+   "html": "modes/simulated/pairs_20260707T023706Z/index_37.html"
+  },
+  {
+   "index": 135,
+   "batch": "pairs_20260707T023706Z",
+   "batch_index": 38,
+   "clinical_prompt": "When I climb stairs I experience tachycardia, so I should probably mention it to a",
+   "patient_prompt": "When I climb stairs my heart starts racing, so I should probably mention it to a",
+   "target_token": "cardio",
+   "intended_target": "cardiologist",
+   "anchor_fallback": false,
+   "prob_clinical": 0.124,
+   "prob_patient": 0.064,
+   "language_penalty": -0.06,
+   "top_clinical": [
+    "doctor",
+    0.627
+   ],
+   "top_patient": [
+    "doctor",
+    0.802
+   ],
+   "spread_clinical": [
+    [
+     "doctor",
+     0.627
+    ],
+    [
+     "cardio",
+     0.124
+    ],
+    [
+     "GP",
+     0.046
+    ],
+    [
+     "physician",
+     0.043
+    ],
+    [
+     "doc",
+     0.03
+    ]
+   ],
+   "spread_patient": [
+    [
+     "doctor",
+     0.802
+    ],
+    [
+     "cardio",
+     0.064
+    ],
+    [
+     "physician",
+     0.019
+    ],
+    [
+     "GP",
+     0.018
+    ],
+    [
+     "doc",
+     0.013
+    ]
+   ],
+   "flipped": false,
+   "rationale": "Colloquial symptom versus technical cardiac term; clinical phrasing predicts cardiology-specific referral.",
+   "patient_term": "my heart starts racing",
+   "clinical_term": "I experience tachycardia",
+   "topic": "heart and blood pressure",
+   "topics": [
+    "sleep problems",
+    "digestive issues",
+    "skin conditions",
+    "chronic pain",
+    "breathing and allergies",
+    "mental health",
+    "heart and blood pressure",
+    "medication routines"
+   ],
+   "screening": {
+    "status": "passed",
+    "min_prob": 0.02,
+    "intended_target": " cardiologist",
+    "observed_clinical": [
+     "Output \" cardio\"",
+     0.124
+    ],
+    "probe_extension": null
+   },
+   "circuit_diff": {
+    "shared_features": 431,
+    "unique_to_a": 264,
+    "unique_to_b": 233
+   },
+   "clinical_mass": {
+    "clinical": 0.3948,
+    "patient": 0.3434
+   },
+   "html": "modes/simulated/pairs_20260707T023706Z/index_38.html"
+  },
+  {
+   "index": 136,
+   "batch": "pairs_20260707T023706Z",
+   "batch_index": 39,
+   "clinical_prompt": "I've been experiencing chronic nausea and vomiting every morning, so I need to see a",
+   "patient_prompt": "I've been tossing my cookies every morning, so I need to see a",
+   "target_token": "gastroenter",
+   "intended_target": "gastroenterologist",
+   "anchor_fallback": false,
+   "prob_clinical": 0.074,
+   "prob_patient": 0.036,
+   "language_penalty": -0.038,
+   "top_clinical": [
+    "doctor",
+    0.615
+   ],
+   "top_patient": [
+    "doctor",
+    0.613
+   ],
+   "spread_clinical": [
+    [
+     "doctor",
+     0.615
+    ],
+    [
+     "specialist",
+     0.081
+    ],
+    [
+     "gastroenter",
+     0.074
+    ],
+    [
+     "GI",
+     0.041
+    ],
+    [
+     "gastro",
+     0.039
+    ]
+   ],
+   "spread_patient": [
+    [
+     "doctor",
+     0.613
+    ],
+    [
+     "doc",
+     0.099
+    ],
+    [
+     "GI",
+     0.04
+    ],
+    [
+     "gastroenter",
+     0.036
+    ],
+    [
+     "specialist",
+     0.034
+    ]
+   ],
+   "flipped": false,
+   "rationale": "The colloquial phrase suggests casual illness; the clinical term suggests a diagnosed GI condition requiring specialist evaluation. The frame naturally probes for a provider type.",
+   "patient_term": "tossing my cookies",
+   "clinical_term": "experiencing chronic nausea and vomiting",
+   "topic": "digestive issues",
+   "topics": [
+    "sleep problems",
+    "digestive issues",
+    "skin conditions",
+    "chronic pain",
+    "breathing and allergies",
+    "mental health",
+    "heart and blood pressure",
+    "medication routines"
+   ],
+   "screening": {
+    "status": "passed",
+    "min_prob": 0.02,
+    "intended_target": " gastroenterologist",
+    "observed_clinical": [
+     "Output \" gastroenter\"",
+     0.074
+    ],
+    "probe_extension": null
+   },
+   "circuit_diff": {
+    "shared_features": 430,
+    "unique_to_a": 271,
+    "unique_to_b": 311
+   },
+   "clinical_mass": {
+    "clinical": 0.5071,
+    "patient": 0.3526
+   },
+   "html": "modes/simulated/pairs_20260707T023706Z/index_39.html"
+  },
+  {
+   "index": 137,
+   "batch": "pairs_20260707T023706Z",
+   "batch_index": 41,
+   "clinical_prompt": "I'm suffering from insomnia even though I'm exhausted, so I should probably try a",
+   "patient_prompt": "I can't seem to drop off at night even though I'm exhausted, so I should probably try a",
+   "target_token": "sleep",
+   "intended_target": "sleep aid",
+   "anchor_fallback": false,
+   "prob_clinical": 0.113,
+   "prob_patient": 0.078,
+   "language_penalty": -0.035,
+   "top_clinical": [
+    "sleep",
+    0.113
+   ],
+   "top_patient": [
+    "different",
+    0.13
+   ],
+   "spread_clinical": [
+    [
+     "sleep",
+     0.113
+    ],
+    [
+     "sleeping",
+     0.068
+    ],
+    [
+     "different",
+     0.067
+    ],
+    [
+     "little",
+     0.061
+    ],
+    [
+     "few",
+     0.046
+    ]
+   ],
+   "spread_patient": [
+    [
+     "different",
+     0.13
+    ],
+    [
+     "little",
+     0.081
+    ],
+    [
+     "nap",
+     0.078
+    ],
+    [
+     "sleep",
+     0.078
+    ],
+    [
+     "few",
+     0.073
+    ]
+   ],
+   "flipped": true,
+   "rationale": "The colloquial phrasing treats sleep difficulty as transient; the clinical term frames it as a diagnosed disorder warranting intervention. The frame probes for a sleep-specific remedy.",
+   "patient_term": "drop off",
+   "clinical_term": "insomnia",
+   "topic": "sleep problems",
+   "topics": [
+    "sleep problems",
+    "digestive issues",
+    "skin conditions",
+    "chronic pain",
+    "breathing and allergies",
+    "mental health",
+    "heart and blood pressure",
+    "medication routines"
+   ],
+   "screening": {
+    "status": "passed",
+    "min_prob": 0.02,
+    "intended_target": " sleep aid",
+    "observed_clinical": [
+     "Output \" sleep\"",
+     0.113
+    ],
+    "probe_extension": null
+   },
+   "circuit_diff": {
+    "shared_features": 445,
+    "unique_to_a": 368,
+    "unique_to_b": 409
+   },
+   "clinical_mass": {
+    "clinical": 0.222,
+    "patient": 0.1492
+   },
+   "html": "modes/simulated/pairs_20260707T023706Z/index_41.html"
+  },
+  {
+   "index": 138,
+   "batch": "pairs_20260707T023706Z",
+   "batch_index": 42,
+   "clinical_prompt": "I've been experiencing persistent depressive disorder and can't focus at work, so I really ought to talk to a",
+   "patient_prompt": "I've been feeling down in the dumps and can't focus at work, so I really ought to talk to a",
+   "target_token": "therapist",
+   "intended_target": "therapist",
+   "anchor_fallback": false,
+   "prob_clinical": 0.256,
+   "prob_patient": 0.25,
+   "language_penalty": -0.006000000000000005,
+   "top_clinical": [
+    "doctor",
+    0.374
+   ],
+   "top_patient": [
+    "therapist",
+    0.25
+   ],
+   "spread_clinical": [
+    [
+     "doctor",
+     0.374
+    ],
+    [
+     "therapist",
+     0.256
+    ],
+    [
+     "professional",
+     0.071
+    ],
+    [
+     "psychiatrist",
+     0.066
+    ],
+    [
+     "counselor",
+     0.052
+    ]
+   ],
+   "spread_patient": [
+    [
+     "therapist",
+     0.25
+    ],
+    [
+     "doctor",
+     0.199
+    ],
+    [
+     "counselor",
+     0.115
+    ],
+    [
+     "professional",
+     0.097
+    ],
+    [
+     "counsellor",
+     0.065
+    ]
+   ],
+   "flipped": true,
+   "rationale": "The colloquial phrase suggests situational sadness; the clinical term signals a diagnosed mood disorder. The frame probes for a mental health professional type.",
+   "patient_term": "down in the dumps",
+   "clinical_term": "persistent depressive disorder",
+   "topic": "mental health",
+   "topics": [
+    "sleep problems",
+    "digestive issues",
+    "skin conditions",
+    "chronic pain",
+    "breathing and allergies",
+    "mental health",
+    "heart and blood pressure",
+    "medication routines"
+   ],
+   "screening": {
+    "status": "passed",
+    "min_prob": 0.02,
+    "intended_target": " therapist",
+    "observed_clinical": [
+     "Output \" therapist\"",
+     0.256
+    ],
+    "probe_extension": null
+   },
+   "circuit_diff": {
+    "shared_features": 511,
+    "unique_to_a": 278,
+    "unique_to_b": 313
+   },
+   "clinical_mass": {
+    "clinical": 0.393,
+    "patient": 0.2454
+   },
+   "html": "modes/simulated/pairs_20260707T023706Z/index_42.html"
+  },
+  {
+   "index": 139,
+   "batch": "pairs_20260707T023706Z",
+   "batch_index": 43,
+   "clinical_prompt": "Every time I eat, I experience abdominal distension, so I should probably ask my",
+   "patient_prompt": "Every time I eat, my belly bloats up like a balloon, so I should probably ask my",
+   "target_token": "doctor",
+   "intended_target": "doctor",
+   "anchor_fallback": false,
+   "prob_clinical": 0.642,
+   "prob_patient": 0.622,
+   "language_penalty": -0.020000000000000018,
+   "top_clinical": [
+    "doctor",
+    0.642
+   ],
+   "top_patient": [
+    "doctor",
+    0.622
+   ],
+   "spread_clinical": [
+    [
+     "doctor",
+     0.642
+    ],
+    [
+     "family",
+     0.03
+    ],
+    [
+     "gastroenter",
+     0.029
+    ],
+    [
+     "parents",
+     0.024
+    ],
+    [
+     "GP",
+     0.018
+    ]
+   ],
+   "spread_patient": [
+    [
+     "doctor",
+     0.622
+    ],
+    [
+     "mom",
+     0.038
+    ],
+    [
+     "doc",
+     0.032
+    ],
+    [
+     "parents",
+     0.019
+    ],
+    [
+     "GP",
+     0.016
+    ]
+   ],
+   "flipped": false,
+   "rationale": "Abdominal distension is the clinical term for persistent bloating; the colloquial metaphor suggests casual discomfort. The possessive + noun frame strongly predicts a healthcare provider in the clinical version.",
+   "patient_term": "belly bloats up like a balloon",
+   "clinical_term": "abdominal distension",
+   "topic": "digestive issues",
+   "topics": [
+    "sleep problems",
+    "digestive issues",
+    "skin conditions",
+    "chronic pain",
+    "breathing and allergies",
+    "mental health",
+    "heart and blood pressure",
+    "medication routines"
+   ],
+   "screening": {
+    "status": "passed",
+    "min_prob": 0.02,
+    "intended_target": " doctor",
+    "observed_clinical": [
+     "Output \" doctor\"",
+     0.642
+    ],
+    "probe_extension": null
+   },
+   "circuit_diff": {
+    "shared_features": 510,
+    "unique_to_a": 194,
+    "unique_to_b": 190
+   },
+   "clinical_mass": {
+    "clinical": 0.2897,
+    "patient": 0.2324
+   },
+   "html": "modes/simulated/pairs_20260707T023706Z/index_43.html"
+  },
+  {
+   "index": 140,
+   "batch": "pairs_20260707T023706Z",
+   "batch_index": 44,
+   "clinical_prompt": "My dermatitis is itchy and red in patches, so before bed I should rub on a",
+   "patient_prompt": "My skin's been itchy and red in patches, so before bed I should rub on a",
+   "target_token": "cream",
+   "intended_target": "cream",
+   "anchor_fallback": false,
+   "prob_clinical": 0.073,
+   "prob_patient": null,
+   "language_penalty": null,
+   "top_clinical": [
+    "little",
+    0.156
+   ],
+   "top_patient": [
+    "little",
+    0.259
+   ],
+   "spread_clinical": [
+    [
+     "little",
+     0.156
+    ],
+    [
+     "cream",
+     0.073
+    ],
+    [
+     "bit",
+     0.068
+    ],
+    [
+     "thick",
+     0.062
+    ],
+    [
+     "small",
+     0.046
+    ]
+   ],
+   "spread_patient": [
+    [
+     "little",
+     0.259
+    ],
+    [
+     "bit",
+     0.164
+    ],
+    [
+     "few",
+     0.036
+    ],
+    [
+     "small",
+     0.033
+    ],
+    [
+     "thick",
+     0.031
+    ]
+   ],
+   "flipped": false,
+   "rationale": "Dermatitis is a clinical diagnosis; the patient phrasing is symptom-focused. The frame ('rub on a') strongly funnels toward a topical treatment, making the clinical version diagnostic of medical understanding.",
+   "patient_term": "skin's been itchy and red in patches",
+   "clinical_term": "dermatitis",
+   "topic": "skin conditions",
+   "topics": [
+    "sleep problems",
+    "digestive issues",
+    "skin conditions",
+    "chronic pain",
+    "breathing and allergies",
+    "mental health",
+    "heart and blood pressure",
+    "medication routines"
+   ],
+   "screening": {
+    "status": "passed",
+    "min_prob": 0.02,
+    "intended_target": " cream",
+    "observed_clinical": [
+     "Output \" cream\"",
+     0.073
+    ],
+    "probe_extension": null
+   },
+   "circuit_diff": {
+    "shared_features": 623,
+    "unique_to_a": 174,
+    "unique_to_b": 203
+   },
+   "clinical_mass": {
+    "clinical": 0.2912,
+    "patient": 0.2537
+   },
+   "html": "modes/simulated/pairs_20260707T023706Z/index_44.html"
+  },
+  {
+   "index": 141,
+   "batch": "pairs_20260707T023706Z",
+   "batch_index": 45,
+   "clinical_prompt": "When I breathe in the cold air, my asthma flares, so I should probably grab my",
+   "patient_prompt": "When I breathe in the cold air, my chest gets tight, so I should probably grab my",
+   "target_token": "inhal",
+   "intended_target": "inhaler",
+   "anchor_fallback": false,
+   "prob_clinical": 0.781,
+   "prob_patient": 0.528,
+   "language_penalty": -0.253,
+   "top_clinical": [
+    "inhal",
+    0.781
+   ],
+   "top_patient": [
+    "inhal",
+    0.528
+   ],
+   "spread_clinical": [
+    [
+     "inhal",
+     0.781
+    ],
+    [
+     "puffer",
+     0.046
+    ],
+    [
+     "asthma",
+     0.034
+    ],
+    [
+     "nebu",
+     0.013
+    ],
+    [
+     "rescue",
+     0.011
+    ]
+   ],
+   "spread_patient": [
+    [
+     "inhal",
+     0.528
+    ],
+    [
+     "jacket",
+     0.09
+    ],
+    [
+     "scarf",
+     0.052
+    ],
+    [
+     "asthma",
+     0.043
+    ],
+    [
+     "puffer",
+     0.039
+    ]
+   ],
+   "flipped": false,
+   "rationale": "Asthma is a named condition; chest tightness is a symptom description. The possessive + noun frame strongly predicts a device name in the clinical version, contrasting with a symptom-focused response in the patient version.",
+   "patient_term": "my chest gets tight",
+   "clinical_term": "my asthma flares",
+   "topic": "breathing and allergies",
+   "topics": [
+    "sleep problems",
+    "digestive issues",
+    "skin conditions",
+    "chronic pain",
+    "breathing and allergies",
+    "mental health",
+    "heart and blood pressure",
+    "medication routines"
+   ],
+   "screening": {
+    "status": "passed",
+    "min_prob": 0.02,
+    "intended_target": " inhaler",
+    "observed_clinical": [
+     "Output \" inhal\"",
+     0.781
+    ],
+    "probe_extension": null
+   },
+   "circuit_diff": {
+    "shared_features": 488,
+    "unique_to_a": 187,
+    "unique_to_b": 283
+   },
+   "clinical_mass": {
+    "clinical": 0.3458,
+    "patient": 0.2593
+   },
+   "html": "modes/simulated/pairs_20260707T023706Z/index_45.html"
+  },
+  {
+   "index": 142,
+   "batch": "pairs_20260707T023706Z",
+   "batch_index": 46,
+   "clinical_prompt": "My seborrheic dermatitis is flaking and itchy, so I think I should use a",
+   "patient_prompt": "My skin's been flaking and itchy, so I think I should use a",
+   "target_token": null,
+   "intended_target": "cream",
+   "anchor_fallback": false,
+   "prob_clinical": null,
+   "prob_patient": null,
+   "language_penalty": null,
+   "top_clinical": [
+    "shampoo",
+    0.08
+   ],
+   "top_patient": null,
+   "spread_clinical": [
+    [
+     "shampoo",
+     0.08
+    ],
+    [
+     "moisturizer",
+     0.072
+    ],
+    [
+     "medic",
+     0.07
+    ],
+    [
+     "good",
+     0.047
+    ],
+    [
+     "mild",
+     0.041
+    ]
+   ],
+   "spread_patient": [],
+   "flipped": false,
+   "rationale": "Colloquial description of a chronic skin condition versus clinical diagnosis; the frame directs toward a topical remedy word that follows an indefinite article, with different likelihood based on whether the model recognizes a named condition.",
+   "patient_term": "My skin's been flaking and itchy",
+   "clinical_term": "My seborrheic dermatitis is flaking and itchy",
+   "topic": "skin conditions",
+   "topics": [
+    "sleep problems",
+    "digestive issues",
+    "skin conditions",
+    "chronic pain",
+    "breathing and allergies",
+    "mental health",
+    "heart and blood pressure",
+    "medication routines"
+   ],
+   "screening": {
+    "status": "screened_out",
+    "min_prob": 0.02,
+    "intended_target": " cream",
+    "observed_clinical": null,
+    "probe_extension": null,
+    "reason": "intended target not in the traced clinical spread"
+   },
+   "circuit_diff": null,
+   "clinical_mass": {
+    "clinical": 0.3577
+   }
+  },
+  {
+   "index": 143,
+   "batch": "pairs_20260707T023706Z",
+   "batch_index": 47,
+   "clinical_prompt": "I've been waking up in the middle of the night with night sweats, so my",
+   "patient_prompt": "I've been waking up in the middle of the night drenched in sweat, so my",
+   "target_token": "doctor",
+   "intended_target": "doctor",
+   "anchor_fallback": false,
+   "prob_clinical": 0.093,
+   "prob_patient": 0.11,
+   "language_penalty": 0.017,
+   "top_clinical": [
+    "husband",
+    0.256
+   ],
+   "top_patient": [
+    "husband",
+    0.194
+   ],
+   "spread_clinical": [
+    [
+     "husband",
+     0.256
+    ],
+    [
+     "wife",
+     0.138
+    ],
+    [
+     "doctor",
+     0.093
+    ],
+    [
+     "boyfriend",
+     0.05
+    ],
+    [
+     "mom",
+     0.04
+    ]
+   ],
+   "spread_patient": [
+    [
+     "husband",
+     0.194
+    ],
+    [
+     "wife",
+     0.126
+    ],
+    [
+     "doctor",
+     0.11
+    ],
+    [
+     "boyfriend",
+     0.033
+    ],
+    [
+     "friend",
+     0.03
+    ]
+   ],
+   "flipped": false,
+   "rationale": "Colloquial description of nocturnal sweating versus clinical term; the frame leaves a possessive slot where the clinical term is more likely to trigger a medical professional or symptom management word.",
+   "patient_term": "drenched in sweat",
+   "clinical_term": "with night sweats",
+   "topic": "sleep problems",
+   "topics": [
+    "sleep problems",
+    "digestive issues",
+    "skin conditions",
+    "chronic pain",
+    "breathing and allergies",
+    "mental health",
+    "heart and blood pressure",
+    "medication routines"
+   ],
+   "screening": {
+    "status": "passed",
+    "min_prob": 0.02,
+    "intended_target": " doctor",
+    "observed_clinical": [
+     "Output \" doctor\"",
+     0.093
+    ],
+    "probe_extension": null
+   },
+   "circuit_diff": {
+    "shared_features": 531,
+    "unique_to_a": 264,
+    "unique_to_b": 221
+   },
+   "clinical_mass": {
+    "clinical": 0.1782,
+    "patient": 0.1267
+   },
+   "html": "modes/simulated/pairs_20260707T023706Z/index_47.html"
+  },
+  {
+   "index": 144,
+   "batch": "pairs_20260707T023706Z",
+   "batch_index": 48,
+   "clinical_prompt": "When I eat too much greasy food I get constipation, so I should take some",
+   "patient_prompt": "When I eat too much greasy food my insides feel backed up, so I should take some",
+   "target_token": "lax",
+   "intended_target": "laxative",
+   "anchor_fallback": false,
+   "prob_clinical": 0.358,
+   "prob_patient": 0.186,
+   "language_penalty": -0.172,
+   "top_clinical": [
+    "lax",
+    0.358
+   ],
+   "top_patient": [
+    "lax",
+    0.186
+   ],
+   "spread_clinical": [
+    [
+     "lax",
+     0.358
+    ],
+    [
+     "fiber",
+     0.094
+    ],
+    [
+     "medicine",
+     0.062
+    ],
+    [
+     "kind",
+     0.039
+    ],
+    [
+     "probiotics",
+     0.035
+    ]
+   ],
+   "spread_patient": [
+    [
+     "lax",
+     0.186
+    ],
+    [
+     "kind",
+     0.118
+    ],
+    [
+     "sort",
+     0.059
+    ],
+    [
+     "fiber",
+     0.058
+    ],
+    [
+     "probiotics",
+     0.052
+    ]
+   ],
+   "flipped": false,
+   "rationale": "Lay metaphorical language for bowel obstruction versus medical term; the post-article frame strongly funnels toward a remedy word that differs by diagnostic framing.",
+   "patient_term": "my insides feel backed up",
+   "clinical_term": "I get constipation",
+   "topic": "digestive issues",
+   "topics": [
+    "sleep problems",
+    "digestive issues",
+    "skin conditions",
+    "chronic pain",
+    "breathing and allergies",
+    "mental health",
+    "heart and blood pressure",
+    "medication routines"
+   ],
+   "screening": {
+    "status": "passed",
+    "min_prob": 0.02,
+    "intended_target": " laxative",
+    "observed_clinical": [
+     "Output \" lax\"",
+     0.358
+    ],
+    "probe_extension": null
+   },
+   "circuit_diff": {
+    "shared_features": 534,
+    "unique_to_a": 251,
+    "unique_to_b": 310
+   },
+   "clinical_mass": {
+    "clinical": 0.394,
+    "patient": 0.3422
+   },
+   "html": "modes/simulated/pairs_20260707T023706Z/index_48.html"
+  },
+  {
+   "index": 145,
+   "batch": "pairs_20260707T023706Z",
+   "batch_index": 49,
+   "clinical_prompt": "Ever since I quit smoking my nicotine withdrawal is severe, so I think I should take my",
+   "patient_prompt": "Ever since I quit smoking my mood's been all over the place, so I think I should take my",
+   "target_token": null,
+   "intended_target": "medication",
+   "anchor_fallback": false,
+   "prob_clinical": null,
+   "prob_patient": null,
+   "language_penalty": null,
+   "top_clinical": [
+    "nicotine",
+    0.124
+   ],
+   "top_patient": null,
+   "spread_clinical": [
+    [
+     "nicotine",
+     0.124
+    ],
+    [
+     "time",
+     0.065
+    ],
+    [
+     "vitamins",
+     0.055
+    ],
+    [
+     "chances",
+     0.044
+    ],
+    [
+     "daily",
+     0.04
+    ]
+   ],
+   "spread_patient": [],
+   "flipped": false,
+   "rationale": "Vague emotional description versus named withdrawal syndrome; the possessive frame after a modal verb creates a natural slot for medication-type words that diverge based on whether the model recognizes a clinical condition.",
+   "patient_term": "my mood's been all over the place",
+   "clinical_term": "my nicotine withdrawal is severe",
+   "topic": "mental health",
+   "topics": [
+    "sleep problems",
+    "digestive issues",
+    "skin conditions",
+    "chronic pain",
+    "breathing and allergies",
+    "mental health",
+    "heart and blood pressure",
+    "medication routines"
+   ],
+   "screening": {
+    "status": "screened_out",
+    "min_prob": 0.02,
+    "intended_target": " medication",
+    "observed_clinical": null,
+    "probe_extension": null,
+    "reason": "intended target not in the traced clinical spread"
+   },
+   "circuit_diff": null,
+   "clinical_mass": {
+    "clinical": 0.2522
+   }
+  },
+  {
+   "index": 146,
+   "batch": "pairs_20260707T023706Z",
+   "batch_index": 50,
+   "clinical_prompt": "My osteoarthritis has been stiff and achy for months, so I should probably take my",
+   "patient_prompt": "My joints have been stiff and achy for months, so I should probably take my",
+   "target_token": null,
+   "intended_target": "medication",
+   "anchor_fallback": false,
+   "prob_clinical": null,
+   "prob_patient": null,
+   "language_penalty": null,
+   "top_clinical": [
+    "pain",
+    0.118
+   ],
+   "top_patient": null,
+   "spread_clinical": [
+    [
+     "pain",
+     0.118
+    ],
+    [
+     "own",
+     0.075
+    ],
+    [
+     "meds",
+     0.057
+    ],
+    [
+     "arthritis",
+     0.053
+    ],
+    [
+     "daily",
+     0.05
+    ]
+   ],
+   "spread_patient": [],
+   "flipped": false,
+   "rationale": "The frame 'take my' strongly guides toward a medication/remedy. 'Osteoarthritis' (clinical term for a degenerative joint condition) naturally primes medication management, whereas colloquial 'stiff and achy joints' might prompt more lay advice like 'exercise' or 'rest'. The syntactic structure funnels toward a possessive singular remedy or substance.",
+   "patient_term": "joints have been stiff and achy",
+   "clinical_term": "osteoarthritis has been stiff and achy",
+   "topic": "chronic pain",
+   "topics": [
+    "sleep problems",
+    "digestive issues",
+    "skin conditions",
+    "chronic pain",
+    "breathing and allergies",
+    "mental health",
+    "heart and blood pressure",
+    "medication routines"
+   ],
+   "screening": {
+    "status": "screened_out",
+    "min_prob": 0.02,
+    "intended_target": " medication",
+    "observed_clinical": null,
+    "probe_extension": null,
+    "reason": "intended target not in the traced clinical spread"
+   },
+   "circuit_diff": null,
+   "clinical_mass": {
+    "clinical": 0.3782
+   }
   }
  ]
 }
