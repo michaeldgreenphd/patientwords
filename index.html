@@ -272,10 +272,10 @@
         <iframe class="live" src="modes/2panel/index.html" loading="lazy"
                 title="Live preview: two stacked attribution graphs comparing clinical and patient wording" tabindex="-1"></iframe>
       </div></div>
-      <figcaption>modes/2panel · demonstration render</figcaption>
+      <figcaption>demonstration render</figcaption>
     </figure>
     <div class="fig-body">
-      <p class="fig-no">Fig. 1 <span class="mode">· 2panel</span></p>
+      <p class="fig-no">Fig. 1 <span class="mode">· one-word swap</span></p>
       <h3>Word Differences</h3>
       <p>A word-for-word substitution (“depression” vs. “the blues”) mapped as two stacked
          circuit traces. The clinical wording drives prob(therapist) = 0.86; the patient
@@ -283,7 +283,7 @@
       <span class="stat penalty">Language Penalty: −51% probability (0.86 → 0.35)</span>
       <p class="traced" data-mode="2panel" data-traced="gemma-2-2b">
         <span class="tm"><b>traced model:</b> gemma-2-2b · gemma scope transcoders</span>
-        <span class="tp">gemma-3-4b-it · qwen3-4b · qwen3-1.7b · traces pending</span>
+        <span class="tp">hand-authored demonstration graph · gemma-2-2b schema</span>
       </p>
       <span class="open">Open the comparison →</span>
     </div>
@@ -295,10 +295,10 @@
         <iframe class="live" src="modes/4quadrant/index.html" loading="lazy"
                 title="Live preview: four-quadrant matrix factorizing vocabulary and syntax effects" tabindex="-1"></iframe>
       </div></div>
-      <figcaption>modes/4quadrant · live render · simulated scenario</figcaption>
+      <figcaption>live render · simulated scenario</figcaption>
     </figure>
     <div class="fig-body">
-      <p class="fig-no">Fig. 2 <span class="mode">· 4quadrant</span></p>
+      <p class="fig-no">Fig. 2 <span class="mode">· syntax × lexicon</span></p>
       <h3>Syntax Differences</h3>
       <p>A 2×2 factorization crossing the phrasing (patient-derived language vs. medical
          lexicon) with the surrounding morphosyntax (standard vs. nonstandard). In the first
@@ -308,7 +308,7 @@
       <span class="stat penalty">Variety shift Δ: +12% toward the everyday continuation · Register shift Δ: +5%</span>
       <p class="traced" data-mode="4quadrant" data-traced="gemma-2-2b">
         <span class="tm"><b>traced model:</b> gemma-2-2b · gemma scope transcoders</span>
-        <span class="tp">gemma-3-4b-it · qwen3-4b · qwen3-1.7b · traces pending</span>
+        <span class="tp">hosted circuit-tracer via Neuronpedia</span>
       </p>
       <span class="open">Open the matrix →</span>
     </div>
@@ -320,10 +320,10 @@
            data-live-title="Live preview: dialect-mode attribution graphs">
         <div class="pending-inner"><span class="pending-mark"></span>loading · dialect mode</div>
       </div>
-      <figcaption>modes/dialect · live render · traced 2026-07-07</figcaption>
+      <figcaption>live render · traced 2026-07-07</figcaption>
     </figure>
     <div class="fig-body">
-      <p class="fig-no">Fig. 3 <span class="mode">· dialect</span></p>
+      <p class="fig-no">Fig. 3 <span class="mode">· dialect sweep</span></p>
       <h3>Dialect Differences</h3>
       <p>Eight clinical terms from the hand-measured dataset are each held fixed while the
          sentence around them is re-traced across six dialect and register framings, so any
@@ -345,10 +345,10 @@
         <iframe class="live" src="modes/translation/index.html" loading="lazy"
                 title="Live preview: translation mitigation chain restoring the clinical circuit" tabindex="-1"></iframe>
       </div></div>
-      <figcaption>modes/translation · demonstration render</figcaption>
+      <figcaption>demonstration render</figcaption>
     </figure>
     <div class="fig-body">
-      <p class="fig-no">Fig. 4 <span class="mode">· translation</span></p>
+      <p class="fig-no">Fig. 4 <span class="mode">· translation recovery</span></p>
       <h3>Translation</h3>
       <p>The organic fix: an LLM translates the patient sentence into standard terminology and
          the raw output is traced natively. The clinical circuit comes back, and the
@@ -356,7 +356,7 @@
       <span class="stat recovery">Recovered target probability: +51% (0.35 → 0.86)</span>
       <p class="traced" data-mode="translation" data-traced="gemma-2-2b">
         <span class="tm"><b>traced model:</b> gemma-2-2b · gemma scope transcoders</span>
-        <span class="tp">gemma-3-4b-it · qwen3-4b · qwen3-1.7b · traces pending</span>
+        <span class="tp">hand-authored demonstration graph · gemma-2-2b schema</span>
       </p>
       <span class="open">Open the mitigation chain →</span>
     </div>
@@ -371,12 +371,12 @@
     <figure class="fig-media">
       <div class="embed preview pending" data-live-src="modes/simulated/preview.html"
            data-live-title="Live preview: simulated scenario traced as two stacked attribution graphs">
-        <div class="pending-inner"><span class="pending-mark"></span>traces pending · simulated series</div>
+        <div class="pending-inner"><span class="pending-mark"></span>loading · simulated series</div>
       </div>
-      <figcaption>modes/simulated · live renders · simulated data</figcaption>
+      <figcaption>live renders · simulated data</figcaption>
     </figure>
     <div class="fig-body">
-      <p class="fig-no">Sim series <span class="mode">· 2panel · simulated data</span></p>
+      <p class="fig-no">Sim series <span class="mode">· generated pairs · simulated data</span></p>
       <h3>Simulated Scenarios</h3>
       <p>Claude authors new patient-vs-clinical stress pairs in the hand-built dataset’s
          format (everyday condition areas, one contiguous term swap per pair), and
