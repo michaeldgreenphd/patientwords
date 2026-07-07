@@ -77,6 +77,15 @@
 
   /* concise summary table (one row per scenario, rows jump to the full card) */
   .sum-scroll{overflow-x:auto;margin:26px 0 0}
+  .sum-scroll{background:
+    linear-gradient(90deg,var(--paper) 35%,rgba(250,249,245,0)),
+    linear-gradient(270deg,var(--paper) 35%,rgba(250,249,245,0)) 100% 0,
+    linear-gradient(90deg,rgba(28,28,25,.14),rgba(28,28,25,0)),
+    linear-gradient(270deg,rgba(28,28,25,.14),rgba(28,28,25,0)) 100% 0;
+    background-repeat:no-repeat;background-size:46px 100%,46px 100%,12px 100%,12px 100%;
+    background-attachment:local,local,scroll,scroll}
+  .sum-table th:first-child,.sum-table td:first-child{position:sticky;left:0;background:var(--paper);z-index:2}
+
   .sum-table{width:100%;min-width:760px;border-collapse:collapse}
   .sum-table th{font-family:var(--mono);font-size:10.5px;font-weight:600;letter-spacing:.14em;
     text-transform:uppercase;color:var(--muted);text-align:left;
@@ -196,6 +205,9 @@
   footer a:hover{color:var(--ink)}
 
   @media (max-width:760px){
+    .masthead nav{gap:8px 22px}
+    .masthead nav a{padding:7px 0}
+
     body{font-size:16px}
     .masthead{padding-top:12px}
     .subtitle{font-size:18px}

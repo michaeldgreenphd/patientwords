@@ -81,6 +81,10 @@
     font-size:10px;letter-spacing:.12em;text-transform:uppercase;background:#fff;
     border:1px solid var(--hairline);color:var(--muted);padding:5px 9px;cursor:pointer}
   .zoom-btn:hover{color:var(--ink);border-color:var(--ink)}
+  .embed-shell.fs-fallback{position:fixed;inset:0;z-index:60;background:#fff;
+    margin:0;overflow:hidden}
+  .embed-shell.fs-fallback .embed{max-height:100vh;height:100vh;border:0}
+  body.pw-no-scroll{overflow:hidden}
   .embed-shell:fullscreen{background:#fff;overflow:hidden}
   .embed-shell:fullscreen .embed{max-height:100vh;height:100vh;border:0}
   .back{display:inline-block;margin-top:8px;font-family:var(--mono);font-size:12px;
@@ -99,6 +103,8 @@
     body{font-size:16px}
     .masthead{padding-top:12px}
     .subtitle{font-size:18px}
+    .masthead nav{gap:8px 22px}
+    .masthead nav a{padding:7px 0}
   }
   @media print{
     html,body{background:#fff;color:#000}
@@ -176,14 +182,22 @@
     try{
       var d=f.contentDocument;
       if(!d||!d.documentElement)return;
-      var w=d.documentElement.scrollWidth||f.offsetWidth||1180;
-      var h=d.documentElement.scrollHeight;
-      if(!h)return;
+      var svg=d.querySelector('svg');
+      var w=(svg&&svg.viewBox&&svg.viewBox.baseVal&&svg.viewBox.baseVal.width)||
+        d.documentElement.scrollWidth||f.offsetWidth||1180;
       var fr=f.parentElement;
-      if(!fr.classList.contains('zframe')){f.style.height=h+'px';return;}
+      if(!fr.classList.contains('zframe')){
+        f.style.height=(d.documentElement.scrollHeight||400)+'px';return;
+      }
       var box=fr.parentElement;
+      var shell=box.parentElement;
+      var expanded=(document.fullscreenElement&&document.fullscreenElement.contains(box))||
+        (shell&&shell.classList&&shell.classList.contains('fs-fallback'));
       var s=Math.min(1,(box.clientWidth||1)/w);
+      if(expanded&&window.innerWidth<900)s=Math.max(s,0.7);
       f.style.width=w+'px';
+      var h=d.documentElement.scrollHeight||600;
+      if(!h)return;
       f.style.height=h+'px';
       fr.style.width=w+'px';
       fr.style.transform='scale('+s+')';
@@ -203,8 +217,21 @@
     btn.textContent='\u2922 full screen';
     btn.setAttribute('aria-label','Toggle full screen view');
     btn.addEventListener('click',function(){
-      if(document.fullscreenElement){document.exitFullscreen();}
-      else if(shell.requestFullscreen){shell.requestFullscreen();}
+      if(document.fullscreenElement){document.exitFullscreen();return;}
+      if(shell.classList.contains('fs-fallback')){
+        shell.classList.remove('fs-fallback');
+        document.body.classList.remove('pw-no-scroll');
+        btn.textContent='\u2922 full screen';
+        setTimeout(fitAll,60);
+        return;
+      }
+      if(shell.requestFullscreen){shell.requestFullscreen();}
+      else{
+        shell.classList.add('fs-fallback');
+        document.body.classList.add('pw-no-scroll');
+        btn.textContent='\u2715 exit full screen';
+        setTimeout(fitAll,60);
+      }
     });
     shell.appendChild(btn);
   });
