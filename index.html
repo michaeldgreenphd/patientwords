@@ -470,6 +470,11 @@
       try{
         var d=f.contentDocument;
         if(!d||!d.documentElement)return;
+        // A below-fold loading="lazy" iframe reports its placeholder about:blank
+        // document (scrollHeight 150) until Chromium actually loads it; measuring
+        // it there would lock the preview at a ~44px sliver. Skip until loaded;
+        // the load handler re-runs fitAll with the real document.
+        if(!d.URL||d.URL==='about:blank')return;
         var h=d.documentElement.scrollHeight;
         if(!h)return;
         f.style.height=h+'px';
@@ -478,7 +483,9 @@
           var fr=f.closest('.frame');
           var s=pv.clientWidth/fr.offsetWidth;
           fr.style.transform='scale('+s+')';
-          pv.style.height=(h*s)+'px';
+          // Cap the thumbnail so a very tall render (e.g. the 7-graph dialect
+          // page) can't grow into a screen-burying strip; .embed crops the rest.
+          pv.style.height=Math.min(h*s,pv.classList.contains('wide')?260:520)+'px';
         }
       }catch(e){}
     });
