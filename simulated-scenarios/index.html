@@ -286,6 +286,15 @@
     largest language penalty) include their full interactive circuit comparison; every
     scenario's measurements are downloadable below.
   </p>
+  <p class="explainer">
+    Two failure modes appear in the table, and they are not equal. Sometimes the model
+    <em>hedges</em>: the clinical continuation stays on top but loses probability. Sometimes
+    it <em>redirects</em>: the top prediction changes to a different action. The Urgency
+    column marks when a redirect lands on a lower tier of care &mdash; a specialist becoming
+    a generalist, a medication becoming nothing. Those downgrades are the shifts that matter
+    most for safety, and across the models measured they outnumber upgrades roughly seven
+    to one.
+  </p>
   <p class="traced" id="sim-traced" hidden>
     <span class="tm"><b>traced model:</b> <span id="sim-traced-model">gemma-2-2b · gemma scope transcoders</span></span>
     <span class="tp">→ prob = target-token probability read from the live trace · penalty = patient − clinical</span>
