@@ -4,13 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Dialect differences — PatientWords</title>
-<meta name="description" content="The clinical term is held fixed while the sentence is re-traced across dialect and register variants of the surrounding syntax in gemma-2-2b. Framing alone moves p(therapist) from 0.07 to 0.38 around a 0.26 standard-English baseline.">
+<meta name="description" content="Eight clinical terms held fixed while each sentence is re-traced across six dialect and register framings in gemma-2-2b: 48 re-traced sentences, and most framings move the model's top prediction.">
 <link rel="canonical" href="https://michaeldgreenphd.github.io/patientwords/dialect-differences/">
 <meta name="theme-color" content="#faf9f5">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="PatientWords">
 <meta property="og:title" content="Dialect differences — PatientWords">
-<meta property="og:description" content="The same clinical phrase, framed the way different communities actually speak. Three of six framings flip the model's referral away from therapist.">
+<meta property="og:description" content="The same clinical phrases, framed the way different communities actually speak. Eight terms, six framings each, and most framings move the model's top prediction.">
 <meta property="og:url" content="https://michaeldgreenphd.github.io/patientwords/dialect-differences/">
 <meta property="og:image" content="https://michaeldgreenphd.github.io/patientwords/modes/2panel/preview.png">
 <meta property="og:image:width" content="1690">
@@ -18,7 +18,7 @@
 <meta property="og:image:alt" content="Attribution graphs comparing clinical and patient wording in gemma-2-2b">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Dialect differences — PatientWords">
-<meta name="twitter:description" content="The same clinical phrase, framed the way different communities actually speak. Three of six framings flip the model's referral.">
+<meta name="twitter:description" content="The same clinical phrases, framed the way different communities actually speak. Eight terms, six framings each.">
 <meta name="twitter:image" content="https://michaeldgreenphd.github.io/patientwords/modes/2panel/preview.png">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23faf9f5'/%3E%3Crect x='9' y='9' width='30' height='30' fill='%23111827'/%3E%3Crect x='25' y='25' width='30' height='30' fill='%2315803d'/%3E%3C/svg%3E">
 <style>
@@ -170,20 +170,22 @@
   <hr class="rule-fine">
 </header>
 <main>
-  <p class="dateline">Fig. 3 <span class="mode">· modes/dialect · live render · traced July 6, 2026</span></p>
+  <p class="dateline">Fig. 3 <span class="mode">· modes/dialect · live render · traced July 7, 2026</span></p>
   <h1>Dialect differences</h1>
   <p class="subtitle">The same clinical phrase, framed the way different communities actually speak.</p>
   <p class="explainer">The engine holds the clinical term fixed and re-traces the sentence
      across dialect and register variants of the surrounding syntax, so any probability
      shift is attributable to framing alone, extending the single syntax delta of the
-     2×2 matrix into a distribution across dialects. Every prompt below contains the
-     identical clinical term, <em>clinical depression</em>; only the words around it change.
-     Three of the six framings flip the model's top referral away from
-     <span style="font-family:var(--mono)">&nbsp;therapist</span> entirely.</p>
-  <p class="traced" data-mode="dialect" data-traced="2026-07-06">
-    <span class="tm"><b>model:</b> gemma-2-2b · <b>features:</b> Gemma Scope transcoders (16k) · <b>graphs:</b> 7 (1 baseline + 6 framings)</span><br>
-    <span class="tm"><b>held fixed:</b> “clinical depression” · <b>target token:</b> “&nbsp;therapist” · <b>baseline p:</b> 0.26</span><br>
-    <span class="tp">framings authored by claude-opus-4-8 ($0.0099, 6/6 accepted) · traced via Neuronpedia · batch dialects_20260706T232102Z</span>
+     2×2 matrix into a distribution across dialects. The sweep below holds eight
+     clinical terms from the hand-measured dataset fixed, one per row, and re-traces each
+     across six framings: 48 sentences, every one containing its clinical term verbatim.
+     Most framings move the model's top prediction; the featured term
+     <em>clinical depression</em> loses its
+     <span style="font-family:var(--mono)">&nbsp;therapist</span> referral under three of six.</p>
+  <p class="traced" data-mode="dialect" data-traced="2026-07-07">
+    <span class="tm"><b>model:</b> gemma-2-2b · <b>features:</b> Gemma Scope transcoders (16k) · <b>graphs:</b> 56 (8 baselines + 48 framings)</span><br>
+    <span class="tm"><b>held fixed:</b> 8 clinical terms from the hand-measured dataset · <b>framings:</b> 6 per term</span><br>
+    <span class="tp">framings authored by claude-opus-4-8 ($0.083, 48/48 accepted) · traced via Neuronpedia · batch dialects_20260707T000923Z</span>
   </p>
 
   <section id="dl-matrix" hidden>
@@ -267,7 +269,10 @@
     .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
     .then(function(data){
       var items=data.items||[];if(!items.length)return;
-      var dialects=items[0].variants.map(function(v){return v.dialect;});
+      var freq={};
+      items.forEach(function(it){it.variants.forEach(function(v){
+        freq[v.dialect]=(freq[v.dialect]||0)+1;});});
+      var dialects=Object.keys(freq).sort(function(a,b){return freq[b]-freq[a];});
       var head=document.getElementById('dlm-head');
       var tr=el('tr');
       tr.appendChild(el('th',null,'Term (target)'));
@@ -307,8 +312,8 @@
         body.appendChild(row);
       });
       document.getElementById('dl-matrix-sub').textContent=
-        items.length+' clinical terms '+String.fromCharCode(215)+' '+dialects.length+
-        ' framings = '+cells+' re-traced sentences '+String.fromCharCode(183)+' '+flips+
+        items.length+' clinical terms '+String.fromCharCode(183)+' '+dialects.length+
+        ' framing varieties '+String.fromCharCode(183)+' '+cells+' re-traced sentences '+String.fromCharCode(183)+' '+flips+
         ' top-pick flips '+String.fromCharCode(183)+' batch '+(data.batch||'')+
         ' '+String.fromCharCode(183)+' '+(data.graph_model||'');
       document.getElementById('dl-matrix').hidden=false;
