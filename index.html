@@ -637,6 +637,7 @@
     .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
     .then(function(data){
       var models=data.models||[];
+      if(!models.length){sec.hidden=true;return;}  // no data: stay hidden, not a half-built skeleton
       var tb=document.getElementById('me-body');
       models.forEach(function(m){
         var tr=document.createElement('tr');

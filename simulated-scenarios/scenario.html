@@ -352,15 +352,18 @@
 
       var tgt=s.target_token||'';
       var intent=(s.intended_target||'').trim();
+      var screenedOut=!tgt&&s.screening&&s.screening.status==='screened_out';
       var tgtNote='';
-      if(intent&&intent!==tgt){
+      if(screenedOut){
+        tgtNote=intent?' · screened out (intended “'+intent+'” unmeasurable)':' · screened out';
+      }else if(intent&&intent!==tgt){
         tgtNote=s.anchor_fallback
           ?' · intended “'+intent+'” fell below the traced spread; anchored on the clinical top prediction'
           :' (first piece of “'+intent+'”)';
       }
       var no=el('p','sim-no','Sim '+pad(s.index)+' ');
       no.appendChild(el('span','mode','· '+(s.batch||'')+' #'+(s.batch_index||'')
-        +' · target “'+tgt+'”'+tgtNote));
+        +(tgt?' · target “'+tgt+'”':'')+tgtNote));
       card.appendChild(no);
 
       var grid=el('div','sim-prompts');

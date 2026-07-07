@@ -94,7 +94,7 @@
     line-height:1.8;margin:22px 0 0}
   .embed{border:1px solid var(--hairline);background:#fff;margin:26px 0 10px;
     overflow-x:auto;overflow-y:hidden}
-  .embed iframe{width:100%;min-width:1400px;border:0;display:block;min-height:400px}
+  .embed iframe{width:100%;border:0;display:block;min-height:400px}
   .embed-caption{font-family:var(--mono);font-size:11px;color:var(--muted);
     letter-spacing:.04em;margin:0 0 26px}
   .embed-shell{position:relative;margin:26px 0 10px}
@@ -134,6 +134,8 @@
     .masthead nav,.back{display:none}
     a{text-decoration:none;color:inherit}
     .embed{border-color:#999;break-inside:avoid}
+    .embed-shell .embed{max-height:none;overflow:visible}
+    .zoom-btn{display:none}
     .dateline,.endnote p,footer{color:#444}
   }
 </style>
@@ -234,8 +236,8 @@
     <iframe class="live" src="../modes/4quadrant/index.html" loading="lazy"
             title="Interactive four-quadrant matrix factorizing vocabulary and syntax effects"></iframe>
   </div>
-  <p class="embed-caption">The matrix is wider than the page by design; scroll it sideways to
-     compare all four boxes. Each box traces one cell’s prompt: columns are that sentence’s words
+  <p class="embed-caption">The matrix is scaled to fit the page; open it full screen (button, top-right) to
+     compare all four boxes at full detail. Each box traces one cell’s prompt: columns are that sentence’s words
      in order, height is depth in the model, and the predicted next word sits at the top. Hover
      any node for its feature id, category, attribution mass, and autointerp description. Live
      gemma-2-2b trace of a simulated quadrant scenario (batch quadrants_20260706T191617Z,

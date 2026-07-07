@@ -316,7 +316,7 @@
       <a href="../phrase-dataset/">Phrase Dataset</a>.
     </p>
     <footer>
-      Built with the patientwords-engine pipeline
+      Built with the patientwords-engine pipeline (engine repo, currently private)
       on <a href="https://neuronpedia.org">Neuronpedia</a> ·
       attribution graphs by <a href="https://github.com/safety-research/circuit-tracer">circuit-tracer</a> ·
       features from <a href="https://huggingface.co/google/gemma-scope-2b-pt-transcoders">Gemma Scope</a> transcoders ·
@@ -499,10 +499,13 @@
         if(filterText){
           var q=filterText.toLowerCase();
           list=list.filter(function(s){
+            // per-row fields only: the batch-wide `topics` array is identical
+            // across every scenario, so including it made any condition word
+            // match all rows. `topic` is the per-scenario condition.
             return [s.clinical_prompt,s.patient_prompt,s.patient_term,s.clinical_term,
                     s.target_token,s.intended_target,s.topic,
                     s.top_clinical&&s.top_clinical[0],s.top_patient&&s.top_patient[0],
-                    (s.topics||[]).join(' '),s.rationale]
+                    s.rationale]
               .join(' ').toLowerCase().indexOf(q)>=0;
           });
         }
