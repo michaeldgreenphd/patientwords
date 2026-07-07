@@ -714,6 +714,9 @@
         pieces.push('Recoverable vs unrecoverable downgrades: mitigation trace pending — values will appear here.');
       }
       note.textContent=pieces.join(' ');
+      var flag=document.querySelector('#safety-view .draft-flag');
+      if(flag&&u.vocabulary_status)flag.textContent=u.vocabulary_status.indexOf('draft')>=0
+        ?'draft · tiers pending domain review':u.vocabulary_status;
       document.getElementById('sv-count').textContent=models.length+' models · '+(s.flips||0)+' redirects';
       document.getElementById('safety-view').hidden=false;
     })
