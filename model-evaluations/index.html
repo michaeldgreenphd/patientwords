@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Model Evaluations — PatientWords</title>
+<meta name="description" content="Claude models scored on the same 10-item clinical concept-extraction task before and after translating patient phrasing into clinician wording; Δ isolates what the translation step adds or destroys.">
+<link rel="canonical" href="https://michaeldgreenphd.github.io/patientwords/model-evaluations/">
+<meta name="theme-color" content="#faf9f5">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="PatientWords">
+<meta property="og:title" content="Model Evaluations — PatientWords">
+<meta property="og:description" content="The same extraction task, before and after translation. On this 10-item set the models read patient phrasing perfectly; the losses appear after the translation step.">
+<meta property="og:url" content="https://michaeldgreenphd.github.io/patientwords/model-evaluations/">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23faf9f5'/%3E%3Crect x='9' y='9' width='30' height='30' fill='%23111827'/%3E%3Crect x='25' y='25' width='30' height='30' fill='%2315803d'/%3E%3C/svg%3E">
+<style>
+  :root{
+    --paper:#faf9f5; --ink:#1c1c19; --patient:#111827; --clinical:#15803d;
+    --penalty:#b4483d; --muted:#6d6c66; --structural:#c3c9d2; --hairline:#dcdad2;
+    --serif:'Iowan Old Style','Palatino Linotype',Palatino,'Book Antiqua',Georgia,serif;
+    --mono:ui-monospace,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace;
+  }
+  html{background:var(--paper)}
+  body{margin:0;padding:0;background:var(--paper);color:var(--ink);
+    font-family:var(--serif);font-size:17px;line-height:1.62;
+    -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+  main{max-width:760px;margin:0 auto;padding:0 22px 56px}
+  a{color:inherit}
+  a:focus-visible{outline:2px solid var(--clinical);outline-offset:3px;border-radius:1px}
+  ::selection{background:#dbe9df}
+  .skip{position:absolute;left:-9999px;top:0;background:var(--paper);color:var(--ink);
+    padding:8px 14px;border:1px solid var(--ink);z-index:10}
+  .skip:focus{left:8px}
+
+  .masthead{max-width:760px;margin:0 auto;padding:20px 22px 0}
+  .masthead-row{display:flex;align-items:baseline;justify-content:space-between;
+    flex-wrap:wrap;gap:8px 24px;padding:10px 0 12px}
+  .wordmark{font-family:var(--serif);font-size:19px;font-weight:600;letter-spacing:.02em;
+    text-decoration:none}
+  .wordmark .pw-p{color:var(--patient)}
+  .wordmark .pw-w{color:var(--clinical)}
+  .masthead nav{display:flex;flex-wrap:wrap;gap:6px 20px}
+  .masthead nav a{font-family:var(--mono);font-size:11px;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--muted);text-decoration:none;padding:2px 0}
+  .masthead nav a:hover{color:var(--ink);text-decoration:underline;text-underline-offset:4px}
+  .masthead nav a[aria-current=page]{color:var(--ink);border-bottom:1px solid var(--ink)}
+  .rule-heavy{border:0;border-top:2px solid var(--ink);margin:0}
+  .rule-fine{border:0;border-top:1px solid var(--hairline);margin:3px 0 0}
+
+  .dateline{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--clinical);font-weight:600;margin:34px 0 14px}
+  .dateline .mode{color:var(--muted);font-weight:400;letter-spacing:.06em;text-transform:none}
+  h1{font-size:clamp(28px,4.6vw,38px);line-height:1.16;font-weight:600;
+    letter-spacing:-.006em;margin:0 0 10px}
+  .subtitle{font-style:italic;font-size:20px;line-height:1.5;color:var(--muted);margin:0 0 20px}
+  .explainer{font-size:17px;line-height:1.66;margin:0 0 14px}
+  section{border-top:1px solid var(--ink);margin-top:40px;padding-top:12px}
+  h2{font-size:23px;font-weight:600;line-height:1.24;margin:0 0 12px;letter-spacing:-.004em}
+  section p{margin:0 0 14px;font-size:16px;line-height:1.66}
+  .cols{list-style:none;margin:6px 0 14px;padding:0}
+  .cols li{border-bottom:1px solid var(--hairline);padding:10px 0;font-size:15.5px;line-height:1.6}
+  .cols li:last-child{border-bottom:0}
+  .cols b{font-weight:600}
+  .cols .term{font-family:var(--mono);font-size:12px;letter-spacing:.06em;color:var(--clinical);
+    text-transform:uppercase;font-weight:600;margin-right:8px}
+
+  .me-scroll{overflow-x:auto;margin:22px 0 12px}
+  .me-table{width:100%;min-width:560px;border-collapse:collapse}
+  .me-table th{font-family:var(--mono);font-size:10.5px;font-weight:600;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--muted);text-align:left;
+    padding:0 18px 8px 0;border-bottom:1px solid var(--ink)}
+  .me-table th.num{text-align:right}
+  .me-table td{padding:11px 18px 11px 0;border-bottom:1px solid var(--hairline);
+    font-size:14.5px;line-height:1.5;vertical-align:top}
+  .me-table td.num{text-align:right;font-family:var(--mono);font-size:12.5px;white-space:nowrap}
+  .me-table td.mono{font-family:var(--mono);font-size:12.5px}
+  .me-table tr:last-child td{border-bottom:1px solid var(--ink)}
+  .delta-neg{color:var(--penalty);font-weight:600}
+  .delta-zero{color:var(--clinical);font-weight:600}
+  .me-caption{font-family:var(--mono);font-size:11px;color:var(--muted);
+    letter-spacing:.04em;margin:6px 0 0}
+  .stat{font-family:var(--mono);font-size:13px;font-weight:600}
+  .stat.penalty{color:var(--penalty)}
+  .back{display:inline-block;margin-top:26px;font-family:var(--mono);font-size:12px;
+    letter-spacing:.1em;text-transform:uppercase;color:var(--ink);text-decoration:none;
+    border-bottom:1px solid var(--ink);padding-bottom:2px}
+  .back:hover{color:var(--clinical);border-bottom-color:var(--clinical)}
+
+  .endnote{border-top:1px solid var(--ink);margin-top:46px;padding-top:14px}
+  .endnote p{font-family:var(--mono);font-size:12px;line-height:1.8;color:var(--muted);margin:0 0 14px}
+  footer{font-family:var(--mono);font-size:12px;line-height:1.9;color:var(--muted)}
+  footer a{color:var(--muted);text-underline-offset:3px}
+  footer a:hover{color:var(--ink)}
+  @media (max-width:760px){body{font-size:16px}}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="masthead">
+  <hr class="rule-heavy"><hr class="rule-fine">
+  <div class="masthead-row">
+    <a class="wordmark" href="../"><span class="pw-p">Patient</span><span class="pw-w">Words</span></a>
+    <nav aria-label="Site">
+      <a href="../">Home</a>
+      <a href="../methods.html">Methods</a>
+      <a href="../word-differences/">Word Differences</a>
+      <a href="../syntax-differences/">Syntax Differences</a>
+      <a href="../dialect-differences/">Dialect Differences</a>
+      <a href="../translation/">Translation</a>
+      <a href="../simulated-scenarios/">Simulated Scenarios</a>
+      <a href="../phrase-dataset/">Phrase Dataset</a>
+      <a href="./" aria-current="page">Model Evaluations</a>
+      <a href="https://github.com/michaeldgreenphd/patientwords">GitHub</a>
+    </nav>
+  </div>
+  <hr class="rule-fine">
+</header>
+<main id="main">
+  <p class="dateline">Model evaluations <span class="mode">· behavioral scores · live API runs</span></p>
+  <h1>The same task, before and after translation.</h1>
+  <p class="subtitle">On this set the models read patient phrasing perfectly. The losses
+    appear after the translation step.</p>
+
+  <p class="explainer">
+    The figures elsewhere on this site trace circuits inside one small model. This page asks
+    a different question of production-scale models: can a Claude model extract the clinical
+    concepts from a sentence, and does translating the sentence first help or hurt? Each
+    model is scored on the same fixed set of items, so the two percentages are directly
+    comparable.
+  </p>
+
+  <section>
+    <h2>What the percentages mean</h2>
+    <p>
+      Each evaluation item is a sentence in raw patient phrasing plus a list of expected
+      clinical terms. The model is asked to name the clinical concepts in the sentence;
+      the answer scores a hit only if it contains the item's expected terms. Every model
+      sees the identical items.
+    </p>
+    <ul class="cols">
+      <li><span class="term">Patient phrasing</span> The share of items answered correctly
+        when the model reads the patient's own words, untouched. 100% = every item correct.</li>
+      <li><span class="term">Clinician phrasing</span> The same model first translates each
+        patient sentence into clinician wording, then the identical extraction task is
+        re-scored on that translation, against the same expected terms.</li>
+      <li><span class="term">Δ</span> Clinician minus patient. Because the items and the
+        scoring are identical in both stages, Δ isolates what the translation step itself
+        added or destroyed. A negative Δ means the model's own translation discarded
+        clinical content it had understood perfectly in the original.</li>
+    </ul>
+    <p id="me-scale" class="explainer"></p>
+  </section>
+
+  <section>
+    <h2>Results</h2>
+    <div class="me-scroll">
+      <table class="me-table">
+        <thead><tr>
+          <th scope="col">Model</th>
+          <th scope="col" class="num">Items</th>
+          <th scope="col" class="num">Patient phrasing</th>
+          <th scope="col" class="num">Clinician phrasing</th>
+          <th scope="col" class="num">Δ</th>
+          <th scope="col" class="num">Run cost</th>
+        </tr></thead>
+        <tbody id="me-body"></tbody>
+      </table>
+    </div>
+    <p class="me-caption" id="me-updated"></p>
+    <p>
+      The reading is the reverse of the gemma story told by the circuit figures. gemma-2-2b,
+      a 2-billion-parameter model, measurably loses the clinical continuation when it reads
+      patient phrasing. These production models did not: on this set, every model scored
+      100% on the untouched patient wording. Where content was lost was the translation
+      step itself — the same failure mode the engine flags as a translation regression, and
+      the reason the <a href="../translation/">Translation</a> figure's mitigation cannot be
+      assumed safe without checking its output.
+    </p>
+  </section>
+
+  <section>
+    <h2>Read this with its limits</h2>
+    <p>
+      The item set is small, so single items move the percentages in large steps; treat
+      the numbers as a demonstration of the harness and the direction of the effect, not
+      as a ranking of models. Scoring is term-matching against expected clinical terms: an
+      answer phrased with a valid synonym the item list lacks would score as a miss. Runs
+      hit a live API on a specific date and can differ on re-run. See the broader
+      <a href="../methods.html#limitations">limitations</a> for what this evidence does
+      and does not show.
+    </p>
+    <a class="back" href="../">Back home →</a>
+  </section>
+
+  <div class="endnote">
+    <p>
+      Scores come from live Anthropic API runs under a hard spend ceiling; the table is
+      generated from <a href="../data/model_evaluations.json">data/model_evaluations.json</a>,
+      exported by the engine's evaluation workflow. Expected terms live in a data file,
+      not in code.
+    </p>
+    <footer>
+      Built with the patientwords-engine pipeline (engine repo, currently private)
+      on <a href="https://neuronpedia.org">Neuronpedia</a> ·
+      attribution graphs by <a href="https://github.com/safety-research/circuit-tracer">circuit-tracer</a> ·
+      features from <a href="https://huggingface.co/google/gemma-scope-2b-pt-transcoders">Gemma Scope</a> transcoders
+    </footer>
+  </div>
+</main>
+<script>
+(function(){
+  function el(tag,cls,text){var e=document.createElement(tag);if(cls)e.className=cls;if(text!=null)e.textContent=text;return e;}
+  function pct(x){return typeof x==='number'?Math.round(x*100)+'%':'—';}
+  fetch('../data/model_evaluations.json',{cache:'no-cache'})
+    .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
+    .then(function(data){
+      var body=document.getElementById('me-body');
+      var items=null;
+      (data.models||[]).forEach(function(m){
+        var tr=document.createElement('tr');
+        tr.appendChild(el('td','mono',m.id||'—'));
+        tr.appendChild(el('td','num',m.items!=null?String(m.items):'—'));
+        if(m.items!=null)items=m.items;
+        tr.appendChild(el('td','num',pct(m.patient_accuracy)));
+        tr.appendChild(el('td','num',pct(m.clinician_accuracy)));
+        var d=el('td','num');
+        if(typeof m.delta==='number'){
+          d.appendChild(el('span',m.delta<0?'delta-neg':'delta-zero',
+            (m.delta>0?'+':'')+Math.round(m.delta*100)+' pts'));
+        }else{d.textContent='—';}
+        tr.appendChild(d);
+        tr.appendChild(el('td','num',typeof m.cost_usd==='number'?'$'+m.cost_usd.toFixed(4):'—'));
+        body.appendChild(tr);
+      });
+      if(items){
+        document.getElementById('me-scale').textContent=
+          'This run used '+items+' items per model, so one item is '+Math.round(100/items)+
+          ' percentage points; small differences are within one item.';
+      }
+      var up=document.getElementById('me-updated');
+      up.textContent=(data.task?data.task+' · ':'')+(data.updated?'updated '+data.updated:'');
+    })
+    .catch(function(){
+      document.getElementById('me-updated').textContent='data pending — table renders from data/model_evaluations.json';
+    });
+})();
+</script>
+</body>
+</html>
