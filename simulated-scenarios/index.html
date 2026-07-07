@@ -585,7 +585,7 @@
             flip.appendChild(el('span','stat neutral','screened out · unmeasurable'));
           }else{
             flip.appendChild(m.flipped
-              ?el('span','stat penalty',tc+' → '+tp+' (flipped)')
+              ?el('span','stat penalty',tc+' → '+tp+' (redirected)')
               :el('span',null,tc+' (unchanged)'));
           }
         }
@@ -759,7 +759,7 @@
           [{val:'',name:'all conditions'}].concat(topics.map(function(x){return {val:x,name:x};})),
           function(){return filterTopic;},function(v){filterTopic=v;});
         group('outcome',
-          [{val:'',name:'all'},{val:'flipped',name:'flipped'},
+          [{val:'',name:'all'},{val:'flipped',name:'redirected (flipped)'},
            {val:'clin',name:'clinical stronger'},{val:'pat',name:'patient stronger'},
            {val:'screened',name:'screened out'}],
           function(){return filterStatus;},function(v){filterStatus=v;});

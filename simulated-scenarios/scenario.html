@@ -474,7 +474,7 @@
             statline.appendChild(el('span','stat neutral','Language Penalty: —'));
           }
           statline.appendChild(el('span','sim-flip '+(m.flipped?'flipped':'held'),
-            m.flipped?'top prediction flipped':'top prediction unchanged'));
+            m.flipped?'top prediction redirected':(typeof m.language_penalty==='number'&&m.language_penalty<0?'top prediction held — hedged':'top prediction unchanged')));
         }
         card.appendChild(statline);
 
