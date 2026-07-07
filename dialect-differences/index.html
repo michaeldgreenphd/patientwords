@@ -317,10 +317,10 @@
       var head=document.getElementById('dlm-head');
       var tr=el('tr');
       tr.appendChild(el('th',null,'Term (target)'));
-      var thb=el('th','num','baseline p');thb.className='num';tr.appendChild(thb);
-      dialects.forEach(function(d){var th=el('th','num',shortName(d));th.className='num';
+      var thb=el('th','num','baseline p');tr.appendChild(thb);
+      dialects.forEach(function(d){var th=el('th','num',shortName(d));
         th.title=d;tr.appendChild(th);});
-      var thc=el('th','num','core');thc.className='num';
+      var thc=el('th','num','core');
       thc.title='clinical features surviving every framing / clinical features in the baseline trace';
       tr.appendChild(thc);
       tr.appendChild(el('th',null,''));
@@ -335,11 +335,11 @@
         td.appendChild(el('span','tgt',String.fromCharCode(8594)+' '+(it.target_token||'?')));
         row.appendChild(td);
         var bp=el('td','num',it.baseline_p==null?String.fromCharCode(8212):it.baseline_p.toFixed(2));
-        bp.className='num';row.appendChild(bp);
+        row.appendChild(bp);
         dialects.forEach(function(d){
           var v=null;
           for(var i=0;i<it.variants.length;i++){if(it.variants[i].dialect===d){v=it.variants[i];break;}}
-          var c=el('td','num');c.className='num';
+          var c=el('td','num');
           if(!v){c.textContent=String.fromCharCode(8212);row.appendChild(c);return;}
           cells++;
           var s=el('span',v.delta>0?'dpos':(v.delta<0?'dneg':null),fmtD(v.delta));
@@ -349,7 +349,7 @@
           if(v.flip){flips++;var fm=el('span','flipmark',String.fromCharCode(9679));c.appendChild(fm);}
           row.appendChild(c);
         });
-        var cc=el('td','num');cc.className='num';
+        var cc=el('td','num');
         if(it.core){
           cc.textContent=it.core.invariant+'/'+it.core.baseline_clinical;
           cc.title=it.core.invariant+' of '+it.core.baseline_clinical+
@@ -390,7 +390,7 @@
         return td;
       }
       function barCell(p,base){
-        var td=el('td','num');td.className='num';
+        var td=el('td','num');
         td.appendChild(document.createTextNode(p==null?String.fromCharCode(8212):p.toFixed(3)));
         var bar=el('span','pbar');
         var fill=el('i');fill.style.width=((p||0)*100)+'%';bar.appendChild(fill);
@@ -402,7 +402,7 @@
       baseRow.appendChild(el('td','framing','Standard English'));
       baseRow.appendChild(promptCell(feat.baseline_prompt,feat.term));
       baseRow.appendChild(barCell(feat.baseline_p,null));
-      var bd=el('td','num','baseline');bd.className='num';baseRow.appendChild(bd);
+      var bd=el('td','num','baseline');baseRow.appendChild(bd);
       var bt=el('td');bt.appendChild(el('span','stay',(feat.target_token||'?')+' '+String.fromCharCode(183)+' '+(feat.baseline_p!=null?feat.baseline_p.toFixed(3):'?')));
       baseRow.appendChild(bt);
       fb.appendChild(baseRow);
@@ -411,7 +411,7 @@
         row.appendChild(el('td','framing',shortName(v.dialect)));
         row.appendChild(promptCell(v.prompt,feat.term));
         row.appendChild(barCell(v.p,feat.baseline_p));
-        var dd=el('td','num');dd.className='num';
+        var dd=el('td','num');
         dd.appendChild(el('span',v.delta>0?'dpos':'dneg',fmtD(v.delta)));
         row.appendChild(dd);
         var tp=el('td');
@@ -432,9 +432,9 @@
           var tf=el('td');tf.appendChild(el('span','term',c.feature));row.appendChild(tf);
           var td=el('td','prompt',c.desc||String.fromCharCode(8212));row.appendChild(td);
           var tm=el('td','num',(c.norm_mass!=null?c.norm_mass.toFixed(2):String.fromCharCode(8212)));
-          tm.className='num';row.appendChild(tm);
+          row.appendChild(tm);
           var full=c.survives&&c.survives.split('/')[0]===c.survives.split('/')[1];
-          var ts=el('td','num');ts.className='num';
+          var ts=el('td','num');
           ts.appendChild(el('span',full?'dpos':'dneg',c.survives||String.fromCharCode(8212)));
           row.appendChild(ts);
           cb.appendChild(row);

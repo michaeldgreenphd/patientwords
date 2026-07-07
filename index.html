@@ -616,7 +616,7 @@
   var sec=document.getElementById('model-evaluations');
   if(!sec||!window.fetch)return;
   function fmtPct(v){
-    if(v==null||typeof v!=='number')return null;
+    if(typeof v!=='number')return null;
     return (Math.abs(v)<=1?v*100:v).toFixed(1)+'%';
   }
   function cell(cls,text,muted){
