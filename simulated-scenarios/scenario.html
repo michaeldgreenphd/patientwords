@@ -98,6 +98,15 @@
     margin-left:8px;vertical-align:middle}
   .mass-bar{display:block;height:5px;background:var(--clinical)}
   .embed{border:1px solid var(--hairline);background:#fff;overflow:hidden;margin:18px 0 8px}
+  .embed-shell{position:relative;margin:18px 0 8px}
+  .embed-shell .embed{margin:0;max-height:78vh;overflow:auto;overscroll-behavior:contain}
+  .embed-shell .zframe{transform-origin:top left}
+  .zoom-btn{position:absolute;top:-1px;right:-1px;z-index:6;font-family:var(--mono);
+    font-size:10px;letter-spacing:.12em;text-transform:uppercase;background:#fff;
+    border:1px solid var(--hairline);color:var(--muted);padding:5px 9px;cursor:pointer}
+  .zoom-btn:hover{color:var(--ink);border-color:var(--ink)}
+  .embed-shell:fullscreen{background:#fff;overflow:hidden}
+  .embed-shell:fullscreen .embed{max-height:100vh;height:100vh;border:0}
   .embed iframe{width:100%;border:0;display:block;min-height:400px}
   .embed-caption{font-family:var(--mono);font-size:11px;color:var(--muted);
     letter-spacing:.04em;margin:0 0 8px}
@@ -179,18 +188,34 @@
 </main>
 <script>
 (function(){
-  function fitAll(){
-    document.querySelectorAll('iframe.live').forEach(function(f){
-      try{
-        var d=f.contentDocument;
-        if(!d||!d.documentElement)return;
-        var h=d.documentElement.scrollHeight;
-        if(!h)return;
-        f.style.height=h+'px';
-      }catch(e){}
-    });
+  function fit(f){
+    try{
+      var d=f.contentDocument;
+      if(!d||!d.documentElement)return;
+      var w=d.documentElement.scrollWidth||f.offsetWidth||1180;
+      var h=d.documentElement.scrollHeight;
+      if(!h)return;
+      var fr=f.parentElement;
+      if(!fr.classList.contains('zframe')){f.style.height=h+'px';return;}
+      var box=fr.parentElement;
+      var s=Math.min(1,(box.clientWidth||1)/w);
+      f.style.width=w+'px';
+      f.style.height=h+'px';
+      fr.style.width=w+'px';
+      fr.style.transform='scale('+s+')';
+      fr.style.marginRight=(w*s-w)+'px';
+      fr.style.marginBottom=(h*s-h)+'px';
+    }catch(e){}
   }
+  function fitAll(){document.querySelectorAll('.embed iframe.live').forEach(fit);}
   window.addEventListener('resize',fitAll);
+  document.addEventListener('fullscreenchange',function(){
+    var on=!!document.fullscreenElement;
+    document.querySelectorAll('.zoom-btn').forEach(function(b){
+      b.textContent=on?'\u2715 exit full screen':'\u2922 full screen';
+    });
+    setTimeout(fitAll,60);
+  });
 
   function el(tag,cls,text){
     var e=document.createElement(tag);
@@ -251,13 +276,25 @@
   }
 
   function embedBlock(card,src,captionText){
+    var shell=el('div','embed-shell');
     var box=el('div','embed');
+    var fr=el('div','zframe');
     var f=document.createElement('iframe');
     f.className='live';f.src='../'+src;f.loading='lazy';
     f.title=captionText;
-    f.addEventListener('load',fitAll);
-    box.appendChild(f);
-    card.appendChild(box);
+    f.addEventListener('load',function(){fit(f);});
+    fr.appendChild(f);
+    box.appendChild(fr);
+    shell.appendChild(box);
+    var btn=el('button','zoom-btn','\u2922 full screen');
+    btn.type='button';
+    btn.setAttribute('aria-label','Toggle full screen view');
+    btn.addEventListener('click',function(){
+      if(document.fullscreenElement){document.exitFullscreen();}
+      else if(shell.requestFullscreen){shell.requestFullscreen();}
+    });
+    shell.appendChild(btn);
+    card.appendChild(shell);
     var cap=el('p','embed-caption');
     cap.appendChild(el('span',null,captionText+' '));
     var open=el('a',null,'open standalone ↗');
