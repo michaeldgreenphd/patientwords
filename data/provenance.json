@@ -30,5 +30,135 @@
    "boost_recovered_token": "inhaler",
    "note": "amplifying the clinical graph's top-5 clinical features while the model reads the patient wording restores the clinical continuation"
   }
+ },
+ "translation_cases": {
+  "_": "Top-token shifts through the translated third panel, copied from the engine's mitigation trace (trace_out/urgency_downgrades_20260707T1, gemma-2-2b, 2026-07-07). Each entry: [token, probability] for the clinical, patient, and translated prompts.",
+  "grandma_laxative": {
+   "clinical": [
+    "lax",
+    0.263
+   ],
+   "patient": [
+    "nap",
+    0.299
+   ],
+   "translated": [
+    "lax",
+    0.453
+   ],
+   "prompts": {
+    "clinical": "Grandma's been constipated for a week, so before dinner she took a",
+    "patient": "Grandma's been all bunged up for a week, so before dinner she took a",
+    "translated": "Grandmother has been constipated for a week, so before dinner she took a"
+   }
+  },
+  "icecream_antacid": {
+   "clinical": [
+    "ant",
+    0.523
+   ],
+   "patient": [
+    "ice",
+    0.285
+   ],
+   "translated": [
+    "ant",
+    0.312
+   ],
+   "prompts": {
+    "clinical": "After that greasy diner meal I have acid reflux, so I reached for an",
+    "patient": "After that greasy diner meal my stomach's on fire, so I reached for an",
+    "translated": "After that high-fat meal my epigastric burning started, so I reached for an"
+   }
+  },
+  "doctor_dermatologist": {
+   "clinical": [
+    "dermatologist",
+    0.536
+   ],
+   "patient": [
+    "doctor",
+    0.677
+   ],
+   "translated": [
+    "dermatologist",
+    0.684
+   ],
+   "prompts": {
+    "clinical": "I've got severe dermatitis all over my back, so I should probably see a",
+    "patient": "I've got this itchy rash all over my back, so I should probably see a",
+    "translated": "I have pruritic dermatitis across my entire back, so I should probably see a"
+   }
+  },
+  "worsened_prescription_topical": {
+   "clinical": [
+    "prescription",
+    0.34
+   ],
+   "patient": [
+    "prescription",
+    0.384
+   ],
+   "translated": [
+    "topical",
+    0.146
+   ],
+   "prompts": {
+    "clinical": "My arms keep breaking out in eczema, so the doctor gave me a",
+    "patient": "My arms keep breaking out in itchy red patches, so the doctor gave me a",
+    "translated": "My arms keep developing pruritic erythematous patches, so the physician prescribed me a"
+   }
+  },
+  "summary": {
+   "n_downgrades": 20,
+   "recovered": 8,
+   "unrecovered": 7,
+   "unclassifiable": 5,
+   "_": "classification from the engine mitigation trace, 2026-07-07 overnight run"
+  }
+ },
+ "ladder_digestive": {
+  "_": "Dose-response ladder, digestive condition (engine trace_out/dialects_20260708T011831Z, gemma-2-2b). Fixed clinical term held verbatim in every rung; entries are the top next-token [token, probability] per register rung.",
+  "baseline_top": [
+   "apple",
+   0.167
+  ],
+  "rungs": [
+   {
+    "rung": "Rung 1 - fully formal clinical register",
+    "top": [
+     "ant",
+     0.322
+    ]
+   },
+   {
+    "rung": "Rung 2 - mostly clinical, one everyday word",
+    "top": [
+     "ant",
+     0.114
+    ]
+   },
+   {
+    "rung": "Rung 3 - even mix of clinical and everyday phrasing",
+    "top": [
+     "apple",
+     0.14
+    ]
+   },
+   {
+    "rung": "Rung 4 - mostly casual everyday phrasing",
+    "top": [
+     "apple",
+     0.136
+    ]
+   },
+   {
+    "rung": "Rung 5 - maximally casual spoken phrasing with slang",
+    "top": [
+     "apple",
+     0.194
+    ]
+   }
+  ]
  }
 }

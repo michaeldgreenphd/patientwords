@@ -255,11 +255,16 @@
   <h1><span class="patient">Patients</span> don’t speak like doctors.<br><span class="clinical">Medical&nbsp;AI</span> must be ready to interpret them.</h1>
   <p class="lede">
     We trace how gemma-2-2b processes standard clinical terminology versus the colloquial
-    language patients use, with attribution
-    graphs built on Gemma&nbsp;Scope transcoders. Saying <em>“I’ve got the blues”</em> instead of
-    <em>“I have depression”</em> reroutes the model’s internal circuit and collapses the
-    probability of the correct clinical continuation. Translating patient language back into
-    clinical terms restores it.
+    language patients use, with attribution graphs built on Gemma&nbsp;Scope transcoders.
+    The stakes are easiest to see when the words change <em>what is offered</em>, not just
+    how confidently. In one live-traced pair, <em>“my asthma flares, so at work I keep a
+    spare”</em> continues with <span class="clinical" style="font-weight:600">inhaler</span>
+    at probability 0.69; say <em>“my chest gets all tight”</em> instead and the top
+    continuation becomes <em>shirt</em>, with the inhaler collapsing to 0.04. The same
+    shift appears across word swaps like <em>“the blues”</em> for <em>“depression”</em> —
+    and translating patient language back into clinical terms restores the clinical
+    continuation. (Numbers: scenario 85 in the <a href="simulated-scenarios/">simulated
+    series</a>, <code>data/simulated_scenarios.json</code>.)
   </p>
   <p class="lede">
     Each figure below embeds the interactive render, so the page always shows the

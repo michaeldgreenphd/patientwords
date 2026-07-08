@@ -147,6 +147,18 @@
   <p class="explainer">The mitigation: an LLM translates the patient sentence into standard
      terminology and the raw output is traced natively. The clinical features reappear in
      the trace and the target probability recovers.</p>
+  <p class="explainer">Translation matters most when it changes the <em>advice</em>, not
+     just the confidence. In live traces of the downgrade set: <em>“Grandma’s been all
+     bunged up for a week, so before dinner she took a”</em> continues with <em>nap</em>
+     (0.30); translated to clinical wording, the top continuation becomes
+     <em>lax(ative)</em> at 0.45 — stronger than the original clinical phrasing itself
+     (0.26). <em>“My stomach’s on fire… I reached for an”</em> goes from <em>ice
+     (cream)</em> (0.29) to <em>ant(acid)</em> (0.31). An itchy-rash sentence goes from
+     generic <em>doctor</em> (0.68) to <em>dermatologist</em> (0.68) — translation
+     recovers the specialist. It is not a cure-all: in one case translation replaced the
+     correct <em>prescription</em> (0.38) with <em>topical</em> (0.15), worse than doing
+     nothing. Eight of twenty downgrades recovered; seven did not. (Numbers:
+     <code>data/provenance.json → translation_cases</code>; tiers draft pending review.)</p>
   <span class="stat recovery">Recovered target probability: +51% (0.35 → 0.86)</span>
   <p class="traced" data-mode="translation" data-traced="gemma-2-2b">
     <span class="tm"><b>demonstration graph:</b> hand-authored · gemma-2-2b schema</span>
