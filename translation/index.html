@@ -161,13 +161,29 @@
      <code>data/provenance.json → translation_cases</code>; tiers draft pending review.)</p>
   <span class="stat recovery">Recovered target probability: +51% (0.35 → 0.86)</span>
   <p class="traced" data-mode="translation" data-traced="gemma-2-2b">
+    <span class="tm"><b>live trace:</b> gemma-2-2b · gemma scope transcoders</span>
+    <span class="tp">hosted circuit-tracer via Neuronpedia · traced 2026-07-07 · downgrade
+      set item 17, three panels (clinical / patient / LLM-translated) · greedy next-token
+      probabilities · “constipated” vs. “all bunged up”, translation restores “ lax(ative)”</span>
+  </p>
+
+  <div class="embed">
+    <iframe class="live" src="../modes/simulated/urgency_downgrades_20260707T1/index_17.html" loading="lazy"
+            title="Live translation mitigation: nap under patient wording, laxative after translation"></iframe>
+  </div>
+  <p class="embed-caption">Live trace: under patient wording the top continuation is
+     “&nbsp;nap” (0.30); after LLM translation to clinical wording it is “&nbsp;lax(ative)”
+     (0.45) — stronger than the original clinical phrasing (0.26). Numbers:
+     <code>data/provenance.json → translation_cases.grandma_laxative</code>.</p>
+
+  <p class="traced" data-mode="translation" data-traced="gemma-2-2b">
     <span class="tm"><b>demonstration graph:</b> hand-authored · gemma-2-2b schema</span>
     <span class="tp">gemma scope transcoders (feature schema) · pipeline-validation render</span>
   </p>
 
   <div class="embed">
     <iframe class="live" src="../modes/translation/index.html" loading="lazy"
-            title="Interactive translation mitigation chain restoring the clinical circuit"></iframe>
+            title="Interactive translation mitigation chain (demonstration render)"></iframe>
   </div>
   <p class="embed-caption">How to read it: the panels follow the mitigation chain, the raw
      patient sentence first and its LLM translation after it, both traced the same way. Axes as

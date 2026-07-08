@@ -158,13 +158,28 @@
      <code>data/stress_pairs.json</code>, hand-measured from real patient language.)</p>
   <span class="stat penalty">Language Penalty: −51% probability (0.86 → 0.35)</span>
   <p class="traced" data-mode="2panel" data-traced="gemma-2-2b">
+    <span class="tm"><b>live trace:</b> gemma-2-2b · gemma scope transcoders</span>
+    <span class="tp">hosted circuit-tracer via Neuronpedia · traced 2026-07-07 · batch
+      pairs_20260707T171223Z, item 49 · greedy next-token probabilities · “asthma flares”
+      vs. “chest gets all tight”, target “ inhaler”</span>
+  </p>
+
+  <div class="embed">
+    <iframe class="live" src="../modes/simulated/pairs_20260707T171223Z/index_49.html" loading="lazy"
+            title="Live attribution-graph comparison: asthma flares vs. chest gets all tight"></iframe>
+  </div>
+  <p class="embed-caption">Live trace: the clinical wording reaches “&nbsp;inhaler” at 0.69;
+     the patient idiom’s top continuation is “&nbsp;shirt”, with the inhaler collapsing to
+     0.04 (scenario 85, <code>data/simulated_scenarios.json</code>).</p>
+
+  <p class="traced" data-mode="2panel" data-traced="gemma-2-2b">
     <span class="tm"><b>demonstration graph:</b> hand-authored · gemma-2-2b schema</span>
     <span class="tp">gemma scope transcoders (feature schema) · pipeline-validation render</span>
   </p>
 
   <div class="embed">
     <iframe class="live" src="../modes/2panel/index.html" loading="lazy"
-            title="Interactive attribution-graph comparison: clinical vs. patient wording"></iframe>
+            title="Interactive attribution-graph comparison: clinical vs. patient wording (demonstration)"></iframe>
   </div>
   <p class="embed-caption">How to read it: two panels on one scale, the clinical sentence above
      and the patient sentence below. Above the swapped word, the clinical wording builds a tall
