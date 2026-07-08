@@ -4,18 +4,18 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Translation — PatientWords</title>
-<meta name="description" content="An LLM translates the patient sentence into standard terminology and the output is traced natively in gemma-2-2b. Recovered target probability: +51%.">
+<meta name="description" content="An LLM translates the patient sentence into standard terminology and the output is traced. The figure is a demonstration render from synthetic sample graphs (pipeline validation), gemma-2-2b schema. Demonstration recovered target probability: +51%.">
 <link rel="canonical" href="https://michaeldgreenphd.github.io/patientwords/translation/">
 <meta name="theme-color" content="#faf9f5">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="PatientWords">
 <meta property="og:title" content="Translation — PatientWords">
-<meta property="og:description" content="There is a way to translate this. Translating patient language back into clinical terms restores the circuit: +51% probability (0.35 → 0.86).">
+<meta property="og:description" content="Translating patient language back into clinical terms restores the circuit: +51% probability (0.35 → 0.86). Demonstration render from synthetic sample graphs (pipeline validation).">
 <meta property="og:url" content="https://michaeldgreenphd.github.io/patientwords/translation/">
 <meta property="og:image" content="https://michaeldgreenphd.github.io/patientwords/modes/translation/preview.png">
 <meta property="og:image:width" content="1690">
 <meta property="og:image:height" content="2543">
-<meta property="og:image:alt" content="Translation mitigation chain restoring the clinical circuit in gemma-2-2b">
+<meta property="og:image:alt" content="Demonstration render of a translation mitigation chain restoring the clinical circuit (gemma-2-2b schema)">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Translation — PatientWords">
 <meta name="twitter:description" content="There is a way to translate this.">
@@ -24,7 +24,7 @@
 <style>
   :root{
     --paper:#faf9f5; --ink:#1c1c19; --patient:#111827; --clinical:#15803d;
-    --penalty:#b4483d; --muted:#75746d; --structural:#c3c9d2; --hairline:#dcdad2;
+    --penalty:#b4483d; --muted:#6d6c66; --structural:#c3c9d2; --hairline:#dcdad2;
     --serif:'Iowan Old Style','Palatino Linotype',Palatino,'Book Antiqua',Georgia,serif;
     --mono:ui-monospace,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace;
   }
@@ -35,6 +35,8 @@
   main{max-width:1240px;margin:0 auto;padding:0 22px 56px}
   a{color:inherit}
   a:focus-visible{outline:2px solid var(--clinical);outline-offset:3px;border-radius:1px}
+  .skip{position:absolute;left:-9999px;top:0;background:var(--paper);color:var(--ink);padding:8px 14px;border:1px solid var(--ink);z-index:10}
+  .skip:focus{left:8px}
   ::selection{background:#dbe9df}
 
   .masthead{max-width:1240px;margin:0 auto;padding:20px 22px 0}
@@ -118,6 +120,7 @@
 </style>
 </head>
 <body>
+<a class="skip" href="#main">Skip to content</a>
 <header class="masthead">
   <hr class="rule-heavy"><hr class="rule-fine">
   <div class="masthead-row">
@@ -131,23 +134,35 @@
       <a href="./" aria-current="page">Translation</a>
       <a href="../simulated-scenarios/">Simulated Scenarios</a>
       <a href="../phrase-dataset/">Phrase Dataset</a>
-      <a href="../#model-evaluations">Model Evaluations</a>
+      <a href="../model-evaluations/">Model Evaluations</a>
       <a href="https://github.com/michaeldgreenphd/patientwords">GitHub</a>
     </nav>
   </div>
   <hr class="rule-fine">
 </header>
-<main>
+<main id="main">
   <p class="dateline">Fig. 4 <span class="mode">· translation recovery · demonstration render</span></p>
   <h1>Translation</h1>
-  <p class="subtitle">There is a way to translate this.</p>
-  <p class="explainer">The organic fix: an LLM translates the patient sentence into standard
-     terminology and the raw output is traced natively. The clinical circuit comes back,
-     and the correct prediction with it.</p>
+  <p class="subtitle">Translating the patient sentence back into clinical terms restores the prediction.</p>
+  <p class="explainer">The mitigation: an LLM translates the patient sentence into standard
+     terminology and the raw output is traced natively. The clinical features reappear in
+     the trace and the target probability recovers.</p>
+  <p class="explainer">Translation matters most when it changes the <em>advice</em>, not
+     just the confidence. In live traces of the downgrade set: <em>“Grandma’s been all
+     bunged up for a week, so before dinner she took a”</em> continues with <em>nap</em>
+     (0.30); translated to clinical wording, the top continuation becomes
+     <em>lax(ative)</em> at 0.45 — stronger than the original clinical phrasing itself
+     (0.26). <em>“My stomach’s on fire… I reached for an”</em> goes from <em>ice
+     (cream)</em> (0.29) to <em>ant(acid)</em> (0.31). An itchy-rash sentence goes from
+     generic <em>doctor</em> (0.68) to <em>dermatologist</em> (0.68) — translation
+     recovers the specialist. It is not a cure-all: in one case translation replaced the
+     correct <em>prescription</em> (0.38) with <em>topical</em> (0.15), worse than doing
+     nothing. Eight of twenty downgrades recovered; seven did not. (Numbers:
+     <code>data/provenance.json → translation_cases</code>; tiers draft pending review.)</p>
   <span class="stat recovery">Recovered target probability: +51% (0.35 → 0.86)</span>
   <p class="traced" data-mode="translation" data-traced="gemma-2-2b">
-    <span class="tm"><b>traced model:</b> gemma-2-2b · gemma scope transcoders</span>
-    <span class="tp">hand-authored demonstration graph · gemma-2-2b schema</span>
+    <span class="tm"><b>demonstration graph:</b> hand-authored · gemma-2-2b schema</span>
+    <span class="tp">gemma scope transcoders (feature schema) · pipeline-validation render</span>
   </p>
 
   <div class="embed">
@@ -155,11 +170,12 @@
             title="Interactive translation mitigation chain restoring the clinical circuit"></iframe>
   </div>
   <p class="embed-caption">How to read it: the panels follow the mitigation chain, the raw
-     patient sentence first and its LLM translation after it, both traced the same way. Columns
-     are the words of each prompt; height is depth in the model; the predicted next word sits at
+     patient sentence first and its LLM translation after it, both traced the same way. Axes as
+     in Fig. 3: columns are prompt words; height is model depth; the predicted next word sits at
      the top. In the translated panel the green clinical stack reappears above the restored
      terminology and the target probability recovers. Hover any node for its feature id,
-     category, attribution mass, and autointerp description.</p>
+     category, attribution mass, and autointerp description; hover needs a pointer, and a click
+     or tap pins the tooltip.</p>
 
   <a class="back" href="../">← Back home</a>
 
@@ -170,7 +186,7 @@
       as the study progresses.
     </p>
     <footer>
-      Built with the patientwords-engine pipeline (engine repo, currently private)
+      Built with the <a href="https://github.com/michaeldgreenphd/patientwords-engine">patientwords-engine</a> pipeline
       on <a href="https://neuronpedia.org">Neuronpedia</a> ·
       attribution graphs by <a href="https://github.com/safety-research/circuit-tracer">circuit-tracer</a> ·
       features from <a href="https://huggingface.co/google/gemma-scope-2b-pt-transcoders">Gemma Scope</a> transcoders
@@ -220,7 +236,6 @@
     box.parentNode.insertBefore(shell,box);shell.appendChild(box);
     var btn=document.createElement('button');btn.className='zoom-btn';btn.type='button';
     btn.textContent='\u2922 full screen';
-    btn.setAttribute('aria-label','Toggle full screen view');
     btn.addEventListener('click',function(){
       if(document.fullscreenElement){document.exitFullscreen();return;}
       if(shell.classList.contains('fs-fallback')){

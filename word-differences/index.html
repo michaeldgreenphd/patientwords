@@ -24,7 +24,7 @@
 <style>
   :root{
     --paper:#faf9f5; --ink:#1c1c19; --patient:#111827; --clinical:#15803d;
-    --penalty:#b4483d; --muted:#75746d; --structural:#c3c9d2; --hairline:#dcdad2;
+    --penalty:#b4483d; --muted:#6d6c66; --structural:#c3c9d2; --hairline:#dcdad2;
     --serif:'Iowan Old Style','Palatino Linotype',Palatino,'Book Antiqua',Georgia,serif;
     --mono:ui-monospace,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace;
   }
@@ -35,6 +35,8 @@
   main{max-width:1240px;margin:0 auto;padding:0 22px 56px}
   a{color:inherit}
   a:focus-visible{outline:2px solid var(--clinical);outline-offset:3px;border-radius:1px}
+  .skip{position:absolute;left:-9999px;top:0;background:var(--paper);color:var(--ink);padding:8px 14px;border:1px solid var(--ink);z-index:10}
+  .skip:focus{left:8px}
   ::selection{background:#dbe9df}
 
   .masthead{max-width:1240px;margin:0 auto;padding:20px 22px 0}
@@ -118,6 +120,7 @@
 </style>
 </head>
 <body>
+<a class="skip" href="#main">Skip to content</a>
 <header class="masthead">
   <hr class="rule-heavy"><hr class="rule-fine">
   <div class="masthead-row">
@@ -131,23 +134,32 @@
       <a href="../translation/">Translation</a>
       <a href="../simulated-scenarios/">Simulated Scenarios</a>
       <a href="../phrase-dataset/">Phrase Dataset</a>
-      <a href="../#model-evaluations">Model Evaluations</a>
+      <a href="../model-evaluations/">Model Evaluations</a>
       <a href="https://github.com/michaeldgreenphd/patientwords">GitHub</a>
     </nav>
   </div>
   <hr class="rule-fine">
 </header>
-<main>
+<main id="main">
   <p class="dateline">Fig. 1 <span class="mode">· one-word swap · demonstration render</span></p>
   <h1>Word differences</h1>
-  <p class="subtitle">Patients say the clinical concepts in different ways.</p>
+  <p class="subtitle">One sentence, one swapped word: clinical term vs. patient idiom.</p>
   <p class="explainer">A word-for-word substitution (“depression” vs. “the blues”) mapped as
      two stacked circuit traces. The clinical wording drives prob(therapist) = 0.86; the
-     patient idiom collapses it to 0.35, with “friend” closing to within four points of the referral.</p>
+     patient idiom collapses it to 0.35, with “friend” within four points of “therapist”.</p>
+  <p class="explainer">The starkest case in the hand-measured set is not a probability
+     shift but a recommendation shift. <em>“Since her urinary tract was completely blocked
+     up, they had to urgently call a”</em> continues with <em>uro(logist)</em> at 0.20;
+     phrase it as <em>“her water was completely blocked up”</em> and the model calls a
+     <em>plumber</em> — at 0.68, more confident in the wrong profession than it ever was
+     in the right one. In another pair, <em>“I’m having a fit, so you need to give me my”</em>
+     draws <em>Money</em> (0.25) where the clinical phrasing draws <em>Meds</em> (0.29). The idiom does not just weaken the
+     answer; it changes what arrives. (Numbers: pairs 15 and 14 in
+     <code>data/stress_pairs.json</code>, hand-measured from real patient language.)</p>
   <span class="stat penalty">Language Penalty: −51% probability (0.86 → 0.35)</span>
   <p class="traced" data-mode="2panel" data-traced="gemma-2-2b">
-    <span class="tm"><b>traced model:</b> gemma-2-2b · gemma scope transcoders</span>
-    <span class="tp">hand-authored demonstration graph · gemma-2-2b schema</span>
+    <span class="tm"><b>demonstration graph:</b> hand-authored · gemma-2-2b schema</span>
+    <span class="tp">gemma scope transcoders (feature schema) · pipeline-validation render</span>
   </p>
 
   <div class="embed">
@@ -155,12 +167,11 @@
             title="Interactive attribution-graph comparison: clinical vs. patient wording"></iframe>
   </div>
   <p class="embed-caption">How to read it: two panels on one scale, the clinical sentence above
-     and the patient sentence below. Columns are the words of the prompt in order; height is
-     depth in the model; the predicted next word sits at the top of each panel. Above the swapped
-     word, the clinical wording builds a tall stack of green clinical features feeding
-     “&nbsp;therapist”, while the patient idiom replaces that stack with off-target features and
-     the probability collapses. Hover any node for its feature id, category, attribution mass,
-     and autointerp description.</p>
+     and the patient sentence below. Above the swapped word, the clinical wording builds a tall
+     stack of green clinical features feeding “&nbsp;therapist”, while the patient idiom replaces
+     that stack with off-target features and the probability collapses. Hover any node for its
+     feature id, category, attribution mass, and autointerp description; hover needs a pointer,
+     and a click or tap pins the tooltip.</p>
 
   <a class="back" href="../">← Back home</a>
 
@@ -171,7 +182,7 @@
       as the study progresses.
     </p>
     <footer>
-      Built with the patientwords-engine pipeline (engine repo, currently private)
+      Built with the <a href="https://github.com/michaeldgreenphd/patientwords-engine">patientwords-engine</a> pipeline
       on <a href="https://neuronpedia.org">Neuronpedia</a> ·
       attribution graphs by <a href="https://github.com/safety-research/circuit-tracer">circuit-tracer</a> ·
       features from <a href="https://huggingface.co/google/gemma-scope-2b-pt-transcoders">Gemma Scope</a> transcoders
@@ -221,7 +232,6 @@
     box.parentNode.insertBefore(shell,box);shell.appendChild(box);
     var btn=document.createElement('button');btn.className='zoom-btn';btn.type='button';
     btn.textContent='\u2922 full screen';
-    btn.setAttribute('aria-label','Toggle full screen view');
     btn.addEventListener('click',function(){
       if(document.fullscreenElement){document.exitFullscreen();return;}
       if(shell.classList.contains('fs-fallback')){

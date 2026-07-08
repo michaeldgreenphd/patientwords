@@ -11,7 +11,7 @@
 <style>
   :root{
     --paper:#faf9f5; --ink:#1c1c19; --patient:#111827; --clinical:#15803d;
-    --penalty:#b4483d; --muted:#75746d; --structural:#c3c9d2; --hairline:#dcdad2;
+    --penalty:#b4483d; --muted:#6d6c66; --structural:#c3c9d2; --hairline:#dcdad2;
     --serif:'Iowan Old Style','Palatino Linotype',Palatino,'Book Antiqua',Georgia,serif;
     --mono:ui-monospace,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace;
   }
@@ -23,6 +23,9 @@
   a{color:inherit}
   a:focus-visible{outline:2px solid var(--clinical);outline-offset:3px;border-radius:1px}
   ::selection{background:#dbe9df}
+  .skip{position:absolute;left:-9999px;top:0;background:var(--paper);color:var(--ink);
+    padding:8px 14px;border:1px solid var(--ink);z-index:10}
+  .skip:focus{left:8px}
 
   .masthead{max-width:1240px;margin:0 auto;padding:20px 22px 0}
   .masthead-row{display:flex;align-items:baseline;justify-content:space-between;
@@ -142,9 +145,21 @@
     body{font-size:16px}
     .sim-prompts{grid-template-columns:1fr}
   }
+  /* model selector (mirrors the series index chips) */
+  .sum-chips{display:flex;flex-direction:column;gap:8px;margin:20px 0 4px}
+  .chip-g{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+  .chip-lbl{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--muted);margin-right:4px;min-width:74px}
+  .chip{font-family:var(--mono);font-size:11px;color:var(--muted);background:#fff;
+    border:1px solid var(--hairline);padding:4px 10px;cursor:pointer;border-radius:2px}
+  .chip:hover{color:var(--ink);border-color:var(--muted)}
+  .chip.on{color:var(--clinical);border-color:var(--clinical);font-weight:600}
+  .chip:disabled{color:var(--structural);border-color:var(--hairline);cursor:default;opacity:.55}
+  .chip:disabled:hover{color:var(--structural);border-color:var(--hairline)}
 </style>
 </head>
 <body>
+<a class="skip" href="#main">Skip to content</a>
 <header class="masthead">
   <hr class="rule-heavy"><hr class="rule-fine">
   <div class="masthead-row">
@@ -158,13 +173,13 @@
       <a href="../translation/">Translation</a>
       <a href="./" aria-current="page">Simulated Scenarios</a>
       <a href="../phrase-dataset/">Phrase Dataset</a>
-      <a href="../#model-evaluations">Model Evaluations</a>
+      <a href="../model-evaluations/">Model Evaluations</a>
       <a href="https://github.com/michaeldgreenphd/patientwords">GitHub</a>
     </nav>
   </div>
   <hr class="rule-fine">
 </header>
-<main>
+<main id="main">
   <p class="dateline">Simulated series <span class="mode">· one scenario · live render · simulated data</span></p>
   <h1 id="sim-title">Simulated scenario</h1>
   <div class="pager">
@@ -176,6 +191,7 @@
     </span>
   </div>
 
+  <div class="sum-chips" id="sim-model-row"></div>
   <div id="sim-card"></div>
   <div class="pending-note" id="sim-missing" hidden>scenario not found · <a href="./">back to the series</a></div>
 
@@ -354,86 +370,177 @@
 
       var card=document.getElementById('sim-card');
 
-      var tgt=s.target_token||'';
-      var intent=(s.intended_target||'').trim();
-      var screenedOut=!tgt&&s.screening&&s.screening.status==='screened_out';
-      var tgtNote='';
-      if(screenedOut){
-        tgtNote=intent?' · screened out (intended “'+intent+'” unmeasurable)':' · screened out';
-      }else if(intent&&intent!==tgt){
-        tgtNote=s.anchor_fallback
-          ?' · intended “'+intent+'” fell below the traced spread; anchored on the clinical top prediction'
-          :' (first piece of “'+intent+'”)';
+      // Cross-model view (same contract as the series index): gemma-2-2b is the
+      // base and fallback; other models add s.models[id]. The selector switches
+      // which model's measurements + render this page shows.
+      var baseModel=(data.traced&&data.traced.graph_model)||'gemma-2-2b';
+      var modelsMeta=(data.models_meta&&data.models_meta.length)?data.models_meta
+        :[{id:baseModel,label:baseModel,source_set:data.traced&&data.traced.source_set,
+           features:true,available:true,'default':true}];
+      var modelList=modelsMeta.map(function(x){return x.id;});
+      function metaFor(m){return modelsMeta.filter(function(x){return x.id===m;})[0]||{};}
+      var currentModel=qs.get('model')||baseModel;
+      if(modelList.indexOf(currentModel)<0)currentModel=baseModel;
+      function hasModelFor(mid){return mid===baseModel||!!(s.models&&s.models[mid]);}
+      function cur(){return (s.models&&s.models[currentModel])||s;}
+      function archiveUrlFor(){
+        var a=data.archive; if(!a)return null;
+        if(a.models&&a.models[currentModel]&&a.models[currentModel].release_url)
+          return a.models[currentModel].release_url;
+        return a.release_url||null;
       }
-      var no=el('p','sim-no','Sim '+pad(s.index)+' ');
-      no.appendChild(el('span','mode','· '+(s.batch||'')+' #'+(s.batch_index||'')
-        +(tgt?' · target “'+tgt+'”':'')+tgtNote));
-      card.appendChild(no);
 
-      var grid=el('div','sim-prompts');
-      var pc=el('div');
-      pc.appendChild(el('span','sim-side','clinical phrasing'));
-      pc.appendChild(el('p','sim-prompt sim-c',s.clinical_prompt));
-      pc.appendChild(spreadDetails('prob('+tgt.trim()+')',s.prob_clinical,s.top_clinical,s.spread_clinical,s.target_token));
-      var mc=massLine((s.clinical_mass||{}).clinical);
-      if(mc)pc.appendChild(mc);
-      var pp=el('div');
-      pp.appendChild(el('span','sim-side','patient phrasing (simulated)'));
-      pp.appendChild(el('p','sim-prompt sim-p',s.patient_prompt));
-      pp.appendChild(spreadDetails('prob('+tgt.trim()+')',s.prob_patient,s.top_patient,s.spread_patient,s.target_token));
-      var mp=massLine((s.clinical_mass||{}).patient);
-      if(mp)pp.appendChild(mp);
-      grid.appendChild(pc);grid.appendChild(pp);
-      card.appendChild(grid);
+      (function buildModelRow(){
+        var wrap=document.getElementById('sim-model-row');
+        if(!wrap||modelList.length<2)return;
+        var g=el('div','chip-g');
+        g.setAttribute('role','group');
+        g.setAttribute('aria-label','select model');
+        g.appendChild(el('span','chip-lbl','model'));
+        modelsMeta.forEach(function(mm){
+          var avail=hasModelFor(mm.id);
+          var c=el('button','chip'+(mm.id===currentModel?' on':''),mm.label||mm.id);
+          c.type='button';
+          c.setAttribute('aria-pressed',mm.id===currentModel?'true':'false');
+          if(!avail){c.disabled=true;c.title='this phrase was not traced on '+mm.id;}
+          else c.title=(mm.features===false
+            ?'structure only (no clinical-feature meter)'
+            :'clinical-feature attribution available');
+          c.addEventListener('click',function(){
+            if(c.disabled)return;
+            currentModel=mm.id;
+            g.querySelectorAll('.chip').forEach(function(x){
+              x.classList.remove('on');x.setAttribute('aria-pressed','false');});
+            c.classList.add('on');
+            c.setAttribute('aria-pressed','true');
+            var u=new URL(location);u.searchParams.set('model',mm.id);history.replaceState(null,'',u);
+            renderCard();
+          });
+          g.appendChild(c);
+        });
+        wrap.appendChild(g);
+      })();
 
-      var statline=el('p');
-      if(s.screening&&s.screening.status==='screened_out'){
-        statline.appendChild(el('span','stat neutral',
-          'screened out of measurement: '+(s.screening.reason||'intended target unmeasurable')
-          +' (clinical trace and spread retained; fed back to the generator)'));
-      }else{
-        if(typeof s.language_penalty==='number'){
-          statline.appendChild(el('span','stat '+(s.language_penalty<0?'penalty':'recovery'),
-            'Language Penalty: '+pct(s.language_penalty)+' probability ('
-            +p2(s.prob_clinical)+' → '+p2(s.prob_patient)+')'));
-        }else{
-          statline.appendChild(el('span','stat neutral','Language Penalty: —'));
+      function renderCard(){
+        card.textContent='';
+        var m=cur();   // measurements for the selected model
+        var traced=hasModelFor(currentModel);
+        var tgt=m.target_token||'';
+        var intent=(s.intended_target||'').trim();
+        var screenedOut=!tgt&&m.screening&&m.screening.status==='screened_out';
+        var tgtNote='';
+        if(screenedOut){
+          tgtNote=intent?' · screened out (intended “'+intent+'” unmeasurable)':' · screened out';
+        }else if(intent&&intent!==tgt){
+          tgtNote=m.anchor_fallback
+            ?' · intended “'+intent+'” fell below the traced spread; anchored on the clinical top prediction'
+            :' (first piece of “'+intent+'”)';
         }
-        statline.appendChild(el('span','sim-flip '+(s.flipped?'flipped':'held'),
-          s.flipped?'top prediction flipped':'top prediction unchanged'));
-      }
-      card.appendChild(statline);
+        var no=el('p','sim-no','Sim '+pad(s.index)+' ');
+        no.appendChild(el('span','mode','· '+(s.batch||'')+' #'+(s.batch_index||'')
+          +(tgt?' · target “'+tgt+'”':'')+tgtNote));
+        card.appendChild(no);
 
-      if(s.rationale){
-        var ra=el('div','sim-rationale');
-        ra.appendChild(el('span','sim-side','generator’s rationale (simulated-data provenance)'));
-        ra.appendChild(el('p',null,s.rationale));
-        card.appendChild(ra);
-      }
+        var grid=el('div','sim-prompts');
+        var pc=el('div');
+        pc.appendChild(el('span','sim-side','clinical phrasing'));
+        pc.appendChild(el('p','sim-prompt sim-c',s.clinical_prompt));
+        pc.appendChild(spreadDetails('prob('+tgt.trim()+')',m.prob_clinical,m.top_clinical,m.spread_clinical,m.target_token));
+        var mc=massLine((m.clinical_mass||{}).clinical);
+        if(mc)pc.appendChild(mc);
+        var pp=el('div');
+        pp.appendChild(el('span','sim-side','patient phrasing (simulated)'));
+        pp.appendChild(el('p','sim-prompt sim-p',s.patient_prompt));
+        pp.appendChild(spreadDetails('prob('+tgt.trim()+')',m.prob_patient,m.top_patient,m.spread_patient,m.target_token));
+        var mp=massLine((m.clinical_mass||{}).patient);
+        if(mp)pp.appendChild(mp);
+        grid.appendChild(pc);grid.appendChild(pp);
+        card.appendChild(grid);
 
-      if(s.diff_html){
-        var vh=el('p','view-head','Circuit diff: what the swap changed');
-        card.appendChild(vh);
-        var vs=el('p','view-sub','features present under BOTH phrasings are dimmed to context'
-          +(s.circuit_diff?(' · '+s.circuit_diff.shared_features+' shared · '
-          +s.circuit_diff.unique_to_a+' only clinical · '+s.circuit_diff.unique_to_b+' only patient'):''));
-        card.appendChild(vs);
-        embedBlock(card,s.diff_html,'Circuit diff: shared features dimmed; full-ink nodes are what the term swap added or removed.');
+        var statline=el('p');
+        if(!traced){
+          statline.appendChild(el('span','stat neutral',
+            'this phrase was not traced on '+currentModel+' — pick another model above'));
+        }else if(m.screening&&m.screening.status==='screened_out'){
+          statline.appendChild(el('span','stat neutral',
+            'screened out of measurement: '+(m.screening.reason||'intended target unmeasurable')
+            +' (clinical trace and spread retained; fed back to the generator)'));
+        }else{
+          if(typeof m.language_penalty==='number'){
+            statline.appendChild(el('span','stat '+(m.language_penalty<0?'penalty':'recovery'),
+              'Language Penalty: '+pct(m.language_penalty)+' probability ('
+              +p2(m.prob_clinical)+' → '+p2(m.prob_patient)+')'));
+          }else{
+            statline.appendChild(el('span','stat neutral','Language Penalty: —'));
+          }
+          statline.appendChild(el('span','sim-flip '+(m.flipped?'flipped':'held'),
+            m.flipped?'top prediction redirected':(typeof m.language_penalty==='number'&&m.language_penalty<0?'top prediction held — hedged':'top prediction unchanged')));
+        }
+        card.appendChild(statline);
+
+        if(s.rationale){
+          var ra=el('div','sim-rationale');
+          ra.appendChild(el('span','sim-side','generator’s rationale (simulated-data provenance)'));
+          ra.appendChild(el('p',null,s.rationale));
+          card.appendChild(ra);
+        }
+
+        if(m.diff_html){
+          var vh=el('p','view-head','Circuit diff: what the swap changed');
+          card.appendChild(vh);
+          var vs=el('p','view-sub','features present under BOTH phrasings are dimmed to context'
+            +(m.circuit_diff?(' · '+m.circuit_diff.shared_features+' shared · '
+            +m.circuit_diff.unique_to_a+' only clinical · '+m.circuit_diff.unique_to_b+' only patient'):''));
+          card.appendChild(vs);
+          embedBlock(card,m.diff_html,'Circuit diff: shared features dimmed; full-ink nodes are what the term swap added or removed.');
+        }
+        if(m.html){
+          card.appendChild(el('p','view-head','Full comparison: every traced feature'));
+          embedBlock(card,m.html,'Hover any node for its feature id, category, attribution mass, and autointerp description.');
+        }
+        if(!m.html&&!m.diff_html){
+          var pn=el('div','pending-note');
+          var noGraphs=metaFor(currentModel).graphs===false;
+          if(!traced){
+            pn.appendChild(document.createTextNode(
+              'this phrase wasn’t traced on '+currentModel+'; pick another model above. '+
+              'the full render set is not published on this site; the scenario’s complete '+
+              'measurements across traced models are downloadable at '));
+            var mx=el('a',null,'data/simulated_archive.csv');
+            mx.href='../data/simulated_archive.csv';
+            pn.appendChild(mx);
+          }else if(m.screening&&m.screening.status==='screened_out'){
+            pn.textContent='screened out before the patient-side trace — no interactive render';
+          }else if(noGraphs){
+            pn.appendChild(document.createTextNode(
+              currentModel+' is measured by next-token probability only — Neuronpedia doesn’t '+
+              'host its transcoders, so there is no attribution graph. The probabilities above '+
+              'are its cross-model comparison for this phrase.'));
+          }else{
+            pn.appendChild(document.createTextNode(
+              'this scenario’s full circuit render isn’t in the public demonstration set '+
+              '(the site keeps the 25 largest-effect scenarios: prediction flips first, then '+
+              'largest language penalty). the full render set is not published on this site; '+
+              'the scenario’s complete measurements are shown above and downloadable at '));
+            var cx=el('a',null,'data/simulated_archive.csv');
+            cx.href='../data/simulated_archive.csv';
+            pn.appendChild(cx);
+          }
+          // a graph-less model has nothing to download; only offer the archive
+          // link for models whose render exists but was left out of the demo
+          var arc=(!noGraphs&&traced)?archiveUrlFor():null;
+          if(arc){
+            pn.appendChild(document.createTextNode(' — '));
+            var a=el('a',null,'download the full render set');
+            a.href=arc;a.target='_blank';a.rel='noopener';
+            pn.appendChild(a);
+          }
+          card.appendChild(pn);
+        }
+        setTimeout(fitAll,300);
+        setTimeout(fitAll,1200);
       }
-      if(s.html){
-        card.appendChild(el('p','view-head','Full comparison: every traced feature'));
-        embedBlock(card,s.html,'Hover any node for its feature id, category, attribution mass, and autointerp description.');
-      }
-      if(!s.html&&!s.diff_html){
-        var pn=el('div','pending-note');
-        var screened=s.screening&&s.screening.status==='screened_out';
-        pn.textContent=screened
-          ? 'screened out before the patient-side trace — no interactive render'
-          : 'this scenario’s full circuit render isn’t in the public demonstration set (the site keeps the most consequential 25); its measurements are shown above, and the complete render is in the back-end archive';
-        card.appendChild(pn);
-      }
-      setTimeout(fitAll,300);
-      setTimeout(fitAll,1200);
+      renderCard();
     })
     .catch(function(){document.getElementById('sim-missing').hidden=false;});
 })();

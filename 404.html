@@ -10,7 +10,7 @@
 <style>
   :root{
     --paper:#faf9f5; --ink:#1c1c19; --patient:#111827; --clinical:#15803d;
-    --muted:#75746d; --hairline:#dcdad2;
+    --muted:#6d6c66; --hairline:#dcdad2;
     --serif:'Iowan Old Style','Palatino Linotype',Palatino,'Book Antiqua',Georgia,serif;
     --mono:ui-monospace,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace;
   }
@@ -21,6 +21,8 @@
   main{max-width:760px;margin:0 auto;padding:0 22px 56px}
   a{color:inherit}
   a:focus-visible{outline:2px solid var(--clinical);outline-offset:3px;border-radius:1px}
+  .skip{position:absolute;left:-9999px;top:0;background:var(--paper);color:var(--ink);padding:8px 14px;border:1px solid var(--ink);z-index:10}
+  .skip:focus{left:8px}
 
   .masthead{max-width:760px;margin:0 auto;padding:20px 22px 0}
   .masthead-row{display:flex;align-items:baseline;justify-content:space-between;
@@ -41,7 +43,6 @@
     color:var(--muted);margin:56px 0 18px}
   h1{font-size:clamp(30px,5vw,42px);line-height:1.16;font-weight:600;
     letter-spacing:-.006em;margin:0 0 18px}
-  h1 .err{color:#b4483d}
   p{;margin:0 0 14px;font-size:17px}
   .note{font-family:var(--mono);font-size:12.5px;color:var(--muted);line-height:1.8;
     border-top:1px solid var(--hairline);margin-top:30px;padding-top:14px}
@@ -52,6 +53,7 @@
 </style>
 </head>
 <body>
+<a class="skip" href="#main">Skip to content</a>
 <header class="masthead">
   <hr class="rule-heavy"><hr class="rule-fine">
   <div class="masthead-row">
@@ -65,24 +67,23 @@
       <a href="/patientwords/translation/">Translation</a>
       <a href="/patientwords/simulated-scenarios/">Simulated Scenarios</a>
       <a href="/patientwords/phrase-dataset/">Phrase Dataset</a>
-      <a href="/patientwords/#model-evaluations">Model Evaluations</a>
+      <a href="/patientwords/model-evaluations/">Model Evaluations</a>
       <a href="https://github.com/michaeldgreenphd/patientwords">GitHub</a>
     </nav>
   </div>
   <hr class="rule-fine">
 </header>
-<main>
+<main id="main">
   <p class="dateline">Error · <span style="color:#b4483d">HTTP 404</span></p>
-  <h1>This page isn’t in the trace.<br><span class="err">Attribution mass: zero.</span></h1>
+  <h1>Page not found.</h1>
   <p>
     The address you followed doesn’t resolve to any figure, method, or render on this site.
-    It may have been moved when the gallery was regenerated, or the link may simply be
-    misspelled.
+    It may have been moved when the gallery was regenerated, or the link may be misspelled.
   </p>
   <p class="note">
     Everything published here is reachable from the gallery: four comparison
-    engines (2panel, 4quadrant, dialect, translation), the phrase dataset,
-    model evaluations, and the methods page.
+    engines (2panel, 4quadrant, dialect, translation), the simulated scenarios
+    series, the phrase dataset, model evaluations, and the methods page.
   </p>
   <a class="back" href="/patientwords/">Back home →</a>
 </main>

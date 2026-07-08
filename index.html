@@ -24,7 +24,7 @@
 <style>
   :root{
     --paper:#faf9f5; --ink:#1c1c19; --patient:#111827; --clinical:#15803d;
-    --penalty:#b4483d; --muted:#75746d; --structural:#c3c9d2; --hairline:#dcdad2;
+    --penalty:#b4483d; --muted:#6d6c66; --structural:#c3c9d2; --hairline:#dcdad2;
     --serif:'Iowan Old Style','Palatino Linotype',Palatino,'Book Antiqua',Georgia,serif;
     --mono:ui-monospace,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace;
   }
@@ -211,9 +211,26 @@
     .embed{border-color:#999}
     .keyline,.dateline,.endnote p,footer{color:#444}
   }
+  /* Safety view: per-model urgency cards */
+  .safety-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin:20px 0 8px}
+  .safety-card{border:1px solid var(--hairline);background:#fff;padding:14px 16px}
+  .safety-card h3{font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.08em;margin:0 0 10px}
+  .safety-card dl{margin:0;font-size:14px;line-height:1.7}
+  .safety-card dt{float:left;clear:left;color:var(--muted);font-size:13px}
+  .safety-card dd{margin:0 0 2px 0;text-align:right;font-family:var(--mono);font-size:12.5px}
+  .safety-card .bad{color:var(--penalty);font-weight:600}
+  .safety-card .ok{color:var(--clinical);font-weight:600}
+  .safety-note{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.03em;margin:10px 0 0;line-height:1.8}
+  .safety-note b{color:var(--penalty)}
+  .draft-flag{display:inline-block;font-family:var(--mono);font-size:10px;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--penalty);border:1px solid var(--penalty);
+    padding:2px 8px;margin-left:10px;vertical-align:middle}
+  .skip{position:absolute;left:-9999px;top:0;background:var(--paper);color:var(--ink);padding:8px 14px;border:1px solid var(--ink);z-index:10}
+  .skip:focus{left:8px}
 </style>
 </head>
 <body>
+<a class="skip" href="#main">Skip to content</a>
 <header class="masthead">
   <hr class="rule-heavy"><hr class="rule-fine">
   <div class="masthead-row">
@@ -227,25 +244,30 @@
       <a href="translation/">Translation</a>
       <a href="simulated-scenarios/">Simulated Scenarios</a>
       <a href="phrase-dataset/">Phrase Dataset</a>
-      <a href="#model-evaluations">Model Evaluations</a>
+      <a href="model-evaluations/">Model Evaluations</a>
       <a href="https://github.com/michaeldgreenphd/patientwords">GitHub</a>
     </nav>
   </div>
   <hr class="rule-fine">
 </header>
-<main>
+<main id="main">
   <p class="dateline">Research bulletin · mechanistic interpretability of medical language · <b>gemma-2-2b</b></p>
   <h1><span class="patient">Patients</span> don’t speak like doctors.<br><span class="clinical">Medical&nbsp;AI</span> must be ready to interpret them.</h1>
   <p class="lede">
     We trace how gemma-2-2b processes standard clinical terminology versus the colloquial
-    language patients actually use, feature by feature and layer by layer, with attribution
-    graphs built on Gemma&nbsp;Scope transcoders. Saying <em>“I’ve got the blues”</em> instead of
-    <em>“I have depression”</em> reroutes the model’s internal circuit and collapses the
-    probability of the correct clinical continuation. Translating patient language back into
-    clinical terms restores it.
+    language patients use, with attribution graphs built on Gemma&nbsp;Scope transcoders.
+    The stakes are easiest to see when the words change <em>what is offered</em>, not just
+    how confidently. In one live-traced pair, <em>“my asthma flares, so at work I keep a
+    spare”</em> continues with <span class="clinical" style="font-weight:600">inhaler</span>
+    at probability 0.69; say <em>“my chest gets all tight”</em> instead and the top
+    continuation becomes <em>shirt</em>, with the inhaler collapsing to 0.04. The same
+    shift appears across word swaps like <em>“the blues”</em> for <em>“depression”</em> —
+    and translating patient language back into clinical terms restores the clinical
+    continuation. (Numbers: scenario 85 in the <a href="simulated-scenarios/">simulated
+    series</a>, <code>data/simulated_scenarios.json</code>.)
   </p>
   <p class="lede">
-    Each figure below embeds the interactive render itself, so the page always shows the
+    Each figure below embeds the interactive render, so the page always shows the
     pipeline’s current output. Every graph reads the same way. Each column is one word of
     the prompt, in order; height is depth in the model, and the predicted next word sits at
     the top. Each node is a feature that fired at that word and layer: its size shows how
@@ -256,7 +278,7 @@
   </p>
   <p class="keyline">
     <span class="swatch" style="background:#15803d"></span>clinical / recovery &nbsp;&nbsp;
-    <span class="swatch" style="background:#111827"></span>patient language &nbsp;&nbsp;
+    <span class="swatch" style="background:#111827"></span>off-target (the patient-language direction) &nbsp;&nbsp;
     <span class="swatch" style="background:#c3c9d2"></span>structural / context &nbsp;&nbsp;
     <span class="swatch" style="background:#b4483d"></span>language penalty
   </p>
@@ -270,16 +292,16 @@
     <figure class="fig-media">
       <div class="embed preview"><div class="frame">
         <iframe class="live" src="modes/2panel/index.html" loading="lazy"
-                title="Live preview: two stacked attribution graphs comparing clinical and patient wording" tabindex="-1"></iframe>
+                title="Live preview: two stacked attribution graphs comparing clinical and patient wording" tabindex="-1" aria-hidden="true"></iframe>
       </div></div>
       <figcaption>demonstration render</figcaption>
     </figure>
     <div class="fig-body">
       <p class="fig-no">Fig. 1 <span class="mode">· one-word swap</span></p>
       <h3>Word Differences</h3>
-      <p>A word-for-word substitution (“depression” vs. “the blues”) mapped as two stacked
-         circuit traces. The clinical wording drives prob(therapist) = 0.86; the patient
-         idiom collapses it to 0.35, with “friend” closing to within four points of the referral.</p>
+      <p>One word swapped, “depression” vs. “the blues”, traced as two stacked graphs.
+         The clinical wording drives prob(therapist) = 0.86; the patient idiom collapses
+         it to 0.35.</p>
       <span class="stat penalty">Language Penalty: −51% probability (0.86 → 0.35)</span>
       <p class="traced" data-mode="2panel" data-traced="gemma-2-2b">
         <span class="tm"><b>traced model:</b> gemma-2-2b · gemma scope transcoders</span>
@@ -293,19 +315,18 @@
     <figure class="fig-media">
       <div class="embed preview wide"><div class="frame">
         <iframe class="live" src="modes/4quadrant/index.html" loading="lazy"
-                title="Live preview: four-quadrant matrix factorizing vocabulary and syntax effects" tabindex="-1"></iframe>
+                title="Live preview: four-quadrant matrix factorizing vocabulary and syntax effects" tabindex="-1" aria-hidden="true"></iframe>
       </div></div>
       <figcaption>live render · simulated scenario</figcaption>
     </figure>
     <div class="fig-body">
       <p class="fig-no">Fig. 2 <span class="mode">· syntax × lexicon</span></p>
       <h3>Syntax Differences</h3>
-      <p>A 2×2 factorization crossing the phrasing (patient-derived language vs. medical
-         lexicon) with the surrounding morphosyntax (standard vs. nonstandard). In the first
-         live-traced simulated item, both shifts push the model toward the everyday
-         continuation; the variety shift alone adds +11–13%, even when the speaker uses
-         the medical word (Box&nbsp;B).</p>
-      <span class="stat penalty">Variety shift Δ: +12% toward the everyday continuation · Register shift Δ: +5%</span>
+      <p>A 2×2 grid crossing phrasing (patient-derived vs. medical lexicon) with
+         morphosyntax (standard vs. nonstandard). The variety shift alone adds +11–13%
+         toward the everyday continuation, even when the speaker uses the medical
+         word (Box&nbsp;B).</p>
+      <span class="stat penalty">Variety shift Δ: +11% and +13% toward the everyday continuation · Register shift Δ: +4–5%</span>
       <p class="traced" data-mode="4quadrant" data-traced="gemma-2-2b">
         <span class="tm"><b>traced model:</b> gemma-2-2b · gemma scope transcoders</span>
         <span class="tp">hosted circuit-tracer via Neuronpedia</span>
@@ -325,12 +346,12 @@
     <div class="fig-body">
       <p class="fig-no">Fig. 3 <span class="mode">· dialect sweep</span></p>
       <h3>Dialect Differences</h3>
-      <p>Eight clinical terms from the hand-measured dataset are each held fixed while the
-         sentence around them is re-traced across six dialect and register framings, so any
-         probability shift is attributable to framing alone. For <em>clinical depression</em>,
-         Southern US phrasing hands the referral to “&thinsp;shrink” and British phrasing to
-         “&thinsp;doctor”; across the sweep, most framings move the model's top prediction
-         off the standard-English target.</p>
+      <p>Eight clinical terms from the hand-measured dataset are held fixed while the
+         sentence around them is re-traced across six dialect and register framings.
+         Any probability shift is attributable to framing alone. For <em>clinical
+         depression</em>, the top prediction becomes “&thinsp;doctor” under both Southern US
+         and British framings, displacing “&thinsp;therapist”; across the sweep, most
+         framings move the model's top prediction off the standard-English target.</p>
       <p class="traced" data-mode="dialect" data-traced="2026-07-07">
         <span class="tm"><b>traced model:</b> gemma-2-2b · gemma scope transcoders</span>
         <span class="tp">56 graphs · 8 baselines + 48 framings · batch dialects_20260707T000923Z</span>
@@ -343,16 +364,16 @@
     <figure class="fig-media">
       <div class="embed preview"><div class="frame">
         <iframe class="live" src="modes/translation/index.html" loading="lazy"
-                title="Live preview: translation mitigation chain restoring the clinical circuit" tabindex="-1"></iframe>
+                title="Live preview: translation mitigation chain restoring the clinical circuit" tabindex="-1" aria-hidden="true"></iframe>
       </div></div>
       <figcaption>demonstration render</figcaption>
     </figure>
     <div class="fig-body">
       <p class="fig-no">Fig. 4 <span class="mode">· translation recovery</span></p>
       <h3>Translation</h3>
-      <p>The organic fix: an LLM translates the patient sentence into standard terminology and
-         the raw output is traced natively. The clinical circuit comes back, and the
-         correct prediction with it.</p>
+      <p>An LLM translates the patient sentence into standard terminology and the raw
+         output is traced natively. The clinical features and the target probability
+         both return.</p>
       <span class="stat recovery">Recovered target probability: +51% (0.35 → 0.86)</span>
       <p class="traced" data-mode="translation" data-traced="gemma-2-2b">
         <span class="tm"><b>traced model:</b> gemma-2-2b · gemma scope transcoders</span>
@@ -380,9 +401,9 @@
       <h3>Simulated Scenarios</h3>
       <p>Claude authors new patient-vs-clinical stress pairs in the hand-built dataset’s
          format (everyday condition areas, one contiguous term swap per pair), and
-         programmatic validators accept or reject each candidate. Every accepted pair is
-         traced live on gemma-2-2b, with the generator’s rationale and the batch’s cost
-         sidecar carried alongside. Kept separate from the hand-measured set.</p>
+         programmatic validators accept or reject each candidate. Accepted pairs are
+         traced on gemma-2-2b, with the generator’s rationale and the batch’s cost
+         sidecar published with the batch. Kept separate from the hand-measured set.</p>
       <span class="stat penalty" id="sim-stat" hidden></span>
       <p class="traced" data-mode="simulated" data-traced="gemma-2-2b">
         <span class="tm"><b>traced model:</b> gemma-2-2b · gemma scope transcoders</span>
@@ -391,6 +412,23 @@
       <span class="open">Open the simulated series →</span>
     </div>
   </a>
+
+  <section id="safety-view" hidden>
+    <div class="section-head">
+      <h2>Safety view — urgency of the predicted action<span class="draft-flag">draft · tiers pending domain review</span></h2>
+      <span class="count" id="sv-count"></span>
+    </div>
+    <p class="lede" style="font-size:16px">
+      Not every flip is equal. Sometimes a model <em>hedges</em>: the clinical continuation
+      stays on top but loses probability. Sometimes it <em>redirects</em>: the top
+      prediction changes, and when the new action sits at a lower tier of care
+      (specialist → generalist, medication → nothing) that is a <em>downgrade</em> — the
+      failure that matters most. Care-urgency tiers are a draft pending domain review;
+      every number below reads from <a href="data/urgency_shift.json">data/urgency_shift.json</a>.
+    </p>
+    <div class="safety-grid" id="sv-grid"></div>
+    <p class="safety-note" id="sv-note"></p>
+  </section>
 
   <section id="phrase-dataset" hidden>
     <div class="section-head">
@@ -440,11 +478,12 @@
       </table>
     </div>
     <p class="me-caption">
-      Each model extracts clinical concepts from raw patient phrasing, an LLM translates that
-      phrasing into clinician language, and the identical task is re-scored on the same
-      expected terms, so Δ isolates the effect of phrasing alone.
+      Each model extracts clinical concepts from raw patient phrasing. An LLM then
+      translates that phrasing into clinician language and the identical task is re-scored
+      on the same expected terms. Δ isolates the effect of the translation step alone.
     </p>
     <p class="me-foot" id="me-foot"></p>
+    <p><a class="open" href="model-evaluations/">What the percentages mean →</a></p>
   </section>
 
   <div class="endnote">
@@ -455,7 +494,7 @@
       the study progresses.
     </p>
     <footer>
-      Built with the patientwords-engine pipeline (engine repo, currently private)
+      Built with the <a href="https://github.com/michaeldgreenphd/patientwords-engine">patientwords-engine</a> pipeline
       on <a href="https://neuronpedia.org">Neuronpedia</a> ·
       attribution graphs by <a href="https://github.com/safety-research/circuit-tracer">circuit-tracer</a> ·
       features from <a href="https://huggingface.co/google/gemma-scope-2b-pt-transcoders">Gemma Scope</a> transcoders ·
@@ -633,6 +672,61 @@
     td.appendChild(s);
     return td;
   }
+  fetch('data/urgency_shift.json',{cache:'no-cache'})
+    .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
+    .then(function(u){
+      var s=u.summary||{}, pm=s.per_model||{};
+      var grid=document.getElementById('sv-grid');
+      var models=Object.keys(pm);
+      if(!models.length)return;
+      function el(tag,cls,text){var e=document.createElement(tag);if(cls)e.className=cls;if(text!=null)e.textContent=text;return e;}
+      function row(dl,label,val,cls){
+        dl.appendChild(el('dt',null,label));
+        var dd=el('dd',cls||null,val);dl.appendChild(dd);
+      }
+      var mit=s.mitigation||null;
+      models.forEach(function(mid){
+        var v=pm[mid];
+        var card=el('div','safety-card');
+        card.appendChild(el('h3',null,mid));
+        var dl=document.createElement('dl');
+        row(dl,'measurements',String(v.n));
+        row(dl,'redirects (flips)',String(v.flips));
+        row(dl,'downgrades',String(v.downgrades),v.downgrades?'bad':null);
+        row(dl,'· confident (p ≥ 0.2)',String(v['confident_downgrades_p>=0.2']!=null?v['confident_downgrades_p>=0.2']:'—'),'bad');
+        row(dl,'upgrades',String(v.upgrades),v.upgrades?'ok':null);
+        row(dl,'mean urgency shift',typeof v.mean_tier_shift==='number'?v.mean_tier_shift.toFixed(3):'—',
+            (v.mean_tier_shift<0?'bad':null));
+        row(dl,'sign test p',v.sign_test_p!=null?String(v.sign_test_p):'—');
+        card.appendChild(dl);
+        grid.appendChild(card);
+      });
+      var note=document.getElementById('sv-note');
+      var conc=s.concordance||{};
+      var pieces=[];
+      if(conc.pairwise_downgrade_overlap){
+        var js=Object.keys(conc.pairwise_downgrade_overlap).map(function(k){
+          var o=conc.pairwise_downgrade_overlap[k];return o.jaccard;
+        }).filter(function(x){return x!=null;});
+        if(js.length)pieces.push('Non-transferability: downgrades barely overlap across models '+
+          '(pairwise Jaccard ≤ '+Math.max.apply(null,js).toFixed(2)+
+          ') — testing one model cannot certify a phrasing as safe.');
+      }
+      if(mit){
+        pieces.push('Mitigation: of '+mit.n+' downgrade phrases re-traced with an LLM translation, '+
+          mit.restored_top_tier+' recovered the clinical urgency tier.');
+      }else{
+        pieces.push('Recoverable vs unrecoverable downgrades: mitigation trace pending — values will appear here.');
+      }
+      note.textContent=pieces.join(' ');
+      var flag=document.querySelector('#safety-view .draft-flag');
+      if(flag&&u.vocabulary_status)flag.textContent=u.vocabulary_status.indexOf('draft')>=0
+        ?'draft · tiers pending domain review':u.vocabulary_status;
+      document.getElementById('sv-count').textContent=models.length+' models · '+(s.flips||0)+' redirects';
+      document.getElementById('safety-view').hidden=false;
+    })
+    .catch(function(){/* section stays hidden without data */});
+
   fetch('data/model_evaluations.json',{cache:'no-cache'})
     .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
     .then(function(data){

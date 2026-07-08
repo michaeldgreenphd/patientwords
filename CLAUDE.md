@@ -1,0 +1,87 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## What this is
+
+The public GitHub Pages gallery for a mechanistic-interpretability study of clinical vs.
+patient language in language models. Everything shown here is generated or measured by the
+private backend repo (`patientwords-engine`, expected as a sibling checkout); this repo is
+presentation only. The voice is a careful research notebook: short declarative sentences,
+exact technical terms, no marketing.
+
+## Hard rules
+
+- **Never edit anything under `modes/`** — engine-generated, self-contained figure renders.
+  They are replaced wholesale by engine exports, never patched here.
+- **Every number on a page must trace to a source in this repo**: a `data/*.json` field, a
+  `modes/` figure, or page JS that computes it at runtime from fetched data. Unverifiable
+  numbers get corrected or cut — never invented, never extrapolated. Provenance numbers
+  copied from engine sidecars live in `data/provenance.json`.
+- **The synthetic-demo disclosure stays prominent.** Figs. 1 and 4 are hand-authored
+  demonstration renders (pipeline validation), not live traces; their labels and meta tags
+  must say so. The methods endnote distinguishes three provenances: LLM-written scenarios
+  with real live traces, the hand-built dataset from real patient language, and synthetic
+  demo renders.
+- **Draft labels are load-bearing.** Urgency-tier content is marked "draft pending domain
+  review" (from `data/urgency_shift.json:vocabulary_status`); do not remove or soften that
+  until the tier vocabulary is approved (`docs/tier_review_checklist.md` in the engine).
+- Intentional misspellings in the phrase dataset are stress-test stimuli. Missing data
+  renders as pending/em-dash states — those paths must keep working.
+- Preserve the provenance & acknowledgments footer content.
+
+## No build system
+
+Every page is a self-contained HTML file: inline CSS, inline vanilla JS, no CDN, no
+imports. **Cross-page duplication of CSS/JS is deliberate** — pages must work standalone.
+A change to shared behavior (masthead, chips, palette variables) means editing each page.
+
+Semantic palette (do not change): clinical green `#15803d`, patient ink `#111827`,
+structural grey `#c3c9d2`, penalty red `#b4483d`, paper `#faf9f5`, muted `#6d6c66`
+(chosen for WCAG AA on paper). Serif display + mono data.
+
+## Data contracts (what page JS reads)
+
+- `data/simulated_scenarios.json` — payload from the engine exporter. Per-scenario
+  measurements for the base model (gemma-2-2b) sit at the top level; other models under
+  `scenario.models[<id>]`. `payload.models_meta` drives the model-selector chips
+  (`features:false` → grey the clinical-circuit meter; `graphs:false` → say "next-token
+  behavior only", never imply a hidden render). Pages must fall back gracefully when
+  `models_meta`/`models`/`archive` are absent (older payload shapes).
+- `data/urgency_shift.json` — urgency rows joined by `(batch, batch_index, model)`;
+  drives the Urgency column and downgrade badges.
+- `data/model_evaluations.json`, `data/dialects.json`, `data/stress_pairs.json`,
+  `data/provenance.json`, `data/simulated_archive.{csv,json}` (collaborator download).
+
+## Established UI conventions
+
+- Filter/model chips: `.chip` buttons in `.chip-g` groups with `role="group"`,
+  `aria-pressed` toggled with the `.on` class.
+- Sortable table headers: real `<button>`s inside `th[data-key]`, `aria-sort` on the
+  active `th`; first click on the Urgency column sorts most-safety-relevant first.
+- Accessibility floor: skip link on every page, `:focus-visible` outlines (never bare
+  `outline:none`), `scope="col"` on generated headers, iframe `title`s, decorative
+  preview iframes `aria-hidden`.
+- Vocabulary used across flip displays: the model *hedges* (top prediction holds, loses
+  probability) vs. *redirects* (top prediction changes); a redirect that drops a
+  care-urgency tier is a *downgrade*.
+
+## Figure style (standing preference)
+
+Tufte: simple and readable. Maximum data-ink, hairline structure, direct labeling over
+legends, muted context so the semantic colors carry the finding, no chartjunk. Applies to
+any inline SVG/chart built on pages (the engine renders modes/ figures to the same
+standard).
+
+## Verifying changes
+
+Serve and drive the real pages — the scenario tables are JS-heavy:
+
+```bash
+python3 -m http.server 8900          # from the repo root
+# Playwright with the preinstalled browser:
+#   chromium.launch({ executablePath: '/opt/pw-browsers/chromium' })
+```
+
+Check: no console/page errors, row counts match the payload, sorting/filtering/model
+switching still work, and pending/em-dash states render on scenarios lacking data.

@@ -10,7 +10,7 @@
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="PatientWords">
 <meta property="og:title" content="Methods — PatientWords">
-<meta property="og:description" content="How the pipeline works: gemma-2-2b + Gemma Scope transcoders → circuit-tracer attribution graphs via Neuronpedia → feature tagging → three comparison engines.">
+<meta property="og:description" content="How the pipeline works: gemma-2-2b + Gemma Scope transcoders → circuit-tracer attribution graphs via Neuronpedia → feature tagging → four comparison engines.">
 <meta property="og:url" content="https://michaeldgreenphd.github.io/patientwords/methods.html">
 <meta property="og:image" content="https://michaeldgreenphd.github.io/patientwords/modes/2panel/preview.png">
 <meta property="og:image:width" content="1690">
@@ -24,7 +24,7 @@
 <style>
   :root{
     --paper:#faf9f5; --ink:#1c1c19; --patient:#111827; --clinical:#15803d;
-    --penalty:#b4483d; --muted:#75746d; --structural:#c3c9d2; --hairline:#dcdad2;
+    --penalty:#b4483d; --muted:#6d6c66; --structural:#c3c9d2; --hairline:#dcdad2;
     --serif:'Iowan Old Style','Palatino Linotype',Palatino,'Book Antiqua',Georgia,serif;
     --mono:ui-monospace,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace;
   }
@@ -109,9 +109,12 @@
     code{background:none}
     .dateline,.endnote p,footer{color:#444}
   }
+  .skip{position:absolute;left:-9999px;top:0;background:var(--paper);color:var(--ink);padding:8px 14px;border:1px solid var(--ink);z-index:10}
+  .skip:focus{left:8px}
 </style>
 </head>
 <body>
+<a class="skip" href="#main">Skip to content</a>
 <header class="masthead">
   <hr class="rule-heavy"><hr class="rule-fine">
   <div class="masthead-row">
@@ -125,20 +128,19 @@
       <a href="translation/">Translation</a>
       <a href="simulated-scenarios/">Simulated Scenarios</a>
       <a href="phrase-dataset/">Phrase Dataset</a>
-      <a href="./#model-evaluations">Model Evaluations</a>
+      <a href="model-evaluations/">Model Evaluations</a>
       <a href="https://github.com/michaeldgreenphd/patientwords">GitHub</a>
     </nav>
   </div>
   <hr class="rule-fine">
 </header>
-<main>
+<main id="main">
   <p class="dateline">Methods · how the pipeline works</p>
   <h1>From a sentence to a circuit, in four steps.</h1>
   <p class="lede">
-    Every figure in the gallery starts as two (or four) plain sentences, one phrased the way
-    a clinician would write it and one the way a patient would say it, and ends as an interactive
-    map of the computation gemma-2-2b performs on each. Here is what happens in between,
-    in plain language.
+    Every figure starts as two (or four) plain sentences, one in clinician wording and one
+    in patient wording. Each ends as an interactive map of the computation gemma-2-2b
+    performs on it.
   </p>
 
   <section>
@@ -162,10 +164,9 @@
       For each prompt we run <a href="https://github.com/safety-research/circuit-tracer">circuit-tracer</a>
       through <a href="https://neuronpedia.org">Neuronpedia</a> to build an
       <em>attribution graph</em>: a causal map of which features, at which layers and token
-      positions, actually pushed the model toward its next-token prediction. Edges carry
+      positions, pushed the model toward its next-token prediction. Edges carry
       attribution mass, the amount one feature’s firing contributed to another’s and
-      ultimately to the final logits. The graph records what the model actually did on
-      this exact sentence, at every layer and every token position of the run.
+      ultimately to the final logits.
     </p>
   </section>
 
@@ -186,8 +187,8 @@
         position, and punctuation that appear in every trace and carry no medical content.</li>
     </ul>
     <p>
-      This three-way split is what makes two graphs comparable: when the wording changes,
-      you can see clinical mass drain away and off-target mass take its place.
+      The three-way split makes two graphs comparable: when the wording changes,
+      clinical mass falls and off-target mass rises.
     </p>
   </section>
 
@@ -195,53 +196,109 @@
     <p class="step-no">Step 4 · Comparison</p>
     <h2>Four engines for putting graphs side by side</h2>
     <p>
-      The tagged graphs feed four rendering engines, each answering a different question:
+      The tagged graphs feed four rendering engines:
     </p>
     <ul class="engines">
       <li>
         <span class="eng-name"><a href="word-differences/">Word Differences</a></span>
         <span class="eng-mode">2panel · Fig. 1</span>
-        <p>What does one word cost? Two stacked traces of the same sentence, differing only
+        <p>Two stacked traces of the same sentence, differing only
            in “depression” vs. “the blues.”</p>
       </li>
       <li>
         <span class="eng-name"><a href="syntax-differences/">Syntax Differences</a></span>
         <span class="eng-mode">4quadrant · Fig. 2</span>
-        <p>Which part of patient language does the damage? A 2×2 grid crossing the medical
+        <p>A 2×2 grid crossing the medical
            keyword with the surrounding frame, separating the vocabulary effect from the
            syntax effect.</p>
       </li>
       <li>
         <span class="eng-name"><a href="dialect-differences/">Dialect Differences</a></span>
         <span class="eng-mode">dialect · Fig. 3</span>
-        <p>Which communities pay the framing tax? The clinical term is held fixed while the
+        <p>The clinical term is held fixed while the
            surrounding syntax is re-traced across dialect and register variants, extending
            the single syntax delta into a distribution across dialects.</p>
       </li>
       <li>
         <span class="eng-name"><a href="translation/">Translation</a></span>
         <span class="eng-mode">translation · Fig. 4</span>
-        <p>Can the penalty be undone? An LLM translates the patient sentence into clinical
+        <p>An LLM translates the patient sentence into clinical
            terms, and the translated output is traced natively to show the circuit and
            the prediction recovering together.</p>
       </li>
     </ul>
     <p>
-      Every render is a single self-contained HTML file: hover any node for its feature
-      identity, category, attribution mass, and autointerp description.
+      Every render is a single self-contained HTML file.
+    </p>
+    <p>
+      Whatever the engine, each comparison ends in one of three outcomes. The model
+      <em>hedges</em>: the clinical continuation stays on top but loses probability. It
+      <em>redirects</em>: the top continuation changes to something else. Or it
+      <em>downgrades</em>: the redirect lands on a lower tier of care. A worked downgrade
+      from the live traces &mdash; <em>“Grandma’s been constipated for a week, so before
+      dinner she took a”</em> continues with <em>laxative</em>; rephrase it as
+      <em>“all bunged up”</em> and the top continuation becomes <em>nap</em>
+      (0.30 vs. the laxative’s 0.26 under clinical wording). The advice object itself
+      changed, not merely its probability. (Numbers: <code>data/provenance.json →
+      translation_cases.grandma_laxative</code>; tier labels are a draft pending domain
+      review.)
     </p>
     <a class="back" href="./">Back home →</a>
   </section>
 
+  <section id="limitations">
+    <p class="step-no">Limitations</p>
+    <h2>What this evidence does and does not show</h2>
+    <p>
+      This project measures one narrow thing: how the probability of a single next token
+      changes when clinical wording is replaced by the words patients use. That is a probe
+      of model behavior, not a clinical outcome. A lower probability for “antacid” is not a
+      measurement of harm; it is a measurable trace of the model treating the two phrasings
+      differently.
+    </p>
+    <ul class="engines">
+      <li><p><b>One small model carries the circuit evidence.</b> Every attribution graph
+        here comes from gemma-2-2b, a 2-billion-parameter model chosen because its
+        transcoders are public. The behavioral checks on qwen3-4b and qwen3-1.7b measure
+        next-token probabilities only, with no circuits. None of this establishes how larger
+        or instruction-tuned clinical systems behave.</p></li>
+      <li><p><b>Attribution graphs are an interpretive tool.</b> They reconstruct the
+        model’s computation through transcoder features and prune heavily; error nodes
+        absorb what the reconstruction misses. A clean-looking circuit is a hypothesis
+        about mechanism, not a proof.</p></li>
+      <li><p><b>Feature labels are machine-generated.</b> The clinical / off-target
+        categories come from keyword-matching auto-interp descriptions. Both steps can be
+        wrong, and a mislabeled feature shifts the clinical-mass numbers.</p></li>
+      <li><p><b>Measurements are a point in time.</b> The hand-measured probabilities were
+        observed on specific dates against a hosted service; re-runs can differ.</p></li>
+      <li><p><b>Translation can fail.</b> The mitigation the Translation figure demonstrates
+        is itself an LLM step. The engine flags translation regressions, cases where the
+        rewrite made the target token less likely, and they occur.</p></li>
+      <li><p><b>The stimuli are constructed.</b> Most phrase pairs were written by a
+        language model and validated programmatically, not collected from patients. They
+        are stress tests, not a sample of real clinical conversations.</p></li>
+    </ul>
+    <p>
+      Nothing here is medical advice, and no part of this pipeline is a deployed clinical
+      tool. The claim this evidence supports is narrower: on the models measured, the same
+      medical situation phrased in patient words is measurably less likely to reach the
+      clinical continuation than when phrased in clinical terms, and the circuit view shows
+      where that difference arises.
+    </p>
+  </section>
+
   <div class="endnote">
     <p>
-      Figs. 2 and 3, the simulated scenarios, and the phrase-dataset measurements are live
-      gemma-2-2b traces. Figs. 1 and 4 remain demonstration renders generated from synthetic
-      sample graphs to validate the visualization pipeline; live traces will replace them as
-      the study progresses.
+      Three kinds of provenance appear in the gallery. Figs. 2 and 3 and the simulated
+      scenarios use prompts written by an LLM and validated programmatically: the scenarios
+      are simulated, but the testing is real — every measurement is a live gemma-2-2b
+      trace. The phrase dataset is hand-built from real patient language and measured live
+      the same way. Figs. 1 and 4 are demonstration renders built from synthetic sample
+      graphs to validate the visualization pipeline; no live trace stands behind them, and
+      live traces will replace them as the study progresses.
     </p>
     <footer>
-      Built with the patientwords-engine pipeline (engine repo, currently private)
+      Built with the <a href="https://github.com/michaeldgreenphd/patientwords-engine">patientwords-engine</a> pipeline
       on <a href="https://neuronpedia.org">Neuronpedia</a> ·
       attribution graphs by <a href="https://github.com/safety-research/circuit-tracer">circuit-tracer</a> ·
       features from <a href="https://huggingface.co/google/gemma-scope-2b-pt-transcoders">Gemma Scope</a> transcoders
