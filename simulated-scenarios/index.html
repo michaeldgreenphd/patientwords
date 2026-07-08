@@ -61,6 +61,22 @@
   .subtitle{font-style:italic;font-size:20px;line-height:1.5;color:var(--muted);
     margin:0 0 20px}
   .explainer{font-size:17px;line-height:1.66;margin:0 0 14px}
+  .meth{border:1px solid var(--hairline);background:#fbfaf6;margin:0 0 16px;padding:0 16px}
+  .meth summary{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--muted);padding:10px 0;cursor:pointer;list-style-position:inside}
+  .meth summary:hover{color:var(--ink)}
+  .meth[open]{padding-bottom:6px}
+  .meth .explainer{font-size:15.5px}
+  .tip{border-bottom:1px dotted var(--muted);cursor:help;position:relative}
+  .tip:hover::after,.tip:focus::after{content:attr(data-tip);position:absolute;left:0;bottom:130%;
+    z-index:8;background:var(--ink);color:#fff;font-family:var(--mono);font-size:11px;
+    line-height:1.5;letter-spacing:.02em;padding:7px 10px;width:30ch;white-space:normal}
+  th .th-tip{border-bottom:1px dotted var(--muted)}
+  .sum-table tbody tr{cursor:pointer}
+  .sum-table tbody tr:hover td{background:#f2f0e9}
+  .sum-idx .chev{display:inline-block;margin-left:4px;color:var(--muted);
+    font-weight:400;transition:transform .12s ease}
+  .sum-table tbody tr:hover .chev{transform:translateX(3px);color:var(--clinical)}
   .stat{font-family:var(--mono);font-size:13px;font-weight:600;letter-spacing:.01em}
   .stat.penalty{color:var(--penalty)}
   .stat.recovery{color:var(--clinical)}
@@ -98,6 +114,7 @@
     font-size:14.5px;line-height:1.45;vertical-align:top}
   .sum-table td.num{text-align:right;font-family:var(--mono);font-size:12.5px;white-space:nowrap}
   .sum-table td.mono{font-family:var(--mono);font-size:12.5px}
+  .shift-nums{font-family:var(--mono);font-size:11.5px;color:var(--muted);margin-top:2px}
   .sum-table tr:last-child td{border-bottom:1px solid var(--ink)}
   .sum-idx a{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--clinical);
     text-decoration:none;white-space:nowrap}
@@ -293,6 +310,8 @@
   <h1>Simulated scenarios</h1>
   <p class="subtitle">Stress scenarios authored by an LLM, programmatically validated, traced live on gemma-2-2b,
      and kept apart from the hand-measured set.</p>
+  <details class="meth">
+    <summary>View generation methodology</summary>
   <p class="explainer">
     This section widens the hand-measured <a href="../#phrase-dataset">phrase dataset</a> with
     <em>simulated</em> scenarios. Claude authors new patient-vs-clinical sentence pairs in the
@@ -308,6 +327,7 @@
     largest language penalty) include their full interactive circuit comparison; every
     scenario's measurements are downloadable below.
   </p>
+  </details>
   <p class="explainer">
     Two failure modes appear in the table, and they are not equal. Sometimes the model
     <em>hedges</em>: the clinical continuation stays on top but loses probability. Sometimes
@@ -354,12 +374,9 @@
           <th scope="col" data-key="index"><button type="button" title="sort">Sim</button></th>
           <th scope="col">Swap (patient → clinical)</th>
           <th scope="col">Target</th>
-          <th scope="col" class="num" data-key="clin"><button type="button" title="sort">prob clinical</button></th>
-          <th scope="col" class="num" data-key="pat"><button type="button" title="sort">prob patient</button></th>
-          <th scope="col" class="num" data-key="clinStronger"><button type="button" title="clinical wording holds the target more strongly — click to sort by margin">Clinical stronger</button></th>
-          <th scope="col" class="num" data-key="patStronger"><button type="button" title="patient wording holds the target more strongly — click to sort by margin">Patient stronger</button></th>
-          <th scope="col" class="num" data-key="urgency"><button type="button" title="care-urgency shift of the top prediction under patient wording (draft tiers) — click to sort">Urgency</button></th>
-          <th scope="col">clin → pat</th>
+          <th scope="col" data-key="shift"><button type="button" class="th-tip" title="target-token likelihood, clinical wording → patient wording — click to sort by size of change">Likelihood shift</button></th>
+          <th scope="col" class="num" data-key="net"><button type="button" class="th-tip" title="which wording holds the target more strongly, and by how much — click to sort">Net effect ⓘ</button></th>
+          <th scope="col" class="num" data-key="urgency"><button type="button" class="th-tip" title="flags when the top prediction moves to a lower tier of care under patient wording (draft tiers) — click to sort">Urgency ⓘ</button></th>
           <th scope="col" data-key="mass"><button type="button" title="sort by the clinical phrasing’s clinical-circuit share">Clinical circuit</button></th>
           <th scope="col" data-key="flip"><button type="button" title="sort: flips first">Top prediction</button></th>
         </tr></thead>
@@ -613,11 +630,17 @@
             sw.appendChild(el('span','rx-arrow',' → '));
             sw.appendChild(el('span','rx-p','“'+s.spread_patient[0][0]+'”'));
             c.appendChild(sw);
-            c.appendChild(el('p','rx-why',
-              '“'+(s.patient_term||'')+'” for “'+(s.clinical_term||'')+'”: tier '
-              +u.tier_top_clinical+' → '
-              +(typeof u.tier_top_patient==='number'?('tier '+u.tier_top_patient):'untiered')
-              +' · Sim '+s.index));
+            var why=el('p','rx-why');
+            why.appendChild(el('span',null,'“'+(s.patient_term||'')+'” for “'+(s.clinical_term||'')+'”: '));
+            var tierTxt='tier '+u.tier_top_clinical+' → '
+              +(typeof u.tier_top_patient==='number'?('tier '+u.tier_top_patient):'untiered');
+            var tt=el('span','tip',tierTxt);
+            tt.setAttribute('tabindex','0');
+            tt.setAttribute('data-tip','Care-urgency tiers (draft): 4 emergency · 3 specialist · '
+              +'2 general doctor · 1 self-treatment or medication · 0 no care action');
+            why.appendChild(tt);
+            why.appendChild(el('span',null,' · Sim '+s.index));
+            c.appendChild(why);
             rg.appendChild(c);
           });
           document.getElementById('redir-ex').hidden=false;
@@ -662,26 +685,33 @@
         var has=hasModel(s);
         var m=has?cur(s):{};   // measurements for the selected model
         var idx=el('td','sum-idx');
-        var jump=el('a',null,'Sim '+pad(s.index)+' →');
+        var jump=el('a',null,'Sim '+pad(s.index));
         jump.href='scenario.html?sim='+s.index
           +(currentModel!==baseModel?'&model='+encodeURIComponent(currentModel):'');
+        jump.appendChild(el('span','chev','›'));
         idx.appendChild(jump);
         tr.appendChild(idx);
+        tr.addEventListener('click',function(e){
+          if(e.target.closest&&e.target.closest('a'))return;
+          location.href=jump.href;
+        });
         // the swapped wording is the phrase itself - identical across models
         tr.appendChild(el('td','sum-swap','“'+(s.patient_term||'—')+'” → “'+(s.clinical_term||'—')+'”'));
         tr.appendChild(el('td','mono','“'+(m.target_token||'—')+'”'+(m.anchor_fallback?' *':'')));
-        tr.appendChild(el('td','num',p2(m.prob_clinical)));
-        tr.appendChild(el('td','num',p2(m.prob_patient)));
-        // language_penalty = patient − clinical; split by direction so sorting
-        // ranks within a direction instead of by absolute value.
+        // Likelihood shift: the slopegraph glyph plus the two numbers inline
+        var shift=slopeCell(m);
+        var nums=el('div','shift-nums',
+          (typeof m.prob_clinical==='number'?p2(m.prob_clinical):'—')+' → '
+          +(typeof m.prob_patient==='number'?p2(m.prob_patient):'—'));
+        shift.appendChild(nums);
+        tr.appendChild(shift);
+        // Net effect: one signed cell instead of two mostly-empty columns
         var lp=m.language_penalty;
-        var clinC=el('td','num'),patC=el('td','num');
-        if(typeof lp==='number'&&lp<0)clinC.appendChild(el('span','dir-cli',mag(lp)));
-        else clinC.textContent='—';
-        if(typeof lp==='number'&&lp>0)patC.appendChild(el('span','dir-pat',mag(lp)));
-        else patC.textContent='—';
-        tr.appendChild(clinC);
-        tr.appendChild(patC);
+        var net=el('td','num');
+        if(typeof lp==='number'&&lp<0)net.appendChild(el('span','dir-cli',mag(lp)+' clinical'));
+        else if(typeof lp==='number'&&lp>0)net.appendChild(el('span','dir-pat',mag(lp)+' patient'));
+        else net.textContent='—';
+        tr.appendChild(net);
         var uc=el('td','num');
         var u=urgFor(s);
         if(u&&u.flip_class==='downgrade'){
@@ -697,7 +727,6 @@
           uc.textContent='—';
         }
         tr.appendChild(uc);
-        tr.appendChild(slopeCell(m));
         tr.appendChild(massCell(m));
         var flip=el('td','mono');
         if(!has){
@@ -722,10 +751,8 @@
         var m=hasModel(s)?cur(s):{};   // rows untraced on the model sink (null)
         switch(sortKey){
           case 'index':return s.index;
-          case 'clin':return typeof m.prob_clinical==='number'?m.prob_clinical:null;
-          case 'pat':return typeof m.prob_patient==='number'?m.prob_patient:null;
-          case 'clinStronger':return (typeof m.language_penalty==='number'&&m.language_penalty<0)?-m.language_penalty:null;
-          case 'patStronger':return (typeof m.language_penalty==='number'&&m.language_penalty>0)?m.language_penalty:null;
+          case 'shift':return typeof m.language_penalty==='number'?Math.abs(m.language_penalty):null;
+          case 'net':return typeof m.language_penalty==='number'?m.language_penalty:null;
           case 'urgency':{var u=urgFor(s);
             // descending (first click) = most safety-relevant first:
             // downgrade flips, biggest tier drop, then most-negative shifts
@@ -798,7 +825,7 @@
         if(!list.length){
           var tr=document.createElement('tr');
           var td=el('td','sum-empty','no scenarios match; clear the filters');
-          td.colSpan=11;
+          td.colSpan=8;
           tr.appendChild(td);
           sumBody.appendChild(tr);
           return;
