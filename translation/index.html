@@ -100,13 +100,36 @@
   .flow-txt{font-size:16.5px;font-style:italic}
   .flow-txt .chg{border-bottom:2px solid #0f766e;font-style:normal}
   .flow-txt .tgt{color:#0f766e;font-weight:700;font-style:normal;font-family:var(--mono);font-size:14px}
-  .tx-g{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;margin:12px 0 4px}
-  .tx{border:1px solid var(--hairline);background:#fff;padding:9px 12px}
-  .tx .tx-swap{font-family:var(--mono);font-size:12px;margin:0 0 4px}
+  .tx-g{display:grid;grid-template-columns:repeat(auto-fill,minmax(255px,1fr));gap:8px;margin:12px 0 4px;align-items:start}
+  .tx{position:relative;border:1px solid var(--hairline);background:#fff;perspective:700px}
   .tx.rec{border-left:3px solid #0f766e}
   .tx.unrec{border-left:3px solid #9aa1ad}
   .tx.wors{border-left:3px solid #b45309}
-  .tx .tx-k{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+  .tx-inner{display:grid;position:relative;transform-style:preserve-3d;transition:transform .45s cubic-bezier(.2,.7,.3,1)}
+  .tx.flipped .tx-inner{transform:rotateY(180deg)}
+  @media (prefers-reduced-motion:reduce){.tx-inner{transition:none}}
+  .tx-face{grid-area:1/1;backface-visibility:hidden;-webkit-backface-visibility:hidden;
+    padding:9px 30px 9px 12px;min-width:0}
+  /* only the showing face sets the card height: compact front, roomy back */
+  .tx:not(.flipped) .tx-back{position:absolute;inset:0}
+  .tx.flipped .tx-front{position:absolute;inset:0;pointer-events:none}
+  .tx-front{display:flex;flex-direction:column;justify-content:center;min-height:52px;cursor:pointer}
+  .tx-back{transform:rotateY(180deg)}
+  .tx .tx-k{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0 0 3px}
+  .tx .tx-swap{font-family:var(--mono);font-size:12px;margin:0}
+  .tx-flip{position:absolute;top:4px;right:4px;z-index:1;width:22px;height:22px;padding:0;border:0;
+    background:none;color:var(--muted);font:13px/22px var(--mono);cursor:pointer;border-radius:50%}
+  .tx-flip:hover{color:var(--ink)}
+  .tx-flip:focus-visible,.tx-trace:focus-visible,.tabs button:focus-visible{outline:2px solid var(--clinical);outline-offset:2px;border-radius:1px}
+  .tx-line{margin:0 0 5px}
+  .tx-line .lbl{font-family:var(--mono);font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:1px}
+  .tx-line .txt{font-size:11.5px;line-height:1.4;font-style:italic}
+  .tx-line.pat .txt{color:var(--muted)}
+  .tx-line .chg{border-bottom:2px solid #0f766e;font-style:normal}
+  .tx-line .tgt{color:#0f766e;font-weight:700;font-style:normal;font-family:var(--mono);font-size:11.5px}
+  .tx-trace{display:inline-block;font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;color:#0f766e;
+    text-decoration:none;border-bottom:1px solid #0f766e;margin-top:2px}
+  .tx-trace:hover{color:var(--ink);border-bottom-color:var(--ink)}
   .tabs{display:flex;gap:0;margin:16px 0 0;border-bottom:1px solid var(--ink)}
   .tabs button{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;
     background:none;border:1px solid transparent;border-bottom:0;color:var(--muted);padding:8px 14px;cursor:pointer}
@@ -201,11 +224,11 @@
      top token per panel · numbers in <code>data/provenance.json</code> · tiers draft pending review</p>
 
   <span class="stat recovery">Recovered target probability: 0.45 after translation (clinical baseline 0.26)</span>
-  <details class="meth">
+  <details class="meth" id="trace-fold">
     <summary>View the live three-panel trace (clinical / patient / translated)</summary>
   <p class="traced" data-mode="translation" data-traced="gemma-2-2b">
     <span class="tm"><b>live trace:</b> gemma-2-2b · gemma scope transcoders</span>
-    <span class="tp">hosted circuit-tracer via Neuronpedia · traced July 7, 2026 · phrase 17 of the
+    <span class="tp" id="fold-meta">hosted circuit-tracer via Neuronpedia · traced July 7, 2026 · phrase 17 of the
       downgrade set, three panels (clinical / patient / LLM-translated) · next-token
       probabilities read directly from the trace · “constipated” vs. “all bunged up”,
       translation restores “ lax(ative)”</span>
@@ -222,7 +245,7 @@
             title="Live translation mitigation: nap under patient wording, laxative after translation"></iframe>
   </div>
   </div>
-  <p class="embed-caption">Live trace: under patient wording the top continuation is “ nap” (0.30); after LLM translation to clinical wording it’s “ lax(ative)” (0.45) — stronger than the original clinical phrasing (0.26). Numbers in <code>data/provenance.json</code>.</p>
+  <p class="embed-caption" id="flip-cap">Live trace: under patient wording the top continuation is “ nap” (0.30); after LLM translation to clinical wording it’s “ lax(ative)” (0.45) — stronger than the original clinical phrasing (0.26). Numbers in <code>data/provenance.json</code>.</p>
   </details>
 
 
@@ -361,7 +384,7 @@
       out.appendChild(document.createTextNode(' \u2014 was '+ic.patient[0]+' ('+Math.round(ic.patient[1]*100)+'%) untranslated'));
       document.getElementById('tx-flow').hidden=false;
     }
-    // 2. gallery
+    // 2. gallery: two-sided flip cards (front = signal, back = the sentences)
     var all=(tc.all&&tc.all.cases)||[];
     if(all.length){
       var g=document.getElementById('tx-gal');
@@ -369,9 +392,57 @@
       all.slice().sort(function(a,b){return order[a.class]-order[b.class];}).forEach(function(c){
         if(c.class==='already_ok')return; // no downgrade to fix on that trace
         var d=el('div','tx '+(c.class==='recovered'?'rec':(c.class==='worsened'?'wors':'unrec')));
-        d.appendChild(el('p','tx-k',c.class==='recovered'?'recovered':(c.class==='worsened'?'worsened':'unrecovered')));
-        d.appendChild(el('p','tx-swap',c.patient_top[0]+' \u2192 '+c.translated_top[0]
+        var inner=el('div','tx-inner');
+        // front: the high-level signal
+        var front=el('div','tx-face tx-front');
+        front.appendChild(el('p','tx-k',c.class==='recovered'?'recovered':(c.class==='worsened'?'worsened':'unrecovered')));
+        front.appendChild(el('p','tx-swap',c.patient_top[0]+' \u2192 '+c.translated_top[0]
           +'  ('+c.patient_top[1].toFixed(2)+' \u2192 '+c.translated_top[1].toFixed(2)+')'));
+        inner.appendChild(front);
+        // back: the sentences behind the tokens
+        var back=el('div','tx-face tx-back');
+        function line(cls,lbl){
+          var w=el('div','tx-line'+(cls?' '+cls:''));
+          w.appendChild(el('span','lbl',lbl));
+          var t=el('span','txt');w.appendChild(t);back.appendChild(w);return t;
+        }
+        if(c.patient_prompt){line('pat','patient').textContent='\u201c'+c.patient_prompt+'\u201d';}
+        if(c.translated_prompt){
+          var tt=line(null,'translated');
+          tt.appendChild(document.createTextNode('\u201c'));
+          var pw2=new Set((c.patient_prompt||'').toLowerCase().replace(/[^a-z\s']/g,'').split(/\s+/));
+          c.translated_prompt.split(/(\s+)/).forEach(function(w){
+            var clean=w.toLowerCase().replace(/[^a-z']/g,'');
+            if(clean&&!pw2.has(clean)){tt.appendChild(el('span','chg',w));}
+            else tt.appendChild(document.createTextNode(w));
+          });
+          tt.appendChild(document.createTextNode('\u201d'));
+        }
+        var ot=line(null,'output \u00b7 next token');
+        ot.appendChild(document.createTextNode('\u2026 '));
+        ot.appendChild(el('span','tgt',c.translated_top[0]+' ('+c.translated_top[1].toFixed(2)+')'));
+        ot.appendChild(document.createTextNode(' \u2014 was '+c.patient_top[0]+' ('+c.patient_top[1].toFixed(2)+')'));
+        var a=el('a','tx-trace','Examine activation circuit \u2192');
+        a.href='#trace-fold';
+        a.addEventListener('click',function(ev){
+          ev.preventDefault();ev.stopPropagation();
+          showTrace(c); // the card stays flipped: a persistent anchor for cross-reference
+        });
+        back.appendChild(a);
+        inner.appendChild(back);
+        d.appendChild(inner);
+        // corner toggle: the only way back to the front face
+        var b=el('button','tx-flip','\u24d8');
+        b.type='button';
+        b.setAttribute('aria-pressed','false');
+        b.setAttribute('aria-label','Flip card to show the sentences behind the tokens');
+        function setFlip(f){d.classList.toggle('flipped',f);b.setAttribute('aria-pressed',String(f));}
+        b.addEventListener('click',function(ev){ev.stopPropagation();setFlip(!d.classList.contains('flipped'));});
+        d.addEventListener('click',function(ev){
+          if(ev.target.closest('a,button'))return;
+          if(!d.classList.contains('flipped'))setFlip(true); // body click opens; only the toggle closes
+        });
+        d.appendChild(b);
         g.appendChild(d);
       });
       document.getElementById('tx-gal-head').hidden=false;
@@ -427,20 +498,55 @@
       });
     }
   }).catch(function(){});
-  // 3. flipbook tabs: scroll the shared-grid render to the selected panel
+  // 3. flipbook tabs. fit() inflates the render iframe to its full three-panel
+  // height (the site keeps a single scrollbar), so "showing a panel" means
+  // scrolling the page to that panel's offset inside the inline render.
   var frame=document.getElementById('flip-frame');
-  document.querySelectorAll('.tabs [role=tab]').forEach(function(tab){
-    tab.addEventListener('click',function(){
-      document.querySelectorAll('.tabs [role=tab]').forEach(function(x){x.setAttribute('aria-selected','false');});
-      tab.setAttribute('aria-selected','true');
-      var i=+tab.dataset.panel;
-      try{
-        var w=frame.contentWindow,d=w.document;
-        var h=d.documentElement.scrollHeight;
-        w.scrollTo({top:h*i/3,behavior:'smooth'});
-      }catch(e){}
+  var curPanel=0,pendingScroll=false;
+  function setTabs(i){
+    curPanel=i;
+    document.querySelectorAll('.tabs [role=tab]').forEach(function(x){
+      x.setAttribute('aria-selected',String(+x.dataset.panel===i));
     });
+  }
+  function panelScroll(){
+    var r=frame.getBoundingClientRect();
+    var top=r.top+window.pageYOffset+r.height*curPanel/3;
+    window.scrollTo({top:Math.max(0,top-72),behavior:'smooth'});
+  }
+  document.querySelectorAll('.tabs [role=tab]').forEach(function(tab){
+    tab.addEventListener('click',function(){setTabs(+tab.dataset.panel);panelScroll();});
   });
+  frame.addEventListener('load',function(){
+    if(!pendingScroll)return; // don't hijack the page on the initial lazy load
+    setTimeout(panelScroll,250);
+    setTimeout(function(){panelScroll();pendingScroll=false;},900);
+  });
+  // 3b. card → tracer: load that case's render, focus the post-translation panel
+  function showTrace(c){
+    var fold=document.getElementById('trace-fold');
+    if(fold)fold.open=true;
+    var nn=(c.index<10?'0':'')+c.index;
+    var src='../modes/simulated/urgency_downgrades_20260707T1/index_'+nn+'.html';
+    var meta=document.getElementById('fold-meta');
+    if(meta)meta.textContent='hosted circuit-tracer via Neuronpedia · traced July 7, 2026 · phrase '
+      +c.index+' of the downgrade set, three panels (clinical / patient / LLM-translated) · '
+      +'next-token probabilities read directly from the trace';
+    var cap=document.getElementById('flip-cap');
+    if(cap)cap.textContent='Live trace: under patient wording the top continuation is “'
+      +c.patient_top[0]+'” ('+c.patient_top[1].toFixed(2)+'); after LLM translation it’s “'
+      +c.translated_top[0]+'” ('+c.translated_top[1].toFixed(2)+') — clinical baseline top “'
+      +c.clinical_top[0]+'” ('+c.clinical_top[1].toFixed(2)+'). Numbers in data/provenance.json.';
+    frame.title='Live translation mitigation trace, phrase '+c.index+' of the downgrade set';
+    setTabs(2);
+    if(frame.getAttribute('src')!==src){
+      pendingScroll=true;
+      frame.src=src;                                  // panelScroll runs after load+fit
+      if(fold)fold.scrollIntoView({behavior:'smooth',block:'start'}); // instant feedback
+    }else{
+      panelScroll();
+    }
+  }
 })();
 </script>
 </body>
