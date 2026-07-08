@@ -170,7 +170,12 @@
   </div>
   <p class="embed-caption">Live trace: the clinical wording reaches “&nbsp;inhaler” at 0.69;
      the patient idiom’s top continuation is “&nbsp;shirt”, with the inhaler collapsing to
-     0.04 (scenario 85 in the <a href="../simulated-scenarios/">simulated series</a>).</p>
+     0.04 (scenario 85 in the <a href="../simulated-scenarios/">simulated series</a>).
+     How to read it: two panels on one scale, the clinical sentence above and the patient
+     sentence below. Above the swapped word, the clinical wording builds a stack of green
+     clinical features feeding the clinical continuation; the patient idiom replaces that
+     stack with off-target features and the probability collapses. Hover any node for its
+     feature id, category, attribution mass, and description; a click or tap pins the tooltip.</p>
 
   <p class="traced" data-mode="2panel" data-traced="gemma-2-2b">
     <span class="tm"><b>demonstration graph:</b> hand-authored · gemma-2-2b schema</span>
@@ -181,12 +186,9 @@
     <iframe class="live" src="../modes/2panel/index.html" loading="lazy"
             title="Interactive attribution-graph comparison: clinical vs. patient wording (demonstration)"></iframe>
   </div>
-  <p class="embed-caption">How to read it: two panels on one scale, the clinical sentence above
-     and the patient sentence below. Above the swapped word, the clinical wording builds a tall
-     stack of green clinical features feeding “&nbsp;therapist”, while the patient idiom replaces
-     that stack with off-target features and the probability collapses. Hover any node for its
-     feature id, category, attribution mass, and autointerp description; hover needs a pointer,
-     and a click or tap pins the tooltip.</p>
+  <p class="embed-caption">Demonstration render (“depression” vs. “the blues”): the original
+     hand-authored pipeline-validation figure, kept for comparison. Reads the same way as the
+     live figure above.</p>
 
   <a class="back" href="../">← Back home</a>
 
