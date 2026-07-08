@@ -526,9 +526,17 @@
     "n": 5,
     "note": "replication; original run 5/5"
    },
-   "20": null
+   "20": {
+    "recovered": 0,
+    "n": 1,
+    "_": "boost top-5 at strength 20: 3 of 5 steer calls failed server-side (HTTP 500); the one measured continuation degenerated into token repetition — the over-steering regime, where the model breaks down rather than recovers; pair 5 truncated. Read as 'breaks down at 20', not 'zero effect' — trace_out/boostgrid_s20, 2026-07-08"
+   }
   },
-  "low_rank_6_10": null,
+  "low_rank_6_10": {
+   "recovered": 3,
+   "n": 4,
+   "_": "boost clinical ranks 6-10 at strength 10 (rank offset 5): 3/4 measured pairs recovered (one call 500'd server-side). Near-parity with the top-5 arm (4/5): the causal handle is distributed across the clinical circuit, not concentrated in the top-5 features. Placebo (random features) remains 0/5 — trace_out/boostgrid_lowrank, 2026-07-08"
+  },
   "placebo": {
    "recovered": 0,
    "n": 5,
