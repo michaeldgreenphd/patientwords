@@ -94,6 +94,34 @@
     border-bottom:1px solid var(--ink);padding-bottom:2px}
   .back:hover{color:var(--clinical);border-bottom-color:var(--clinical)}
 
+  .flow{border:1px solid var(--hairline);background:#fff;padding:16px 18px;margin:18px 0 8px}
+  .flow-step{display:grid;grid-template-columns:112px 1fr;gap:12px;padding:7px 0;align-items:baseline}
+  .flow-lbl{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  .flow-txt{font-size:16.5px;font-style:italic}
+  .flow-txt .chg{border-bottom:2px solid #0f766e;font-style:normal}
+  .flow-txt .tgt{color:#0f766e;font-weight:700;font-style:normal;font-family:var(--mono);font-size:14px}
+  .tx-g{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;margin:12px 0 4px}
+  .tx{border:1px solid var(--hairline);background:#fff;padding:9px 12px}
+  .tx .tx-swap{font-family:var(--mono);font-size:12px;margin:0 0 4px}
+  .tx.rec{border-left:3px solid #0f766e}
+  .tx.unrec{border-left:3px solid #9aa1ad}
+  .tx.wors{border-left:3px solid #b45309}
+  .tx .tx-k{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+  .tabs{display:flex;gap:0;margin:16px 0 0;border-bottom:1px solid var(--ink)}
+  .tabs button{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+    background:none;border:1px solid transparent;border-bottom:0;color:var(--muted);padding:8px 14px;cursor:pointer}
+  .tabs button[aria-selected=true]{color:var(--ink);border-color:var(--ink);background:#fff}
+  .tabs button:hover{color:var(--ink)}
+  .flip .embed{margin-top:0;border-top:0}
+  .flip iframe{height:760px;min-height:760px}
+  .titr{border:1px solid var(--hairline);background:#fbfaf6;margin:26px 0 16px;padding:0 16px}
+  .titr summary{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--muted);padding:10px 0;cursor:pointer}
+  .titr summary:hover{color:var(--ink)}
+  .titr .tt-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px;padding:6px 0 14px}
+  .titr h3{font-size:15px;font-weight:600;margin:4px 0 6px}
+  .titr .tt-note{font-family:var(--mono);font-size:10.5px;color:var(--muted);line-height:1.7;margin:6px 0 0}
+  @media (max-width:640px){.titr .tt-grid{grid-template-columns:1fr}}
   .endnote{border-top:1px solid var(--ink);margin-top:42px;padding-top:14px}
   .endnote p{font-family:var(--mono);font-size:12px;line-height:1.8;color:var(--muted);
     ;margin:0 0 14px}
@@ -159,6 +187,17 @@
      recovers the specialist. It is not a cure-all: in one case translation replaced the
      correct <em>prescription</em> (0.38) with <em>topical</em> (0.15), worse than doing
      nothing. Eight of twenty downgrades recovered; seven did not. (Numbers are recorded in <code>data/provenance.json</code>; tiers draft pending review.)</p>
+  <div class="flow" id="tx-flow" hidden>
+    <div class="flow-step"><span class="flow-lbl">patient says</span><span class="flow-txt" id="fl-pat"></span></div>
+    <div class="flow-step"><span class="flow-lbl">translation layer</span><span class="flow-txt" id="fl-tr"></span></div>
+    <div class="flow-step"><span class="flow-lbl">model continues</span><span class="flow-txt" id="fl-out"></span></div>
+  </div>
+
+  <h2 id="tx-gal-head" hidden>Where the patch holds, and where it does not</h2>
+  <div class="tx-g" id="tx-gal"></div>
+  <p class="embed-caption" id="tx-gal-cap" hidden>every classifiable case from the live mitigation trace ·
+     top token per panel · numbers in <code>data/provenance.json</code> · tiers draft pending review</p>
+
   <span class="stat recovery">Recovered target probability: +51% (0.35 → 0.86)</span>
   <p class="traced" data-mode="translation" data-traced="gemma-2-2b">
     <span class="tm"><b>live trace:</b> gemma-2-2b · gemma scope transcoders</span>
@@ -168,9 +207,16 @@
       translation restores “ lax(ative)”</span>
   </p>
 
+  <div class="tabs" role="tablist" aria-label="Trace panels">
+    <button role="tab" aria-selected="true" data-panel="0">Baseline clinical trace</button>
+    <button role="tab" aria-selected="false" data-panel="1">Raw patient trace</button>
+    <button role="tab" aria-selected="false" data-panel="2">Post-translation trace</button>
+  </div>
+  <div class="flip">
   <div class="embed">
-    <iframe class="live" src="../modes/simulated/urgency_downgrades_20260707T1/index_17.html" loading="lazy"
+    <iframe class="live" id="flip-frame" src="../modes/simulated/urgency_downgrades_20260707T1/index_17.html" loading="lazy"
             title="Live translation mitigation: nap under patient wording, laxative after translation"></iframe>
+  </div>
   </div>
   <p class="embed-caption">Live trace: under patient wording the top continuation is
      “&nbsp;nap” (0.30); after LLM translation to clinical wording it is “&nbsp;lax(ative)”
@@ -192,6 +238,26 @@
      terminology and the target probability recovers. Hover any node for its feature id,
      category, attribution mass, and autointerp description; hover needs a pointer, and a click
      or tap pins the tooltip.</p>
+
+  <details class="titr" id="titr">
+    <summary>Causal faithfulness &amp; titration metrics (gemma-2-2b)</summary>
+    <div class="tt-grid">
+      <div>
+        <h3>Dose–response: recovery by steering strength</h3>
+        <div id="tt-dose"></div>
+        <p class="tt-note">boost the top-5 clinical features while the model reads the patient
+           wording; recovery = the clinical target appears in the steered continuation.
+           Strengths without a bar are queued and fill in as runs land.</p>
+      </div>
+      <div>
+        <h3>Faithfulness: does attribution rank predict effect?</h3>
+        <div id="tt-rank"></div>
+        <p class="tt-note">same strength, different features: top-5 by attribution mass vs
+           ranks 6–10. Control: 5 random features at strength 10 recovered 0/5 —
+           the effect is the clinical circuit, not steering itself.</p>
+      </div>
+    </div>
+  </details>
 
   <a class="back" href="../">← Back home</a>
 
@@ -284,6 +350,114 @@
   window.addEventListener('resize',fitAll);
   setTimeout(fitAll,300);
   setTimeout(fitAll,1400);
+})();
+</script>
+<script>
+(function(){
+  function el(t,c,x){var e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e;}
+  fetch('../data/provenance.json',{cache:'no-cache'}).then(function(r){return r.json();}).then(function(p){
+    var tc=p.translation_cases||{};
+    // 1. process flow from the ice-cream/antacid case (real texts + tokens)
+    var ic=tc.icecream_antacid;
+    if(ic&&ic.prompts){
+      var pat=ic.prompts.patient||'', tr=ic.prompts.translated||'';
+      document.getElementById('fl-pat').textContent='\u201C'+pat+'\u201D';
+      // highlight translated words not present in the patient sentence
+      var pw=new Set(pat.toLowerCase().replace(/[^a-z\s']/g,'').split(/\s+/));
+      var holder=document.getElementById('fl-tr');
+      holder.appendChild(document.createTextNode('\u201C'));
+      tr.split(/(\s+)/).forEach(function(w){
+        var clean=w.toLowerCase().replace(/[^a-z']/g,'');
+        if(clean&&!pw.has(clean)){holder.appendChild(el('span','chg',w));}
+        else holder.appendChild(document.createTextNode(w));
+      });
+      holder.appendChild(document.createTextNode('\u201D'));
+      var out=document.getElementById('fl-out');
+      out.appendChild(document.createTextNode('\u2026 '));
+      out.appendChild(el('span','tgt',ic.translated[0]+' ('+Math.round(ic.translated[1]*100)+'%)'));
+      out.appendChild(document.createTextNode(' \u2014 was '+ic.patient[0]+' ('+Math.round(ic.patient[1]*100)+'%) untranslated'));
+      document.getElementById('tx-flow').hidden=false;
+    }
+    // 2. gallery
+    var all=(tc.all&&tc.all.cases)||[];
+    if(all.length){
+      var g=document.getElementById('tx-gal');
+      var order={recovered:0,worsened:1,unrecovered:2,already_ok:3};
+      all.slice().sort(function(a,b){return order[a.class]-order[b.class];}).forEach(function(c){
+        if(c.class==='already_ok')return; // no downgrade to fix on that trace
+        var d=el('div','tx '+(c.class==='recovered'?'rec':(c.class==='worsened'?'wors':'unrec')));
+        d.appendChild(el('p','tx-k',c.class==='recovered'?'recovered':(c.class==='worsened'?'worsened':'unrecovered')));
+        d.appendChild(el('p','tx-swap',c.patient_top[0]+' \u2192 '+c.translated_top[0]
+          +'  ('+c.patient_top[1].toFixed(2)+' \u2192 '+c.translated_top[1].toFixed(2)+')'));
+        g.appendChild(d);
+      });
+      document.getElementById('tx-gal-head').hidden=false;
+      document.getElementById('tx-gal-cap').hidden=false;
+    }
+    // 4. titration
+    var t=p.steering_titration;
+    if(t){
+      var dose=document.getElementById('tt-dose');
+      ['2.5','5','10','20'].forEach(function(k){
+        var row=el('div','bar-row');
+        row.style.cssText='display:flex;align-items:center;gap:10px;margin:5px 0';
+        var l=el('span',null,'s='+k);
+        l.style.cssText='font:12px ui-monospace,Menlo,monospace;min-width:6ch;text-align:right';
+        row.appendChild(l);
+        var track=el('div');track.style.cssText='flex:1;height:13px;border:1px solid var(--hairline)';
+        var v=t.strengths[k];
+        if(v&&typeof v.recovered==='number'){
+          var fill=el('div');
+          fill.style.cssText='height:100%;width:'+(v.recovered/v.n*100)+'%;background:#0f766e';
+          track.appendChild(fill);
+          row.appendChild(track);
+          row.appendChild(el('span',null,v.recovered+'/'+v.n));
+        }else{
+          track.style.borderStyle='dashed';
+          row.appendChild(track);
+          var pend=el('span',null,'pending');
+          pend.style.cssText='font:10px ui-monospace,monospace;color:var(--muted)';
+          row.appendChild(pend);
+        }
+        row.lastChild.style.cssText+=';font:11px ui-monospace,monospace;min-width:6ch';
+        dose.appendChild(row);
+      });
+      var rank=document.getElementById('tt-rank');
+      [['top 5 by mass',t.strengths['10']],['ranks 6\u201310',t.low_rank_6_10],['5 random (placebo)',t.placebo]].forEach(function(pair){
+        var row=el('div');row.style.cssText='display:flex;align-items:center;gap:10px;margin:5px 0';
+        var l=el('span',null,pair[0]);
+        l.style.cssText='font:12px ui-monospace,monospace;min-width:14ch;text-align:right';
+        row.appendChild(l);
+        var track=el('div');track.style.cssText='flex:1;height:13px;border:1px solid var(--hairline)';
+        var v=pair[1];
+        if(v&&typeof v.recovered==='number'){
+          var fill=el('div');
+          fill.style.cssText='height:100%;width:'+(v.recovered/v.n*100)+'%;background:'+(pair[0].indexOf('random')>=0?'#9aa1ad':'#0f766e');
+          track.appendChild(fill);row.appendChild(track);
+          row.appendChild(el('span',null,v.recovered+'/'+v.n));
+        }else{
+          track.style.borderStyle='dashed';row.appendChild(track);
+          row.appendChild(el('span',null,'pending'));
+        }
+        row.lastChild.style.cssText+=';font:11px ui-monospace,monospace;min-width:6ch';
+        rank.appendChild(row);
+      });
+    }
+  }).catch(function(){});
+  // 3. flipbook tabs: scroll the shared-grid render to the selected panel
+  var frame=document.getElementById('flip-frame');
+  document.querySelectorAll('.tabs [role=tab]').forEach(function(tab){
+    tab.addEventListener('click',function(){
+      document.querySelectorAll('.tabs [role=tab]').forEach(function(x){x.setAttribute('aria-selected','false');});
+      tab.setAttribute('aria-selected','true');
+      var i=+tab.dataset.panel;
+      try{
+        var w=frame.contentWindow,d=w.document;
+        var h=d.documentElement.scrollHeight;
+        w.scrollTo({top:h*i/3,behavior:'smooth'});
+      }catch(e){}
+    });
+  });
 })();
 </script>
 </body>
