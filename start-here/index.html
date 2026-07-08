@@ -223,16 +223,23 @@
     <p>Put a translator between the patient and the model: it rewrites the sentence
        into clinical wording before the model answers. Same stomach, same person —
        the answer comes back.</p>
-    <div class="fig" role="img" aria-label="The patient phrase passes through a translation layer, becomes clinical wording, and the model now answers antacid at 31 percent instead of ice cream at 29 percent.">
-    <svg viewBox="0 0 720 120">
-      <text x="0" y="52" class="sv-q">“My stomach’s on fire.”</text>
-      <path class="sv-line" d="M232,46 L268,46"/>
-      <rect x="268" y="22" width="112" height="48" rx="24" fill="#eceae3"/>
-      <text x="324" y="52" class="sv-m" text-anchor="middle" fill="#0f766e">translation layer</text>
-      <path class="sv-line" d="M380,46 L410,46"/>
-      <text x="418" y="52" class="sv-q" fill="#0f766e">“I have acid reflux.”</text>
-      <path class="sv-line" d="M622,46 L648,46" stroke="#0f766e" stroke-width="2.2"/>
-      <text x="656" y="52" class="sv-a" fill="#0f766e">antacid</text>
+    <div class="fig" role="img" aria-label="The same three phrasings from panel 2 all pass through a translation layer, emerge as the single clinical wording I have acid reflux, enter the language model, and come out as antacid.">
+    <svg viewBox="0 0 720 190">
+      <text x="0" y="28" class="sv-q">“I have acid reflux.”</text>
+      <text x="0" y="88" class="sv-q">“My stomach’s on fire.”</text>
+      <text x="0" y="148" class="sv-q">“My dyspepsia flared up.”</text>
+      <path class="sv-line" d="M232,22 C258,22 262,84 282,86" stroke-width="1.2"/>
+      <path class="sv-line" d="M232,82 C252,82 258,88 282,88" stroke-width="1.2"/>
+      <path class="sv-line" d="M232,142 C258,142 262,92 282,90" stroke-width="1.2"/>
+      <rect x="282" y="66" width="104" height="44" rx="22" fill="#eceae3"/>
+      <text x="334" y="92" class="sv-m" text-anchor="middle" fill="#0f766e">translation layer</text>
+      <path class="sv-line" d="M386,88 L404,88" stroke-width="1.2"/>
+      <text x="412" y="93" class="sv-q" fill="#0f766e">“I have acid reflux.”</text>
+      <path class="sv-line" d="M556,88 L574,88" stroke-width="1.2"/>
+      <rect x="574" y="56" width="52" height="64" fill="none" stroke="#6d6c66" stroke-width="1.2" stroke-dasharray="5 5"/>
+      <text x="600" y="140" class="sv-m" text-anchor="middle">model</text>
+      <path class="sv-line" d="M626,88 L646,88" stroke="#0f766e" stroke-width="2.2"/>
+      <text x="652" y="93" class="sv-a" fill="#0f766e">antacid</text>
     </svg>
     </div>
     <p class="cap">ice cream (29%) becomes antacid (31%) after translation — a patch, not a cure:
