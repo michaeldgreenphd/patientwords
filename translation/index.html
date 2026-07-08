@@ -4,18 +4,18 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Translation — PatientWords</title>
-<meta name="description" content="An LLM translates the patient sentence into standard terminology and the output is traced. The figure is a demonstration render from synthetic sample graphs (pipeline validation), gemma-2-2b schema. Demonstration recovered target probability: +51%.">
+<meta name="description" content="An LLM translates the patient sentence into standard terminology and the raw output is traced natively. Live gemma-2-2b trace: translation restores the clinical continuation — lax(ative) at 0.45, above the clinical baseline (0.26).">
 <link rel="canonical" href="https://michaeldgreenphd.github.io/patientwords/translation/">
 <meta name="theme-color" content="#faf9f5">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="PatientWords">
 <meta property="og:title" content="Translation — PatientWords">
-<meta property="og:description" content="Translating patient language back into clinical terms restores the circuit: +51% probability (0.35 → 0.86). Demonstration render from synthetic sample graphs (pipeline validation).">
+<meta property="og:description" content="Translating patient language back into clinical terms restores the circuit: the top continuation returns to lax(ative) at 0.45, above the clinical baseline (0.26). Live gemma-2-2b trace.">
 <meta property="og:url" content="https://michaeldgreenphd.github.io/patientwords/translation/">
 <meta property="og:image" content="https://michaeldgreenphd.github.io/patientwords/modes/translation/preview.png">
 <meta property="og:image:width" content="1690">
 <meta property="og:image:height" content="2543">
-<meta property="og:image:alt" content="Demonstration render of a translation mitigation chain restoring the clinical circuit (gemma-2-2b schema)">
+<meta property="og:image:alt" content="Attribution-graph panels of a translation mitigation chain restoring the clinical circuit (gemma-2-2b).">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Translation — PatientWords">
 <meta name="twitter:description" content="There is a way to translate this.">
@@ -174,7 +174,7 @@
   <hr class="rule-fine">
 </header>
 <main id="main">
-  <p class="dateline">Fig. 4 <span class="mode">· translation recovery · demonstration render</span></p>
+  <p class="dateline">Fig. 4 <span class="mode">· translation recovery · live trace</span></p>
   <h1>Translation</h1>
   <p class="subtitle">Translating the patient sentence back into clinical terms restores the prediction.</p>
   <p class="explainer">The mitigation: an LLM translates the patient sentence into standard terminology, and the raw output is traced natively. The clinical features reappear and the target probability recovers.</p>
@@ -200,7 +200,7 @@
   <p class="embed-caption" id="tx-gal-cap" hidden>every classifiable case from the live mitigation trace ·
      top token per panel · numbers in <code>data/provenance.json</code> · tiers draft pending review</p>
 
-  <span class="stat recovery">Recovered target probability: +51% (0.35 → 0.86)</span>
+  <span class="stat recovery">Recovered target probability: 0.45 after translation (clinical baseline 0.26)</span>
   <details class="meth">
     <summary>View the live three-panel trace (clinical / patient / translated)</summary>
   <p class="traced" data-mode="translation" data-traced="gemma-2-2b">
@@ -226,17 +226,6 @@
   </details>
 
 
-  <p class="traced" data-mode="translation" data-traced="gemma-2-2b">
-    <span class="tm"><b>demonstration graph:</b> hand-authored · gemma-2-2b schema</span>
-    <span class="tp">gemma scope transcoders (feature schema) · pipeline-validation render</span>
-  </p>
-
-  <div class="embed">
-    <iframe class="live" src="../modes/translation/index.html" loading="lazy"
-            title="Interactive translation mitigation chain (demonstration render)"></iframe>
-  </div>
-  <p class="embed-caption">How to read it: the panels follow the mitigation chain — the raw patient sentence first, its LLM translation after — both traced the same way. Axes as in Fig. 3: columns are prompt words; height is model depth; the predicted next word sits at the top. In the translated panel the green clinical stack reappears above the restored terminology and the target probability recovers. Hover any node for its feature id, category, attribution mass, and description (a click or tap pins the tooltip).</p>
-
   <details class="titr" id="titr">
     <summary>Causal faithfulness &amp; titration metrics (gemma-2-2b)</summary>
     <div class="tt-grid">
@@ -257,9 +246,9 @@
 
   <div class="endnote">
     <p>
-      This render is a demonstration output generated from synthetic sample graphs to validate
-      the visualization pipeline end-to-end; traces from live gemma-2-2b runs will replace it
-      as the study progresses.
+      The traces on this page are live gemma-2-2b runs. Earlier versions of this page led
+      with a hand-authored demonstration render (pipeline validation); live traces replaced
+      it as the study progressed.
     </p>
     <footer>
       Built with the <a href="https://github.com/michaeldgreenphd/patientwords-engine">patientwords-engine</a> pipeline

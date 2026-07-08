@@ -18,11 +18,12 @@ exact technical terms, no marketing.
   `modes/` figure, or page JS that computes it at runtime from fetched data. Unverifiable
   numbers get corrected or cut — never invented, never extrapolated. Provenance numbers
   copied from engine sidecars live in `data/provenance.json`.
-- **The synthetic-demo disclosure stays prominent.** Figs. 1 and 4 are hand-authored
-  demonstration renders (pipeline validation), not live traces; their labels and meta tags
-  must say so. The methods endnote distinguishes three provenances: LLM-written scenarios
-  with real live traces, the hand-built dataset from real patient language, and synthetic
-  demo renders.
+- **Provenance labels must stay accurate.** The hand-authored demonstration renders that
+  once served as Figs. 1 and 4 were retired at the owner's request (2026-07-08); every
+  figure now shown is a live gemma-2-2b trace and is labeled as such. If a demo render
+  ever returns, its labels and meta tags must disclose it. The methods endnote
+  distinguishes two provenances: LLM-written scenarios with real live traces, and the
+  hand-built dataset from real patient language.
 - **Draft labels are load-bearing.** Urgency-tier content is marked "draft pending domain
   review" (from `data/urgency_shift.json:vocabulary_status`); do not remove or soften that
   until the tier vocabulary is approved (`docs/tier_review_checklist.md` in the engine).
