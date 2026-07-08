@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Start Here — PatientWords</title>
+<meta name="description" content="A plain-language introduction: doctors interpret many ways of saying the same thing; a language model can answer each one differently. What we trace and measure.">
+<link rel="canonical" href="https://michaeldgreenphd.github.io/patientwords/start-here/">
+<meta name="theme-color" content="#faf9f5">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23faf9f5'/%3E%3Crect x='9' y='9' width='30' height='30' fill='%23111827'/%3E%3Crect x='25' y='25' width='30' height='30' fill='%2315803d'/%3E%3C/svg%3E">
+<style>
+  :root{
+    --paper:#faf9f5; --ink:#1c1c19; --patient:#111827; --clinical:#15803d;
+    --penalty:#b4483d; --muted:#6d6c66; --structural:#c3c9d2; --hairline:#dcdad2;
+    --serif:'Iowan Old Style','Palatino Linotype',Palatino,'Book Antiqua',Georgia,serif;
+    --mono:ui-monospace,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace;
+  }
+  html{background:var(--paper)}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--serif);
+    font-size:17px;line-height:1.62;-webkit-font-smoothing:antialiased}
+  main{max-width:760px;margin:0 auto;padding:0 22px 56px}
+  a{color:inherit}
+  a:focus-visible{outline:2px solid var(--clinical);outline-offset:3px}
+  .skip{position:absolute;left:-9999px;top:0;background:var(--paper);color:var(--ink);padding:8px 14px;border:1px solid var(--ink);z-index:10}
+  .skip:focus{left:8px}
+  ::selection{background:#dbe9df}
+  .masthead{max-width:760px;margin:0 auto;padding:20px 22px 0}
+  .masthead-row{display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:8px 24px;padding:10px 0 12px}
+  .wordmark{font-family:var(--serif);font-size:19px;font-weight:600;letter-spacing:.02em;text-decoration:none}
+  .wordmark .pw-p{color:var(--patient)} .wordmark .pw-w{color:var(--clinical)}
+  .masthead nav{display:flex;flex-wrap:wrap;gap:6px 20px}
+  .masthead nav a{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);text-decoration:none;padding:2px 0}
+  .masthead nav a:hover{color:var(--ink);text-decoration:underline;text-underline-offset:4px}
+  .masthead nav a[aria-current=page]{color:var(--ink);border-bottom:1px solid var(--ink)}
+  .rule-heavy{border:0;border-top:2px solid var(--ink);margin:0}
+  .rule-fine{border:0;border-top:1px solid var(--hairline);margin:3px 0 0}
+  .dateline{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--clinical);font-weight:600;margin:34px 0 14px}
+  h1{font-size:clamp(28px,4.6vw,38px);line-height:1.16;font-weight:600;margin:0 0 12px}
+  .subtitle{font-style:italic;font-size:19px;color:var(--muted);margin:0 0 8px}
+  section{border-top:1px solid var(--ink);margin-top:42px;padding-top:12px}
+  .step-no{font-family:var(--mono);font-size:11.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--clinical);font-weight:600;margin:0 0 8px}
+  h2{font-size:22px;font-weight:600;margin:0 0 10px}
+  section p{margin:0 0 12px;font-size:16px;line-height:1.64}
+  .fig{margin:18px 0 6px}
+  .fig svg{width:100%;height:auto;display:block}
+  .cap{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.04em;margin:6px 0 0}
+  .sv-t{font:600 15px var(--serif);fill:var(--ink)}
+  .sv-q{font:italic 14px var(--serif);fill:var(--patient)}
+  .sv-m{font:11px var(--mono);fill:var(--muted)}
+  .sv-a{font:600 14px var(--mono)}
+  .sv-line{stroke:var(--structural);stroke-width:1.2;fill:none}
+  /* toggle demo */
+  .tg{border:1px solid var(--hairline);background:#fff;padding:18px 20px;margin:16px 0 6px}
+  .tg-sentence{font-size:17px;line-height:1.6;margin:0 0 4px}
+  .tg-swap{display:inline-block;border-bottom:2px solid var(--penalty);cursor:default}
+  .tg button{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+    background:none;border:1px solid var(--ink);color:var(--ink);padding:6px 12px;cursor:pointer;margin:10px 0 14px}
+  .tg button:hover{background:var(--ink);color:#fff}
+  .tg button:focus-visible{outline:2px solid var(--clinical);outline-offset:2px}
+  .bar-row{display:flex;align-items:center;gap:10px;margin:6px 0}
+  .bar-lbl{font-family:var(--mono);font-size:12.5px;min-width:8ch;text-align:right}
+  .bar-track{flex:1;height:16px;background:none}
+  .bar-fill{height:16px;transition:width .7s ease}
+  .bar-val{font-family:var(--mono);font-size:11.5px;color:var(--muted);min-width:4ch}
+  @media (prefers-reduced-motion:reduce){.bar-fill{transition:none}}
+  .src{border-top:1px solid var(--ink);margin-top:46px;padding-top:12px;
+    font-family:var(--mono);font-size:11.5px;line-height:1.8;color:var(--muted)}
+  .back{display:inline-block;margin-top:22px;font-family:var(--mono);font-size:12px;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--ink);text-decoration:none;border-bottom:1px solid var(--ink);padding-bottom:2px}
+  .back:hover{color:var(--clinical);border-bottom-color:var(--clinical)}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="masthead">
+  <hr class="rule-heavy"><hr class="rule-fine">
+  <div class="masthead-row">
+    <a class="wordmark" href="../"><span class="pw-p">Patient</span><span class="pw-w">Words</span></a>
+    <nav aria-label="Site">
+      <a href="../">Home</a>
+      <a href="./" aria-current="page">Start Here</a>
+      <a href="../methods.html">Methods</a>
+      <a href="../word-differences/">Word Differences</a>
+      <a href="../syntax-differences/">Syntax Differences</a>
+      <a href="../dialect-differences/">Dialect Differences</a>
+      <a href="../translation/">Translation</a>
+      <a href="../simulated-scenarios/">Simulated Scenarios</a>
+      <a href="../phrase-dataset/">Phrase Dataset</a>
+      <a href="../model-evaluations/">Model Evaluations</a>
+    </nav>
+  </div>
+  <hr class="rule-fine">
+</header>
+<main id="main">
+  <p class="dateline">Start here · the whole idea in five minutes</p>
+  <h1>People say the same thing many ways.<br>What does the machine hear?</h1>
+
+  <section>
+    <p class="step-no">1 · A doctor converges</p>
+    <h2>Three phrasings, one interpretation</h2>
+    <p>Patients rarely use textbook words. A clinician hears all three of these,
+       recognizes the same stomach problem, and reaches the same recommendation.</p>
+    <div class="fig" role="img" aria-label="Three patient phrasings converge through a clinician to one recommendation: an antacid.">
+    <svg viewBox="0 0 720 190">
+      <text x="0" y="28" class="sv-q">“I have acid reflux.”</text>
+      <text x="0" y="88" class="sv-q">“My stomach’s on fire.”</text>
+      <text x="0" y="148" class="sv-q">“My dyspepsia flared up.”</text>
+      <path class="sv-line" d="M232,22 C330,22 350,86 430,88"/>
+      <path class="sv-line" d="M232,82 C320,82 340,88 430,88"/>
+      <path class="sv-line" d="M232,142 C330,142 350,90 430,88"/>
+      <circle cx="452" cy="88" r="16" fill="none" stroke="#1c1c19" stroke-width="1.6"/>
+      <text x="452" y="63" class="sv-m" text-anchor="middle">clinician</text>
+      <path class="sv-line" d="M470,88 L540,88" stroke="#15803d" stroke-width="1.8"/>
+      <text x="552" y="93" class="sv-a" fill="#15803d">antacid</text>
+    </svg>
+    </div>
+    <p class="cap">interpretation absorbs the wording</p>
+  </section>
+
+  <section>
+    <p class="step-no">2 · The model diverges</p>
+    <h2>Same three phrasings, three different answers</h2>
+    <p>We gave a language model the same sentences and read off its most likely
+       next word. The clinical phrasing gets the medicine. The casual phrasings
+       get food.</p>
+    <div class="fig" role="img" aria-label="The same three phrasings pass through a language model and come out as three different answers: antacid, ice cream, and apple.">
+    <svg viewBox="0 0 720 190">
+      <text x="0" y="28" class="sv-q">“I have acid reflux.”</text>
+      <text x="0" y="88" class="sv-q">“My stomach’s on fire.”</text>
+      <text x="0" y="148" class="sv-q">“My dyspepsia flared up.”</text>
+      <path class="sv-line" d="M232,22 L430,22"/>
+      <path class="sv-line" d="M232,82 L430,82"/>
+      <path class="sv-line" d="M232,142 L430,142"/>
+      <rect x="430" y="6" width="70" height="152" fill="none" stroke="#1c1c19" stroke-width="1.6"/>
+      <text x="465" y="180" class="sv-m" text-anchor="middle">language model</text>
+      <path class="sv-line" d="M500,22 L540,22" stroke="#15803d" stroke-width="1.8"/>
+      <text x="552" y="27" class="sv-a" fill="#15803d">antacid</text>
+      <path class="sv-line" d="M500,82 L540,82" stroke="#b4483d" stroke-width="1.8"/>
+      <text x="552" y="87" class="sv-a" fill="#b4483d">ice cream</text>
+      <path class="sv-line" d="M500,142 L540,142" stroke="#b4483d" stroke-width="1.8"/>
+      <text x="552" y="147" class="sv-a" fill="#b4483d">apple</text>
+    </svg>
+    </div>
+    <p class="cap">the wording chooses the answer — measured on gemma-2-2b, live traces</p>
+  </section>
+
+  <section>
+    <p class="step-no">3 · Try it</p>
+    <h2>Watch one word change the answer</h2>
+    <p>A language model works by guessing the next word. Flip the phrasing and
+       watch its guesses reshuffle.</p>
+    <div class="tg">
+      <p class="tg-sentence">“When the dust kicks up my
+        <span class="tg-swap" id="tg-swap">asthma flares</span>,
+        so at work I keep a spare&nbsp;___”</p>
+      <button id="tg-btn" type="button" aria-label="Switch between clinical and patient wording">say it the other way</button>
+      <div id="tg-bars" aria-live="polite"></div>
+    </div>
+    <p class="cap">real measurements: scenario 85 of the simulated series</p>
+  </section>
+
+  <section>
+    <p class="step-no">4 · Look inside</p>
+    <h2>Circuit tracing photographs the reasoning</h2>
+    <p>Inside the model, small units called <b>features</b> switch on as it reads —
+       some respond to medical ideas <span style="color:var(--clinical)">●</span>,
+       others to everyday ones <span style="color:var(--patient)">●</span>.
+       A circuit trace records which features fired and how strongly each one fed
+       the final guess. Clinical wording lights the medical features; casual wording
+       lights everyday features instead — and the guess follows whichever circuit is lit.</p>
+    <p>Every figure on this site is one of those photographs.</p>
+  </section>
+
+  <section>
+    <p class="step-no">5 · What we measure</p>
+    <h2>Two numbers per sentence pair</h2>
+    <p><b>How much confidence the right answer lost</b> when the wording turned casual —
+       and <b>whether the top answer changed</b>. A changed answer that points to less
+       help (an inhaler becoming a shirt) is the case that matters most.
+       Translating the sentence back into clinical wording usually restores the answer —
+       that is the fix the <a href="../translation/">Translation</a> page shows.</p>
+    <a class="back" href="../word-differences/">See the real traces →</a>
+  </section>
+
+  <div class="src">
+    Sources: all model answers and probabilities are live gemma-2-2b measurements —
+    scenario 48 (panel 2, first two rows), the register ladder (panel 2, third row), and scenario 85 (panel 3) in <a href="../data/simulated_scenarios.json">data/simulated_scenarios.json</a>,
+    the register ladder in <a href="../data/provenance.json">data/provenance.json</a>.
+    The clinician panel is illustrative, not a measurement.
+  </div>
+</main>
+<script>
+(function(){
+  // scenario 85, live-traced: bars re-rank when the wording flips
+  var states={
+    clinical:{swap:'asthma flares',bars:[['inhaler',0.69,'#15803d'],['mask',0.06,'#c3c9d2'],['set',0.03,'#c3c9d2']]},
+    patient:{swap:'chest gets all tight',bars:[['shirt',0.18,'#b4483d'],['t-',0.07,'#c3c9d2'],['pair',0.06,'#c3c9d2']]}
+  };
+  var cur='clinical';
+  var wrap=document.getElementById('tg-bars');
+  function render(){
+    var st=states[cur];
+    document.getElementById('tg-swap').textContent=st.swap;
+    wrap.textContent='';
+    st.bars.forEach(function(b){
+      var row=document.createElement('div');row.className='bar-row';
+      var l=document.createElement('span');l.className='bar-lbl';l.textContent=b[0];
+      var t=document.createElement('div');t.className='bar-track';
+      var f=document.createElement('div');f.className='bar-fill';
+      f.style.background=b[2];f.style.width='0%';
+      t.appendChild(f);
+      var v=document.createElement('span');v.className='bar-val';v.textContent=b[1].toFixed(2);
+      row.appendChild(l);row.appendChild(t);row.appendChild(v);
+      wrap.appendChild(row);
+      requestAnimationFrame(function(){f.style.width=(b[1]*100)+'%';});
+    });
+  }
+  document.getElementById('tg-btn').addEventListener('click',function(){
+    cur=(cur==='clinical')?'patient':'clinical';render();
+  });
+  render();
+})();
+</script>
+</body>
+</html>
