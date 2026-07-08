@@ -142,21 +142,11 @@
   <hr class="rule-fine">
 </header>
 <main id="main">
-  <p class="dateline">Fig. 1 <span class="mode">· one-word swap · demonstration render</span></p>
+  <p class="dateline">Fig. 1 <span class="mode">· one-word swap · live trace</span></p>
   <h1>Word differences</h1>
   <p class="subtitle">One sentence, one swapped word: clinical term vs. patient idiom.</p>
-  <p class="explainer">A word-for-word substitution (“depression” vs. “the blues”) mapped as
-     two stacked circuit traces. The clinical wording drives prob(therapist) = 0.86; the
-     patient idiom collapses it to 0.35, with “friend” within four points of “therapist”.</p>
-  <p class="explainer">The starkest case in the hand-measured set is not a probability
-     shift but a recommendation shift. <em>“Since her urinary tract was completely blocked
-     up, they had to urgently call a”</em> continues with <em>uro(logist)</em> at 0.20;
-     phrase it as <em>“her water was completely blocked up”</em> and the model calls a
-     <em>plumber</em> — at 0.68, more confident in the wrong profession than it ever was
-     in the right one. In another pair, <em>“I’m having a fit, so you need to give me my”</em>
-     draws <em>Money</em> (0.25) where the clinical phrasing draws <em>Meds</em> (0.29). The idiom does not just weaken the
-     answer; it changes what arrives. (Numbers: pairs 15 and 14 in
-     <code>data/stress_pairs.json</code>, hand-measured from real patient language.)</p>
+  <p class="explainer">A word-for-word substitution (“depression” vs. “the blues”) as two stacked circuit traces. Clinical wording drives prob(therapist) = 0.86; the patient idiom collapses it to 0.35, with “friend” within four points of “therapist”.</p>
+  <p class="explainer">The starkest case in the hand-measured set is a recommendation shift, not just a probability shift. “Since her urinary tract was completely blocked up, they had to urgently call a” continues with uro(logist) at 0.20; phrase it as “her water was completely blocked up” and the model calls a plumber — at 0.68, more confident in the wrong profession than it ever was in the right one. In another pair, “I’m having a fit, so you need to give me my” draws Money (0.25) where the clinical phrasing draws Meds (0.29). The idiom doesn’t just weaken the answer; it changes what arrives. (Pairs 15 and 14 in data/stress_pairs.json, hand-measured from real patient language.)</p>
   <span class="stat penalty">Language Penalty: −51% probability (0.86 → 0.35)</span>
   <p class="traced" data-mode="2panel" data-traced="gemma-2-2b">
     <span class="tm"><b>live trace:</b> gemma-2-2b · gemma scope transcoders</span>
@@ -169,35 +159,17 @@
     <iframe class="live" src="../modes/simulated/featured_sim85/index_01.html" loading="lazy"
             title="Live attribution-graph comparison: asthma flares vs. chest gets all tight"></iframe>
   </div>
-  <p class="embed-caption">Live trace: the clinical wording reaches “&nbsp;inhaler” at 0.69;
-     the patient idiom’s top continuation is “&nbsp;shirt”, with the inhaler collapsing to
-     0.04 (scenario 85 in the <a href="../simulated-scenarios/">simulated series</a>).
-     How to read it: two panels on one scale, the clinical sentence above and the patient
-     sentence below. Above the swapped word, the clinical wording builds a stack of green
-     clinical features feeding the clinical continuation; the patient idiom replaces that
-     stack with off-target features and the probability collapses. Hover any node for its
-     feature id, category, attribution mass, and description; a click or tap pins the tooltip.</p>
+  <p class="embed-caption">Live trace: clinical wording reaches “ inhaler” at 0.69; the patient idiom’s top continuation is “ shirt”, inhaler collapsing to 0.04 (scenario 85 in the <a href="../simulated-scenarios/">simulated series</a>). How to read it: two panels on one scale, clinical sentence above, patient below. Above the swapped word, the clinical wording stacks green clinical features feeding the continuation; the patient idiom replaces them with off-target features and the probability collapses. Hover any node for its feature id, category, attribution mass, and description; a click or tap pins the tooltip.</p>
 
-  <p class="traced" data-mode="2panel" data-traced="gemma-2-2b">
-    <span class="tm"><b>demonstration graph:</b> hand-authored · gemma-2-2b schema</span>
-    <span class="tp">gemma scope transcoders (feature schema) · pipeline-validation render</span>
-  </p>
 
-  <div class="embed">
-    <iframe class="live" src="../modes/2panel/index.html" loading="lazy"
-            title="Interactive attribution-graph comparison: clinical vs. patient wording (demonstration)"></iframe>
-  </div>
-  <p class="embed-caption">Demonstration render (“depression” vs. “the blues”): the original
-     hand-authored pipeline-validation figure, kept for comparison. Reads the same way as the
-     live figure above.</p>
 
   <a class="back" href="../">← Back home</a>
 
   <div class="endnote">
     <p>
-      This render is a demonstration output generated from synthetic sample graphs to validate
-      the visualization pipeline end-to-end; traces from live gemma-2-2b runs will replace it
-      as the study progresses.
+      The featured render above is a live gemma-2-2b trace. Earlier versions of this page led
+      with a hand-authored demonstration render (pipeline validation); live traces replaced it
+      as the study progressed.
     </p>
     <footer>
       Built with the <a href="https://github.com/michaeldgreenphd/patientwords-engine">patientwords-engine</a> pipeline

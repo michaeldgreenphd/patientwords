@@ -209,15 +209,7 @@
   <p class="dateline">Fig. 3 <span class="mode">· dialect & register sweep · live render · traced July 7, 2026</span></p>
   <h1>Dialect differences</h1>
   <p class="subtitle">The clinical term held fixed while the surrounding sentence shifts across six dialect and register framings.</p>
-  <p class="explainer">The engine holds the clinical term fixed and re-traces the sentence
-     across dialect and register variants of the surrounding syntax; any probability
-     shift is therefore attributable to framing. This extends the single syntax delta of the
-     2×2 matrix into a distribution across dialects. The sweep below holds eight
-     clinical terms from the hand-measured dataset fixed, one per row, and re-traces each
-     across six framings: 48 sentences.
-     Most framings move the model's top prediction; the featured term
-     <em>clinical depression</em> loses
-     <span style="font-family:var(--mono)">&nbsp;therapist</span> as top prediction under three of six framings.</p>
+  <p class="explainer">The engine holds the clinical term fixed and re-traces the surrounding syntax across dialect and register variants, so any probability shift comes from framing. This extends the single syntax delta of the 2×2 matrix into a distribution across dialects. The sweep below holds eight clinical terms from the hand-measured dataset fixed, one per row, and re-traces each across six framings — 48 sentences. Most framings move the top prediction; the featured term clinical depression loses therapist as top prediction under three of six framings.</p>
   <p class="traced" data-mode="dialect" data-traced="2026-07-07">
     <span class="tm"><b>model:</b> gemma-2-2b · <b>features:</b> Gemma Scope transcoders (16k) · <b>graphs:</b> 56 (8 baselines + 48 framings)</span><br>
     <span class="tm"><b>held fixed:</b> 8 clinical terms from the hand-measured dataset · <b>framings:</b> 6 per term</span><br>
@@ -288,24 +280,13 @@
     <iframe class="live" src="../modes/dialect/index.html" loading="lazy"
       title="Interactive dialect-mode attribution graphs"></iframe>
   </div>
-  <p class="embed-caption" id="embed-caption">How to read it: seven panels, the standard-English
-     baseline first and the six framings after it. Columns are the words of each prompt; height
-     is depth in the model; the predicted next word sits at the top of each panel. The clinical
-     term appears in every panel while the sentence around it changes, so differences in the
-     stacks above it show the framing effect. Hover any node for its feature id, category,
-     attribution mass, and autointerp description.</p>
+  <p class="embed-caption" id="embed-caption">How to read it: seven panels — the standard-English baseline first, then the six framings. Columns are the prompt’s words; height is model depth; the predicted next word sits at the top. The clinical term appears in every panel while the sentence around it changes, so differences in the stacks above it are the framing effect. Hover any node for its feature id, category, attribution mass, and autointerp description.</p>
   </details>
 
   <a class="back" href="../">← Back home</a>
 
   <div class="endnote">
-    <p>
-      The graphs above are live gemma-2-2b traces. The dialect framings themselves were
-      authored by an LLM (claude-opus-4-8) to hold the clinical term fixed while shifting
-      the surrounding syntax. Treat them as register probes; an LLM’s rendering of a dialect
-      is an approximation and may miss how a community actually speaks. All six generated
-      variants were traced and all six are shown; none were filtered on outcome.
-    </p>
+    <p>The graphs above are live gemma-2-2b traces. The dialect framings were authored by an LLM (claude-opus-4-8) to hold the clinical term fixed while shifting the surrounding syntax. Treat them as register probes: an LLM’s rendering of a dialect is an approximation and may miss how a community actually speaks. All six variants were traced and all six are shown; none were filtered on outcome.</p>
     <footer>
       Built with the <a href="https://github.com/michaeldgreenphd/patientwords-engine">patientwords-engine</a> pipeline
       on <a href="https://neuronpedia.org">Neuronpedia</a> ·

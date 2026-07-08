@@ -254,29 +254,8 @@
 <main id="main">
   <p class="dateline">Research bulletin · mechanistic interpretability of medical language · <b>gemma-2-2b</b></p>
   <h1><span class="patient">Patients</span> don’t speak like doctors.<br><span class="clinical">Medical&nbsp;AI</span> must be ready to interpret them.</h1>
-  <p class="lede">
-    We trace how gemma-2-2b processes standard clinical terminology versus the colloquial
-    language patients use, with attribution graphs built on Gemma&nbsp;Scope transcoders.
-    The stakes are easiest to see when the words change <em>what is offered</em>, not just
-    how confidently. In one live-traced pair, <em>“my asthma flares, so at work I keep a
-    spare”</em> continues with <span class="clinical" style="font-weight:600">inhaler</span>
-    at probability 0.69; say <em>“my chest gets all tight”</em> instead and the top
-    continuation becomes <em>shirt</em>, with the inhaler collapsing to 0.04. The same
-    shift appears across word swaps like <em>“the blues”</em> for <em>“depression”</em> —
-    and translating patient language back into clinical terms restores the clinical
-    continuation. (Numbers: scenario 85 in the <a href="simulated-scenarios/">simulated
-    series</a>, <code>data/simulated_scenarios.json</code>.)
-  </p>
-  <p class="lede">
-    Each figure below embeds the interactive render, so the page always shows the
-    pipeline’s current output. Every graph reads the same way. Each column is one word of
-    the prompt, in order; height is depth in the model, and the predicted next word sits at
-    the top. Each node is a feature that fired at that word and layer: its size shows how
-    much it contributed to the prediction, and its color gives its category (clinical,
-    off-target, or structural). The curves between nodes are paths of influence, and the
-    spread at the logit layer shows the model’s competing next-token predictions. Hover any
-    node for its feature identity, category, attribution mass, and autointerp description.
-  </p>
+  <p class="lede">We trace how gemma-2-2b handles clinical terms versus the everyday language patients use, using attribution graphs built on Gemma Scope transcoders. The stakes show clearest when the wording changes what the model offers, not just its confidence. In one live-traced pair, “my asthma flares, so at work I keep a spare” continues with inhaler at 0.69; swap in “my chest gets all tight” and the top continuation becomes shirt, inhaler collapsing to 0.04. The same shift appears in swaps like “the blues” for “depression” — and translating patient language back to clinical terms restores the clinical continuation. (Scenario 85 in the <a href="simulated-scenarios/">simulated series</a>, data/simulated_scenarios.json.)</p>
+  <p class="lede">Each figure embeds a live render, so the page always shows the pipeline’s current output. Every graph reads the same way: each column is one word of the prompt in order; height is depth in the model; the predicted next word sits at the top. Each node is a feature that fired at that word and layer — size is its contribution, color its category (clinical, off-target, or structural). Curves are paths of influence; the spread at the logit layer shows the model’s competing next-token predictions. Hover any node for its feature identity, category, attribution mass, and autointerp description.</p>
   <p class="keyline">
     <span class="swatch" style="background:#15803d"></span>clinical / recovery &nbsp;&nbsp;
     <span class="swatch" style="background:#111827"></span>off-target (the patient-language direction) &nbsp;&nbsp;
@@ -300,9 +279,7 @@
     <div class="fig-body">
       <p class="fig-no">Fig. 1 <span class="mode">· one-word swap</span></p>
       <h3>Word Differences</h3>
-      <p>One phrase swapped, “asthma flares” vs. “chest gets all tight”, traced as two
-         stacked graphs. The clinical wording drives prob(inhaler) = 0.69; the patient
-         idiom hands the top spot to “shirt” and the inhaler collapses to 0.04.</p>
+      <p>One phrase swapped — “asthma flares” vs. “chest gets all tight” — as two stacked graphs. Clinical wording drives prob(inhaler) = 0.69; the patient idiom hands the top spot to “shirt” and inhaler collapses to 0.04.</p>
       <span class="stat penalty">Language Penalty: −65% probability (0.69 → 0.04)</span>
       <p class="traced" data-mode="2panel" data-traced="gemma-2-2b">
         <span class="tm"><b>live trace:</b> gemma-2-2b · gemma scope transcoders</span>
@@ -347,12 +324,7 @@
     <div class="fig-body">
       <p class="fig-no">Fig. 3 <span class="mode">· dialect sweep</span></p>
       <h3>Dialect Differences</h3>
-      <p>Eight clinical terms from the hand-measured dataset are held fixed while the
-         sentence around them is re-traced across six dialect and register framings.
-         Any probability shift is attributable to framing alone. For <em>clinical
-         depression</em>, the top prediction becomes “&thinsp;doctor” under both Southern US
-         and British framings, displacing “&thinsp;therapist”; across the sweep, most
-         framings move the model's top prediction off the standard-English target.</p>
+      <p>Eight clinical terms from the hand-measured dataset are held fixed while the surrounding sentence is re-traced across six dialect and register framings, so any probability shift comes from framing alone. For clinical depression, the top prediction becomes “ doctor” under both Southern US and British framings, displacing “ therapist”; across the sweep, most framings move the top prediction off the standard-English target.</p>
       <p class="traced" data-mode="dialect" data-traced="2026-07-07">
         <span class="tm"><b>traced model:</b> gemma-2-2b · gemma scope transcoders</span>
         <span class="tp">56 graphs · 8 baselines + 48 framings · batch dialects_20260707T000923Z</span>
@@ -372,9 +344,7 @@
     <div class="fig-body">
       <p class="fig-no">Fig. 4 <span class="mode">· translation recovery</span></p>
       <h3>Translation</h3>
-      <p>An LLM translates the patient sentence into standard terminology and the raw
-         output is traced natively. The clinical features and the target probability
-         both return.</p>
+      <p>An LLM translates the patient sentence into standard terminology and traces the raw output natively. The clinical features and the target probability both return.</p>
       <span class="stat recovery">Recovered target probability: +51% (0.35 → 0.86)</span>
       <p class="traced" data-mode="translation" data-traced="gemma-2-2b">
         <span class="tm"><b>traced model:</b> gemma-2-2b · gemma scope transcoders</span>
@@ -400,11 +370,7 @@
     <div class="fig-body">
       <p class="fig-no">Sim series <span class="mode">· generated pairs · simulated data</span></p>
       <h3>Simulated Scenarios</h3>
-      <p>Claude authors new patient-vs-clinical stress pairs in the hand-built dataset’s
-         format (everyday condition areas, one contiguous term swap per pair), and
-         programmatic validators accept or reject each candidate. Accepted pairs are
-         traced on gemma-2-2b, with the generator’s rationale and the batch’s cost
-         sidecar published with the batch. Kept separate from the hand-measured set.</p>
+      <p>Claude authors new patient-vs-clinical stress pairs in the hand-built dataset’s format (everyday condition areas, one contiguous term swap per pair); programmatic validators accept or reject each. Accepted pairs are traced on gemma-2-2b, published with the generator’s rationale and the batch’s cost sidecar. Kept separate from the hand-measured set.</p>
       <span class="stat penalty" id="sim-stat" hidden></span>
       <p class="traced" data-mode="simulated" data-traced="gemma-2-2b">
         <span class="tm"><b>traced model:</b> gemma-2-2b · gemma scope transcoders</span>
@@ -489,9 +455,9 @@
 
   <div class="endnote">
     <p>
-      Figs. 2 and 3, the simulated scenarios, and the phrase-dataset measurements are live
-      gemma-2-2b traces. Figs. 1 and 4 remain demonstration renders generated from synthetic
-      sample graphs to validate the visualization pipeline; live traces will replace them as
+      Figs. 1, 2, and 3, the simulated scenarios, and the phrase-dataset measurements are live
+      gemma-2-2b traces. Fig. 4 remains a demonstration render generated from synthetic
+      sample graphs to validate the visualization pipeline; a live trace will replace it as
       the study progresses.
     </p>
     <footer>

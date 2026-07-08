@@ -122,6 +122,10 @@
   .titr h3{font-size:15px;font-weight:600;margin:4px 0 6px}
   .titr .tt-note{font-family:var(--mono);font-size:10.5px;color:var(--muted);line-height:1.7;margin:6px 0 0}
   @media (max-width:640px){.titr .tt-grid{grid-template-columns:1fr}}
+  .meth{border:1px solid var(--hairline);background:#fbfaf6;margin:22px 0 16px;padding:0 16px}
+  .meth summary{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--muted);padding:10px 0;cursor:pointer}
+  .meth summary:hover{color:var(--ink)}
   .endnote{border-top:1px solid var(--ink);margin-top:42px;padding-top:14px}
   .endnote p{font-family:var(--mono);font-size:12px;line-height:1.8;color:var(--muted);
     ;margin:0 0 14px}
@@ -173,9 +177,7 @@
   <p class="dateline">Fig. 4 <span class="mode">· translation recovery · demonstration render</span></p>
   <h1>Translation</h1>
   <p class="subtitle">Translating the patient sentence back into clinical terms restores the prediction.</p>
-  <p class="explainer">The mitigation: an LLM translates the patient sentence into standard
-     terminology and the raw output is traced natively. The clinical features reappear in
-     the trace and the target probability recovers.</p>
+  <p class="explainer">The mitigation: an LLM translates the patient sentence into standard terminology, and the raw output is traced natively. The clinical features reappear and the target probability recovers.</p>
   <p class="explainer">Translation matters most when it changes the <em>advice</em>, not
      just the confidence. In live traces of the downgrade set: <em>“Grandma’s been all
      bunged up for a week, so before dinner she took a”</em> continues with <em>nap</em>
@@ -199,6 +201,8 @@
      top token per panel · numbers in <code>data/provenance.json</code> · tiers draft pending review</p>
 
   <span class="stat recovery">Recovered target probability: +51% (0.35 → 0.86)</span>
+  <details class="meth">
+    <summary>View the live three-panel trace (clinical / patient / translated)</summary>
   <p class="traced" data-mode="translation" data-traced="gemma-2-2b">
     <span class="tm"><b>live trace:</b> gemma-2-2b · gemma scope transcoders</span>
     <span class="tp">hosted circuit-tracer via Neuronpedia · traced July 7, 2026 · phrase 17 of the
@@ -218,9 +222,9 @@
             title="Live translation mitigation: nap under patient wording, laxative after translation"></iframe>
   </div>
   </div>
-  <p class="embed-caption">Live trace: under patient wording the top continuation is
-     “&nbsp;nap” (0.30); after LLM translation to clinical wording it is “&nbsp;lax(ative)”
-     (0.45) — stronger than the original clinical phrasing (0.26). Numbers are recorded in <code>data/provenance.json</code>.</p>
+  <p class="embed-caption">Live trace: under patient wording the top continuation is “ nap” (0.30); after LLM translation to clinical wording it’s “ lax(ative)” (0.45) — stronger than the original clinical phrasing (0.26). Numbers in <code>data/provenance.json</code>.</p>
+  </details>
+
 
   <p class="traced" data-mode="translation" data-traced="gemma-2-2b">
     <span class="tm"><b>demonstration graph:</b> hand-authored · gemma-2-2b schema</span>
@@ -231,13 +235,7 @@
     <iframe class="live" src="../modes/translation/index.html" loading="lazy"
             title="Interactive translation mitigation chain (demonstration render)"></iframe>
   </div>
-  <p class="embed-caption">How to read it: the panels follow the mitigation chain, the raw
-     patient sentence first and its LLM translation after it, both traced the same way. Axes as
-     in Fig. 3: columns are prompt words; height is model depth; the predicted next word sits at
-     the top. In the translated panel the green clinical stack reappears above the restored
-     terminology and the target probability recovers. Hover any node for its feature id,
-     category, attribution mass, and autointerp description; hover needs a pointer, and a click
-     or tap pins the tooltip.</p>
+  <p class="embed-caption">How to read it: the panels follow the mitigation chain — the raw patient sentence first, its LLM translation after — both traced the same way. Axes as in Fig. 3: columns are prompt words; height is model depth; the predicted next word sits at the top. In the translated panel the green clinical stack reappears above the restored terminology and the target probability recovers. Hover any node for its feature id, category, attribution mass, and description (a click or tap pins the tooltip).</p>
 
   <details class="titr" id="titr">
     <summary>Causal faithfulness &amp; titration metrics (gemma-2-2b)</summary>
@@ -245,16 +243,12 @@
       <div>
         <h3>Dose–response: recovery by steering strength</h3>
         <div id="tt-dose"></div>
-        <p class="tt-note">boost the top-5 clinical features while the model reads the patient
-           wording; recovery = the clinical target appears in the steered continuation.
-           Strengths without a bar are queued and fill in as runs land.</p>
+        <p class="tt-note">Boost the top-5 clinical features while the model reads the patient wording; recovery = the clinical target appears in the steered continuation. Strengths without a bar are queued and fill in as runs land.</p>
       </div>
       <div>
         <h3>Faithfulness: does attribution rank predict effect?</h3>
         <div id="tt-rank"></div>
-        <p class="tt-note">same strength, different features: top-5 by attribution mass vs
-           ranks 6–10. Control: 5 random features at strength 10 recovered 0/5 —
-           the effect is the clinical circuit, not steering itself.</p>
+        <p class="tt-note">same strength, different features: top-5 by attribution mass vs ranks 6–10. Control: 5 random features at strength 10 recovered 0/5 — the effect is the clinical circuit, not steering itself.</p>
       </div>
     </div>
   </details>
