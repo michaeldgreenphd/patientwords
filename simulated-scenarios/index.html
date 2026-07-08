@@ -337,7 +337,7 @@
     <p class="explainer">
       Some redirects do more than weaken the clinical continuation &mdash; the top prediction
       lands on a different object altogether. Probability aside, these are the swaps to watch:
-      the wording changes <em>what is offered</em>. Tier labels are a draft pending domain review.
+      the wording changes <em>what is offered</em>. Tier labels follow the reviewed v1 vocabulary.
     </p>
     <div class="rx-g" id="rx-cards"></div>
   </section>
@@ -361,7 +361,7 @@
           <th scope="col">Target</th>
           <th scope="col" data-key="shift"><button type="button" class="th-tip" title="target-token likelihood, clinical wording → patient wording — click to sort by size of change">Likelihood shift</button></th>
           <th scope="col" class="num" data-key="net"><button type="button" class="th-tip" title="which wording holds the target more strongly, and by how much — click to sort">Net effect ⓘ</button></th>
-          <th scope="col" class="num" data-key="urgency"><button type="button" class="th-tip" title="flags when the top prediction moves to a lower tier of care under patient wording (draft tiers) — click to sort">Urgency ⓘ</button></th>
+          <th scope="col" class="num" data-key="urgency"><button type="button" class="th-tip" title="flags when the top prediction moves to a lower tier of care under patient wording (reviewed v1 tiers) — click to sort">Urgency ⓘ</button></th>
           <th scope="col" data-key="mass"><button type="button" title="sort by the clinical phrasing’s clinical-circuit share">Clinical circuit</button></th>
           <th scope="col" data-key="flip"><button type="button" title="sort: flips first">Top prediction</button></th>
         </tr></thead>
@@ -534,8 +534,8 @@
         var uline=el('div');
         uline.appendChild(el('span',null,'Urgency view — '));
         uline.appendChild(el('b',null,(fc.downgrade||0)+' downgrade flips vs '+(fc.upgrade||0)+' upgrades'));
-        uline.appendChild(el('span',null,' across models. Care-urgency tiers are a '));
-        uline.appendChild(el('b',null,'draft pending domain review'));
+        uline.appendChild(el('span',null,' across models. Care-urgency tier vocabulary: '));
+        uline.appendChild(el('b',null,urg.vocabulary_status||'reviewed v1'));
         uline.appendChild(el('span',null,'; the Urgency column reads from data/urgency_shift.json.'));
         prov.appendChild(uline);
       }
@@ -616,7 +616,7 @@
               +(typeof u.tier_top_patient==='number'?('tier '+u.tier_top_patient):'untiered');
             var tt=el('span','tip',tierTxt);
             tt.setAttribute('tabindex','0');
-            tt.setAttribute('data-tip','Care-urgency tiers (draft): 4 emergency · 3 specialist · '
+            tt.setAttribute('data-tip','Care-urgency tiers (reviewed v1): 4 emergency · 3 specialist · '
               +'2 general doctor · 1 self-treatment or medication · 0 no care action');
             why.appendChild(tt);
             why.appendChild(el('span',null,' · Sim '+s.index));
@@ -696,13 +696,13 @@
         var u=urgFor(s);
         if(u&&u.flip_class==='downgrade'){
           uc.appendChild(el('span','urg-down','t'+u.tier_top_clinical+'→t'+u.tier_top_patient+' ↓'));
-          uc.title='top prediction moves to a lower care-urgency tier (draft tiers)';
+          uc.title='top prediction moves to a lower care-urgency tier (reviewed v1 tiers)';
         }else if(u&&u.flip_class==='upgrade'){
           uc.appendChild(el('span','urg-up','t'+u.tier_top_clinical+'→t'+u.tier_top_patient+' ↑'));
-          uc.title='top prediction moves to a higher care-urgency tier (draft tiers)';
+          uc.title='top prediction moves to a higher care-urgency tier (reviewed v1 tiers)';
         }else if(u&&typeof u.tier_shift==='number'){
           uc.appendChild(el('span','urg-flat',(u.tier_shift>0?'+':'')+u.tier_shift.toFixed(2)));
-          uc.title='expected care-urgency shift, probability-weighted (draft tiers)';
+          uc.title='expected care-urgency shift, probability-weighted (reviewed v1 tiers)';
         }else{
           uc.textContent='—';
         }
