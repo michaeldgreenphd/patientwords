@@ -148,7 +148,7 @@
       <text x="552" y="147" class="sv-a" fill="#b45309">apple</text>
     </svg>
     </div>
-    <p class="cap">the wording chooses the answer — measured on gemma-2-2b, live traces</p>
+    <p class="cap">the wording chooses the answer — measured on gemma-2-2b · see the traces: <a href="../modes/simulated/pairs_20260707T171223Z/index_12.html">stomach’s on fire</a> · <a href="../modes/simulated/dialects_20260708T011831Z/index_01.html">dyspepsia ladder</a></p>
   </section>
 
   <section>
@@ -164,7 +164,7 @@
       <div class="bar-head" aria-hidden="true">likelihood</div>
       <div id="tg-bars" aria-live="polite"></div>
     </div>
-    <p class="cap">real measurements: scenario 85 of the simulated series</p>
+    <p class="cap">real measurements: <a href="../modes/simulated/pairs_20260707T171223Z/index_49.html">open scenario 85’s full trace</a> · <a href="../simulated-scenarios/">browse all scenarios</a></p>
   </section>
 
   <section>
@@ -184,9 +184,42 @@
     <h2>Two numbers per sentence pair</h2>
     <p><b>How much confidence the right answer lost</b> when the wording turned casual —
        and <b>whether the top answer changed</b>. A changed answer that points to less
-       help (an inhaler becoming a shirt) is the case that matters most.
-       Translating the sentence back into clinical wording usually restores the answer —
-       that is the fix the <a href="../translation/">Translation</a> page shows.</p>
+       help (an inhaler becoming a shirt) is the case that matters most.</p>
+  </section>
+
+  <section>
+    <p class="step-no">6 · The patch</p>
+    <h2>A translation layer, for now</h2>
+    <p>Put a translator between the patient and the model: it rewrites the sentence
+       into clinical wording before the model answers. Same stomach, same person —
+       the answer comes back.</p>
+    <div class="fig" role="img" aria-label="The patient phrase passes through a translation layer, becomes clinical wording, and the model now answers antacid at 31 percent instead of ice cream at 29 percent.">
+    <svg viewBox="0 0 720 120">
+      <text x="0" y="52" class="sv-q">“My stomach’s on fire.”</text>
+      <path class="sv-line" d="M232,46 L268,46"/>
+      <rect x="268" y="22" width="112" height="48" fill="none" stroke="#0f766e" stroke-width="1.2" stroke-dasharray="5 5"/>
+      <text x="324" y="52" class="sv-m" text-anchor="middle" fill="#0f766e">translation layer</text>
+      <path class="sv-line" d="M380,46 L410,46"/>
+      <text x="418" y="52" class="sv-q" fill="#0f766e">“I have acid reflux.”</text>
+      <path class="sv-line" d="M622,46 L648,46" stroke="#0f766e" stroke-width="2.2"/>
+      <text x="656" y="52" class="sv-a" fill="#0f766e">antacid</text>
+    </svg>
+    </div>
+    <p class="cap">ice cream (29%) becomes antacid (31%) after translation — a patch, not a cure:
+       it fixed 8 of the 20 hardest cases, left 7 unchanged, and once made things worse ·
+       <a href="../translation/">see the live translation traces</a></p>
+  </section>
+
+  <section>
+    <p class="step-no">7 · The real fix</p>
+    <h2>Teach the listener, not just the speaker</h2>
+    <p>Two paths lead past the patch. <b>Give the model context up front:</b> in our
+       measurements, one plain sentence placing the conversation in a medical setting
+       roughly halved the damage from casual wording — no translation needed.
+       <b>Train on patient language:</b> models could learn the way people actually
+       describe symptoms — idioms, misspellings, dialects — the way clinicians do.
+       That is a change to how models are built, not how they are prompted, and it is
+       the future direction this project points to rather than a result it claims.</p>
     <a class="back" href="../word-differences/">See the real traces →</a>
   </section>
 
