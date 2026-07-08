@@ -205,6 +205,11 @@
 
   .embed{border:1px solid var(--hairline);background:#fff;overflow:hidden;margin:18px 0 8px}
   .embed iframe{width:100%;border:0;display:block;min-height:400px}
+  .kx-full iframe{min-height:1300px}
+  .sum-reset{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;
+    background:none;border:1px solid var(--hairline);color:var(--muted);padding:5px 10px;cursor:pointer}
+  .sum-reset:hover{color:var(--ink);border-color:var(--ink)}
+  .sum-reset:focus-visible{outline:2px solid var(--clinical);outline-offset:2px}
   .kx{border:1px solid var(--hairline);background:#fff;padding:14px 16px;margin:10px 0 6px}
   .kx .kx-pair{margin:2px 0;font-size:15px}
   .kx .kx-pair b{font-family:var(--mono);font-weight:600}
@@ -316,12 +321,9 @@
     <span class="tp">→ prob = target-token probability read from the live trace · penalty = patient − clinical</span>
   </p>
 
-  <div class="provenance" id="sim-provenance" hidden></div>
-
   <section id="key-ex" hidden>
     <h2>Key example</h2>
     <div class="kx" id="kx-card"></div>
-    <div class="embed" id="kx-embed" hidden></div>
   </section>
 
   <section id="redir-ex" hidden>
@@ -337,6 +339,7 @@
   <section id="sim-summary" hidden>
     <div class="sum-chips" id="sim-chips"></div>
     <div class="sum-controls">
+      <button class="sum-reset" id="sim-reset" type="button" title="Clear search, filters, and sorting">reset view</button>
       <input id="sim-filter" type="search"
              placeholder="search prompts, terms, or tokens…"
              aria-label="Search scenarios">
@@ -367,6 +370,13 @@
       * intended target fell below the traced spread; measurement anchored on the clinical top prediction · screened-out rows kept their clinical trace but failed the measurement screen (open a Sim page for details)</p>
     <nav class="sum-pages" id="sim-pages" aria-label="Scenario pages"></nav>
   </section>
+
+  <section id="key-ex-full" hidden>
+    <h2>The key example, full size</h2>
+    <div class="embed kx-full" id="kx-embed" hidden></div>
+  </section>
+
+  <div class="provenance" id="sim-provenance" hidden></div>
 
 
   <div class="pending-note" id="sim-pending" hidden>
@@ -572,6 +582,7 @@
             var ifr=document.createElement('iframe');
             ifr.src='../'+ks.html;ifr.title='Interactive circuit comparison for the key example';
             ifr.loading='lazy';emb.appendChild(ifr);emb.hidden=false;
+            document.getElementById('key-ex-full').hidden=false;
           }
           document.getElementById('key-ex').hidden=false;
         }
@@ -877,6 +888,26 @@
            {val:'screened',name:'screened out'}],
           function(){return filterStatus;},function(v){filterStatus=v;});
       })();
+
+      document.getElementById('sim-reset').addEventListener('click',function(){
+        sortKey=null;sortDir=-1;filterText='';filterTopic='';filterStatus='';
+        var fb=document.getElementById('sim-filter');
+        if(fb)fb.value='';
+        // filter chip groups reset to their first ("all") chip; the model
+        // selector is a view choice, not a filter, so it stays put
+        document.querySelectorAll('#sim-chips .chip-g').forEach(function(g){
+          if((g.getAttribute('aria-label')||'').indexOf('filter by')!==0)return;
+          g.querySelectorAll('.chip').forEach(function(c,i){
+            c.classList.toggle('on',i===0);
+            c.setAttribute('aria-pressed',i===0?'true':'false');
+          });
+        });
+        document.querySelectorAll('.sum-table th[data-key]').forEach(function(th){
+          th.classList.remove('sorted','asc');
+          th.removeAttribute('aria-sort');
+        });
+        renderTable();
+      });
 
       document.querySelectorAll('.sum-table th[data-key]').forEach(function(th){
         var btn=th.querySelector('button');
