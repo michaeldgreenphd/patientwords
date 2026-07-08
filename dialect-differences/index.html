@@ -39,6 +39,7 @@
   .skip{position:absolute;left:-9999px;top:0;background:var(--paper);color:var(--ink);
     padding:8px 14px;border:1px solid var(--ink);z-index:10}
   .skip:focus{left:8px}
+  .sr-only{position:absolute;left:-9999px}
 
   .masthead{max-width:1240px;margin:0 auto;padding:20px 22px 0}
   .masthead-row{display:flex;align-items:baseline;justify-content:space-between;
@@ -95,17 +96,30 @@
   .dl .prompt{font-family:var(--serif);font-style:italic;font-size:14.5px;color:var(--ink);
     min-width:280px}
   .dl .prompt .kept{font-style:normal;color:var(--clinical);font-weight:600}
-  .dl .pbar{position:relative;display:block;width:150px;height:11px;background:#efede6;
+  .dl .pbar{position:relative;display:block;width:150px;height:11px;background:none;border:1px solid var(--hairline);box-sizing:border-box;
     margin-top:3px}
-  .dl .pbar i{position:absolute;left:0;top:0;bottom:0;background:var(--patient)}
-  .dl tr.base .pbar i{background:var(--clinical)}
-  .dl .pbar b{position:absolute;top:0;bottom:0;width:1px;background:var(--clinical);opacity:.85}
+  .dl .pbar i{position:absolute;left:0;top:0;bottom:0;background:#0f766e}
+  .dl tr.base .pbar i{background:#0f766e}
+  .dl .pbar b{position:absolute;top:0;bottom:0;width:1.5px;background:var(--ink);opacity:.75}
   .dl .dneg{color:var(--penalty)}
   .dl .dpos{color:var(--clinical)}
   .dl .flip{color:var(--penalty);font-weight:600}
   .dl .stay{color:var(--muted)}
   .dl-caption{font-family:var(--mono);font-size:11px;color:var(--muted);
     letter-spacing:.04em;margin:0 0 8px}
+  .dl tbody tr.rowlink{cursor:pointer}
+  .dl tbody tr.rowlink:hover td{background:#f2f0e9}
+  .dl td.chev-c{width:26px;text-align:right;color:var(--muted);font-family:var(--mono)}
+  .dl tr.rowlink .chev-i{opacity:0;transition:opacity .1s}
+  .dl tr.rowlink:hover .chev-i,.dl tr.rowlink:focus-within .chev-i{opacity:1}
+  .dl tr.acc-open .chev-i{opacity:1;color:var(--clinical)}
+  tr.acc td{padding:0;border-bottom:1px solid var(--hairline)}
+  tr.acc iframe{width:100%;border:0;display:block;min-height:520px;background:#fff}
+  tr.acc .acc-cap{font-family:var(--mono);font-size:10.5px;color:var(--muted);padding:6px 0 10px}
+  .meth{border:1px solid var(--hairline);background:#fbfaf6;margin:22px 0 16px;padding:0 16px}
+  .meth summary{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--muted);padding:10px 0;cursor:pointer}
+  .meth summary:hover{color:var(--ink)}
   .view-head{font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.18em;
     text-transform:uppercase;margin:34px 0 0;border-top:1px solid var(--ink);padding-top:10px}
   .view-sub{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.03em;
@@ -222,8 +236,8 @@
     <p class="dl-caption">Each cell is the change in p(target) when that framing replaces
        standard English. A red
        <span class="flipmark">&#9679;</span> marks a framing that also flips the model&rsquo;s top
-       prediction away from the baseline target; hover a cell for the new top prediction. Rows link
-       to each term&rsquo;s standalone render.</p>
+       prediction away from the baseline target; hover a cell for the new top prediction. Click any row to open that
+       term&rsquo;s standalone render.</p>
   </section>
 
   <section id="dl-featured" hidden>
@@ -237,16 +251,18 @@
           <th scope="col" class="num">p(target)</th>
           <th scope="col" class="num">&Delta; vs baseline</th>
           <th scope="col">Model&rsquo;s top prediction</th>
+          <th scope="col"><span class="sr-only">expand</span></th>
         </tr></thead>
         <tbody id="dlf-body"></tbody>
       </table>
     </div>
-    <p class="dl-caption">Bars share a fixed 0&ndash;1 probability scale; the thin green tick marks
+    <p class="dl-caption">Bars share a fixed 0&ndash;1 probability scale; the thin ink tick marks
        the standard-English baseline. Rows sorted by p, baseline first.</p>
   </section>
 
   <section id="dl-core" hidden>
-    <p class="view-head">The dialect-invariant clinical core</p>
+    <details class="meth">
+    <summary id="dlc-summary">View the dialect-invariant clinical features</summary>
     <p class="view-sub" id="dlc-sub"></p>
     <div class="dl-scroll">
       <table class="dl">
@@ -263,10 +279,13 @@
        normalized attribution mass. &ldquo;Survives&rdquo; counts the framings whose trace still
        contains the feature; features surviving 6/6 framings are the dialect-invariant core.
        Computed from the committed renders, no re-tracing.</p>
+    </details>
   </section>
 
+  <details class="meth">
+    <summary>View the full framing trace (all panels)</summary>
   <div class="embed">
-    <iframe class="live" src="../modes/dialect/index.html"
+    <iframe class="live" src="../modes/dialect/index.html" loading="lazy"
       title="Interactive dialect-mode attribution graphs"></iframe>
   </div>
   <p class="embed-caption" id="embed-caption">How to read it: seven panels, the standard-English
@@ -275,6 +294,7 @@
      term appears in every panel while the sentence around it changes, so differences in the
      stacks above it show the framing effect. Hover any node for its feature id, category,
      attribution mass, and autointerp description.</p>
+  </details>
 
   <a class="back" href="../">← Back home</a>
 
@@ -364,9 +384,17 @@
             ' baseline clinical features survive all '+it.core.framings+' framings';
         }else{cc.textContent=String.fromCharCode(8212);}
         row.appendChild(cc);
-        var lk=el('td');
-        if(it.render){var a=el('a',null,'render '+String.fromCharCode(8594));
-          a.href='../modes/dialect/sweep/'+it.render;lk.appendChild(a);}
+        var lk=el('td','chev-c');
+        if(it.render){
+          lk.appendChild(el('span','chev-i',String.fromCharCode(8250)));
+          row.className='rowlink';
+          row.tabIndex=0;
+          row.setAttribute('role','link');
+          row.setAttribute('aria-label','open the standalone render for '+it.term);
+          var go=function(){location.href='../modes/dialect/sweep/'+it.render;};
+          row.addEventListener('click',go);
+          row.addEventListener('keydown',function(e){if(e.key==='Enter')go();});
+        }
         row.appendChild(lk);
         body.appendChild(row);
       });
@@ -406,6 +434,38 @@
         td.appendChild(bar);
         return td;
       }
+      var openAcc=null;
+      function wireAccordion(row,label){
+        var c=el('td','chev-c');c.appendChild(el('span','chev-i','+'));
+        row.appendChild(c);
+        row.classList.add('rowlink');
+        row.tabIndex=0;
+        row.setAttribute('aria-expanded','false');
+        row.setAttribute('aria-label','show the circuit trace for '+label);
+        function toggle(){
+          if(openAcc&&openAcc.row===row){
+            openAcc.tr.remove();openAcc.row.classList.remove('acc-open');
+            openAcc.row.setAttribute('aria-expanded','false');openAcc=null;return;
+          }
+          if(openAcc){openAcc.tr.remove();openAcc.row.classList.remove('acc-open');
+            openAcc.row.setAttribute('aria-expanded','false');}
+          var tr=el('tr','acc');
+          var td=el('td');td.colSpan=6;
+          var f=document.createElement('iframe');
+          f.src='../modes/dialect/sweep/'+(feat.render||'index_01.html');
+          f.title='Circuit trace for '+feat.term+' - panel per framing; find '+label+' by its panel label';
+          td.appendChild(f);
+          td.appendChild(el('div','acc-cap','all framings of this term, one panel each - '
+            +label+' is the panel with the matching label; hover nodes for details'));
+          tr.appendChild(td);
+          row.after(tr);
+          row.classList.add('acc-open');
+          row.setAttribute('aria-expanded','true');
+          openAcc={row:row,tr:tr};
+        }
+        row.addEventListener('click',toggle);
+        row.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();toggle();}});
+      }
       var baseRow=el('tr','base');
       baseRow.appendChild(el('td','framing','Standard English'));
       baseRow.appendChild(promptCell(feat.baseline_prompt,feat.term));
@@ -413,6 +473,7 @@
       var bd=el('td','num','baseline');baseRow.appendChild(bd);
       var bt=el('td');bt.appendChild(el('span','stay',(feat.target_token||'?')+' '+String.fromCharCode(183)+' '+(feat.baseline_p!=null?feat.baseline_p.toFixed(3):'?')));
       baseRow.appendChild(bt);
+      wireAccordion(baseRow,'Standard English (baseline)');
       fb.appendChild(baseRow);
       feat.variants.slice().sort(function(a,b){return (b.p||0)-(a.p||0);}).forEach(function(v){
         var row=el('tr');
@@ -427,6 +488,7 @@
           (v.top_token||'?')+' '+String.fromCharCode(183)+' '+(v.top_p!=null?v.top_p.toFixed(3):'?')+
           (v.flip?' '+String.fromCharCode(8592)+' flip':'')));
         row.appendChild(tp);
+        wireAccordion(row,shortName(v.dialect));
         fb.appendChild(row);
       });
       document.getElementById('dl-featured').hidden=false;
@@ -434,6 +496,9 @@
         document.getElementById('dlc-sub').textContent=
           feat.term+': '+feat.core.invariant+' of '+feat.core.baseline_clinical+
           ' baseline clinical features survive all '+feat.core.framings+' framings';
+        var summ=document.getElementById('dlc-summary');
+        if(summ)summ.textContent='View the dialect-invariant clinical features ('
+          +feat.core.invariant+' of '+feat.core.baseline_clinical+' survive all framings)';
         var cb=document.getElementById('dlc-body');
         feat.core.top.forEach(function(c){
           var row=el('tr');
