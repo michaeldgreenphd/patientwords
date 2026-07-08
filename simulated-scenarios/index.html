@@ -205,6 +205,22 @@
 
   .embed{border:1px solid var(--hairline);background:#fff;overflow:hidden;margin:18px 0 8px}
   .embed iframe{width:100%;border:0;display:block;min-height:400px}
+  .kx{border:1px solid var(--hairline);background:#fff;padding:14px 16px;margin:10px 0 6px}
+  .kx .kx-pair{margin:2px 0;font-size:15px}
+  .kx .kx-pair b{font-family:var(--mono);font-weight:600}
+  .kx .kx-clin b{color:var(--clinical)}
+  .kx .kx-pat b{color:var(--ink)}
+  .kx .kx-nums{font-family:var(--mono);font-size:12.5px;color:var(--muted);margin:8px 0 0}
+  .kx .kx-nums .pen{color:var(--penalty)}
+  .kx .kx-steer{font-size:13.5px;color:var(--muted);margin:6px 0 0}
+  .kx .kx-steer b{color:var(--clinical)}
+  .rx-g{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:8px;margin:10px 0 4px}
+  .rx{border:1px solid var(--hairline);background:#fff;padding:10px 12px}
+  .rx .rx-swap{font-family:var(--mono);font-size:12.5px;margin:0 0 6px}
+  .rx .rx-arrow{color:var(--muted)}
+  .rx .rx-c{color:var(--clinical);font-weight:600}
+  .rx .rx-p{color:var(--penalty);font-weight:600}
+  .rx .rx-why{font-size:12.5px;color:var(--muted);line-height:1.45}
   .embed-caption{font-family:var(--mono);font-size:11px;color:var(--muted);
     letter-spacing:.04em;margin:0 0 8px}
   .embed-caption a{color:var(--muted)}
@@ -301,6 +317,22 @@
   </p>
 
   <div class="provenance" id="sim-provenance" hidden></div>
+
+  <section id="key-ex" hidden>
+    <h2>Key example</h2>
+    <div class="kx" id="kx-card"></div>
+    <div class="embed" id="kx-embed" hidden></div>
+  </section>
+
+  <section id="redir-ex" hidden>
+    <h2>When the advice itself changes</h2>
+    <p class="explainer">
+      Some redirects do more than weaken the clinical continuation &mdash; the top prediction
+      lands on a different object altogether. Probability aside, these are the swaps to watch:
+      the wording changes <em>what is offered</em>. Tier labels are a draft pending domain review.
+    </p>
+    <div class="rx-g" id="rx-cards"></div>
+  </section>
 
   <section id="sim-summary" hidden>
     <div class="sum-chips" id="sim-chips"></div>
@@ -451,9 +483,11 @@
     fetch('../data/simulated_scenarios.json',{cache:'no-cache'})
       .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();}),
     fetch('../data/urgency_shift.json',{cache:'no-cache'})
+      .then(function(r){return r.ok?r.json():null;}).catch(function(){return null;}),
+    fetch('../data/provenance.json',{cache:'no-cache'})
       .then(function(r){return r.ok?r.json():null;}).catch(function(){return null;})
   ]).then(function(loaded){
-      var data=loaded[0], urg=loaded[1];
+      var data=loaded[0], urg=loaded[1], provData=loaded[2];
       // urgency rows join on (batch, in-batch index, model); tiers are DRAFT
       var urgMap={};
       if(urg&&urg.rows)urg.rows.forEach(function(u){
@@ -498,6 +532,85 @@
         prov.appendChild(uline);
       }
       prov.hidden=false;
+
+      // Key example — pointer lives in data/provenance.json (steering.key_example,
+      // copied from the engine's overnight steering run); all numbers read from
+      // the payload scenario itself.
+      var steer=provData&&provData.steering;
+      if(steer&&steer.key_example){
+        var ke=steer.key_example;
+        var ks=scenarios.filter(function(s){
+          return s.batch===ke.batch&&s.batch_index===ke.batch_index;})[0];
+        if(ks){
+          var card=document.getElementById('kx-card');
+          var pc=ks.prob_clinical,pp=ks.prob_patient;
+          var cl=el('p','kx-pair kx-clin');
+          cl.appendChild(el('span',null,'Clinical wording: '));
+          cl.appendChild(el('b',null,'“'+(ks.clinical_prompt||'')+'”'));
+          var pa=el('p','kx-pair kx-pat');
+          pa.appendChild(el('span',null,'Patient wording: '));
+          pa.appendChild(el('b',null,'“'+(ks.patient_prompt||'')+'”'));
+          card.appendChild(cl);card.appendChild(pa);
+          var nums=el('p','kx-nums');
+          nums.appendChild(el('span',null,'prob('+((ks.intended_target||'')+'').trim()+'): clinical '
+            +(typeof pc==='number'?pc.toFixed(2):'—')+' → patient '
+            +(typeof pp==='number'?pp.toFixed(2):'—')+' · '));
+          nums.appendChild(el('span','pen','penalty '
+            +(typeof ks.language_penalty==='number'?ks.language_penalty.toFixed(2):'—')));
+          card.appendChild(nums);
+          if(typeof steer.boost_recoveries==='number'){
+            var st=el('p','kx-steer');
+            st.appendChild(el('span',null,'Causal check (steering, engine run 2026-07-08): amplifying the clinical graph’s top features while the model reads the patient wording restores '));
+            st.appendChild(el('b',null,'“'+(ke.boost_recovered_token||'')+'”'));
+            st.appendChild(el('span',null,' — one of '+steer.boost_recoveries+'/'+steer.n_phrases
+              +' such recoveries; suppressing the colloquial features manages only '
+              +steer.ablation_recoveries+'/'+steer.n_phrases+'.'));
+            card.appendChild(st);
+          }
+          if(ks.html){
+            var emb=document.getElementById('kx-embed');
+            var ifr=document.createElement('iframe');
+            ifr.src='../'+ks.html;ifr.title='Interactive circuit comparison for the key example';
+            ifr.loading='lazy';emb.appendChild(ifr);emb.hidden=false;
+          }
+          document.getElementById('key-ex').hidden=false;
+        }
+      }
+
+      // Redirect gallery — flips where the patient top lands on a lower-tier
+      // (or untiered) object than the clinical top: the advice itself changed.
+      if(urg&&urg.rows){
+        var byKey={};scenarios.forEach(function(s){byKey[s.batch+'#'+s.batch_index]=s;});
+        var picks=urg.rows.filter(function(u){
+          var s=byKey[u.batch+'#'+u.index];
+          return u.model==='gemma-2-2b'&&u.flip_class==='downgrade'
+            &&typeof u.tier_top_clinical==='number'
+            &&s&&(s.spread_clinical||[]).length&&(s.spread_patient||[]).length;
+        }).sort(function(a,b){
+          var ta=(typeof a.tier_top_patient==='number')?a.tier_top_patient:-0.5;
+          var tb=(typeof b.tier_top_patient==='number')?b.tier_top_patient:-0.5;
+          return (ta-a.tier_top_clinical)-(tb-b.tier_top_clinical);
+        }).slice(0,6);
+        if(picks.length){
+          var rg=document.getElementById('rx-cards');
+          picks.forEach(function(u){
+            var s=byKey[u.batch+'#'+u.index];
+            var c=el('div','rx');
+            var sw=el('p','rx-swap');
+            sw.appendChild(el('span','rx-c','“'+s.spread_clinical[0][0]+'”'));
+            sw.appendChild(el('span','rx-arrow',' → '));
+            sw.appendChild(el('span','rx-p','“'+s.spread_patient[0][0]+'”'));
+            c.appendChild(sw);
+            c.appendChild(el('p','rx-why',
+              '“'+(s.patient_term||'')+'” for “'+(s.clinical_term||'')+'”: tier '
+              +u.tier_top_clinical+' → '
+              +(typeof u.tier_top_patient==='number'?('tier '+u.tier_top_patient):'untiered')
+              +' · Sim '+s.index));
+            rg.appendChild(c);
+          });
+          document.getElementById('redir-ex').hidden=false;
+        }
+      }
 
       var sumBody=document.getElementById('sim-sum-body');
       var pages=document.getElementById('sim-pages');
