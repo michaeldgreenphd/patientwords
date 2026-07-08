@@ -70,6 +70,11 @@
     margin:0 2px;position:relative;top:1px}
   .nd-med{background:var(--teal);box-shadow:0 0 0 2px #fff,0 0 0 3px var(--teal)}
   .nd-day{background:var(--patient);box-shadow:0 0 0 2px #fff,0 0 0 3px var(--patient)}
+  .paths{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin:14px 0 8px}
+  .path{border-top:1px solid var(--hairline);padding-top:12px}
+  .path h3{font-size:16.5px;font-weight:600;margin:8px 0 6px}
+  .path p{font-size:14.5px;line-height:1.6;color:var(--ink);margin:0}
+  @media (max-width:560px){.paths{grid-template-columns:1fr}}
   .src{border-top:1px solid var(--ink);margin-top:46px;padding-top:12px;
     font-family:var(--mono);font-size:11.5px;line-height:1.8;color:var(--muted)}
   .back{display:inline-block;margin-top:22px;font-family:var(--mono);font-size:12px;letter-spacing:.1em;
@@ -176,6 +181,31 @@
        A circuit trace records which features fired and how strongly each one fed
        the final guess. Clinical wording lights the medical features; casual wording
        lights everyday features instead — and the guess follows whichever circuit is lit.</p>
+    <div class="fig" role="img" aria-label="Two parallel tracks of feature nodes. The clinical term dyspepsia lights up teal medical nodes and leads to antacid. The casual phrase stomach on fire lights up dark everyday nodes and leads to ice cream.">
+    <svg viewBox="0 0 720 130">
+      <text x="0" y="40" class="sv-q">“dyspepsia”</text>
+      <path d="M120,35 L188,35" stroke="#dcdad2" stroke-width="1" fill="none"/>
+      <circle cx="200" cy="35" r="5.5" fill="#0f766e"/>
+      <circle cx="248" cy="35" r="3" fill="#c3c9d2" opacity=".5"/>
+      <circle cx="296" cy="35" r="6.5" fill="#0f766e"/>
+      <circle cx="344" cy="35" r="4" fill="#0f766e" opacity=".55"/>
+      <circle cx="392" cy="35" r="3" fill="#c3c9d2" opacity=".5"/>
+      <circle cx="440" cy="35" r="5" fill="#0f766e" opacity=".8"/>
+      <path d="M452,35 L520,35" stroke="#dcdad2" stroke-width="1" fill="none"/>
+      <text x="530" y="40" class="sv-a" fill="#0f766e">antacid</text>
+      <text x="0" y="100" class="sv-q">“stomach on fire”</text>
+      <path d="M160,95 L188,95" stroke="#dcdad2" stroke-width="1" fill="none"/>
+      <circle cx="200" cy="95" r="3" fill="#c3c9d2" opacity=".5"/>
+      <circle cx="248" cy="95" r="6" fill="#111827"/>
+      <circle cx="296" cy="95" r="3" fill="#c3c9d2" opacity=".5"/>
+      <circle cx="344" cy="95" r="5" fill="#111827" opacity=".75"/>
+      <circle cx="392" cy="95" r="6.5" fill="#111827"/>
+      <circle cx="440" cy="95" r="4" fill="#111827" opacity=".55"/>
+      <path d="M452,95 L520,95" stroke="#dcdad2" stroke-width="1" fill="none"/>
+      <text x="530" y="100" class="sv-a" fill="#b45309">ice cream</text>
+    </svg>
+    </div>
+    <p class="cap">node size = how strongly the feature fed the guess · faint dots = features that barely fired</p>
     <p>Every figure on this site is one of those photographs.</p>
   </section>
 
@@ -197,7 +227,7 @@
     <svg viewBox="0 0 720 120">
       <text x="0" y="52" class="sv-q">“My stomach’s on fire.”</text>
       <path class="sv-line" d="M232,46 L268,46"/>
-      <rect x="268" y="22" width="112" height="48" fill="none" stroke="#0f766e" stroke-width="1.2" stroke-dasharray="5 5"/>
+      <rect x="268" y="22" width="112" height="48" rx="24" fill="#eceae3"/>
       <text x="324" y="52" class="sv-m" text-anchor="middle" fill="#0f766e">translation layer</text>
       <path class="sv-line" d="M380,46 L410,46"/>
       <text x="418" y="52" class="sv-q" fill="#0f766e">“I have acid reflux.”</text>
@@ -213,13 +243,27 @@
   <section>
     <p class="step-no">7 · The real fix</p>
     <h2>Teach the listener, not just the speaker</h2>
-    <p>Two paths lead past the patch. <b>Give the model context up front:</b> in our
-       measurements, one plain sentence placing the conversation in a medical setting
-       roughly halved the damage from casual wording — no translation needed.
-       <b>Train on patient language:</b> models could learn the way people actually
-       describe symptoms — idioms, misspellings, dialects — the way clinicians do.
-       That is a change to how models are built, not how they are prompted, and it is
-       the future direction this project points to rather than a result it claims.</p>
+    <p>Two paths lead past the patch.</p>
+    <div class="paths">
+      <div class="path">
+        <svg viewBox="0 0 40 40" width="34" height="34" aria-hidden="true">
+          <rect x="8" y="4" width="24" height="32" fill="none" stroke="#0f766e" stroke-width="1.4"/>
+          <path d="M13,12 h14 M13,18 h14 M13,24 h9" stroke="#0f766e" stroke-width="1.2"/>
+        </svg>
+        <h3>Context up front</h3>
+        <p>One plain sentence placing the conversation in a medical setting roughly
+           halved the damage from casual wording. Measured.</p>
+      </div>
+      <div class="path">
+        <svg viewBox="0 0 40 40" width="34" height="34" aria-hidden="true">
+          <ellipse cx="20" cy="10" rx="13" ry="4.5" fill="none" stroke="#6d6c66" stroke-width="1.4"/>
+          <path d="M7,10 v9 a13,4.5 0 0 0 26,0 v-9 M7,19 v9 a13,4.5 0 0 0 26,0 v-9" fill="none" stroke="#6d6c66" stroke-width="1.4"/>
+        </svg>
+        <h3>Train on patient language</h3>
+        <p>Models learn idioms, misspellings, and dialects the way clinicians do —
+           a change to how models are built. Future direction, not a claimed result.</p>
+      </div>
+    </div>
     <a class="back" href="../word-differences/">See the real traces →</a>
   </section>
 
