@@ -938,13 +938,18 @@
       });
       document.getElementById('sim-summary').hidden=false;
 
+      // the loading box has done its job; trace-progress status (when some
+      // accepted pairs have not landed yet) reads better as a provenance line
+      document.getElementById('sim-pending').hidden=true;
       var accepted=batches.reduce(function(a,b){
         return a+((b.generated&&b.generated.accepted)||0);
       },0);
       if(accepted>scenarios.length){
-        var pend=document.getElementById('sim-pending');
-        pend.hidden=false;
-        pend.appendChild(document.createTextNode(' '+(accepted-scenarios.length)+' of '+accepted+' scenarios still tracing'));
+        var pline=el('div');
+        pline.appendChild(el('span',null,'In progress — '));
+        pline.appendChild(el('b',null,(accepted-scenarios.length)+' of '+accepted+' accepted scenarios are still tracing'));
+        pline.appendChild(el('span',null,'; the table grows as chunks land.'));
+        prov.appendChild(pline);
       }
     })
     .catch(function(){
