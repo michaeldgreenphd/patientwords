@@ -139,8 +139,8 @@
   <p class="dateline">Methods · how the pipeline works</p>
   <h1>From a sentence to a circuit, in four steps.</h1>
   <p class="lede">
-    Every figure starts as two (or four) plain sentences, one in clinician wording and one
-    in patient wording. Each ends as an interactive map of the computation gemma-2-2b
+    Every figure starts as two (or four) plain sentences — one in clinician wording, one
+    in patient wording — and ends as an interactive map of the computation gemma-2-2b
     performs on it.
   </p>
 
@@ -148,13 +148,12 @@
     <p class="step-no">Step 1 · Model &amp; features</p>
     <h2>gemma-2-2b, read through Gemma Scope transcoders</h2>
     <p>
-      The subject of the study is <code>gemma-2-2b</code>, an open-weights language model.
+      The study’s subject is <code>gemma-2-2b</code>, an open-weights language model.
       On its own, its internal activity is millions of undifferentiated numbers. Google
       DeepMind’s <a href="https://huggingface.co/google/gemma-scope-2b-pt-transcoders">Gemma
-      Scope</a> transcoders re-express that activity as a sparse set of <em>features</em>:
-      individually meaningful units that tend to fire for one recognizable thing, such as
-      mentions of mental-health treatment, first-person symptom talk, or the syntax of a
-      quoted sentence.
+      Scope</a> transcoders re-express that activity as a sparse set of <em>features</em> —
+      units that each tend to fire for one recognizable thing, such as mental-health
+      treatment, first-person symptom talk, or the syntax of a quoted sentence.
     </p>
   </section>
 
@@ -164,9 +163,9 @@
     <p>
       For each prompt we run <a href="https://github.com/safety-research/circuit-tracer">circuit-tracer</a>
       through <a href="https://neuronpedia.org">Neuronpedia</a> to build an
-      <em>attribution graph</em>: a causal map of which features, at which layers and token
+      <em>attribution graph</em>: a causal map of which features, at which layers and
       positions, pushed the model toward its next-token prediction. Edges carry
-      attribution mass, the amount one feature’s firing contributed to another’s and
+      attribution mass — how much one feature’s firing contributed to another’s, and
       ultimately to the final logits.
     </p>
   </section>
@@ -175,15 +174,15 @@
     <p class="step-no">Step 3 · Tagging</p>
     <h2>Sorting features into clinical, off-target, and structural</h2>
     <p>
-      Each feature in a graph is tagged by what it responds to, using its autointerp
+      Each feature is tagged by what it responds to, from its autointerp
       description and activation profile:
     </p>
     <ul class="tags">
-      <li class="t-clinical"><b>Clinical</b>: features that belong to the medical
-        computation we want: the concept of depression, therapy, diagnosis, treatment.</li>
-      <li class="t-offtarget"><b>Off-target</b>: features dragged in by the colloquial
-        wording: idiom, mood-as-weather metaphors, music senses of “the blues.” These are
-        the mechanism of the language penalty.</li>
+      <li class="t-clinical"><b>Clinical</b>: features in the medical
+        computation we want — depression, therapy, diagnosis, treatment.</li>
+      <li class="t-offtarget"><b>Off-target</b>: features dragged in by colloquial
+        wording — idiom, mood-as-weather metaphors, the music sense of “the blues.” These
+        are the mechanism of the language penalty.</li>
       <li class="t-structural"><b>Structural</b>: scaffolding features for syntax,
         position, and punctuation that appear in every trace and carry no medical content.</li>
     </ul>
@@ -218,7 +217,7 @@
         <span class="eng-mode">dialect · Fig. 3</span>
         <p>The clinical term is held fixed while the
            surrounding syntax is re-traced across dialect and register variants, extending
-           the single syntax delta into a distribution across dialects.</p>
+           the single syntax delta into a distribution.</p>
       </li>
       <li>
         <span class="eng-name"><a href="translation/">Translation</a></span>
@@ -250,16 +249,16 @@
     <h2>What this evidence does and does not show</h2>
     <p>
       This project measures one narrow thing: how the probability of a single next token
-      changes when clinical wording is replaced by the words patients use. That is a probe
-      of model behavior, not a clinical outcome. A lower probability for “antacid” is not a
-      measurement of harm; it is a measurable trace of the model treating the two phrasings
+      changes when clinical wording is replaced by patient wording. That is a probe
+      of model behavior, not a clinical outcome. A lower probability for “antacid” isn’t a
+      measurement of harm; it’s a trace of the model treating the two phrasings
       differently.
     </p>
     <ul class="engines">
       <li><p><b>One small model carries the circuit evidence.</b> Every attribution graph
         here comes from gemma-2-2b, a 2-billion-parameter model chosen because its
         transcoders are public. The behavioral checks on qwen3-4b and qwen3-1.7b measure
-        next-token probabilities only, with no circuits. None of this establishes how larger
+        next-token probabilities only, no circuits. None of this establishes how larger
         or instruction-tuned clinical systems behave.</p></li>
       <li><p><b>Attribution graphs are an interpretive tool.</b> They reconstruct the
         model’s computation through transcoder features and prune heavily; error nodes
@@ -271,8 +270,8 @@
       <li><p><b>Measurements are a point in time.</b> The hand-measured probabilities were
         observed on specific dates against a hosted service; re-runs can differ.</p></li>
       <li><p><b>Translation can fail.</b> The mitigation the Translation figure demonstrates
-        is itself an LLM step. The engine flags translation regressions, cases where the
-        rewrite made the target token less likely, and they occur.</p></li>
+        is itself an LLM step. The engine flags translation regressions — cases where the
+        rewrite made the target token less likely — and they occur.</p></li>
       <li><p><b>The stimuli are constructed.</b> Most phrase pairs were written by a
         language model and validated programmatically, not collected from patients. They
         are stress tests, not a sample of real clinical conversations.</p></li>
@@ -281,7 +280,7 @@
       Nothing here is medical advice, and no part of this pipeline is a deployed clinical
       tool. The claim this evidence supports is narrower: on the models measured, the same
       medical situation phrased in patient words is measurably less likely to reach the
-      clinical continuation than when phrased in clinical terms, and the circuit view shows
+      clinical continuation than in clinical terms — and the circuit view shows
       where that difference arises.
     </p>
   </section>
