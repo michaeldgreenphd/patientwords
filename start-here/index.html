@@ -12,6 +12,7 @@
   :root{
     --paper:#faf9f5; --ink:#1c1c19; --patient:#111827; --clinical:#15803d;
     --penalty:#b4483d; --muted:#6d6c66; --structural:#c3c9d2; --hairline:#dcdad2;
+    --teal:#0f766e; --orange:#b45309;
     --serif:'Iowan Old Style','Palatino Linotype',Palatino,'Book Antiqua',Georgia,serif;
     --mono:ui-monospace,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace;
   }
@@ -34,11 +35,11 @@
   .masthead nav a[aria-current=page]{color:var(--ink);border-bottom:1px solid var(--ink)}
   .rule-heavy{border:0;border-top:2px solid var(--ink);margin:0}
   .rule-fine{border:0;border-top:1px solid var(--hairline);margin:3px 0 0}
-  .dateline{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--clinical);font-weight:600;margin:34px 0 14px}
+  .dateline{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--teal);font-weight:600;margin:34px 0 14px}
   h1{font-size:clamp(28px,4.6vw,38px);line-height:1.16;font-weight:600;margin:0 0 12px}
   .subtitle{font-style:italic;font-size:19px;color:var(--muted);margin:0 0 8px}
   section{border-top:1px solid var(--ink);margin-top:42px;padding-top:12px}
-  .step-no{font-family:var(--mono);font-size:11.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--clinical);font-weight:600;margin:0 0 8px}
+  .step-no{font-family:var(--mono);font-size:11.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--teal);font-weight:600;margin:0 0 8px}
   h2{font-size:22px;font-weight:600;margin:0 0 10px}
   section p{margin:0 0 12px;font-size:16px;line-height:1.64}
   .fig{margin:18px 0 6px}
@@ -48,21 +49,27 @@
   .sv-q{font:italic 14px var(--serif);fill:var(--patient)}
   .sv-m{font:11px var(--mono);fill:var(--muted)}
   .sv-a{font:600 14px var(--mono)}
-  .sv-line{stroke:var(--structural);stroke-width:1.2;fill:none}
+  .sv-line{stroke:#9aa1ad;stroke-width:1.8;fill:none}
   /* toggle demo */
   .tg{border:1px solid var(--hairline);background:#fff;padding:18px 20px;margin:16px 0 6px}
   .tg-sentence{font-size:17px;line-height:1.6;margin:0 0 4px}
-  .tg-swap{display:inline-block;border-bottom:2px solid var(--penalty);cursor:default}
+  .tg-swap{display:inline-block;border-bottom:2px solid var(--orange);cursor:default}
   .tg button{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;
     background:none;border:1px solid var(--ink);color:var(--ink);padding:6px 12px;cursor:pointer;margin:10px 0 14px}
   .tg button:hover{background:var(--ink);color:#fff}
   .tg button:focus-visible{outline:2px solid var(--clinical);outline-offset:2px}
+  .bar-head{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--muted);text-align:right;margin:0 0 2px}
   .bar-row{display:flex;align-items:center;gap:10px;margin:6px 0}
   .bar-lbl{font-family:var(--mono);font-size:12.5px;min-width:8ch;text-align:right}
   .bar-track{flex:1;height:16px;background:none}
   .bar-fill{height:16px;transition:width .7s ease}
   .bar-val{font-family:var(--mono);font-size:11.5px;color:var(--muted);min-width:4ch}
   @media (prefers-reduced-motion:reduce){.bar-fill{transition:none}}
+  .nd{display:inline-block;width:11px;height:11px;border-radius:50%;vertical-align:baseline;
+    margin:0 2px;position:relative;top:1px}
+  .nd-med{background:var(--teal);box-shadow:0 0 0 2px #fff,0 0 0 3px var(--teal)}
+  .nd-day{background:var(--patient);box-shadow:0 0 0 2px #fff,0 0 0 3px var(--patient)}
   .src{border-top:1px solid var(--ink);margin-top:46px;padding-top:12px;
     font-family:var(--mono);font-size:11.5px;line-height:1.8;color:var(--muted)}
   .back{display:inline-block;margin-top:22px;font-family:var(--mono);font-size:12px;letter-spacing:.1em;
@@ -110,8 +117,8 @@
       <path class="sv-line" d="M232,142 C330,142 350,90 430,88"/>
       <circle cx="452" cy="88" r="16" fill="none" stroke="#1c1c19" stroke-width="1.6"/>
       <text x="452" y="63" class="sv-m" text-anchor="middle">clinician</text>
-      <path class="sv-line" d="M470,88 L540,88" stroke="#15803d" stroke-width="1.8"/>
-      <text x="552" y="93" class="sv-a" fill="#15803d">antacid</text>
+      <path class="sv-line" d="M470,88 L540,88" stroke="#0f766e" stroke-width="2.2"/>
+      <text x="552" y="93" class="sv-a" fill="#0f766e">antacid</text>
     </svg>
     </div>
     <p class="cap">interpretation absorbs the wording</p>
@@ -131,14 +138,14 @@
       <path class="sv-line" d="M232,22 L430,22"/>
       <path class="sv-line" d="M232,82 L430,82"/>
       <path class="sv-line" d="M232,142 L430,142"/>
-      <rect x="430" y="6" width="70" height="152" fill="none" stroke="#1c1c19" stroke-width="1.6"/>
+      <rect x="430" y="6" width="70" height="152" fill="none" stroke="#6d6c66" stroke-width="1.2" stroke-dasharray="5 5"/>
       <text x="465" y="180" class="sv-m" text-anchor="middle">language model</text>
-      <path class="sv-line" d="M500,22 L540,22" stroke="#15803d" stroke-width="1.8"/>
-      <text x="552" y="27" class="sv-a" fill="#15803d">antacid</text>
-      <path class="sv-line" d="M500,82 L540,82" stroke="#b4483d" stroke-width="1.8"/>
-      <text x="552" y="87" class="sv-a" fill="#b4483d">ice cream</text>
-      <path class="sv-line" d="M500,142 L540,142" stroke="#b4483d" stroke-width="1.8"/>
-      <text x="552" y="147" class="sv-a" fill="#b4483d">apple</text>
+      <path class="sv-line" d="M500,82 C516,82 518,24 540,22" stroke="#0f766e" stroke-width="2.2"/>
+      <text x="552" y="27" class="sv-a" fill="#0f766e">antacid</text>
+      <path class="sv-line" d="M500,82 L540,82" stroke="#b45309" stroke-width="2.2"/>
+      <text x="552" y="87" class="sv-a" fill="#b45309">ice cream</text>
+      <path class="sv-line" d="M500,82 C516,82 518,140 540,142" stroke="#b45309" stroke-width="2.2"/>
+      <text x="552" y="147" class="sv-a" fill="#b45309">apple</text>
     </svg>
     </div>
     <p class="cap">the wording chooses the answer — measured on gemma-2-2b, live traces</p>
@@ -154,6 +161,7 @@
         <span class="tg-swap" id="tg-swap">asthma flares</span>,
         so at work I keep a spare&nbsp;___”</p>
       <button id="tg-btn" type="button" aria-label="Switch between clinical and patient wording">say it the other way</button>
+      <div class="bar-head" aria-hidden="true">likelihood</div>
       <div id="tg-bars" aria-live="polite"></div>
     </div>
     <p class="cap">real measurements: scenario 85 of the simulated series</p>
@@ -163,8 +171,8 @@
     <p class="step-no">4 · Look inside</p>
     <h2>Circuit tracing photographs the reasoning</h2>
     <p>Inside the model, small units called <b>features</b> switch on as it reads —
-       some respond to medical ideas <span style="color:var(--clinical)">●</span>,
-       others to everyday ones <span style="color:var(--patient)">●</span>.
+       some respond to medical ideas <span class="nd nd-med" aria-label="medical feature node"></span>,
+       others to everyday ones <span class="nd nd-day" aria-label="everyday feature node"></span>.
        A circuit trace records which features fired and how strongly each one fed
        the final guess. Clinical wording lights the medical features; casual wording
        lights everyday features instead — and the guess follows whichever circuit is lit.</p>
@@ -193,8 +201,8 @@
 (function(){
   // scenario 85, live-traced: bars re-rank when the wording flips
   var states={
-    clinical:{swap:'asthma flares',bars:[['inhaler',0.69,'#15803d'],['mask',0.06,'#c3c9d2'],['set',0.03,'#c3c9d2']]},
-    patient:{swap:'chest gets all tight',bars:[['shirt',0.18,'#b4483d'],['t-',0.07,'#c3c9d2'],['pair',0.06,'#c3c9d2']]}
+    clinical:{swap:'asthma flares',bars:[['inhaler',0.69,'#0f766e'],['mask',0.06,'#c3c9d2'],['set',0.03,'#c3c9d2']]},
+    patient:{swap:'chest gets all tight',bars:[['shirt',0.18,'#b45309'],['t-',0.07,'#c3c9d2'],['pair',0.06,'#c3c9d2']]}
   };
   var cur='clinical';
   var wrap=document.getElementById('tg-bars');
@@ -209,7 +217,7 @@
       var f=document.createElement('div');f.className='bar-fill';
       f.style.background=b[2];f.style.width='0%';
       t.appendChild(f);
-      var v=document.createElement('span');v.className='bar-val';v.textContent=b[1].toFixed(2);
+      var v=document.createElement('span');v.className='bar-val';v.textContent=Math.round(b[1]*100)+'%';
       row.appendChild(l);row.appendChild(t);row.appendChild(v);
       wrap.appendChild(row);
       requestAnimationFrame(function(){f.style.width=(b[1]*100)+'%';});
