@@ -74,16 +74,16 @@
 
   .qm-scroll{overflow-x:auto;margin:24px 0 6px}
   .qm-table{border-collapse:collapse;min-width:560px}
-  .qm-table th{font-family:var(--mono);font-size:10.5px;font-weight:600;letter-spacing:.14em;
-    text-transform:uppercase;color:var(--muted);text-align:left;padding:8px 22px 8px 0}
-  .qm-table thead th{border-bottom:1px solid var(--ink)}
-  .qm-table tbody th{border-bottom:1px solid var(--hairline)}
-  .qm-table td{border-bottom:1px solid var(--hairline);padding:10px 22px 10px 0;
+  .qm-table th{font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--ink);text-align:left;padding:8px 22px 8px 0}
+  .qm-table thead th{border-bottom:1px solid var(--hairline)}
+  .qm-table tbody th{border-bottom:0}
+  .qm-table td{border-bottom:0;padding:10px 22px 10px 0;
     font-size:15.5px;line-height:1.5;vertical-align:top}
   .qm-table b{font-family:var(--mono);font-size:12.5px}
   .qm-table .qm-m{color:var(--clinical)}
   .qm-table .qm-p{color:var(--patient)}
-  .qm-note{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.04em;
+  .qm-note{font-family:var(--mono);font-size:10.5px;color:var(--muted);letter-spacing:.04em;
     line-height:1.9;margin:0}
   .qm-note code{font-family:var(--mono);color:var(--ink)}
 
@@ -112,6 +112,24 @@
   body.pw-no-scroll{overflow:hidden}
   .embed-shell:fullscreen{background:#fff;overflow:hidden}
   .embed-shell:fullscreen .embed{max-height:100vh;height:100vh;border:0;overflow:auto}
+  .meth{border:1px solid var(--hairline);background:#fbfaf6;margin:26px 0 16px;padding:0 16px}
+  .meth summary{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--muted);padding:10px 0;cursor:pointer}
+  .meth summary:hover{color:var(--ink)}
+  .quad-wrap{position:relative}
+  .quad-hit{position:absolute;width:50%;height:50%;background:transparent;border:0;cursor:pointer;padding:0}
+  .qh-tl{top:0;left:0}.qh-tr{top:0;right:0}.qh-bl{bottom:0;left:0}.qh-br{bottom:0;right:0}
+  .quad-hit span{position:absolute;top:8px;right:10px;font-size:15px;color:var(--muted);
+    opacity:0;background:#fff;border:1px solid var(--hairline);padding:2px 7px}
+  .quad-hit:hover{background:rgba(28,28,25,.045)}
+  .quad-hit:hover span,.quad-hit:focus-visible span{opacity:1}
+  .qmodal{position:fixed;inset:0;z-index:70;background:#fff;display:none}
+  .qmodal.open{display:block}
+  .qmodal iframe{width:100%;height:100%;border:0}
+  .qmodal-close{position:absolute;top:10px;right:14px;z-index:71;font-family:var(--mono);
+    font-size:12px;letter-spacing:.1em;text-transform:uppercase;background:#fff;
+    border:1px solid var(--ink);color:var(--ink);padding:7px 14px;cursor:pointer}
+  .qmodal-close:hover{background:var(--ink);color:#fff}
   .back{display:inline-block;margin-top:8px;font-family:var(--mono);font-size:12px;
     letter-spacing:.1em;text-transform:uppercase;color:var(--ink);text-decoration:none;
     border-bottom:1px solid var(--ink);padding-bottom:2px}
@@ -178,29 +196,6 @@
      everyday reading and away from care-seeking continuations: the variety shift alone
      adds +11–13% to “it”, the register shift another +4–5%.</p>
   <span class="stat penalty">Variety shift Δ: +11% (C → D, 0.26 → 0.37) and +13% (A → B, 0.21 → 0.34) toward the everyday continuation · Register shift Δ: +4–5% (measured on “it”)</span>
-  <p class="explainer">The register effect is dose-dependent. In a five-rung ladder traced
-     on the same model, the clinical term <em>“dyspepsia”</em> is held verbatim while the
-     sentence around it slides from formal clinical register to casual speech: the top
-     continuation is <em>antacid</em> at 0.32 in the fully clinical rung, <em>antacid</em>
-     at 0.11 one rung down — and from the mixed rung onward it is <em>apple</em>. The
-     recommendation object changes with register alone, and it changes gradually, not at
-     once. (Numbers are recorded in <code>data/provenance.json</code>.)</p>
-  <p class="traced" data-mode="dialect" data-traced="gemma-2-2b">
-    <span class="tm"><b>live trace (dose-response ladder):</b> gemma-2-2b · gemma scope transcoders</span>
-    <span class="tp">hosted circuit-tracer via Neuronpedia · traced July 8, 2026 · “dyspepsia” held
-      verbatim across five register rungs · next-token probabilities read directly
-      from the trace</span>
-  </p>
-
-  <div class="embed">
-    <iframe class="live" src="../modes/simulated/dialects_20260708T011831Z/index_01.html" loading="lazy"
-            title="Live dose-response ladder: five register rungs around the fixed clinical term"></iframe>
-  </div>
-  <p class="embed-caption">Live trace: baseline plus five rungs from formal clinical register
-     to casual speech, the clinical term unchanged in every sentence. The top continuation is
-     “&nbsp;antacid” at 0.32 (rung 1) and 0.11 (rung 2), then “&nbsp;apple” from the mixed rung
-     onward. Numbers are recorded in <code>data/provenance.json</code>.</p>
-
   <p class="traced" data-mode="4quadrant" data-traced="gemma-2-2b">
     <span class="tm"><b>traced model:</b> gemma-2-2b · gemma scope transcoders</span>
     <span class="tp">hosted circuit-tracer via Neuronpedia</span>
@@ -234,7 +229,25 @@
      D&nbsp;“I been had the sugar, my blood sugar been over 400 …”.
      The engine generates these with <code>medlang-generate quadrants</code> (frames × terms,
      validated) and traces them with <code>--mode 4quadrant</code>.</p>
+  <h2 class="view-head">The full matrix: all four cells at once</h2>
+  <div class="quad-wrap">
+    <div class="embed">
+      <iframe class="live" src="../modes/4quadrant/index.html" loading="lazy"
+              title="Interactive four-quadrant matrix factorizing vocabulary and syntax effects"></iframe>
+    </div>
+    <button class="quad-hit qh-tl" type="button" aria-label="Expand quadrant C (patient language, standard syntax)"><span>⤢</span></button>
+    <button class="quad-hit qh-tr" type="button" aria-label="Expand quadrant A (medical lexicon, standard syntax)"><span>⤢</span></button>
+    <button class="quad-hit qh-bl" type="button" aria-label="Expand quadrant D (patient language, nonstandard syntax)"><span>⤢</span></button>
+    <button class="quad-hit qh-br" type="button" aria-label="Expand quadrant B (medical lexicon, nonstandard syntax)"><span>⤢</span></button>
+  </div>
+  <p class="embed-caption">The matrix is scaled to fit the page; click any quadrant to expand it full screen to
+     compare all four boxes at full detail. Each box traces one cell’s prompt. Live
+     gemma-2-2b trace of a simulated quadrant scenario (batch quadrants_20260706T191617Z,
+     generated by claude-opus-4-8 for $0.025; sidecar published at
+     <a href="../data/provenance.json">data/provenance.json</a>).</p>
 
+  <details class="meth">
+    <summary>More views: one swap at a time · the dose-response ladder</summary>
   <h2 class="view-head">The four edges, one swap at a time</h2>
   <p class="view-sub">each comparison below isolates ONE cell swap of the matrix. Features present
      in both cells are dimmed to faint gray, so whatever remains at full ink is exactly the
@@ -257,17 +270,37 @@
   <p class="edge-head">Variety shift, patient column · C → D · Δ +11% · 220 only in C, 255 only in D</p>
   <div class="embed"><iframe class="live" src="../modes/4quadrant/edge_variety_patient.html" loading="lazy"
        title="Morphosyntax shift within the patient-language column, shared circuit dimmed"></iframe></div>
+  <p class="traced" data-mode="dialect" data-traced="gemma-2-2b">
+    <span class="tm"><b>live trace (dose-response ladder):</b> gemma-2-2b · gemma scope transcoders</span>
+    <span class="tp">hosted circuit-tracer via Neuronpedia · traced July 8, 2026 · “dyspepsia” held
+      verbatim across five register rungs · next-token probabilities read directly
+      from the trace</span>
+  </p>
 
-  <h2 class="view-head">The full matrix: all four cells at once</h2>
   <div class="embed">
-    <iframe class="live" src="../modes/4quadrant/index.html" loading="lazy"
-            title="Interactive four-quadrant matrix factorizing vocabulary and syntax effects"></iframe>
+    <iframe class="live" src="../modes/simulated/dialects_20260708T011831Z/index_01.html" loading="lazy"
+            title="Live dose-response ladder: five register rungs around the fixed clinical term"></iframe>
   </div>
-  <p class="embed-caption">The matrix is scaled to fit the page; open it full screen (button, top-right) to
-     compare all four boxes at full detail. Each box traces one cell’s prompt. Live
-     gemma-2-2b trace of a simulated quadrant scenario (batch quadrants_20260706T191617Z,
-     generated by claude-opus-4-8 for $0.025; sidecar published at
-     <a href="../data/provenance.json">data/provenance.json</a>).</p>
+  <p class="embed-caption">Live trace: baseline plus five rungs from formal clinical register
+     to casual speech, the clinical term unchanged in every sentence. The top continuation is
+     “&nbsp;antacid” at 0.32 (rung 1) and 0.11 (rung 2), then “&nbsp;apple” from the mixed rung
+     onward. Numbers are recorded in <code>data/provenance.json</code>.</p>
+  </details>
+
+  <p class="explainer">The register effect is dose-dependent. In a five-rung ladder traced
+     on the same model, the clinical term <em>“dyspepsia”</em> is held verbatim while the
+     sentence around it slides from formal clinical register to casual speech: the top
+     continuation is <em>antacid</em> at 0.32 in the fully clinical rung, <em>antacid</em>
+     at 0.11 one rung down — and from the mixed rung onward it is <em>apple</em>. The
+     recommendation object changes with register alone, and it changes gradually, not at
+     once. (Numbers are recorded in <code>data/provenance.json</code>.)</p>
+
+
+
+
+
+
+
 
   <a class="back" href="../">← Back home</a>
 
@@ -361,6 +394,28 @@
   window.addEventListener('resize',fitAll);
   setTimeout(fitAll,300);
   setTimeout(fitAll,1400);
+})();
+</script>
+<div class="qmodal" id="qmodal" role="dialog" aria-modal="true" aria-label="Full-screen quadrant matrix">
+  <button class="qmodal-close" id="qmodal-close" type="button">✕ Close</button>
+</div>
+<script>
+(function(){
+  var modal=document.getElementById('qmodal');
+  var closeBtn=document.getElementById('qmodal-close');
+  function open(){
+    if(!modal.querySelector('iframe')){
+      var f=document.createElement('iframe');
+      f.src='../modes/4quadrant/index.html';
+      f.title='Four-quadrant matrix, full screen';
+      modal.appendChild(f);
+    }
+    modal.classList.add('open');document.body.style.overflow='hidden';closeBtn.focus();
+  }
+  function close(){modal.classList.remove('open');document.body.style.overflow='';}
+  document.querySelectorAll('.quad-hit').forEach(function(h){h.addEventListener('click',open);});
+  closeBtn.addEventListener('click',close);
+  window.addEventListener('keydown',function(e){if(e.key==='Escape')close();});
 })();
 </script>
 </body>
