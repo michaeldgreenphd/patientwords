@@ -157,14 +157,14 @@
      generic <em>doctor</em> (0.68) to <em>dermatologist</em> (0.68) — translation
      recovers the specialist. It is not a cure-all: in one case translation replaced the
      correct <em>prescription</em> (0.38) with <em>topical</em> (0.15), worse than doing
-     nothing. Eight of twenty downgrades recovered; seven did not. (Numbers:
-     <code>data/provenance.json → translation_cases</code>; tiers draft pending review.)</p>
+     nothing. Eight of twenty downgrades recovered; seven did not. (Numbers are recorded in <code>data/provenance.json</code>; tiers draft pending review.)</p>
   <span class="stat recovery">Recovered target probability: +51% (0.35 → 0.86)</span>
   <p class="traced" data-mode="translation" data-traced="gemma-2-2b">
     <span class="tm"><b>live trace:</b> gemma-2-2b · gemma scope transcoders</span>
-    <span class="tp">hosted circuit-tracer via Neuronpedia · traced 2026-07-07 · downgrade
-      set item 17, three panels (clinical / patient / LLM-translated) · greedy next-token
-      probabilities · “constipated” vs. “all bunged up”, translation restores “ lax(ative)”</span>
+    <span class="tp">hosted circuit-tracer via Neuronpedia · traced July 7, 2026 · phrase 17 of the
+      downgrade set, three panels (clinical / patient / LLM-translated) · next-token
+      probabilities read directly from the trace · “constipated” vs. “all bunged up”,
+      translation restores “ lax(ative)”</span>
   </p>
 
   <div class="embed">
@@ -173,8 +173,7 @@
   </div>
   <p class="embed-caption">Live trace: under patient wording the top continuation is
      “&nbsp;nap” (0.30); after LLM translation to clinical wording it is “&nbsp;lax(ative)”
-     (0.45) — stronger than the original clinical phrasing (0.26). Numbers:
-     <code>data/provenance.json → translation_cases.grandma_laxative</code>.</p>
+     (0.45) — stronger than the original clinical phrasing (0.26). Numbers are recorded in <code>data/provenance.json</code>.</p>
 
   <p class="traced" data-mode="translation" data-traced="gemma-2-2b">
     <span class="tm"><b>demonstration graph:</b> hand-authored · gemma-2-2b schema</span>
