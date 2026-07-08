@@ -54,6 +54,13 @@
     letter-spacing:-.006em;margin:0 0 10px}
   .subtitle{font-style:italic;font-size:20px;line-height:1.5;color:var(--muted);margin:0 0 20px}
   .explainer{font-size:17px;line-height:1.66;margin:0 0 14px}
+  .me-n{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--muted);margin:-6px 0 10px}
+  .th-tip{border-bottom:1px dotted var(--muted);cursor:help}
+  .me-cost{font-size:11px;color:var(--muted)}
+  .slope-cell svg{display:block}
+  .pull{border-left:2px solid var(--ink);margin:18px 0 14px;padding:2px 0 2px 16px;
+    font-size:19px;line-height:1.5;font-style:italic}
   section{border-top:1px solid var(--ink);margin-top:40px;padding-top:12px}
   h2{font-size:23px;font-weight:600;line-height:1.24;margin:0 0 12px;letter-spacing:-.004em}
   section p{margin:0 0 14px;font-size:16px;line-height:1.66}
@@ -130,52 +137,30 @@
     comparable.
   </p>
 
-  <section>
-    <h2>What the percentages mean</h2>
-    <p>
-      Each evaluation item is a sentence in raw patient phrasing plus a list of expected
-      clinical terms. The model is asked to name the clinical concepts in the sentence;
-      the answer scores a hit only if it contains the item's expected terms. Every model
-      sees the identical items.
-    </p>
-    <ul class="cols">
-      <li><span class="term">Patient phrasing</span> The share of items answered correctly
-        when the model reads the patient's own words, untouched. 100% = every item correct.</li>
-      <li><span class="term">Clinician phrasing</span> The same model first translates each
-        patient sentence into clinician wording, then the identical extraction task is
-        re-scored on that translation, against the same expected terms.</li>
-      <li><span class="term">Δ</span> Clinician minus patient. Because the items and the
-        scoring are identical in both stages, Δ isolates what the translation step itself
-        added or destroyed. A negative Δ means the model's own translation discarded
-        clinical content it had understood perfectly in the original.</li>
-    </ul>
-    <p id="me-scale" class="explainer"></p>
-  </section>
+  
 
   <section>
     <h2>Results</h2>
+    <p class="me-n" id="me-n"></p>
     <div class="me-scroll">
       <table class="me-table">
         <thead><tr>
           <th scope="col">Model</th>
-          <th scope="col" class="num">Items</th>
-          <th scope="col" class="num">Patient phrasing</th>
-          <th scope="col" class="num">Clinician phrasing</th>
-          <th scope="col" class="num">Δ</th>
-          <th scope="col" class="num">Run cost</th>
+          <th scope="col"><span class="th-tip" title="Left node: share of items answered correctly from the patient's own words. Right node: the same items after the model translated the sentence into clinician wording. A downward slope means the model's own translation discarded clinical content.">Patient → clinician phrasing</span></th>
+          <th scope="col" class="num"><span class="th-tip" title="Live Anthropic API spend for this model's run">Run cost</span></th>
         </tr></thead>
         <tbody id="me-body"></tbody>
       </table>
     </div>
     <p class="me-caption" id="me-updated"></p>
+    <p class="pull">Where content was lost was the translation step itself.</p>
     <p>
       The reading is the reverse of the gemma story told by the circuit figures. gemma-2-2b,
       a 2-billion-parameter model, measurably loses the clinical continuation when it reads
-      patient phrasing. These production models did not: on this set, every model scored
-      100% on the untouched patient wording. Where content was lost was the translation
-      step itself — the same failure mode the engine flags as a translation regression, and
-      the reason the <a href="../translation/">Translation</a> figure's mitigation cannot be
-      assumed safe without checking its output.
+      patient phrasing. These production models did not: every model scored 100% on the
+      untouched patient wording. That is the same failure mode the engine flags as a
+      translation regression, and the reason the <a href="../translation/">Translation</a>
+      figure's mitigation cannot be assumed safe without checking its output.
     </p>
   </section>
 
@@ -220,23 +205,49 @@
       (data.models||[]).forEach(function(m){
         var tr=document.createElement('tr');
         tr.appendChild(el('td','mono',m.id||'—'));
-        tr.appendChild(el('td','num',m.items!=null?String(m.items):'—'));
         if(m.items!=null)items=m.items;
-        tr.appendChild(el('td','num',pct(m.patient_accuracy)));
-        tr.appendChild(el('td','num',pct(m.clinician_accuracy)));
-        var d=el('td','num');
-        if(typeof m.delta==='number'){
-          d.appendChild(el('span',m.delta<0?'delta-neg':'delta-zero',
-            (m.delta>0?'+':'')+Math.round(m.delta*100)+' pts'));
-        }else{d.textContent='—';}
-        tr.appendChild(d);
-        tr.appendChild(el('td','num',typeof m.cost_usd==='number'?'$'+m.cost_usd.toFixed(4):'—'));
+        // inline slopegraph: patient (left) to clinician (right) on a shared
+        // 0-100% scale; a downward slope carries the loss in burnt orange
+        var sc=el('td','slope-cell');
+        var pa=m.patient_accuracy,ca=m.clinician_accuracy;
+        if(typeof pa==='number'&&typeof ca==='number'){
+          var NS='http://www.w3.org/2000/svg';
+          var svg=document.createElementNS(NS,'svg');
+          svg.setAttribute('viewBox','0 0 210 40');svg.setAttribute('width','210');svg.setAttribute('height','40');
+          function y(v){return 32-24*v;}
+          var base=document.createElementNS(NS,'line');
+          base.setAttribute('x1','44');base.setAttribute('x2','166');
+          base.setAttribute('y1',y(pa));base.setAttribute('y2',y(pa));
+          base.setAttribute('stroke','#dcdad2');base.setAttribute('stroke-width','1');
+          svg.appendChild(base);
+          var drop=ca<pa;
+          var seg=document.createElementNS(NS,'line');
+          seg.setAttribute('x1','44');seg.setAttribute('x2','166');
+          seg.setAttribute('y1',y(pa));seg.setAttribute('y2',y(ca));
+          seg.setAttribute('stroke',drop?'#b45309':'#9aa1ad');
+          seg.setAttribute('stroke-width','2');
+          svg.appendChild(seg);
+          [[44,pa,'#6d6c66','end',-6],[166,ca,drop?'#b45309':'#6d6c66','start',6]].forEach(function(n){
+            var c=document.createElementNS(NS,'circle');
+            c.setAttribute('cx',n[0]);c.setAttribute('cy',y(n[1]));c.setAttribute('r','3');
+            c.setAttribute('fill',n[2]);svg.appendChild(c);
+            var t=document.createElementNS(NS,'text');
+            t.setAttribute('x',n[0]+n[4]);t.setAttribute('y',y(n[1])+4);
+            t.setAttribute('text-anchor',n[3]);
+            t.setAttribute('style','font:600 12px ui-monospace,Menlo,monospace;fill:'+n[2]);
+            t.textContent=Math.round(n[1]*100)+'%';svg.appendChild(t);
+          });
+          sc.appendChild(svg);
+        }else{sc.textContent='—';}
+        tr.appendChild(sc);
+        var cost=el('td','num');
+        cost.appendChild(el('span','me-cost',typeof m.cost_usd==='number'?'$'+m.cost_usd.toFixed(4):'—'));
+        tr.appendChild(cost);
         body.appendChild(tr);
       });
       if(items){
-        document.getElementById('me-scale').textContent=
-          'This run used '+items+' items per model, so one item is '+Math.round(100/items)+
-          ' percentage points; small differences are within one item.';
+        document.getElementById('me-n').textContent='n = '+items+' items per model · one item = '
+          +Math.round(100/items)+' percentage points';
       }
       var up=document.getElementById('me-updated');
       up.textContent=(data.task?data.task+' · ':'')+(data.updated?'updated '+data.updated:'');
