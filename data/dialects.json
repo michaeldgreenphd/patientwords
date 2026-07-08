@@ -1,6 +1,6 @@
 {
- "updated": "2026-07-07",
- "batch": "dialects_20260707T000923Z",
+ "updated": "2026-07-08",
+ "batch": "dialects_20260708T120729Z",
  "graph_model": "gemma-2-2b",
  "source_set": "gemmascope-transcoder-16k",
  "items": [
@@ -14,233 +14,77 @@
    "variants": [
     {
      "dialect": "Southern US English",
-     "prompt": "Well, bless my heart, I reckon I'm just plain clinically depressed, so I figure I ought to take a",
-     "p": null,
-     "delta": null,
-     "top_token": "little",
-     "top_p": 0.181,
-     "flip": true
+     "prompt": "I swear I'm clinically depressed, so I reckon I oughta take a",
+     "p": 0.16,
+     "delta": 0.046,
+     "top_token": "break",
+     "top_p": 0.16,
+     "flip": false
     },
     {
      "dialect": "African American Vernacular English",
-     "prompt": "Real talk, I'm clinically depressed, so I know I need to take a",
-     "p": 0.277,
-     "delta": 0.16300000000000003,
+     "prompt": "I'm straight up clinically depressed, so I know I gotta take a",
+     "p": 0.204,
+     "delta": 0.08999999999999998,
      "top_token": "break",
-     "top_p": 0.277,
+     "top_p": 0.204,
+     "flip": false
+    },
+    {
+     "dialect": "New England US English",
+     "prompt": "I'm wicked clinically depressed, so I figure I should take a",
+     "p": 0.24,
+     "delta": 0.126,
+     "top_token": "break",
+     "top_p": 0.24,
      "flip": false
     },
     {
      "dialect": "British English",
-     "prompt": "Honestly, I'm quite clinically depressed, so I suppose I really ought to take a",
-     "p": 0.095,
-     "delta": -0.019000000000000003,
-     "top_token": "look",
-     "top_p": 0.123,
+     "prompt": "I'm properly clinically depressed, so I suppose I ought to take a",
+     "p": 0.075,
+     "delta": -0.03900000000000001,
+     "top_token": "pill",
+     "top_p": 0.114,
      "flip": true
     },
     {
      "dialect": "Irish English",
-     "prompt": "Ah sure look, I'm clinically depressed, so I'd say I'd best take a",
-     "p": 0.064,
-     "delta": -0.05,
-     "top_token": "look",
-     "top_p": 0.1,
-     "flip": true
+     "prompt": "I'm right clinically depressed, so I should probably take a",
+     "p": 0.26,
+     "delta": 0.14600000000000002,
+     "top_token": "break",
+     "top_p": 0.26,
+     "flip": false
     },
     {
      "dialect": "Caribbean English",
-     "prompt": "I tellin you straight, I clinically depressed, so I think I must take a",
-     "p": 0.127,
-     "delta": 0.012999999999999998,
-     "top_token": "break",
-     "top_p": 0.127,
-     "flip": false
-    },
-    {
-     "dialect": "elaborated formal register",
-     "prompt": "Given that I have come to recognise that I am clinically depressed, it stands to reason that I should take a",
-     "p": null,
-     "delta": null,
-     "top_token": "look",
-     "top_p": 0.179,
+     "prompt": "Mi clinically depressed fi true, so mi haffi take a",
+     "p": 0.076,
+     "delta": -0.038000000000000006,
+     "top_token": "pill",
+     "top_p": 0.119,
      "flip": true
-    }
-   ],
-   "core": {
-    "baseline_clinical": 156,
-    "invariant": 61,
-    "framings": 6,
-    "top": [
-     {
-      "feature": "L25/11867",
-      "desc": "uses of the first person and second person, and possessives, as well as some references to literature and surg",
-      "survives": "6/6",
-      "norm_mass": 0.24
-     },
-     {
-      "feature": "L19/645",
-      "desc": "terminology related to medicine, health, and nutrition | Pills and supplements",
-      "survives": "6/6",
-      "norm_mass": 0.2
-     },
-     {
-      "feature": "L4/8257",
-      "desc": "medical terms and concepts related to depression, psychiatric disorders, and neurology | depressive",
-      "survives": "6/6",
-      "norm_mass": 0.19
-     },
-     {
-      "feature": "L19/15289",
-      "desc": "words and phrases from medical research papers and case studies | Medications and trials",
-      "survives": "4/6",
-      "norm_mass": 0.18
-     },
-     {
-      "feature": "L19/8313",
-      "desc": "words related to the process of scientific research, especially inhibitors and blocking | inhibitors and drugs",
-      "survives": "6/6",
-      "norm_mass": 0.17
-     },
-     {
-      "feature": "L19/14940",
-      "desc": "drug prescriptions and medical treatments | medicine",
-      "survives": "6/6",
-      "norm_mass": 0.17
-     },
-     {
-      "feature": "L16/8800",
-      "desc": "words related to health issues, medical treatments, and pain. | unexplained code or programming jargon | medic",
-      "survives": "6/6",
-      "norm_mass": 0.14
-     },
-     {
-      "feature": "L22/5406",
-      "desc": "text about women's health and work | leave",
-      "survives": "3/6",
-      "norm_mass": 0.14
-     }
-    ]
-   }
-  },
-  {
-   "index": 2,
-   "term": "clinical depression",
-   "baseline_prompt": "I've got clinical depression, so I need to talk to a",
-   "target_token": "therapist",
-   "baseline_p": 0.26,
-   "render": "index_02.html",
-   "variants": [
-    {
-     "dialect": "Southern US English",
-     "prompt": "Well, I reckon I've been dealin' with clinical depression for a while now, so I'm fixin' to talk to a",
-     "p": 0.088,
-     "delta": -0.17200000000000001,
-     "top_token": "doctor",
-     "top_p": 0.284,
-     "flip": true
-    },
-    {
-     "dialect": "African American Vernacular English",
-     "prompt": "Look, I been havin' clinical depression, so I really need to go talk to a",
-     "p": 0.257,
-     "delta": -0.0030000000000000027,
-     "top_token": "therapist",
-     "top_p": 0.257,
-     "flip": false
-    },
-    {
-     "dialect": "British English",
-     "prompt": "Right, so I've been diagnosed with clinical depression, and I reckon I ought to have a word with a",
-     "p": 0.095,
-     "delta": -0.165,
-     "top_token": "doctor",
-     "top_p": 0.277,
-     "flip": true
-    },
-    {
-     "dialect": "Irish English",
-     "prompt": "Ah sure, I've got clinical depression on me, so I'm needing to have a chat with a",
-     "p": 0.116,
-     "delta": -0.14400000000000002,
-     "top_token": "therapist",
-     "top_p": 0.116,
-     "flip": false
     },
     {
      "dialect": "ESL-influenced English",
-     "prompt": "For me, I am having clinical depression, so now I think I must to speak with a",
-     "p": 0.146,
-     "delta": -0.11400000000000002,
-     "top_token": "doctor",
-     "top_p": 0.252,
+     "prompt": "I am very clinically depressed, so I must take a",
+     "p": null,
+     "delta": null,
+     "top_token": "medication",
+     "top_p": 0.16,
      "flip": true
     },
     {
      "dialect": "texting/informal register",
-     "prompt": "ngl i think i got clinical depression so i really gotta go talk to a",
-     "p": 0.38,
-     "delta": 0.12,
-     "top_token": "therapist",
-     "top_p": 0.38,
+     "prompt": "im so clinically depressed rn so i shld take a",
+     "p": 0.47,
+     "delta": 0.356,
+     "top_token": "break",
+     "top_p": 0.47,
      "flip": false
     }
-   ],
-   "core": {
-    "baseline_clinical": 220,
-    "invariant": 127,
-    "framings": 6,
-    "top": [
-     {
-      "feature": "L4/8257",
-      "desc": "medical terms and concepts related to depression, psychiatric disorders, and neurology | depressive",
-      "survives": "6/6",
-      "norm_mass": 0.25
-     },
-     {
-      "feature": "L19/12787",
-      "desc": "language about therapy and counseling | therapy and counseling",
-      "survives": "6/6",
-      "norm_mass": 0.25
-     },
-     {
-      "feature": "L17/7176",
-      "desc": "mentions of insanity, mental illness, or being adjudged insane in a legal context. | Mental illness and insani",
-      "survives": "6/6",
-      "norm_mass": 0.18
-     },
-     {
-      "feature": "L18/13444",
-      "desc": "mentions of the DSM and definitions and discussions of symptoms of depression in the DSM. | Mental health and ",
-      "survives": "6/6",
-      "norm_mass": 0.18
-     },
-     {
-      "feature": "L18/15048",
-      "desc": "language related to doctor's visits for some medical reason | medical professionals",
-      "survives": "6/6",
-      "norm_mass": 0.18
-     },
-     {
-      "feature": "L20/15217",
-      "desc": "language related to medical care, including doctors, treatments, and medications. | medical professionals",
-      "survives": "6/6",
-      "norm_mass": 0.16
-     },
-     {
-      "feature": "L20/1169",
-      "desc": "a cluster of words that relate to medicine, hospitals, doctors, health insurance, or medical care. | healthcar",
-      "survives": "5/6",
-      "norm_mass": 0.16
-     },
-     {
-      "feature": "L17/1130",
-      "desc": "medical advice | information about methadone use, particularly warnings and instructions related to it",
-      "survives": "6/6",
-      "norm_mass": 0.15
-     }
-    ]
-   }
+   ]
   },
   {
    "index": 3,
@@ -252,38 +96,47 @@
    "variants": [
     {
      "dialect": "Southern US English",
-     "prompt": "Well, to keep a handle on the HIV, I reckon I gotta go on and take my",
-     "p": 0.135,
-     "delta": -0.094,
+     "prompt": "Y'all, to keep the HIV managed, I gotta go on and take my",
+     "p": 0.155,
+     "delta": -0.07400000000000001,
      "top_token": "meds",
-     "top_p": 0.23,
+     "top_p": 0.334,
      "flip": true
     },
     {
      "dialect": "African American Vernacular English",
-     "prompt": "So to stay on top of the HIV, I gotta make sure I be takin my",
-     "p": 0.064,
-     "delta": -0.165,
+     "prompt": "To manage this HIV, I got to be taking my",
+     "p": 0.188,
+     "delta": -0.04100000000000001,
+     "top_token": "medication",
+     "top_p": 0.188,
+     "flip": false
+    },
+    {
+     "dialect": "New England US English",
+     "prompt": "So to manage the HIV, I need to go take my",
+     "p": 0.202,
+     "delta": -0.026999999999999996,
      "top_token": "meds",
-     "top_p": 0.405,
+     "top_p": 0.202,
      "flip": true
     },
     {
      "dialect": "British English",
-     "prompt": "In order to keep the HIV under control, I really must remember to take my",
-     "p": 0.217,
-     "delta": -0.01200000000000001,
+     "prompt": "In order to manage the HIV, I need to take my",
+     "p": 0.251,
+     "delta": 0.021999999999999992,
      "top_token": "medication",
-     "top_p": 0.217,
+     "top_p": 0.251,
      "flip": false
     },
     {
      "dialect": "Irish English",
-     "prompt": "Sure to keep the HIV in check, I've to be taking my",
-     "p": 0.111,
-     "delta": -0.11800000000000001,
+     "prompt": "So as to keep the HIV managed, sure I need to take my",
+     "p": 0.116,
+     "delta": -0.113,
      "top_token": "meds",
-     "top_p": 0.178,
+     "top_p": 0.117,
      "flip": true
     },
     {
@@ -296,189 +149,24 @@
      "flip": true
     },
     {
-     "dialect": "elaborated formal register",
-     "prompt": "In order to adequately manage the HIV, it is necessary that I consistently take my",
-     "p": 0.281,
-     "delta": 0.05200000000000002,
+     "dialect": "ESL-influenced English",
+     "prompt": "For managing the HIV, I am needing to take my",
+     "p": 0.159,
+     "delta": -0.07,
      "top_token": "medication",
-     "top_p": 0.281,
+     "top_p": 0.159,
      "flip": false
-    }
-   ],
-   "core": {
-    "baseline_clinical": 209,
-    "invariant": 40,
-    "framings": 6,
-    "top": [
-     {
-      "feature": "L13/3597",
-      "desc": "technical writing related to legal, medical, or engineering contexts | machines | say \"\u2581\"\n\nMethod used: 2 \u2014 to",
-      "survives": "5/6",
-      "norm_mass": 0.2
-     },
-     {
-      "feature": "L19/14940",
-      "desc": "drug prescriptions and medical treatments | medicine",
-      "survives": "6/6",
-      "norm_mass": 0.18
-     },
-     {
-      "feature": "L21/1760",
-      "desc": "text from medical research studies, especially those related to HIV and treatment | words related to HIV and m",
-      "survives": "5/6",
-      "norm_mass": 0.18
-     },
-     {
-      "feature": "L19/645",
-      "desc": "terminology related to medicine, health, and nutrition | Pills and supplements",
-      "survives": "6/6",
-      "norm_mass": 0.16
-     },
-     {
-      "feature": "L19/15289",
-      "desc": "words and phrases from medical research papers and case studies | Medications and trials",
-      "survives": "5/6",
-      "norm_mass": 0.16
-     },
-     {
-      "feature": "L19/14199",
-      "desc": "words associated with mathematics and health problems like asthma | asthma and medication",
-      "survives": "5/6",
-      "norm_mass": 0.15
-     },
-     {
-      "feature": "L15/3820",
-      "desc": "words and phrases associated with medical treatment and medication | drugs",
-      "survives": "5/6",
-      "norm_mass": 0.12
-     },
-     {
-      "feature": "L20/13778",
-      "desc": "language related to medical treatment, especially for headaches or respiratory issues | Medicine/Vaccines",
-      "survives": "6/6",
-      "norm_mass": 0.12
-     }
-    ]
-   }
-  },
-  {
-   "index": 4,
-   "term": "bronchitis",
-   "baseline_prompt": "Because I have bronchitis, I need to take some",
-   "target_token": "antibiotics",
-   "baseline_p": 0.183,
-   "render": "index_04.html",
-   "variants": [
-    {
-     "dialect": "Southern US English",
-     "prompt": "On account of I got this bronchitis, I reckon I need to go on and take me some",
-     "p": 0.123,
-     "delta": -0.06,
-     "top_token": "time",
-     "top_p": 0.182,
-     "flip": true
-    },
-    {
-     "dialect": "African American Vernacular English",
-     "prompt": "Since I done caught bronchitis, I'm finna need to take me some",
-     "p": 0.11,
-     "delta": -0.073,
-     "top_token": "time",
-     "top_p": 0.24,
-     "flip": true
-    },
-    {
-     "dialect": "British English",
-     "prompt": "Seeing as I've come down with bronchitis, I really ought to take some",
-     "p": 0.035,
-     "delta": -0.148,
-     "top_token": "time",
-     "top_p": 0.505,
-     "flip": true
-    },
-    {
-     "dialect": "Irish English",
-     "prompt": "Sure I've got the bronchitis on me, so I'll be needing to take some",
-     "p": 0.1,
-     "delta": -0.08299999999999999,
-     "top_token": "time",
-     "top_p": 0.272,
-     "flip": true
     },
     {
      "dialect": "texting/informal register",
-     "prompt": "ugh cuz i got bronchitis i gotta take some",
-     "p": 0.165,
-     "delta": -0.017999999999999988,
-     "top_token": "medicine",
-     "top_p": 0.192,
+     "prompt": "ok so to manage the HIV i gotta take my",
+     "p": 0.092,
+     "delta": -0.137,
+     "top_token": "meds",
+     "top_p": 0.33,
      "flip": true
-    },
-    {
-     "dialect": "elaborated formal register",
-     "prompt": "Given that I have been diagnosed with bronchitis, it is necessary for me to take a certain amount of",
-     "p": 0.276,
-     "delta": 0.09300000000000003,
-     "top_token": "antibiotics",
-     "top_p": 0.276,
-     "flip": false
     }
-   ],
-   "core": {
-    "baseline_clinical": 231,
-    "invariant": 90,
-    "framings": 6,
-    "top": [
-     {
-      "feature": "L0/8464",
-      "desc": "words and phrases related to diseases, medical procedures, and symptoms | inflammation/disease",
-      "survives": "6/6",
-      "norm_mass": 0.22
-     },
-     {
-      "feature": "L7/14668",
-      "desc": "words and phrases related to illnesses and their symptoms | runny nose/rhinitis",
-      "survives": "6/6",
-      "norm_mass": 0.22
-     },
-     {
-      "feature": "L18/6804",
-      "desc": "terminology and concepts in medical research about lung disease | lung",
-      "survives": "6/6",
-      "norm_mass": 0.2
-     },
-     {
-      "feature": "L19/10886",
-      "desc": "words and phrases related to being sick and medical tests | common cold",
-      "survives": "6/6",
-      "norm_mass": 0.2
-     },
-     {
-      "feature": "L19/15289",
-      "desc": "words and phrases from medical research papers and case studies | Medications and trials",
-      "survives": "6/6",
-      "norm_mass": 0.18
-     },
-     {
-      "feature": "L20/13778",
-      "desc": "language related to medical treatment, especially for headaches or respiratory issues | Medicine/Vaccines",
-      "survives": "6/6",
-      "norm_mass": 0.18
-     },
-     {
-      "feature": "L25/11867",
-      "desc": "uses of the first person and second person, and possessives, as well as some references to literature and surg",
-      "survives": "4/6",
-      "norm_mass": 0.18
-     },
-     {
-      "feature": "L19/8313",
-      "desc": "words related to the process of scientific research, especially inhibitors and blocking | inhibitors and drugs",
-      "survives": "6/6",
-      "norm_mass": 0.17
-     }
-    ]
-   }
+   ]
   },
   {
    "index": 5,
@@ -490,20 +178,29 @@
    "variants": [
     {
      "dialect": "Southern US English",
-     "prompt": "Fixin' to head on outside, so I go and grab my inhaler and",
-     "p": 0.146,
-     "delta": -0.027999999999999997,
+     "prompt": "Fore I head on outside, I go on and grab my inhaler and",
+     "p": 0.229,
+     "delta": 0.05500000000000002,
      "top_token": "my",
-     "top_p": 0.146,
+     "top_p": 0.229,
      "flip": false
     },
     {
      "dialect": "African American Vernacular English",
-     "prompt": "Before I be steppin outside I go grab my inhaler and",
-     "p": 0.262,
-     "delta": 0.08800000000000002,
+     "prompt": "Before I step outside I be grabbing my inhaler and",
+     "p": 0.341,
+     "delta": 0.16700000000000004,
      "top_token": "my",
-     "top_p": 0.262,
+     "top_p": 0.341,
+     "flip": false
+    },
+    {
+     "dialect": "New England US English",
+     "prompt": "Before I head out the door I grab my inhaler and",
+     "p": 0.2,
+     "delta": 0.026000000000000023,
+     "top_token": "my",
+     "top_p": 0.2,
      "flip": false
     },
     {
@@ -516,88 +213,42 @@
      "flip": false
     },
     {
-     "dialect": "Irish English",
-     "prompt": "Sure before I head out the door I grab my inhaler and",
-     "p": 0.211,
-     "delta": 0.037000000000000005,
+     "dialect": "Caribbean English",
+     "prompt": "Before I go outside I does grab my inhaler and",
+     "p": 0.147,
+     "delta": -0.026999999999999996,
      "top_token": "my",
-     "top_p": 0.211,
+     "top_p": 0.147,
      "flip": false
     },
     {
-     "dialect": "Caribbean English",
-     "prompt": "Before me go outside me tek up me inhaler and",
-     "p": 0.034,
-     "delta": -0.13999999999999999,
-     "top_token": "me",
-     "top_p": 0.259,
-     "flip": true
+     "dialect": "ESL-influenced English",
+     "prompt": "Before I am going outside, I am taking my inhaler and",
+     "p": 0.183,
+     "delta": 0.009000000000000008,
+     "top_token": "my",
+     "top_p": 0.183,
+     "flip": false
     },
     {
      "dialect": "texting/informal register",
-     "prompt": "b4 i go out i grab my inhaler and",
-     "p": 0.199,
-     "delta": 0.025000000000000022,
+     "prompt": "b4 i head out i grab my inhaler and",
+     "p": 0.187,
+     "delta": 0.013000000000000012,
      "top_token": "my",
-     "top_p": 0.199,
+     "top_p": 0.187,
+     "flip": false
+    },
+    {
+     "dialect": "Irish English",
+     "prompt": "Before I head out the door I grab a hold of me inhaler and",
+     "p": 0.156,
+     "delta": -0.017999999999999988,
+     "top_token": "my",
+     "top_p": 0.156,
      "flip": false
     }
-   ],
-   "core": {
-    "baseline_clinical": 118,
-    "invariant": 23,
-    "framings": 6,
-    "top": [
-     {
-      "feature": "L25/11867",
-      "desc": "uses of the first person and second person, and possessives, as well as some references to literature and surg",
-      "survives": "6/6",
-      "norm_mass": 0.28
-     },
-     {
-      "feature": "L13/3597",
-      "desc": "technical writing related to legal, medical, or engineering contexts | machines | say \"\u2581\"\n\nMethod used: 2 \u2014 to",
-      "survives": "4/6",
-      "norm_mass": 0.25
-     },
-     {
-      "feature": "L19/14199",
-      "desc": "words associated with mathematics and health problems like asthma | asthma and medication",
-      "survives": "6/6",
-      "norm_mass": 0.24
-     },
-     {
-      "feature": "L18/6804",
-      "desc": "terminology and concepts in medical research about lung disease | lung",
-      "survives": "6/6",
-      "norm_mass": 0.23
-     },
-     {
-      "feature": "L21/4736",
-      "desc": "medical procedures related to the arterial and respiratory systems | terms related to breathing | breathing",
-      "survives": "6/6",
-      "norm_mass": 0.22
-     },
-     {
-      "feature": "L22/16178",
-      "desc": "words or phrases related to allergic reactions and the immune system | allergic reactions",
-      "survives": "5/6",
-      "norm_mass": 0.2
-     },
-     {
-      "feature": "L18/11440",
-      "desc": "words related to allergic rhinitis and asthma, plus some other medical terms like symptoms | allergies",
-      "survives": "6/6",
-      "norm_mass": 0.19
-     },
-     {
-      "feature": "L10/3837",
-      "desc": "content related to scientific publications or medical procedures, possibly extracting patient data from resear",
-      "survives": "5/6",
-      "norm_mass": 0.18
-     }
-    ]
-   }
+   ]
   },
   {
    "index": 6,
@@ -609,114 +260,77 @@
    "variants": [
     {
      "dialect": "Southern US English",
-     "prompt": "Well, now that I done got the postprandial, I reckon I'm just gonna head on over to my",
-     "p": null,
-     "delta": null,
-     "top_token": "local",
-     "top_p": 0.102,
-     "flip": true
+     "prompt": "Now that I done got the postprandial, I'm fixin' to just go on over to",
+     "p": 0.578,
+     "delta": 0.26299999999999996,
+     "top_token": "the",
+     "top_p": 0.578,
+     "flip": false
     },
     {
      "dialect": "African American Vernacular English",
-     "prompt": "Aight, now that I got the postprandial done, I'm finna just go on to my",
-     "p": null,
-     "delta": null,
-     "top_token": "next",
-     "top_p": 0.23,
-     "flip": true
+     "prompt": "Now that I got the postprandial, I'm finna just go on to",
+     "p": 0.448,
+     "delta": 0.133,
+     "top_token": "the",
+     "top_p": 0.448,
+     "flip": false
+    },
+    {
+     "dialect": "New England US English",
+     "prompt": "Now that I've got the postprandial, I'm just gonna head on over to",
+     "p": 0.614,
+     "delta": 0.299,
+     "top_token": "the",
+     "top_p": 0.614,
+     "flip": false
     },
     {
      "dialect": "British English",
-     "prompt": "Right, now that I've got the postprandial sorted, I'm just going to pop over to the",
-     "p": null,
-     "delta": null,
-     "top_token": "other",
-     "top_p": 0.104,
-     "flip": true
+     "prompt": "Now that I've got the postprandial, I'm just going to pop round to",
+     "p": 0.425,
+     "delta": 0.10999999999999999,
+     "top_token": "the",
+     "top_p": 0.425,
+     "flip": false
     },
     {
      "dialect": "Irish English",
-     "prompt": "Sure now that I've the postprandial done, I'm just going to head away to the",
-     "p": null,
-     "delta": null,
-     "top_token": "pub",
-     "top_p": 0.071,
+     "prompt": "Now that I have the postprandial, I'm just going to head off to",
+     "p": 0.172,
+     "delta": -0.14300000000000002,
+     "top_token": "bed",
+     "top_p": 0.544,
      "flip": true
     },
     {
      "dialect": "Caribbean English",
-     "prompt": "Now that I get the postprandial finish, I just going to go over to the",
-     "p": null,
-     "delta": null,
-     "top_token": "other",
-     "top_p": 0.064,
-     "flip": true
+     "prompt": "Now that I have the postprandial, I going to just go over to",
+     "p": 0.592,
+     "delta": 0.27699999999999997,
+     "top_token": "the",
+     "top_p": 0.592,
+     "flip": false
+    },
+    {
+     "dialect": "ESL-influenced English",
+     "prompt": "Now that I am having the postprandial, I will just go to",
+     "p": 0.318,
+     "delta": 0.0030000000000000027,
+     "top_token": "the",
+     "top_p": 0.318,
+     "flip": false
     },
     {
      "dialect": "texting/informal register",
-     "prompt": "ok so now that i got the postprandial im just gonna go to the",
-     "p": null,
-     "delta": null,
-     "top_token": "next",
-     "top_p": 0.125,
+     "prompt": "ok got the postprandial, bout to just go to",
+     "p": 0.081,
+     "delta": -0.23399999999999999,
+     "top_token": "bed",
+     "top_p": 0.508,
      "flip": true
     }
-   ],
-   "core": {
-    "baseline_clinical": 23,
-    "invariant": 6,
-    "framings": 6,
-    "top": [
-     {
-      "feature": "L19/4837",
-      "desc": "references to effort or things people invest in | trouble, effort, pain",
-      "survives": "1/6",
-      "norm_mass": 0.14
-     },
-     {
-      "feature": "L21/3294",
-      "desc": "instances of prepositions | words related to 'heart' | body parts",
-      "survives": "0/6",
-      "norm_mass": 0.09
-     },
-     {
-      "feature": "L3/373",
-      "desc": "word beginnings with the letters \"a,\" \"h,\"\"i,\" \"r,\" and \"p\" (perhaps prefixes and/or related to medical or sci",
-      "survives": "5/6",
-      "norm_mass": 0.05
-     },
-     {
-      "feature": "L4/9312",
-      "desc": "words related to medical procedures, experimental data, and legal proceedings | scientific/technical texts",
-      "survives": "6/6",
-      "norm_mass": 0.05
-     },
-     {
-      "feature": "L3/2080",
-      "desc": "the prefix \"post\" in technical and medical terms | post",
-      "survives": "6/6",
-      "norm_mass": 0.04
-     },
-     {
-      "feature": "L5/157",
-      "desc": "the verb \"go\" and sometimes also finds other verbs, especially in the context of user interfaces or going plac",
-      "survives": "0/6",
-      "norm_mass": 0.04
-     },
-     {
-      "feature": "L2/1968",
-      "desc": "varied words ending in \"ing\" or related to actions/activity | medical/research texts",
-      "survives": "4/6",
-      "norm_mass": 0.03
-     },
-     {
-      "feature": "L0/703",
-      "desc": "the word \"purpose\" | purpose",
-      "survives": "6/6",
-      "norm_mass": 0.02
-     }
-    ]
-   }
+   ]
   },
   {
    "index": 7,
@@ -728,233 +342,77 @@
    "variants": [
     {
      "dialect": "Southern US English",
-     "prompt": "Bless her heart, ever since that fallin' out with her sister she's been having syncopal episodes down at work, so the nurse went and told her she oughta head on over to the",
-     "p": null,
-     "delta": null,
-     "top_token": "doctor",
-     "top_p": 0.305,
-     "flip": true
+     "prompt": "Ever since that falling-out with her sister, she's been having syncopal episodes at work, so the nurse told her she best go on to",
+     "p": 0.366,
+     "delta": -0.41600000000000004,
+     "top_token": "the",
+     "top_p": 0.366,
+     "flip": false
     },
     {
      "dialect": "African American Vernacular English",
-     "prompt": "Ever since she got into it with her sister, she keep having syncopal episodes while she at work, so the nurse told her she need to go on down to the",
-     "p": null,
-     "delta": null,
-     "top_token": "ER",
-     "top_p": 0.221,
-     "flip": true
+     "prompt": "Ever since she had that argument with her sister, she been having syncopal episodes at work, so the nurse told her she need to go to",
+     "p": 0.737,
+     "delta": -0.04500000000000004,
+     "top_token": "the",
+     "top_p": 0.737,
+     "flip": false
+    },
+    {
+     "dialect": "New England US English",
+     "prompt": "Ever since the row with her sister, she's been having syncopal episodes at work, so the nurse told her she ought to go to",
+     "p": 0.622,
+     "delta": -0.16000000000000003,
+     "top_token": "the",
+     "top_p": 0.622,
+     "flip": false
     },
     {
      "dialect": "British English",
-     "prompt": "Ever since the row with her sister, she's been having syncopal episodes at work, so the nurse advised her to pop along to the",
-     "p": null,
-     "delta": null,
-     "top_token": "doctor",
-     "top_p": 0.23,
-     "flip": true
+     "prompt": "Ever since the argument with her sister, she's been having syncopal episodes at work, so the nurse told her to pop along to",
+     "p": 0.587,
+     "delta": -0.19500000000000006,
+     "top_token": "the",
+     "top_p": 0.587,
+     "flip": false
     },
     {
      "dialect": "Irish English",
-     "prompt": "Sure ever since the falling-out with her sister, she does be having syncopal episodes at the work, so the nurse told her to head away to the",
-     "p": null,
-     "delta": null,
-     "top_token": "hospital",
-     "top_p": 0.261,
-     "flip": true
+     "prompt": "Ever since the row with her sister, she's after having syncopal episodes at work, so the nurse told her to go on to",
+     "p": 0.333,
+     "delta": -0.449,
+     "top_token": "the",
+     "top_p": 0.333,
+     "flip": false
     },
     {
      "dialect": "Caribbean English",
-     "prompt": "Ever since the quarrel with she sister, she keep having syncopal episodes at the work, so the nurse tell she fi go to the",
-     "p": null,
-     "delta": null,
-     "top_token": "hospital",
-     "top_p": 0.393,
-     "flip": true
-    },
-    {
-     "dialect": "texting/informal register",
-     "prompt": "omg ever since that fight w her sister she keeps having syncopal episodes at work so the nurse told her to go to the",
-     "p": null,
-     "delta": null,
-     "top_token": "ER",
-     "top_p": 0.265,
-     "flip": true
-    }
-   ],
-   "core": {
-    "baseline_clinical": 137,
-    "invariant": 68,
-    "framings": 6,
-    "top": [
-     {
-      "feature": "L17/1379",
-      "desc": "words and phrases related to medical care and emergencies | hospital related words",
-      "survives": "6/6",
-      "norm_mass": 0.36
-     },
-     {
-      "feature": "L18/3693",
-      "desc": "medical emergencies and their immediate aftermath. | doctors and hospitals",
-      "survives": "6/6",
-      "norm_mass": 0.34
-     },
-     {
-      "feature": "L19/9531",
-      "desc": "medical information and context related to hospitals, diseases, medical procedures, or medical staff | Medical",
-      "survives": "6/6",
-      "norm_mass": 0.27
-     },
-     {
-      "feature": "L18/571",
-      "desc": "terms related to emergency medical response to cardiac arrest events | Emergency medical services",
-      "survives": "3/6",
-      "norm_mass": 0.26
-     },
-     {
-      "feature": "L20/1169",
-      "desc": "a cluster of words that relate to medicine, hospitals, doctors, health insurance, or medical care. | healthcar",
-      "survives": "6/6",
-      "norm_mass": 0.26
-     },
-     {
-      "feature": "L25/11867",
-      "desc": "uses of the first person and second person, and possessives, as well as some references to literature and surg",
-      "survives": "2/6",
-      "norm_mass": 0.26
-     },
-     {
-      "feature": "L17/2553",
-      "desc": "information related to medical conditions and how to treat them | medical advice",
-      "survives": "6/6",
-      "norm_mass": 0.25
-     },
-     {
-      "feature": "L18/15048",
-      "desc": "language related to doctor's visits for some medical reason | medical professionals",
-      "survives": "6/6",
-      "norm_mass": 0.23
-     }
-    ]
-   }
-  },
-  {
-   "index": 8,
-   "term": "iodinated contrast through your IV so the",
-   "baseline_prompt": "For the scan they will run iodinated contrast through your IV so the before you should",
-   "target_token": "drink",
-   "baseline_p": 0.198,
-   "render": "index_08.html",
-   "variants": [
-    {
-     "dialect": "Southern US English",
-     "prompt": "Now for that there scan, they're fixin' to run iodinated contrast through your IV so the before you oughta",
-     "p": null,
-     "delta": null,
-     "top_token": "be",
-     "top_p": 0.117,
-     "flip": true
-    },
-    {
-     "dialect": "African American Vernacular English",
-     "prompt": "So for the scan they gon' run iodinated contrast through your IV so the before that you",
-     "p": null,
-     "delta": null,
-     "top_token": "'",
-     "top_p": 0.221,
-     "flip": true
-    },
-    {
-     "dialect": "British English",
-     "prompt": "Right, for the scan they'll be running iodinated contrast through your IV so the beforehand you ought to",
-     "p": 0.106,
-     "delta": -0.09200000000000001,
-     "top_token": "be",
-     "top_p": 0.154,
-     "flip": true
-    },
-    {
-     "dialect": "Irish English",
-     "prompt": "Sure for the scan they'll run iodinated contrast through your IV so the before it you'd want to",
-     "p": 0.134,
-     "delta": -0.064,
-     "top_token": "drink",
-     "top_p": 0.134,
+     "prompt": "Ever since she and her sister have that argument, she keep having syncopal episodes at work, so the nurse tell her to go to",
+     "p": 0.788,
+     "delta": 0.006000000000000005,
+     "top_token": "the",
+     "top_p": 0.788,
      "flip": false
     },
     {
      "dialect": "ESL-influenced English",
-     "prompt": "For make the scan they will put iodinated contrast through your IV so the before you must to",
-     "p": 0.138,
-     "delta": -0.06,
-     "top_token": "drink",
-     "top_p": 0.138,
+     "prompt": "Since the argument with her sister happen, she is having syncopal episodes at work all the time, so the nurse told her to go to",
+     "p": 0.726,
+     "delta": -0.05600000000000005,
+     "top_token": "the",
+     "top_p": 0.726,
      "flip": false
     },
     {
-     "dialect": "texting/informal register",
-     "prompt": "so for the scan theyll run iodinated contrast through your IV so the before u gotta",
-     "p": 0.183,
-     "delta": -0.015000000000000013,
-     "top_token": "drink",
-     "top_p": 0.183,
+     "dialect": "elaborated formal register",
+     "prompt": "Following the disagreement with her sister, she has continued having syncopal episodes while at work, prompting the nurse to advise that she proceed to",
+     "p": 0.632,
+     "delta": -0.15000000000000002,
+     "top_token": "the",
+     "top_p": 0.632,
      "flip": false
     }
-   ],
-   "core": {
-    "baseline_clinical": 158,
-    "invariant": 45,
-    "framings": 6,
-    "top": [
-     {
-      "feature": "L20/574",
-      "desc": "words related to medical procedures, especially related to urinary issues, and their context. | kidney related",
-      "survives": "4/6",
-      "norm_mass": 0.2
-     },
-     {
-      "feature": "L20/5093",
-      "desc": "language concerning medical imaging and radiology, especially computed tomography | medical imaging",
-      "survives": "2/6",
-      "norm_mass": 0.2
-     },
-     {
-      "feature": "L16/3381",
-      "desc": "words related to medical tests, procedures, patients and discomfort | medical procedures and patient care | Co",
-      "survives": "6/6",
-      "norm_mass": 0.19
-     },
-     {
-      "feature": "L19/8482",
-      "desc": "medical terminology related to bodily fluids and treatments | electrolytes and fluids",
-      "survives": "4/6",
-      "norm_mass": 0.18
-     },
-     {
-      "feature": "L20/13601",
-      "desc": "words related to stool or urine specimen collection | bodily waste",
-      "survives": "5/6",
-      "norm_mass": 0.18
-     },
-     {
-      "feature": "L21/1633",
-      "desc": "words and phrases related to gut bacteria, digestion, and microbiology | terms related to gut and intestinal h",
-      "survives": "3/6",
-      "norm_mass": 0.18
-     },
-     {
-      "feature": "L21/8429",
-      "desc": "mentions of medical problems or lack of water in a place | words related to drinking or beverages | drinks",
-      "survives": "6/6",
-      "norm_mass": 0.18
-     },
-     {
-      "feature": "L17/2218",
-      "desc": "words in the context of scientific or medical research | before",
-      "survives": "6/6",
-      "norm_mass": 0.16
-     }
-    ]
-   }
+   ]
   }
  ]
 }
