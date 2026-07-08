@@ -511,7 +511,11 @@
  "steering_titration": {
   "_": "boost dose-response + faithfulness on the 5 boost-recovered downgrade cases; gemma-2-2b, /api/steer simple-additive, temperature 0, seed 16, 8-token continuations",
   "strengths": {
-   "2.5": null,
+   "2.5": {
+    "recovered": 4,
+    "n": 4,
+    "_": "boost top-5 clinical features at strength 2.5 on the recovered subset; 4 of 5 pairs landed (mid-batch truncation dropped pair 5, remeasure queued), all 4 recovered — trace_out/boostgrid_s2p5, run 2026-07-08"
+   },
    "5": null,
    "10": {
     "recovered": 4,
