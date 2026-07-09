@@ -106,12 +106,12 @@
 </header>
 <main id="main">
   <p class="dateline">Start here · the whole idea in five minutes</p>
-  <h1>People say the same thing many ways.<br>What does the machine hear?</h1>
+  <h1>People say the same thing many ways. What does a machine "hear"?</h1>
 
   <section>
     <p class="step-no">1 · A doctor converges</p>
     <h2>Three phrasings, one interpretation</h2>
-    <p>Patients rarely use textbook words. A clinician hears all three, recognizes the same stomach problem, and reaches the same recommendation.</p>
+    <p>Patients rarely use words that appear in medical textbooks. A clinician understands multiple different framings, recognizes the same stomach problem, and reaches the same recommendation.</p>
     <div class="fig" role="img" aria-label="Three patient phrasings converge through a clinician to one recommendation: an antacid.">
     <svg viewBox="0 0 720 190">
       <text x="0" y="28" class="sv-q">“I have acid reflux.”</text>
@@ -132,9 +132,7 @@
   <section>
     <p class="step-no">2 · The model diverges</p>
     <h2>Same three phrasings, three different answers</h2>
-    <p>We gave a language model the same sentences and read off its most likely
-       next word. The clinical phrasing gets the medicine. The casual phrasings
-       get food.</p>
+    <p>We gave a language model the same sentences and read off its most likely next word. The clinical phrasing makes a medical recommendation. The casual phrasings make a food recommendation.</p>
     <div class="fig" role="img" aria-label="The same three phrasings pass through a language model and come out as three different answers: antacid, ice cream, and apple.">
     <svg viewBox="0 0 720 190">
       <text x="0" y="28" class="sv-q">“I have acid reflux.”</text>
@@ -175,7 +173,7 @@
   <section>
     <p class="step-no">4 · Look inside</p>
     <h2>Circuit tracing photographs the reasoning</h2>
-    <p>Inside the model, small units called features switch on as it reads — some respond to medical ideas, others to everyday ones. A circuit trace records which features fired and how strongly each fed the final guess. Clinical wording lights the medical features; casual wording lights the everyday ones — and the guess follows whichever circuit is lit.</p>
+    <p>Inside the model, small units called "features" switch on as it reads — some respond to medical ideas, others to everyday ones. A circuit trace records which features fired and how strongly each fed the final recommendation. Clinical wording lights the medical features; patient wording lights the everyday ones.</p>
     <div class="fig" role="img" aria-label="Two parallel tracks of feature nodes. The clinical term dyspepsia lights up teal medical nodes and leads to antacid. The casual phrase stomach on fire lights up dark everyday nodes and leads to ice cream.">
     <svg viewBox="0 0 720 130">
       <text x="0" y="40" class="sv-q">“dyspepsia”</text>
@@ -201,23 +199,19 @@
     </svg>
     </div>
     <p class="cap">node size = how strongly the feature fed the guess · faint dots = features that barely fired</p>
-    <p>Every figure on this site is one of those photographs.</p>
+    <p>Most figures on this site are circuit tracings like this one.</p>
   </section>
 
   <section>
     <p class="step-no">5 · What we measure</p>
     <h2>Two numbers per sentence pair</h2>
-    <p><b>How much confidence the right answer lost</b> when the wording turned casual —
-       and <b>whether the top answer changed</b>. A changed answer that points to less
-       help (an inhaler becoming a shirt) is the case that matters most.</p>
+    <p><b>How much confidence the right answer lost</b> when the wording was more similar to patient language, and <b>whether the top answer changed</b>. A changed answer that points to less help — a recommendation for an "inhaler" becoming a recommendation for a "shirt" shows how some of these differences present themselves.</p>
   </section>
 
   <section>
     <p class="step-no">6 · The patch</p>
     <h2>A translation layer, for now</h2>
-    <p>Put a translator between the patient and the model: it rewrites the sentence
-       into clinical wording before the model answers. Same stomach, same person —
-       the answer comes back.</p>
+    <p>Put a translator between the patient and the model: it rewrites the sentence into clinical wording before the model answers.</p>
     <div class="fig" role="img" aria-label="The same three phrasings from panel 2 all pass through a translation layer, emerge as the single clinical wording I have acid reflux, enter the language model, and come out as antacid.">
     <svg viewBox="0 0 720 190">
       <text x="0" y="28" class="sv-q">“I have acid reflux.”</text>
@@ -237,9 +231,7 @@
       <text x="652" y="93" class="sv-a" fill="#0f766e">antacid</text>
     </svg>
     </div>
-    <p class="cap">ice cream (29%) becomes antacid (31%) after translation — a patch, not a cure:
-       it fixed 8 of the 20 hardest cases, left 7 unchanged, and once made things worse ·
-       <a href="../translation/">see the live translation traces</a></p>
+    <p class="cap">ice cream (29%) becomes antacid (31%) after translation. Importantly for now this is a patch, not a permanent solution: it fixed 8 of the 20 hardest cases, left 7 unchanged, and once made things worse · <a href="../translation/">see the live translation traces</a></p>
   </section>
 
   <section>
@@ -253,8 +245,7 @@
           <path d="M13,12 h14 M13,18 h14 M13,24 h9" stroke="#0f766e" stroke-width="1.2"/>
         </svg>
         <h3>Context up front</h3>
-        <p>One plain sentence placing the conversation in a medical setting roughly
-           halved the damage from casual wording. Measured.</p>
+        <p>One plain sentence placing the conversation in a medical setting roughly halved the damage from casual wording.</p>
       </div>
       <div class="path">
         <svg viewBox="0 0 40 40" width="34" height="34" aria-hidden="true">
@@ -262,8 +253,7 @@
           <path d="M7,10 v9 a13,4.5 0 0 0 26,0 v-9 M7,19 v9 a13,4.5 0 0 0 26,0 v-9" fill="none" stroke="#6d6c66" stroke-width="1.4"/>
         </svg>
         <h3>Train on patient language</h3>
-        <p>Models learn idioms, misspellings, and dialects the way clinicians do —
-           a change to how models are built. Future direction, not a claimed result.</p>
+        <p>Models learn idioms, misspellings, and dialects the way clinicians do.</p>
       </div>
     </div>
     <a class="back" href="../word-differences/">See the real traces →</a>

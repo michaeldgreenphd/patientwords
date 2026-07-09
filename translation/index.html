@@ -201,18 +201,13 @@
   <p class="dateline">Fig. 4 <span class="mode">· translation recovery · live trace · traced July 7, 2026</span></p>
   <h1>Translation</h1>
   <p class="subtitle">Translating the patient sentence back into clinical terms restores the prediction.</p>
-  <p class="explainer">The mitigation: an LLM translates the patient sentence into standard terminology, and the raw output is traced natively. The clinical features reappear and the target probability recovers.</p>
-  <p class="explainer">Translation matters most when it changes the <em>advice</em>, not
-     just the confidence. In live traces of the downgrade set: <em>“Grandma’s been all
-     bunged up for a week, so before dinner she took a”</em> continues with <em>nap</em>
-     (0.30); translated to clinical wording, the top continuation becomes
-     <em>lax(ative)</em> at 0.45 — stronger than the original clinical phrasing itself
-     (0.26). <em>“My stomach’s on fire… I reached for an”</em> goes from <em>ice
-     (cream)</em> (0.29) to <em>ant(acid)</em> (0.31). An itchy-rash sentence goes from
-     generic <em>doctor</em> (0.68) to <em>dermatologist</em> (0.68) — translation
-     recovers the specialist. It is not a cure-all: in one case translation replaced the
-     correct <em>prescription</em> (0.38) with <em>topical</em> (0.15), worse than doing
-     nothing. Eight of twenty downgrades recovered; seven did not. (Numbers are recorded in <code>data/provenance.json</code>; tiers reviewed v1.)</p>
+  <p class="explainer">The mitigation: an LLM rewrites the patient sentence in standard terms, and that rewrite is traced directly. The clinical features reappear and the target probability recovers.</p>
+  <p class="explainer">Translation matters most when it changes the <em>advice</em>. In the downgraded
+     clinical advice set, <em>“Grandma’s been all bunged up for a week, so before dinner
+     she took a”</em> continues with <em>nap</em> (30%); rewritten in clinical terms, the
+     top word becomes <em>lax(ative)</em> at 45% — above the original clinical phrasing
+     (26%). It is not a cure-all: in one case the rewrite replaced the
+     <em>prescription</em> (38%) with <em>topical</em> (15%).</p>
   <div class="flow" id="tx-flow" hidden>
     <div class="flow-step"><span class="flow-lbl">patient says</span><span class="flow-txt" id="fl-pat"></span></div>
     <div class="flow-step"><span class="flow-lbl">translation layer</span><span class="flow-txt" id="fl-tr"></span></div>
@@ -221,8 +216,7 @@
 
   <h2 id="tx-gal-head" hidden>Where the patch holds, and where it does not</h2>
   <div class="tx-g" id="tx-gal"></div>
-  <p class="embed-caption" id="tx-gal-cap" hidden>every classifiable case from the live mitigation trace ·
-     top token per panel · numbers in <code>data/provenance.json</code> · tiers reviewed v1</p>
+  <p class="embed-caption" id="tx-gal-cap" hidden>every classifiable case from the live mitigation trace · top token per panel</p>
 
   <span class="stat recovery">Recovered target probability: 0.41 after translation (clinical baseline 0.26)</span>
   <details class="meth" id="trace-fold">
@@ -230,9 +224,7 @@
   <p class="traced" data-mode="translation" data-traced="gemma-2-2b">
     <span class="tm"><b>live trace:</b> gemma-2-2b · gemma scope transcoders</span>
     <span class="tp" id="fold-meta">hosted circuit-tracer via Neuronpedia · re-traced July 9, 2026 · phrase 17 of the
-      downgrade set, three panels (clinical / patient / LLM-translated) · next-token
-      probabilities read directly from the trace · “constipated” vs. “all bunged up”,
-      translation restores “ lax(ative)”</span>
+      downgrade set, three panels (clinical / patient / LLM-translated)</span>
   </p>
 
   <div class="tabs" role="tablist" aria-label="Trace panels">
@@ -246,7 +238,7 @@
             title="Live translation mitigation: nap under patient wording, laxative after translation"></iframe>
   </div>
   </div>
-  <p class="embed-caption" id="flip-cap">Live trace: under patient wording the top continuation is “ nap” (0.30); after LLM translation to clinical wording it’s “ lax(ative)” (0.41) — stronger than the original clinical phrasing (0.26). Independent re-trace of the study case (which measured 0.45); numbers in <code>data/provenance.json</code>.</p>
+  <p class="embed-caption" id="flip-cap">Live trace: under patient wording the top word is “ nap” (30%); after rewriting to clinical wording it’s “ lax(ative)” (41%) — above the original clinical phrasing (26%).</p>
   </details>
 
 
@@ -256,7 +248,7 @@
       <div>
         <h3>Dose–response: recovery by steering strength</h3>
         <div id="tt-dose"></div>
-        <p class="tt-note">Boost the top-5 clinical features while the model reads the patient wording; recovery = the clinical target appears in the steered continuation. Recovery saturates at the lowest strength tried and declines at 20, where continuations occasionally degenerate. A strength marked pending is queued and fills in when its run lands.</p>
+        <p class="tt-note">Boost the top-5 clinical features while the model reads the patient wording; recovery = the clinical target appears in the steered output. Recovery peaks at the lowest strength tried and falls off at 20, where the output sometimes breaks down.</p>
       </div>
       <div>
         <h3>Faithfulness: does attribution rank predict effect?</h3>
@@ -269,11 +261,7 @@
   <a class="back" href="../">← Back home</a>
 
   <div class="endnote">
-    <p>
-      The traces on this page are live gemma-2-2b runs. Earlier versions of this page led
-      with a hand-authored demonstration render (pipeline validation); live traces replaced
-      it as the study progressed.
-    </p>
+    <p>The traces here are live gemma-2-2b runs.</p>
     <footer>
       Built with the <a href="https://github.com/michaeldgreenphd/patientwords-engine">patientwords-engine</a> pipeline
       on <a href="https://neuronpedia.org">Neuronpedia</a> ·

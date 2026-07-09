@@ -309,20 +309,13 @@
 <main id="main">
   <p class="dateline">Simulated series <span class="mode">· generated stress pairs · live renders · simulated data</span></p>
   <h1>Simulated scenarios</h1>
-  <p class="subtitle">Stress scenarios authored by an LLM, programmatically validated, traced live on gemma-2-2b,
-     and kept apart from the hand-measured set.</p>
+  <p class="subtitle">Stress scenarios authored by an LLM, validated, traced live on gemma-2-2b, and kept apart from the hand-measured set.</p>
   <details class="meth">
     <summary>View generation methodology</summary>
-  <p class="explainer">This section widens the hand-measured <a href="../#phrase-dataset">phrase dataset</a> with simulated scenarios. Claude authors new patient-vs-clinical pairs in the same format: one contiguous term swap inside an identical frame, ending at a next-token probe boundary. Each candidate must pass programmatic validators (single-span swap, probe-boundary ending, term-verbatim check, dedupe against the measured set) before acceptance. Accepted pairs are traced live on gemma-2-2b, like the hand-measured pairs.</p>
-  <p class="explainer">
-    Each scenario below shows the two phrasings, the traced next-token probabilities with the
-    Language Penalty, and the generator's rationale for why the swap should be diagnostic.
-    This is a demonstration set: the 25 largest-effect scenarios (prediction flips first, then
-    largest language penalty) include their full interactive circuit comparison; every
-    scenario's measurements are downloadable below.
-  </p>
+  <p class="explainer">This section adds simulated scenarios to the <a href="../#phrase-dataset">hand-measured dataset</a>. Claude writes new patient-vs-clinical pairs in the same format — one term swapped inside an identical frame, ending at the next-token probe. Each candidate must pass automatic checks (single swap, correct ending, term-verbatim, no duplicates of the measured set) before it’s accepted and traced live on gemma-2-2b.</p>
+  <p class="explainer">Each scenario shows the two phrasings, the traced probabilities with the language penalty, and the generator’s reason the swap should matter. The 25 largest-effect scenarios (prediction flips first, then largest penalty) include a full circuit comparison; every scenario’s measurements are downloadable below.</p>
   </details>
-  <p class="explainer">Two unequal failure modes appear in the table. The model hedges: the clinical continuation stays on top but loses probability. Or it redirects: the top prediction changes to a different action. The Urgency column marks when a redirect lands on a lower tier of care — a specialist becoming a generalist, a medication becoming nothing. Those downgrades matter most for safety, and across the models measured they outnumber upgrades roughly seven to one.</p>
+  <p class="explainer">Two unequal failure modes appear in the table. 1) The model hedges: the clinical answer stays on top but loses probability. 2) It redirects: the top answer changes to a different action. The urgency column marks a redirect that lands on a lower tier of care, like a specialist becoming a generalist or a medication becoming nothing.</p>
   <p class="traced" id="sim-traced" hidden>
     <span class="tm"><b>traced model:</b> <span id="sim-traced-model">gemma-2-2b · gemma scope transcoders</span></span>
     <span class="tp">→ prob = target-token probability read from the live trace · penalty = patient − clinical</span>
@@ -336,9 +329,9 @@
   <section id="redir-ex" hidden>
     <h2>When the advice itself changes</h2>
     <p class="explainer">
-      Some redirects do more than weaken the clinical continuation &mdash; the top prediction
-      lands on a different object altogether. Probability aside, these are the swaps to watch:
-      the wording changes <em>what is offered</em>. Tier labels follow the reviewed v1 vocabulary.
+      Some redirects go further &mdash; the top answer lands on a different object altogether.
+      These are the swaps to watch: the wording changes <em>what’s offered</em>.
+      Tier labels follow the reviewed v1 vocabulary.
     </p>
     <div class="rx-g" id="rx-cards"></div>
   </section>
@@ -392,7 +385,7 @@
   <a class="back" href="../">← Back home</a>
 
   <div class="endnote">
-    <p id="sim-endnote">SIMULATED DATA · these phrasings were authored by an LLM (see the provenance strip above) and accepted by the scenario generator's programmatic validators; they are not statements from patients and contain no real personal or clinical data. The traces are live gemma-2-2b runs via the Neuronpedia circuit tracer. The hand-measured dataset lives separately under <a href="../phrase-dataset/">Phrase Dataset</a>.</p>
+    <p id="sim-endnote">SIMULATED DATA · these phrasings were written by an LLM (see the strip above) and passed the generator's automatic validators; they are not statements from patients and contain no real personal or clinical data. The traces are live gemma-2-2b runs via the Neuronpedia circuit tracer.</p>
     <footer>
       Built with the <a href="https://github.com/michaeldgreenphd/patientwords-engine">patientwords-engine</a> pipeline
       on <a href="https://neuronpedia.org">Neuronpedia</a> ·

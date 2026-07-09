@@ -146,8 +146,8 @@
   <p class="dateline">Fig. 1 <span class="mode">· one-word swap · live trace · traced July 7, 2026</span></p>
   <h1>Word differences</h1>
   <p class="subtitle">One sentence, one swapped word: clinical term vs. patient idiom.</p>
-  <p class="explainer">A word-for-word substitution (“depression” vs. “the blues”) as two stacked circuit traces. Clinical wording drives prob(therapist) = 0.86; the patient idiom collapses it to 0.35, with “friend” within four points of “therapist”.</p>
-  <p class="explainer">The starkest case in the hand-measured set is a recommendation shift, not just a probability shift. “Since her urinary tract was completely blocked up, they had to urgently call a” continues with uro(logist) at 0.20; phrase it as “her water was completely blocked up” and the model calls a plumber — at 0.68, more confident in the wrong profession than it ever was in the right one. In another pair, “I’m having a fit, so you need to give me my” draws Money (0.25) where the clinical phrasing draws Meds (0.29). The idiom doesn’t just weaken the answer; it changes what arrives. (Pairs 15 and 14 in data/stress_pairs.json, hand-measured from real patient language.)</p>
+  <p class="explainer">A single word swapped — “depression” vs. “the blues” — as two stacked traces. Clinical wording gives therapist at 86%; the patient wording drops it to 35%, with “friend” only 4 percentage points behind.</p>
+  <p class="explainer">The starkest case in our hand-measured dataset illustrates a change in the recommended clinical advice. “Since her urinary tract was completely blocked up, they had to urgently call a” continues with uro(logist) at 20%; phrase it as “her water was completely blocked up” and the model calls a plumber — at 68%. The patient language changed what was recommended. (Pair 15 in data/stress_pairs.json.)</p>
   <span class="stat penalty">Language Penalty: −51% probability (0.86 → 0.35)</span>
   <p class="traced" data-mode="2panel" data-traced="gemma-2-2b">
     <span class="tm"><b>live trace:</b> gemma-2-2b · gemma scope transcoders</span>
@@ -160,18 +160,14 @@
     <iframe class="live" src="../modes/simulated/featured_sim85/index_01.html" loading="lazy"
             title="Live attribution-graph comparison: asthma flares vs. chest gets all tight"></iframe>
   </div>
-  <p class="embed-caption">Live trace: clinical wording reaches “ inhaler” at 0.69; the patient idiom’s top continuation is “ shirt”, inhaler collapsing to 0.04 (scenario 85 in the <a href="../simulated-scenarios/">simulated series</a>). Two panels, one scale — clinical above, patient below: green clinical features stack over the swapped word and feed the continuation; the idiom replaces them and the probability collapses.</p>
+  <p class="embed-caption">Live trace: clinical wording reaches “ inhaler” at 69%; the patient phrasing top word is “ shirt”, with inhaler at 4% (scenario 85). Two panels on one scale — clinical above, patient below: green clinical features stack over the swapped word and feed the continuation; the idiom replaces them and the probability falls.</p>
 
 
 
   <a class="back" href="../">← Back home</a>
 
   <div class="endnote">
-    <p>
-      The featured render above is a live gemma-2-2b trace. Earlier versions of this page led
-      with a hand-authored demonstration render (pipeline validation); live traces replaced it
-      as the study progressed.
-    </p>
+    <p>The render above is a live gemma-2-2b trace.</p>
     <footer>
       Built with the <a href="https://github.com/michaeldgreenphd/patientwords-engine">patientwords-engine</a> pipeline
       on <a href="https://neuronpedia.org">Neuronpedia</a> ·

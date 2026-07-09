@@ -271,8 +271,8 @@
 <main id="main">
   <p class="dateline">Research bulletin · mechanistic interpretability of medical language · <b>gemma-2-2b</b></p>
   <h1><span class="patient">Patients</span> don’t speak like doctors.<br><span class="clinical">Medical&nbsp;AI</span> must be ready to interpret them.</h1>
-  <p class="lede">We trace how gemma-2-2b handles clinical terms versus the everyday language patients use, with attribution graphs built on Gemma Scope transcoders. The stakes show clearest when wording changes what the model offers: “my asthma flares, so at work I keep a spare” continues with inhaler at 0.69; say “my chest gets all tight” and the top continuation becomes shirt, inhaler collapsing to 0.04. Translating patient language back to clinical terms restores it. (Scenario 85, data/simulated_scenarios.json.)</p>
-  <p class="lede">Every figure is a live render and reads the same way: columns are the prompt’s words in order; height is depth in the model; the predicted next word sits at the top. Nodes are features — size is contribution, color is category. Curves are paths of influence; the spread at the top shows the competing predictions. Hover any node for its identity and mass.</p>
+  <p class="lede">We trace how gemma-2-2b reads clinical terms versus the everyday words patients use. Wording can change what the model suggests in addition to its confidence: “my asthma flares, so at work I keep a spare” continues with inhaler at 69% probability; “my chest gets all tight” makes the top word shirt, and inhaler falls to 4% probability. Rewriting the sentence in clinical terms restores it. (Scenario 85, data/simulated_scenarios.json.)</p>
+  <p class="lede">Every figure is a live render: columns are the prompt’s words in order; height is depth in the model; the predicted next word sits at the top. Nodes (the dots) are features — size is contribution, color is category. Curves are paths of influence; the spread at the top shows the competing recommendations ranked by probability. Hover any node for its identity and mass.</p>
   <p class="keyline">
     <span class="swatch" style="background:#15803d"></span>clinical / recovery &nbsp;&nbsp;
     <span class="swatch" style="background:#111827"></span>off-target (the patient-language direction) &nbsp;&nbsp;
@@ -305,7 +305,7 @@
     <div class="fig-body">
       <p class="fig-no">Fig. 1 <span class="mode">· one-word swap</span></p>
       <h3>Word Differences</h3>
-      <p>One phrase swapped — “asthma flares” vs. “chest gets all tight” — as two stacked graphs. Clinical wording drives prob(inhaler) = 0.69; the patient idiom hands the top spot to “shirt” and inhaler collapses to 0.04.</p>
+      <p>One phrase swapped — “asthma flares” vs. “chest gets all tight” — as two stacked graphs. Clinical wording gives inhaler at 69%; the patient phrasing makes "shirt" the top word and drops "inhaler" to 4%.</p>
       <span class="stat penalty">Language Penalty: −65% probability (0.69 → 0.04)</span>
       <p class="traced" data-mode="2panel" data-traced="gemma-2-2b">
         <span class="tm"><b>live trace:</b> gemma-2-2b · gemma scope transcoders</span>
@@ -326,10 +326,7 @@
     <div class="fig-body">
       <p class="fig-no">Fig. 2 <span class="mode">· syntax × lexicon</span></p>
       <h3>Syntax Differences</h3>
-      <p>A 2×2 grid crossing phrasing (patient-derived vs. medical lexicon) with
-         morphosyntax (standard vs. nonstandard). The variety shift alone adds +11–13%
-         toward the everyday continuation, even when the speaker uses the medical
-         word (Box&nbsp;B).</p>
+      <p>A 2×2 grid crossing wording (patient vs. medical) with grammar (standard vs. nonstandard). From our analysis, changing the grammar alone shifts +11–13% toward the everyday continuation, even when the medical word stays (Box B).</p>
       <span class="stat penalty">Variety shift Δ: +11% and +13% toward the everyday continuation · Register shift Δ: +4–5%</span>
       <p class="traced" data-mode="4quadrant" data-traced="gemma-2-2b">
         <span class="tm"><b>traced model:</b> gemma-2-2b · gemma scope transcoders</span>
@@ -348,9 +345,9 @@
       <figcaption>live render · traced 2026-07-07</figcaption>
     </figure>
     <div class="fig-body">
-      <p class="fig-no">Fig. 3 <span class="mode">· dialect sweep</span></p>
+      <p class="fig-no">Fig. 3 <span class="mode">· dialect</span></p>
       <h3>Dialect Differences</h3>
-      <p>Eight clinical terms from the hand-measured dataset are held fixed while the surrounding sentence is re-traced across six dialect and register framings, so any probability shift comes from framing alone. For clinical depression, the top prediction becomes “ doctor” under both Southern US and British framings, displacing “ therapist”; across the sweep, most framings move the top prediction off the standard-English target.</p>
+      <p>8 clinical terms stay fixed while the sentence around them is re-traced across 6 dialect and grammar framings, so any shift comes from framing alone. For clinical depression, the top word becomes “ doctor” under both Southern US and British framings, replacing the recommendation “ therapist”. Across dialects, most framings move the top word off the standard-English target.</p>
       <p class="traced" data-mode="dialect" data-traced="2026-07-07">
         <span class="tm"><b>traced model:</b> gemma-2-2b · gemma scope transcoders</span>
         <span class="tp">56 graphs · 8 baselines + 48 framings · batch dialects_20260707T000923Z</span>
@@ -370,7 +367,7 @@
     <div class="fig-body">
       <p class="fig-no">Fig. 4 <span class="mode">· translation recovery</span></p>
       <h3>Translation</h3>
-      <p>An LLM translates the patient sentence into standard terminology and traces the raw output natively. The clinical features and the target probability both return.</p>
+      <p>An LLM rewrites the patient sentence into clinical terms, and the rewrite is evaluated. The clinical features and the target probability often both come back.</p>
       <span class="stat recovery">Recovered target probability: 0.45 after translation (clinical baseline 0.26)</span>
       <p class="traced" data-mode="translation" data-traced="gemma-2-2b">
         <span class="tm"><b>live trace:</b> gemma-2-2b · gemma scope transcoders</span>
@@ -396,7 +393,7 @@
     <div class="fig-body">
       <p class="fig-no">Sim series <span class="mode">· generated pairs · simulated data</span></p>
       <h3>Simulated Scenarios</h3>
-      <p>Claude authors new patient-vs-clinical stress pairs in the hand-built dataset’s format (everyday condition areas, one contiguous term swap per pair); programmatic validators accept or reject each. Accepted pairs are traced on gemma-2-2b, published with the generator’s rationale and the batch’s cost sidecar. Kept separate from the hand-measured set.</p>
+      <p>Claude writes new patient-vs-clinical pairs in the hand-built dataset’s format — one term swapped per pair — and automatic validators accept or reject each. Accepted pairs are traced on gemma-2-2b and published with the generator’s rationale and cost. Kept separate from the hand-measured set.</p>
       <span class="stat penalty" id="sim-stat" hidden></span>
       <p class="traced" data-mode="simulated" data-traced="gemma-2-2b">
         <span class="tm"><b>traced model:</b> gemma-2-2b · gemma scope transcoders</span>
@@ -411,14 +408,7 @@
       <h2>Safety view — urgency of the predicted action<span class="draft-flag">tiers reviewed v1</span></h2>
       <span class="count" id="sv-count"></span>
     </div>
-    <p class="lede" style="font-size:16px">
-      Not every flip is equal. Sometimes a model <em>hedges</em>: the clinical continuation
-      stays on top but loses probability. Sometimes it <em>redirects</em>: the top
-      prediction changes, and when the new action sits at a lower tier of care
-      (specialist → generalist, medication → nothing) that is a <em>downgrade</em> — the
-      failure that matters most. Care-urgency tiers follow the reviewed v1 vocabulary;
-      every number below reads from <a href="data/urgency_shift.json">data/urgency_shift.json</a>.
-    </p>
+    <p class="lede" style="font-size:16px">Not every flip is equal. Sometimes the model <em>hedges</em> (e.g. the clinical answer stays on top but loses probability). Sometimes it <em>redirects</em>: the top answer changes, and when it lands on a lower tier of care (specialist → generalist, medication → nothing) we call that a recommendation <em>downgrade</em>. Care-urgency tiers follow the reviewed vocabulary; every number below reads from <a href="data/urgency_shift.json">data/urgency_shift.json</a>.</p>
     <div class="safety-grid" id="sv-grid"></div>
     <p class="safety-note" id="sv-note"></p>
   </section>
@@ -470,21 +460,13 @@
         <tbody id="me-body"></tbody>
       </table>
     </div>
-    <p class="me-caption">
-      Each model extracts clinical concepts from raw patient phrasing. An LLM then
-      translates that phrasing into clinician language and the identical task is re-scored
-      on the same expected terms. Δ isolates the effect of the translation step alone.
-    </p>
+    <p class="me-caption">Each model extracts clinical concepts from patient phrasing. An LLM then translates that phrasing into clinician language and the identical task is re-scored on the same expected terms. Δ isolates the effect of the translation step alone.</p>
     <p class="me-foot" id="me-foot"></p>
     <p><a class="open" href="model-evaluations/">What the percentages mean →</a></p>
   </section>
 
   <div class="endnote">
-    <p>
-      Figs. 1–4, the simulated scenarios, and the phrase-dataset measurements are live
-      gemma-2-2b traces. Earlier versions of the gallery used hand-authored demonstration
-      renders to validate the visualization pipeline; live traces have replaced them.
-    </p>
+    <p>Figs. 1–4, the simulated scenarios, and the phrase-dataset measurements are live gemma-2-2b traces.</p>
     <footer>
       Built with the <a href="https://github.com/michaeldgreenphd/patientwords-engine">patientwords-engine</a> pipeline
       on <a href="https://neuronpedia.org">Neuronpedia</a> ·

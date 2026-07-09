@@ -130,7 +130,7 @@
   <p class="subtitle">On this set the models read patient phrasing perfectly. The losses
     appear after the translation step.</p>
 
-  <p class="explainer">The figures elsewhere on this site trace circuits inside one small model. This page asks a different question of production-scale models: can a Claude model extract the clinical concepts from a sentence, and does translating it first help or hurt? Each model is scored on the same fixed set of items, so the two percentages are directly comparable.</p>
+  <p class="explainer">The figures elsewhere trace circuits inside one small model. This page asks a different question of production-scale models: can a Claude model pull the clinical concepts out of a sentence, and does translating it first help or hurt? Each model is scored on the same items, so the two percentages are directly comparable.</p>
 
   
 
@@ -149,29 +149,18 @@
     </div>
     <p class="me-caption" id="me-updated"></p>
     <p class="pull">Content was lost at the translation step itself.</p>
-    <p>This reverses the gemma story from the circuit figures. gemma-2-2b, a 2-billion-parameter model, measurably loses the clinical continuation on patient phrasing. These production models did not: every model scored 100% on the untouched patient wording. That is the same failure mode the engine flags as a translation regression, and the reason the <a href="../translation/">Translation</a> figure’s mitigation can’t be assumed safe without checking its output.</p>
+    <p>This reverses the gemma story. gemma-2-2b, a 2-billion-parameter model, loses the clinical continuation on patient phrasing. These production models did not — every one scored 100% on the untouched patient wording. The losses came from translating, the same regression the engine flags, and the reason the <a href="../translation/">Translation</a> fix can’t be assumed safe without checking its output.</p>
   </section>
 
   <section>
     <h2>Read this with its limits</h2>
-    <p>
-      The item set is small, so single items move the percentages in large steps; treat
-      the numbers as a demonstration of the harness and the direction of the effect, not
-      as a ranking of models. Scoring is term-matching against expected clinical terms: an
-      answer phrased with a valid synonym the item list lacks would score as a miss. Runs
-      hit a live API on a specific date and can differ on re-run. See the broader
-      <a href="../methods.html#limitations">limitations</a> for what this evidence does
-      and does not show.
-    </p>
+    <p>The item set is small, so single items move the percentages a lot; read the numbers as a demonstration of the method and the direction of the effect, not a ranking of models. Scoring matches against expected clinical terms, so a valid synonym the list lacks would count as a miss. Runs hit a live API on a specific date and can differ on re-run. See the broader <a href="../methods.html#limitations">limitations</a> for what this evidence does and doesn’t show.</p>
     <a class="back" href="../">Back home →</a>
   </section>
 
   <div class="endnote">
     <p>
-      Scores come from live Anthropic API runs under a hard spend ceiling; the table is
-      generated from <a href="../data/model_evaluations.json">data/model_evaluations.json</a>,
-      exported by the engine's evaluation workflow. Expected terms live in a data file,
-      not in code.
+      Scores come from live Anthropic API runs under a hard spend ceiling.
     </p>
     <footer>
       Built with the <a href="https://github.com/michaeldgreenphd/patientwords-engine">patientwords-engine</a> pipeline

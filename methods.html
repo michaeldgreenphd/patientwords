@@ -148,27 +148,13 @@
   <section>
     <p class="step-no">Step 1 · Model &amp; features</p>
     <h2>gemma-2-2b, read through Gemma Scope transcoders</h2>
-    <p>
-      The study’s subject is <code>gemma-2-2b</code>, an open-weights language model.
-      On its own, its internal activity is millions of undifferentiated numbers. Google
-      DeepMind’s <a href="https://huggingface.co/google/gemma-scope-2b-pt-transcoders">Gemma
-      Scope</a> transcoders re-express that activity as a sparse set of <em>features</em> —
-      units that each tend to fire for one recognizable thing, such as mental-health
-      treatment, first-person symptom talk, or the syntax of a quoted sentence.
-    </p>
+    <p>The study’s subject is <code>gemma-2-2b</code>, an open-weights language model. On its own, its inner workings are millions of undifferentiated numbers. Google DeepMind’s <a href="https://huggingface.co/google/gemma-scope-2b-pt-transcoders">Gemma Scope</a> transcoders turn that activity into a sparse set of <em>features</em> — units that each tend to fire for one recognizable thing, like mental-health treatment, first-person symptom talk, or the grammar of a quoted sentence.</p>
   </section>
 
   <section>
     <p class="step-no">Step 2 · Attribution</p>
     <h2>Tracing the circuit with circuit-tracer, via Neuronpedia</h2>
-    <p>
-      For each prompt we run <a href="https://github.com/safety-research/circuit-tracer">circuit-tracer</a>
-      through <a href="https://neuronpedia.org">Neuronpedia</a> to build an
-      <em>attribution graph</em>: a causal map of which features, at which layers and
-      positions, pushed the model toward its next-token prediction. Edges carry
-      attribution mass — how much one feature’s firing contributed to another’s, and
-      ultimately to the final logits.
-    </p>
+    <p>For each prompt we run <a href="https://github.com/safety-research/circuit-tracer">circuit-tracer</a> through <a href="https://neuronpedia.org">Neuronpedia</a> to build an <em>attribution graph</em>: a map of which features, at which layers and positions, pushed the model toward its next word. Edges carry attribution mass — how much one feature’s firing fed another’s, and ultimately the final prediction.</p>
   </section>
 
   <section>
@@ -213,34 +199,22 @@
            keyword with the surrounding frame, separating the vocabulary effect from the
            syntax effect.</p>
       </li>
-      <li>
-        <span class="eng-name"><a href="dialect-differences/">Dialect Differences</a></span>
-        <span class="eng-mode">dialect · Fig. 3</span>
-        <p>The clinical term is held fixed while the
-           surrounding syntax is re-traced across dialect and register variants, extending
-           the single syntax delta into a distribution.</p>
-      </li>
-      <li>
-        <span class="eng-name"><a href="translation/">Translation</a></span>
-        <span class="eng-mode">translation · Fig. 4</span>
-        <p>An LLM translates the patient sentence into clinical
-           terms, and the translated output is traced natively to show the circuit and
-           the prediction recovering together.</p>
-      </li>
+      <li><span class="eng-name">Dialect Differences</span> <span class="eng-mode">dialect · Fig. 3</span> The clinical term is held fixed while the surrounding syntax is re-traced across dialect and register variants.</li>
+      <li><span class="eng-name">Translation</span> <span class="eng-mode">translation · Fig. 4</span> An LLM rewrites the patient sentence in clinical terms, and the rewrite is traced to show the circuit and prediction recover together.</li>
     </ul>
     <p>
       Every render is a single self-contained HTML file.
     </p>
     <p>
-      Whatever the engine, each comparison ends in one of three outcomes. The model
-      <em>hedges</em>: the clinical continuation stays on top but loses probability. It
-      <em>redirects</em>: the top continuation changes to something else. Or it
-      <em>downgrades</em>: the redirect lands on a lower tier of care. A worked downgrade
-      from the live traces &mdash; <em>“Grandma’s been constipated for a week, so before
-      dinner she took a”</em> continues with <em>laxative</em>; rephrase it as
-      <em>“all bunged up”</em> and the top continuation becomes <em>nap</em>
-      (0.30 vs. the laxative’s 0.26 under clinical wording). The advice object itself
-      changed, not merely its probability. (Numbers are recorded in <code>data/provenance.json</code>; tier vocabulary reviewed v1, 2026-07-09.)
+      Whatever the engine, each comparison ends one of three ways. The model
+      <em>hedges</em>: the clinical answer stays on top but loses probability. It
+      <em>redirects</em>: the top answer changes. Or it <em>downgrades</em>: the redirect
+      lands on a lower tier of care. A worked case &mdash; <em>“Grandma’s been constipated
+      for a week, so before dinner she took a”</em> continues with <em>laxative</em>;
+      rephrase it as <em>“all bunged up”</em> and the top word becomes <em>nap</em>
+      (30%, against the laxative’s 26% under clinical wording). The advice itself changed,
+      not just its probability. Tier labels follow the reviewed v1 vocabulary
+      (<code>data/urgency_shift.json</code>).
     </p>
     <a class="back" href="./">Back home →</a>
   </section>
@@ -248,53 +222,23 @@
   <section id="limitations">
     <p class="step-no">Limitations</p>
     <h2>What this evidence does and does not show</h2>
-    <p>
-      This project measures one narrow thing: how the probability of a single next token
-      changes when clinical wording is replaced by patient wording. That is a probe
-      of model behavior, not a clinical outcome. A lower probability for “antacid” isn’t a
-      measurement of harm; it’s a trace of the model treating the two phrasings
-      differently.
-    </p>
+    <p>This project measures one narrow thing: how the probability of a single next word changes when clinical wording is replaced by patient wording. That is a probe of model behavior, not a clinical outcome. A lower probability for “antacid” isn’t a measure of harm; it’s a sign the model treats the two phrasings differently.</p>
     <ul class="engines">
-      <li><p><b>One small model carries the circuit evidence.</b> Every attribution graph
-        here comes from gemma-2-2b, a 2-billion-parameter model chosen because its
-        transcoders are public. The behavioral checks on qwen3-4b and qwen3-1.7b measure
-        next-token probabilities only, no circuits. None of this establishes how larger
-        or instruction-tuned clinical systems behave.</p></li>
-      <li><p><b>Attribution graphs are an interpretive tool.</b> They reconstruct the
-        model’s computation through transcoder features and prune heavily; error nodes
-        absorb what the reconstruction misses. A clean-looking circuit is a hypothesis
-        about mechanism, not a proof.</p></li>
+      <li><p><b>One small model carries the circuit evidence.</b> Every graph here comes from gemma-2-2b, chosen because its transcoders are public. The behavioral checks on qwen3-4b and qwen3-1.7b measure next-word probabilities only, no circuits. None of this shows how larger or instruction-tuned clinical systems behave.</p></li>
+      <li><p><b>Attribution graphs are an interpretive tool.</b> They reconstruct the model’s computation through features and prune heavily; error nodes absorb what’s missed.</p></li>
       <li><p><b>Feature labels are machine-generated.</b> The clinical / off-target
         categories come from keyword-matching auto-interp descriptions. Both steps can be
         wrong, and a mislabeled feature shifts the clinical-mass numbers.</p></li>
       <li><p><b>Measurements are a point in time.</b> The hand-measured probabilities were
         observed on specific dates against a hosted service; re-runs can differ.</p></li>
-      <li><p><b>Translation can fail.</b> The mitigation the Translation figure demonstrates
-        is itself an LLM step. The engine flags translation regressions — cases where the
-        rewrite made the target token less likely — and they occur.</p></li>
-      <li><p><b>The stimuli are constructed.</b> Most phrase pairs were written by a
-        language model and validated programmatically, not collected from patients. They
-        are stress tests, not a sample of real clinical conversations.</p></li>
+      <li><p><b>Translation can fail.</b> The fix in the Translation figure is itself an LLM step. The engine flags regressions — cases where the rewrite made the target word less likely.</p></li>
+      <li><p><b>The stimuli are constructed.</b> Most phrase pairs were written by a language model and checked automatically, not collected from patients. They are stress tests, not a sample of real clinical conversations.</p></li>
     </ul>
-    <p>
-      Nothing here is medical advice, and no part of this pipeline is a deployed clinical
-      tool. The claim this evidence supports is narrower: on the models measured, the same
-      medical situation phrased in patient words is measurably less likely to reach the
-      clinical continuation than in clinical terms — and the circuit view shows
-      where that difference arises.
-    </p>
+    <p>Nothing here is medical advice, and no part of this pipeline is a deployed clinical tool. The claim is narrower: on the models measured, the same situation phrased in patient words is measurably less likely to reach the clinical answer than in clinical terms — and the circuit view shows where that difference arises.</p>
   </section>
 
   <div class="endnote">
-    <p>
-      Two kinds of provenance appear in the gallery. Figs. 1–4 and the simulated
-      scenarios use prompts written by an LLM and validated programmatically: the scenarios
-      are simulated, but the testing is real — every measurement is a live gemma-2-2b
-      trace. The phrase dataset is hand-built from real patient language and measured live
-      the same way. Earlier versions of the gallery included hand-authored demonstration
-      renders (pipeline validation); live traces have replaced them.
-    </p>
+    <p>Two kinds of provenance appear in the gallery. Figs. 1–4 and the simulated scenarios use prompts written by an LLM and checked automatically: the scenarios are simulated, but the testing is real.</p>
     <footer>
       Built with the <a href="https://github.com/michaeldgreenphd/patientwords-engine">patientwords-engine</a> pipeline
       on <a href="https://neuronpedia.org">Neuronpedia</a> ·
