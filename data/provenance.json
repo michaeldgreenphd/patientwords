@@ -569,5 +569,13 @@
   "rung5_below_rung1": "3 of 6 baselines with both endpoints",
   "mean_delta_rung5_minus_rung1": 0.0438,
   "verdict": "no reliable register gradient with the clinical term held fixed; the single-case staircase (ladder_digestive) is real but not representative"
+ },
+ "paraphrase_robustness": {
+  "_": "Innocuous-paraphrase sweep: 10 downgrade baselines x 5 meaning-preserving rewordings, term held fixed (trace_out/dialects_20260708T203111Z, gemma-2-2b, 2026-07-09).",
+  "n_baselines_measured": 9,
+  "mean_abs_delta_vs_baseline": 0.0642,
+  "per_baseline_sd_mean": 0.0764,
+  "per_baseline_sd_median": 0.0415,
+  "verdict": "single-sentence next-token probabilities move under innocuous rewording by about the same magnitude as the term-swap penalty (0.070); single pairs are illustrations, inference lives in the paired aggregate where bidirectional paraphrase noise averages out (SE contribution ~0.009 at n=132)"
  }
 }
