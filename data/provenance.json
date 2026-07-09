@@ -528,8 +528,8 @@
   "strengths": {
    "2.5": {
     "recovered": 4,
-    "n": 4,
-    "_": "boost top-5 clinical features at strength 2.5 on the recovered subset; 4 of 5 pairs landed (mid-batch truncation dropped pair 5, remeasure queued), all 4 recovered — trace_out/boostgrid_s2p5, run 2026-07-08"
+    "n": 5,
+    "_": "boost top-5 at strength 2.5: pair-5 remeasure landed (not recovered — the same pair misses at every strength); final 4/5 — trace_out/boostgrid_s2p5"
    },
    "5": {
     "recovered": 5,
@@ -542,9 +542,9 @@
     "note": "replication; original run 5/5"
    },
    "20": {
-    "recovered": 0,
-    "n": 1,
-    "_": "boost top-5 at strength 20: 3 of 5 steer calls failed server-side (HTTP 500); the one measured continuation degenerated into token repetition — the over-steering regime, where the model breaks down rather than recovers; pair 5 truncated. Read as 'breaks down at 20', not 'zero effect' — trace_out/boostgrid_s20, 2026-07-08"
+    "recovered": 1,
+    "n": 4,
+    "_": "boost top-5 at strength 20: remeasure resolved the three server 500s (flake, not strength); 1/4 recovered, with occasional degeneration — recovery declines sharply at the top of the dose range; pair 5 unmeasured — trace_out/boostgrid_s20"
    }
   },
   "low_rank_6_10": {
