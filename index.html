@@ -44,7 +44,8 @@
   .wordmark{font-family:var(--serif);font-size:19px;font-weight:600;letter-spacing:.02em;
     text-decoration:none}
   .wordmark .pw-p{color:var(--patient)}
-  .wordmark .pw-w{color:var(--clinical)}
+  .wordmark .pw-w{color:var(--clinical);font-style:italic}
+  .wordmark .pw-w::before{content:'·';color:var(--muted);font-style:normal;font-weight:400;margin:0 3px 0 2px}
   .masthead nav{display:flex;flex-wrap:wrap;gap:6px 20px}
   .masthead nav a{font-family:var(--mono);font-size:11px;letter-spacing:.16em;
     text-transform:uppercase;color:var(--muted);text-decoration:none;padding:2px 0}
@@ -66,6 +67,22 @@
   .keyline{font-family:var(--mono);font-size:12.5px;color:var(--muted);
     letter-spacing:.02em;margin:26px 0 0;line-height:2}
   .keyline .swatch{display:inline-block;width:9px;height:9px;margin:0 7px 0 0;vertical-align:baseline}
+
+  .specimen{border:1px solid var(--ink);background:#fff;margin:26px 0 8px}
+  .spec-head{border-bottom:1px solid var(--hairline);padding:14px 18px 12px;margin:0}
+  .spec-eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+  .spec-head h2{font-size:22px;margin:4px 0 0;letter-spacing:-.005em;text-wrap:balance}
+  .spec-rows{padding:4px 0}
+  .spec-row{display:grid;grid-template-columns:186px 1fr max-content;gap:14px;align-items:baseline;
+    padding:8px 18px;border-bottom:1px solid #f0eee7}
+  .spec-row:last-child{border-bottom:0}
+  .spec-dial{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+  .spec-txt{font-style:italic;font-size:15.5px;line-height:1.5}
+  .spec-out{font-family:var(--mono);font-size:12.5px;white-space:nowrap;color:var(--clinical)}
+  .spec-out.flip{color:var(--penalty);font-weight:600}
+  .spec-note{font-family:var(--mono);font-size:11px;color:var(--muted);padding:10px 18px 12px;margin:0;
+    border-top:1px solid var(--hairline);line-height:1.7}
+  @media (max-width:640px){.spec-row{grid-template-columns:1fr;gap:2px}.spec-out{justify-self:start}}
 
   /* Section heads */
   .section-head{display:flex;align-items:baseline;justify-content:space-between;gap:16px;
@@ -262,6 +279,15 @@
     <span class="swatch" style="background:#c3c9d2"></span>structural / context &nbsp;&nbsp;
     <span class="swatch" style="background:#b4483d"></span>language penalty
   </p>
+
+  <figure class="specimen" id="dialect-specimen" hidden>
+    <figcaption class="spec-head">
+      <span class="spec-eyebrow">the theme in one panel · live measurements</span>
+      <h2>Same medical situation. Different dialect. Different prediction.</h2>
+    </figcaption>
+    <div class="spec-rows" id="spec-rows"></div>
+    <p class="spec-note" id="spec-note"></p>
+  </figure>
 
   <div class="section-head">
     <h2>Four comparison engines</h2>
@@ -463,7 +489,8 @@
       Built with the <a href="https://github.com/michaeldgreenphd/patientwords-engine">patientwords-engine</a> pipeline
       on <a href="https://neuronpedia.org">Neuronpedia</a> ·
       attribution graphs by <a href="https://github.com/safety-research/circuit-tracer">circuit-tracer</a> ·
-      features from <a href="https://huggingface.co/google/gemma-scope-2b-pt-transcoders">Gemma Scope</a> transcoders ·
+      features from <a href="https://huggingface.co/google/gemma-scope-2b-pt-transcoders">Gemma Scope</a> transcoders<br>
+      set in Iowan Old Style &amp; ui-monospace · every number on this page traces to a data file in this repository ·
       <a href="methods.html">how the pipeline works</a>
     </footer>
   </div>
@@ -777,6 +804,58 @@
       stat.hidden=false;
     })
     .catch(function(){});
+})();
+(function(){
+  // dialect-variance specimen: picks its own example from the data, so the
+  // panel stays current as batches change (no hand-named scenarios here)
+  function el(t,c,x){var e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e;}
+  fetch('data/dialects.json',{cache:'no-cache'}).then(function(r){return r.json();}).then(function(d){
+    var items=(d&&d.items)||[];
+    if(!items.length)return;
+    function spread(it){
+      var ds=it.variants.map(function(v){return Math.abs(v.delta||0);});
+      return Math.max.apply(null,ds.concat([0]));
+    }
+    function stem(t){return String(t||'').trim().toLowerCase().slice(0,3);}
+    function crossFlips(it){
+      return it.variants.filter(function(v){
+        return v.flip&&stem(v.top_token)!==stem(it.target_token);
+      }).length;
+    }
+    items=items.slice().sort(function(a,b){
+      var xa=crossFlips(a),xb=crossFlips(b);
+      var fa=a.variants.filter(function(v){return v.flip;}).length;
+      var fb=b.variants.filter(function(v){return v.flip;}).length;
+      return (xb-xa)||(fb-fa)||(spread(b)-spread(a));
+    });
+    var it=items[0];
+    var rows=document.getElementById('spec-rows');
+    function row(lbl,txt,out,isFlip){
+      var r=el('div','spec-row');
+      r.appendChild(el('span','spec-dial',lbl));
+      r.appendChild(el('span','spec-txt','\u201C'+txt+'\u201D'));
+      r.appendChild(el('span','spec-out'+(isFlip?' flip':''),out));
+      rows.appendChild(r);
+    }
+    row('baseline framing', it.baseline_prompt,
+        '\u2192 '+it.target_token+' ('+it.baseline_p.toFixed(2)+')', false);
+    var vs=it.variants.slice().sort(function(a,b){
+      function w(v){return (v.flip&&stem(v.top_token)!==stem(it.target_token))?2:(v.flip?1:0);}
+      return w(b)-w(a)||Math.abs(b.delta||0)-Math.abs(a.delta||0);
+    }).slice(0,4);
+    vs.forEach(function(v){
+      row(v.dialect, v.prompt, '\u2192 '+v.top_token+' ('+v.top_p.toFixed(2)+')', !!v.flip);
+    });
+    var flips=it.variants.filter(function(v){return v.flip;}).length;
+    var note=document.getElementById('spec-note');
+    note.textContent='one instruction \u00b7 '+it.variants.length+' dialect framings measured, '
+      +vs.length+' shown \u00b7 '+flips+' change the top prediction (red) \u00b7 gemma-2-2b live, batch '
+      +(d.batch||'')+' \u00b7 this panel picks its example from data/dialects.json and updates with the study \u00b7 ';
+    var a=el('a',null,'full study \u2192 Dialect Differences');
+    a.href='dialect-differences/';
+    note.appendChild(a);
+    document.getElementById('dialect-specimen').hidden=false;
+  }).catch(function(){});
 })();
 </script>
 </body>
