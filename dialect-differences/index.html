@@ -4,13 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Dialect differences — PatientWords</title>
-<meta name="description" content="Eight clinical terms held fixed while each sentence is re-traced across six dialect and register framings in gemma-2-2b: 48 re-traced sentences, and most framings move the model's top prediction.">
+<meta name="description" content="Clinical terms held fixed while each sentence is re-traced across dialect and register framings in gemma-2-2b; a minority of framings move the model's top prediction.">
 <link rel="canonical" href="https://michaeldgreenphd.github.io/patientwords/dialect-differences/">
 <meta name="theme-color" content="#faf9f5">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="PatientWords">
 <meta property="og:title" content="Dialect differences — PatientWords">
-<meta property="og:description" content="The same clinical phrases, framed the way different communities actually speak. Eight terms, six framings each, and most framings move the model's top prediction.">
+<meta property="og:description" content="The same clinical phrases, framed the way different communities actually speak; a minority of framings move the model's top prediction.">
 <meta property="og:url" content="https://michaeldgreenphd.github.io/patientwords/dialect-differences/">
 <meta property="og:image" content="https://michaeldgreenphd.github.io/patientwords/modes/2panel/preview.png">
 <meta property="og:image:width" content="1690">
@@ -18,7 +18,7 @@
 <meta property="og:image:alt" content="Attribution graphs comparing clinical and patient wording in gemma-2-2b">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Dialect differences — PatientWords">
-<meta name="twitter:description" content="The clinical term held fixed while the sentence shifts across dialect and register framings. Eight terms, six framings each.">
+<meta name="twitter:description" content="The clinical term held fixed while the sentence shifts across dialect and register framings.">
 <meta name="twitter:image" content="https://michaeldgreenphd.github.io/patientwords/modes/2panel/preview.png">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23faf9f5'/%3E%3Crect x='9' y='9' width='30' height='30' fill='%23111827'/%3E%3Crect x='25' y='25' width='30' height='30' fill='%2315803d'/%3E%3C/svg%3E">
 <style>
@@ -210,10 +210,10 @@
   <p class="dateline">Fig. 3 <span class="mode">· dialect & register sweep · live render · traced July 7, 2026</span></p>
   <h1>Dialect differences</h1>
   <p class="subtitle">The clinical term held fixed while the surrounding sentence shifts across six dialect and register framings.</p>
-  <p class="explainer">The clinical term stays fixed while the sentence around it is re-traced across dialect and register variants, so any shift comes from framing. The sweep below holds eight clinical terms fixed, one per row, and re-traces each across six framings — 48 sentences. Most framings move the top word; clinical depression loses therapist as the top word under three of six framings.</p>
+  <p class="explainer">The clinical term stays fixed while the sentence around it is re-traced across dialect and register variants, so any shift comes from framing. The sweep below holds a set of clinical terms fixed, one per row, and re-traces each across several dialect and register framings; the matrix reports the exact counts. A minority of framings move the top word.</p>
   <p class="traced" data-mode="dialect" data-traced="2026-07-07">
     <span class="tm"><b>model:</b> gemma-2-2b · <b>features:</b> Gemma Scope transcoders (16k) · <b>graphs:</b> 56 (8 baselines + 48 framings)</span><br>
-    <span class="tm"><b>held fixed:</b> 8 clinical terms from the hand-measured dataset · <b>framings:</b> 6 per term</span><br>
+    <span class="tm"><b>held fixed:</b> clinical terms from the hand-measured dataset · <b>framings:</b> dialect + register variants per term</span><br>
     <span class="tp">framings authored by claude-opus-4-8 ($0.083, 48/48 accepted) · traced via Neuronpedia</span>
   </p>
 
@@ -281,7 +281,7 @@
     <iframe class="live" src="../modes/dialect/index.html" loading="lazy"
       title="Interactive dialect-mode attribution graphs"></iframe>
   </div>
-  <p class="embed-caption" id="embed-caption">How to read it: seven panels — the standard-English baseline first, then the six framings. Columns are the prompt’s words; height is model depth; the predicted next word sits at the top. The clinical term appears in every panel while the sentence around it changes, so differences in the stacks above it are the framing effect.</p>
+  <p class="embed-caption" id="embed-caption">How to read it: the standard-English baseline first, then one panel per framing. Columns are the prompt’s words; height is model depth; the predicted next word sits at the top. The clinical term appears in every panel while the sentence around it changes, so differences in the stacks above it are the framing effect.</p>
   </details>
 
   <a class="back" href="../">← Back home</a>
