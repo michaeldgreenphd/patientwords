@@ -256,7 +256,7 @@
       <div>
         <h3>Dose–response: recovery by steering strength</h3>
         <div id="tt-dose"></div>
-        <p class="tt-note">Boost the top-5 clinical features while the model reads the patient wording; recovery = the clinical target appears in the steered continuation. Strengths without a bar are queued and fill in as runs land.</p>
+        <p class="tt-note">Boost the top-5 clinical features while the model reads the patient wording; recovery = the clinical target appears in the steered continuation. Recovery saturates at the lowest strength tried and declines at 20, where continuations occasionally degenerate. A strength marked pending is queued and fills in when its run lands.</p>
       </div>
       <div>
         <h3>Faithfulness: does attribution rank predict effect?</h3>
@@ -365,6 +365,9 @@
   function el(t,c,x){var e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e;}
   fetch('../data/provenance.json',{cache:'no-cache'}).then(function(r){return r.json();}).then(function(p){
     var tc=p.translation_cases||{};
+    // phrase 17's embedded render is the July 9 re-trace; its caption must
+    // show the numbers the figure displays, not the classification study's
+    retrace17=(tc.grandma_laxative&&tc.grandma_laxative.retrace_20260709)||null;
     // 1. process flow from the ice-cream/antacid case (real texts + tokens)
     var ic=tc.icecream_antacid;
     if(ic&&ic.prompts){
@@ -453,31 +456,54 @@
     // 4. titration
     var t=p.steering_titration;
     if(t){
+      // dose-response curve (all four cells final 2026-07-09): recovery
+      // fraction vs boost strength, log spacing, direct point labels
       var dose=document.getElementById('tt-dose');
-      ['2.5','5','10','20'].forEach(function(k){
-        var row=el('div','bar-row');
-        row.style.cssText='display:flex;align-items:center;gap:10px;margin:5px 0';
-        var l=el('span',null,'s='+k);
-        l.style.cssText='font:12px ui-monospace,Menlo,monospace;min-width:6ch;text-align:right';
-        row.appendChild(l);
-        var track=el('div');track.style.cssText='flex:1;height:13px;border:1px solid var(--hairline)';
-        var v=t.strengths[k];
-        if(v&&typeof v.recovered==='number'){
-          var fill=el('div');
-          fill.style.cssText='height:100%;width:'+(v.recovered/v.n*100)+'%;background:#0f766e';
-          track.appendChild(fill);
-          row.appendChild(track);
-          row.appendChild(el('span',null,v.recovered+'/'+v.n));
-        }else{
-          track.style.borderStyle='dashed';
-          row.appendChild(track);
-          var pend=el('span',null,'pending');
-          pend.style.cssText='font:10px ui-monospace,monospace;color:var(--muted)';
-          row.appendChild(pend);
-        }
-        row.lastChild.style.cssText+=';font:11px ui-monospace,monospace;min-width:6ch';
-        dose.appendChild(row);
+      var SNS='http://www.w3.org/2000/svg';
+      function sv(tag,at){var e=document.createElementNS(SNS,tag);
+        Object.keys(at||{}).forEach(function(k){e.setAttribute(k,at[k]);});return e;}
+      var W=340,H=172,X0=46,X1=312,Y0=136,Y1=26;
+      var svg=sv('svg',{viewBox:'0 0 '+W+' '+H,role:'img',
+        'aria-label':'Dose-response: recovery fraction by boost strength; 4 of 5 at 2.5, 5 of 5 at 5, 4 of 5 at 10, 1 of 4 at 20'});
+      svg.style.cssText='width:100%;max-width:380px;height:auto;display:block';
+      function xs(s){var a=Math.log(2.5),b=Math.log(20);
+        return X0+(Math.log(s)-a)/(b-a)*(X1-X0);}
+      function ys(f){return Y0-f*(Y0-Y1);}
+      [0,0.5,1].forEach(function(f){
+        svg.appendChild(sv('line',{x1:X0-4,y1:ys(f),x2:X1,y2:ys(f),
+          'stroke-dasharray':f===0.5?'2 3':'',
+          style:'stroke:var(--hairline);stroke-width:1'}));
+        var yl=sv('text',{x:X0-8,y:ys(f)+3.5,'text-anchor':'end',
+          style:'font:10px var(--mono);fill:var(--muted)'});
+        yl.textContent=(f*100)+'%';svg.appendChild(yl);
       });
+      var pts=[];
+      ['2.5','5','10','20'].forEach(function(k){
+        var v=t.strengths[k],x=xs(parseFloat(k));
+        var xl=sv('text',{x:x,y:Y0+16,'text-anchor':'middle',
+          style:'font:11px var(--mono);fill:var(--ink)'});
+        xl.textContent=k;svg.appendChild(xl);
+        if(v&&typeof v.recovered==='number'){
+          pts.push({x:x,y:ys(v.recovered/v.n),lbl:v.recovered+'/'+v.n});
+        }else{
+          var pd=sv('text',{x:x,y:Y0-6,'text-anchor':'middle',
+            style:'font:10px var(--mono);fill:var(--muted)'});
+          pd.textContent='pending';svg.appendChild(pd);
+        }
+      });
+      if(pts.length>1)svg.appendChild(sv('polyline',{
+        points:pts.map(function(q){return q.x+','+q.y;}).join(' '),
+        style:'fill:none;stroke:#0f766e;stroke-width:1.6'}));
+      pts.forEach(function(q){
+        svg.appendChild(sv('circle',{cx:q.x,cy:q.y,r:3.2,style:'fill:#0f766e'}));
+        var tl=sv('text',{x:q.x,y:q.y-9,'text-anchor':'middle',
+          style:'font:11px var(--mono);fill:var(--ink)'});
+        tl.textContent=q.lbl;svg.appendChild(tl);
+      });
+      var xc=sv('text',{x:(X0+X1)/2,y:H-4,'text-anchor':'middle',
+        style:'font:10px var(--mono);fill:var(--muted)'});
+      xc.textContent='boost strength · log spacing';svg.appendChild(xc);
+      dose.appendChild(svg);
       var rank=document.getElementById('tt-rank');
       [['top 5 by mass',t.strengths['10']],['ranks 6\u201310',t.low_rank_6_10],['5 random (placebo)',t.placebo]].forEach(function(pair){
         var row=el('div');row.style.cssText='display:flex;align-items:center;gap:10px;margin:5px 0';
@@ -504,7 +530,7 @@
   // height (the site keeps a single scrollbar), so "showing a panel" means
   // scrolling the page to that panel's offset inside the inline render.
   var frame=document.getElementById('flip-frame');
-  var curPanel=0,pendingScroll=false;
+  var curPanel=0,pendingScroll=false,retrace17=null;
   function setTabs(i){
     curPanel=i;
     document.querySelectorAll('.tabs [role=tab]').forEach(function(x){
@@ -530,15 +556,24 @@
     if(fold)fold.open=true;
     var nn=(c.index<10?'0':'')+c.index;
     var src='../modes/simulated/urgency_downgrades_20260707T1/index_'+nn+'.html';
+    // phrase 17 displays the July 9 re-trace; caption must match the render
+    var pt=c.patient_top,tt=c.translated_top,ct=c.clinical_top,
+        when='traced July 7, 2026',extra='';
+    if(c.index===17&&retrace17){
+      pt=retrace17.patient_top;tt=retrace17.translated;ct=retrace17.clinical;
+      when='re-traced July 9, 2026';
+      extra=' Independent re-trace of the study case (which measured '
+        +c.translated_top[1].toFixed(2)+').';
+    }
     var meta=document.getElementById('fold-meta');
-    if(meta)meta.textContent='hosted circuit-tracer via Neuronpedia · traced July 7, 2026 · phrase '
+    if(meta)meta.textContent='hosted circuit-tracer via Neuronpedia · '+when+' · phrase '
       +c.index+' of the downgrade set, three panels (clinical / patient / LLM-translated) · '
       +'next-token probabilities read directly from the trace';
     var cap=document.getElementById('flip-cap');
     if(cap)cap.textContent='Live trace: under patient wording the top continuation is “'
-      +c.patient_top[0]+'” ('+c.patient_top[1].toFixed(2)+'); after LLM translation it’s “'
-      +c.translated_top[0]+'” ('+c.translated_top[1].toFixed(2)+') — clinical baseline top “'
-      +c.clinical_top[0]+'” ('+c.clinical_top[1].toFixed(2)+'). Numbers in data/provenance.json.';
+      +pt[0]+'” ('+pt[1].toFixed(2)+'); after LLM translation it’s “'
+      +tt[0]+'” ('+tt[1].toFixed(2)+') — clinical baseline top “'
+      +ct[0]+'” ('+ct[1].toFixed(2)+').'+extra+' Numbers in data/provenance.json.';
     frame.title='Live translation mitigation trace, phrase '+c.index+' of the downgrade set';
     setTabs(2);
     if(frame.getAttribute('src')!==src){
