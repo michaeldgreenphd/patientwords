@@ -4,13 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Translation — PatientWords</title>
-<meta name="description" content="An LLM translates the patient sentence into standard terminology and the raw output is traced natively. Live gemma-2-2b trace: translation restores the clinical continuation — lax(ative) at 0.45, above the clinical baseline (0.26).">
+<meta name="description" content="An LLM translates the patient sentence into standard terminology and the raw output is traced natively. Live gemma-2-2b trace: translation restores the clinical continuation — lax(ative) at 0.41, above the clinical baseline (0.26).">
 <link rel="canonical" href="https://michaeldgreenphd.github.io/patientwords/translation/">
 <meta name="theme-color" content="#faf9f5">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="PatientWords">
 <meta property="og:title" content="Translation — PatientWords">
-<meta property="og:description" content="Translating patient language back into clinical terms restores the circuit: the top continuation returns to lax(ative) at 0.45, above the clinical baseline (0.26). Live gemma-2-2b trace.">
+<meta property="og:description" content="Translating patient language back into clinical terms restores the circuit: the top continuation returns to lax(ative) at 0.41, above the clinical baseline (0.26). Live gemma-2-2b trace.">
 <meta property="og:url" content="https://michaeldgreenphd.github.io/patientwords/translation/">
 <meta property="og:image" content="https://michaeldgreenphd.github.io/patientwords/modes/translation/preview.png">
 <meta property="og:image:width" content="1690">
@@ -224,12 +224,12 @@
   <p class="embed-caption" id="tx-gal-cap" hidden>every classifiable case from the live mitigation trace ·
      top token per panel · numbers in <code>data/provenance.json</code> · tiers reviewed v1</p>
 
-  <span class="stat recovery">Recovered target probability: 0.45 after translation (clinical baseline 0.26)</span>
+  <span class="stat recovery">Recovered target probability: 0.41 after translation (clinical baseline 0.26)</span>
   <details class="meth" id="trace-fold">
     <summary>View the live three-panel trace (clinical / patient / translated)</summary>
   <p class="traced" data-mode="translation" data-traced="gemma-2-2b">
     <span class="tm"><b>live trace:</b> gemma-2-2b · gemma scope transcoders</span>
-    <span class="tp" id="fold-meta">hosted circuit-tracer via Neuronpedia · traced July 7, 2026 · phrase 17 of the
+    <span class="tp" id="fold-meta">hosted circuit-tracer via Neuronpedia · re-traced July 9, 2026 · phrase 17 of the
       downgrade set, three panels (clinical / patient / LLM-translated) · next-token
       probabilities read directly from the trace · “constipated” vs. “all bunged up”,
       translation restores “ lax(ative)”</span>
@@ -246,7 +246,7 @@
             title="Live translation mitigation: nap under patient wording, laxative after translation"></iframe>
   </div>
   </div>
-  <p class="embed-caption" id="flip-cap">Live trace: under patient wording the top continuation is “ nap” (0.30); after LLM translation to clinical wording it’s “ lax(ative)” (0.45) — stronger than the original clinical phrasing (0.26). Numbers in <code>data/provenance.json</code>.</p>
+  <p class="embed-caption" id="flip-cap">Live trace: under patient wording the top continuation is “ nap” (0.30); after LLM translation to clinical wording it’s “ lax(ative)” (0.41) — stronger than the original clinical phrasing (0.26). Independent re-trace of the study case (which measured 0.45); numbers in <code>data/provenance.json</code>.</p>
   </details>
 
 
