@@ -268,7 +268,7 @@
   <p class="embed-caption">Live trace: baseline plus five rungs from formal clinical register to casual speech, the clinical term unchanged throughout. The top continuation is “ antacid” at 0.32 (rung 1) and 0.11 (rung 2), then “ apple” from the mixed rung onward. Numbers in data/provenance.json.</p>
   </details>
 
-  <p class="explainer">The register effect is dose-dependent. In a five-rung ladder on the same model, “dyspepsia” is held verbatim while the surrounding sentence slides from formal clinical register to casual speech: the top continuation is antacid at 0.32 in the fully clinical rung, 0.11 one rung down — and apple from the mixed rung onward. The recommendation object changes with register alone, and gradually rather than at once. (Numbers in data/provenance.json.)</p>
+  <p class="explainer">Register alone moves the target less than the term swap does. In the single-case ladder above, “dyspepsia” is held verbatim while the sentence slides from formal clinical register to casual speech, and the top continuation degrades from antacid (0.32, then 0.11) to apple from the mixed rung onward. But that staircase does not generalize: across ten baselines traced the same way (term held verbatim), mean target probability is flat across the five rungs (0.27–0.34) with no reliable decay. The penalty concentrates in the vocabulary swap itself; the single-case gradient is real but not representative. (Numbers in data/provenance.json.)</p>
 
 
 

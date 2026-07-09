@@ -535,7 +535,12 @@
   "low_rank_6_10": {
    "recovered": 3,
    "n": 4,
-   "_": "boost clinical ranks 6-10 at strength 10 (rank offset 5): 3/4 measured pairs recovered (one call 500'd server-side). Near-parity with the top-5 arm (4/5): the causal handle is distributed across the clinical circuit, not concentrated in the top-5 features. Placebo (random features) remains 0/5 — trace_out/boostgrid_lowrank, 2026-07-08"
+   "_": "boost clinical ranks 6-10 at strength 10 (rank offset 5): 3/4 measured pairs recovered (one call 500'd server-side). Near-parity with the top-5 arm (4/5): the causal handle is distributed across the clinical circuit, not concentrated in the top-5 features. Placebo (random features) remains 0/5 — trace_out/boostgrid_lowrank, 2026-07-08",
+   "replication": {
+    "recovered": 3,
+    "n": 4,
+    "_": "independent second run, identical pattern: same three pairs recover, same pair misses, same pair 500s server-side — trace_out/boostgrid_lowrank (branch), 2026-07-09"
+   }
   },
   "placebo": {
    "recovered": 0,
@@ -543,5 +548,26 @@
    "note": "5 random features at strength 10"
   },
   "updated": "2026-07-08"
+ },
+ "ladder_n10": {
+  "_": "Register-ladder sweep, n=10 baselines x 5 rungs, clinical term held verbatim (engine trace_out/dialects_20260708T201616Z, gemma-2-2b, traced 2026-07-09). Mean target probability per rung; some rungs screened out per baseline.",
+  "rung_means": {
+   "1": 0.2841,
+   "2": 0.2667,
+   "3": 0.3353,
+   "4": 0.3324,
+   "5": 0.2908
+  },
+  "rung_ns": {
+   "1": 7,
+   "2": 9,
+   "3": 9,
+   "4": 8,
+   "5": 8
+  },
+  "n_baselines": 10,
+  "rung5_below_rung1": "3 of 6 baselines with both endpoints",
+  "mean_delta_rung5_minus_rung1": 0.0438,
+  "verdict": "no reliable register gradient with the clinical term held fixed; the single-case staircase (ladder_digestive) is real but not representative"
  }
 }
