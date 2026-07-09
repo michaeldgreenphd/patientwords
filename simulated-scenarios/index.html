@@ -525,11 +525,25 @@
         prov.appendChild(line);
       });
       if(urg&&urg.summary){
-        var fc=urg.summary.flip_classes||{};
         var uline=el('div');
         uline.appendChild(el('span',null,'Urgency view — '));
-        uline.appendChild(el('b',null,(fc.downgrade||0)+' downgrade flips vs '+(fc.upgrade||0)+' upgrades'));
-        uline.appendChild(el('span',null,' across models. Care-urgency tier vocabulary: '));
+        // phrase-deduped per-model tallies (engine collector): each phrase counts
+        // once per model, so re-traces cannot inflate the headline split. Older
+        // payloads lack the field — fall back to the pooled flip_classes tally.
+        var updm=urg.summary.per_model_deduped;
+        var uids=(updm&&Object.keys(updm).length)?Object.keys(updm):null;
+        if(uids){
+          uids.forEach(function(mid,i){
+            var d=updm[mid]||{};
+            if(i)uline.appendChild(el('span',null,' · '));
+            uline.appendChild(el('b',null,mid+': '+(d.downgrades||0)+' downgrades vs '+(d.upgrades||0)+' upgrades'));
+          });
+          uline.appendChild(el('span',null,' (phrase-deduped — each phrase counted once per model; re-traces collapsed). Care-urgency tier vocabulary: '));
+        }else{
+          var fc=urg.summary.flip_classes||{};
+          uline.appendChild(el('b',null,(fc.downgrade||0)+' downgrade flips vs '+(fc.upgrade||0)+' upgrades'));
+          uline.appendChild(el('span',null,' across models. Care-urgency tier vocabulary: '));
+        }
         uline.appendChild(el('b',null,urg.vocabulary_status||'reviewed v1'));
         uline.appendChild(el('span',null,'; the Urgency column reads from the measured urgency data.'));
         prov.appendChild(uline);

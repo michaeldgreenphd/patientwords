@@ -428,6 +428,7 @@
     </div>
     <p class="tier-cap" id="tier-cap" hidden>care-urgency tiers, reviewed v1 · predicted words with no urgency information are excluded · a redirect that lands on a lower tier is a downgrade</p>
     <div class="safety-grid" id="sv-grid"></div>
+    <p class="safety-note" id="sv-dedup-note" hidden>counts are phrase-deduped — each phrase counted once per model; re-traces collapsed</p>
     <p class="safety-note" id="sv-note"></p>
   </section>
 
@@ -669,6 +670,10 @@
     .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
     .then(function(u){
       var s=u.summary||{}, pm=s.per_model||{};
+      // phrase-deduped headline counts (engine collector, mirrors paired_stats_rigor):
+      // re-traced phrases collapse to one record per model, so counts are not
+      // inflated by pseudoreplication. Older payloads lack the field — fall back.
+      var pmd=(s.per_model_deduped&&Object.keys(s.per_model_deduped).length)?s.per_model_deduped:null;
       var grid=document.getElementById('sv-grid');
       var models=Object.keys(pm);
       if(!models.length)return;
@@ -676,6 +681,16 @@
       function row(dl,label,val,cls){
         dl.appendChild(el('dt',null,label));
         var dd=el('dd',cls||null,val);dl.appendChild(dd);
+      }
+      function signTest(kd,ku){
+        // exact two-sided sign test (binomial p=0.5), same formula as the engine;
+        // terms built incrementally so nothing overflows at these counts
+        var n=kd+ku;
+        if(!n)return null;
+        var k=Math.min(kd,ku);
+        var term=Math.pow(0.5,n),tail=term;
+        for(var i=1;i<=k;i++){term=term*(n-i+1)/i;tail+=term;}
+        return Math.round(Math.min(1,2*tail)*1e5)/1e5;
       }
       var mit=s.mitigation||null;
       // tier table: definitions + measured example words, straight from the data
@@ -697,20 +712,42 @@
       }
       models.forEach(function(mid){
         var v=pm[mid];
+        var d=(pmd&&pmd[mid])||null;
         var card=el('div','safety-card');
         card.appendChild(el('h3',null,mid));
         var dl=document.createElement('dl');
         row(dl,'measurements',String(v.n));
-        row(dl,'redirects (flips)',String(v.flips));
-        row(dl,'downgrades',String(v.downgrades),v.downgrades?'bad':null);
-        row(dl,'· confident (p ≥ 0.2)',String(v['confident_downgrades_p>=0.2']!=null?v['confident_downgrades_p>=0.2']:'—'),'bad');
-        row(dl,'upgrades',String(v.upgrades),v.upgrades?'ok':null);
-        row(dl,'mean urgency shift',typeof v.mean_tier_shift==='number'?v.mean_tier_shift.toFixed(3):'—',
-            (v.mean_tier_shift<0?'bad':null));
-        row(dl,'sign test p',v.sign_test_p!=null?String(v.sign_test_p):'—');
+        if(d){
+          // deduped: one record per phrase per model; the confident-downgrade
+          // sub-count is row-level and would exceed the deduped tally, so it
+          // is omitted here; the sign test recomputes from the deduped split
+          function nOrDash(x){return typeof x==='number'?String(x):'—';}
+          var dg=typeof d.downgrades==='number'?d.downgrades:null;
+          var ug=typeof d.upgrades==='number'?d.upgrades:null;
+          if(d.n_phrases!=null)row(dl,'unique phrases',String(d.n_phrases));
+          row(dl,'redirects (flips)',nOrDash(d.flips));
+          row(dl,'downgrades',nOrDash(d.downgrades),dg?'bad':null);
+          row(dl,'upgrades',nOrDash(d.upgrades),ug?'ok':null);
+          row(dl,'mean urgency shift',typeof v.mean_tier_shift==='number'?v.mean_tier_shift.toFixed(3):'—',
+              (v.mean_tier_shift<0?'bad':null));
+          var sp=(dg!=null&&ug!=null)?signTest(dg,ug):null;
+          row(dl,'sign test p',sp!=null?String(sp):'—');
+        }else{
+          row(dl,'redirects (flips)',String(v.flips));
+          row(dl,'downgrades',String(v.downgrades),v.downgrades?'bad':null);
+          row(dl,'· confident (p ≥ 0.2)',String(v['confident_downgrades_p>=0.2']!=null?v['confident_downgrades_p>=0.2']:'—'),'bad');
+          row(dl,'upgrades',String(v.upgrades),v.upgrades?'ok':null);
+          row(dl,'mean urgency shift',typeof v.mean_tier_shift==='number'?v.mean_tier_shift.toFixed(3):'—',
+              (v.mean_tier_shift<0?'bad':null));
+          row(dl,'sign test p',v.sign_test_p!=null?String(v.sign_test_p):'—');
+        }
         card.appendChild(dl);
         grid.appendChild(card);
       });
+      if(pmd){
+        var dn=document.getElementById('sv-dedup-note');
+        if(dn)dn.hidden=false;
+      }
       var note=document.getElementById('sv-note');
       var conc=s.concordance||{};
       var pieces=[];
@@ -732,7 +769,14 @@
       var flag=document.querySelector('#safety-view .draft-flag');
       if(flag&&u.vocabulary_status)flag.textContent=u.vocabulary_status.indexOf('draft')>=0
         ?'draft · tiers pending domain review':u.vocabulary_status;
-      document.getElementById('sv-count').textContent=models.length+' models · '+(s.flips||0)+' redirects';
+      var svc=models.length+' models · '+(s.flips||0)+' redirects';
+      var dedupComplete=!!pmd&&models.every(function(mid){
+        var d=pmd[mid];return d&&typeof d.flips==='number';});
+      if(dedupComplete){
+        var dedupFlips=models.reduce(function(a,mid){return a+pmd[mid].flips;},0);
+        svc=models.length+' models · '+dedupFlips+' redirects (phrase-deduped, summed across models)';
+      }
+      document.getElementById('sv-count').textContent=svc;
       document.getElementById('safety-view').hidden=false;
     })
     .catch(function(){/* section stays hidden without data */});

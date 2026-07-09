@@ -111,7 +111,9 @@
   .dl tbody tr.rowlink{cursor:pointer}
   .dl tbody tr.rowlink:hover td{background:#f2f0e9}
   .dl td.chev-c{width:26px;text-align:right;color:var(--muted);font-family:var(--mono)}
-  .dl tr.rowlink .chev-i{opacity:0;transition:opacity .1s}
+  .dl tr.rowlink .chev-i{opacity:0;transition:opacity .1s;background:none;border:0;
+    font:inherit;color:inherit;cursor:pointer;padding:0}
+  .dl tr.rowlink .chev-i:focus-visible{opacity:1;outline:2px solid var(--clinical);outline-offset:2px}
   .dl tr.rowlink:hover .chev-i,.dl tr.rowlink:focus-within .chev-i{opacity:1}
   .dl tr.acc-open .chev-i{opacity:1;color:var(--clinical)}
   tr.acc td{padding:0;border-bottom:1px solid var(--hairline)}
@@ -421,19 +423,23 @@
       }
       var openAcc=null;
       function wireAccordion(row,label){
-        var c=el('td','chev-c');c.appendChild(el('span','chev-i','+'));
+        // the tr must stay a row for table semantics; a real <button> in the
+        // chevron cell carries focus, aria-expanded, and Enter/Space natively
+        var c=el('td','chev-c');
+        var btn=document.createElement('button');
+        btn.type='button';btn.className='chev-i';btn.textContent='+';
+        btn.setAttribute('aria-expanded','false');
+        btn.setAttribute('aria-label','show the circuit trace for '+label);
+        c.appendChild(btn);
         row.appendChild(c);
         row.classList.add('rowlink');
-        row.tabIndex=0;
-        row.setAttribute('aria-expanded','false');
-        row.setAttribute('aria-label','show the circuit trace for '+label);
         function toggle(){
           if(openAcc&&openAcc.row===row){
             openAcc.tr.remove();openAcc.row.classList.remove('acc-open');
-            openAcc.row.setAttribute('aria-expanded','false');openAcc=null;return;
+            openAcc.btn.setAttribute('aria-expanded','false');openAcc=null;return;
           }
           if(openAcc){openAcc.tr.remove();openAcc.row.classList.remove('acc-open');
-            openAcc.row.setAttribute('aria-expanded','false');}
+            openAcc.btn.setAttribute('aria-expanded','false');}
           var tr=el('tr','acc');
           var td=el('td');td.colSpan=6;
           var f=document.createElement('iframe');
@@ -445,11 +451,11 @@
           tr.appendChild(td);
           row.after(tr);
           row.classList.add('acc-open');
-          row.setAttribute('aria-expanded','true');
-          openAcc={row:row,tr:tr};
+          btn.setAttribute('aria-expanded','true');
+          openAcc={row:row,tr:tr,btn:btn};
         }
-        row.addEventListener('click',toggle);
-        row.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();toggle();}});
+        btn.addEventListener('click',function(e){e.stopPropagation();toggle();});
+        row.addEventListener('click',toggle);   // pointer convenience; button is the accessible path
       }
       var baseRow=el('tr','base');
       baseRow.appendChild(el('td','framing','Standard English'));

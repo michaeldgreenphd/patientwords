@@ -134,7 +134,7 @@
   .tabs{display:flex;gap:0;margin:16px 0 0;border-bottom:1px solid var(--ink)}
   .tabs button{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;
     background:none;border:1px solid transparent;border-bottom:0;color:var(--muted);padding:8px 14px;cursor:pointer}
-  .tabs button[aria-selected=true]{color:var(--ink);border-color:var(--ink);background:#fff}
+  .tabs button[aria-pressed=true]{color:var(--ink);border-color:var(--ink);background:#fff}
   .tabs button:hover{color:var(--ink)}
   .flip .embed{margin-top:0;border-top:0}
   .flip iframe{height:760px;min-height:760px}
@@ -227,10 +227,10 @@
       downgrade set, three panels (clinical / patient / LLM-translated)</span>
   </p>
 
-  <div class="tabs" role="tablist" aria-label="Trace panels">
-    <button role="tab" aria-selected="true" data-panel="0">Baseline clinical trace</button>
-    <button role="tab" aria-selected="false" data-panel="1">Raw patient trace</button>
-    <button role="tab" aria-selected="false" data-panel="2">Post-translation trace</button>
+  <div class="tabs" role="group" aria-label="Trace panels">
+    <button type="button" aria-pressed="true" data-panel="0" aria-label="scroll to Baseline clinical trace panel">Baseline clinical trace</button>
+    <button type="button" aria-pressed="false" data-panel="1" aria-label="scroll to Raw patient trace panel">Raw patient trace</button>
+    <button type="button" aria-pressed="false" data-panel="2" aria-label="scroll to Post-translation trace panel">Post-translation trace</button>
   </div>
   <div class="flip">
   <div class="embed">
@@ -522,8 +522,8 @@
   var curPanel=0,pendingScroll=false,retrace17=null;
   function setTabs(i){
     curPanel=i;
-    document.querySelectorAll('.tabs [role=tab]').forEach(function(x){
-      x.setAttribute('aria-selected',String(+x.dataset.panel===i));
+    document.querySelectorAll('.tabs button[data-panel]').forEach(function(x){
+      x.setAttribute('aria-pressed',String(+x.dataset.panel===i));
     });
   }
   function panelScroll(){
@@ -531,7 +531,7 @@
     var top=r.top+window.pageYOffset+r.height*curPanel/3;
     window.scrollTo({top:Math.max(0,top-72),behavior:'smooth'});
   }
-  document.querySelectorAll('.tabs [role=tab]').forEach(function(tab){
+  document.querySelectorAll('.tabs button[data-panel]').forEach(function(tab){
     tab.addEventListener('click',function(){setTabs(+tab.dataset.panel);panelScroll();});
   });
   frame.addEventListener('load',function(){

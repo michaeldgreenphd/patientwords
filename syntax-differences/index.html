@@ -373,6 +373,7 @@
 (function(){
   var modal=document.getElementById('qmodal');
   var closeBtn=document.getElementById('qmodal-close');
+  var lastFocus=null;
   function open(){
     if(!modal.querySelector('iframe')){
       var f=document.createElement('iframe');
@@ -380,12 +381,35 @@
       f.title='Four-quadrant matrix, full screen';
       modal.appendChild(f);
     }
+    lastFocus=document.activeElement;
     modal.classList.add('open');document.body.style.overflow='hidden';closeBtn.focus();
   }
-  function close(){modal.classList.remove('open');document.body.style.overflow='';}
+  function close(){
+    if(!modal.classList.contains('open'))return;
+    modal.classList.remove('open');document.body.style.overflow='';
+    if(lastFocus&&typeof lastFocus.focus==='function')lastFocus.focus();
+    lastFocus=null;
+  }
   document.querySelectorAll('.quad-hit').forEach(function(h){h.addEventListener('click',open);});
   closeBtn.addEventListener('click',close);
-  window.addEventListener('keydown',function(e){if(e.key==='Escape')close();});
+  window.addEventListener('keydown',function(e){
+    if(!modal.classList.contains('open'))return;
+    if(e.key==='Escape'){close();return;}
+    if(e.key!=='Tab')return;
+    // keep Tab / Shift+Tab cycling inside the open dialog
+    var focusables=modal.querySelectorAll('button,iframe,a[href],[tabindex]:not([tabindex="-1"])');
+    if(!focusables.length)return;
+    var first=focusables[0],last=focusables[focusables.length-1];
+    if(!modal.contains(document.activeElement)){first.focus();e.preventDefault();return;}
+    if(e.shiftKey&&document.activeElement===first){last.focus();e.preventDefault();}
+    else if(!e.shiftKey&&document.activeElement===last){first.focus();e.preventDefault();}
+  });
+  // keydown can't see Tab presses inside the embedded iframe document, so if
+  // sequential focus ever escapes the open dialog, pull it straight back in
+  document.addEventListener('focusin',function(e){
+    if(!modal.classList.contains('open'))return;
+    if(!modal.contains(e.target))closeBtn.focus();
+  });
 })();
 </script>
 </body>

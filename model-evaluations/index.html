@@ -192,6 +192,8 @@
           var NS='http://www.w3.org/2000/svg';
           var svg=document.createElementNS(NS,'svg');
           svg.setAttribute('viewBox','0 0 210 40');svg.setAttribute('width','210');svg.setAttribute('height','40');
+          svg.setAttribute('role','img');
+          svg.setAttribute('aria-label','patient '+Math.round(pa*100)+'% → clinician '+Math.round(ca*100)+'%');
           function y(v){return 32-24*v;}
           var base=document.createElementNS(NS,'line');
           base.setAttribute('x1','44');base.setAttribute('x2','166');
