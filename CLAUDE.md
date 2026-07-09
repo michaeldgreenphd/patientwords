@@ -6,8 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 The public GitHub Pages gallery for a mechanistic-interpretability study of clinical vs.
 patient language in language models. Everything shown here is generated or measured by the
-private backend repo (`patientwords-engine`, expected as a sibling checkout); this repo is
-presentation only. The voice is a careful research notebook: short declarative sentences,
+backend repo (`patientwords-engine`, also public — no secrets in either repo, ever;
+expected as a sibling checkout); this repo is presentation only. The voice is a careful research notebook: short declarative sentences,
 exact technical terms, no marketing.
 
 ## Hard rules
