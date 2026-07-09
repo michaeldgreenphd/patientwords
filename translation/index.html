@@ -4,13 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Translation — PatientWords</title>
-<meta name="description" content="An LLM translates the patient sentence into standard terminology and the raw output is traced natively. Live gemma-2-2b trace: translation restores the clinical continuation — lax(ative) at 0.41, above the clinical baseline (0.26).">
+<meta name="description" content="An LLM translates the patient sentence into standard terminology and the raw output is traced natively. Live gemma-2-2b trace: translation restores the clinical continuation — lax(ative) at 41%, above the clinical baseline (26%).">
 <link rel="canonical" href="https://michaeldgreenphd.github.io/patientwords/translation/">
 <meta name="theme-color" content="#faf9f5">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="PatientWords">
 <meta property="og:title" content="Translation — PatientWords">
-<meta property="og:description" content="Translating patient language back into clinical terms restores the circuit: the top continuation returns to lax(ative) at 0.41, above the clinical baseline (0.26). Live gemma-2-2b trace.">
+<meta property="og:description" content="Translating patient language back into clinical terms restores the circuit: the top continuation returns to lax(ative) at 41%, above the clinical baseline (26%). Live gemma-2-2b trace.">
 <meta property="og:url" content="https://michaeldgreenphd.github.io/patientwords/translation/">
 <meta property="og:image" content="https://michaeldgreenphd.github.io/patientwords/modes/translation/preview.png">
 <meta property="og:image:width" content="1690">
@@ -182,9 +182,9 @@
   <div class="masthead-row">
     <a class="wordmark" href="../"><span class="pw-p">Patient</span><span class="pw-w">Words</span></a>
     <nav aria-label="Site">
-      <a href="../">Home</a>
       <a href="../start-here/">Start Here</a>
       <a href="../methods.html">Methods</a>
+      <a href="../">Overview</a>
       <a href="../word-differences/">Word Differences</a>
       <a href="../syntax-differences/">Syntax Differences</a>
       <a href="../dialect-differences/">Dialect Differences</a>
@@ -218,7 +218,7 @@
   <div class="tx-g" id="tx-gal"></div>
   <p class="embed-caption" id="tx-gal-cap" hidden>every classifiable case from the live mitigation trace · top token per panel</p>
 
-  <span class="stat recovery">Recovered target probability: 0.41 after translation (clinical baseline 0.26)</span>
+  <span class="stat recovery">Recovered target probability: 41% after translation (clinical baseline 26%)</span>
   <details class="meth" id="trace-fold">
     <summary>View the live three-panel trace (clinical / patient / translated)</summary>
   <p class="traced" data-mode="translation" data-traced="gemma-2-2b">
@@ -351,6 +351,7 @@
 <script>
 (function(){
   function el(t,c,x){var e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e;}
+  function pct(p){return Math.round(p*100)+'%';}
   fetch('../data/provenance.json',{cache:'no-cache'}).then(function(r){return r.json();}).then(function(p){
     var tc=p.translation_cases||{};
     // phrase 17's embedded render is the July 9 re-trace; its caption must
@@ -390,7 +391,7 @@
         var front=el('div','tx-face tx-front');
         front.appendChild(el('p','tx-k',c.class==='recovered'?'recovered':(c.class==='worsened'?'worsened':'unrecovered')));
         front.appendChild(el('p','tx-swap',c.patient_top[0]+' \u2192 '+c.translated_top[0]
-          +'  ('+c.patient_top[1].toFixed(2)+' \u2192 '+c.translated_top[1].toFixed(2)+')'));
+          +'  ('+pct(c.patient_top[1])+' \u2192 '+pct(c.translated_top[1])+')'));
         inner.appendChild(front);
         // back: the sentences behind the tokens
         var back=el('div','tx-face tx-back');
@@ -413,8 +414,8 @@
         }
         var ot=line(null,'output \u00b7 next token');
         ot.appendChild(document.createTextNode('\u2026 '));
-        ot.appendChild(el('span','tgt',c.translated_top[0]+' ('+c.translated_top[1].toFixed(2)+')'));
-        ot.appendChild(document.createTextNode(' \u2014 was '+c.patient_top[0]+' ('+c.patient_top[1].toFixed(2)+')'));
+        ot.appendChild(el('span','tgt',c.translated_top[0]+' ('+pct(c.translated_top[1])+')'));
+        ot.appendChild(document.createTextNode(' \u2014 was '+c.patient_top[0]+' ('+pct(c.patient_top[1])+')'));
         var a=el('a','tx-trace','Examine activation circuit \u2192');
         a.href='#trace-fold';
         a.addEventListener('click',function(ev){
@@ -551,7 +552,7 @@
       pt=retrace17.patient_top;tt=retrace17.translated;ct=retrace17.clinical;
       when='re-traced July 9, 2026';
       extra=' Independent re-trace of the study case (which measured '
-        +c.translated_top[1].toFixed(2)+').';
+        +pct(c.translated_top[1])+').';
     }
     var meta=document.getElementById('fold-meta');
     if(meta)meta.textContent='hosted circuit-tracer via Neuronpedia · '+when+' · phrase '
@@ -559,9 +560,9 @@
       +'next-token probabilities read directly from the trace';
     var cap=document.getElementById('flip-cap');
     if(cap)cap.textContent='Live trace: under patient wording the top continuation is “'
-      +pt[0]+'” ('+pt[1].toFixed(2)+'); after LLM translation it’s “'
-      +tt[0]+'” ('+tt[1].toFixed(2)+') — clinical baseline top “'
-      +ct[0]+'” ('+ct[1].toFixed(2)+').'+extra;
+      +pt[0]+'” ('+pct(pt[1])+'); after LLM translation it’s “'
+      +tt[0]+'” ('+pct(tt[1])+') — clinical baseline top “'
+      +ct[0]+'” ('+pct(ct[1])+').'+extra;
     frame.title='Live translation mitigation trace, phrase '+c.index+' of the downgrade set';
     setTabs(2);
     if(frame.getAttribute('src')!==src){

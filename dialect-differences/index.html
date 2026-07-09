@@ -191,9 +191,9 @@
   <div class="masthead-row">
     <a class="wordmark" href="../"><span class="pw-p">Patient</span><span class="pw-w">Words</span></a>
     <nav aria-label="Site">
-      <a href="../">Home</a>
       <a href="../start-here/">Start Here</a>
       <a href="../methods.html">Methods</a>
+      <a href="../">Overview</a>
       <a href="../word-differences/">Word Differences</a>
       <a href="../syntax-differences/">Syntax Differences</a>
       <a href="./" aria-current="page">Dialect Differences</a>
@@ -249,7 +249,7 @@
         <tbody id="dlf-body"></tbody>
       </table>
     </div>
-    <p class="dl-caption">Bars share a fixed 0&ndash;1 probability scale; the thin ink tick marks
+    <p class="dl-caption">Bars share a fixed 0&ndash;100% probability scale; the thin ink tick marks
        the standard-English baseline. Rows sorted by p, baseline first.</p>
   </section>
 
@@ -302,6 +302,7 @@
   if(!window.fetch)return;
   function el(tag,cls,txt){var e=document.createElement(tag);if(cls)e.className=cls;
     if(txt!=null)e.textContent=txt;return e;}
+  function pct(p){return Math.round(p*100)+'%';}
   function shortName(d){
     if(/african american/i.test(d))return 'AAVE';
     if(/texting/i.test(d))return 'texting';
@@ -312,8 +313,9 @@
     return d.replace(/ English$/,'');
   }
   function fmtD(x){if(x==null)return String.fromCharCode(8212);
-    var s=(Math.abs(x)).toFixed(2).replace(/^0/,'');
-    return (x>0?'+':(x<0?String.fromCharCode(8722):''))+s;}
+    var v=Math.abs(x)*100;
+    var s=v>=9.5?String(Math.round(v)):v.toFixed(1).replace(/\.0$/,'');
+    return (x>0?'+':(x<0?String.fromCharCode(8722):''))+s+'%';}
   fetch('../data/dialects.json',{cache:'no-cache'})
     .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
     .then(function(data){
@@ -343,7 +345,7 @@
         td.appendChild(tspan);
         td.appendChild(el('span','tgt',String.fromCharCode(8594)+' '+(it.target_token||'?')));
         row.appendChild(td);
-        var bp=el('td','num',it.baseline_p==null?String.fromCharCode(8212):it.baseline_p.toFixed(2));
+        var bp=el('td','num',it.baseline_p==null?String.fromCharCode(8212):pct(it.baseline_p));
         row.appendChild(bp);
         dialects.forEach(function(d){
           var v=null;
@@ -354,7 +356,7 @@
           var s=el('span',v.delta>0?'dpos':(v.delta<0?'dneg':null),fmtD(v.delta));
           c.appendChild(s);
           c.title=v.prompt+' '+String.fromCharCode(8594)+' top: '+(v.top_token||'?')+
-            (v.top_p!=null?' ('+v.top_p.toFixed(2)+')':'');
+            (v.top_p!=null?' ('+pct(v.top_p)+')':'');
           if(v.flip){flips++;var fm=el('span','flipmark',String.fromCharCode(9679));c.appendChild(fm);}
           c.setAttribute('aria-label',fmtD(v.delta)+(v.flip?' (flips top prediction)':'')+
             ' '+String.fromCharCode(183)+' '+c.title);
@@ -397,7 +399,7 @@
       document.getElementById('dlf-sub').textContent=
         'baseline '+String.fromCharCode(8220)+feat.baseline_prompt+String.fromCharCode(8221)+
         ' '+String.fromCharCode(8594)+' '+String.fromCharCode(8220)+(feat.target_token||'?')+
-        String.fromCharCode(8221)+' at p='+(feat.baseline_p!=null?feat.baseline_p.toFixed(2):'?');
+        String.fromCharCode(8221)+' at '+(feat.baseline_p!=null?pct(feat.baseline_p):'?');
       var fb=document.getElementById('dlf-body');
       function promptCell(txt,term){
         var td=el('td','prompt');
@@ -410,7 +412,7 @@
       }
       function barCell(p,base){
         var td=el('td','num');
-        td.appendChild(document.createTextNode(p==null?String.fromCharCode(8212):p.toFixed(3)));
+        td.appendChild(document.createTextNode(p==null?String.fromCharCode(8212):pct(p)));
         var bar=el('span','pbar');
         var fill=el('i');fill.style.width=((p||0)*100)+'%';bar.appendChild(fill);
         if(base!=null){var tick=el('b');tick.style.left=(base*100)+'%';bar.appendChild(tick);}
@@ -454,7 +456,7 @@
       baseRow.appendChild(promptCell(feat.baseline_prompt,feat.term));
       baseRow.appendChild(barCell(feat.baseline_p,null));
       var bd=el('td','num','baseline');baseRow.appendChild(bd);
-      var bt=el('td');bt.appendChild(el('span','stay',(feat.target_token||'?')+' '+String.fromCharCode(183)+' '+(feat.baseline_p!=null?feat.baseline_p.toFixed(3):'?')));
+      var bt=el('td');bt.appendChild(el('span','stay',(feat.target_token||'?')+' '+String.fromCharCode(183)+' '+(feat.baseline_p!=null?pct(feat.baseline_p):'?')));
       baseRow.appendChild(bt);
       wireAccordion(baseRow,'Standard English (baseline)');
       fb.appendChild(baseRow);
@@ -468,7 +470,7 @@
         row.appendChild(dd);
         var tp=el('td');
         tp.appendChild(el('span',v.flip?'flip':'stay',
-          (v.top_token||'?')+' '+String.fromCharCode(183)+' '+(v.top_p!=null?v.top_p.toFixed(3):'?')+
+          (v.top_token||'?')+' '+String.fromCharCode(183)+' '+(v.top_p!=null?pct(v.top_p):'?')+
           (v.flip?' '+String.fromCharCode(8592)+' flip':'')));
         row.appendChild(tp);
         wireAccordion(row,shortName(v.dialect));
