@@ -127,6 +127,13 @@
 
   /* Phrase dataset */
   .sp-scroll{overflow-x:auto}
+  .tier-table{border-collapse:collapse;margin:14px 0 6px;font-size:14.5px}
+  .tier-table th{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--muted);text-align:left;font-weight:400;padding:4px 22px 6px 0;border-bottom:1px solid var(--ink)}
+  .tier-table td{padding:6px 22px 6px 0;border-bottom:1px solid var(--hairline);vertical-align:baseline}
+  .tier-table .tn{font-family:var(--mono);font-weight:600}
+  .tier-table .tex{font-family:var(--mono);font-size:13px;color:var(--muted)}
+  .tier-cap{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.04em;margin:0 0 18px}
   .sp-scroll,.me-scroll{background:
     linear-gradient(90deg,var(--paper) 35%,rgba(250,249,245,0)),
     linear-gradient(270deg,var(--paper) 35%,rgba(250,249,245,0)) 100% 0,
@@ -271,7 +278,7 @@
 <main id="main">
   <p class="dateline">Research bulletin · mechanistic interpretability of medical language · <b>gemma-2-2b</b></p>
   <h1><span class="patient">Patients</span> don’t speak like doctors.<br><span class="clinical">Medical&nbsp;AI</span> must be ready to interpret them.</h1>
-  <p class="lede">We trace how gemma-2-2b reads clinical terms versus the everyday words patients use. Wording can change what the model suggests in addition to its confidence: “my asthma flares, so at work I keep a spare” continues with inhaler at 69% probability; “my chest gets all tight” makes the top word shirt, and inhaler falls to 4% probability. Rewriting the sentence in clinical terms restores it. (Scenario 85, data/simulated_scenarios.json.)</p>
+  <p class="lede">We trace how gemma-2-2b reads clinical terms versus the everyday words patients use. Wording can change what the model suggests in addition to its confidence: “my asthma flares, so at work I keep a spare” continues with inhaler at 69% probability; “my chest gets all tight” makes the top word shirt, and inhaler falls to 4% probability. Rewriting the sentence in clinical terms restores it. (Scenario 85 of the simulated series.)</p>
   <p class="lede">Every figure is a live render: columns are the prompt’s words in order; height is depth in the model; the predicted next word sits at the top. Nodes (the dots) are features — size is contribution, color is category. Curves are paths of influence; the spread at the top shows the competing recommendations ranked by probability. Hover any node for its identity and mass.</p>
   <p class="keyline">
     <span class="swatch" style="background:#15803d"></span>clinical / recovery &nbsp;&nbsp;
@@ -408,7 +415,18 @@
       <h2>Safety view — urgency of the predicted action<span class="draft-flag">tiers reviewed v1</span></h2>
       <span class="count" id="sv-count"></span>
     </div>
-    <p class="lede" style="font-size:16px">Not every flip is equal. Sometimes the model <em>hedges</em> (e.g. the clinical answer stays on top but loses probability). Sometimes it <em>redirects</em>: the top answer changes, and when it lands on a lower tier of care (specialist → generalist, medication → nothing) we call that a recommendation <em>downgrade</em>. Care-urgency tiers follow the reviewed vocabulary; every number below reads from <a href="data/urgency_shift.json">data/urgency_shift.json</a>.</p>
+    <p class="lede" style="font-size:16px">Not every flip is equal. Sometimes the model <em>hedges</em> (e.g. the clinical answer stays on top but loses probability). Sometimes it <em>redirects</em>: the top answer changes, and when it lands on a lower tier of care (specialist → generalist, medication → nothing) we call that a recommendation <em>downgrade</em>. The tiers, with example words from the model’s measured predictions:</p>
+    <div class="sp-scroll">
+      <table class="tier-table" id="tier-table" hidden>
+        <thead><tr>
+          <th scope="col">tier</th>
+          <th scope="col">meaning</th>
+          <th scope="col">measured examples</th>
+        </tr></thead>
+        <tbody id="tier-body"></tbody>
+      </table>
+    </div>
+    <p class="tier-cap" id="tier-cap" hidden>care-urgency tiers, reviewed v1 · predicted words with no urgency information are excluded · a redirect that lands on a lower tier is a downgrade</p>
     <div class="safety-grid" id="sv-grid"></div>
     <p class="safety-note" id="sv-note"></p>
   </section>
@@ -660,6 +678,23 @@
         var dd=el('dd',cls||null,val);dl.appendChild(dd);
       }
       var mit=s.mitigation||null;
+      // tier table: definitions + measured example words, straight from the data
+      var tiersDef=u.tiers||{}, tex=u.tier_examples||{};
+      var tb=document.getElementById('tier-body');
+      if(tb&&Object.keys(tiersDef).length){
+        ['4','3','2','1','0'].forEach(function(k){
+          if(!(k in tiersDef))return;
+          var tr=document.createElement('tr');
+          tr.appendChild(el('td','tn',k));
+          tr.appendChild(el('td',null,String(tiersDef[k])));
+          tr.appendChild(el('td','tex',(tex[k]&&tex[k].length)?tex[k].join(' · '):'—'));
+          tb.appendChild(tr);
+        });
+        if(tb.children.length){
+          document.getElementById('tier-table').hidden=false;
+          var tcap=document.getElementById('tier-cap');if(tcap)tcap.hidden=false;
+        }
+      }
       models.forEach(function(mid){
         var v=pm[mid];
         var card=el('div','safety-card');
@@ -743,7 +778,7 @@
       document.getElementById('me-count').textContent=models.length+' translation models';
       document.getElementById('me-foot').textContent=
         'updated '+(data.updated||'—')+' · task: '+(data.task||'—')
-        +' · source: data/model_evaluations.json';
+        +' · from the live evaluation runs';
       sec.hidden=false;
       if(location.hash==='#'+sec.id)sec.scrollIntoView();
     })
@@ -832,7 +867,7 @@
     var note=document.getElementById('spec-note');
     note.textContent='one instruction \u00b7 '+it.variants.length+' dialect framings measured, '
       +vs.length+' shown \u00b7 '+flips+' change the top prediction (red) \u00b7 gemma-2-2b live, batch '
-      +(d.batch||'')+' \u00b7 this panel picks its example from data/dialects.json and updates with the study \u00b7 ';
+      +(d.batch||'')+' \u00b7 this panel picks its example from the measured dialect data and updates with the study \u00b7 ';
     var a=el('a',null,'full study \u2192 Dialect Differences');
     a.href='dialect-differences/';
     note.appendChild(a);
