@@ -54,11 +54,11 @@
   /* toggle demo */
   .tg{border:1px solid var(--hairline);background:#fff;padding:18px 20px;margin:16px 0 6px}
   .tg-sentence{font-size:17px;line-height:1.6;margin:0 0 4px}
-  .tg-swap{display:inline-block;border-bottom:2px solid var(--clinical);cursor:default}
+  .tg-swap{display:inline-block;border-bottom:2px solid var(--teal);cursor:default}
   .tg.pat .tg-swap{border-bottom-color:var(--orange)}
   .tg button{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;
-    background:none;border:1px solid var(--clinical);color:var(--clinical);padding:6px 12px;cursor:pointer;margin:10px 0 14px}
-  .tg button:hover{background:var(--clinical);color:#fff}
+    background:none;border:1px solid var(--teal);color:var(--teal);padding:6px 12px;cursor:pointer;margin:10px 0 14px}
+  .tg button:hover{background:var(--teal);color:#fff}
   .tg.pat button{border-color:var(--orange);color:var(--orange)}
   .tg.pat button:hover{background:var(--orange);color:#fff}
   .tg button:focus-visible{outline:2px solid var(--clinical);outline-offset:2px}
@@ -117,14 +117,14 @@
     <p>Patients rarely use words that appear in medical textbooks. A clinician understands multiple different framings, recognizes the same stomach problem, and reaches the same recommendation.</p>
     <div class="fig" role="img" aria-label="Three patient phrasings converge through a clinician to one recommendation: an antacid.">
     <svg viewBox="0 0 720 190">
-      <text x="0" y="28" class="sv-q">“I have <tspan style="fill:var(--clinical)">acid reflux</tspan>.”</text>
+      <text x="0" y="28" class="sv-q">“I have <tspan style="fill:var(--teal);font-weight:700">acid reflux</tspan>.”</text>
       <text x="0" y="88" class="sv-q">“My stomach’s on fire.”</text>
       <text x="0" y="148" class="sv-q">“My dyspepsia flared up.”</text>
       <path class="sv-line" d="M232,22 C330,22 350,86 430,88"/>
       <path class="sv-line" d="M232,82 C320,82 340,88 430,88"/>
       <path class="sv-line" d="M232,142 C330,142 350,90 430,88"/>
-      <circle cx="452" cy="88" r="16" fill="none" stroke="var(--clinical)" stroke-width="1.6"/>
-      <text x="452" y="63" class="sv-m" text-anchor="middle" style="fill:var(--clinical)">clinician</text>
+      <circle cx="452" cy="88" r="16" fill="none" stroke="var(--teal)" stroke-width="2"/>
+      <text x="452" y="63" class="sv-m" text-anchor="middle" style="fill:var(--teal);font-weight:700">clinician</text>
       <path class="sv-line" d="M470,88 L540,88" stroke="#0f766e" stroke-width="2.2"/>
       <text x="552" y="93" class="sv-a" fill="#0f766e">antacid</text>
     </svg>
@@ -138,7 +138,7 @@
     <p>We gave a language model the same sentences and read off its most likely next word. The clinical phrasing makes a medical recommendation. The casual phrasings make a food recommendation.</p>
     <div class="fig" role="img" aria-label="The same three phrasings pass through a language model and come out as three different answers: antacid, ice cream, and apple.">
     <svg viewBox="0 0 720 190">
-      <text x="0" y="28" class="sv-q">“I have <tspan style="fill:var(--clinical)">acid reflux</tspan>.”</text>
+      <text x="0" y="28" class="sv-q">“I have <tspan style="fill:var(--teal);font-weight:700">acid reflux</tspan>.”</text>
       <text x="0" y="88" class="sv-q">“My stomach’s on fire.”</text>
       <text x="0" y="148" class="sv-q">“My dyspepsia flared up.”</text>
       <path class="sv-line" d="M232,22 L430,22"/>
@@ -217,7 +217,7 @@
     <p>Put a translator between the patient and the model: it rewrites the sentence into clinical wording before the model answers.</p>
     <div class="fig" role="img" aria-label="The same three phrasings from panel 2 all pass through a translation layer, emerge as the single clinical wording I have acid reflux, enter the language model, and come out as antacid.">
     <svg viewBox="0 0 720 190">
-      <text x="0" y="28" class="sv-q">“I have <tspan style="fill:var(--clinical)">acid reflux</tspan>.”</text>
+      <text x="0" y="28" class="sv-q">“I have <tspan style="fill:var(--teal);font-weight:700">acid reflux</tspan>.”</text>
       <text x="0" y="88" class="sv-q">“My stomach’s on fire.”</text>
       <text x="0" y="148" class="sv-q">“My dyspepsia flared up.”</text>
       <path class="sv-line" d="M232,22 C258,22 262,84 282,86" stroke-width="1.2"/>
@@ -226,7 +226,7 @@
       <rect x="282" y="66" width="104" height="44" rx="22" fill="#eceae3"/>
       <text x="334" y="92" class="sv-m" text-anchor="middle" fill="#0f766e">translation layer</text>
       <path class="sv-line" d="M386,88 L404,88" stroke-width="1.2"/>
-      <text x="412" y="93" class="sv-q" fill="#0f766e">“I have acid reflux.”</text>
+      <text x="412" y="93" class="sv-q">“I have <tspan style="fill:var(--teal);font-weight:700">acid reflux</tspan>.”</text>
       <path class="sv-line" d="M556,88 L574,88" stroke-width="1.2"/>
       <rect x="574" y="56" width="52" height="64" fill="none" stroke="#6d6c66" stroke-width="1.2" stroke-dasharray="5 5"/>
       <text x="600" y="140" class="sv-m" text-anchor="middle">model</text>
