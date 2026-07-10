@@ -188,9 +188,9 @@
   <section>
     <p class="step-no">4 · Look inside</p>
     <h2>Circuit tracing photographs the reasoning</h2>
-    <p>Inside the model, small units called "features" switch on as it reads — some respond to medical ideas, others to everyday ones. A circuit trace records which features fired and how strongly each fed the final recommendation. Clinical wording lights the medical features; patient wording lights the everyday ones.</p>
-    <div class="fig" role="img" aria-label="Two parallel tracks of feature nodes. The clinical term dyspepsia lights up teal medical nodes and leads to antacid. The casual phrase stomach on fire lights up dark everyday nodes and leads to ice cream.">
-    <svg viewBox="0 0 720 130">
+    <p>Inside the model, small units called "features" switch on as it reads. Some respond to medical ideas; others to everyday ones. A circuit trace records which features fired and how strongly each fed the final recommendation. Clinical wording lights the medical features; patient wording lights the everyday ones.</p>
+    <div class="fig" role="img" aria-label="Two parallel tracks of feature nodes reading left to right through the network, from early layers to deep layers. The clinical term dyspepsia lights up teal medical nodes and leads to antacid. The casual phrase stomach on fire lights up dark everyday nodes and leads to ice cream.">
+    <svg viewBox="0 0 720 136">
       <text x="0" y="40" class="sv-q">“dyspepsia”</text>
       <path d="M120,35 L188,35" stroke="#dcdad2" stroke-width="1" fill="none"/>
       <circle cx="200" cy="35" r="5.5" fill="#0f766e"/>
@@ -211,9 +211,15 @@
       <circle cx="440" cy="95" r="4" fill="#111827" opacity=".55"/>
       <path d="M452,95 L520,95" stroke="#dcdad2" stroke-width="1" fill="none"/>
       <text x="530" y="100" class="sv-a" fill="#b45309">ice cream</text>
+      <g aria-hidden="true">
+        <path d="M188,114 H452 M188,114 v3 M276,114 v3 M364,114 v3 M452,114 v3"
+          stroke="#dcdad2" stroke-width="1" fill="none"/>
+        <text x="188" y="128" style="font:9.5px ui-monospace,Menlo,monospace;fill:#6d6c66;letter-spacing:.04em">early layers</text>
+        <text x="452" y="128" text-anchor="end" style="font:9.5px ui-monospace,Menlo,monospace;fill:#6d6c66;letter-spacing:.04em">deep layers →</text>
+      </g>
     </svg>
     </div>
-    <p class="cap">node size = how strongly the feature fed the guess · faint dots = features that barely fired</p>
+    <p class="cap">larger node = stronger influence on the answer · faint node = barely fired</p>
     <p>Most figures on this site are circuit tracings like this one.</p>
   </section>
 
