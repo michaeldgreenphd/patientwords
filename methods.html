@@ -113,6 +113,13 @@
   .me-table tr:last-child td{border-bottom:1px solid var(--ink)}
   .me-caption{font-family:var(--mono);font-size:11px;color:var(--muted);
     letter-spacing:.04em;margin:6px 0 0}
+  .me-table th:nth-child(2){min-width:240px;white-space:normal;line-height:1.7}
+  .me-legend{font-family:var(--mono);font-size:11px;color:var(--muted);
+    letter-spacing:.04em;margin:8px 0 0}
+  .me-legend .sw{display:inline-block;width:9px;height:9px;margin:0 5px 0 0;
+    vertical-align:baseline;transform:translateY(1px)}
+  .conv-xlab{font-family:var(--mono);font-size:10.5px;color:var(--muted);
+    text-align:center;letter-spacing:.06em;margin:-2px 0 4px}
 
   /* Fig. 5 · convergence small multiples (drawn at load from data/convergence.json) */
   .conv-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:18px 26px;margin:18px 0 6px}
@@ -174,7 +181,7 @@
 </header>
 <main id="main">
   <p class="dateline">Methods · how the pipeline works</p>
-  <h1>From a sentence to a circuit, in four steps.</h1>
+  <h1>From a sentence to a circuit, in six steps.</h1>
   <p class="lede">
     Every figure starts as two (or four) plain sentences — one in clinician wording, one
     in patient wording — and ends as an interactive map of the computation gemma-2-2b
@@ -183,22 +190,35 @@
 
   <section>
     <p class="step-no">Step 1 · Model &amp; features</p>
-    <h2>gemma-2-2b, read through Gemma Scope transcoders</h2>
-    <p>The study’s subject is <code>gemma-2-2b</code>, an open-weights language model. On its own, its inner workings are millions of undifferentiated numbers. Google DeepMind’s <a href="https://huggingface.co/google/gemma-scope-2b-pt-transcoders">Gemma Scope</a> transcoders turn that activity into a sparse set of <em>features</em> — units that each tend to fire for one recognizable thing, like mental-health treatment, first-person symptom talk, or the grammar of a quoted sentence.</p>
+    <h2>A prism splits the model’s activity into readable features</h2>
+    <p>The study’s subject is <code>gemma-2-2b</code>, a small open language model. Watched
+      directly, its inner workings are millions of undifferentiated numbers — white light.
+      Google DeepMind’s <a href="https://huggingface.co/google/gemma-scope-2b-pt-transcoders">Gemma
+      Scope</a> transcoders act as a prism: they split that light into distinct, readable
+      colors called <em>features</em>, each of which tends to fire for one recognizable
+      thing — mental-health treatment, first-person symptom talk, the grammar of a quoted
+      sentence. Once the light is split, we can see which parts of the model’s thinking a
+      sentence switches on.</p>
   </section>
 
   <section>
     <p class="step-no">Step 2 · Attribution</p>
-    <h2>Tracing the circuit with circuit-tracer, via Neuronpedia</h2>
-    <p>For each prompt we run <a href="https://github.com/safety-research/circuit-tracer">circuit-tracer</a> through <a href="https://neuronpedia.org">Neuronpedia</a> to build an <em>attribution graph</em>: a map of which features, at which layers and positions, pushed the model toward its next word. Edges carry attribution mass — how much one feature’s firing fed another’s, and ultimately the final prediction.</p>
+    <h2>Tracing which features pushed the model to its next word</h2>
+    <p>For each sentence we run <a href="https://github.com/safety-research/circuit-tracer">circuit-tracer</a>
+      through <a href="https://neuronpedia.org">Neuronpedia</a> to build an
+      <em>attribution graph</em>: a map of which features, at which depth and position in
+      the sentence, pushed the model toward its next word. Each connection carries a
+      <em>weight</em> — how much influence one feature’s firing had on another’s, and
+      ultimately on the word the model chose. (The technical term for that weight is
+      attribution mass.)</p>
   </section>
 
   <section>
     <p class="step-no">Step 3 · Tagging</p>
-    <h2>Sorting features into clinical, off-target, and structural</h2>
+    <h2>Every feature gets sorted: clinical, off-target, or structural</h2>
     <p>
-      Each feature is tagged by what it responds to, from its autointerp
-      description and activation profile:
+      Each feature is tagged by what it responds to — read from its machine-written
+      description and from the kinds of text that make it fire:
     </p>
     <ul class="tags">
       <li class="t-clinical"><b>Clinical</b>: features in the medical
@@ -210,16 +230,16 @@
         position, and punctuation that appear in every trace and carry no medical content.</li>
     </ul>
     <p>
-      The three-way split makes two graphs comparable: when the wording changes,
-      clinical mass falls and off-target mass rises.
+      The three-way split makes two graphs comparable: when the wording turns
+      colloquial, the clinical share of the circuit falls and the off-target share rises.
     </p>
   </section>
 
   <section>
     <p class="step-no">Step 4 · Comparison</p>
-    <h2>Four engines for putting graphs side by side</h2>
+    <h2>Four views put the two phrasings side by side</h2>
     <p>
-      The tagged graphs feed four rendering engines:
+      The tagged graphs feed four comparison views:
     </p>
     <ul class="engines">
       <li>
@@ -257,21 +277,24 @@
 
   <section id="generation-eval">
     <p class="step-no">Step 5 · Generation &amp; its audit</p>
-    <h2>The generation engine runs on Claude models &mdash; and gets audited</h2>
+    <h2>One set of AIs writes the test; a different set takes it</h2>
     <p>
-      Transparency about the pipeline&rsquo;s own tooling: the phrase pairs are written
-      by Anthropic Claude models (the batch sidecars record which &mdash; Opus, Sonnet,
-      and Haiku variants; the current scale run uses <code>claude-haiku-4-5</code>),
-      the Translation figure&rsquo;s rewrite step is a Claude call, and the audit below
-      also runs on Claude via the live API. The models being <em>measured</em> &mdash;
-      the gemma and qwen families on every other page &mdash; are open-weights models
-      and are never used to write stimuli.
+      The pipeline keeps a strict separation of church and state. Anthropic&rsquo;s
+      Claude models do exactly two jobs: they <em>write</em> the test questions (the
+      phrase pairs; each batch&rsquo;s record names the exact model &mdash; the current
+      scale run uses <code>claude-haiku-4-5</code>) and they <em>translate</em> patient
+      wording into clinical wording for the Translation figure. A completely different
+      set of models &mdash; the open-weights gemma and qwen families on every other
+      page &mdash; <em>takes</em> the test. The test-writers are never test-takers,
+      and the test-takers never write their own questions.
     </p>
     <p>
-      The audit asks whether the generation-and-translation engine itself loses
-      clinical content: can a Claude model pull the clinical concepts out of a
-      sentence, and does translating it first help or hurt? Each model is scored on
-      the same items, so the two percentages are directly comparable.
+      Because the test-writer is itself an AI, it gets audited. The audit below asks a
+      Claude model to pull the clinical concepts out of a sentence twice: once from the
+      patient&rsquo;s own words, once after translating those words into clinical
+      language. The plain-English finding: the models read patient wording perfectly,
+      but <em>translating patient words into clinical words destroys information</em>
+      &mdash; the losses appear at the translation step, not before it.
     </p>
     <p class="me-n" id="me-n"></p>
     <div class="me-scroll">
@@ -285,13 +308,15 @@
       </table>
     </div>
     <p class="me-caption" id="me-updated"></p>
+    <p class="me-legend"><span class="sw" style="background:#b45309" aria-hidden="true"></span>orange
+      slope = clinical content lost in translation &nbsp;·&nbsp;
+      <span class="sw" style="background:#9aa1ad" aria-hidden="true"></span>grey = no loss</p>
     <p>
-      On this set the production models read patient phrasing perfectly &mdash; every
-      one scored 100% on the untouched wording. The losses came from the translation
-      step itself: the same regression the engine flags, and the reason the
+      That is the same regression the engine flags automatically, and the reason the
       <a href="translation/">Translation</a> fix can&rsquo;t be assumed safe without
       checking its output. The item set is small, so read the percentages as a
-      demonstration of the method and the direction of the effect, not a ranking.
+      demonstration of the method and the direction of the effect, not a ranking of
+      models.
     </p>
   </section>
   <script>
@@ -360,21 +385,27 @@
 
   <section id="convergence">
     <p class="step-no">Step 6 · Accumulation</p>
-    <h2>The estimate as measurement accumulated</h2>
+    <h2>Confidence grows as the data accumulates</h2>
     <p>
-      Each panel tracks one model&rsquo;s mean language penalty &mdash; in percentage
-      points of next-word probability &mdash; as generated batches were measured, with
-      a bootstrap 95% interval around it. The interval tightens as phrases accumulate
-      and stays below zero for every model. Not every model got there at the same
-      speed: at 133 phrases, gemma-3-4b-it&rsquo;s downgrade asymmetry was not yet
-      statistically significant; from roughly 240 phrases on, it is. Tier&nbsp;B rows
-      enter these curves from the exploration split only &mdash; the pre-registered
-      10% holdout stays sealed until the collection week ends.
+      Each panel follows one model as it reads more and more phrase pairs. The red line
+      is the average language penalty &mdash; how many percentage points of probability
+      the clinical answer loses when the wording turns colloquial. The shaded band is
+      the range where the true penalty plausibly sits: it starts wide, because a handful
+      of phrases could mislead, and narrows as hundreds accumulate, because our
+      confidence grows. For every model the band settles below zero. Not every model
+      got there at the same speed &mdash; at 133 phrases gemma-3-4b-it&rsquo;s downgrade
+      pattern could still have been chance; by 240 it could not. And one honesty rule:
+      a random tenth of the newly collected phrases is locked away untouched, so the
+      week&rsquo;s conclusions can be checked once, at the end, against data no interim
+      analysis has seen.
     </p>
     <div class="conv-grid" id="conv-grid" aria-describedby="conv-caption"></div>
-    <p class="conv-cap" id="conv-caption">Fig. 5 &mdash; mean penalty with bootstrap 95% CI
-      vs. phrases measured, batch by batch; hairline at zero. Drawn at load time from
-      the convergence data file in this repository.</p>
+    <div class="conv-xlab" aria-hidden="true">phrases tested →</div>
+    <p class="conv-cap" id="conv-caption">Fig. 5 &mdash; mean language penalty per model
+      as measurement accumulates, batch by batch. Shaded band: bootstrap 95% confidence
+      interval (seed 7, phrase-deduped, Tier B exploration split only); grey hairline:
+      zero penalty. Drawn at load time from the convergence data file in this
+      repository.</p>
     <details class="conv-table"><summary>Data table (every point)</summary>
       <div id="conv-table-wrap"></div></details>
   </section>
@@ -412,7 +443,7 @@
       function X(n){ return m.l + (W - m.l - m.r) * (n / xmax); }
       function Y(v){ return m.t + (H - m.t - m.b) * (1 - (v - ymin) / (ymax - ymin)); }
       var rows = [];
-      ids.forEach(function(id){
+      ids.forEach(function(id, panelIndex){
         var pts = models[id].points.filter(function(p){ return p.ci95 && p.ci95[0] != null; });
         if (!pts.length) return;
         var fin = pts[pts.length - 1];
@@ -434,12 +465,8 @@
             'font-family:var(--mono);font-size:10px;fill:var(--muted)');
           t.textContent = v === 0 ? '0' : pp(v);
           svg.appendChild(t);
-          if (v !== 0) svg.appendChild(el('line', {x1: m.l, x2: m.l + 4, y1: Y(v), y2: Y(v)},
-            'stroke:var(--muted);stroke-width:1'));
         });
-        // x baseline + end ticks
-        svg.appendChild(el('line', {x1: m.l, x2: W - m.r, y1: H - m.b, y2: H - m.b},
-          'stroke:var(--hairline);stroke-width:1'));
+        // end ticks only (no baseline - the zero rule is the anchor)
         [[0, '0'], [xmax, String(xmax)]].forEach(function(tk){
           var t = el('text', {x: X(tk[0]), y: H - m.b + 14,
             'text-anchor': tk[0] === 0 ? 'start' : 'end'},
@@ -457,6 +484,23 @@
           'stroke:var(--penalty);stroke-width:2;stroke-linejoin:round'));
         svg.appendChild(el('circle', {cx: X(fin.n_phrases), cy: Y(fin.mean_penalty), r: 3},
           'fill:var(--penalty)'));
+        if (panelIndex === 0) {
+          // one-time axis label + direct annotation (Tufte: integrate text and data)
+          var ylab = el('text', {x: 2, y: m.t + 6},
+            'font-family:var(--mono);font-size:9.5px;fill:var(--muted);letter-spacing:.04em');
+          ylab.textContent = 'penalty (percentage points)';
+          svg.appendChild(ylab);
+          var mid = pts.reduce(function(best, p){
+            return Math.abs(p.n_phrases - xmax * 0.7) < Math.abs(best.n_phrases - xmax * 0.7) ? p : best;
+          }, pts[0]);
+          var ax = X(mid.n_phrases), ay = Y(mid.ci95[1]);
+          var note = el('text', {x: W - m.r, y: m.t + 20, 'text-anchor': 'end'},
+            'font-family:var(--mono);font-size:9.5px;fill:var(--muted)');
+          note.textContent = 'band tightens as more phrases are measured';
+          svg.appendChild(note);
+          svg.appendChild(el('line', {x1: ax, x2: ax, y1: m.t + 24, y2: ay - 3},
+            'stroke:var(--muted);stroke-width:.75'));
+        }
         // hover hit targets
         pts.forEach(function(p){
           var text = 'through ' + p.through_batch + ' · n=' + p.n_phrases + ' · ' +
