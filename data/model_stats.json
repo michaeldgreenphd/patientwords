@@ -1,0 +1,209 @@
+{
+ "seed": 7,
+ "boot": 5000,
+ "models": [
+  "gemma-2-2b",
+  "gemma-3-4b-it",
+  "qwen3-1.7b",
+  "qwen3-4b"
+ ],
+ "ci_method_penalty": "cluster bootstrap (percentile 95%), cluster = clinical_prompt phrase",
+ "ci_method_downgrade": "clopper-pearson exact 95%",
+ "dedupe": "one record per (model, clinical_prompt); mean penalty, majority flip label",
+ "per_model": {
+  "gemma-2-2b": {
+   "n_rows": 537,
+   "n_unique_phrases": 454,
+   "pseudoreplication_gap": 83,
+   "penalty": {
+    "n_rows_with_penalty": 425,
+    "n_phrases_with_penalty": 362,
+    "mean": -0.0506,
+    "ci95": [
+     -0.0674,
+     -0.0351
+    ],
+    "n_phrases": 362
+   },
+   "flips": {
+    "n_flips": 173,
+    "downgrades": 31,
+    "upgrades": 6,
+    "downgrade_rate": 0.1792,
+    "downgrade_rate_ci95": [
+     0.1251,
+     0.2446
+    ],
+    "ci_method": "clopper-pearson"
+   },
+   "sign_test": {
+    "downgrades": 31,
+    "upgrades": 6,
+    "p_raw": 4e-05,
+    "p_bh": 8e-05
+   }
+  },
+  "gemma-3-4b-it": {
+   "n_rows": 340,
+   "n_unique_phrases": 325,
+   "pseudoreplication_gap": 15,
+   "penalty": {
+    "n_rows_with_penalty": 340,
+    "n_phrases_with_penalty": 325,
+    "mean": -0.0475,
+    "ci95": [
+     -0.0739,
+     -0.0215
+    ],
+    "n_phrases": 325
+   },
+   "flips": {
+    "n_flips": 145,
+    "downgrades": 24,
+    "upgrades": 5,
+    "downgrade_rate": 0.1655,
+    "downgrade_rate_ci95": [
+     0.109,
+     0.2362
+    ],
+    "ci_method": "clopper-pearson"
+   },
+   "sign_test": {
+    "downgrades": 24,
+    "upgrades": 5,
+    "p_raw": 0.00055,
+    "p_bh": 0.00073
+   }
+  },
+  "qwen3-1.7b": {
+   "n_rows": 320,
+   "n_unique_phrases": 320,
+   "pseudoreplication_gap": 0,
+   "penalty": {
+    "n_rows_with_penalty": 320,
+    "n_phrases_with_penalty": 320,
+    "mean": -0.0626,
+    "ci95": [
+     -0.086,
+     -0.039
+    ],
+    "n_phrases": 320
+   },
+   "flips": {
+    "n_flips": 151,
+    "downgrades": 21,
+    "upgrades": 6,
+    "downgrade_rate": 0.1391,
+    "downgrade_rate_ci95": [
+     0.0882,
+     0.2047
+    ],
+    "ci_method": "clopper-pearson"
+   },
+   "sign_test": {
+    "downgrades": 21,
+    "upgrades": 6,
+    "p_raw": 0.00592,
+    "p_bh": 0.00592
+   }
+  },
+  "qwen3-4b": {
+   "n_rows": 277,
+   "n_unique_phrases": 277,
+   "pseudoreplication_gap": 0,
+   "penalty": {
+    "n_rows_with_penalty": 277,
+    "n_phrases_with_penalty": 277,
+    "mean": -0.0851,
+    "ci95": [
+     -0.1177,
+     -0.0544
+    ],
+    "n_phrases": 277
+   },
+   "flips": {
+    "n_flips": 126,
+    "downgrades": 22,
+    "upgrades": 2,
+    "downgrade_rate": 0.1746,
+    "downgrade_rate_ci95": [
+     0.1128,
+     0.2523
+    ],
+    "ci_method": "clopper-pearson"
+   },
+   "sign_test": {
+    "downgrades": 22,
+    "upgrades": 2,
+    "p_raw": 4e-05,
+    "p_bh": 8e-05
+   }
+  }
+ },
+ "benjamini_hochberg": {
+  "across": [
+   "gemma-2-2b",
+   "gemma-3-4b-it",
+   "qwen3-1.7b",
+   "qwen3-4b"
+  ],
+  "n_tests": 4,
+  "adjusted": {
+   "gemma-2-2b": 8e-05,
+   "gemma-3-4b-it": 0.00073,
+   "qwen3-1.7b": 0.00592,
+   "qwen3-4b": 8e-05
+  }
+ },
+ "source": "urgency_shift.json",
+ "models_meta": [
+  {
+   "id": "gemma-2-2b",
+   "label": "Gemma 2 2B",
+   "graph_model": "gemma-2-2b",
+   "source_set": "gemmascope-transcoder-16k",
+   "features": true,
+   "attention_replacement": false,
+   "graphs": true,
+   "available": true,
+   "n_traced": 235,
+   "default": true
+  },
+  {
+   "id": "gemma-3-4b-it",
+   "label": "Gemma 3 4B-it",
+   "graph_model": "gemma-3-4b-it",
+   "source_set": null,
+   "features": false,
+   "attention_replacement": false,
+   "graphs": false,
+   "available": true,
+   "n_traced": 235,
+   "default": false
+  },
+  {
+   "id": "qwen3-4b",
+   "label": "Qwen3 4B",
+   "graph_model": "qwen3-4b",
+   "source_set": null,
+   "features": false,
+   "attention_replacement": false,
+   "graphs": false,
+   "available": true,
+   "n_traced": 235,
+   "default": false
+  },
+  {
+   "id": "qwen3-1.7b",
+   "label": "Qwen3 1.7B \u00b7 LoRSA attn",
+   "graph_model": "qwen3-1.7b",
+   "source_set": null,
+   "features": false,
+   "attention_replacement": true,
+   "graphs": false,
+   "available": true,
+   "n_traced": 235,
+   "default": false
+  }
+ ]
+}

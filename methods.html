@@ -94,6 +94,26 @@
   footer a{color:var(--muted);text-underline-offset:3px}
   footer a:hover{color:var(--ink)}
 
+  /* Step 5 · generation-engine evaluation (moved from the Model Evaluations tab 2026-07-10) */
+  .me-n{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--muted);margin:-6px 0 10px}
+  .th-tip{border-bottom:1px dotted var(--muted);cursor:help}
+  .me-cost{font-size:11px;color:var(--muted)}
+  .slope-cell svg{display:block}
+  .me-scroll{overflow-x:auto;margin:22px 0 12px}
+  .me-table{width:100%;min-width:560px;border-collapse:collapse}
+  .me-table th{font-family:var(--mono);font-size:10.5px;font-weight:600;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--muted);text-align:left;
+    padding:0 18px 8px 0;border-bottom:1px solid var(--ink)}
+  .me-table th.num{text-align:right}
+  .me-table td{padding:11px 18px 11px 0;border-bottom:1px solid var(--hairline);
+    font-size:14.5px;line-height:1.5;vertical-align:top}
+  .me-table td.num{text-align:right;font-family:var(--mono);font-size:12.5px;white-space:nowrap}
+  .me-table td.mono{font-family:var(--mono);font-size:12.5px}
+  .me-table tr:last-child td{border-bottom:1px solid var(--ink)}
+  .me-caption{font-family:var(--mono);font-size:11px;color:var(--muted);
+    letter-spacing:.04em;margin:6px 0 0}
+
   /* Fig. 5 · convergence small multiples (drawn at load from data/convergence.json) */
   .conv-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:18px 26px;margin:18px 0 6px}
   .conv-panel h3{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--ink);margin:0 0 2px;letter-spacing:.02em}
@@ -235,8 +255,111 @@
     <a class="back" href="./">Back home →</a>
   </section>
 
+  <section id="generation-eval">
+    <p class="step-no">Step 5 · Generation &amp; its audit</p>
+    <h2>The generation engine runs on Claude models &mdash; and gets audited</h2>
+    <p>
+      Transparency about the pipeline&rsquo;s own tooling: the phrase pairs are written
+      by Anthropic Claude models (the batch sidecars record which &mdash; Opus, Sonnet,
+      and Haiku variants; the current scale run uses <code>claude-haiku-4-5</code>),
+      the Translation figure&rsquo;s rewrite step is a Claude call, and the audit below
+      also runs on Claude via the live API. The models being <em>measured</em> &mdash;
+      the gemma and qwen families on every other page &mdash; are open-weights models
+      and are never used to write stimuli.
+    </p>
+    <p>
+      The audit asks whether the generation-and-translation engine itself loses
+      clinical content: can a Claude model pull the clinical concepts out of a
+      sentence, and does translating it first help or hurt? Each model is scored on
+      the same items, so the two percentages are directly comparable.
+    </p>
+    <p class="me-n" id="me-n"></p>
+    <div class="me-scroll">
+      <table class="me-table">
+        <thead><tr>
+          <th scope="col">Model</th>
+          <th scope="col"><span class="th-tip" title="Left node: share of items answered correctly from the patient's own words. Right node: the same items after the model translated the sentence into clinician wording. A downward slope means the model's own translation discarded clinical content.">Patient → clinician phrasing</span></th>
+          <th scope="col" class="num"><span class="th-tip" title="Live Anthropic API spend for this model's run">Run cost</span></th>
+        </tr></thead>
+        <tbody id="me-body"></tbody>
+      </table>
+    </div>
+    <p class="me-caption" id="me-updated"></p>
+    <p>
+      On this set the production models read patient phrasing perfectly &mdash; every
+      one scored 100% on the untouched wording. The losses came from the translation
+      step itself: the same regression the engine flags, and the reason the
+      <a href="translation/">Translation</a> fix can&rsquo;t be assumed safe without
+      checking its output. The item set is small, so read the percentages as a
+      demonstration of the method and the direction of the effect, not a ranking.
+    </p>
+  </section>
+  <script>
+  (function(){
+    function el(tag,cls,text){var e=document.createElement(tag);if(cls)e.className=cls;if(text!=null)e.textContent=text;return e;}
+    fetch('data/model_evaluations.json',{cache:'no-cache'})
+      .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
+      .then(function(data){
+        var body=document.getElementById('me-body');
+        var items=null;
+        (data.models||[]).forEach(function(m){
+          var tr=document.createElement('tr');
+          tr.appendChild(el('td','mono',m.id||'—'));
+          if(m.items!=null)items=m.items;
+          var sc=el('td','slope-cell');
+          var pa=m.patient_accuracy,ca=m.clinician_accuracy;
+          if(typeof pa==='number'&&typeof ca==='number'){
+            var NS='http://www.w3.org/2000/svg';
+            var svg=document.createElementNS(NS,'svg');
+            svg.setAttribute('viewBox','0 0 210 40');svg.setAttribute('width','210');svg.setAttribute('height','40');
+            svg.setAttribute('role','img');
+            svg.setAttribute('aria-label','patient '+Math.round(pa*100)+'% → clinician '+Math.round(ca*100)+'%');
+            function y(v){return 32-24*v;}
+            var base=document.createElementNS(NS,'line');
+            base.setAttribute('x1','44');base.setAttribute('x2','166');
+            base.setAttribute('y1',y(pa));base.setAttribute('y2',y(pa));
+            base.setAttribute('stroke','#dcdad2');base.setAttribute('stroke-width','1');
+            svg.appendChild(base);
+            var drop=ca<pa;
+            var seg=document.createElementNS(NS,'line');
+            seg.setAttribute('x1','44');seg.setAttribute('x2','166');
+            seg.setAttribute('y1',y(pa));seg.setAttribute('y2',y(ca));
+            seg.setAttribute('stroke',drop?'#b45309':'#9aa1ad');
+            seg.setAttribute('stroke-width','2');
+            svg.appendChild(seg);
+            [[44,pa,'#6d6c66','end',-6],[166,ca,drop?'#b45309':'#6d6c66','start',6]].forEach(function(n){
+              var c=document.createElementNS(NS,'circle');
+              c.setAttribute('cx',n[0]);c.setAttribute('cy',y(n[1]));c.setAttribute('r','3');
+              c.setAttribute('fill',n[2]);svg.appendChild(c);
+              var t=document.createElementNS(NS,'text');
+              t.setAttribute('x',n[0]+n[4]);t.setAttribute('y',y(n[1])+4);
+              t.setAttribute('text-anchor',n[3]);
+              t.setAttribute('style','font:600 12px ui-monospace,Menlo,monospace;fill:'+n[2]);
+              t.textContent=Math.round(n[1]*100)+'%';svg.appendChild(t);
+            });
+            sc.appendChild(svg);
+          }else{sc.textContent='—';}
+          tr.appendChild(sc);
+          var cost=el('td','num');
+          cost.appendChild(el('span','me-cost',typeof m.cost_usd==='number'?'$'+m.cost_usd.toFixed(4):'—'));
+          tr.appendChild(cost);
+          body.appendChild(tr);
+        });
+        if(items){
+          document.getElementById('me-n').textContent='n = '+items+' items per model · one item = '
+            +Math.round(100/items)+' percentage points';
+        }
+        var up=document.getElementById('me-updated');
+        up.textContent=(data.task?data.task+' · ':'')+(data.updated?'updated '+data.updated:'');
+      })
+      .catch(function(){
+        document.getElementById('me-updated').textContent='data pending — the table fills in when evaluation results land';
+      });
+  })();
+  </script>
+
   <section id="convergence">
-    <p class="step-no">Step 5 · Accumulation</p>
+    <p class="step-no">Step 6 · Accumulation</p>
     <h2>The estimate as measurement accumulated</h2>
     <p>
       Each panel tracks one model&rsquo;s mean language penalty &mdash; in percentage
