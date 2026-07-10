@@ -189,7 +189,7 @@
     <p class="step-no">4 · Look inside</p>
     <h2>Circuit tracing photographs the reasoning</h2>
     <p>Inside the model, small units called "features" switch on as it reads. Some respond to medical ideas; others to everyday ones. A circuit trace records which features fired and how strongly each fed the final recommendation. Clinical wording lights the medical features; patient wording lights the everyday ones.</p>
-    <div class="fig" role="img" aria-label="Two parallel tracks of feature nodes reading left to right through the network, from early layers to deep layers. The clinical term dyspepsia lights up teal medical nodes and leads to antacid. The casual phrase stomach on fire lights up dark everyday nodes and leads to ice cream.">
+    <div class="fig" role="img" aria-label="Two parallel tracks of feature nodes reading left to right through the network, from early layers to deep layers, each with a scatter of faint weak-firing features behind a handful of strong ones. The clinical term dyspepsia lights up teal medical nodes and leads to antacid. The casual phrase stomach on fire lights up dark everyday nodes and leads to ice cream.">
     <svg viewBox="0 0 720 136">
       <text x="0" y="40" class="sv-q">“dyspepsia”</text>
       <path d="M120,35 L188,35" stroke="#dcdad2" stroke-width="1" fill="none"/>
@@ -199,6 +199,13 @@
       <circle cx="344" cy="35" r="4" fill="#0f766e" opacity=".55"/>
       <circle cx="392" cy="35" r="3" fill="#c3c9d2" opacity=".5"/>
       <circle cx="440" cy="35" r="5" fill="#0f766e" opacity=".8"/>
+      <g fill="#c3c9d2" opacity=".45" aria-hidden="true">
+        <circle cx="216" cy="35" r="1.8"/><circle cx="232" cy="35" r="1.8"/>
+        <circle cx="264" cy="35" r="1.8"/><circle cx="312" cy="35" r="1.8"/>
+        <circle cx="326" cy="35" r="1.8"/><circle cx="360" cy="35" r="1.8"/>
+        <circle cx="376" cy="35" r="1.8"/><circle cx="408" cy="35" r="1.8"/>
+        <circle cx="424" cy="35" r="1.8"/>
+      </g>
       <path d="M452,35 L520,35" stroke="#dcdad2" stroke-width="1" fill="none"/>
       <text x="530" y="40" class="sv-a" fill="#0f766e">antacid</text>
       <text x="0" y="100" class="sv-q">“stomach on fire”</text>
@@ -209,6 +216,13 @@
       <circle cx="344" cy="95" r="5" fill="#111827" opacity=".75"/>
       <circle cx="392" cy="95" r="6.5" fill="#111827"/>
       <circle cx="440" cy="95" r="4" fill="#111827" opacity=".55"/>
+      <g fill="#c3c9d2" opacity=".45" aria-hidden="true">
+        <circle cx="216" cy="95" r="1.8"/><circle cx="232" cy="95" r="1.8"/>
+        <circle cx="262" cy="95" r="1.8"/><circle cx="312" cy="95" r="1.8"/>
+        <circle cx="326" cy="95" r="1.8"/><circle cx="360" cy="95" r="1.8"/>
+        <circle cx="374" cy="95" r="1.8"/><circle cx="410" cy="95" r="1.8"/>
+        <circle cx="426" cy="95" r="1.8"/><circle cx="434" cy="95" r="1.8"/>
+      </g>
       <path d="M452,95 L520,95" stroke="#dcdad2" stroke-width="1" fill="none"/>
       <text x="530" y="100" class="sv-a" fill="#b45309">ice cream</text>
       <g aria-hidden="true">
@@ -219,7 +233,7 @@
       </g>
     </svg>
     </div>
-    <p class="cap">larger node = stronger influence on the answer · faint node = barely fired</p>
+    <p class="cap">larger node = stronger influence · faint = barely fired · the real traces of this pair fire 732 and 787 features and share 465; the sketch draws the strongest few</p>
     <p>Most figures on this site are circuit tracings like this one.</p>
   </section>
 
@@ -316,7 +330,7 @@
 
   <div class="src">
     Sources: all model answers and probabilities are live gemma-2-2b measurements —
-    scenario 48 (panel 2, first two rows), the register ladder (panel 2, third row), and scenario 85 (panel 3) in <a href="../data/simulated_scenarios.json">data/simulated_scenarios.json</a>,
+    scenario 48 (panel 2, first two rows; panel 4&rsquo;s feature counts are its circuit_diff), the register ladder (panel 2, third row), and scenario 85 (panel 3) in <a href="../data/simulated_scenarios.json">data/simulated_scenarios.json</a>,
     the register ladder in <a href="../data/provenance.json">data/provenance.json</a>.
     The clinician panel is illustrative, not a measurement.
   </div>
