@@ -95,6 +95,12 @@
   .provenance b{color:var(--ink);font-weight:600}
   .provenance .pv-cost{color:var(--clinical);font-weight:600}
 
+  /* study timeline strip (drawn at load from ../data/timeline.json) */
+  .tl{margin:8px 0 0;padding:10px 16px 8px;border:1px solid var(--hairline);background:#fff}
+  .tl svg{width:100%;height:auto;display:block}
+  .tl-sum{font-family:var(--mono);font-size:11.5px;line-height:1.9;color:var(--muted);margin:4px 0 0}
+  .tl-sum b{color:var(--ink);font-weight:600}
+
   /* concise summary table (one row per scenario, rows jump to the full card) */
   .sum-scroll{overflow-x:auto;margin:26px 0 0}
   .sum-scroll{background:
@@ -376,6 +382,82 @@
   </section>
 
   <div class="provenance" id="sim-provenance" hidden></div>
+  <div class="tl" id="sim-timeline" hidden></div>
+  <script>
+  (function(){
+    var box = document.getElementById('sim-timeline');
+    var NS = 'http://www.w3.org/2000/svg';
+    function el(name, attrs, style){
+      var e = document.createElementNS(NS, name);
+      for (var k in attrs) e.setAttribute(k, attrs[k]);
+      if (style) e.setAttribute('style', style);
+      return e;
+    }
+    fetch('../data/timeline.json', {cache:'no-cache'})
+      .then(function(r){ if(!r.ok) throw new Error('missing'); return r.json(); })
+      .then(draw).catch(function(){ /* strip stays hidden; page unaffected */ });
+    function draw(t){
+      var batches = (t.batches || []).filter(function(b){ return b.utc; });
+      if (batches.length < 2) return;
+      var t0 = Date.parse(batches[0].utc), t1 = Date.parse(batches[batches.length - 1].utc);
+      var span = Math.max(t1 - t0, 1);
+      var W = 720, H = 74, ml = 8, mr = 8, axisY = 46;
+      function X(iso){ return ml + (W - ml - mr) * ((Date.parse(iso) - t0) / span); }
+      function day(iso){ return iso.slice(5, 10).replace('-', ' / '); }
+      var svg = el('svg', {viewBox: '0 0 ' + W + ' ' + H, role: 'img',
+        'aria-label': 'Study timeline: ' + t.totals.generation_batches + ' generation batches from ' +
+          batches[0].utc.slice(0,10) + ' to ' + batches[batches.length-1].utc.slice(0,10) +
+          '; hollow dots are Tier A batches, filled dots Tier B; the pre-registration mark precedes every Tier B batch.'});
+      svg.appendChild(el('line', {x1: ml, x2: W - mr, y1: axisY, y2: axisY},
+        'stroke:var(--hairline);stroke-width:1'));
+      // milestones: small vertical rules with staggered labels above the axis
+      (t.milestones || []).forEach(function(ms, i){
+        var x = Math.min(Math.max(X(ms.utc), ml), W - mr);
+        var short = /pre-registration/i.test(ms.label) ? 'pre-registered'
+                  : /started/i.test(ms.label) ? 'tier B started'
+                  : ms.label.toLowerCase();
+        var atRight = x > W * 0.7;
+        svg.appendChild(el('line', {x1: x, x2: x, y1: axisY - 26 + i * 12, y2: axisY},
+          'stroke:var(--ink);stroke-width:1'));
+        var lb = el('text', {x: atRight ? x - 4 : x + 4, y: axisY - 28 + i * 12,
+          'text-anchor': atRight ? 'end' : 'start'},
+          'font-family:var(--mono);font-size:9.5px;fill:var(--ink)');
+        lb.textContent = short;
+        svg.appendChild(lb);
+      });
+      batches.forEach(function(b){
+        var isPairs = b.kind === 'pairs';
+        var dot = el('circle', {cx: X(b.utc), cy: axisY, r: isPairs ? 3.5 : 2},
+          b.tierb ? 'fill:var(--ink);stroke:none'
+                  : 'fill:#fff;stroke:var(--muted);stroke-width:1');
+        var ti = document.createElementNS(NS, 'title');
+        ti.textContent = b.batch + ' · ' + (b.generator || '') + ' · ' +
+          (b.accepted != null ? b.accepted + ' accepted · ' : '') +
+          '$' + (b.cost_usd != null ? b.cost_usd.toFixed(4) : '—') +
+          (b.tierb ? ' · Tier B' : '');
+        dot.appendChild(ti);
+        svg.appendChild(dot);
+      });
+      // end date labels
+      [[batches[0].utc, 'start'], [batches[batches.length-1].utc, 'end']].forEach(function(e, i){
+        var lb = el('text', {x: i === 0 ? ml : W - mr, y: axisY + 16,
+          'text-anchor': i === 0 ? 'start' : 'end'},
+          'font-family:var(--mono);font-size:10px;fill:var(--muted)');
+        lb.textContent = day(e[0]);
+        svg.appendChild(lb);
+      });
+      box.appendChild(svg);
+      var sum = document.createElement('p');
+      sum.className = 'tl-sum';
+      sum.innerHTML = '<b>' + t.totals.generation_batches + '</b> generation batches · <b>' +
+        t.totals.accepted_pairs + '</b> accepted pairs (<b>' + t.totals.tierb_accepted +
+        '</b> Tier B so far) · generation <b>$' + t.totals.generation_usd.toFixed(2) +
+        '</b> total · tracing and inference $0 on public CI · hollow = Tier A, filled = Tier B';
+      box.appendChild(sum);
+      box.hidden = false;
+    }
+  })();
+  </script>
 
 
   <div class="pending-note" id="sim-pending" hidden>
