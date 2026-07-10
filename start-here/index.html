@@ -75,6 +75,18 @@
   .nd-med{background:var(--teal);box-shadow:0 0 0 2px #fff,0 0 0 3px var(--teal)}
   .nd-day{background:var(--patient);box-shadow:0 0 0 2px #fff,0 0 0 3px var(--patient)}
   .paths{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin:14px 0 8px}
+  .cycle-svg{margin:16px 0 4px}
+  .cycle-svg svg{width:100%;height:auto;display:block;max-width:640px}
+  .cycle{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:0 26px;margin:6px 0 10px;max-width:640px}
+  .cycle h3{font-family:var(--mono);font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--ink);font-weight:600;margin:10px 0 4px;border-bottom:1px solid var(--ink);padding-bottom:5px}
+  .cycle ul{list-style:none;margin:0;padding:0}
+  .cycle li{font-size:14.5px;line-height:1.55;padding:7px 0;border-bottom:1px solid var(--hairline)}
+  .cycle li:last-child{border-bottom:0}
+  .cycle .now{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;color:var(--teal);
+    text-transform:uppercase;font-weight:600;margin-right:6px}
+  .cycle .next{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;color:var(--muted);
+    text-transform:uppercase;font-weight:600;margin-right:6px}
   .path{border-top:1px solid var(--hairline);padding-top:12px}
   .path h3{font-size:16.5px;font-weight:600;margin:8px 0 6px}
   .path p{font-size:14.5px;line-height:1.6;color:var(--ink);margin:0}
@@ -238,25 +250,54 @@
   </section>
 
   <section>
-    <p class="step-no">7 · The real fix</p>
-    <h2>Teach the listener, not just the speaker</h2>
-    <p>Two paths lead past the patch.</p>
-    <div class="paths">
-      <div class="path">
-        <svg viewBox="0 0 40 40" width="34" height="34" aria-hidden="true">
-          <rect x="8" y="4" width="24" height="32" fill="none" stroke="#0f766e" stroke-width="1.4"/>
-          <path d="M13,12 h14 M13,18 h14 M13,24 h9" stroke="#0f766e" stroke-width="1.2"/>
-        </svg>
-        <h3>Context up front</h3>
-        <p>One plain sentence placing the conversation in a medical setting roughly halved the damage from casual wording.</p>
+    <p class="step-no">7 · The lasting fix</p>
+    <h2>Measure, mend, maintain: a cycle, not a patch</h2>
+    <p>No single fix closes this gap. Making the test language representative is a large
+      job: real patient phrasing, checked by clinicians, validated by the communities who
+      speak it. And language does not hold still; dialects, slang, and communities change.
+      So the last step is not a step. It is a cycle.</p>
+    <div class="cycle-svg">
+      <svg viewBox="0 0 640 96" role="img"
+        aria-label="A three-stage cycle: measure, then mend, then maintain, with an arrow returning from maintain to measure labelled: language drifts, re-measure.">
+        <g style="font-family:var(--mono);font-size:13px;font-weight:600;letter-spacing:.14em;fill:var(--ink)">
+          <text x="30" y="38">MEASURE</text>
+          <text x="270" y="38">MEND</text>
+          <text x="460" y="38">MAINTAIN</text>
+        </g>
+        <g style="stroke:var(--ink);stroke-width:1.2;fill:none">
+          <path d="M126,33 H252 M244,28 l8,5 -8,5"/>
+          <path d="M330,33 H442 M434,28 l8,5 -8,5"/>
+        </g>
+        <path d="M560,46 v18 a8,8 0 0 1 -8,8 H72 a8,8 0 0 1 -8,-8 V46 M59,54 l5,-8 5,8"
+          style="stroke:var(--teal);stroke-width:1.2;fill:none"/>
+        <text x="320" y="86" text-anchor="middle"
+          style="font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;fill:var(--teal)">language drifts · re-measure</text>
+      </svg>
+    </div>
+    <div class="cycle">
+      <div>
+        <h3>Measure</h3>
+        <ul>
+          <li>Pair each clinical phrasing with its patient phrasing; count how often the answer drops in urgency.</li>
+          <li><span class="now">now</span>simulated phrases, pre-registered, a tenth sealed for checking.</li>
+          <li><span class="next">next</span>real patient language, clinician-checked, community-validated dialects.</li>
+        </ul>
       </div>
-      <div class="path">
-        <svg viewBox="0 0 40 40" width="34" height="34" aria-hidden="true">
-          <ellipse cx="20" cy="10" rx="13" ry="4.5" fill="none" stroke="#6d6c66" stroke-width="1.4"/>
-          <path d="M7,10 v9 a13,4.5 0 0 0 26,0 v-9 M7,19 v9 a13,4.5 0 0 0 26,0 v-9" fill="none" stroke="#6d6c66" stroke-width="1.4"/>
-        </svg>
-        <h3>Train on patient language</h3>
-        <p>Models learn idioms, misspellings, and dialects the way clinicians do.</p>
+      <div>
+        <h3>Mend</h3>
+        <ul>
+          <li>Strengthen the model&rsquo;s clinical reading. One plain sentence of medical context roughly halved the damage from casual wording.</li>
+          <li>Train on patient language: models learn idioms, misspellings, and dialects the way clinicians do.</li>
+          <li>Translate only with a regression check; the rewrite can lose clinical content.</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Maintain</h3>
+        <ul>
+          <li>Re-run the measurement on a schedule; a fixed test goes stale.</li>
+          <li>Refresh the phrase sets and urgency tiers with clinician and community review.</li>
+          <li>Watch the circuit itself for drift as models are updated.</li>
+        </ul>
       </div>
     </div>
     <a class="back" href="../word-differences/">See the real traces →</a>
