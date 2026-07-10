@@ -76,7 +76,7 @@
   .nd-day{background:var(--patient);box-shadow:0 0 0 2px #fff,0 0 0 3px var(--patient)}
   .paths{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin:14px 0 8px}
   .cycle-svg{margin:16px 0 4px}
-  .cycle-svg svg{width:100%;height:auto;display:block;max-width:640px}
+  .cycle-svg svg{width:100%;height:auto;display:block;max-width:400px;margin:0 auto}
   .cycle{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:0 26px;margin:6px 0 10px;max-width:640px}
   .cycle h3{font-family:var(--mono);font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;
     color:var(--ink);font-weight:600;margin:10px 0 4px;border-bottom:1px solid var(--ink);padding-bottom:5px}
@@ -252,33 +252,38 @@
   <section>
     <p class="step-no">7 · The lasting fix</p>
     <h2>Measure, mend, maintain: a cycle, not a patch</h2>
-    <p>No single fix closes this gap. Making the test language representative is a large
-      job: real patient phrasing, checked by clinicians, validated by the communities who
-      speak it. And language does not hold still; dialects, slang, and communities change.
-      So the last step is not a step. It is a cycle.</p>
+    <p>No single fix closes this gap. Language evolves; dialects, slang, and
+      communities change, and a test built once goes stale. The method has to be a
+      loop: measure, mend, maintain, repeat.</p>
     <div class="cycle-svg">
-      <svg viewBox="0 0 640 96" role="img"
-        aria-label="A three-stage cycle: measure, then mend, then maintain, with an arrow returning from maintain to measure labelled: language drifts, re-measure.">
+      <svg viewBox="0 0 360 268" role="img"
+        aria-label="A circular three-stage cycle: measure leads to mend, mend to maintain, and a teal return curve labelled language drifts, re-measure leads from maintain back to measure.">
         <g style="font-family:var(--mono);font-size:13px;font-weight:600;letter-spacing:.14em;fill:var(--ink)">
-          <text x="30" y="38">MEASURE</text>
-          <text x="270" y="38">MEND</text>
-          <text x="460" y="38">MAINTAIN</text>
+          <text x="180" y="52" text-anchor="middle">MEASURE</text>
+          <text x="270" y="208" text-anchor="middle">MEND</text>
+          <text x="90" y="208" text-anchor="middle">MAINTAIN</text>
         </g>
         <g style="stroke:var(--ink);stroke-width:1.2;fill:none">
-          <path d="M126,33 H252 M244,28 l8,5 -8,5"/>
-          <path d="M330,33 H442 M434,28 l8,5 -8,5"/>
+          <path d="M222.3,57.0 A104,104 0 0 1 283.0,166.5"/>
+          <path d="M287.5,158.7 L283.0,166.5 L280.8,157.8"/>
+          <path d="M241.1,236.1 A104,104 0 0 1 116.0,234.0"/>
+          <path d="M120.5,241.8 L116.0,234.0 L124.7,236.5"/>
         </g>
-        <path d="M560,46 v18 a8,8 0 0 1 -8,8 H72 a8,8 0 0 1 -8,-8 V46 M59,54 l5,-8 5,8"
-          style="stroke:var(--teal);stroke-width:1.2;fill:none"/>
-        <text x="320" y="86" text-anchor="middle"
-          style="font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;fill:var(--teal)">language drifts · re-measure</text>
+        <g style="stroke:var(--teal);stroke-width:1.2;fill:none">
+          <path d="M76.6,162.9 A104,104 0 0 1 137.7,57.0"/>
+          <path d="M128.7,57.3 L137.7,57.0 L131.4,63.5"/>
+        </g>
+        <path id="cyc-return-label" d="M63.6,176.7 A119,119 0 0 1 143.2,38.8" fill="none" stroke="none"/>
+        <text style="font-family:var(--mono);font-size:9px;fill:var(--teal)">
+          <textPath href="#cyc-return-label" startOffset="50%" text-anchor="middle">language drifts · re-measure</textPath>
+        </text>
       </svg>
     </div>
     <div class="cycle">
       <div>
         <h3>Measure</h3>
         <ul>
-          <li>Pair each clinical phrasing with its patient phrasing; count how often the answer drops in urgency.</li>
+          <li>Pair each clinical phrasing with its patient phrasing. Count how often the answer drops in urgency.</li>
           <li><span class="now">now</span>simulated phrases, pre-registered, a tenth sealed for checking.</li>
           <li><span class="next">next</span>real patient language, clinician-checked, community-validated dialects.</li>
         </ul>
@@ -286,17 +291,17 @@
       <div>
         <h3>Mend</h3>
         <ul>
-          <li>Strengthen the model&rsquo;s clinical reading. One plain sentence of medical context roughly halved the damage from casual wording.</li>
-          <li>Train on patient language: models learn idioms, misspellings, and dialects the way clinicians do.</li>
-          <li>Translate only with a regression check; the rewrite can lose clinical content.</li>
+          <li>Fortify the model. One sentence of explicit medical context roughly halves the penalty from casual wording.</li>
+          <li>Train on patient language. Models learn idioms, misspellings, and dialects the way clinicians do.</li>
+          <li>Translate only behind a regression check; rewrites can lose clinical content.</li>
         </ul>
       </div>
       <div>
         <h3>Maintain</h3>
         <ul>
-          <li>Re-run the measurement on a schedule; a fixed test goes stale.</li>
+          <li>Re-run the audit on a schedule.</li>
           <li>Refresh the phrase sets and urgency tiers with clinician and community review.</li>
-          <li>Watch the circuit itself for drift as models are updated.</li>
+          <li>Watch the circuit for drift as models update.</li>
         </ul>
       </div>
     </div>
