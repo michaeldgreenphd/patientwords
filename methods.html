@@ -183,8 +183,8 @@
   <p class="dateline">Methods · how the pipeline works</p>
   <h1>From a sentence to a circuit, in six steps.</h1>
   <p class="lede">
-    Every figure starts as two (or four) plain sentences — one in clinician wording, one
-    in patient wording — and ends as an interactive map of the computation gemma-2-2b
+    Every figure starts as two (or four) plain sentences, one in clinician wording and
+    one in patient wording, and ends as an interactive map of the computation gemma-2-2b
     performs on it.
   </p>
 
@@ -192,13 +192,13 @@
     <p class="step-no">Step 1 · Model &amp; features</p>
     <h2>A prism splits the model’s activity into readable features</h2>
     <p>The study’s subject is <code>gemma-2-2b</code>, a small open language model. Watched
-      directly, its inner workings are millions of undifferentiated numbers — white light.
+      directly, its inner workings are millions of undifferentiated numbers: white light.
       Google DeepMind’s <a href="https://huggingface.co/google/gemma-scope-2b-pt-transcoders">Gemma
-      Scope</a> transcoders act as a prism: they split that light into distinct, readable
-      colors called <em>features</em>, each of which tends to fire for one recognizable
-      thing — mental-health treatment, first-person symptom talk, the grammar of a quoted
-      sentence. Once the light is split, we can see which parts of the model’s thinking a
-      sentence switches on.</p>
+      Scope</a> transcoders act as a prism. They split that light into distinct, readable
+      colors called <em>features</em>. Each feature fires for one recognizable thing:
+      mental-health treatment, first-person symptom talk, the grammar of a quoted
+      sentence. Once the light is split, we can see which parts of the model’s thinking
+      a sentence switches on.</p>
   </section>
 
   <section>
@@ -208,23 +208,22 @@
       through <a href="https://neuronpedia.org">Neuronpedia</a> to build an
       <em>attribution graph</em>: a map of which features, at which depth and position in
       the sentence, pushed the model toward its next word. Each connection carries a
-      <em>weight</em> — how much influence one feature’s firing had on another’s, and
-      ultimately on the word the model chose. (The technical term for that weight is
-      attribution mass.)</p>
+      <em>weight</em>: the influence one feature’s firing had on another’s, and on the
+      word the model chose. The technical term for that weight is attribution mass.</p>
   </section>
 
   <section>
     <p class="step-no">Step 3 · Tagging</p>
     <h2>Every feature gets sorted: clinical, off-target, or structural</h2>
     <p>
-      Each feature is tagged by what it responds to — read from its machine-written
+      Each feature is tagged by what it responds to, read from its machine-written
       description and from the kinds of text that make it fire:
     </p>
     <ul class="tags">
       <li class="t-clinical"><b>Clinical</b>: features in the medical
-        computation we want — depression, therapy, diagnosis, treatment.</li>
+        computation we want: depression, therapy, diagnosis, treatment.</li>
       <li class="t-offtarget"><b>Off-target</b>: features dragged in by colloquial
-        wording — idiom, mood-as-weather metaphors, the music sense of “the blues.” These
+        wording: idiom, mood-as-weather metaphors, the music sense of “the blues.” These
         are the mechanism of the language penalty.</li>
       <li class="t-structural"><b>Structural</b>: scaffolding features for syntax,
         position, and punctuation that appear in every trace and carry no medical content.</li>
@@ -262,12 +261,12 @@
       Every render is a single self-contained HTML file.
     </p>
     <p>
-      Whatever the engine, each comparison ends one of three ways. The model
+      Whatever the view, each comparison ends one of three ways. The model
       <em>hedges</em>: the clinical answer stays on top but loses probability. It
       <em>redirects</em>: the top answer changes. Or it <em>downgrades</em>: the redirect
-      lands on a lower tier of care. A worked case &mdash; <em>“Grandma’s been constipated
-      for a week, so before dinner she took a”</em> continues with <em>laxative</em>;
-      rephrase it as <em>“all bunged up”</em> and the top word becomes <em>nap</em>
+      lands on a lower tier of care. A worked case: <em>“Grandma’s been constipated
+      for a week, so before dinner she took a”</em> continues with <em>laxative</em>.
+      Rephrase it as <em>“all bunged up”</em> and the top word becomes <em>nap</em>
       (30%, against the laxative’s 26% under clinical wording). The advice itself changed,
       not just its probability. Tier labels follow the reviewed v1 vocabulary; the tier table in the
       home page’s safety view lists each tier with measured examples.
@@ -280,21 +279,21 @@
     <h2>One set of AIs writes the test; a different set takes it</h2>
     <p>
       The pipeline keeps a strict separation of church and state. Anthropic&rsquo;s
-      Claude models do exactly two jobs: they <em>write</em> the test questions (the
-      phrase pairs; each batch&rsquo;s record names the exact model &mdash; the current
-      scale run uses <code>claude-haiku-4-5</code>) and they <em>translate</em> patient
-      wording into clinical wording for the Translation figure. A completely different
-      set of models &mdash; the open-weights gemma and qwen families on every other
-      page &mdash; <em>takes</em> the test. The test-writers are never test-takers,
-      and the test-takers never write their own questions.
+      Claude models do exactly two jobs. They <em>write</em> the test questions (the
+      phrase pairs; each batch&rsquo;s record names the exact model, currently
+      <code>claude-haiku-4-5</code>) and they <em>translate</em> patient wording into
+      clinical wording for the Translation figure. A different set of models
+      <em>takes</em> the test: the open-weights gemma and qwen families on every other
+      page. The test-writers never take the test, and the test-takers never write
+      their own questions.
     </p>
     <p>
-      Because the test-writer is itself an AI, it gets audited. The audit below asks a
+      Because the test-writer is itself an AI, it gets audited. The audit asks a
       Claude model to pull the clinical concepts out of a sentence twice: once from the
       patient&rsquo;s own words, once after translating those words into clinical
-      language. The plain-English finding: the models read patient wording perfectly,
-      but <em>translating patient words into clinical words destroys information</em>
-      &mdash; the losses appear at the translation step, not before it.
+      language. The finding is plain: the models read patient wording perfectly, but
+      <em>translating patient words into clinical words destroys information</em>. The
+      losses appear at the translation step, not before it.
     </p>
     <p class="me-n" id="me-n"></p>
     <div class="me-scroll">
@@ -314,9 +313,8 @@
     <p>
       That is the same regression the engine flags automatically, and the reason the
       <a href="translation/">Translation</a> fix can&rsquo;t be assumed safe without
-      checking its output. The item set is small, so read the percentages as a
-      demonstration of the method and the direction of the effect, not a ranking of
-      models.
+      checking its output. The item set is small; read the percentages as the direction
+      of the effect, not a ranking of models.
     </p>
   </section>
   <script>
@@ -378,7 +376,7 @@
         up.textContent=(data.task?data.task+' · ':'')+(data.updated?'updated '+data.updated:'');
       })
       .catch(function(){
-        document.getElementById('me-updated').textContent='data pending — the table fills in when evaluation results land';
+        document.getElementById('me-updated').textContent='data pending: the table fills in when evaluation results land';
       });
   })();
   </script>
@@ -387,23 +385,23 @@
     <p class="step-no">Step 6 · Accumulation</p>
     <h2>Confidence grows as the data accumulates</h2>
     <p>
-      Each panel follows one model as it reads more and more phrase pairs. The red line
-      is the average language penalty &mdash; how many percentage points of probability
-      the clinical answer loses when the wording turns colloquial. The shaded band is
-      the range where the true penalty plausibly sits: it starts wide, because a handful
-      of phrases could mislead, and narrows as hundreds accumulate, because our
-      confidence grows. For every model the band settles below zero. Not every model
-      got there at the same speed &mdash; at 133 phrases gemma-3-4b-it&rsquo;s downgrade
-      pattern could still have been chance; by 240 it could not. And one honesty rule:
-      a random tenth of the newly collected phrases is locked away untouched, so the
-      week&rsquo;s conclusions can be checked once, at the end, against data no interim
-      analysis has seen.
+      Each panel follows one model as it reads more phrase pairs. The red line is the
+      average language penalty: how many percentage points of probability the clinical
+      answer loses when the wording turns colloquial. The shaded band is the confidence
+      band, the range where the true penalty plausibly sits. It starts wide, because a
+      handful of phrases could mislead, and narrows as hundreds accumulate, because
+      certainty in the penalty grows. For every model the band settles below zero. Not
+      every model got there at the same speed: at 133 phrases the downgrade pattern in
+      gemma-3-4b-it could still have been chance; by 240 it could not. One honesty
+      rule: a random tenth of new phrases is locked away untouched, so the week&rsquo;s
+      conclusions can be checked once, at the end, against data no interim analysis
+      has seen.
     </p>
     <div class="conv-grid" id="conv-grid" aria-describedby="conv-caption"></div>
     <div class="conv-xlab" aria-hidden="true">phrases tested →</div>
-    <p class="conv-cap" id="conv-caption">Fig. 5 &mdash; mean language penalty per model
-      as measurement accumulates, batch by batch. Shaded band: bootstrap 95% confidence
-      interval (seed 7, phrase-deduped, Tier B exploration split only); grey hairline:
+    <p class="conv-cap" id="conv-caption">Fig. 5: mean language penalty per model as
+      measurement accumulates, batch by batch. Shaded band: bootstrap 95% confidence
+      interval (seed 7, phrase-deduped, Tier B exploration split only). Grey hairline:
       zero penalty. Drawn at load time from the convergence data file in this
       repository.</p>
     <details class="conv-table"><summary>Data table (every point)</summary>
@@ -423,7 +421,7 @@
       return e;
     }
     function pending(){
-      grid.outerHTML = '<p class="conv-pending">Convergence data pending &mdash; this figure draws itself once the data file lands.</p>';
+      grid.outerHTML = '<p class="conv-pending">Convergence data pending: this figure draws itself once the data file lands.</p>';
     }
     fetch('data/convergence.json')
       .then(function(r){ if(!r.ok) throw new Error('missing'); return r.json(); })

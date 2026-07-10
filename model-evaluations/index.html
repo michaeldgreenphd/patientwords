@@ -73,7 +73,7 @@
     text-transform:uppercase;font-weight:600;margin-right:8px}
 
   .me-scroll{overflow-x:auto;margin:22px 0 12px}
-  .me-table{width:100%;min-width:560px;border-collapse:collapse}
+  .me-table{width:100%;min-width:520px;border-collapse:collapse}
   .me-table th{font-family:var(--mono);font-size:10.5px;font-weight:600;letter-spacing:.14em;
     text-transform:uppercase;color:var(--muted);text-align:left;
     padding:0 18px 8px 0;border-bottom:1px solid var(--ink)}
@@ -130,23 +130,24 @@
   <p class="subtitle">The same two-phrasing probe, run on every model. The penalty
     is not one model’s quirk.</p>
 
-  <p class="explainer">Each open-weights model reads the same phrase pairs — one
-    clinical, one in patient wording — and the probability of the clinical next word
-    is measured under both. gemma-2-2b additionally carries circuit evidence
-    (attribution graphs and transcoder features, on the <a href="../methods.html">methods
-    page</a>); the other models are measured by direct CPU inference with the identical
-    schema. Statistics are phrase-deduped (each clinical phrase counts once per model),
-    intervals are cluster-bootstrap, asymmetry tests are exact sign tests with
-    Benjamini–Hochberg correction across models. Tier B rows enter from the
-    pre-registered exploration split only. Note the models here are the <em>measured</em>
-    subjects; the stimuli they read are written by Claude models, audited on the
+  <p class="explainer">Each open-weights model reads the same phrase pairs, one
+    clinical and one in patient wording, and the probability of the clinical next word
+    is measured under both. gemma-2-2b also carries circuit evidence (attribution
+    graphs and features, on the <a href="../methods.html">methods page</a>); the other
+    models are measured by direct CPU inference with the identical schema. Every count
+    uses each phrase once per model and is adjusted for multiple comparisons; exact
+    procedures are in the <a href="#stat-methods">statistical methods</a> note below.
+    One tenth of the newly collected data is sealed off in advance and never touched
+    by these interim numbers; it will check the conclusions once, at the end. The
+    models here are the <em>measured</em> subjects; the stimuli they read are written
+    by Claude models, audited on the
     <a href="../methods.html#generation-eval">methods page</a>.</p>
 
   <section id="penalty">
     <h2>The penalty, model by model</h2>
-    <p>Mean language penalty — how many percentage points of next-word probability the
-      clinical answer loses when the wording turns colloquial — with its 95% interval.
-      Every interval sits below zero.</p>
+    <p>Mean language penalty: the percentage points of next-word probability the
+      clinical answer loses when the wording turns colloquial, with its confidence
+      band. Every band sits below zero.</p>
     <div id="forest"></div>
     <p class="me-caption" id="forest-cap"></p>
   </section>
@@ -154,10 +155,12 @@
   <section id="asymmetry">
     <h2>When the answer changes, it goes down the care ladder</h2>
     <p>Among phrases where the top prediction <em>changes</em> under patient wording,
-      downgrades (a lower tier of care) outnumber upgrades on every model. q is the
-      BH-corrected exact sign-test p-value.</p>
+      downgrades outnumber upgrades on every model. A downgrade drops the answer&rsquo;s
+      clinical urgency: a general remedy where the model had named a specialist.
+      Asterisks mark asymmetry that survives multiple-comparison correction; hover a
+      row for the exact value.</p>
     <div id="dumbbells"></div>
-    <p class="me-caption">filled red = downgrades · hollow = upgrades · per model, phrase-deduped</p>
+    <p class="me-caption">filled red = downgrades · hollow = upgrades · * significant after correction (q &lt; 0.05)</p>
   </section>
 
   <section id="evidence">
@@ -169,8 +172,7 @@
           <th scope="col">Measurement</th>
           <th scope="col">Circuit features</th>
           <th scope="col" class="num">n phrases</th>
-          <th scope="col" class="num">Penalty (pp)</th>
-          <th scope="col" class="num">95% CI</th>
+          <th scope="col" class="num">Penalty, pp (95% CI)</th>
           <th scope="col" class="num">Down v up</th>
           <th scope="col" class="num">q</th>
         </tr></thead>
@@ -180,10 +182,20 @@
     <p class="me-caption" id="ev-cap"></p>
   </section>
 
+  <section id="stat-methods">
+    <h2>Statistical methods</h2>
+    <p class="me-caption" style="margin:0 0 6px">One record per (model, clinical phrase);
+      re-traced phrases collapse by majority vote. Penalty intervals: cluster bootstrap,
+      percentile 95%, seed 7, cluster = phrase. Downgrade rates: Clopper&ndash;Pearson
+      exact 95%. Asymmetry: exact sign tests, Benjamini&ndash;Hochberg corrected across
+      models. Interim numbers use the pre-registered exploration split; a 10% holdout
+      stays sealed until collection ends. Source: data/model_stats.json.</p>
+  </section>
+
   <section>
     <h2>Read this with its limits</h2>
     <p>Only gemma-2-2b carries circuit evidence; for the other models these are
-      behavioral measurements — next-word probabilities — with no claim about their
+      behavioral measurements, next-word probabilities, with no claim about their
       internals. Care-urgency tier labels follow the reviewed v1 vocabulary (clinician
       review pending). Measurements are a point in time against fixed open weights. See
       the broader <a href="../methods.html#limitations">limitations</a> for what this
@@ -215,7 +227,7 @@
   fetch('../data/model_stats.json',{cache:'no-cache'})
     .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
     .then(draw)
-    .catch(function(){pending('data pending — the figures fill in when model_stats.json lands');});
+    .catch(function(){pending('data pending: the figures fill in when model_stats.json lands');});
   function draw(d){
     var per=d.per_model||{}; var ids=(d.models||Object.keys(per)).filter(function(m){return per[m];});
     var meta={}; (d.models_meta||[]).forEach(function(m){meta[m.id]=m;});
@@ -230,9 +242,9 @@
       'aria-label':'Mean language penalty with 95 percent interval per model; every interval below zero. Values in the table below.'});
     svg.appendChild(el('line',{x1:X(0),x2:X(0),y1:10,y2:H-26},'stroke:var(--structural);stroke-width:1'));
     var zl=el('text',{x:X(0),y:H-12,'text-anchor':'middle'},'font-family:var(--mono);font-size:10px;fill:var(--muted)');
-    zl.textContent='0'; svg.appendChild(zl);
+    zl.textContent='no penalty'; svg.appendChild(zl);
     var al=el('text',{x:X(lo)+2,y:H-12},'font-family:var(--mono);font-size:10px;fill:var(--muted)');
-    al.textContent='← larger penalty (pp)'; svg.appendChild(al);
+    al.textContent='← more of the clinical answer\u2019s probability lost'; svg.appendChild(al);
     ids.forEach(function(id,i){
       var p=per[id].penalty, y=24+i*R;
       var name=el('text',{x:ML-10,y:y+4,'text-anchor':'end'},'font-family:var(--mono);font-size:12px;fill:var(--ink)');
@@ -262,10 +274,9 @@
       svg2.appendChild(el('line',{x1:X2(s.upgrades),x2:X2(s.downgrades),y1:y,y2:y},'stroke:var(--hairline);stroke-width:1.5'));
       svg2.appendChild(el('circle',{cx:X2(s.upgrades),cy:y,r:4.5},'fill:var(--paper);stroke:var(--ink);stroke-width:1.4'));
       svg2.appendChild(el('circle',{cx:X2(s.downgrades),cy:y,r:5},'fill:var(--penalty)'));
+      var sig=(typeof s.p_bh==='number'&&s.p_bh<0.05)?' *':'';
       var cd=el('text',{x:X2(s.downgrades)+10,y:y+4},'font-family:var(--mono);font-size:11.5px;fill:var(--ink)');
-      cd.textContent=s.downgrades+'↓ v '+s.upgrades+'↑';svg2.appendChild(cd);
-      var q=el('text',{x:W2-4,y:y+4,'text-anchor':'end'},'font-family:var(--mono);font-size:11px;fill:var(--muted)');
-      q.textContent='q='+s.p_bh;svg2.appendChild(q);
+      cd.textContent=s.downgrades+'↓ v '+s.upgrades+'↑'+sig;svg2.appendChild(cd);
       var t2=document.createElementNS(NS,'title');
       t2.textContent=id+': '+s.downgrades+' downgrades vs '+s.upgrades+' upgrades, BH q='+s.p_bh;
       svg2.appendChild(t2);
@@ -282,8 +293,7 @@
       td(null,m.graphs?'hosted attribution graphs':'CPU next-token behavior only');
       td(null,m.features?'tagged (Gemma Scope)':'—');
       td('num',String(p.penalty.n_phrases));
-      td('num',pp(p.penalty.mean));
-      td('num','['+pp(p.penalty.ci95[0])+', '+pp(p.penalty.ci95[1])+']');
+      td('num',pp(p.penalty.mean)+' ['+pp(p.penalty.ci95[0])+', '+pp(p.penalty.ci95[1])+']');
       td('num',p.sign_test.downgrades+' v '+p.sign_test.upgrades);
       td('num',String(p.sign_test.p_bh));
       body.appendChild(tr);
