@@ -101,7 +101,7 @@
   .me-cost{font-size:11px;color:var(--muted)}
   .slope-cell svg{display:block}
   .me-scroll{overflow-x:auto;margin:22px 0 12px}
-  .me-table{width:100%;min-width:560px;border-collapse:collapse}
+  .me-table{width:100%;min-width:420px;border-collapse:collapse;table-layout:fixed}
   .me-table th{font-family:var(--mono);font-size:10.5px;font-weight:600;letter-spacing:.14em;
     text-transform:uppercase;color:var(--muted);text-align:left;
     padding:0 18px 8px 0;border-bottom:1px solid var(--ink)}
@@ -113,7 +113,11 @@
   .me-table tr:last-child td{border-bottom:1px solid var(--ink)}
   .me-caption{font-family:var(--mono);font-size:11px;color:var(--muted);
     letter-spacing:.04em;margin:6px 0 0}
-  .me-table th:nth-child(2){min-width:240px;white-space:normal;line-height:1.7}
+  .me-table th{white-space:normal;word-wrap:break-word;line-height:1.7}
+  .me-table th:first-child{width:26%}
+  .me-table th:nth-child(2){width:52%;min-width:120px}
+  .me-table th:last-child{width:22%}
+  .slope-cell svg{width:100%;max-width:210px;height:auto}
   .me-legend{font-family:var(--mono);font-size:11px;color:var(--muted);
     letter-spacing:.04em;margin:8px 0 0}
   .me-legend .sw{display:inline-block;width:9px;height:9px;margin:0 5px 0 0;
@@ -334,7 +338,7 @@
           if(typeof pa==='number'&&typeof ca==='number'){
             var NS='http://www.w3.org/2000/svg';
             var svg=document.createElementNS(NS,'svg');
-            svg.setAttribute('viewBox','0 0 210 40');svg.setAttribute('width','210');svg.setAttribute('height','40');
+            svg.setAttribute('viewBox','0 0 210 40');
             svg.setAttribute('role','img');
             svg.setAttribute('aria-label','patient '+Math.round(pa*100)+'% → clinician '+Math.round(ca*100)+'%');
             function y(v){return 32-24*v;}
@@ -465,7 +469,7 @@
           svg.appendChild(t);
         });
         // end ticks only (no baseline - the zero rule is the anchor)
-        [[0, '0'], [xmax, String(xmax)]].forEach(function(tk){
+        [[0, '0'], [xmax, xmax + ' phrases']].forEach(function(tk){
           var t = el('text', {x: X(tk[0]), y: H - m.b + 14,
             'text-anchor': tk[0] === 0 ? 'start' : 'end'},
             'font-family:var(--mono);font-size:10px;fill:var(--muted)');
@@ -488,16 +492,10 @@
             'font-family:var(--mono);font-size:9.5px;fill:var(--muted);letter-spacing:.04em');
           ylab.textContent = 'penalty (percentage points)';
           svg.appendChild(ylab);
-          var mid = pts.reduce(function(best, p){
-            return Math.abs(p.n_phrases - xmax * 0.7) < Math.abs(best.n_phrases - xmax * 0.7) ? p : best;
-          }, pts[0]);
-          var ax = X(mid.n_phrases), ay = Y(mid.ci95[1]);
           var note = el('text', {x: W - m.r, y: m.t + 20, 'text-anchor': 'end'},
             'font-family:var(--mono);font-size:9.5px;fill:var(--muted)');
-          note.textContent = 'band tightens as more phrases are measured';
+          note.textContent = 'band tightens as more phrases are measured \u2193';
           svg.appendChild(note);
-          svg.appendChild(el('line', {x1: ax, x2: ax, y1: m.t + 24, y2: ay - 3},
-            'stroke:var(--muted);stroke-width:.75'));
         }
         // hover hit targets
         pts.forEach(function(p){
