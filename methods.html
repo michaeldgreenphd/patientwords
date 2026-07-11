@@ -294,13 +294,14 @@
       readable, and does it survive to the output.
     </p>
     <p>
-      The pair below contrasts &ldquo;dealing with insomnia&rdquo; with &ldquo;counting
-      sheep all night&rdquo;. Both wordings make the answer readable in the deep
-      layers; the everyday wording holds less than half the probability. Ranks locate;
-      probabilities decide. So the causal check runs in probabilities: copy the
-      clinical run&rsquo;s internal state into the everyday run one layer at a time and
-      re-measure. Patched at layers 20 to 22, the everyday sentence recovers the
-      clinical level. Those layers carry the difference.
+      The pair below asks for a word after &ldquo;so I might need to take a&rdquo;.
+      Under the clinical wording the answer is readable from layer 10 and reaches
+      first place by layer 19. Under the everyday wording it appears 9 layers later,
+      never rises past second place, and is gone at the output, where &ldquo;take a
+      break&rdquo; wins. The causal check: copy the clinical run&rsquo;s internal
+      state into the everyday run one layer at a time and re-measure. The early
+      layers return nothing; the deep layers return most of the probability. Those
+      layers carry the difference.
     </p>
     <div class="rl-figwrap"><div id="rl-fig"><span class="rl-pend">figure pending — data/jlens_depth.json</span></div></div>
     <p class="rl-cap">
@@ -689,7 +690,9 @@
           txt(svg,LEFT-6,py(ref[0])-2,ref[1],{fill:ref[2],'text-anchor':'end'});
           txt(svg,LEFT-6,py(ref[0])+10,ref[0].toFixed(3),{fill:ref[2],'text-anchor':'end'});
         });
-      txt(svg,xAt(best)+CELL/2,py(ex.patched[best])-14,'patched here, the answer returns',
+      var full=ex.patched[best]>=ex.clean_prob*0.95;
+      txt(svg,xAt(best)+CELL/2,py(ex.patched[best])-14,
+        full?'patched here, the answer returns':'patched here, most of it returns',
         {fill:'#15803d','text-anchor':'end'});
       el('line',{x1:xAt(best)+CELL/2,y1:py(ex.patched[best])-11,
         x2:xAt(best)+CELL/2,y2:py(ex.patched[best])-2,
