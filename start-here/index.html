@@ -345,12 +345,10 @@
     </div>
     <div class="depth">
       <h3>Two kinds of loss, two kinds of fix</h3>
-      <p>A layer-by-layer readout shows where the answer is lost. Of the 50 pairs in
-        the newest batch, 26 keep the clinical answer under everyday wording, 19 never
-        form it at any layer, and 5 form it in the middle layers and lose it by the
-        output.</p>
-      <p>The 5 matter most. The model did the work and dropped the result at the last
-        step. Translation adds no knowledge; it recovers work already done.</p>
+      <p>A layer-by-layer readout shows where the answer is lost.</p>
+      <p>The lost-late pairs matter most. The model did the work and dropped the
+        result at the last step. Translation adds no knowledge; it recovers work
+        already done.</p>
       <div class="depth-fig" id="depth-units"><span class="depth-pend">figure pending — data/jlens_depth.json</span></div>
       <p class="depth-cap">Each square is one measured pair from the
         <a href="../simulated-scenarios/">scenario gallery</a>; hover for its clinical
