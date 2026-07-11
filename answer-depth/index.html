@@ -242,9 +242,10 @@
       pth.appendChild(phr);pt.appendChild(pth);
       var ptb=h('tbody');
       blocks.forEach(function(b){
+        var setName=(b.label||b.id).split('·')[0].trim();  // human name, not the file stem
         b.pairs.forEach(function(u){
           var row=h('tr');
-          row.appendChild(h('td','mono',b.id));
+          row.appendChild(h('td',null,setName));
           row.appendChild(h('td','num mono',String(u.index)));
           row.appendChild(h('td',null,u.target));
           var td=h('td');td.appendChild(h('span','cls cls-'+u['class'],labels[u['class']]));
