@@ -192,6 +192,7 @@
       <a href="../simulated-scenarios/">Simulated Scenarios</a>
       <a href="../phrase-dataset/">Phrase Dataset</a>
       <a href="../model-evaluations/">Model Evaluations</a>
+      <a href="../answer-depth/">Answer Depth</a>
       <a href="https://github.com/michaeldgreenphd/patientwords">GitHub</a>
     </nav>
   </div>
@@ -219,6 +220,17 @@
   <p class="embed-caption" id="tx-gal-cap" hidden>every classifiable case from the live mitigation trace · top token per panel</p>
 
   <span class="stat recovery">Recovered target probability: 41% after translation (clinical baseline 26%)</span>
+
+  <h2>What the depth readout adds</h2>
+  <p class="explainer">A layer-by-layer readout splits the penalty into two failure
+     kinds. When the answer forms in the middle layers and is lost late, translation
+     recovers work the model already did. When the answer never forms, translation
+     supplies the clinical wording itself. First join on this page&rsquo;s downgrade
+     set: pairs whose answer survives in depth recover a mean 0.267 of the lost
+     urgency after translation; pairs where it never forms recover 0.124. Small
+     sample, exploratory. The running test lives on the
+     <a href="../answer-depth/">Answer Depth</a> page.</p>
+
   <details class="meth" id="trace-fold">
     <summary>View the live three-panel trace (clinical / patient / translated)</summary>
   <p class="traced" data-mode="translation" data-traced="gemma-2-2b">
