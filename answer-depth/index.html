@@ -67,6 +67,20 @@
   details{margin:10px 0 0}
   summary{font-family:var(--mono);font-size:12px;color:var(--muted);cursor:pointer}
   summary:focus-visible{outline:2px solid var(--clinical);outline-offset:2px}
+  .ex{border:1px solid var(--hairline);padding:10px 14px;margin:10px 0}
+  .ex summary{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:baseline;color:var(--ink)}
+  .ex .ex-snip{font-style:italic;font-family:var(--serif);font-size:14.5px}
+  .ex .ex-sw{font-family:var(--mono);font-size:12px}
+  .ex .ex-sw .t{color:var(--clinical);font-weight:600}
+  .ex .ex-sw .w{color:var(--penalty);font-weight:600}
+  .ex-body{margin-top:12px;border-top:1px solid var(--hairline);padding-top:10px}
+  .ex-line{font-size:15px;line-height:1.6;margin:0 0 6px}
+  .ex-line .lbl{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--muted);display:inline-block;min-width:74px}
+  .ex-line .out-t{color:var(--clinical);font-weight:600}
+  .ex-line .out-w{color:var(--penalty);font-weight:600}
+  .ex-strip{margin:10px 0 4px;overflow-x:auto}
+  .ex-story{font-size:13px;color:var(--muted);margin:6px 0 0;max-width:640px}
   .endnote{border-top:1px solid var(--ink);margin-top:46px;padding-top:14px}
   footer{font-family:var(--mono);font-size:12px;line-height:1.9;color:var(--muted)}
   footer a{color:var(--muted);text-underline-offset:3px}
@@ -146,6 +160,16 @@
       <summary>per-pair table (depth class · care-urgency tiers regained by translation, where measured)</summary>
       <div class="scroll" id="ad-pairs"></div>
     </details>
+  </section>
+
+  <section id="closeup">
+    <h2>The switch, close up</h2>
+    <p>Six pairs, selected by rule: every lost-late pair, strongest clinical hold
+      first, capped at four, plus the two never-formed pairs whose clinical wording
+      holds best at the output. Each shows the same sentence asked two ways, the word
+      the model lands on, and where in the layers the clinical answer lived before it
+      was lost. All sentences are generated stress-test stimuli.</p>
+    <div id="ad-examples"><span class="pend">examples pending — data/jlens_depth.json</span></div>
   </section>
 
   <div class="endnote">
@@ -276,6 +300,85 @@
       });
       pt.appendChild(ptb);
       pmount.appendChild(pt);
+
+      // --- worked examples ----------------------------------------------
+      var exs=data.examples||[];
+      if(exs.length){
+        var emount=document.getElementById('ad-examples');
+        emount.textContent='';
+        exs.forEach(function(ex){
+          var det=h('details','ex');
+          var sum=h('summary');
+          sum.appendChild(h('span','ex-snip','“'+ex.snippet+'”'));
+          var sw=h('span','ex-sw');
+          sw.appendChild(h('span','t',ex.target));
+          sw.appendChild(document.createTextNode(' → '));
+          sw.appendChild(h('span','w',ex.winner||'?'));
+          sum.appendChild(sw);
+          var chip=h('span','cls cls-'+ex['class'],labels[ex['class']]);
+          sum.appendChild(chip);
+          det.appendChild(sum);
+
+          var body=h('div','ex-body');
+          [['clinical',ex.prompts.clinical,ex.target,'out-t'],
+           ['everyday',ex.prompts.patient,ex.winner||'?','out-w']].forEach(function(l){
+            var p=h('p','ex-line');
+            p.appendChild(h('span','lbl',l[0]));
+            p.appendChild(document.createTextNode(l[1]+' '));
+            p.appendChild(h('span',l[3],l[2]));
+            if(l[0]==='clinical'&&ex.clin_last_rank>1){
+              var note=h('span',null,' (rank '+ex.clin_last_rank+' at the output)');
+              note.style.cssText='font-size:12px;color:#6d6c66';
+              p.appendChild(note);
+            }
+            body.appendChild(p);
+          });
+
+          // compact two-lane strip: where the clinical answer was readable
+          var CELL=12,GAP=1,LEFT=72,TOP=4,LANE_GAP=10;
+          var W=LEFT+26*(CELL+GAP)+10, H=TOP+2*(CELL+LANE_GAP)+16;
+          var strip=h('div','ex-strip');
+          var svg=el('svg',{viewBox:'0 0 '+W+' '+H,width:W,role:'img',
+            'aria-label':'Layers where the clinical answer is readable under each wording'},null);
+          strip.appendChild(svg);
+          [['clinical',ex.clin_ranks,'#15803d'],['everyday',ex.pat_ranks,'#111827']]
+            .forEach(function(lane,idx){
+              var y=TOP+idx*(CELL+LANE_GAP);
+              txt(svg,0,y+CELL-2,lane[0],{'font-size':9.5});
+              el('line',{x1:LEFT,y1:y+CELL/2,x2:LEFT+26*(CELL+GAP)-GAP,y2:y+CELL/2,
+                stroke:'#dcdad2','stroke-width':1},svg);
+              for(var l=0;l<26;l++){
+                var rank=lane[1][String(l)];
+                if(rank)el('rect',{x:LEFT+l*(CELL+GAP),y:y,width:CELL,height:CELL,
+                  fill:lane[2],'fill-opacity':(1.05-rank*0.115).toFixed(2)},svg);
+              }
+              if(!lane[1]['25']){
+                var lx=LEFT+25*(CELL+GAP)+CELL/2, cy=y+CELL/2;
+                el('line',{x1:lx-4,y1:cy-4,x2:lx+4,y2:cy+4,stroke:'#b4483d','stroke-width':1.6},svg);
+                el('line',{x1:lx-4,y1:cy+4,x2:lx+4,y2:cy-4,stroke:'#b4483d','stroke-width':1.6},svg);
+              }
+            });
+          var ay=TOP+2*(CELL+LANE_GAP)+8;
+          txt(svg,LEFT,ay,'layer 0',{'font-size':9});
+          txt(svg,LEFT+26*(CELL+GAP)-GAP,ay,'output',{'font-size':9,'text-anchor':'end'});
+          body.appendChild(strip);
+
+          var pl=Object.keys(ex.pat_ranks).map(Number);
+          var story;
+          if(ex['class']==='suppressed'){
+            story='Under the everyday wording the answer enters the readout at layer '+
+              Math.min.apply(null,pl)+', is last readable at layer '+Math.max.apply(null,pl)+
+              ', and is gone at the output, where “'+(ex.winner||'?')+'” wins.';
+          }else{
+            story='Under the everyday wording the answer never enters any layer’s readout. '+
+              'Under the clinical wording it holds rank '+ex.clin_last_rank+
+              ' at the output. “'+(ex.winner||'?')+'” wins instead.';
+          }
+          body.appendChild(h('p','ex-story',story));
+          det.appendChild(body);
+          emount.appendChild(det);
+        });
+      }
     })
     .catch(function(){/* pending states stay */});
 })();
