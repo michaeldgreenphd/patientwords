@@ -54,6 +54,11 @@
   td{padding:9px 16px 9px 0;border-bottom:1px solid var(--hairline);font-size:14.5px;vertical-align:top}
   td.mono{font-family:var(--mono);font-size:12.5px;white-space:nowrap}
   tr:last-child td{border-bottom:1px solid var(--ink)}
+  .defs{margin:14px 0 6px;max-width:640px}
+  .defs div{display:flex;gap:12px;align-items:baseline;padding:6px 0;border-bottom:1px solid var(--hairline)}
+  .defs div:last-child{border-bottom:0}
+  .defs dt{flex:0 0 110px}
+  .defs dd{margin:0;font-size:14.5px;line-height:1.55}
   .cls{font-family:var(--mono);font-size:11px;letter-spacing:.06em;padding:1px 7px;border:1px solid var(--hairline)}
   .cls-retained{color:var(--clinical);border-color:var(--clinical)}
   .cls-suppressed{color:var(--penalty);border-color:var(--penalty)}
@@ -93,17 +98,26 @@
   <p class="dateline">Depth readouts · gemma-2-2b · exploratory</p>
   <h1>Where the answer forms</h1>
   <p class="lede">
-    A language model builds its answer layer by layer. A lens readout at each of the
-    26 layers shows where the clinical answer becomes readable and whether it survives
-    to the output. Each measured pair lands in one of three classes: the answer is
-    kept under everyday wording, lost late, or never formed. The
+    Most of this site measures what is lost when a health question is asked in
+    everyday words instead of clinical terms. This page shows where it is lost.
+    A language model builds its answer in stages: 26 layers, each refining the last.
+    The Jacobian lens reads each layer as a ranked list of the words the model is
+    leaning toward at that stage. The clinical answer counts as readable at a layer
+    when it appears in that layer&rsquo;s top 8. The
     <a href="../methods.html#reading-layers">methods page</a> explains the instrument
     and its causal check.
   </p>
 
   <section id="sets">
     <h2>Every measured set</h2>
-    <p>One row of squares per outcome, one square per pair. New sets join as the
+    <p>Follow a pair through the layers under everyday wording and its outcome lands
+      in one of three classes.</p>
+    <dl class="defs">
+      <div><dt class="cls cls-retained">kept</dt><dd>the answer is still readable at the output layer.</dd></div>
+      <div><dt class="cls cls-suppressed">lost late</dt><dd>the answer becomes readable in the middle layers, then drops out before the model speaks. The model did the work and lost the result.</dd></div>
+      <div><dt class="cls cls-absent">never formed</dt><dd>the answer is not readable at any layer.</dd></div>
+    </dl>
+    <p>One row of squares per class, one square per pair. New sets join as the
       nightly cycle measures them.</p>
     <div id="ad-blocks"><span class="pend">figure pending — data/jlens_depth.json</span></div>
     <p class="cap">Hover a square for its clinical target. The pairs live in the
@@ -112,11 +126,16 @@
 
   <section id="translation-test">
     <h2>Does translation work where it should?</h2>
-    <p>The depth classes make a testable prediction. Translation should rescue pairs
-      that lost the answer late more than pairs that never formed it: in the first
-      kind the model computed the answer and dropped it, in the second there is
-      nothing to recover. The table tracks that prediction as translated panels
-      accumulate.</p>
+    <p>Every answer sits on a ladder of care urgency, from reassurance up to urgent
+      care. Under everyday wording the expected rung drops. For some pairs an LLM
+      rewrites the everyday sentence in clinical terms and the model is measured
+      again on the rewrite: the translated panel. Recovery is the rungs regained,
+      the expected care-urgency of the translated sentence minus the everyday one
+      (probability-weighted, reviewed v1 tiers).</p>
+    <p>The depth classes make a testable prediction. Translation should regain more
+      where the model computed the answer and dropped it than where the answer never
+      formed: in the first kind there is finished work to recover. The table tracks
+      that prediction as translated panels accumulate.</p>
     <div id="ad-trans"><span class="pend">table pending — data/jlens_depth.json</span></div>
     <p class="cap" id="ad-trans-cap"></p>
   </section>
@@ -124,7 +143,7 @@
   <section id="pairs">
     <h2>Every pair</h2>
     <details>
-      <summary>per-pair table (depth class · translation recovery where measured)</summary>
+      <summary>per-pair table (depth class · care-urgency tiers regained by translation, where measured)</summary>
       <div class="scroll" id="ad-pairs"></div>
     </details>
   </section>
@@ -203,7 +222,7 @@
         var table=h('table');
         table.setAttribute('aria-label','Translation recovery by depth class');
         var thead=h('thead'),hrow=h('tr');
-        [['depth class',''],['pairs','num'],['mean urgency recovery','num']].forEach(function(c){
+        [['depth class',''],['pairs','num'],['mean recovery (tiers)','num']].forEach(function(c){
           var th=h('th',c[1],c[0]);th.setAttribute('scope','col');hrow.appendChild(th);});
         thead.appendChild(hrow);table.appendChild(thead);
         var tbody=h('tbody');
@@ -237,7 +256,7 @@
       var pt=h('table');
       pt.setAttribute('aria-label','Every lens-measured pair');
       var pth=h('thead'),phr=h('tr');
-      [['set',''],['pair','num'],['target',''],['depth class',''],['recovery','num']].forEach(function(c){
+      [['set',''],['pair','num'],['clinical answer',''],['depth class',''],['recovery (tiers)','num']].forEach(function(c){
         var th=h('th',c[1],c[0]);th.setAttribute('scope','col');phr.appendChild(th);});
       pth.appendChild(phr);pt.appendChild(pth);
       var ptb=h('tbody');
