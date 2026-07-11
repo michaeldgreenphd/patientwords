@@ -96,6 +96,16 @@
   .back{display:inline-block;margin-top:22px;font-family:var(--mono);font-size:12px;letter-spacing:.1em;
     text-transform:uppercase;color:var(--ink);text-decoration:none;border-bottom:1px solid var(--ink);padding-bottom:2px}
   .back:hover{color:var(--clinical);border-bottom-color:var(--clinical)}
+
+  /* Two kinds of loss (unit rows drawn at load from ../data/jlens_depth.json) */
+  .depth{margin:26px 0 8px;max-width:640px}
+  .depth h3{font-family:var(--mono);font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--ink);font-weight:600;margin:10px 0 8px;border-bottom:1px solid var(--ink);padding-bottom:5px}
+  .depth p{font-size:14.5px;line-height:1.6;margin:0 0 8px}
+  .depth-fig{margin:14px 0 4px;overflow-x:auto}
+  .depth-fig svg{display:block}
+  .depth-cap{font-size:12.5px;color:var(--muted)}
+  .depth-pend{font-family:var(--mono);font-size:12px;color:var(--muted);border:1px dashed var(--structural);padding:14px;display:inline-block}
 </style>
 </head>
 <body>
@@ -333,6 +343,21 @@
         </ul>
       </div>
     </div>
+    <div class="depth">
+      <h3>Two kinds of loss, two kinds of fix</h3>
+      <p>A layer-by-layer readout shows where the answer is lost. Of the 50 pairs in
+        the newest batch, 26 keep the clinical answer under everyday wording, 19 never
+        form it at any layer, and 5 form it in the middle layers and lose it by the
+        output.</p>
+      <p>The 5 matter most. The model did the work and dropped the result at the last
+        step. Translation adds no knowledge; it recovers work already done.</p>
+      <div class="depth-fig" id="depth-units"><span class="depth-pend">figure pending — data/jlens_depth.json</span></div>
+      <p class="depth-cap">Each square is one measured pair from the
+        <a href="../simulated-scenarios/">scenario gallery</a>; hover for its clinical
+        target. Depth readouts: Jacobian lens (Gurnee et&nbsp;al., Transformer
+        Circuits, 2026) via Neuronpedia; the <a href="../methods.html#reading-layers">methods
+        page</a> shows the causal check.</p>
+    </div>
     <a class="back" href="../word-differences/">See the real traces →</a>
   </section>
 
@@ -384,6 +409,54 @@
     cur=(cur==='clinical')?'patient':'clinical';render();
   });
   render();
+})();
+</script>
+<script>
+(function(){
+  // Two kinds of loss: unit rows from ../data/jlens_depth.json
+  // (engine export_jlens_depth.py). Pending state stays when absent.
+  var NS='http://www.w3.org/2000/svg';
+  function el(tag,attrs,parent){var n=document.createElementNS(NS,tag);
+    for(var k in attrs)n.setAttribute(k,attrs[k]);if(parent)parent.appendChild(n);return n;}
+  function txt(parent,x,y,str,attrs){var t=el('text',Object.assign({x:x,y:y,
+    'font-size':11,'font-family':'ui-monospace,SF Mono,Menlo,Consolas,monospace',
+    fill:'#6d6c66'},attrs||{}),parent);t.textContent=str;return t;}
+  fetch('../data/jlens_depth.json',{cache:'no-cache'})
+    .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
+    .then(function(data){
+      var pairs=(data.units&&data.units.pairs)||[];
+      if(!pairs.length)return;
+      var CLASSES=[['retained','kept','#15803d'],
+                   ['suppressed','lost late','#b4483d'],
+                   ['absent','never formed','#c3c9d2']];
+      var CELL=17,GAP=3,LEFT=118,ROW_GAP=14,TOP=6;
+      var maxRow=Math.max.apply(null,CLASSES.map(function(c){
+        return pairs.filter(function(u){return u['class']===c[0];}).length;}));
+      var W=LEFT+maxRow*(CELL+GAP)+250, H=TOP+3*(CELL+ROW_GAP)+4;
+      var mount=document.getElementById('depth-units');
+      mount.textContent='';
+      var counts=data.units.counts||{};
+      var svg=el('svg',{viewBox:'0 0 '+W+' '+H,width:W,role:'img',
+        'aria-label':(pairs.length)+' pairs: '+(counts.retained||0)+' kept, '+
+          (counts.suppressed||0)+' lost late, '+(counts.absent||0)+' never formed'},null);
+      mount.appendChild(svg);
+      CLASSES.forEach(function(cls,row){
+        var members=pairs.filter(function(u){return u['class']===cls[0];});
+        var y=TOP+row*(CELL+ROW_GAP);
+        txt(svg,0,y+CELL-4,cls[1]+' '+members.length,
+          {fill:cls[0]==='absent'?'#6d6c66':cls[2]});
+        members.forEach(function(u,k){
+          var rect=el('rect',{x:LEFT+k*(CELL+GAP),y:y,width:CELL,height:CELL,fill:cls[2]},svg);
+          var title=document.createElementNS(NS,'title');
+          title.textContent='pair '+u.index+' · '+u.target;
+          rect.appendChild(title);
+        });
+        var ann=data.units.annotation;
+        if(cls[0]==='suppressed'&&ann&&ann.text)
+          txt(svg,LEFT+members.length*(CELL+GAP)+10,y+CELL-4,ann.text,{fill:cls[2]});
+      });
+    })
+    .catch(function(){/* pending state stays */});
 })();
 </script>
 </body>
