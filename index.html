@@ -12,14 +12,14 @@
 <meta property="og:title" content="PatientWords — clinical vs. patient language in medical AI circuits">
 <meta property="og:description" content="Patients don’t speak like doctors. Medical AI must be ready to interpret them. Attribution-graph comparisons of clinical vs. patient language in gemma-2-2b.">
 <meta property="og:url" content="https://michaeldgreenphd.github.io/patientwords/">
-<meta property="og:image" content="https://michaeldgreenphd.github.io/patientwords/modes/2panel/preview.png">
-<meta property="og:image:width" content="1690">
-<meta property="og:image:height" content="2543">
-<meta property="og:image:alt" content="Two stacked attribution graphs comparing clinical and patient wording in gemma-2-2b">
+<meta property="og:image" content="https://michaeldgreenphd.github.io/patientwords/assets/share_card.png">
+<meta property="og:image:width" content="2400">
+<meta property="og:image:height" content="1260">
+<meta property="og:image:alt" content="Patients don't speak like doctors. Medical AI must be ready to interpret them. Scenario 85: the clinical wording predicts inhaler at 69%; the everyday wording predicts shirt, and inhaler falls to 4%.">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="PatientWords — clinical vs. patient language in medical AI circuits">
 <meta name="twitter:description" content="Patients don’t speak like doctors. Medical AI must be ready to interpret them.">
-<meta name="twitter:image" content="https://michaeldgreenphd.github.io/patientwords/modes/2panel/preview.png">
+<meta name="twitter:image" content="https://michaeldgreenphd.github.io/patientwords/assets/share_card.png">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23faf9f5'/%3E%3Crect x='9' y='9' width='30' height='30' fill='%23111827'/%3E%3Crect x='25' y='25' width='30' height='30' fill='%2315803d'/%3E%3C/svg%3E">
 <style>
   :root{
@@ -251,6 +251,27 @@
     padding:2px 8px;margin-left:10px;vertical-align:middle}
   .skip{position:absolute;left:-9999px;top:0;background:var(--paper);color:var(--ink);padding:8px 14px;border:1px solid var(--ink);z-index:10}
   .skip:focus{left:8px}
+  /* say-it-two-ways demo (front door; same widget pattern as start-here step 3,
+     colors mapped to this page's semantic keyline) */
+  .tg{border:1px solid var(--hairline);background:#fff;padding:18px 20px;margin:18px 0 6px;max-width:640px}
+  .tg-sentence{font-size:17px;line-height:1.6;margin:0 0 4px}
+  .tg-swap{display:inline-block;border-bottom:2px solid var(--clinical);cursor:default}
+  .tg.pat .tg-swap{border-bottom-color:var(--patient)}
+  .tg button{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+    background:none;border:1px solid var(--clinical);color:var(--clinical);padding:6px 12px;cursor:pointer;margin:10px 0 14px}
+  .tg button:hover{background:var(--clinical);color:#fff}
+  .tg.pat button{border-color:var(--patient);color:var(--patient)}
+  .tg.pat button:hover{background:var(--patient);color:#fff}
+  .tg button:focus-visible{outline:2px solid var(--clinical);outline-offset:2px}
+  .tg .bar-head{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--muted);text-align:right;margin:0 0 2px}
+  .tg .bar-row{display:flex;align-items:center;gap:10px;margin:6px 0}
+  .tg .bar-lbl{font-family:var(--mono);font-size:12.5px;min-width:8ch;text-align:right}
+  .tg .bar-track{flex:1;height:16px;background:none}
+  .tg .bar-fill{height:16px;transition:width .7s ease}
+  .tg .bar-val{font-family:var(--mono);font-size:11.5px;color:var(--muted);min-width:4ch}
+  .tg-cap{font-family:var(--mono);font-size:11.5px;color:var(--muted);margin:2px 0 0;max-width:640px}
+  @media (prefers-reduced-motion:reduce){.tg .bar-fill{transition:none}}
 </style>
 </head>
 <body>
@@ -281,6 +302,17 @@
   <h1><span class="patient">Patients</span> don’t speak like doctors.<br><span class="clinical">Medical&nbsp;AI</span> must be ready to interpret them.</h1>
   <p class="lede">We trace how gemma-2-2b reads clinical terms versus the everyday words patients use. Wording can change what the model suggests in addition to its confidence: “my asthma flares, so at work I keep a spare” continues with inhaler at 69% probability; “my chest gets all tight” makes the top word shirt, and inhaler falls to 4% probability. Rewriting the sentence in clinical terms restores it. (Scenario 85 of the simulated series.)</p>
   <p class="lede">Every figure is a live render: columns are the prompt’s words in order; height is depth in the model; the predicted next word sits at the top. Nodes (the dots) are features — size is contribution, color is category. Curves are paths of influence; the spread at the top shows the competing recommendations ranked by probability. Hover any node for its identity and mass.</p>
+
+  <div class="tg" id="home-tg">
+    <p class="tg-sentence">“When the dust kicks up my
+      <span class="tg-swap" id="tg-swap">asthma flares</span>,
+      so at work I keep a spare&nbsp;___”</p>
+    <button id="tg-btn" type="button" aria-label="Switch between clinical and patient wording">say it the other way</button>
+    <div class="bar-head" aria-hidden="true">model’s next-word guesses</div>
+    <div id="tg-bars" aria-live="polite"></div>
+  </div>
+  <p class="tg-cap">live measurements, scenario 85 · <a href="modes/simulated/pairs_20260707T171223Z/index_49.html">open the full trace</a> · <a href="simulated-scenarios/">browse all scenarios</a></p>
+
   <p class="keyline">
     <span class="swatch" style="background:#15803d"></span>clinical / recovery &nbsp;&nbsp;
     <span class="swatch" style="background:#111827"></span>off-target (the patient-language direction) &nbsp;&nbsp;
@@ -918,6 +950,43 @@
     note.appendChild(a);
     document.getElementById('dialect-specimen').hidden=false;
   }).catch(function(){});
+})();
+</script>
+<script>
+(function(){
+  // say-it-two-ways demo. Numbers are scenario 85's measured spreads
+  // (data/simulated_scenarios.json: batch pairs_20260707T171223Z, index 49);
+  // 'inhaler' is the continuation-disambiguated label for the 'inhal' wordpiece.
+  var states={
+    clinical:{swap:'asthma flares',bars:[['inhaler',0.692,'#15803d'],['mask',0.059,'#c3c9d2'],['set',0.028,'#c3c9d2']]},
+    patient:{swap:'chest gets all tight',bars:[['shirt',0.183,'#b4483d'],['t-',0.068,'#c3c9d2'],['inhaler',0.043,'#15803d']]}
+  };
+  var cur='clinical';
+  var wrap=document.getElementById('tg-bars');
+  if(!wrap)return;
+  function render(){
+    var st=states[cur];
+    var tgWrap=document.getElementById('home-tg');
+    tgWrap.classList.toggle('pat',cur==='patient');
+    document.getElementById('tg-swap').textContent=st.swap;
+    wrap.textContent='';
+    st.bars.forEach(function(b){
+      var row=document.createElement('div');row.className='bar-row';
+      var l=document.createElement('span');l.className='bar-lbl';l.textContent=b[0];
+      var t=document.createElement('div');t.className='bar-track';
+      var f=document.createElement('div');f.className='bar-fill';
+      f.style.background=b[2];f.style.width='0%';
+      t.appendChild(f);
+      var v=document.createElement('span');v.className='bar-val';v.textContent=Math.round(b[1]*100)+'%';
+      row.appendChild(l);row.appendChild(t);row.appendChild(v);
+      wrap.appendChild(row);
+      requestAnimationFrame(function(){f.style.width=(b[1]*100)+'%';});
+    });
+  }
+  document.getElementById('tg-btn').addEventListener('click',function(){
+    cur=(cur==='clinical')?'patient':'clinical';render();
+  });
+  render();
 })();
 </script>
 </body>

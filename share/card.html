@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>share card source · 1200x630</title>
+<!-- Source for assets/share_card.png (og:image). Not linked from the site nav.
+     Text reuses the homepage headline verbatim; numbers are scenario 85's
+     measured spreads (data/simulated_scenarios.json, pairs_20260707T171223Z #49).
+     Regenerate the PNG with a 1200x630 screenshot of this page. -->
+<style>
+  :root{
+    --paper:#faf9f5; --ink:#1c1c19; --patient:#111827; --clinical:#15803d;
+    --penalty:#b4483d; --muted:#6d6c66; --structural:#c3c9d2; --hairline:#dcdad2;
+    --serif:'Iowan Old Style','Palatino Linotype',Palatino,'Book Antiqua',Georgia,serif;
+    --mono:ui-monospace,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace;
+  }
+  *{box-sizing:border-box;margin:0}
+  html,body{width:1200px;height:630px;overflow:hidden}
+  body{background:var(--paper);color:var(--ink);font-family:var(--serif);
+    display:flex;align-items:stretch;padding:56px 60px 48px}
+  .left{flex:1.1;display:flex;flex-direction:column;justify-content:space-between;padding-right:56px}
+  h1{font-size:52px;line-height:1.15;font-weight:700;letter-spacing:-.01em}
+  h1 .patient{color:var(--patient)}
+  h1 .clinical{color:var(--clinical)}
+  .foot{font-family:var(--mono);font-size:17px;color:var(--muted);letter-spacing:.04em}
+  .foot b{color:var(--ink);font-weight:600}
+  .right{flex:1;display:flex;flex-direction:column;justify-content:center;gap:34px;
+    border-left:1px solid var(--hairline);padding-left:56px}
+  .panel .say{font-size:22px;line-height:1.45;margin-bottom:12px}
+  .panel .say u{text-decoration:none;border-bottom:3px solid var(--clinical)}
+  .panel.pat .say u{border-bottom-color:var(--patient)}
+  .bar-row{display:flex;align-items:center;gap:12px;margin:7px 0}
+  .bar-lbl{font-family:var(--mono);font-size:19px;min-width:120px;text-align:right}
+  .bar-track{width:300px}
+  .bar-fill{height:22px}
+  .bar-val{font-family:var(--mono);font-size:17px;color:var(--muted)}
+</style>
+</head>
+<body>
+  <div class="left">
+    <h1><span class="patient">Patients</span> don’t speak like doctors.<br>
+        <span class="clinical">Medical&nbsp;AI</span> must be ready to interpret them.</h1>
+    <div class="foot">live measurements · gemma-2-2b · scenario 85<br>
+      <b>michaeldgreenphd.github.io/patientwords</b></div>
+  </div>
+  <div class="right">
+    <div class="panel">
+      <p class="say">“my <u>asthma flares</u>, so at work I keep a spare&nbsp;___”</p>
+      <div class="bar-row"><span class="bar-lbl">inhaler</span>
+        <div class="bar-track"><div class="bar-fill" style="width:69%;background:#15803d"></div></div>
+        <span class="bar-val">69%</span></div>
+    </div>
+    <div class="panel pat">
+      <p class="say">“my <u>chest gets all tight</u>, so at work I keep a spare&nbsp;___”</p>
+      <div class="bar-row"><span class="bar-lbl">shirt</span>
+        <div class="bar-track"><div class="bar-fill" style="width:18%;background:#b4483d"></div></div>
+        <span class="bar-val">18%</span></div>
+      <div class="bar-row"><span class="bar-lbl">inhaler</span>
+        <div class="bar-track"><div class="bar-fill" style="width:4%;background:#15803d"></div></div>
+        <span class="bar-val">4%</span></div>
+    </div>
+  </div>
+</body>
+</html>
