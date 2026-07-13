@@ -270,28 +270,37 @@
     <p class="step-no">6 · The patch</p>
     <h2>A translation layer, for now</h2>
     <p>Put a translator between the patient and the model: it rewrites the sentence into clinical wording before the model answers.</p>
-    <div class="fig" role="img" aria-label="Two routes to the model. Sent directly, the everyday phrasing comes out as ice cream at 29%. Passed through a translation layer, the three phrasings emerge as the single clinical wording I have acid reflux, enter the model, and come out as antacid at 31%.">
-    <svg viewBox="0 0 800 190">
-      <text x="0" y="28" class="sv-q">“I have <tspan style="fill:var(--teal);font-weight:700">acid reflux</tspan>.”</text>
-      <text x="0" y="88" class="sv-q">“My stomach’s on fire.”</text>
-      <text x="0" y="148" class="sv-q">“My dyspepsia flared up.”</text>
-      <path class="sv-line" d="M232,22 C258,22 262,84 282,86" stroke-width="1.2"/>
-      <path class="sv-line" d="M232,82 C252,82 258,88 282,88" stroke-width="1.2"/>
-      <path class="sv-line" d="M232,142 C258,142 262,92 282,90" stroke-width="1.2"/>
-      <rect x="282" y="66" width="104" height="44" rx="22" fill="#eceae3"/>
-      <text x="334" y="92" class="sv-m" text-anchor="middle" fill="#0f766e">translation layer</text>
-      <path class="sv-line" d="M386,88 L404,88" stroke-width="1.2"/>
-      <text x="412" y="93" class="sv-q">“I have <tspan style="fill:var(--teal);font-weight:700">acid reflux</tspan>.”</text>
-      <path class="sv-line" d="M556,88 L574,88" stroke-width="1.2"/>
-      <rect x="574" y="56" width="52" height="64" fill="none" stroke="#6d6c66" stroke-width="1.2" stroke-dasharray="5 5"/>
-      <text x="600" y="140" class="sv-m" text-anchor="middle">model</text>
-      <path d="M626,84 L646,84" style="stroke:#0f766e;stroke-width:2.2;fill:none"/>
-      <text x="652" y="89" class="sv-a" fill="#0f766e">antacid 31%</text>
-      <path d="M232,92 C300,172 470,162 570,114" style="stroke:#b4483d;stroke-width:1.6;fill:none"/>
-      <path d="M570,114 L560,119 L565,109 Z" fill="#b4483d"/>
-      <text x="368" y="178" class="sv-m" text-anchor="middle" fill="#b4483d">no translation</text>
-      <path d="M626,106 L646,106" style="stroke:#b4483d;stroke-width:2.2;fill:none"/>
-      <text x="652" y="111" class="sv-a" fill="#b4483d">ice cream 29%</text>
+    <div class="fig" role="img" aria-label="Without translation: the two everyday phrasings go straight into the language model and come out as ice cream at 29% and apple.">
+    <svg viewBox="0 0 800 150">
+      <text x="0" y="14" class="sv-m" style="letter-spacing:.14em;text-transform:uppercase">without translation</text>
+      <text x="0" y="49" class="sv-q">“My stomach’s on fire.”</text>
+      <text x="0" y="109" class="sv-q">“My dyspepsia flared up.”</text>
+      <path class="sv-line" d="M232,44 L430,44" stroke-width="1.2"/>
+      <path class="sv-line" d="M232,104 L430,104" stroke-width="1.2"/>
+      <rect x="430" y="26" width="70" height="96" fill="none" stroke="#6d6c66" stroke-width="1.2" stroke-dasharray="5 5"/>
+      <text x="465" y="142" class="sv-m" text-anchor="middle">language model</text>
+      <path d="M500,44 L540,44" style="stroke:#b45309;stroke-width:2.2;fill:none"/>
+      <text x="552" y="49" class="sv-a" fill="#b45309">ice cream 29%</text>
+      <path d="M500,104 L540,104" style="stroke:#b45309;stroke-width:2.2;fill:none"/>
+      <text x="552" y="109" class="sv-a" fill="#b45309">apple</text>
+    </svg>
+    </div>
+    <div class="fig" role="img" aria-label="With translation: the same two phrasings pass through a translation layer, emerge as the single clinical wording I have acid reflux, enter the language model, and come out as antacid at 31%.">
+    <svg viewBox="0 0 800 150">
+      <text x="0" y="14" class="sv-m" style="letter-spacing:.14em;text-transform:uppercase">with translation</text>
+      <text x="0" y="49" class="sv-q">“My stomach’s on fire.”</text>
+      <text x="0" y="109" class="sv-q">“My dyspepsia flared up.”</text>
+      <path class="sv-line" d="M232,44 C262,44 266,70 288,72" stroke-width="1.2"/>
+      <path class="sv-line" d="M232,104 C262,104 266,78 288,76" stroke-width="1.2"/>
+      <rect x="288" y="52" width="104" height="44" rx="22" fill="#eceae3"/>
+      <text x="340" y="79" class="sv-m" text-anchor="middle" fill="#0f766e">translation layer</text>
+      <path class="sv-line" d="M392,74 L410,74" stroke-width="1.2"/>
+      <text x="418" y="79" class="sv-q">“I have <tspan style="fill:var(--teal);font-weight:700">acid reflux</tspan>.”</text>
+      <path class="sv-line" d="M566,74 L584,74" stroke-width="1.2"/>
+      <rect x="584" y="38" width="70" height="72" fill="none" stroke="#6d6c66" stroke-width="1.2" stroke-dasharray="5 5"/>
+      <text x="619" y="130" class="sv-m" text-anchor="middle">language model</text>
+      <path d="M654,74 L674,74" style="stroke:#0f766e;stroke-width:2.2;fill:none"/>
+      <text x="680" y="79" class="sv-a" fill="#0f766e">antacid 31%</text>
     </svg>
     </div>
     <p class="cap">a patch, not a permanent solution: translation fixed 8 of the 20 hardest cases, left 7 unchanged, and once made things worse · <a href="../translation/">see the live translation traces</a></p>
