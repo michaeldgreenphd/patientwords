@@ -85,6 +85,9 @@
   .me-table tr:last-child td{border-bottom:1px solid var(--ink)}
   .delta-neg{color:var(--penalty);font-weight:600}
   .delta-zero{color:var(--clinical);font-weight:600}
+  .prov{font-family:var(--mono);font-size:10.5px;color:var(--muted);margin-top:3px;letter-spacing:.02em}
+  .prov a{color:var(--muted);text-underline-offset:3px}
+  .prov a:hover{color:var(--ink)}
   .me-caption{font-family:var(--mono);font-size:11px;color:var(--muted);
     letter-spacing:.04em;margin:6px 0 0}
   .stat{font-family:var(--mono);font-size:13px;font-weight:600}
@@ -166,6 +169,9 @@
 
   <section id="evidence">
     <h2>What kind of evidence each model carries</h2>
+    <p>Each model is listed with its maker and release month, linked to the
+      maker&rsquo;s specification. The dates say what era of model is being
+      measured; they are not a ranking.</p>
     <div class="me-scroll">
       <table class="me-table" id="ev-table">
         <thead><tr>
@@ -225,9 +231,14 @@
   function pp(v){return (v*100).toFixed(1).replace('-','−');}
   function pending(msg){['forest-cap','ev-cap'].forEach(function(id){
     var n=document.getElementById(id); if(n) n.textContent=msg;});}
+  var PROV={};
+  var provReady=fetch('../data/model_provenance.json',{cache:'no-cache'})
+    .then(function(r){return r.ok?r.json():{};})
+    .then(function(p){PROV=(p&&p.models)||{};})
+    .catch(function(){});
   fetch('../data/model_stats.json',{cache:'no-cache'})
     .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
-    .then(draw)
+    .then(function(d){return provReady.then(function(){draw(d);});})
     .catch(function(){pending('data pending: the figures fill in when model_stats.json lands');});
   function draw(d){
     var per=d.per_model||{}; var ids=(d.models||Object.keys(per)).filter(function(m){return per[m];});
@@ -284,13 +295,30 @@
     });
     document.getElementById('dumbbells').appendChild(svg2);
 
-    /* evidence table */
+    /* evidence table (model cell carries maker, release month, and a spec
+       link from data/model_provenance.json: era transparency, not ranking) */
+    function fmtMonth(ym){
+      var m=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      var p=String(ym).split('-');
+      return (p[1]?m[parseInt(p[1],10)-1]+' ':'')+p[0];
+    }
     var body=document.getElementById('ev-body');
     ids.forEach(function(id){
       var p=per[id],m=meta[id]||{};
       var tr=document.createElement('tr');
       function td(cls,txt){var c=document.createElement('td');if(cls)c.className=cls;c.textContent=txt;tr.appendChild(c);}
-      td('mono',m.label||id);
+      var mc=document.createElement('td');mc.className='mono';
+      mc.appendChild(document.createTextNode(m.label||id));
+      var pv=PROV[id];
+      if(pv&&pv.maker){
+        var sub=document.createElement('div');sub.className='prov';
+        var when=pv.released?(' · '+fmtMonth(pv.released)):'';
+        sub.appendChild(document.createTextNode(pv.maker+when+' · '));
+        var a=document.createElement('a');a.href=pv.spec;a.textContent='spec';
+        a.rel='noopener';sub.appendChild(a);
+        mc.appendChild(sub);
+      }
+      tr.appendChild(mc);
       td(null,m.graphs?'hosted attribution graphs':'CPU next-token behavior only');
       td(null,m.features?'tagged (Gemma Scope)':'—');
       td('num',String(p.penalty.n_phrases));

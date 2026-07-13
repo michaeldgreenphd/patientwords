@@ -236,6 +236,9 @@
     .keyline,.dateline,.endnote p,footer{color:#444}
   }
   /* Safety view: per-model urgency cards */
+  .prov{font-family:var(--mono);font-size:10.5px;color:var(--muted);margin-top:2px;letter-spacing:.02em}
+  .prov a{color:var(--muted);text-underline-offset:3px}
+  .prov a:hover{color:var(--ink)}
   .fold{margin:14px 0 6px}
   .fold>summary{font-family:var(--mono);font-size:12px;color:var(--muted);cursor:pointer;
     letter-spacing:.02em;line-height:1.7}
@@ -721,8 +724,29 @@
     td.appendChild(s);
     return td;
   }
+  // maker / release / spec link per model (data/model_provenance.json);
+  // era transparency, not ranking. Pages render fine if the file is absent.
+  window.PW_PROV={};
+  window.PW_PROV_READY=fetch('data/model_provenance.json',{cache:'no-cache'})
+    .then(function(r){return r.ok?r.json():{};})
+    .then(function(p){window.PW_PROV=(p&&p.models)||{};})
+    .catch(function(){});
+  function pwProvLine(id){
+    var pv=window.PW_PROV[id];
+    if(!pv||!pv.maker)return null;
+    var M=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    var when='';
+    if(pv.released){var p=String(pv.released).split('-');
+      when=' · '+(p[1]?M[parseInt(p[1],10)-1]+' ':'')+p[0];}
+    var div=document.createElement('div');div.className='prov';
+    div.appendChild(document.createTextNode(pv.maker+when+' · '));
+    var a=document.createElement('a');a.href=pv.spec;a.rel='noopener';a.textContent='spec';
+    div.appendChild(a);
+    return div;
+  }
   fetch('data/urgency_shift.json',{cache:'no-cache'})
     .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
+    .then(function(u){return window.PW_PROV_READY.then(function(){return u;});})
     .then(function(u){
       var s=u.summary||{}, pm=s.per_model||{};
       // phrase-deduped headline counts (engine collector, mirrors paired_stats_rigor):
@@ -804,6 +828,8 @@
         var d=(pmd&&pmd[mid])||null;
         var card=el('div','safety-card');
         card.appendChild(el('h3',null,mid));
+        var provLine=pwProvLine(mid);
+        if(provLine)card.appendChild(provLine);
         var dl=document.createElement('dl');
         row(dl,'measurements',String(v.n));
         if(d){
@@ -872,6 +898,7 @@
 
   fetch('data/model_evaluations.json',{cache:'no-cache'})
     .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
+    .then(function(data){return window.PW_PROV_READY.then(function(){return data;});})
     .then(function(data){
       var models=data.models||[];
       if(!models.length){sec.hidden=true;return;}  // no data: stay hidden, not a half-built skeleton
@@ -889,6 +916,8 @@
         idspan.className='me-model';
         idspan.textContent=m.id||'—';
         tdm.appendChild(idspan);
+        var provLine2=pwProvLine(m.id);
+        if(provLine2)tdm.appendChild(provLine2);
         if(pending){
           var note=document.createElement('span');
           note.className='me-pending-note';
