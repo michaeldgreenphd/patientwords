@@ -116,6 +116,9 @@
   .ladder-sent .ans{font-family:var(--mono);font-size:13px;white-space:nowrap}
   .ladder-sent .ans.c{color:var(--clinical)}
   .ladder-sent .ans.p{color:var(--patient)}
+  .ladder-model{font-family:var(--mono);font-size:10px;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--muted);margin:10px 0 2px}
+  .ladder-sent .ladder-model:first-child{margin-top:0}
 </style>
 </head>
 <body>
@@ -486,11 +489,14 @@
 </script>
 <script>
 (function(){
-  // Care ladder: one measured redirect drawn on the urgency tiers.
-  // Pair reference: batch pairs_20260707T215921Z index 54 (gemma-2-2b);
-  // words, probabilities, tiers, and counts all come from the fetched data.
+  // Care ladder: measured redirects drawn on the urgency tiers. Two pair
+  // references; each names the model it was measured on. Words,
+  // probabilities, tiers, and counts all come from the fetched data.
   var NS='http://www.w3.org/2000/svg';
-  var BATCH='pairs_20260707T215921Z', IDX=54;
+  var PAIRS=[
+    {batch:'pairs_20260707T215921Z',idx:54,model:'gemma-2-2b',x:330},
+    {batch:'pairs_20260707T171223Z',idx:83,model:'gemma-3-4b-it',x:560}
+  ];
   function el(name,attrs,text){
     var node=document.createElementNS(NS,name);
     for(var k in attrs)node.setAttribute(k,attrs[k]);
@@ -502,16 +508,28 @@
     fetch('../data/simulated_scenarios.json',{cache:'no-cache'}).then(function(r){return r.json();})
   ]).then(function(res){
     var u=res[0], payload=res[1];
-    var row=(u.rows||[]).find(function(r){
-      return r.batch===BATCH&&r.index===IDX&&r.model==='gemma-2-2b';});
-    var sc=(payload.scenarios||[]).find(function(s){
-      return s.batch===BATCH&&s.batch_index===IDX;});
-    if(!row||!sc||row.tier_top_clinical==null||row.tier_top_patient==null)return;
+    function measurement(sc,model){
+      // base-model numbers sit at the scenario top level; others under models[id]
+      if(model==='gemma-2-2b')return sc;
+      return (sc.models||{})[model]||null;
+    }
+    var resolved=[];
+    PAIRS.forEach(function(ref){
+      var row=(u.rows||[]).find(function(r){
+        return r.batch===ref.batch&&r.index===ref.idx&&r.model===ref.model;});
+      var sc=(payload.scenarios||[]).find(function(s){
+        return s.batch===ref.batch&&s.batch_index===ref.idx;});
+      var m=sc&&measurement(sc,ref.model);
+      if(!row||!sc||!m||!m.top_clinical||!m.top_patient)return;
+      if(row.tier_top_clinical==null||row.tier_top_patient==null)return;
+      resolved.push({ref:ref,row:row,sc:sc,m:m});
+    });
+    if(!resolved.length)return;
     var tiers=u.tiers||{};
     var order=['4','3','2','1','0'].filter(function(t){return tiers[t];});
     var W=620,rowH=40,top=24,H=top+order.length*rowH;
     var svg=el('svg',{viewBox:'0 0 '+W+' '+H,role:'img',
-      'aria-label':'Care-urgency ladder: the clinical wording’s top answer sits one tier above the everyday wording’s'});
+      'aria-label':'Care-urgency ladder: in each measured pair the everyday wording\u2019s top answer lands on a lower tier than the clinical wording\u2019s'});
     var yFor={};
     order.forEach(function(t,i){
       var y=top+i*rowH;yFor[t]=y;
@@ -519,48 +537,52 @@
       svg.appendChild(el('text',{x:0,y:y+3.5,'font-family':'ui-monospace,Menlo,monospace',
         'font-size':'10.5',fill:'#6d6c66'},tiers[t]));
     });
-    var yC=yFor[String(row.tier_top_clinical)], yP=yFor[String(row.tier_top_patient)];
-    if(yC==null||yP==null)return;
-    var x=420;
-    var wC=(sc.top_clinical||[])[0]||'', pC=Math.round(((sc.top_clinical||[])[1]||0)*100);
-    var wP=(sc.top_patient||[])[0]||'', pP=Math.round(((sc.top_patient||[])[1]||0)*100);
-    var lblC='“'+wC+'” '+pC+'%';
-    var lblP='“'+wP+'” '+pP+'%';
-    // full sentences above the ladder, differing term underlined
+    var sent=document.createElement('div');sent.className='ladder-sent';
     function sentence(prompt,term,cls,word,pct,ansCls){
       var p=document.createElement('p');
       var idx=term?prompt.indexOf(term):-1;
       if(idx>=0){
-        p.appendChild(document.createTextNode('“'+prompt.slice(0,idx)));
-        var u=document.createElement('span');u.className=cls;u.textContent=term;
-        p.appendChild(u);
-        p.appendChild(document.createTextNode(prompt.slice(idx+term.length)+' ___”'));
+        p.appendChild(document.createTextNode('\u201c'+prompt.slice(0,idx)));
+        var uEl=document.createElement('span');uEl.className=cls;uEl.textContent=term;
+        p.appendChild(uEl);
+        p.appendChild(document.createTextNode(prompt.slice(idx+term.length)+' ___\u201d'));
       }else{
-        p.appendChild(document.createTextNode('“'+prompt+' ___”'));
+        p.appendChild(document.createTextNode('\u201c'+prompt+' ___\u201d'));
       }
       var a=document.createElement('span');a.className='ans '+ansCls;
-      a.textContent=' → “'+word+'” '+pct+'%';
+      a.textContent=' \u2192 \u201c'+word+'\u201d '+pct+'%';
       p.appendChild(a);
       return p;
     }
-    var sent=document.createElement('div');sent.className='ladder-sent';
-    sent.appendChild(sentence(sc.clinical_prompt,sc.clinical_term,'term-c',wC,pC,'c'));
-    sent.appendChild(sentence(sc.patient_prompt,sc.patient_term,'term-p',wP,pP,'p'));
-    svg.appendChild(el('circle',{cx:x,cy:yC,r:5,fill:'#15803d'}));
-    svg.appendChild(el('text',{x:x-14,y:yC-8,'text-anchor':'end',
-      'font-family':'ui-monospace,Menlo,monospace','font-size':'11.5',fill:'#15803d'},lblC));
-    svg.appendChild(el('circle',{cx:x,cy:yP,r:5,fill:'#111827'}));
-    svg.appendChild(el('text',{x:x-14,y:yP+18,'text-anchor':'end',
-      'font-family':'ui-monospace,Menlo,monospace','font-size':'11.5',fill:'#111827'},lblP));
-    svg.appendChild(el('line',{x1:x,y1:yC+8,x2:x,y2:yP-9,stroke:'#b4483d','stroke-width':1.5}));
-    svg.appendChild(el('path',{d:'M '+(x-4)+' '+(yP-9)+' L '+x+' '+(yP-3)+' L '+(x+4)+' '+(yP-9)+' Z',
-      fill:'#b4483d'}));
+    resolved.forEach(function(item){
+      var m=item.m,row=item.row,sc=item.sc,x=item.ref.x;
+      var yC=yFor[String(row.tier_top_clinical)], yP=yFor[String(row.tier_top_patient)];
+      if(yC==null||yP==null)return;
+      var wC=m.top_clinical[0]||'', pC=Math.round((m.top_clinical[1]||0)*100);
+      var wP=m.top_patient[0]||'', pP=Math.round((m.top_patient[1]||0)*100);
+      var tag=document.createElement('p');tag.className='ladder-model';
+      tag.textContent='measured on '+item.ref.model;
+      sent.appendChild(tag);
+      sent.appendChild(sentence(sc.clinical_prompt,sc.clinical_term,'term-c',wC,pC,'c'));
+      sent.appendChild(sentence(sc.patient_prompt,sc.patient_term,'term-p',wP,pP,'p'));
+      svg.appendChild(el('circle',{cx:x,cy:yC,r:5,fill:'#15803d'}));
+      svg.appendChild(el('text',{x:x-14,y:yC-8,'text-anchor':'end',
+        'font-family':'ui-monospace,Menlo,monospace','font-size':'11.5',fill:'#15803d'},
+        '\u201c'+wC+'\u201d '+pC+'%'));
+      svg.appendChild(el('circle',{cx:x,cy:yP,r:5,fill:'#111827'}));
+      svg.appendChild(el('text',{x:x-14,y:yP+18,'text-anchor':'end',
+        'font-family':'ui-monospace,Menlo,monospace','font-size':'11.5',fill:'#111827'},
+        '\u201c'+wP+'\u201d '+pP+'%'));
+      svg.appendChild(el('line',{x1:x,y1:yC+8,x2:x,y2:yP-9,stroke:'#b4483d','stroke-width':1.5}));
+      svg.appendChild(el('path',{d:'M '+(x-4)+' '+(yP-9)+' L '+x+' '+(yP-3)+' L '+(x+4)+' '+(yP-9)+' Z',
+        fill:'#b4483d'}));
+    });
     var fig=document.getElementById('care-ladder');
     fig.textContent='';fig.appendChild(sent);fig.appendChild(svg);
     var cap=document.getElementById('ladder-cap');
     var pm=((u.summary||{}).per_model_deduped||{})['gemma-2-2b'];
-    var counts=pm?pm.downgrades+' of '+pm.n_phrases+' measured phrases slide down the ladder, '+pm.upgrades+' move up (phrase-deduped) · ':'';
-    cap.textContent='the same complaint, said two ways, lands on different rungs · measured on gemma-2-2b · '+counts+'tiers: '+(u.vocabulary_status||'draft pending domain review');
+    var counts=pm?pm.downgrades+' of '+pm.n_phrases+' measured phrases slide down the ladder on gemma-2-2b, '+pm.upgrades+' move up (phrase-deduped) · ':'';
+    cap.textContent='the same complaint, said two ways, lands on different rungs · each example names its model · '+counts+'tiers: '+(u.vocabulary_status||'draft pending domain review');
     cap.hidden=false;
   }).catch(function(){/* pending state stays */});
 })();
