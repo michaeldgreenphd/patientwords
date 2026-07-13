@@ -229,6 +229,12 @@
       the sentence, pushed the model toward its next word. Each connection carries a
       <em>weight</em>: the influence one feature’s firing had on another’s, and on the
       word the model chose. The technical term for that weight is attribution mass.</p>
+    <p id="retrace-note" hidden>The instrument repeats itself. <span id="rt-n">—</span> phrase
+      pairs were traced two or more times on different days; every one reproduced
+      identical probabilities (largest spread <span id="rt-spread">—</span>) and the top
+      word never changed (<span id="rt-stable">—</span> pairs). A difference between two
+      wordings therefore cannot be trace noise. Source:
+      <a href="data/retrace_consistency.json">data/retrace_consistency.json</a>.</p>
   </section>
 
   <section>
@@ -636,8 +642,10 @@
       <li><p><b>Feature labels are machine-generated.</b> The clinical / off-target
         categories come from keyword-matching auto-interp descriptions. Both steps can be
         wrong, and a mislabeled feature shifts the clinical-mass numbers.</p></li>
-      <li><p><b>Measurements are a point in time.</b> The hand-measured probabilities were
-        observed on specific dates against a hosted service; re-runs can differ.</p></li>
+      <li><p><b>Measurements are a point in time.</b> The probabilities were observed on
+        specific dates against a hosted service. Re-traces to date reproduce exactly
+        (52 of 52 repeated pairs, zero spread; see step 2), so future drift would come
+        from service changes. A daily three-pair sentinel re-trace watches for that.</p></li>
       <li><p><b>Translation can fail.</b> The fix in the Translation figure is itself an LLM step. The engine flags regressions — cases where the rewrite made the target word less likely.</p></li>
       <li><p><b>The stimuli are constructed.</b> Most phrase pairs were written by a language model and checked automatically, not collected from patients. They are stress tests, not a sample of real clinical conversations.</p></li>
     </ul>
@@ -741,6 +749,20 @@
       });
     })
     .catch(function(){/* pending state stays */});
+})();
+</script>
+<script>
+(function(){
+  // repeatability note (step 2): filled from data/retrace_consistency.json
+  fetch('data/retrace_consistency.json',{cache:'no-cache'})
+    .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
+    .then(function(d){
+      if(!d.pairs_retraced)return;
+      document.getElementById('rt-n').textContent=String(d.pairs_retraced);
+      document.getElementById('rt-spread').textContent=String(d.prob_spread_max);
+      document.getElementById('rt-stable').textContent=d.top_word_stable_pairs+' of '+d.pairs_retraced;
+      document.getElementById('retrace-note').hidden=false;
+    }).catch(function(){});
 })();
 </script>
 </body>
