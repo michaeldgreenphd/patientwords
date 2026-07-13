@@ -173,7 +173,7 @@
 <header class="masthead">
   <hr class="rule-heavy"><hr class="rule-fine">
   <div class="masthead-row">
-    <a class="wordmark" href="./"><span class="pw-p">Patient</span><span class="pw-w">Words</span></a>
+    <a class="wordmark" href="./" aria-label="PatientWords home, the overview page"><span class="pw-p">Patient</span><span class="pw-w">Words</span></a>
     <nav aria-label="Site">
       <a href="start-here/">Start Here</a>
       <a href="methods.html" aria-current="page">Methods</a>
@@ -279,9 +279,9 @@
       lands on a lower tier of care. A worked case: <em>“Grandma’s been constipated
       for a week, so before dinner she took a”</em> continues with <em>laxative</em>.
       Rephrase it as <em>“all bunged up”</em> and the top word becomes <em>nap</em>
-      (30%, against the laxative’s 26% under clinical wording). The advice itself changed,
-      not just its probability. Tier labels follow the reviewed v1 vocabulary; the tier table in the
-      home page’s safety view lists each tier with measured examples.
+      (30%, against the laxative’s 26% under clinical wording). The advice changed,
+      not just its probability. Tiers follow the reviewed v1 vocabulary; the home
+      page’s safety view lists them with measured examples.
     </p>
     <a class="back" href="./">Back home →</a>
   </section>
@@ -449,16 +449,14 @@
     <h2>Confidence grows as the data accumulates</h2>
     <p>
       Each panel follows one model as it reads more phrase pairs. The red line is the
-      average language penalty: how many percentage points of probability the clinical
-      answer loses when the wording turns colloquial. The shaded band is the confidence
-      band, the range where the true penalty plausibly sits. It starts wide, because a
-      handful of phrases could mislead, and narrows as hundreds accumulate, because
-      certainty in the penalty grows. For every model the band settles below zero. Not
-      every model got there at the same speed: at 133 phrases the downgrade pattern in
-      gemma-3-4b-it could still have been chance; by 240 it could not. One honesty
-      rule: a random tenth of new phrases is locked away untouched, so the week&rsquo;s
-      conclusions can be checked once, at the end, against data no interim analysis
-      has seen.
+      average language penalty: the percentage points of probability the clinical
+      answer loses when the wording turns colloquial. The band around it starts wide,
+      because a handful of phrases could mislead, and narrows as hundreds accumulate.
+      For every model it settles below zero. Not every model got there at the same
+      speed: at 133 phrases the downgrade pattern in gemma-3-4b-it could still have
+      been chance; by 240 it could not. One honesty rule: a random tenth of new
+      phrases is locked away untouched, so conclusions can be checked once, at the
+      end, against data no interim analysis has seen.
     </p>
     <div class="conv-grid" id="conv-grid" aria-describedby="conv-caption"></div>
     <div class="conv-xlab" aria-hidden="true">phrases tested →</div>

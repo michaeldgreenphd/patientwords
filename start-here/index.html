@@ -109,6 +109,13 @@
   .ladder-fig{max-width:620px;margin:14px 0 0}
   .ladder-fig svg{width:100%;height:auto;display:block}
   .ladder-pend{font-family:var(--mono);font-size:12px;color:var(--muted);border:1px dashed var(--structural);padding:14px;display:inline-block}
+  .ladder-sent{margin:0 0 14px}
+  .ladder-sent p{font-size:15.5px;line-height:1.55;margin:0 0 6px}
+  .ladder-sent .term-c{border-bottom:2px solid var(--clinical)}
+  .ladder-sent .term-p{border-bottom:2px solid var(--patient)}
+  .ladder-sent .ans{font-family:var(--mono);font-size:13px;white-space:nowrap}
+  .ladder-sent .ans.c{color:var(--clinical)}
+  .ladder-sent .ans.p{color:var(--patient)}
 </style>
 </head>
 <body>
@@ -116,7 +123,7 @@
 <header class="masthead">
   <hr class="rule-heavy"><hr class="rule-fine">
   <div class="masthead-row">
-    <a class="wordmark" href="../"><span class="pw-p">Patient</span><span class="pw-w">Words</span></a>
+    <a class="wordmark" href="../" aria-label="PatientWords home, the overview page"><span class="pw-p">Patient</span><span class="pw-w">Words</span></a>
     <nav aria-label="Site">
       <a href="./" aria-current="page">Start Here</a>
       <a href="../methods.html">Methods</a>
@@ -503,8 +510,28 @@
     var x=420;
     var wC=(sc.top_clinical||[])[0]||'', pC=Math.round(((sc.top_clinical||[])[1]||0)*100);
     var wP=(sc.top_patient||[])[0]||'', pP=Math.round(((sc.top_patient||[])[1]||0)*100);
-    var lblC=(sc.clinical_term||'clinical wording')+': “'+wC+'” '+pC+'%';
-    var lblP=(sc.patient_term||'everyday wording')+': “'+wP+'” '+pP+'%';
+    var lblC='“'+wC+'” '+pC+'%';
+    var lblP='“'+wP+'” '+pP+'%';
+    // full sentences above the ladder, differing term underlined
+    function sentence(prompt,term,cls,word,pct,ansCls){
+      var p=document.createElement('p');
+      var idx=term?prompt.indexOf(term):-1;
+      if(idx>=0){
+        p.appendChild(document.createTextNode('“'+prompt.slice(0,idx)));
+        var u=document.createElement('span');u.className=cls;u.textContent=term;
+        p.appendChild(u);
+        p.appendChild(document.createTextNode(prompt.slice(idx+term.length)+' ___”'));
+      }else{
+        p.appendChild(document.createTextNode('“'+prompt+' ___”'));
+      }
+      var a=document.createElement('span');a.className='ans '+ansCls;
+      a.textContent=' → “'+word+'” '+pct+'%';
+      p.appendChild(a);
+      return p;
+    }
+    var sent=document.createElement('div');sent.className='ladder-sent';
+    sent.appendChild(sentence(sc.clinical_prompt,sc.clinical_term,'term-c',wC,pC,'c'));
+    sent.appendChild(sentence(sc.patient_prompt,sc.patient_term,'term-p',wP,pP,'p'));
     svg.appendChild(el('circle',{cx:x,cy:yC,r:5,fill:'#15803d'}));
     svg.appendChild(el('text',{x:x-14,y:yC-8,'text-anchor':'end',
       'font-family':'ui-monospace,Menlo,monospace','font-size':'11.5',fill:'#15803d'},lblC));
@@ -515,7 +542,7 @@
     svg.appendChild(el('path',{d:'M '+(x-4)+' '+(yP-9)+' L '+x+' '+(yP-3)+' L '+(x+4)+' '+(yP-9)+' Z',
       fill:'#b4483d'}));
     var fig=document.getElementById('care-ladder');
-    fig.textContent='';fig.appendChild(svg);
+    fig.textContent='';fig.appendChild(sent);fig.appendChild(svg);
     var cap=document.getElementById('ladder-cap');
     var pm=((u.summary||{}).per_model_deduped||{})['gemma-2-2b'];
     var counts=pm?pm.downgrades+' of '+pm.n_phrases+' measured phrases slide down the ladder, '+pm.upgrades+' move up (phrase-deduped) · ':'';
