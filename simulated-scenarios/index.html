@@ -1121,8 +1121,8 @@
       if(!d.pairs_retraced)return;
       var el=document.getElementById('retrace-line');
       el.textContent='repeatability: '+d.top_word_stable_pairs+' of '+d.pairs_retraced+
-        ' phrases traced more than once reproduce identical probabilities (max spread '+
-        d.prob_spread_max+') · ';
+        ' phrases traced more than once reproduce identical probabilities and top-five lists '+
+        'at recorded precision (max spread '+d.prob_spread_max+') · ';
       var a=document.createElement('a');a.href='../data/retrace_consistency.json';
       a.textContent='source';el.appendChild(a);
       el.hidden=false;
