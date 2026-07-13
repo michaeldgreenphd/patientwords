@@ -495,7 +495,7 @@
   var NS='http://www.w3.org/2000/svg';
   var PAIRS=[
     {batch:'pairs_20260707T215921Z',idx:54,model:'gemma-2-2b',x:330},
-    {batch:'pairs_20260707T171223Z',idx:83,model:'gemma-3-4b-it',x:560}
+    {batch:'pairs_20260710T133708Z',idx:1,model:'gemma-2-2b',x:560}
   ];
   function el(name,attrs,text){
     var node=document.createElementNS(NS,name);
@@ -554,15 +554,19 @@
       p.appendChild(a);
       return p;
     }
+    var lastModel=null;
     resolved.forEach(function(item){
       var m=item.m,row=item.row,sc=item.sc,x=item.ref.x;
       var yC=yFor[String(row.tier_top_clinical)], yP=yFor[String(row.tier_top_patient)];
       if(yC==null||yP==null)return;
       var wC=m.top_clinical[0]||'', pC=Math.round((m.top_clinical[1]||0)*100);
       var wP=m.top_patient[0]||'', pP=Math.round((m.top_patient[1]||0)*100);
-      var tag=document.createElement('p');tag.className='ladder-model';
-      tag.textContent='measured on '+item.ref.model;
-      sent.appendChild(tag);
+      if(item.ref.model!==lastModel){
+        var tag=document.createElement('p');tag.className='ladder-model';
+        tag.textContent='measured on '+item.ref.model;
+        sent.appendChild(tag);
+        lastModel=item.ref.model;
+      }
       sent.appendChild(sentence(sc.clinical_prompt,sc.clinical_term,'term-c',wC,pC,'c'));
       sent.appendChild(sentence(sc.patient_prompt,sc.patient_term,'term-p',wP,pP,'p'));
       svg.appendChild(el('circle',{cx:x,cy:yC,r:5,fill:'#15803d'}));
@@ -582,7 +586,9 @@
     var cap=document.getElementById('ladder-cap');
     var pm=((u.summary||{}).per_model_deduped||{})['gemma-2-2b'];
     var counts=pm?pm.downgrades+' of '+pm.n_phrases+' measured phrases slide down the ladder on gemma-2-2b, '+pm.upgrades+' move up (phrase-deduped) · ':'';
-    cap.textContent='the same complaint, said two ways, lands on different rungs · each example names its model · '+counts+'tiers: '+(u.vocabulary_status||'draft pending domain review');
+    var distinct={};resolved.forEach(function(i){distinct[i.ref.model]=1;});
+    var modelNote=Object.keys(distinct).length>1?'each example names its model':'measured on '+Object.keys(distinct)[0];
+    cap.textContent='the same complaint, said two ways, lands on different rungs · '+modelNote+' · '+counts+'tiers: '+(u.vocabulary_status||'draft pending domain review');
     cap.hidden=false;
   }).catch(function(){/* pending state stays */});
 })();
