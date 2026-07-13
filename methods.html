@@ -133,6 +133,12 @@
   .conv-cap{font-family:var(--mono);font-size:12px;color:var(--muted);line-height:1.8;margin:10px 0 0}
   .conv-pending{font-family:var(--mono);font-size:12px;color:var(--muted);border:1px dashed var(--structural);padding:14px;margin:16px 0}
   .conv-tip{position:fixed;pointer-events:none;background:var(--paper);border:1px solid var(--ink);padding:5px 8px;font-family:var(--mono);font-size:11px;color:var(--ink);z-index:20;display:none;max-width:300px}
+  .fold{margin:14px 0 6px}
+  .fold>summary{font-family:var(--mono);font-size:12px;color:var(--muted);cursor:pointer;
+    letter-spacing:.02em;line-height:1.7}
+  .fold>summary:hover{color:var(--ink)}
+  .fold>summary:focus-visible{outline:2px solid var(--clinical);outline-offset:2px}
+  .fold[open]>summary{color:var(--ink);margin-bottom:6px}
   .conv-table{margin-top:10px}
   .conv-table summary{font-family:var(--mono);font-size:12px;color:var(--muted);cursor:pointer}
   .conv-table summary:focus-visible{outline:2px solid var(--clinical);outline-offset:2px}
@@ -344,6 +350,8 @@
       <em>translating patient words into clinical words destroys information</em>. The
       losses appear at the translation step, not before it.
     </p>
+    <details class="fold">
+      <summary>The audit numbers, model by model: extraction accuracy from the patient&rsquo;s own words versus after translation, with each run&rsquo;s cost.</summary>
     <p class="me-n" id="me-n"></p>
     <div class="me-scroll">
       <table class="me-table">
@@ -359,6 +367,7 @@
     <p class="me-legend"><span class="sw" style="background:#b45309" aria-hidden="true"></span>orange
       slope = clinical content lost in translation &nbsp;·&nbsp;
       <span class="sw" style="background:#9aa1ad" aria-hidden="true"></span>grey = no loss</p>
+    </details>
     <p>
       That is the same regression the engine flags automatically, and the reason the
       <a href="translation/">Translation</a> fix can&rsquo;t be assumed safe without
@@ -459,6 +468,10 @@
       end, against data no interim analysis has seen.
     </p>
     <div class="conv-grid" id="conv-grid" aria-describedby="conv-caption"></div>
+    <details class="fold" id="conv-more" hidden>
+      <summary id="conv-more-sum"></summary>
+      <div class="conv-grid" id="conv-grid-more" aria-describedby="conv-caption"></div>
+    </details>
     <div class="conv-xlab" aria-hidden="true">phrases tested →</div>
     <p class="conv-cap" id="conv-caption">Fig. 5: mean language penalty per model as
       measurement accumulates, batch by batch. Shaded band: bootstrap 95% confidence
@@ -491,6 +504,11 @@
       var models = payload.models || {};
       var ids = Object.keys(models);
       if (!ids.length) return pending();
+      // the base model headlines regardless of payload key order
+      if (ids.indexOf('gemma-2-2b') > 0) {
+        ids.splice(ids.indexOf('gemma-2-2b'), 1);
+        ids.unshift('gemma-2-2b');
+      }
       var xmax = 0, ymin = 0, ymax = 0.005;
       ids.forEach(function(id){ models[id].points.forEach(function(p){
         xmax = Math.max(xmax, p.n_phrases);
@@ -574,8 +592,25 @@
         });
         panel.appendChild(svg);
         panel.appendChild(lab);
-        grid.appendChild(panel);
+        // the first model's panel carries the story; the repeats confirm it
+        // and fold away (owner request 2026-07-13: keep methods scannable)
+        if (panelIndex === 0) grid.appendChild(panel);
+        else document.getElementById('conv-grid-more').appendChild(panel);
       });
+      if (ids.length > 1) {
+        var others = ids.slice(1);
+        // only claim the settling pattern when every folded band actually
+        // ends below zero at its final point
+        var allBelow = others.every(function(id){
+          var pts = models[id].points || [];
+          var last = pts[pts.length - 1];
+          return last && last.ci95 && last.ci95[1] != null && last.ci95[1] < 0;
+        });
+        document.getElementById('conv-more-sum').textContent =
+          'The other ' + others.length + ' models, drawn the same way' +
+          (allBelow ? ': every band settles below zero.' : '.');
+        document.getElementById('conv-more').hidden = false;
+      }
       // data table (accessible view)
       var wrap = document.getElementById('conv-table-wrap');
       var tbl = document.createElement('table');
