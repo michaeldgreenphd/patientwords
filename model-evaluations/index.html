@@ -327,8 +327,34 @@
       td('num',String(p.sign_test.p_bh));
       body.appendChild(tr);
     });
+    // measured-but-below-floor models: honest pending rows, no statistics
+    (d.below_floor||[]).forEach(function(bf){
+      var tr=document.createElement('tr');
+      tr.style.color='#6d6c66';
+      var mc=document.createElement('td');mc.className='mono';
+      mc.appendChild(document.createTextNode(bf.id));
+      var pv=PROV[bf.id];
+      if(pv&&pv.maker){
+        var sub=document.createElement('div');sub.className='prov';
+        var when=pv.released?(' · '+fmtMonth(pv.released)):'';
+        sub.appendChild(document.createTextNode(pv.maker+when+' · '));
+        var a=document.createElement('a');a.href=pv.spec;a.textContent='spec';
+        a.rel='noopener';sub.appendChild(a);
+        mc.appendChild(sub);
+      }
+      tr.appendChild(mc);
+      function td(txt){var c=document.createElement('td');c.textContent=txt;tr.appendChild(c);}
+      td('probe measured · full run in progress');
+      td('—');
+      var n=document.createElement('td');n.className='num';
+      n.textContent=bf.n_phrases+' of '+(d.site_floor_n_phrases||30);
+      tr.appendChild(n);
+      td('—');td('—');td('—');
+      document.getElementById('ev-body').appendChild(tr);
+    });
     document.getElementById('ev-cap').textContent=
-      'dedupe: '+d.dedupe+' · downgrade-rate CI: '+d.ci_method_downgrade+' · sign tests BH-corrected across models';
+      'dedupe: '+d.dedupe+' · downgrade-rate CI: '+d.ci_method_downgrade+' · sign tests BH-corrected across models'+
+      ((d.below_floor&&d.below_floor.length)?' · greyed models enter the comparison at '+(d.site_floor_n_phrases||30)+' measured phrases':'');
   }
 })();
 </script>
