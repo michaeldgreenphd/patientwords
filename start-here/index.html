@@ -149,7 +149,7 @@
     <h2>Three phrasings, one interpretation</h2>
     <p>Patients rarely use words that appear in medical textbooks. A clinician understands multiple different framings, recognizes the same stomach problem, and reaches the same recommendation.</p>
     <div class="fig" role="img" aria-label="Three patient phrasings converge through a clinician to one recommendation: an antacid.">
-    <svg viewBox="0 0 720 190">
+    <svg viewBox="0 0 800 190">
       <text x="0" y="28" class="sv-q">“I have <tspan style="fill:var(--teal);font-weight:700">acid reflux</tspan>.”</text>
       <text x="0" y="88" class="sv-q">“My stomach’s on fire.”</text>
       <text x="0" y="148" class="sv-q">“My dyspepsia flared up.”</text>
@@ -170,7 +170,7 @@
     <h2>Same three phrasings, three different answers</h2>
     <p>We gave a language model the same sentences and read off its most likely next word. The clinical phrasing makes a medical recommendation. The casual phrasings make a food recommendation.</p>
     <div class="fig" role="img" aria-label="The same three phrasings pass through a language model and come out as three different answers: antacid, ice cream, and apple.">
-    <svg viewBox="0 0 720 190">
+    <svg viewBox="0 0 800 190">
       <text x="0" y="28" class="sv-q">“I have <tspan style="fill:var(--teal);font-weight:700">acid reflux</tspan>.”</text>
       <text x="0" y="88" class="sv-q">“My stomach’s on fire.”</text>
       <text x="0" y="148" class="sv-q">“My dyspepsia flared up.”</text>
@@ -270,8 +270,8 @@
     <p class="step-no">6 · The patch</p>
     <h2>A translation layer, for now</h2>
     <p>Put a translator between the patient and the model: it rewrites the sentence into clinical wording before the model answers.</p>
-    <div class="fig" role="img" aria-label="The same three phrasings from panel 2 all pass through a translation layer, emerge as the single clinical wording I have acid reflux, enter the language model, and come out as antacid.">
-    <svg viewBox="0 0 720 190">
+    <div class="fig" role="img" aria-label="Two routes to the model. Sent directly, the everyday phrasing comes out as ice cream at 29%. Passed through a translation layer, the three phrasings emerge as the single clinical wording I have acid reflux, enter the model, and come out as antacid at 31%.">
+    <svg viewBox="0 0 800 190">
       <text x="0" y="28" class="sv-q">“I have <tspan style="fill:var(--teal);font-weight:700">acid reflux</tspan>.”</text>
       <text x="0" y="88" class="sv-q">“My stomach’s on fire.”</text>
       <text x="0" y="148" class="sv-q">“My dyspepsia flared up.”</text>
@@ -285,11 +285,16 @@
       <path class="sv-line" d="M556,88 L574,88" stroke-width="1.2"/>
       <rect x="574" y="56" width="52" height="64" fill="none" stroke="#6d6c66" stroke-width="1.2" stroke-dasharray="5 5"/>
       <text x="600" y="140" class="sv-m" text-anchor="middle">model</text>
-      <path class="sv-line" d="M626,88 L646,88" stroke="#0f766e" stroke-width="2.2"/>
-      <text x="652" y="93" class="sv-a" fill="#0f766e">antacid</text>
+      <path d="M626,84 L646,84" style="stroke:#0f766e;stroke-width:2.2;fill:none"/>
+      <text x="652" y="89" class="sv-a" fill="#0f766e">antacid 31%</text>
+      <path d="M232,92 C300,172 470,162 570,114" style="stroke:#b4483d;stroke-width:1.6;fill:none"/>
+      <path d="M570,114 L560,119 L565,109 Z" fill="#b4483d"/>
+      <text x="368" y="178" class="sv-m" text-anchor="middle" fill="#b4483d">no translation</text>
+      <path d="M626,106 L646,106" style="stroke:#b4483d;stroke-width:2.2;fill:none"/>
+      <text x="652" y="111" class="sv-a" fill="#b4483d">ice cream 29%</text>
     </svg>
     </div>
-    <p class="cap">ice cream (29%) becomes antacid (31%) after translation. Importantly for now this is a patch, not a permanent solution: it fixed 8 of the 20 hardest cases, left 7 unchanged, and once made things worse · <a href="../translation/">see the live translation traces</a></p>
+    <p class="cap">a patch, not a permanent solution: translation fixed 8 of the 20 hardest cases, left 7 unchanged, and once made things worse · <a href="../translation/">see the live translation traces</a></p>
   </section>
 
   <section>

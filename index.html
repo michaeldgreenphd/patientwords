@@ -236,6 +236,8 @@
     .keyline,.dateline,.endnote p,footer{color:#444}
   }
   /* Safety view: per-model urgency cards */
+  .sv-asym{margin:22px 0 0;max-width:680px}
+  .sv-asym svg{width:100%;height:auto;display:block}
   .safety-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin:20px 0 8px}
   .safety-card{border:1px solid var(--hairline);background:#fff;padding:14px 16px}
   .safety-card h3{font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.08em;margin:0 0 10px}
@@ -460,6 +462,8 @@
       </table>
     </div>
     <p class="tier-cap" id="tier-cap" hidden>care-urgency tiers, reviewed v1 · predicted words with no urgency information are excluded · a redirect that lands on a lower tier is a downgrade</p>
+    <div class="sv-asym" id="sv-asym" hidden></div>
+    <p class="safety-note" id="sv-asym-cap" hidden>when a wording change moves the top answer across care tiers, the move is mostly down · red arrows: answers landing on a lower tier · grey: a higher one · phrase-deduped counts per model</p>
     <div class="safety-grid" id="sv-grid"></div>
     <p class="safety-note" id="sv-dedup-note" hidden>counts are phrase-deduped — each phrase counted once per model; re-traces collapsed</p>
     <p class="safety-note" id="sv-note"></p>
@@ -741,6 +745,40 @@
         if(tb.children.length){
           document.getElementById('tier-table').hidden=false;
           var tcap=document.getElementById('tier-cap');if(tcap)tcap.hidden=false;
+        }
+      }
+      // direction of error: one down/up arrow pair per model, deduped counts.
+      // Older payloads without per_model_deduped simply skip the figure.
+      if(pmd){
+        var NSs='http://www.w3.org/2000/svg';
+        function sel(n,a,txt){var e=document.createElementNS(NSs,n);for(var k in a)e.setAttribute(k,a[k]);if(txt!=null)e.textContent=txt;return e;}
+        // only models with observed movement: probe models measured on a
+        // handful of pairs would render as 0/0 and read as "never downgrades"
+        var ams=models.filter(function(m){var d=pmd[m];
+          return d&&typeof d.downgrades==='number'&&typeof d.upgrades==='number'&&(d.downgrades+d.upgrades)>0;});
+        if(ams.length){
+          var slot=92,W2=ams.length*slot,maxLen=84;
+          var maxC=1,maxUp=1;
+          ams.forEach(function(m){maxC=Math.max(maxC,pmd[m].downgrades,pmd[m].upgrades);maxUp=Math.max(maxUp,pmd[m].upgrades);});
+          var base=26+Math.ceil(maxUp/maxC*maxLen)+14;
+          var H2=base+maxLen+46;
+          var svg2=sel('svg',{viewBox:'0 0 '+W2+' '+H2,role:'img',
+            'aria-label':'For every measured model, more answers move down the care ladder than up when the wording turns colloquial.'});
+          svg2.appendChild(sel('line',{x1:6,y1:base,x2:W2-6,y2:base,stroke:'#dcdad2','stroke-width':1}));
+          ams.forEach(function(m,i){
+            var d=pmd[m],x0=i*slot+slot/2;
+            var dn=Math.max(6,d.downgrades/maxC*maxLen), up=Math.max(4,d.upgrades/maxC*maxLen);
+            svg2.appendChild(sel('line',{x1:x0-13,y1:base,x2:x0-13,y2:base+dn,stroke:'#b4483d','stroke-width':2.5}));
+            svg2.appendChild(sel('path',{d:'M '+(x0-17.5)+' '+(base+dn)+' L '+(x0-13)+' '+(base+dn+7)+' L '+(x0-8.5)+' '+(base+dn)+' Z',fill:'#b4483d'}));
+            svg2.appendChild(sel('text',{x:x0-13,y:base+dn+21,'text-anchor':'middle','font-family':'ui-monospace,Menlo,monospace','font-size':'11.5',fill:'#b4483d'},String(d.downgrades)));
+            svg2.appendChild(sel('line',{x1:x0+13,y1:base,x2:x0+13,y2:base-up,stroke:'#9aa1ad','stroke-width':2}));
+            svg2.appendChild(sel('path',{d:'M '+(x0+8.5)+' '+(base-up)+' L '+(x0+13)+' '+(base-up-7)+' L '+(x0+17.5)+' '+(base-up)+' Z',fill:'#9aa1ad'}));
+            svg2.appendChild(sel('text',{x:x0+13,y:base-up-11,'text-anchor':'middle','font-family':'ui-monospace,Menlo,monospace','font-size':'11.5',fill:'#6d6c66'},String(d.upgrades)));
+            svg2.appendChild(sel('text',{x:x0,y:H2-6,'text-anchor':'middle','font-family':'ui-monospace,Menlo,monospace','font-size':'10',fill:'#6d6c66'},m));
+          });
+          var asym=document.getElementById('sv-asym');
+          asym.appendChild(svg2);asym.hidden=false;
+          var acap=document.getElementById('sv-asym-cap');if(acap)acap.hidden=false;
         }
       }
       models.forEach(function(mid){
