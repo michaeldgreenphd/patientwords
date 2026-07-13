@@ -146,6 +146,8 @@
 <main id="main">
   <p class="dateline">Start here · the whole idea in five minutes</p>
   <h1>People say the same thing many ways. What does a machine "hear"?</h1>
+  <p class="subtitle">What happens inside a language model when the same medical
+    question is asked in patient words instead of clinical words.</p>
 
   <section>
     <p class="step-no">1 · A doctor converges</p>
@@ -210,9 +212,24 @@
   </section>
 
   <section>
-    <p class="step-no">4 · Look inside</p>
+    <p class="step-no">4 · What we measure</p>
+    <h2>Two numbers per sentence pair</h2>
+    <p><b>How far the right answer's probability falls</b> when the wording turns casual, and <b>whether the top answer changes</b>. When it changes toward less help, like "inhaler" becoming "shirt" in step 3, we count a downgrade.</p>
+    <div class="ladder-fig" id="care-ladder"><span class="ladder-pend">figure pending — data/urgency_shift.json</span></div>
+    <p class="cap" id="ladder-cap" hidden></p>
+  </section>
+
+  <section>
+    <p class="step-no">5 · Look inside</p>
     <h2>Circuit tracing photographs the reasoning</h2>
-    <p>Inside the model, small units called "features" switch on as it reads. Some respond to medical ideas; others to everyday ones. A circuit trace records which features fired and how strongly each fed the final recommendation. Clinical wording lights the medical features; patient wording lights the everyday ones.</p>
+    <p>A trace is not a later stage: it is a look inside the guess you watched in
+      step 3. Inside the model, small units called "features" switch on as it reads.
+      Some respond to medical ideas; others to everyday ones. A circuit trace records
+      which features fired and how strongly each fed the final recommendation.
+      Clinical wording lights the medical features; patient wording lights the
+      everyday ones. A person chatting with a model never sees any of this: the
+      trace is a diagnostic that researchers compute from the model's internals
+      after it answers.</p>
     <div class="fig" role="img" aria-label="Two parallel tracks of feature nodes reading left to right through the network, from early layers to deep layers, each with a scatter of faint weak-firing features behind a handful of strong ones. The clinical term dyspepsia lights up teal medical nodes and leads to antacid. The casual phrase stomach on fire lights up dark everyday nodes and leads to ice cream.">
     <svg viewBox="0 0 720 136">
       <text x="0" y="40" class="sv-q">“dyspepsia”</text>
@@ -258,15 +275,7 @@
     </svg>
     </div>
     <p class="cap">larger node = stronger influence · faint = barely fired · the real traces of the matching acid-reflux pair fire 732 and 787 features and share 465; the sketch draws the strongest few</p>
-    <p>Most figures on this site are circuit tracings like this one.</p>
-  </section>
-
-  <section>
-    <p class="step-no">5 · What we measure</p>
-    <h2>Two numbers per sentence pair</h2>
-    <p><b>How much confidence the right answer lost</b> when the wording was more similar to patient language, and <b>whether the top answer changed</b>. A changed answer that points to less help — a recommendation for an "inhaler" becoming a recommendation for a "shirt" shows how some of these differences present themselves.</p>
-    <div class="ladder-fig" id="care-ladder"><span class="ladder-pend">figure pending — data/urgency_shift.json</span></div>
-    <p class="cap" id="ladder-cap" hidden></p>
+    <p>Most figures elsewhere on PatientWords are real circuit traces like this sketch.</p>
   </section>
 
   <section>
@@ -306,7 +315,7 @@
       <text x="680" y="79" class="sv-a" fill="#0f766e">antacid 31%</text>
     </svg>
     </div>
-    <p class="cap">a patch, not a permanent solution: translation fixed 8 of the 20 hardest cases, left 7 unchanged, and three times made things worse · <a href="../translation/">see the live translation traces</a></p>
+    <p>A patch, not a permanent solution: translation fixed 8 of the 20 hardest cases, left 7 unchanged, and three times made things worse. <a href="../translation/">See the live translation traces</a>.</p>
   </section>
 
   <section>
@@ -359,9 +368,9 @@
       <div>
         <h3>Mend</h3>
         <ul>
-          <li>Fortify the model. One sentence of explicit medical context roughly halves the penalty measured under casual framing.</li>
-          <li>Train on patient language. Models learn idioms, misspellings, and dialects the way clinicians do.</li>
-          <li>Translate only behind a regression check; rewrites can lose clinical content.</li>
+          <li>Fortify the model: put a line of medical context in front of the question. One sentence of explicit medical context roughly halves the penalty measured under casual framing.</li>
+          <li>Train on patient language: include the way people actually speak in the training data. Models learn idioms, misspellings, and dialects the way clinicians do.</li>
+          <li>Translate only behind a regression check: re-test every rewrite, because rewrites can lose clinical content.</li>
         </ul>
       </div>
       <div>
@@ -391,8 +400,8 @@
 
   <div class="src">
     Sources: all model answers and probabilities are live gemma-2-2b measurements —
-    scenario 48 (panel 2, first two rows; panel 4&rsquo;s feature counts are its circuit_diff) and scenario 85 (panel 3) in <a href="../data/simulated_scenarios.json">data/simulated_scenarios.json</a>;
-    the register ladder (panel 2, third row), panel 5&rsquo;s context result, and panel 6&rsquo;s translation outcomes in <a href="../data/provenance.json">data/provenance.json</a>.
+    scenario 48 (panel 2, first two rows; panel 5&rsquo;s feature counts are its circuit_diff) and scenario 85 (panel 3) in <a href="../data/simulated_scenarios.json">data/simulated_scenarios.json</a>;
+    the register ladder (panel 2, third row), panel 7&rsquo;s context result, and panel 6&rsquo;s translation outcomes in <a href="../data/provenance.json">data/provenance.json</a>.
     The clinician panel is illustrative, not a measurement.
   </div>
   <div class="endnote" style="border-top:1px solid var(--ink);margin-top:42px;padding-top:14px">
