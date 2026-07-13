@@ -210,14 +210,14 @@
   <hr class="rule-fine">
 </header>
 <main id="main">
-  <p class="dateline">Fig. 3 <span class="mode">· dialect & register sweep · live render · traced July 7, 2026</span></p>
+  <p class="dateline">Fig. 3 <span class="mode">· dialect & register sweep · live render · traced July 8, 2026</span></p>
   <h1>Dialect differences</h1>
-  <p class="subtitle">The clinical term held fixed while the surrounding sentence shifts across six dialect and register framings.</p>
+  <p class="subtitle">The clinical term held fixed while the surrounding sentence shifts across eight dialect and register framings.</p>
   <p class="explainer">The clinical term stays fixed while the sentence around it is re-traced across dialect and register variants, so any shift comes from framing. The sweep below holds a set of clinical terms fixed, one per row, and re-traces each across several dialect and register framings; the matrix reports the exact counts. A minority of framings move the top word.</p>
   <p class="traced" data-mode="dialect" data-traced="2026-07-07">
-    <span class="tm"><b>model:</b> gemma-2-2b · <b>features:</b> Gemma Scope transcoders (16k) · <b>graphs:</b> 56 (8 baselines + 48 framings)</span><br>
+    <span class="tm"><b>model:</b> gemma-2-2b · <b>features:</b> Gemma Scope transcoders (16k) · <b>graphs:</b> 45 (5 baselines + 40 framings)</span><br>
     <span class="tm"><b>held fixed:</b> clinical terms from the hand-measured dataset · <b>framings:</b> dialect + register variants per term</span><br>
-    <span class="tp">framings authored by claude-opus-4-8 ($0.083, 48/48 accepted) · traced via Neuronpedia</span>
+    <span class="tp">framings authored by claude-sonnet-5 ($0.189, 64 accepted / 2 rejected) · traced via Neuronpedia</span>
   </p>
 
   <section id="dl-matrix" hidden>
@@ -273,7 +273,7 @@
     </div>
     <p class="dl-caption">The featured term&rsquo;s strongest baseline clinical features, ranked by
        normalized attribution mass. &ldquo;Survives&rdquo; counts the framings whose trace still
-       contains the feature; features surviving 6/6 framings are the dialect-invariant core.
+       contains the feature; features surviving every framing are the dialect-invariant core.
        Computed from the committed renders, no re-tracing.</p>
     </details>
   </section>

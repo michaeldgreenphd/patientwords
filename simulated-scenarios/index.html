@@ -344,7 +344,7 @@
     <p class="explainer">
       Some redirects go further &mdash; the top answer lands on a different object altogether.
       These are the swaps to watch: the wording changes <em>what’s offered</em>.
-      Tier labels follow the reviewed v1 vocabulary.
+      Tier labels follow the owner-reviewed v1 vocabulary (domain review pending).
     </p>
     <div class="rx-g" id="rx-cards"></div>
   </section>
@@ -368,7 +368,7 @@
           <th scope="col">Target</th>
           <th scope="col" data-key="shift"><button type="button" class="th-tip" title="target-token likelihood, clinical wording → patient wording — click to sort by size of change">Likelihood shift</button></th>
           <th scope="col" class="num" data-key="net"><button type="button" class="th-tip" title="which wording holds the target more strongly, and by how much — click to sort">Net effect ⓘ</button></th>
-          <th scope="col" class="num" data-key="urgency"><button type="button" class="th-tip" title="flags when the top prediction moves to a lower tier of care under patient wording (reviewed v1 tiers) — click to sort">Urgency ⓘ</button></th>
+          <th scope="col" class="num" data-key="urgency"><button type="button" class="th-tip" title="flags when the top prediction moves to a lower tier of care under patient wording (owner-reviewed v1 tiers, domain review pending) — click to sort">Urgency ⓘ</button></th>
           <th scope="col" data-key="mass"><button type="button" title="sort by the clinical phrasing’s clinical-circuit share">Clinical circuit</button></th>
           <th scope="col" data-key="flip"><button type="button" title="sort: flips first">Top prediction</button></th>
         </tr></thead>
@@ -659,7 +659,7 @@
           uline.appendChild(el('b',null,(fc.downgrade||0)+' downgrade flips vs '+(fc.upgrade||0)+' upgrades'));
           uline.appendChild(el('span',null,' across models. Care-urgency tier vocabulary: '));
         }
-        uline.appendChild(el('b',null,urg.vocabulary_status||'reviewed v1'));
+        uline.appendChild(el('b',null,urg.vocabulary_status||'owner-reviewed v1 · domain review pending'));
         uline.appendChild(el('span',null,'; the Urgency column reads from the measured urgency data.'));
         prov.appendChild(uline);
       }
@@ -740,7 +740,7 @@
               +(typeof u.tier_top_patient==='number'?('tier '+u.tier_top_patient):'untiered');
             var tt=el('span','tip',tierTxt);
             tt.setAttribute('tabindex','0');
-            tt.setAttribute('data-tip','Care-urgency tiers (reviewed v1): 4 emergency · 3 specialist · '
+            tt.setAttribute('data-tip','Care-urgency tiers (owner-reviewed v1, domain review pending): 4 emergency · 3 specialist · '
               +'2 general doctor · 1 self-treatment or medication · 0 no care action');
             why.appendChild(tt);
             why.appendChild(el('span',null,' · Sim '+s.index));
@@ -821,13 +821,13 @@
         var u=urgFor(s);
         if(u&&u.flip_class==='downgrade'){
           uc.appendChild(el('span','urg-down','t'+u.tier_top_clinical+'→t'+u.tier_top_patient+' ↓'));
-          uc.title='top prediction moves to a lower care-urgency tier (reviewed v1 tiers)';
+          uc.title='top prediction moves to a lower care-urgency tier (owner-reviewed v1 tiers, domain review pending)';
         }else if(u&&u.flip_class==='upgrade'){
           uc.appendChild(el('span','urg-up','t'+u.tier_top_clinical+'→t'+u.tier_top_patient+' ↑'));
-          uc.title='top prediction moves to a higher care-urgency tier (reviewed v1 tiers)';
+          uc.title='top prediction moves to a higher care-urgency tier (owner-reviewed v1 tiers, domain review pending)';
         }else if(u&&typeof u.tier_shift==='number'){
           uc.appendChild(el('span','urg-flat',(u.tier_shift>0?'+':'')+u.tier_shift.toFixed(2)));
-          uc.title='expected care-urgency shift, probability-weighted (reviewed v1 tiers)';
+          uc.title='expected care-urgency shift, probability-weighted (owner-reviewed v1 tiers, domain review pending)';
         }else{
           uc.textContent='—';
         }
