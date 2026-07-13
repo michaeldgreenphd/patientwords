@@ -475,8 +475,8 @@
       because a handful of phrases could mislead, and narrows as hundreds accumulate.
       For every model measured in the hundreds of phrases, the band settles below
       zero; the newest models carry only a handful of pairs so far, and their bands
-      are still wide. Not every model got there at the same speed: at 133 phrases the downgrade pattern in gemma-3-4b-it could still have
-      been chance; by 240 it could not. One honesty rule: a random tenth of new
+      are still wide. Not every model got there at the same speed: at 36 phrases the downgrade pattern
+      in gemma-3-4b-it could still have been chance; by 155 it could not. One honesty rule: a random tenth of new
       phrases is locked away untouched, so conclusions can be checked once, at the
       end, against data no interim analysis has seen.
     </p>
@@ -648,7 +648,7 @@
         categories come from keyword-matching auto-interp descriptions. Both steps can be
         wrong, and a mislabeled feature shifts the clinical-mass numbers.</p></li>
       <li><p><b>Measurements are a point in time.</b> The probabilities were observed on
-        specific dates against a hosted service. The 52 pairs re-traced so far reproduce
+        specific dates against a hosted service. The <span id="lim-rt-n">52</span> pairs re-traced so far reproduce
         exactly at the recorded three-decimal precision (see step 2), but that is the
         set that happened to be repeated, not a guarantee. Future drift would come from
         service changes; a daily three-pair sentinel re-trace watches for that.</p></li>
@@ -769,6 +769,8 @@
       document.getElementById('rt-stable').textContent=d.top_word_stable_pairs+' of '+d.pairs_retraced;
       var lists=document.getElementById('rt-lists');
       if(lists)lists.textContent=(d.spread_lists_identical_pairs!=null?d.spread_lists_identical_pairs:'—')+' of '+d.pairs_retraced;
+      var limN=document.getElementById('lim-rt-n');
+      if(limN)limN.textContent=String(d.pairs_retraced);
       document.getElementById('retrace-note').hidden=false;
     }).catch(function(){});
 })();
