@@ -580,9 +580,11 @@
     fetch('../data/provenance.json',{cache:'no-cache'})
       .then(function(r){return r.ok?r.json():null;}).catch(function(){return null;}),
     fetch('../data/jlens_depth.json',{cache:'no-cache'})
+      .then(function(r){return r.ok?r.json():null;}).catch(function(){return null;}),
+    fetch('../data/specialties.json',{cache:'no-cache'})
       .then(function(r){return r.ok?r.json():null;}).catch(function(){return null;})
   ]).then(function(loaded){
-      var data=loaded[0], urg=loaded[1], provData=loaded[2], depthData=loaded[3];
+      var data=loaded[0], urg=loaded[1], provData=loaded[2], depthData=loaded[3], specData=loaded[4];
       // depth classes join on (batch, in-batch index); lens-measured model only
       var depthMap={}, depthLabels={suppressed:'lost late',absent:'never formed'};
       if(depthData&&depthData.blocks)depthData.blocks.forEach(function(b){
@@ -598,6 +600,22 @@
       var batches=data.batches||[];
       var traced=data.traced||{};
       if(!scenarios.length)throw new Error('empty');
+      // specialty taxonomy (draft, presentational): free-text generation
+      // topics grouped as specialty > subcategory; unmapped topics -> Other
+      var topicSpec=null;
+      if(specData&&specData.specialties){
+        topicSpec={};
+        Object.keys(specData.specialties).forEach(function(spec){
+          var subs=specData.specialties[spec];
+          Object.keys(subs).forEach(function(sub){
+            (subs[sub]||[]).forEach(function(t){topicSpec[t]=[spec,sub];});
+          });
+        });
+      }
+      function specOf(s){
+        var t=(s.topic||'').trim().toLowerCase();
+        return (topicSpec&&topicSpec[t])||['Other','Other'];
+      }
 
       document.getElementById('sim-traced').hidden=false;
 
@@ -736,6 +754,7 @@
       var sumBody=document.getElementById('sim-sum-body');
       var pages=document.getElementById('sim-pages');
       var sortKey=null,sortDir=-1,filterText='',filterTopic='',filterStatus='';
+      var filterSpec='',filterSub='',subRowReset=function(){};
 
       // Cross-model view. gemma-2-2b is the base: its measurements live at the
       // scenario top level and are the fallback; other models add s.models[id].
@@ -865,6 +884,8 @@
       }
       function visibleScenarios(){
         var list=scenarios.slice();
+        if(filterSpec)list=list.filter(function(s){return specOf(s)[0]===filterSpec;});
+        if(filterSub)list=list.filter(function(s){return specOf(s)[1]===filterSub;});
         if(filterTopic)list=list.filter(function(s){return (s.topic||'')===filterTopic;});
         if(filterStatus)list=list.filter(function(s){
           var m=hasModel(s)?cur(s):{};
@@ -982,7 +1003,7 @@
         var topics=[];
         scenarios.forEach(function(s){if(s.topic&&topics.indexOf(s.topic)<0)topics.push(s.topic);});
         topics.sort();
-        function group(label,items,get,set){
+        function group(label,items,get,set,parent){
           var g=el('div','chip-g');
           g.setAttribute('role','group');
           g.setAttribute('aria-label','filter by '+label);
@@ -1001,9 +1022,38 @@
             });
             g.appendChild(c);
           });
-          wrap.appendChild(g);
+          (parent||wrap).appendChild(g);
         }
-        if(topics.length)group('condition',
+        if(topicSpec){
+          // two-level taxonomy: specialty chips, then a subcategory row for
+          // the selected specialty (only when it actually narrows anything)
+          var counts={},subCounts={};
+          scenarios.forEach(function(s){
+            var m=specOf(s);
+            counts[m[0]]=(counts[m[0]]||0)+1;
+            (subCounts[m[0]]=subCounts[m[0]]||{})[m[1]]=(subCounts[m[0]][m[1]]||0)+1;
+          });
+          var specNames=Object.keys(counts).sort(function(a,b){return counts[b]-counts[a];});
+          var subWrap=el('div','');
+          function renderSubRow(){
+            subWrap.innerHTML='';
+            if(!filterSpec||!subCounts[filterSpec])return;
+            var subs=Object.keys(subCounts[filterSpec]);
+            if(subs.length<2)return;
+            subs.sort(function(a,b){return subCounts[filterSpec][b]-subCounts[filterSpec][a];});
+            group('subcategory',
+              [{val:'',name:'all '+filterSpec.toLowerCase()}].concat(subs.map(function(x){
+                return {val:x,name:x.toLowerCase()+' · '+subCounts[filterSpec][x]};})),
+              function(){return filterSub;},function(v){filterSub=v;},subWrap);
+          }
+          subRowReset=function(){filterSub='';renderSubRow();};
+          group('specialty',
+            [{val:'',name:'all specialties'}].concat(specNames.map(function(x){
+              return {val:x,name:x+' · '+counts[x]};})),
+            function(){return filterSpec;},
+            function(v){filterSpec=v;filterSub='';renderSubRow();});
+          wrap.appendChild(subWrap);
+        }else if(topics.length)group('condition',
           [{val:'',name:'all conditions'}].concat(topics.map(function(x){return {val:x,name:x};})),
           function(){return filterTopic;},function(v){filterTopic=v;});
         group('outcome',
@@ -1015,6 +1065,7 @@
 
       document.getElementById('sim-reset').addEventListener('click',function(){
         sortKey=null;sortDir=-1;filterText='';filterTopic='';filterStatus='';
+        filterSpec='';subRowReset();
         var fb=document.getElementById('sim-filter');
         if(fb)fb.value='';
         // filter chip groups reset to their first ("all") chip; the model
