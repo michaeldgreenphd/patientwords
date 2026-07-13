@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Model Evaluations · PatientWords — four measured models compared</title>
-<meta name="description" content="The same clinical-vs-patient phrasing probe measured on gemma-2-2b, gemma-3-4b-it, qwen3-4b, and qwen3-1.7b: per-model penalty intervals, downgrade asymmetry, and the kind of evidence each model carries.">
+<title>Model Evaluations · PatientWords — seven measured models compared</title>
+<meta name="description" content="The same clinical-vs-patient phrasing probe measured on seven open-weights models across four families: per-model penalty intervals, downgrade asymmetry, and the kind of evidence each model carries.">
 <link rel="canonical" href="https://michaeldgreenphd.github.io/patientwords/model-evaluations/">
 <meta name="theme-color" content="#faf9f5">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="PatientWords">
 <meta property="og:title" content="Model Evaluations — PatientWords">
-<meta property="og:description" content="The same extraction task, before and after translation. On this 10-item set the models read patient phrasing perfectly; the losses appear after the translation step.">
+<meta property="og:description" content="Per-model penalty intervals and downgrade asymmetry for seven measured open-weights models. Patient phrasing costs probability on every model measured in the hundreds of phrases.">
 <meta property="og:url" content="https://michaeldgreenphd.github.io/patientwords/model-evaluations/">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23faf9f5'/%3E%3Crect x='9' y='9' width='30' height='30' fill='%23111827'/%3E%3Crect x='25' y='25' width='30' height='30' fill='%2315803d'/%3E%3C/svg%3E">
 <style>
@@ -129,8 +129,8 @@
   <hr class="rule-fine">
 </header>
 <main id="main">
-  <p class="dateline">Model evaluations <span class="mode">· four measured models · phrase-deduped statistics</span></p>
-  <h1>Four models, one measurement.</h1>
+  <p class="dateline">Model evaluations <span class="mode">· <span id="me-count">seven</span> measured models · phrase-deduped statistics</span></p>
+  <h1><span id="me-count-h">Seven</span> models, one measurement.</h1>
   <p class="subtitle">The same two-phrasing probe, run on every model. The penalty
     is not one model’s quirk.</p>
 
@@ -243,6 +243,14 @@
   function draw(d){
     var per=d.per_model||{}; var ids=(d.models||Object.keys(per)).filter(function(m){return per[m];});
     var meta={}; (d.models_meta||[]).forEach(function(m){meta[m.id]=m;});
+
+    // the measured-model count self-updates; title/meta stay hardcoded and
+    // are guarded by the engine's nightly claim check
+    var words=['zero','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve'];
+    var w=words[ids.length]||String(ids.length);
+    var c1=document.getElementById('me-count'), c2=document.getElementById('me-count-h');
+    if(c1)c1.textContent=w;
+    if(c2)c2.textContent=w.charAt(0).toUpperCase()+w.slice(1);
 
     /* forest plot: shared axis, one dot+CI per model */
     var lo=0,hi=0.005;

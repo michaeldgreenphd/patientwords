@@ -171,7 +171,7 @@
   <section>
     <p class="step-no">2 · The model diverges</p>
     <h2>Same three phrasings, three different answers</h2>
-    <p>We gave a language model the same sentences and read off its most likely next word. The clinical phrasing makes a medical recommendation. The casual phrasings make a food recommendation.</p>
+    <p>We gave a language model the same sentences and read off its most likely next word. The clinical phrasing makes a medical recommendation. The casually framed phrasings make a food recommendation, even the one that uses the clinical term.</p>
     <div class="fig" role="img" aria-label="The same three phrasings pass through a language model and come out as three different answers: antacid, ice cream, and apple.">
     <svg viewBox="0 0 800 190">
       <text x="0" y="28" class="sv-q">“I have <tspan style="fill:var(--teal);font-weight:700">acid reflux</tspan>.”</text>
@@ -257,7 +257,7 @@
       </g>
     </svg>
     </div>
-    <p class="cap">larger node = stronger influence · faint = barely fired · the real traces of this pair fire 732 and 787 features and share 465; the sketch draws the strongest few</p>
+    <p class="cap">larger node = stronger influence · faint = barely fired · the real traces of the matching acid-reflux pair fire 732 and 787 features and share 465; the sketch draws the strongest few</p>
     <p>Most figures on this site are circuit tracings like this one.</p>
   </section>
 
@@ -306,7 +306,7 @@
       <text x="680" y="79" class="sv-a" fill="#0f766e">antacid 31%</text>
     </svg>
     </div>
-    <p class="cap">a patch, not a permanent solution: translation fixed 8 of the 20 hardest cases, left 7 unchanged, and once made things worse · <a href="../translation/">see the live translation traces</a></p>
+    <p class="cap">a patch, not a permanent solution: translation fixed 8 of the 20 hardest cases, left 7 unchanged, and three times made things worse · <a href="../translation/">see the live translation traces</a></p>
   </section>
 
   <section>
@@ -359,7 +359,7 @@
       <div>
         <h3>Mend</h3>
         <ul>
-          <li>Fortify the model. One sentence of explicit medical context roughly halves the penalty from casual wording.</li>
+          <li>Fortify the model. One sentence of explicit medical context roughly halves the penalty measured under casual framing.</li>
           <li>Train on patient language. Models learn idioms, misspellings, and dialects the way clinicians do.</li>
           <li>Translate only behind a regression check; rewrites can lose clinical content.</li>
         </ul>
@@ -381,9 +381,8 @@
         result at the last step. Translation adds no knowledge; it recovers work
         already done.</p>
       <div class="depth-fig" id="depth-units"><span class="depth-pend">figure pending — data/jlens_depth.json</span></div>
-      <p class="depth-cap">Each square is one measured pair from the
-        <a href="../simulated-scenarios/">scenario gallery</a>; hover for its clinical
-        target. Depth readouts: Jacobian lens (Gurnee et&nbsp;al., Transformer
+      <p class="depth-cap">Each square is one measured pair from the newest generated
+        batch; hover for its clinical target. Depth readouts: Jacobian lens (Gurnee et&nbsp;al., Transformer
         Circuits, 2026) via Neuronpedia; the <a href="../methods.html#reading-layers">methods
         page</a> shows the causal check.</p>
     </div>
@@ -392,8 +391,8 @@
 
   <div class="src">
     Sources: all model answers and probabilities are live gemma-2-2b measurements —
-    scenario 48 (panel 2, first two rows; panel 4&rsquo;s feature counts are its circuit_diff), the register ladder (panel 2, third row), and scenario 85 (panel 3) in <a href="../data/simulated_scenarios.json">data/simulated_scenarios.json</a>,
-    the register ladder in <a href="../data/provenance.json">data/provenance.json</a>.
+    scenario 48 (panel 2, first two rows; panel 4&rsquo;s feature counts are its circuit_diff) and scenario 85 (panel 3) in <a href="../data/simulated_scenarios.json">data/simulated_scenarios.json</a>;
+    the register ladder (panel 2, third row), panel 5&rsquo;s context result, and panel 6&rsquo;s translation outcomes in <a href="../data/provenance.json">data/provenance.json</a>.
     The clinician panel is illustrative, not a measurement.
   </div>
   <div class="endnote" style="border-top:1px solid var(--ink);margin-top:42px;padding-top:14px">

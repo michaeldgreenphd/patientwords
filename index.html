@@ -393,13 +393,13 @@
            data-live-title="Live preview: dialect-mode attribution graphs">
         <div class="pending-inner"><span class="pending-mark"></span>loading · dialect mode</div>
       </div>
-      <figcaption>live render · traced 2026-07-07</figcaption>
+      <figcaption>live render · traced 2026-07-08</figcaption>
     </figure>
     <div class="fig-body">
       <p class="fig-no">Fig. 3 <span class="mode">· dialect</span></p>
       <h3>Dialect Differences</h3>
       <p>Clinical terms stay fixed while the sentence around them is re-traced across dialect and register framings, so any shift comes from framing alone. A minority of framings move the top word off the standard-English target — the full matrix shows which.</p>
-      <p class="traced" data-mode="dialect" data-traced="2026-07-07">
+      <p class="traced" data-mode="dialect" data-traced="2026-07-08">
         <span class="tm"><b>traced model:</b> gemma-2-2b · gemma scope transcoders</span>
         <span class="tp">45 graphs · 5 baselines + 40 framings · batch dialects_20260708T120729Z</span>
       </p>
@@ -456,7 +456,7 @@
 
   <section id="safety-view" hidden>
     <div class="section-head">
-      <h2>Safety view — urgency of the predicted action<span class="draft-flag">tiers reviewed v1</span></h2>
+      <h2>Safety view — urgency of the predicted action<span class="draft-flag">tiers owner-reviewed v1 · domain review pending</span></h2>
       <span class="count" id="sv-count"></span>
     </div>
     <p class="lede" style="font-size:16px">Not every flip is equal. Sometimes the model <em>hedges</em> (e.g. the clinical answer stays on top but loses probability). Sometimes it <em>redirects</em>: the top answer changes, and when it lands on a lower tier of care (specialist → generalist, medication → nothing) we call that a recommendation <em>downgrade</em>. The tiers, with example words from the model’s measured predictions:</p>
@@ -472,7 +472,7 @@
         <tbody id="tier-body"></tbody>
       </table>
     </div>
-    <p class="tier-cap" id="tier-cap" hidden>care-urgency tiers, reviewed v1 · predicted words with no urgency information are excluded · a redirect that lands on a lower tier is a downgrade</p>
+    <p class="tier-cap" id="tier-cap" hidden>care-urgency tiers, owner-reviewed v1 · domain review pending · predicted words with no urgency information are excluded · a redirect that lands on a lower tier is a downgrade</p>
     </details>
     <div class="sv-asym" id="sv-asym" hidden></div>
     <p class="safety-note" id="sv-asym-cap" hidden>when a wording change moves the top answer across care tiers, the move is mostly down · red arrows: answers landing on a lower tier · grey: a higher one · phrase-deduped counts per model</p>
@@ -1044,7 +1044,7 @@
   // 'inhaler' is the continuation-disambiguated label for the 'inhal' wordpiece.
   var states={
     clinical:{swap:'asthma flares',bars:[['inhaler',0.692,'#15803d'],['mask',0.059,'#c3c9d2'],['set',0.028,'#c3c9d2']]},
-    patient:{swap:'chest gets all tight',bars:[['shirt',0.183,'#b4483d'],['t-',0.068,'#c3c9d2'],['inhaler',0.043,'#15803d']]}
+    patient:{swap:'chest gets all tight',bars:[['shirt',0.183,'#b4483d'],['t-',0.068,'#c3c9d2'],['inhaler (5th)',0.043,'#15803d']]}
   };
   var cur='clinical';
   var wrap=document.getElementById('tg-bars');

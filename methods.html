@@ -298,7 +298,7 @@
       for a week, so before dinner she took a”</em> continues with <em>laxative</em>.
       Rephrase it as <em>“all bunged up”</em> and the top word becomes <em>nap</em>
       (30%, against the laxative’s 26% under clinical wording). The advice changed,
-      not just its probability. Tiers follow the reviewed v1 vocabulary; the home
+      not just its probability. Tiers follow the owner-reviewed v1 vocabulary (domain review pending); the home
       page’s safety view lists them with measured examples.
     </p>
     <a class="back" href="./">Back home →</a>
@@ -347,10 +347,10 @@
     <p>
       The pipeline keeps a strict separation of church and state. Anthropic&rsquo;s
       Claude models do exactly two jobs. They <em>write</em> the test questions (the
-      phrase pairs; each batch&rsquo;s record names the exact model, currently
+      phrase pairs; each batch&rsquo;s record names the exact model, for the main run currently
       <code>claude-haiku-4-5</code>, <a href="https://www.anthropic.com/news/claude-haiku-4-5" rel="noopener">Anthropic, released October 2025</a>) and they <em>translate</em> patient wording into
       clinical wording for the Translation figure. A different set of models
-      <em>takes</em> the test: the open-weights gemma and qwen families on every other
+      <em>takes</em> the test: the open-weights gemma, qwen, llama, and olmo families on every other
       page. The test-writers never take the test, and the test-takers never write
       their own questions.
     </p>
@@ -457,7 +457,7 @@
       The depth readout splits the penalty into two failure kinds. When the answer
       never forms, translation supplies the clinical wording up front. When the answer
       forms and is lost, translation recovers work the model already did. In the
-      newest batch of 50 pairs: 19 of the first kind, 5 of the second, 26 unaffected.
+      newest batch of 50 pairs: 11 of the first kind, 5 of the second, 34 unaffected.
     </p>
     <p>
       The loop for a deployed system: read the layers to see which kind dominates,
@@ -474,8 +474,8 @@
       answer loses when the wording turns colloquial. The band around it starts wide,
       because a handful of phrases could mislead, and narrows as hundreds accumulate.
       For every model measured in the hundreds of phrases, the band settles below
-      zero; the newest models carry only a handful of pairs so far, and their bands
-      are still wide. Not every model got there at the same speed: at 36 phrases the downgrade pattern
+      zero; the newest additions, at about 120 phrases each, have settled below zero
+      as well. Not every model got there at the same speed: at 36 phrases the downgrade pattern
       in gemma-3-4b-it could still have been chance; by 155 it could not. One honesty rule: a random tenth of new
       phrases is locked away untouched, so conclusions can be checked once, at the
       end, against data no interim analysis has seen.
@@ -642,7 +642,7 @@
     <h2>What this evidence does and does not show</h2>
     <p>This project measures one narrow thing: how the probability of a single next word changes when clinical wording is replaced by patient wording. That is a probe of model behavior, not a clinical outcome. A lower probability for “antacid” isn’t a measure of harm; it’s a sign the model treats the two phrasings differently.</p>
     <ul class="engines">
-      <li><p><b>One small model carries the circuit evidence.</b> Every graph here comes from gemma-2-2b, chosen because its transcoders are public. The behavioral checks on qwen3-4b and qwen3-1.7b measure next-word probabilities only, no circuits. None of this shows how larger or instruction-tuned clinical systems behave.</p></li>
+      <li><p><b>One small model carries the circuit evidence.</b> Every graph here comes from gemma-2-2b, chosen because its transcoders are public. The behavioral checks on the other six models measure next-word probabilities only, no circuits. None of this shows how larger or instruction-tuned clinical systems behave.</p></li>
       <li><p><b>Attribution graphs are an interpretive tool.</b> They reconstruct the model’s computation through features and prune heavily; error nodes absorb what’s missed.</p></li>
       <li><p><b>Feature labels are machine-generated.</b> The clinical / off-target
         categories come from keyword-matching auto-interp descriptions. Both steps can be
@@ -659,7 +659,7 @@
   </section>
 
   <div class="endnote">
-    <p>Two kinds of provenance appear in the gallery. Figs. 1–4 and the simulated scenarios use prompts written by an LLM and checked automatically: the scenarios are simulated, but the testing is real.</p>
+    <p>Two kinds of provenance appear in the gallery. Figs. 1–4 and the simulated scenarios use prompts written by an LLM and checked automatically: the scenarios are simulated, but the testing is real. The phrase dataset is the other kind: hand-built from real patient language and measured by hand.</p>
     <footer>
       Built with the <a href="https://github.com/michaeldgreenphd/patientwords-engine">patientwords-engine</a> pipeline
       on <a href="https://neuronpedia.org">Neuronpedia</a> ·

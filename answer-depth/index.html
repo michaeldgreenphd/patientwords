@@ -145,7 +145,7 @@
       rewrites the everyday sentence in clinical terms and the model is measured
       again on the rewrite: the translated panel. Recovery is the rungs regained,
       the expected care-urgency of the translated sentence minus the everyday one
-      (probability-weighted, reviewed v1 tiers).</p>
+      (probability-weighted, owner-reviewed v1 tiers, domain review pending).</p>
     <p>The depth classes make a testable prediction. Translation should regain more
       where the model computed the answer and dropped it than where the answer never
       formed: in the first kind there is finished work to recover. The table tracks
@@ -266,7 +266,7 @@
         tmount.appendChild(table);
         var capBits=['n = '+tr.pairs.length+' pairs with a translated panel; exploratory, small sample.'];
         if(small.length)capBits.push('Held back until n reaches 3: '+small.join(', ')+'.');
-        capBits.push('Translated panels for the newest batch are queued; the table grows as they land.');
+        capBits.push('The table grows as translated panels for newer batches land.');
         document.getElementById('ad-trans-cap').textContent=capBits.join(' ');
       }else{
         document.getElementById('ad-trans-cap').textContent=
