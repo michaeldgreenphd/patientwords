@@ -236,6 +236,12 @@
     .keyline,.dateline,.endnote p,footer{color:#444}
   }
   /* Safety view: per-model urgency cards */
+  .fold{margin:14px 0 6px}
+  .fold>summary{font-family:var(--mono);font-size:12px;color:var(--muted);cursor:pointer;
+    letter-spacing:.02em;line-height:1.7}
+  .fold>summary:hover{color:var(--ink)}
+  .fold>summary:focus-visible{outline:2px solid var(--clinical);outline-offset:2px}
+  .fold[open]>summary{color:var(--ink);margin-bottom:6px}
   .sv-asym{margin:22px 0 0;max-width:680px}
   .sv-asym svg{width:100%;height:auto;display:block}
   .safety-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin:20px 0 8px}
@@ -451,6 +457,8 @@
       <span class="count" id="sv-count"></span>
     </div>
     <p class="lede" style="font-size:16px">Not every flip is equal. Sometimes the model <em>hedges</em> (e.g. the clinical answer stays on top but loses probability). Sometimes it <em>redirects</em>: the top answer changes, and when it lands on a lower tier of care (specialist → generalist, medication → nothing) we call that a recommendation <em>downgrade</em>. The tiers, with example words from the model’s measured predictions:</p>
+    <details class="fold">
+      <summary>The five care tiers, with measured example words at each rung.</summary>
     <div class="sp-scroll">
       <table class="tier-table" id="tier-table" hidden>
         <thead><tr>
@@ -462,11 +470,15 @@
       </table>
     </div>
     <p class="tier-cap" id="tier-cap" hidden>care-urgency tiers, reviewed v1 · predicted words with no urgency information are excluded · a redirect that lands on a lower tier is a downgrade</p>
+    </details>
     <div class="sv-asym" id="sv-asym" hidden></div>
     <p class="safety-note" id="sv-asym-cap" hidden>when a wording change moves the top answer across care tiers, the move is mostly down · red arrows: answers landing on a lower tier · grey: a higher one · phrase-deduped counts per model</p>
+    <details class="fold">
+      <summary>The counts behind the arrows, model by model, with the sign test.</summary>
     <div class="safety-grid" id="sv-grid"></div>
     <p class="safety-note" id="sv-dedup-note" hidden>counts are phrase-deduped — each phrase counted once per model; re-traces collapsed</p>
     <p class="safety-note" id="sv-note"></p>
+    </details>
   </section>
 
   <section id="phrase-dataset" hidden>
@@ -478,6 +490,8 @@
       <span class="tm"><b>measured on:</b> <span id="sp-model">gemma-2-2b · gemma scope transcoders</span></span>
       <span class="tp">→ observed next token · p = observed next-token probability · via the neuronpedia circuit tracer</span>
     </p>
+    <details class="fold">
+      <summary>The five pairs with the largest observed effect, from the hand-built set.</summary>
     <div class="sp-scroll">
       <table class="sp-table">
         <thead><tr>
@@ -492,6 +506,7 @@
       Hand-measured on gemma-2-2b (Gemma Scope transcoders) via the Neuronpedia circuit
       tracer; next-token probabilities as observed at measurement time.
     </p>
+    </details>
     <p class="sp-foot">preview: observed-token flips and biggest probability gaps first · <a href="phrase-dataset/">full dataset (all pairs) →</a></p>
   </section>
 
@@ -504,6 +519,8 @@
       <span class="tm"><b>model under test:</b> listed per row</span>
       <span class="tp">accuracy on the same extraction task before and after translation (behavioral scores; the figures above trace circuits)</span>
     </p>
+    <details class="fold">
+      <summary>Accuracy per model on the same extraction task, before and after translation.</summary>
     <div class="me-scroll">
       <table class="me-table">
         <thead><tr>
@@ -518,6 +535,7 @@
     </div>
     <p class="me-caption">Each model extracts clinical concepts from patient phrasing. An LLM then translates that phrasing into clinician language and the identical task is re-scored on the same expected terms. Δ isolates the effect of the translation step alone.</p>
     <p class="me-foot" id="me-foot"></p>
+    </details>
     <p><a class="open" href="methods.html#generation-eval">What the percentages mean →</a> · <a class="open" href="model-evaluations/">Compare the measured models →</a></p>
   </section>
 
