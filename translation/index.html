@@ -198,15 +198,16 @@
   <hr class="rule-fine">
 </header>
 <main id="main">
-  <p class="dateline">Fig. 4 <span class="mode">· translation recovery · live trace · traced July 7, 2026</span></p>
+  <p class="dateline">Fig. 4 <span class="mode">· translation recovery · live trace · traced July 7, 2026 · re-traced July 9, 2026</span></p>
   <h1>Translation</h1>
   <p class="subtitle">Translating the patient sentence back into clinical terms restores the prediction.</p>
   <p class="explainer">The mitigation: an LLM rewrites the patient sentence in standard terms, and that rewrite is traced directly. The clinical features reappear and the target probability recovers.</p>
   <p class="explainer">Translation matters most when it changes the <em>advice</em>. In the downgraded
      clinical advice set, <em>“Grandma’s been all bunged up for a week, so before dinner
      she took a”</em> continues with <em>nap</em> (30%); rewritten in clinical terms, the
-     top word becomes <em>lax(ative)</em> at 45% — above the original clinical phrasing
-     (26%). It is not a cure-all: in one case the rewrite replaced the
+     top word becomes <em>lax(ative)</em>, above the original clinical phrasing (26%):
+     45% in the July 7 study trace, 41% on the July 9 re-trace shown below.
+     It is not a cure-all: in one case the rewrite replaced the
      <em>prescription</em> (38%) with <em>topical</em> (15%).</p>
   <div class="flow" id="tx-flow" hidden>
     <div class="flow-step"><span class="flow-lbl">patient says</span><span class="flow-txt" id="fl-pat"></span></div>
@@ -218,7 +219,7 @@
   <div class="tx-g" id="tx-gal"></div>
   <p class="embed-caption" id="tx-gal-cap" hidden>every classifiable case from the live mitigation trace · top token per panel</p>
 
-  <span class="stat recovery">Recovered target probability: 41% after translation (clinical baseline 26%)</span>
+  <span class="stat recovery">Recovered target probability: 41% after translation (clinical baseline 26%) · July 9 re-trace</span>
 
   <h2>What the depth readout adds</h2>
   <p class="explainer">A layer-by-layer readout splits the penalty into two failure
@@ -227,8 +228,8 @@
      supplies the clinical wording itself. At 35 joined pairs the class means sit
      close: 0.13 tiers regained where the answer survived in depth, 0.16 where it
      never formed. The early 17-pair gap favoring survived answers did not persist.
-     Exploratory, owner-reviewed v1 tiers (domain review pending). The running test lives on the
-     <a href="../technical/#data">Answer Depth</a> page.</p>
+     Exploratory, owner-reviewed v1 tiers (domain review pending). The running test lives in the
+     data section of the <a href="../technical/#data">Technical page</a>.</p>
 
   <details class="meth" id="trace-fold">
     <summary>View the live three-panel trace (clinical / patient / translated)</summary>

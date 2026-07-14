@@ -1,612 +1,624 @@
 {
-  "_": "Generation provenance for figure batches shown on the site, copied from the engine repo's data/simulated/<batch>.report.json sidecars.",
-  "batches": [
-    {
-      "batch": "quadrants_20260706T191617Z",
-      "generated_by": "claude-opus-4-8",
-      "run_timestamp": "2026-07-06T19:16:32.333244+00:00",
-      "cost_usd": 0.02535,
-      "accepted": 4,
-      "rejected": 0,
-      "item_1_intended_target": " my doctor"
-    },
-    {
-      "batch": "dialects_20260707T000923Z",
-      "generated_by": "claude-opus-4-8",
-      "run_timestamp": "2026-07-07T00:10:21.352373+00:00",
-      "cost_usd": 0.083115,
-      "accepted": 48,
-      "rejected": 0
-    },
-    {
-      "batch": "dialects_20260708T120729Z",
-      "model": "claude-sonnet-5",
-      "cost_usd": 0.189324,
-      "accepted": 64,
-      "rejected": 2,
-      "_": "copied from the engine sidecar data/simulated/dialects_20260708T120729Z.report.json"
-    }
-  ],
-  "steering": {
-    "_": "Causal steering results copied from the engine repo's overnight run (trace_out/urgency_downgrades_20260707T1_steer, 2026-07-08); Neuronpedia /api/steer, strength +/-10, top-5 features, greedy 8-token continuations.",
-    "n_phrases": 20,
-    "boost_recoveries": 5,
-    "ablation_recoveries": 1,
-    "key_example": {
-      "batch": "pairs_20260707T171223Z",
-      "batch_index": 49,
-      "boost_recovered_token": "inhaler",
-      "note": "amplifying the clinical graph's top-5 clinical features while the model reads the patient wording restores the clinical continuation"
-    }
+ "_": "Generation provenance for figure batches shown on the site, copied from the engine repo's data/simulated/<batch>.report.json sidecars.",
+ "batches": [
+  {
+   "batch": "quadrants_20260706T191617Z",
+   "generated_by": "claude-opus-4-8",
+   "run_timestamp": "2026-07-06T19:16:32.333244+00:00",
+   "cost_usd": 0.02535,
+   "accepted": 4,
+   "rejected": 0,
+   "item_1_intended_target": " my doctor"
   },
-  "translation_cases": {
-    "_": "Top-token shifts through the translated third panel, copied from the engine's mitigation trace (trace_out/urgency_downgrades_20260707T1, gemma-2-2b, 2026-07-07). Each entry: [token, probability] for the clinical, patient, and translated prompts.",
-    "grandma_laxative": {
-      "clinical": [
-        "lax",
-        0.263
-      ],
-      "patient": [
-        "nap",
-        0.299
-      ],
-      "translated": [
-        "lax",
-        0.453
-      ],
-      "prompts": {
-        "clinical": "Grandma's been constipated for a week, so before dinner she took a",
-        "patient": "Grandma's been all bunged up for a week, so before dinner she took a",
-        "translated": "Grandmother has been constipated for a week, so before dinner she took a"
-      },
-      "retrace_20260709": {
-        "clinical": [
-          "lax",
-          0.263
-        ],
-        "patient_top": [
-          "nap",
-          0.299
-        ],
-        "translated": [
-          "lax",
-          0.409
-        ],
-        "_": "independent re-trace with the upgraded renderer (trace_out/grandma_r2, 2026-07-09); the embedded three-panel figure displays these numbers. The classification study's original measurements (translated 0.453) remain the gallery record; the difference is re-trace jitter, quantified in paraphrase_robustness."
-      }
-    },
-    "icecream_antacid": {
-      "clinical": [
-        "ant",
-        0.523
-      ],
-      "patient": [
-        "ice",
-        0.285
-      ],
-      "translated": [
-        "ant",
-        0.312
-      ],
-      "prompts": {
-        "clinical": "After that greasy diner meal I have acid reflux, so I reached for an",
-        "patient": "After that greasy diner meal my stomach's on fire, so I reached for an",
-        "translated": "After that high-fat meal my epigastric burning started, so I reached for an"
-      }
-    },
-    "doctor_dermatologist": {
-      "clinical": [
-        "dermatologist",
-        0.536
-      ],
-      "patient": [
-        "doctor",
-        0.677
-      ],
-      "translated": [
-        "dermatologist",
-        0.684
-      ],
-      "prompts": {
-        "clinical": "I've got severe dermatitis all over my back, so I should probably see a",
-        "patient": "I've got this itchy rash all over my back, so I should probably see a",
-        "translated": "I have pruritic dermatitis across my entire back, so I should probably see a"
-      }
-    },
-    "worsened_prescription_topical": {
-      "clinical": [
-        "prescription",
-        0.34
-      ],
-      "patient": [
-        "prescription",
-        0.384
-      ],
-      "translated": [
-        "topical",
-        0.146
-      ],
-      "prompts": {
-        "clinical": "My arms keep breaking out in eczema, so the doctor gave me a",
-        "patient": "My arms keep breaking out in itchy red patches, so the doctor gave me a",
-        "translated": "My arms keep developing pruritic erythematous patches, so the physician prescribed me a"
-      }
-    },
-    "summary": {
-      "n_downgrades": 20,
-      "recovered": 8,
-      "unrecovered": 7,
-      "unclassifiable": 5,
-      "_": "classification from the engine mitigation trace, 2026-07-07 overnight run"
-    },
-    "all": {
-      "_": "every classifiable case from the mitigation trace (top token per panel); recovered = translated top matches clinical top; unrecovered = stays at the patient top; worsened = moved to a third token with negative probability recovery",
-      "cases": [
-        {
-          "index": 1,
-          "clinical_top": [
-            "few",
-            0.066
-          ],
-          "patient_top": [
-            "few",
-            0.107
-          ],
-          "translated_top": [
-            "few",
-            0.173
-          ],
-          "class": "already_ok",
-          "recovery": 0.06599999999999999,
-          "patient_prompt": "She just can't switch her brain off at bedtime lately, so before turning in she takes a",
-          "translated_prompt": "She experiences an inability to quiet her mind at bedtime lately, so before retiring she takes a"
-        },
-        {
-          "index": 2,
-          "clinical_top": [
-            "cardio",
-            0.634
-          ],
-          "patient_top": [
-            "doctor",
-            0.498
-          ],
-          "translated_top": [
-            "cardio",
-            0.448
-          ],
-          "class": "recovered",
-          "recovery": -0.15599999999999997,
-          "patient_prompt": "Because my ticker's been acting funny lately, I finally went to see a",
-          "translated_prompt": "Because my heart's been palpitating lately, I finally went to see a"
-        },
-        {
-          "index": 3,
-          "clinical_top": [
-            "doctor",
-            0.332
-          ],
-          "patient_top": [
-            "sleep",
-            0.383
-          ],
-          "translated_top": [
-            "doctor",
-            0.462
-          ],
-          "class": "recovered",
-          "recovery": 0.193,
-          "patient_prompt": "Because I keep talking in my sleep, my roommate says I should see a",
-          "translated_prompt": "Because I keep experiencing somniloquy, my roommate says I should see a"
-        },
-        {
-          "index": 4,
-          "clinical_top": [
-            "doctor",
-            0.197
-          ],
-          "patient_top": [
-            "trip",
-            0.068
-          ],
-          "translated_top": [
-            "doctor",
-            0.178
-          ],
-          "class": "recovered",
-          "recovery": 0.07999999999999999,
-          "patient_prompt": "Since I've been counting sheep all night for a week straight, I finally scheduled a",
-          "translated_prompt": "Since I've been experiencing insomnia all night for a week straight, I finally scheduled a"
-        },
-        {
-          "index": 5,
-          "clinical_top": [
-            "medication",
-            0.142
-          ],
-          "patient_top": [
-            "dog",
-            0.11
-          ],
-          "translated_top": [
-            "dog",
-            0.06
-          ],
-          "class": "unrecovered",
-          "recovery": null,
-          "patient_prompt": "I've been having stomach troubles for weeks, so I need to take my",
-          "translated_prompt": "I've been having gastrointestinal symptoms for weeks, so I need to take my"
-        },
-        {
-          "index": 6,
-          "clinical_top": [
-            "dermatologist",
-            0.536
-          ],
-          "patient_top": [
-            "doctor",
-            0.677
-          ],
-          "translated_top": [
-            "dermatologist",
-            0.684
-          ],
-          "class": "recovered",
-          "recovery": 0.4630000000000001,
-          "patient_prompt": "I've got this itchy rash all over my back, so I should probably see a",
-          "translated_prompt": "I have pruritic dermatitis across my entire back, so I should probably see a"
-        },
-        {
-          "index": 7,
-          "clinical_top": [
-            "ant",
-            0.404
-          ],
-          "patient_top": [
-            "apple",
-            0.134
-          ],
-          "translated_top": [
-            "apple",
-            0.273
-          ],
-          "class": "unrecovered",
-          "recovery": 0.010000000000000009,
-          "patient_prompt": "My stomach's tied up in knots after lunch, so I reached for an",
-          "translated_prompt": "I have abdominal cramping after lunch, so I reached for an"
-        },
-        {
-          "index": 8,
-          "clinical_top": [
-            "Xan",
-            0.126
-          ],
-          "patient_top": [
-            "few",
-            0.117
-          ],
-          "translated_top": [
-            "few",
-            0.135
-          ],
-          "class": "unrecovered",
-          "recovery": null,
-          "patient_prompt": "She's been feeling on edge lately, so before the meeting she took a",
-          "translated_prompt": "She has been feeling anxious lately, so before the meeting she took a"
-        },
-        {
-          "index": 9,
-          "clinical_top": [
-            "ant",
-            0.523
-          ],
-          "patient_top": [
-            "ice",
-            0.285
-          ],
-          "translated_top": [
-            "ant",
-            0.312
-          ],
-          "class": "recovered",
-          "recovery": 0.222,
-          "patient_prompt": "After that greasy diner meal my stomach's on fire, so I reached for an",
-          "translated_prompt": "After that high-fat meal my epigastric burning started, so I reached for an"
-        },
-        {
-          "index": 10,
-          "clinical_top": [
-            "inhal",
-            0.692
-          ],
-          "patient_top": [
-            "shirt",
-            0.183
-          ],
-          "translated_top": [
-            "inhal",
-            0.458
-          ],
-          "class": "recovered",
-          "recovery": 0.41500000000000004,
-          "patient_prompt": "When the dust kicks up my chest gets all tight, so at work I keep a spare",
-          "translated_prompt": "When exposed to airborne particulate matter I experience chest tightness, so at work I keep a spare"
-        },
-        {
-          "index": 11,
-          "clinical_top": [
-            "chamomile",
-            0.146
-          ],
-          "patient_top": [
-            "tea",
-            0.247
-          ],
-          "translated_top": [
-            "chamomile",
-            0.133
-          ],
-          "class": "recovered",
-          "recovery": -0.16699999999999998,
-          "patient_prompt": "I keep waking up every hour with my mind buzzing, so tonight before bed I'm brewing a cup of",
-          "translated_prompt": "I experience frequent hourly nocturnal awakenings with mental hyperactivity, so tonight before bed I'm brewing"
-        },
-        {
-          "index": 12,
-          "clinical_top": [
-            "break",
-            0.103
-          ],
-          "patient_top": [
-            "break",
-            0.135
-          ],
-          "translated_top": [
-            "break",
-            0.145
-          ],
-          "class": "already_ok",
-          "recovery": 0.009999999999999981,
-          "patient_prompt": "My back's been killing me since the move, so this morning I took a",
-          "translated_prompt": "My back has been experiencing severe pain since the move, so this morning I took a"
-        },
-        {
-          "index": 13,
-          "clinical_top": [
-            "keyboard",
-            0.123
-          ],
-          "patient_top": [
-            "keyboard",
-            0.128
-          ],
-          "translated_top": [
-            "keyboard",
-            0.156
-          ],
-          "class": "already_ok",
-          "recovery": null,
-          "patient_prompt": "My hands seize up and burn all day at the keyboard, so the specialist fitted me with a",
-          "translated_prompt": "My hands develop cramping and a burning sensation throughout the day while typing at the keyboard, so the spec"
-        },
-        {
-          "index": 14,
-          "clinical_top": [
-            "prescription",
-            0.34
-          ],
-          "patient_top": [
-            "prescription",
-            0.384
-          ],
-          "translated_top": [
-            "topical",
-            0.146
-          ],
-          "class": "worsened",
-          "recovery": -0.03899999999999999,
-          "patient_prompt": "My arms keep breaking out in itchy red patches, so the doctor gave me a",
-          "translated_prompt": "My arms keep developing pruritic erythematous patches, so the physician prescribed me a"
-        },
-        {
-          "index": 15,
-          "clinical_top": [
-            "heart",
-            0.204
-          ],
-          "patient_top": [
-            "heart",
-            0.317
-          ],
-          "translated_top": [
-            "cardiac",
-            0.261
-          ],
-          "class": "worsened",
-          "recovery": -0.069,
-          "patient_prompt": "His pounding heart at rest has him worried, so the nurse hooked him up to a",
-          "translated_prompt": "His palpitations at rest have him worried, so the nurse connected him to a"
-        },
-        {
-          "index": 17,
-          "clinical_top": [
-            "lax",
-            0.263
-          ],
-          "patient_top": [
-            "nap",
-            0.299
-          ],
-          "translated_top": [
-            "lax",
-            0.453
-          ],
-          "class": "recovered",
-          "recovery": null,
-          "patient_prompt": "Grandma's been all bunged up for a week, so before dinner she took a",
-          "translated_prompt": "Grandmother has been constipated for a week, so before dinner she took a"
-        },
-        {
-          "index": 18,
-          "clinical_top": [
-            "tea",
-            0.085
-          ],
-          "patient_top": [
-            "tea",
-            0.142
-          ],
-          "translated_top": [
-            "ginger",
-            0.117
-          ],
-          "class": "worsened",
-          "recovery": -0.05299999999999999,
-          "patient_prompt": "My tummy's tied in knots after every meal, so tonight I'm sipping some",
-          "translated_prompt": "My abdomen experiences cramping after every meal, so tonight I'm sipping some"
-        },
-        {
-          "index": 20,
-          "clinical_top": [
-            "apple",
-            0.167
-          ],
-          "patient_top": [
-            "apple",
-            0.167
-          ],
-          "translated_top": [
-            "apple",
-            0.154
-          ],
-          "class": "already_ok",
-          "recovery": -0.013000000000000012,
-          "patient_prompt": "After that greasy fry-up my gut's all churned up, so at the counter I grabbed an",
-          "translated_prompt": "After that high-fat fried meal my gastrointestinal tract is experiencing nausea, so at the counter I grabbed a"
-        }
-      ]
-    }
+  {
+   "batch": "dialects_20260707T000923Z",
+   "generated_by": "claude-opus-4-8",
+   "run_timestamp": "2026-07-07T00:10:21.352373+00:00",
+   "cost_usd": 0.083115,
+   "accepted": 48,
+   "rejected": 0
   },
-  "ladder_digestive": {
-    "_": "Dose-response ladder, digestive condition (engine trace_out/dialects_20260708T011831Z, gemma-2-2b). Fixed clinical term held verbatim in every rung; entries are the top next-token [token, probability] per register rung.",
-    "baseline_top": [
+  {
+   "batch": "dialects_20260708T120729Z",
+   "model": "claude-sonnet-5",
+   "cost_usd": 0.189324,
+   "accepted": 64,
+   "rejected": 2,
+   "_": "copied from the engine sidecar data/simulated/dialects_20260708T120729Z.report.json"
+  }
+ ],
+ "steering": {
+  "_": "Causal steering results copied from the engine repo's overnight run (trace_out/urgency_downgrades_20260707T1_steer, 2026-07-08); Neuronpedia /api/steer, strength +/-10, top-5 features, greedy 8-token continuations.",
+  "n_phrases": 20,
+  "boost_recoveries": 5,
+  "ablation_recoveries": 1,
+  "key_example": {
+   "batch": "pairs_20260707T171223Z",
+   "batch_index": 49,
+   "boost_recovered_token": "inhaler",
+   "note": "amplifying the clinical graph's top-5 clinical features while the model reads the patient wording restores the clinical continuation"
+  }
+ },
+ "translation_cases": {
+  "_": "Top-token shifts through the translated third panel, copied from the engine's mitigation trace (trace_out/urgency_downgrades_20260707T1, gemma-2-2b, 2026-07-07). Each entry: [token, probability] for the clinical, patient, and translated prompts.",
+  "grandma_laxative": {
+   "clinical": [
+    "lax",
+    0.263
+   ],
+   "patient": [
+    "nap",
+    0.299
+   ],
+   "translated": [
+    "lax",
+    0.453
+   ],
+   "prompts": {
+    "clinical": "Grandma's been constipated for a week, so before dinner she took a",
+    "patient": "Grandma's been all bunged up for a week, so before dinner she took a",
+    "translated": "Grandmother has been constipated for a week, so before dinner she took a"
+   },
+   "retrace_20260709": {
+    "clinical": [
+     "lax",
+     0.263
+    ],
+    "patient_top": [
+     "nap",
+     0.299
+    ],
+    "translated": [
+     "lax",
+     0.409
+    ],
+    "_": "independent re-trace with the upgraded renderer (trace_out/grandma_r2, 2026-07-09); the embedded three-panel figure displays these numbers. The classification study's original measurements (translated 0.453) remain the gallery record; the difference is re-trace jitter, quantified in paraphrase_robustness."
+   }
+  },
+  "icecream_antacid": {
+   "clinical": [
+    "ant",
+    0.523
+   ],
+   "patient": [
+    "ice",
+    0.285
+   ],
+   "translated": [
+    "ant",
+    0.312
+   ],
+   "prompts": {
+    "clinical": "After that greasy diner meal I have acid reflux, so I reached for an",
+    "patient": "After that greasy diner meal my stomach's on fire, so I reached for an",
+    "translated": "After that high-fat meal my epigastric burning started, so I reached for an"
+   }
+  },
+  "doctor_dermatologist": {
+   "clinical": [
+    "dermatologist",
+    0.536
+   ],
+   "patient": [
+    "doctor",
+    0.677
+   ],
+   "translated": [
+    "dermatologist",
+    0.684
+   ],
+   "prompts": {
+    "clinical": "I've got severe dermatitis all over my back, so I should probably see a",
+    "patient": "I've got this itchy rash all over my back, so I should probably see a",
+    "translated": "I have pruritic dermatitis across my entire back, so I should probably see a"
+   }
+  },
+  "worsened_prescription_topical": {
+   "clinical": [
+    "prescription",
+    0.34
+   ],
+   "patient": [
+    "prescription",
+    0.384
+   ],
+   "translated": [
+    "topical",
+    0.146
+   ],
+   "prompts": {
+    "clinical": "My arms keep breaking out in eczema, so the doctor gave me a",
+    "patient": "My arms keep breaking out in itchy red patches, so the doctor gave me a",
+    "translated": "My arms keep developing pruritic erythematous patches, so the physician prescribed me a"
+   }
+  },
+  "summary": {
+   "n_downgrades": 20,
+   "recovered": 8,
+   "unrecovered": 7,
+   "unclassifiable": 5,
+   "_": "classification from the engine mitigation trace, 2026-07-07 overnight run"
+  },
+  "all": {
+   "_": "every classifiable case from the mitigation trace (top token per panel); recovered = translated top matches clinical top; unrecovered = stays at the patient top; worsened = moved to a third token with negative probability recovery",
+   "cases": [
+    {
+     "index": 1,
+     "clinical_top": [
+      "few",
+      0.066
+     ],
+     "patient_top": [
+      "few",
+      0.107
+     ],
+     "translated_top": [
+      "few",
+      0.173
+     ],
+     "class": "already_ok",
+     "recovery": 0.06599999999999999,
+     "patient_prompt": "She just can't switch her brain off at bedtime lately, so before turning in she takes a",
+     "translated_prompt": "She experiences an inability to quiet her mind at bedtime lately, so before retiring she takes a"
+    },
+    {
+     "index": 2,
+     "clinical_top": [
+      "cardio",
+      0.634
+     ],
+     "patient_top": [
+      "doctor",
+      0.498
+     ],
+     "translated_top": [
+      "cardio",
+      0.448
+     ],
+     "class": "recovered",
+     "recovery": -0.15599999999999997,
+     "patient_prompt": "Because my ticker's been acting funny lately, I finally went to see a",
+     "translated_prompt": "Because my heart's been palpitating lately, I finally went to see a"
+    },
+    {
+     "index": 3,
+     "clinical_top": [
+      "doctor",
+      0.332
+     ],
+     "patient_top": [
+      "sleep",
+      0.383
+     ],
+     "translated_top": [
+      "doctor",
+      0.462
+     ],
+     "class": "recovered",
+     "recovery": 0.193,
+     "patient_prompt": "Because I keep talking in my sleep, my roommate says I should see a",
+     "translated_prompt": "Because I keep experiencing somniloquy, my roommate says I should see a"
+    },
+    {
+     "index": 4,
+     "clinical_top": [
+      "doctor",
+      0.197
+     ],
+     "patient_top": [
+      "trip",
+      0.068
+     ],
+     "translated_top": [
+      "doctor",
+      0.178
+     ],
+     "class": "recovered",
+     "recovery": 0.07999999999999999,
+     "patient_prompt": "Since I've been counting sheep all night for a week straight, I finally scheduled a",
+     "translated_prompt": "Since I've been experiencing insomnia all night for a week straight, I finally scheduled a"
+    },
+    {
+     "index": 5,
+     "clinical_top": [
+      "medication",
+      0.142
+     ],
+     "patient_top": [
+      "dog",
+      0.11
+     ],
+     "translated_top": [
+      "dog",
+      0.06
+     ],
+     "class": "unrecovered",
+     "recovery": null,
+     "patient_prompt": "I've been having stomach troubles for weeks, so I need to take my",
+     "translated_prompt": "I've been having gastrointestinal symptoms for weeks, so I need to take my"
+    },
+    {
+     "index": 6,
+     "clinical_top": [
+      "dermatologist",
+      0.536
+     ],
+     "patient_top": [
+      "doctor",
+      0.677
+     ],
+     "translated_top": [
+      "dermatologist",
+      0.684
+     ],
+     "class": "recovered",
+     "recovery": 0.4630000000000001,
+     "patient_prompt": "I've got this itchy rash all over my back, so I should probably see a",
+     "translated_prompt": "I have pruritic dermatitis across my entire back, so I should probably see a"
+    },
+    {
+     "index": 7,
+     "clinical_top": [
+      "ant",
+      0.404
+     ],
+     "patient_top": [
+      "apple",
+      0.134
+     ],
+     "translated_top": [
+      "apple",
+      0.273
+     ],
+     "class": "unrecovered",
+     "recovery": 0.010000000000000009,
+     "patient_prompt": "My stomach's tied up in knots after lunch, so I reached for an",
+     "translated_prompt": "I have abdominal cramping after lunch, so I reached for an"
+    },
+    {
+     "index": 8,
+     "clinical_top": [
+      "Xan",
+      0.126
+     ],
+     "patient_top": [
+      "few",
+      0.117
+     ],
+     "translated_top": [
+      "few",
+      0.135
+     ],
+     "class": "unrecovered",
+     "recovery": null,
+     "patient_prompt": "She's been feeling on edge lately, so before the meeting she took a",
+     "translated_prompt": "She has been feeling anxious lately, so before the meeting she took a"
+    },
+    {
+     "index": 9,
+     "clinical_top": [
+      "ant",
+      0.523
+     ],
+     "patient_top": [
+      "ice",
+      0.285
+     ],
+     "translated_top": [
+      "ant",
+      0.312
+     ],
+     "class": "recovered",
+     "recovery": 0.222,
+     "patient_prompt": "After that greasy diner meal my stomach's on fire, so I reached for an",
+     "translated_prompt": "After that high-fat meal my epigastric burning started, so I reached for an"
+    },
+    {
+     "index": 10,
+     "clinical_top": [
+      "inhal",
+      0.692
+     ],
+     "patient_top": [
+      "shirt",
+      0.183
+     ],
+     "translated_top": [
+      "inhal",
+      0.458
+     ],
+     "class": "recovered",
+     "recovery": 0.41500000000000004,
+     "patient_prompt": "When the dust kicks up my chest gets all tight, so at work I keep a spare",
+     "translated_prompt": "When exposed to airborne particulate matter I experience chest tightness, so at work I keep a spare"
+    },
+    {
+     "index": 11,
+     "clinical_top": [
+      "chamomile",
+      0.146
+     ],
+     "patient_top": [
+      "tea",
+      0.247
+     ],
+     "translated_top": [
+      "chamomile",
+      0.133
+     ],
+     "class": "recovered",
+     "recovery": -0.16699999999999998,
+     "patient_prompt": "I keep waking up every hour with my mind buzzing, so tonight before bed I'm brewing a cup of",
+     "translated_prompt": "I experience frequent hourly nocturnal awakenings with mental hyperactivity, so tonight before bed I'm brewing"
+    },
+    {
+     "index": 12,
+     "clinical_top": [
+      "break",
+      0.103
+     ],
+     "patient_top": [
+      "break",
+      0.135
+     ],
+     "translated_top": [
+      "break",
+      0.145
+     ],
+     "class": "already_ok",
+     "recovery": 0.009999999999999981,
+     "patient_prompt": "My back's been killing me since the move, so this morning I took a",
+     "translated_prompt": "My back has been experiencing severe pain since the move, so this morning I took a"
+    },
+    {
+     "index": 13,
+     "clinical_top": [
+      "keyboard",
+      0.123
+     ],
+     "patient_top": [
+      "keyboard",
+      0.128
+     ],
+     "translated_top": [
+      "keyboard",
+      0.156
+     ],
+     "class": "already_ok",
+     "recovery": null,
+     "patient_prompt": "My hands seize up and burn all day at the keyboard, so the specialist fitted me with a",
+     "translated_prompt": "My hands develop cramping and a burning sensation throughout the day while typing at the keyboard, so the spec"
+    },
+    {
+     "index": 14,
+     "clinical_top": [
+      "prescription",
+      0.34
+     ],
+     "patient_top": [
+      "prescription",
+      0.384
+     ],
+     "translated_top": [
+      "topical",
+      0.146
+     ],
+     "class": "worsened",
+     "recovery": -0.03899999999999999,
+     "patient_prompt": "My arms keep breaking out in itchy red patches, so the doctor gave me a",
+     "translated_prompt": "My arms keep developing pruritic erythematous patches, so the physician prescribed me a"
+    },
+    {
+     "index": 15,
+     "clinical_top": [
+      "heart",
+      0.204
+     ],
+     "patient_top": [
+      "heart",
+      0.317
+     ],
+     "translated_top": [
+      "cardiac",
+      0.261
+     ],
+     "class": "worsened",
+     "recovery": -0.069,
+     "patient_prompt": "His pounding heart at rest has him worried, so the nurse hooked him up to a",
+     "translated_prompt": "His palpitations at rest have him worried, so the nurse connected him to a"
+    },
+    {
+     "index": 17,
+     "clinical_top": [
+      "lax",
+      0.263
+     ],
+     "patient_top": [
+      "nap",
+      0.299
+     ],
+     "translated_top": [
+      "lax",
+      0.453
+     ],
+     "class": "recovered",
+     "recovery": null,
+     "patient_prompt": "Grandma's been all bunged up for a week, so before dinner she took a",
+     "translated_prompt": "Grandmother has been constipated for a week, so before dinner she took a"
+    },
+    {
+     "index": 18,
+     "clinical_top": [
+      "tea",
+      0.085
+     ],
+     "patient_top": [
+      "tea",
+      0.142
+     ],
+     "translated_top": [
+      "ginger",
+      0.117
+     ],
+     "class": "worsened",
+     "recovery": -0.05299999999999999,
+     "patient_prompt": "My tummy's tied in knots after every meal, so tonight I'm sipping some",
+     "translated_prompt": "My abdomen experiences cramping after every meal, so tonight I'm sipping some"
+    },
+    {
+     "index": 20,
+     "clinical_top": [
       "apple",
       0.167
-    ],
-    "rungs": [
-      {
-        "rung": "Rung 1 - fully formal clinical register",
-        "top": [
-          "ant",
-          0.322
-        ]
-      },
-      {
-        "rung": "Rung 2 - mostly clinical, one everyday word",
-        "top": [
-          "ant",
-          0.114
-        ]
-      },
-      {
-        "rung": "Rung 3 - even mix of clinical and everyday phrasing",
-        "top": [
-          "apple",
-          0.14
-        ]
-      },
-      {
-        "rung": "Rung 4 - mostly casual everyday phrasing",
-        "top": [
-          "apple",
-          0.136
-        ]
-      },
-      {
-        "rung": "Rung 5 - maximally casual spoken phrasing with slang",
-        "top": [
-          "apple",
-          0.194
-        ]
-      }
-    ]
-  },
-  "steering_titration": {
-    "_": "boost dose-response + faithfulness on the 5 boost-recovered downgrade cases; gemma-2-2b, /api/steer simple-additive, temperature 0, seed 16, 8-token continuations",
-    "strengths": {
-      "2.5": {
-        "recovered": 4,
-        "n": 5,
-        "_": "boost top-5 at strength 2.5: pair-5 remeasure landed (not recovered \u2014 the same pair misses at every strength); final 4/5 \u2014 trace_out/boostgrid_s2p5"
-      },
-      "5": {
-        "recovered": 5,
-        "n": 5,
-        "_": "boost top-5 clinical features at strength 5 on the recovered subset; all 5 pairs landed and recovered \u2014 trace_out/boostgrid_s5, run 2026-07-08"
-      },
-      "10": {
-        "recovered": 4,
-        "n": 5,
-        "note": "replication; original run 5/5"
-      },
-      "20": {
-        "recovered": 1,
-        "n": 4,
-        "_": "boost top-5 at strength 20: remeasure resolved the three server 500s (flake, not strength); 1/4 recovered, with occasional degeneration \u2014 recovery declines sharply at the top of the dose range; pair 5 unmeasured \u2014 trace_out/boostgrid_s20"
-      }
-    },
-    "low_rank_6_10": {
-      "recovered": 3,
-      "n": 4,
-      "_": "boost clinical ranks 6-10 at strength 10 (rank offset 5): 3/4 measured pairs recovered (one call 500'd server-side). Near-parity with the top-5 arm (4/5): the causal handle is distributed across the clinical circuit, not concentrated in the top-5 features. Placebo (random features) remains 0/5 \u2014 trace_out/boostgrid_lowrank, 2026-07-08",
-      "replication": {
-        "recovered": 3,
-        "n": 4,
-        "_": "independent second run, identical pattern: same three pairs recover, same pair misses, same pair 500s server-side \u2014 trace_out/boostgrid_lowrank (branch), 2026-07-09"
-      }
-    },
-    "placebo": {
-      "recovered": 0,
-      "n": 5,
-      "note": "5 random features at strength 10"
-    },
-    "updated": "2026-07-08"
-  },
-  "ladder_n10": {
-    "_": "Register-ladder sweep, n=10 baselines x 5 rungs, clinical term held verbatim (engine trace_out/dialects_20260708T201616Z, gemma-2-2b, traced 2026-07-09). Mean target probability per rung; some rungs screened out per baseline.",
-    "rung_means": {
-      "1": 0.2841,
-      "2": 0.2667,
-      "3": 0.3353,
-      "4": 0.3324,
-      "5": 0.2908
-    },
-    "rung_ns": {
-      "1": 7,
-      "2": 9,
-      "3": 9,
-      "4": 8,
-      "5": 8
-    },
-    "n_baselines": 10,
-    "rung5_below_rung1": "3 of 6 baselines with both endpoints",
-    "mean_delta_rung5_minus_rung1": 0.0438,
-    "verdict": "no reliable register gradient with the clinical term held fixed; the single-case staircase (ladder_digestive) is real but not representative"
-  },
-  "paraphrase_robustness": {
-    "_": "Innocuous-paraphrase sweep: 10 downgrade baselines x 5 meaning-preserving rewordings, term held fixed (trace_out/dialects_20260708T203111Z, gemma-2-2b, 2026-07-09).",
-    "n_baselines_measured": 9,
-    "mean_abs_delta_vs_baseline": 0.0642,
-    "per_baseline_sd_mean": 0.0764,
-    "per_baseline_sd_median": 0.0415,
-    "verdict": "single-sentence next-token probabilities move under innocuous rewording by about the same magnitude as the term-swap penalty (0.070); single pairs are illustrations, inference lives in the paired aggregate where bidirectional paraphrase noise averages out (SE contribution ~0.009 at n=132)"
-  },
-  "context_inoculation": {
-    "_": "copied from the engine context-prefix run (trace_out/urgency_downgrades_20260707T1__context, 2026-07-08; summarized in the released findings synthesis section 5)",
-    "no_context_mean_penalty": -0.092,
-    "casual_context_mean_penalty": -0.137,
-    "clinical_context_mean_penalty": -0.059,
-    "paired_clinical_vs_casual": 0.083,
-    "pairs_improved": "8/14"
+     ],
+     "patient_top": [
+      "apple",
+      0.167
+     ],
+     "translated_top": [
+      "apple",
+      0.154
+     ],
+     "class": "already_ok",
+     "recovery": -0.013000000000000012,
+     "patient_prompt": "After that greasy fry-up my gut's all churned up, so at the counter I grabbed an",
+     "translated_prompt": "After that high-fat fried meal my gastrointestinal tract is experiencing nausea, so at the counter I grabbed a"
+    }
+   ]
   }
+ },
+ "ladder_digestive": {
+  "_": "Dose-response ladder, digestive condition (engine trace_out/dialects_20260708T011831Z, gemma-2-2b). Fixed clinical term held verbatim in every rung; entries are the top next-token [token, probability] per register rung.",
+  "baseline_top": [
+   "apple",
+   0.167
+  ],
+  "rungs": [
+   {
+    "rung": "Rung 1 - fully formal clinical register",
+    "top": [
+     "ant",
+     0.322
+    ]
+   },
+   {
+    "rung": "Rung 2 - mostly clinical, one everyday word",
+    "top": [
+     "ant",
+     0.114
+    ]
+   },
+   {
+    "rung": "Rung 3 - even mix of clinical and everyday phrasing",
+    "top": [
+     "apple",
+     0.14
+    ]
+   },
+   {
+    "rung": "Rung 4 - mostly casual everyday phrasing",
+    "top": [
+     "apple",
+     0.136
+    ]
+   },
+   {
+    "rung": "Rung 5 - maximally casual spoken phrasing with slang",
+    "top": [
+     "apple",
+     0.194
+    ]
+   }
+  ]
+ },
+ "steering_titration": {
+  "_": "boost dose-response + faithfulness on the 5 boost-recovered downgrade cases; gemma-2-2b, /api/steer simple-additive, temperature 0, seed 16, 8-token continuations",
+  "strengths": {
+   "2.5": {
+    "recovered": 4,
+    "n": 5,
+    "_": "boost top-5 at strength 2.5: pair-5 remeasure landed (not recovered — the same pair misses at every strength); final 4/5 — trace_out/boostgrid_s2p5"
+   },
+   "5": {
+    "recovered": 5,
+    "n": 5,
+    "_": "boost top-5 clinical features at strength 5 on the recovered subset; all 5 pairs landed and recovered — trace_out/boostgrid_s5, run 2026-07-08"
+   },
+   "10": {
+    "recovered": 4,
+    "n": 5,
+    "note": "replication; original run 5/5"
+   },
+   "20": {
+    "recovered": 1,
+    "n": 4,
+    "_": "boost top-5 at strength 20: remeasure resolved the three server 500s (flake, not strength); 1/4 recovered, with occasional degeneration — recovery declines sharply at the top of the dose range; pair 5 unmeasured — trace_out/boostgrid_s20"
+   }
+  },
+  "low_rank_6_10": {
+   "recovered": 3,
+   "n": 4,
+   "_": "boost clinical ranks 6-10 at strength 10 (rank offset 5): 3/4 measured pairs recovered (one call 500'd server-side). Near-parity with the top-5 arm (4/5): the causal handle is distributed across the clinical circuit, not concentrated in the top-5 features. Placebo (random features) remains 0/5 — trace_out/boostgrid_lowrank, 2026-07-08",
+   "replication": {
+    "recovered": 3,
+    "n": 4,
+    "_": "independent second run, identical pattern: same three pairs recover, same pair misses, same pair 500s server-side — trace_out/boostgrid_lowrank (branch), 2026-07-09"
+   }
+  },
+  "placebo": {
+   "recovered": 0,
+   "n": 5,
+   "note": "5 random features at strength 10"
+  },
+  "updated": "2026-07-08"
+ },
+ "ladder_n10": {
+  "_": "Register-ladder sweep, n=10 baselines x 5 rungs, clinical term held verbatim (engine trace_out/dialects_20260708T201616Z, gemma-2-2b, traced 2026-07-09). Mean target probability per rung; some rungs screened out per baseline.",
+  "rung_means": {
+   "1": 0.2841,
+   "2": 0.2667,
+   "3": 0.3353,
+   "4": 0.3324,
+   "5": 0.2908
+  },
+  "rung_ns": {
+   "1": 7,
+   "2": 9,
+   "3": 9,
+   "4": 8,
+   "5": 8
+  },
+  "n_baselines": 10,
+  "rung5_below_rung1": "3 of 6 baselines with both endpoints",
+  "mean_delta_rung5_minus_rung1": 0.0438,
+  "verdict": "no reliable register gradient with the clinical term held fixed; the single-case staircase (ladder_digestive) is real but not representative"
+ },
+ "paraphrase_robustness": {
+  "_": "Innocuous-paraphrase sweep: 10 downgrade baselines x 5 meaning-preserving rewordings, term held fixed (trace_out/dialects_20260708T203111Z, gemma-2-2b, 2026-07-09).",
+  "n_baselines_measured": 9,
+  "mean_abs_delta_vs_baseline": 0.0642,
+  "per_baseline_sd_mean": 0.0764,
+  "per_baseline_sd_median": 0.0415,
+  "verdict": "single-sentence next-token probabilities move under innocuous rewording by about the same magnitude as the term-swap penalty (0.070); single pairs are illustrations, inference lives in the paired aggregate where bidirectional paraphrase noise averages out (SE contribution ~0.009 at n=132)"
+ },
+ "context_inoculation": {
+  "_": "copied from the engine context-prefix run (trace_out/urgency_downgrades_20260707T1__context, 2026-07-08; summarized in the released findings synthesis section 5)",
+  "no_context_mean_penalty": -0.092,
+  "casual_context_mean_penalty": -0.137,
+  "clinical_context_mean_penalty": -0.059,
+  "paired_clinical_vs_casual": 0.083,
+  "pairs_improved": "8/14"
+ },
+ "tierb_holdout": {
+  "fraction": 0.1,
+  "rule": "sha1(clinical_prompt) % 10 == 0",
+  "status": "sealed until the pre-registered endpoint; excluded from all interim statistics",
+  "_": "from the engine's docs/preregistration_tierB.md; rows are flagged engine-side at collection"
+ },
+ "emergency_sets": {
+  "rounds": 2,
+  "accepted_pairs": 7,
+  "status": "generation paused (owner decision 2026-07-14); measurement of the 7 landed pairs in flight",
+  "_": "engine batches pairs_20260713T031252Z (2 accepted) + pairs_20260713T135755Z (5 accepted), claude-sonnet-5 generator; kept outside the pre-registered run"
+ }
 }

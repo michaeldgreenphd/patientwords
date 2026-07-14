@@ -94,7 +94,7 @@
   footer a{color:var(--muted);text-underline-offset:3px}
   footer a:hover{color:var(--ink)}
 
-  /* Step 5 · generation-engine evaluation (moved from the Model Evaluations tab 2026-07-10) */
+  /* Step 5 · generation-engine evaluation (moved from the former Model Evaluations page 2026-07-10; that page now redirects to technical/#models) */
   .me-n{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;
     color:var(--muted);margin:-6px 0 10px}
   .th-tip{border-bottom:1px dotted var(--muted);cursor:help}
@@ -455,8 +455,8 @@
     <p>
       The depth readout splits the penalty into two failure kinds. When the answer
       never forms, translation supplies the clinical wording up front. When the answer
-      forms and is lost, translation recovers work the model already did. In the
-      newest batch of 50 pairs: 11 of the first kind, 5 of the second, 34 unaffected.
+      forms and is lost, translation recovers work the model already did. The running
+      census, set by set, lives on the <a href="technical/#data">Technical page</a>.
     </p>
     <p>
       The loop for a deployed system: read the layers to see which kind dominates,
@@ -641,7 +641,7 @@
     <h2>What this evidence does and does not show</h2>
     <p>This project measures one narrow thing: how the probability of a single next word changes when clinical wording is replaced by patient wording. That is a probe of model behavior, not a clinical outcome. A lower probability for “antacid” isn’t a measure of harm; it’s a sign the model treats the two phrasings differently.</p>
     <ul class="engines">
-      <li><p><b>One small model carries the circuit evidence.</b> Every graph here comes from gemma-2-2b, chosen because its transcoders are public. The behavioral checks on the other seven models measure next-word probabilities only, no circuits. None of this shows how larger or instruction-tuned clinical systems behave.</p></li>
+      <li><p><b>One small model carries the circuit evidence.</b> Every graph here comes from gemma-2-2b, chosen because its transcoders are public. The behavioral checks on the other seven models measure next-word probabilities only, no circuits. None of this shows how larger systems behave. The one medically tuned model measured, medgemma-4b-it (4B parameters, next-word behavior only), still shows a below-zero penalty.</p></li>
       <li><p><b>Attribution graphs are an interpretive tool.</b> They reconstruct the model’s computation through features and prune heavily; error nodes absorb what’s missed.</p></li>
       <li><p><b>Feature labels are machine-generated.</b> The clinical / off-target
         categories come from keyword-matching auto-interp descriptions. Both steps can be
