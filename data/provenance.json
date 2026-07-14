@@ -537,12 +537,12 @@
    "2.5": {
     "recovered": 4,
     "n": 5,
-    "_": "boost top-5 at strength 2.5: pair-5 remeasure landed (not recovered — the same pair misses at every strength); final 4/5 — trace_out/boostgrid_s2p5"
+    "_": "boost top-5 at strength 2.5: pair-5 remeasure landed (not recovered \u2014 the same pair misses at every strength); final 4/5 \u2014 trace_out/boostgrid_s2p5"
    },
    "5": {
     "recovered": 5,
     "n": 5,
-    "_": "boost top-5 clinical features at strength 5 on the recovered subset; all 5 pairs landed and recovered — trace_out/boostgrid_s5, run 2026-07-08"
+    "_": "boost top-5 clinical features at strength 5 on the recovered subset; all 5 pairs landed and recovered \u2014 trace_out/boostgrid_s5, run 2026-07-08"
    },
    "10": {
     "recovered": 4,
@@ -552,17 +552,17 @@
    "20": {
     "recovered": 1,
     "n": 4,
-    "_": "boost top-5 at strength 20: remeasure resolved the three server 500s (flake, not strength); 1/4 recovered, with occasional degeneration — recovery declines sharply at the top of the dose range; pair 5 unmeasured — trace_out/boostgrid_s20"
+    "_": "boost top-5 at strength 20: remeasure resolved the three server 500s (flake, not strength); 1/4 recovered, with occasional degeneration \u2014 recovery declines sharply at the top of the dose range; pair 5 unmeasured \u2014 trace_out/boostgrid_s20"
    }
   },
   "low_rank_6_10": {
    "recovered": 3,
    "n": 4,
-   "_": "boost clinical ranks 6-10 at strength 10 (rank offset 5): 3/4 measured pairs recovered (one call 500'd server-side). Near-parity with the top-5 arm (4/5): the causal handle is distributed across the clinical circuit, not concentrated in the top-5 features. Placebo (random features) remains 0/5 — trace_out/boostgrid_lowrank, 2026-07-08",
+   "_": "boost clinical ranks 6-10 at strength 10 (rank offset 5): 3/4 measured pairs recovered (one call 500'd server-side). Near-parity with the top-5 arm (4/5): the causal handle is distributed across the clinical circuit, not concentrated in the top-5 features. Placebo (random features) remains 0/5 \u2014 trace_out/boostgrid_lowrank, 2026-07-08",
    "replication": {
     "recovered": 3,
     "n": 4,
-    "_": "independent second run, identical pattern: same three pairs recover, same pair misses, same pair 500s server-side — trace_out/boostgrid_lowrank (branch), 2026-07-09"
+    "_": "independent second run, identical pattern: same three pairs recover, same pair misses, same pair 500s server-side \u2014 trace_out/boostgrid_lowrank (branch), 2026-07-09"
    }
   },
   "placebo": {
@@ -620,5 +620,12 @@
   "accepted_pairs": 7,
   "status": "generation paused (owner decision 2026-07-14); measurement of the 7 landed pairs in flight",
   "_": "engine batches pairs_20260713T031252Z (2 accepted) + pairs_20260713T135755Z (5 accepted), claude-sonnet-5 generator; kept outside the pre-registered run"
+ },
+ "translation_placebo": {
+  "_": "Translation vs placebo, paired on the same batch-6 pairs: mitigation_recovery = p(target) under the third panel minus under the patient wording. Real arm: haiku clinical rewrite (trace_out/pairs_20260711T051145Z). Placebo arm: meaning-preserving paraphrase keeping casual register (trace_out/pairs_20260711T051145Z_txplacebo). Computed 2026-07-14 for the translation-page placebo display (referee item 6).",
+  "n_paired": 14,
+  "mean_recovery_translation": 0.0188,
+  "mean_recovery_placebo": 0.0047,
+  "translation_beats_placebo": 8
  }
 }

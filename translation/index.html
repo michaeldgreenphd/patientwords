@@ -4,18 +4,18 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Translation — PatientWords</title>
-<meta name="description" content="An LLM translates the patient sentence into standard terminology and the raw output is traced natively. Live gemma-2-2b trace: translation restores the clinical continuation — lax(ative) at 41%, above the clinical baseline (26%).">
+<meta name="description" content="An LLM translates the patient sentence into standard terminology and the raw output is traced natively. On the reviewed hardest set, translation restores the clinical continuation in 8 of 20 cases; a placebo paraphrase recovers a quarter of the probability. Live gemma-2-2b traces.">
 <link rel="canonical" href="https://michaeldgreenphd.github.io/patientwords/translation/">
 <meta name="theme-color" content="#faf9f5">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="PatientWords">
 <meta property="og:title" content="Translation — PatientWords">
-<meta property="og:description" content="Translating patient language back into clinical terms restores the circuit: the top continuation returns to lax(ative) at 41%, above the clinical baseline (26%). Live gemma-2-2b trace.">
+<meta property="og:description" content="Translating patient language back into clinical terms restores the top continuation in 8 of the 20 hardest cases; a placebo paraphrase does not. Live gemma-2-2b traces.">
 <meta property="og:url" content="https://michaeldgreenphd.github.io/patientwords/translation/">
 <meta property="og:image" content="https://michaeldgreenphd.github.io/patientwords/modes/translation/preview.png">
 <meta property="og:image:width" content="1690">
 <meta property="og:image:height" content="2543">
-<meta property="og:image:alt" content="Attribution-graph panels of a translation mitigation chain restoring the clinical circuit (gemma-2-2b).">
+<meta property="og:image:alt" content="Attribution-graph panels of a translation mitigation chain restoring the clinical continuation (gemma-2-2b).">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Translation — PatientWords">
 <meta name="twitter:description" content="There is a way to translate this.">
@@ -199,8 +199,8 @@
 <main id="main">
   <p class="dateline">Fig. 4 <span class="mode">· translation recovery · live trace · traced July 7, 2026 · re-traced July 9, 2026</span></p>
   <h1>Translation</h1>
-  <p class="subtitle">Translating the patient sentence back into clinical terms restores the prediction.</p>
-  <p class="explainer">The mitigation: an LLM rewrites the patient sentence in standard terms, and that rewrite is traced directly. The clinical features reappear and the target probability recovers.</p>
+  <p class="subtitle">Translating the patient sentence back into clinical terms restores the prediction in 8 of the 20 hardest cases.</p>
+  <p class="explainer">The mitigation: an LLM rewrites the patient sentence in standard terms, and that rewrite is traced directly. In the cases translation fixes, the clinical features reappear and the target probability recovers; in 7 of the 20 it changes nothing, and 3 rewrites made the prediction worse.</p>
   <p class="explainer">Translation matters most when it changes the predicted next word, not just
      its probability. In the reviewed downgrade set,
      <em>“Grandma’s been all bunged up for a week, so before dinner
@@ -218,6 +218,10 @@
   <h2 id="tx-gal-head" hidden>Where the patch holds, and where it does not</h2>
   <div class="tx-g" id="tx-gal"></div>
   <p class="embed-caption" id="tx-gal-cap" hidden>every classifiable case from the live mitigation trace · top token per panel</p>
+  <p class="explainer">The control that makes the case: on 14 pairs measured under both arms, the
+     real clinical rewrite recovered a mean +1.9 points of target probability against +0.5 for a
+     placebo paraphrase that keeps the casual register. The terminology does the work, not the
+     rewriting.</p>
 
   <span class="stat recovery">Recovered target probability: 41% after translation (clinical baseline 26%) · July 9 re-trace</span>
 
