@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Model Evaluations · PatientWords — seven measured models compared</title>
-<meta name="description" content="The same clinical-vs-patient phrasing probe measured on seven open-weights models across four families: per-model penalty intervals, downgrade asymmetry, and the kind of evidence each model carries.">
+<title>Model Evaluations · PatientWords — eight measured models compared</title>
+<meta name="description" content="The same clinical-vs-patient phrasing probe measured on eight open-weights models across four families: per-model penalty intervals, downgrade asymmetry, and the kind of evidence each model carries.">
 <link rel="canonical" href="https://michaeldgreenphd.github.io/patientwords/model-evaluations/">
 <meta name="theme-color" content="#faf9f5">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="PatientWords">
 <meta property="og:title" content="Model Evaluations — PatientWords">
-<meta property="og:description" content="Per-model penalty intervals and downgrade asymmetry for seven measured open-weights models. Patient phrasing costs probability on every model measured in the hundreds of phrases.">
+<meta property="og:description" content="Per-model penalty intervals and downgrade asymmetry for eight measured open-weights models. Patient phrasing costs probability on every model measured in the hundreds of phrases.">
 <meta property="og:url" content="https://michaeldgreenphd.github.io/patientwords/model-evaluations/">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23faf9f5'/%3E%3Crect x='9' y='9' width='30' height='30' fill='%23111827'/%3E%3Crect x='25' y='25' width='30' height='30' fill='%2315803d'/%3E%3C/svg%3E">
 <style>
@@ -90,6 +90,12 @@
   .prov a:hover{color:var(--ink)}
   .me-caption{font-family:var(--mono);font-size:11px;color:var(--muted);
     letter-spacing:.04em;margin:6px 0 0}
+  .fold{margin:14px 0 6px}
+  .fold>summary{font-family:var(--mono);font-size:12px;color:var(--muted);cursor:pointer;
+    letter-spacing:.02em;line-height:1.7}
+  .fold>summary:hover{color:var(--ink)}
+  .fold>summary:focus-visible{outline:2px solid var(--clinical);outline-offset:2px}
+  .fold[open]>summary{color:var(--ink);margin-bottom:6px}
   .stat{font-family:var(--mono);font-size:13px;font-weight:600}
   .stat.penalty{color:var(--penalty)}
   .back{display:inline-block;margin-top:26px;font-family:var(--mono);font-size:12px;
@@ -197,6 +203,31 @@
       exact 95%. Asymmetry: exact sign tests, Benjamini&ndash;Hochberg corrected across
       models. Interim numbers use the pre-registered exploration split; a 10% holdout
       stays sealed until collection ends. Source: data/model_stats.json.</p>
+  </section>
+
+  <section id="specialty" hidden>
+    <h2>Where the penalty concentrates</h2>
+    <p>The same phrase pairs, grouped by the medical specialty of their scenario.
+      The penalty is not uniform: some specialties carry it, others sit near zero
+      at current sample sizes.</p>
+    <details class="fold">
+      <summary id="sp-sum">Per-specialty penalty on the base model, exploratory</summary>
+      <div class="me-scroll">
+        <table class="me-table" id="sp-table" aria-describedby="sp-caption">
+          <thead><tr>
+            <th scope="col">Specialty</th>
+            <th scope="col" class="num">Phrases</th>
+            <th scope="col" class="num">Mean penalty</th>
+            <th scope="col" class="num">Downgrades</th>
+          </tr></thead>
+          <tbody id="sp-body"></tbody>
+        </table>
+      </div>
+      <p class="me-caption" id="sp-caption">gemma-2-2b · exploratory: phrase-deduped,
+        no correction for testing many specialties at once, cells under 10 phrases
+        suppressed · grouping follows the draft specialty taxonomy (owner review
+        pending) · hypothesis-generating only, not a pre-registered endpoint</p>
+    </details>
   </section>
 
   <section>
@@ -385,6 +416,35 @@
       'dedupe: '+d.dedupe+' · downgrade-rate CI: '+d.ci_method_downgrade+' · sign tests BH-corrected across models'+
       ((d.below_floor&&d.below_floor.length)?' · greyed models enter the comparison at '+(d.site_floor_n_phrases||30)+' measured phrases':'');
   }
+})();
+</script>
+<script>
+(function(){
+  fetch('../data/specialty_breakdown.json',{cache:'no-cache'})
+    .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
+    .then(function(d){
+      var specs=d.specialties||{};
+      var rows=[];
+      Object.keys(specs).forEach(function(sp){
+        var c=specs[sp]['gemma-2-2b'];
+        if(c)rows.push({sp:sp,n:c.n_phrases,mean:c.mean_penalty,dg:c.downgrades});
+      });
+      if(!rows.length)return;
+      rows.sort(function(a,b){return a.mean-b.mean;});
+      var body=document.getElementById('sp-body');
+      rows.forEach(function(r){
+        var tr=document.createElement('tr');
+        var td=document.createElement('td');td.textContent=r.sp;tr.appendChild(td);
+        td=document.createElement('td');td.className='num';td.textContent=r.n;tr.appendChild(td);
+        td=document.createElement('td');td.className='num'+(r.mean<-0.02?' delta-neg':'');
+        td.textContent=(r.mean>0?'+':'')+r.mean.toFixed(3);tr.appendChild(td);
+        td=document.createElement('td');td.className='num';td.textContent=r.dg;tr.appendChild(td);
+        body.appendChild(tr);
+      });
+      document.getElementById('sp-sum').textContent=
+        'Per-specialty penalty on the base model, '+rows.length+' specialties, exploratory';
+      document.getElementById('specialty').hidden=false;
+    }).catch(function(){});
 })();
 </script>
 </body>
