@@ -212,6 +212,16 @@
 </main>
 <script>
 (function(){
+  function pwBatch(stem,short){
+    var m=/^(pairs|dialects|urgency_downgrades|drift_sentinel)_(\d{4})(\d{2})(\d{2})T(\d{2})?(\d{2})?/.exec(stem||'');
+    if(!m)return stem||'';
+    var mo=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][+m[3]-1];
+    if(short)return mo+' '+(+m[4])+((m[5]&&m[6])?(' '+m[5]+':'+m[6]):'');
+    var kind={pairs:'generated batch',dialects:'dialect framings batch',
+      urgency_downgrades:'reviewed downgrade set',drift_sentinel:'drift sentinel'}[m[1]];
+    return kind+' of '+mo+' '+(+m[4])+', '+m[2]+((m[5]&&m[6])?(' '+m[5]+':'+m[6]+' UTC'):'');
+  }
+
   function fit(f){
     try{
       var d=f.contentDocument;
@@ -438,7 +448,7 @@
             :' (first piece of “'+intent+'”)';
         }
         var no=el('p','sim-no','Sim '+pad(s.index)+' ');
-        no.appendChild(el('span','mode','· '+(s.batch||'')+' #'+(s.batch_index||'')
+        no.appendChild(el('span','mode','· '+pwBatch(s.batch)+' · pair '+(s.batch_index||'')
           +(tgt?' · target “'+tgt+'”':'')+tgtNote));
         card.appendChild(no);
 

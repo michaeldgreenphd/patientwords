@@ -384,7 +384,7 @@
     <p class="spec-note" id="spec-note"></p>
     <p class="traced" data-mode="dialect" data-traced="gemma-2-2b" style="padding:0 18px">
       <span class="tm"><b>traced model:</b> gemma-2-2b · gemma scope transcoders</span>
-      <span class="tp">45 graphs · 5 baselines + 40 framings · batch dialects_20260708T120729Z</span>
+      <span class="tp">45 graphs · 5 baselines + 40 framings · from the <a href="https://github.com/michaeldgreenphd/patientwords-engine/blob/main/data/simulated/dialects_20260708T120729Z.json">dialect framings batch of July 8, 2026</a></span>
     </p>
     <a class="open" href="dialect-differences/" style="margin:0 18px 14px;display:inline-block">Open the dialect study →</a>
   </figure>
@@ -789,9 +789,11 @@
     });
     var flips=it.variants.filter(function(v){return v.flip;}).length;
     var note=document.getElementById('spec-note');
+    var bm=/^dialects_(\d{4})(\d{2})(\d{2})/.exec(d.batch||'');
+    var bWhen=bm?(['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][+bm[2]-1]+' '+(+bm[3])+', '+bm[1]):'';
     note.textContent='one instruction \u00b7 '+it.variants.length+' dialect framings measured, '
-      +vs.length+' shown \u00b7 '+flips+' change the top prediction (red) \u00b7 gemma-2-2b live, batch '
-      +(d.batch||'')+' \u00b7 this panel picks its example from the measured dialect data and updates with the study \u00b7 ';
+      +vs.length+' shown \u00b7 '+flips+' change the top prediction (red) \u00b7 gemma-2-2b live'
+      +(bWhen?(' \u00b7 framings batch of '+bWhen):'')+' \u00b7 this panel picks its example from the measured dialect data and updates with the study \u00b7 ';
     var a=el('a',null,'full study \u2192 Dialect Differences');
     a.href='dialect-differences/';
     note.appendChild(a);

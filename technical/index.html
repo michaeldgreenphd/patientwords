@@ -443,6 +443,16 @@
   <div class="conv-tip" id="conv-tip" aria-hidden="true"></div>
   <script>
   (function(){
+  function pwBatch(stem,short){
+    var m=/^(pairs|dialects|urgency_downgrades|drift_sentinel)_(\d{4})(\d{2})(\d{2})T(\d{2})?(\d{2})?/.exec(stem||'');
+    if(!m)return stem||'';
+    var mo=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][+m[3]-1];
+    if(short)return mo+' '+(+m[4])+((m[5]&&m[6])?(' '+m[5]+':'+m[6]):'');
+    var kind={pairs:'generated batch',dialects:'dialect framings batch',
+      urgency_downgrades:'reviewed downgrade set',drift_sentinel:'drift sentinel'}[m[1]];
+    return kind+' of '+mo+' '+(+m[4])+', '+m[2]+((m[5]&&m[6])?(' '+m[5]+':'+m[6]+' UTC'):'');
+  }
+
     var grid = document.getElementById('conv-grid');
     var tip = document.getElementById('conv-tip');
     var NS = 'http://www.w3.org/2000/svg';
@@ -533,7 +543,7 @@
         }
         // hover hit targets
         pts.forEach(function(p){
-          var text = 'through ' + p.through_batch + ' · n=' + p.n_phrases + ' · ' +
+          var text = 'through ' + pwBatch(p.through_batch,1) + ' · n=' + p.n_phrases + ' · ' +
             pp(p.mean_penalty) + ' pp [' + pp(p.ci95[0]) + ', ' + pp(p.ci95[1]) + '] · ' +
             p.downgrades + '↓ ' + p.upgrades + '↑';
           var hit = el('circle', {cx: X(p.n_phrases), cy: Y(p.mean_penalty), r: 10, 'aria-hidden': 'true'},
@@ -546,7 +556,7 @@
           });
           hit.addEventListener('mouseleave', function(){ tip.style.display = 'none'; });
           svg.appendChild(hit);
-          rows.push([id, p.through_batch, p.n_phrases, pp(p.mean_penalty),
+          rows.push([id, pwBatch(p.through_batch,1), p.n_phrases, pp(p.mean_penalty),
             '[' + pp(p.ci95[0]) + ', ' + pp(p.ci95[1]) + ']', p.downgrades, p.upgrades]);
         });
         panel.appendChild(svg);
@@ -572,7 +582,7 @@
       // data table (accessible view)
       var wrap = document.getElementById('conv-table-wrap');
       var tbl = document.createElement('table');
-      var thead = '<thead><tr><th scope="col">model</th><th scope="col">through batch</th>' +
+      var thead = '<thead><tr><th scope="col">model</th><th scope="col">through batch (generated, UTC)</th>' +
         '<th scope="col">n phrases</th><th scope="col">mean (pp)</th><th scope="col">95% CI (pp)</th>' +
         '<th scope="col">downgrades</th><th scope="col">upgrades</th></tr></thead>';
       tbl.innerHTML = thead + '<tbody>' + rows.map(function(r){
@@ -604,6 +614,16 @@
 
 <script>
 (function(){
+  function pwBatch(stem,short){
+    var m=/^(pairs|dialects|urgency_downgrades|drift_sentinel)_(\d{4})(\d{2})(\d{2})T(\d{2})?(\d{2})?/.exec(stem||'');
+    if(!m)return stem||'';
+    var mo=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][+m[3]-1];
+    if(short)return mo+' '+(+m[4])+((m[5]&&m[6])?(' '+m[5]+':'+m[6]):'');
+    var kind={pairs:'generated batch',dialects:'dialect framings batch',
+      urgency_downgrades:'reviewed downgrade set',drift_sentinel:'drift sentinel'}[m[1]];
+    return kind+' of '+mo+' '+(+m[4])+', '+m[2]+((m[5]&&m[6])?(' '+m[5]+':'+m[6]+' UTC'):'');
+  }
+
   var NS='http://www.w3.org/2000/svg';
   function el(n,attrs){var e=document.createElementNS(NS,n);for(var k in attrs)e.setAttribute(k,attrs[k]);return e;}
   function txt(x,y,s,fill,size,anchor,mono){
@@ -652,7 +672,7 @@
         path(ex.pat_ranks,'#111827','patient wording');
         mount('fig-traj',svg);
         document.getElementById('cap-traj').textContent=
-          'one real measured pair ('+ex.dataset+' #'+ex.index+', class: '+ex['class']+') · rank of the clinical answer in the top-8 window, by layer · green: clinical wording · dark: patient wording · a line that stops means the answer left the window';
+          'one real measured pair (pair '+ex.index+' of the '+pwBatch(ex.dataset)+', class: '+ex['class']+') · rank of the clinical answer in the top-8 window, by layer · green: clinical wording · dark: patient wording · a line that stops means the answer left the window';
       }
 
       /* Fig 2: formation strip */
