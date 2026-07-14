@@ -80,6 +80,29 @@
   ul.plan{list-style:none;margin:6px 0 14px;padding:0}
   ul.plan li{border-bottom:1px solid var(--hairline);padding:10px 0;font-size:15.5px;line-height:1.6}
   ul.plan li:last-child{border-bottom:0}
+  .explainer{font-size:17px;line-height:1.66;margin:0 0 14px}
+  .me-scroll{overflow-x:auto;margin:22px 0 12px}
+  .me-table{width:100%;min-width:520px;border-collapse:collapse}
+  .me-table th{font-family:var(--mono);font-size:10.5px;font-weight:600;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--muted);text-align:left;
+    padding:0 18px 8px 0;border-bottom:1px solid var(--ink)}
+  .me-table th.num{text-align:right}
+  .me-table td{padding:11px 18px 11px 0;border-bottom:1px solid var(--hairline);
+    font-size:14.5px;line-height:1.5;vertical-align:top}
+  .me-table td.num{text-align:right;font-family:var(--mono);font-size:12.5px;white-space:nowrap}
+  .me-table td.mono{font-family:var(--mono);font-size:12.5px}
+  .me-table tr:last-child td{border-bottom:1px solid var(--ink)}
+  .me-caption{font-family:var(--mono);font-size:11px;color:var(--muted);
+    letter-spacing:.04em;margin:6px 0 0}
+  .prov{font-family:var(--mono);font-size:10.5px;color:var(--muted);margin-top:3px;letter-spacing:.02em}
+  .prov a{color:var(--muted);text-underline-offset:3px}
+  .prov a:hover{color:var(--ink)}
+  .fold{margin:14px 0 6px}
+  .fold>summary{font-family:var(--mono);font-size:12px;color:var(--muted);cursor:pointer;
+    letter-spacing:.02em;line-height:1.7}
+  .fold>summary:hover{color:var(--ink)}
+  .fold>summary:focus-visible{outline:2px solid var(--clinical);outline-offset:2px}
+  .fold[open]>summary{color:var(--ink);margin-bottom:6px}
   .back{display:inline-block;margin-top:26px;font-family:var(--mono);font-size:12px;
     letter-spacing:.1em;text-transform:uppercase;color:var(--ink);text-decoration:none;
     border-bottom:1px solid var(--ink);padding-bottom:2px}
@@ -110,7 +133,6 @@
       <a href="../simulated-scenarios/">Simulated Scenarios</a>
       <a href="../phrase-dataset/">Phrase Dataset</a>
       <a href="../answer-depth/">Answer Depth</a>
-      <a href="../model-evaluations/">Model Evaluations</a>
     </nav>
   </div>
   <hr class="rule-fine">
@@ -218,6 +240,81 @@
       <li><span class="next">next</span>Misspelling stress set: does a real observed misspelling delay formation or prevent it?</li>
       <li><span class="next">next</span>A lens reading in the daily drift sentinel, watching the internals for service change, not just the outputs.</li>
     </ul>
+  </section>
+
+  <section id="models">
+    <p class="part">Part 4 · Across models</p>
+    <h2><span id="me-count-h">Eight</span> models, one measurement.</h2>
+    <p class="explainer">The lens results above come from one model. The behavioral
+      finding they explain generalizes: the same phrase pairs, read by eight measured
+      open-weights models across four makers, with the probability of the clinical
+      next word measured under both wordings. Every count uses each phrase once per
+      model and is adjusted for multiple comparisons. One tenth of newly collected
+      data is sealed in advance and never touched by these interim numbers. The
+      models here are the measured subjects; the stimuli they read are written by
+      Claude models and audited on the <a href="../methods.html#generation-eval">methods page</a>.</p>
+
+    <h3>The penalty, model by model</h3>
+    <p>Mean language penalty: the percentage points of next-word probability the
+      clinical answer loses when the wording turns colloquial, with its confidence
+      band. Every band sits below zero.</p>
+    <div id="forest"></div>
+    <p class="me-caption" id="forest-cap"></p>
+
+    <h3>When the answer changes, it goes down the care ladder</h3>
+    <p>Among phrases where the top prediction changes under patient wording,
+      downgrades outnumber upgrades on every model. Asterisks mark asymmetry that
+      survives multiple-comparison correction; hover a row for the exact value.</p>
+    <div id="dumbbells"></div>
+    <p class="me-caption">filled red = downgrades · hollow = upgrades · * significant after correction (q &lt; 0.05)</p>
+
+    <details class="fold">
+      <summary>The claim-grade table: every model with its maker, release month, evidence kind, and exact statistics</summary>
+      <div class="me-scroll">
+        <table class="me-table" id="ev-table">
+          <thead><tr>
+            <th scope="col">Model</th>
+            <th scope="col">Measurement</th>
+            <th scope="col">Circuit features</th>
+            <th scope="col" class="num">n phrases</th>
+            <th scope="col" class="num">Penalty, pp (95% CI)</th>
+            <th scope="col" class="num">Down v up</th>
+            <th scope="col" class="num">q</th>
+          </tr></thead>
+          <tbody id="ev-body"></tbody>
+        </table>
+      </div>
+      <p class="me-caption" id="ev-cap"></p>
+      <p class="me-caption" style="margin-top:8px">Statistical methods: one record per
+        (model, clinical phrase); re-traced phrases collapse by majority vote. Penalty
+        intervals: cluster bootstrap, percentile 95%, seed 7, cluster = phrase.
+        Downgrade rates: Clopper&ndash;Pearson exact 95%. Asymmetry: exact sign tests,
+        Benjamini&ndash;Hochberg corrected across models. Only gemma-2-2b carries
+        circuit evidence; the others are behavioral measurements against fixed open
+        weights, a point in time. Care-urgency tiers: owner-reviewed v1, domain review
+        pending. Source: data/model_stats.json.</p>
+    </details>
+
+    <div id="sp-block" hidden>
+      <details class="fold">
+        <summary id="sp-sum">Where the penalty concentrates: per-specialty, exploratory</summary>
+        <div class="me-scroll">
+          <table class="me-table" id="sp-table" aria-describedby="sp-caption">
+            <thead><tr>
+              <th scope="col">Specialty</th>
+              <th scope="col" class="num">Phrases</th>
+              <th scope="col" class="num">Mean penalty</th>
+              <th scope="col" class="num">Downgrades</th>
+            </tr></thead>
+            <tbody id="sp-body"></tbody>
+          </table>
+        </div>
+        <p class="me-caption" id="sp-caption">gemma-2-2b · exploratory: phrase-deduped,
+          no correction for testing many specialties at once, cells under 10 phrases
+          suppressed · grouping follows the draft specialty taxonomy (owner review
+          pending) · hypothesis-generating only, not a pre-registered endpoint</p>
+      </details>
+    </div>
   </section>
 
   <div class="endnote">
@@ -425,6 +522,175 @@
     .catch(function(){
       document.getElementById('dd-head').textContent='data pending: the figures fill in when jlens_insights.json lands';
     });
+})();
+</script>
+<script>
+(function(){
+  var NS='http://www.w3.org/2000/svg';
+  function el(name,attrs,style){var e=document.createElementNS(NS,name);
+    for(var k in attrs)e.setAttribute(k,attrs[k]);if(style)e.setAttribute('style',style);return e;}
+  function pp(v){return (v*100).toFixed(1).replace('-','−');}
+  var PROV={};
+  var provReady=fetch('../data/model_provenance.json',{cache:'no-cache'})
+    .then(function(r){return r.ok?r.json():{};})
+    .then(function(p){PROV=(p&&p.models)||{};})
+    .catch(function(){});
+  fetch('../data/model_stats.json',{cache:'no-cache'})
+    .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
+    .then(function(d){return provReady.then(function(){draw(d);});})
+    .catch(function(){var n=document.getElementById('forest-cap');
+      if(n)n.textContent='data pending: the figures fill in when model_stats.json lands';});
+  function draw(d){
+    var per=d.per_model||{}; var ids=(d.models||Object.keys(per)).filter(function(m){return per[m];});
+    var meta={}; (d.models_meta||[]).forEach(function(m){meta[m.id]=m;});
+    var words=['zero','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve'];
+    var w=words[ids.length]||String(ids.length);
+    var c2=document.getElementById('me-count-h');
+    if(c2)c2.textContent=w.charAt(0).toUpperCase()+w.slice(1);
+
+    var lo=0,hi=0.005;
+    ids.forEach(function(id){var ci=per[id].penalty.ci95;lo=Math.min(lo,ci[0]);hi=Math.max(hi,ci[1]);});
+    lo-=0.01;
+    var W=680,R=34,ML=170,MR=90,H=ids.length*R+42;
+    function X(v){return ML+(W-ML-MR)*((v-lo)/(hi-lo));}
+    var svg=el('svg',{viewBox:'0 0 '+W+' '+H,role:'img',
+      'aria-label':'Mean language penalty with 95 percent interval per model; every interval below zero. Values in the table below.'});
+    svg.appendChild(el('line',{x1:X(0),x2:X(0),y1:10,y2:H-26},'stroke:var(--structural);stroke-width:1'));
+    var zl=el('text',{x:X(0),y:H-12,'text-anchor':'middle'},'font-family:var(--mono);font-size:10px;fill:var(--muted)');
+    zl.textContent='no penalty'; svg.appendChild(zl);
+    var al=el('text',{x:X(lo)+2,y:H-12},'font-family:var(--mono);font-size:10px;fill:var(--muted)');
+    al.textContent='← more of the clinical answer\u2019s probability lost'; svg.appendChild(al);
+    ids.forEach(function(id,i){
+      var p=per[id].penalty, y=24+i*R;
+      var name=el('text',{x:ML-10,y:y+4,'text-anchor':'end'},'font-family:var(--mono);font-size:12px;fill:var(--ink)');
+      name.textContent=id; svg.appendChild(name);
+      svg.appendChild(el('line',{x1:X(p.ci95[0]),x2:X(p.ci95[1]),y1:y,y2:y},'stroke:var(--penalty);stroke-width:2'));
+      svg.appendChild(el('circle',{cx:X(p.mean),cy:y,r:4},'fill:var(--penalty)'));
+      var v=el('text',{x:W-MR+8,y:y+4},'font-family:var(--mono);font-size:11px;fill:var(--muted)');
+      v.textContent=pp(p.mean)+' pp'; svg.appendChild(v);
+      var t=document.createElementNS(NS,'title');
+      t.textContent=id+': '+pp(p.mean)+' pp ['+pp(p.ci95[0])+', '+pp(p.ci95[1])+'], n='+p.n_phrases;
+      svg.appendChild(t);
+    });
+    document.getElementById('forest').appendChild(svg);
+    document.getElementById('forest-cap').textContent=
+      'phrase-deduped, cluster bootstrap seed '+d.seed+' × '+d.boot+' · source: data/model_stats.json';
+
+    var maxC=0; ids.forEach(function(id){var s=per[id].sign_test;maxC=Math.max(maxC,s.downgrades,s.upgrades);});
+    var W2=680,H2=ids.length*R+30;
+    function X2(c){return ML+(W2-ML-MR-110)*(c/maxC);}
+    var svg2=el('svg',{viewBox:'0 0 '+W2+' '+H2,role:'img',
+      'aria-label':'Downgrades versus upgrades per model among changed predictions; downgrades exceed upgrades on every model. Values in the table below.'});
+    ids.forEach(function(id,i){
+      var s=per[id].sign_test,y=20+i*R;
+      var name=el('text',{x:ML-10,y:y+4,'text-anchor':'end'},'font-family:var(--mono);font-size:12px;fill:var(--ink)');
+      name.textContent=id; svg2.appendChild(name);
+      svg2.appendChild(el('line',{x1:X2(s.upgrades),x2:X2(s.downgrades),y1:y,y2:y},'stroke:var(--hairline);stroke-width:1.5'));
+      svg2.appendChild(el('circle',{cx:X2(s.upgrades),cy:y,r:4.5},'fill:var(--paper);stroke:var(--ink);stroke-width:1.4'));
+      svg2.appendChild(el('circle',{cx:X2(s.downgrades),cy:y,r:5},'fill:var(--penalty)'));
+      var sig=(typeof s.p_bh==='number'&&s.p_bh<0.05)?' *':'';
+      var cd=el('text',{x:X2(s.downgrades)+10,y:y+4},'font-family:var(--mono);font-size:11.5px;fill:var(--ink)');
+      cd.textContent=s.downgrades+'↓ v '+s.upgrades+'↑'+sig;svg2.appendChild(cd);
+      var t2=document.createElementNS(NS,'title');
+      t2.textContent=id+': '+s.downgrades+' downgrades vs '+s.upgrades+' upgrades, BH q='+s.p_bh;
+      svg2.appendChild(t2);
+    });
+    document.getElementById('dumbbells').appendChild(svg2);
+
+    function fmtMonth(ym){
+      var m=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      var p=String(ym).split('-');
+      return (p[1]?m[parseInt(p[1],10)-1]+' ':'')+p[0];
+    }
+    function provCell(mc,id){
+      var pv=PROV[id];
+      if(pv&&pv.maker){
+        var sub=document.createElement('div');sub.className='prov';
+        var when=pv.released?(' · '+fmtMonth(pv.released)):'';
+        sub.appendChild(document.createTextNode(pv.maker+when+' · '));
+        var a=document.createElement('a');a.href=pv.spec;a.textContent='spec';
+        a.rel='noopener';sub.appendChild(a);
+        mc.appendChild(sub);
+      }
+    }
+    var body=document.getElementById('ev-body');
+    ids.forEach(function(id){
+      var p=per[id],m=meta[id]||{};
+      var tr=document.createElement('tr');
+      function td(cls,txt){var c=document.createElement('td');if(cls)c.className=cls;c.textContent=txt;tr.appendChild(c);}
+      var mc=document.createElement('td');mc.className='mono';
+      mc.appendChild(document.createTextNode(m.label||id));
+      provCell(mc,id);tr.appendChild(mc);
+      td(null,m.graphs?'hosted attribution graphs':'CPU next-token behavior only');
+      td(null,m.features?'tagged (Gemma Scope)':'—');
+      td('num',String(p.penalty.n_phrases));
+      td('num',pp(p.penalty.mean)+' ['+pp(p.penalty.ci95[0])+', '+pp(p.penalty.ci95[1])+']');
+      td('num',p.sign_test.downgrades+' v '+p.sign_test.upgrades);
+      td('num',String(p.sign_test.p_bh));
+      body.appendChild(tr);
+    });
+    (d.below_floor||[]).forEach(function(bf){
+      var tr=document.createElement('tr');
+      tr.style.color='#6d6c66';
+      var mc=document.createElement('td');mc.className='mono';
+      mc.appendChild(document.createTextNode(bf.id));
+      provCell(mc,bf.id);tr.appendChild(mc);
+      function td(txt){var c=document.createElement('td');c.textContent=txt;tr.appendChild(c);}
+      td('probe measured · full run in progress');
+      td('—');
+      var n=document.createElement('td');n.className='num';
+      n.textContent=bf.n_phrases+' of '+(d.site_floor_n_phrases||30);
+      tr.appendChild(n);
+      td('—');td('—');td('—');
+      body.appendChild(tr);
+    });
+    Object.keys(PROV).forEach(function(id){
+      var pv=PROV[id];
+      if(!pv||!pv.excluded)return;
+      var tr=document.createElement('tr');
+      tr.style.color='#6d6c66';
+      var mc=document.createElement('td');mc.className='mono';
+      mc.appendChild(document.createTextNode(id));
+      provCell(mc,id);tr.appendChild(mc);
+      var why=document.createElement('td');
+      why.setAttribute('colspan','6');
+      why.textContent='not measured: '+pv.excluded;
+      tr.appendChild(why);
+      body.appendChild(tr);
+    });
+    document.getElementById('ev-cap').textContent=
+      'dedupe: '+d.dedupe+' · downgrade-rate CI: '+d.ci_method_downgrade+' · sign tests BH-corrected across models'+
+      ((d.below_floor&&d.below_floor.length)?' · greyed models enter the comparison at '+(d.site_floor_n_phrases||30)+' measured phrases':'');
+  }
+})();
+</script>
+<script>
+(function(){
+  fetch('../data/specialty_breakdown.json',{cache:'no-cache'})
+    .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
+    .then(function(d){
+      var specs=d.specialties||{};
+      var rows=[];
+      Object.keys(specs).forEach(function(sp){
+        var c=specs[sp]['gemma-2-2b'];
+        if(c)rows.push({sp:sp,n:c.n_phrases,mean:c.mean_penalty,dg:c.downgrades});
+      });
+      if(!rows.length)return;
+      rows.sort(function(a,b){return a.mean-b.mean;});
+      var body=document.getElementById('sp-body');
+      rows.forEach(function(r){
+        var tr=document.createElement('tr');
+        var td=document.createElement('td');td.textContent=r.sp;tr.appendChild(td);
+        td=document.createElement('td');td.className='num';td.textContent=r.n;tr.appendChild(td);
+        td=document.createElement('td');td.className='num';
+        td.textContent=(r.mean>0?'+':'')+r.mean.toFixed(3);tr.appendChild(td);
+        td=document.createElement('td');td.className='num';td.textContent=r.dg;tr.appendChild(td);
+        body.appendChild(tr);
+      });
+      document.getElementById('sp-sum').textContent=
+        'Where the penalty concentrates: per-specialty penalty on the base model, '+rows.length+' specialties, exploratory';
+      document.getElementById('sp-block').hidden=false;
+    }).catch(function(){});
 })();
 </script>
 </body>
