@@ -81,20 +81,37 @@
   ul.plan li{border-bottom:1px solid var(--hairline);padding:10px 0;font-size:15.5px;line-height:1.6}
   ul.plan li:last-child{border-bottom:0}
   .explainer{font-size:17px;line-height:1.66;margin:0 0 14px}
-  .me-scroll{overflow-x:auto;margin:22px 0 12px}
+  .me-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:22px 0 12px}
+  .scroll-hint{display:none;font-family:var(--mono);font-size:10px;letter-spacing:.08em;
+    color:var(--muted);margin:12px 0 -14px}
+  @media (max-width:700px){.scroll-hint{display:block}}
   .me-table{width:100%;min-width:520px;border-collapse:collapse}
   .me-table th{font-family:var(--mono);font-size:10.5px;font-weight:600;letter-spacing:.14em;
-    text-transform:uppercase;color:var(--muted);text-align:left;
-    padding:0 18px 8px 0;border-bottom:1px solid var(--ink)}
+    text-transform:uppercase;color:var(--muted);text-align:left;white-space:nowrap;
+    padding:0 12px 8px 0;border-bottom:1px solid var(--ink);vertical-align:bottom}
   .me-table th.num{text-align:right}
-  .me-table td{padding:11px 18px 11px 0;border-bottom:1px solid var(--hairline);
+  .me-table td{padding:11px 12px 11px 0;border-bottom:1px solid var(--hairline);
     font-size:14.5px;line-height:1.5;vertical-align:top}
+  #ev-table td:first-child{max-width:200px}
   .me-table td.num{text-align:right;font-family:var(--mono);font-size:12.5px;white-space:nowrap}
   .me-table td.mono{font-family:var(--mono);font-size:12.5px}
   .me-table tr:last-child td{border-bottom:1px solid var(--ink)}
+  /* specialty table: rows unruled; thin grey top/bottom anchor the block */
+  #sp-table{min-width:460px;border-top:1px solid var(--hairline);border-bottom:1px solid var(--hairline)}
+  #sp-table th{border-bottom:1px solid var(--hairline)}
+  #sp-table td{border-bottom:0;padding:8px 18px 8px 0}
+  #sp-table tr:last-child td{border-bottom:0}
   .me-caption{font-family:var(--mono);font-size:11px;color:var(--muted);
     letter-spacing:.04em;margin:6px 0 0}
-  .prov{font-family:var(--mono);font-size:10.5px;color:var(--muted);margin-top:3px;letter-spacing:.02em}
+  .sm-h{font-family:var(--mono);font-size:10.5px;font-weight:600;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--muted);margin:14px 0 2px}
+  .sm-l{list-style:none;margin:0;padding:0}
+  .sm-l li{font-family:var(--mono);font-size:11px;color:var(--muted);
+    letter-spacing:.04em;line-height:1.75;padding:1px 0}
+  .prov{display:flex;flex-wrap:wrap;gap:0 6px;font-family:var(--mono);font-size:10.5px;
+    color:var(--muted);margin-top:3px;letter-spacing:.02em}
+  .prov span:last-child{white-space:nowrap}
+  #conv-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
   .prov a{color:var(--muted);text-underline-offset:3px}
   .prov a:hover{color:var(--ink)}
   /* convergence small multiples (moved from methods 2026-07-14, owner decision) */
@@ -372,14 +389,15 @@
 
     <details class="fold">
       <summary>The claim-grade table: every model with its maker, release month, evidence kind, and exact statistics</summary>
+      <p class="scroll-hint" aria-hidden="true">table scrolls sideways →</p>
       <div class="me-scroll">
         <table class="me-table" id="ev-table">
           <thead><tr>
             <th scope="col">Model</th>
             <th scope="col">Measurement</th>
-            <th scope="col">Circuit features</th>
+            <th scope="col">Circuit<br>features</th>
             <th scope="col" class="num">n phrases</th>
-            <th scope="col" class="num">Penalty, pp (95% CI)</th>
+            <th scope="col" class="num">Penalty, pp<br>(95% CI)</th>
             <th scope="col" class="num">Down v up</th>
             <th scope="col" class="num">q</th>
           </tr></thead>
@@ -387,19 +405,22 @@
         </table>
       </div>
       <p class="me-caption" id="ev-cap"></p>
-      <p class="me-caption" style="margin-top:8px">Statistical methods: one record per
-        (model, clinical phrase); re-traced phrases collapse by majority vote. Penalty
-        intervals: cluster bootstrap, percentile 95%, seed 7, cluster = phrase.
-        Downgrade rates: Clopper&ndash;Pearson exact 95%. Asymmetry: exact sign tests,
-        Benjamini&ndash;Hochberg corrected across models. Only gemma-2-2b carries
-        circuit evidence; the others are behavioral measurements against fixed open
-        weights, a point in time. Care-urgency tiers: owner-reviewed v1, domain review
-        pending. Source: data/model_stats.json.</p>
+      <p class="sm-h">Statistical methods</p>
+      <ul class="sm-l">
+        <li>One record per (model, clinical phrase); re-traces collapse by majority vote.</li>
+        <li>Penalty intervals: cluster bootstrap, percentile 95%, seed 7, cluster = phrase.</li>
+        <li>Downgrade rates: Clopper&ndash;Pearson exact 95%.</li>
+        <li>Asymmetry: exact sign tests, Benjamini&ndash;Hochberg corrected across models.</li>
+        <li>Circuit evidence: gemma-2-2b only; the rest behavioral, fixed open weights, a point in time.</li>
+        <li>Care-urgency tiers: owner-reviewed v1, domain review pending.</li>
+        <li>Source: data/model_stats.json.</li>
+      </ul>
     </details>
 
     <div id="sp-block" hidden>
       <details class="fold">
         <summary id="sp-sum">Where the penalty concentrates: per-specialty, exploratory</summary>
+        <p class="scroll-hint" aria-hidden="true">table scrolls sideways →</p>
         <div class="me-scroll">
           <table class="me-table" id="sp-table" aria-describedby="sp-caption">
             <thead><tr>
@@ -858,11 +879,17 @@
     function provCell(mc,id){
       var pv=PROV[id];
       if(pv&&pv.maker){
+        // two nowrap chunks in a wrapping flex: at most two lines, never a
+        // word-per-line stack (mobile row-height fix, 2026-07-14)
         var sub=document.createElement('div');sub.className='prov';
-        var when=pv.released?(' · '+fmtMonth(pv.released)):'';
-        sub.appendChild(document.createTextNode(pv.maker+when+' · '));
+        var mk=document.createElement('span');mk.textContent=pv.maker;
+        sub.appendChild(mk);
+        var rest=document.createElement('span');
+        rest.appendChild(document.createTextNode(
+          (pv.released?('· '+fmtMonth(pv.released)+' '):'')+'· '));
         var a=document.createElement('a');a.href=pv.spec;a.textContent='spec';
-        a.rel='noopener';sub.appendChild(a);
+        a.rel='noopener';rest.appendChild(a);
+        sub.appendChild(rest);
         mc.appendChild(sub);
       }
     }
