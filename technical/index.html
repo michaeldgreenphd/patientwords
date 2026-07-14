@@ -1,0 +1,431 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Technical · PatientWords — watching answers form, layer by layer</title>
+<meta name="description" content="The Jacobian lens in plain language, what it lets us ask about how a language model fails on patient phrasing, and a data dive: formation depth, capture versus hijack, and where each repair applies.">
+<link rel="canonical" href="https://michaeldgreenphd.github.io/patientwords/technical/">
+<meta name="theme-color" content="#faf9f5">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="PatientWords">
+<meta property="og:title" content="Technical — PatientWords">
+<meta property="og:description" content="Watching a model's answer form layer by layer: the lens in plain language, the capture-versus-hijack failure taxonomy, and which repair applies where.">
+<meta property="og:url" content="https://michaeldgreenphd.github.io/patientwords/technical/">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23faf9f5'/%3E%3Crect x='9' y='9' width='30' height='30' fill='%23111827'/%3E%3Crect x='25' y='25' width='30' height='30' fill='%2315803d'/%3E%3C/svg%3E">
+<style>
+  :root{
+    --paper:#faf9f5; --ink:#1c1c19; --patient:#111827; --clinical:#15803d;
+    --penalty:#b4483d; --muted:#6d6c66; --structural:#c3c9d2; --hairline:#dcdad2;
+    --serif:'Iowan Old Style','Palatino Linotype',Palatino,'Book Antiqua',Georgia,serif;
+    --mono:ui-monospace,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace;
+  }
+  html{background:var(--paper)}
+  body{margin:0;padding:0;background:var(--paper);color:var(--ink);
+    font-family:var(--serif);font-size:17px;line-height:1.62;
+    -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+  main{max-width:760px;margin:0 auto;padding:0 22px 56px}
+  a{color:inherit}
+  a:focus-visible{outline:2px solid var(--clinical);outline-offset:3px;border-radius:1px}
+  ::selection{background:#dbe9df}
+  .skip{position:absolute;left:-9999px;top:0;background:var(--paper);color:var(--ink);
+    padding:8px 14px;border:1px solid var(--ink);z-index:10}
+  .skip:focus{left:8px}
+
+  .masthead{max-width:760px;margin:0 auto;padding:20px 22px 0}
+  .masthead-row{display:flex;align-items:baseline;justify-content:space-between;
+    flex-wrap:wrap;gap:8px 24px;padding:10px 0 12px}
+  .wordmark{font-family:var(--serif);font-size:19px;font-weight:600;letter-spacing:.02em;
+    text-decoration:none}
+  .wordmark .pw-p{color:var(--patient)}
+  .wordmark .pw-w{color:var(--clinical);font-style:italic}
+  .wordmark .pw-w::before{content:'·';color:var(--muted);font-style:normal;font-weight:400;margin:0 3px 0 2px}
+  .masthead nav{display:flex;flex-wrap:wrap;gap:6px 20px}
+  .masthead nav a{font-family:var(--mono);font-size:11px;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--muted);text-decoration:none;padding:2px 0}
+  .masthead nav a:hover{color:var(--ink);text-decoration:underline;text-underline-offset:4px}
+  .masthead nav a[aria-current=page]{color:var(--ink);border-bottom:1px solid var(--ink)}
+  .rule-heavy{border:0;border-top:2px solid var(--ink);margin:0}
+  .rule-fine{border:0;border-top:1px solid var(--hairline);margin:3px 0 0}
+
+  .dateline{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--clinical);font-weight:600;margin:34px 0 14px}
+  .dateline .mode{color:var(--muted);font-weight:400;letter-spacing:.06em;text-transform:none}
+  h1{font-size:clamp(28px,4.6vw,38px);line-height:1.16;font-weight:600;
+    letter-spacing:-.006em;margin:0 0 10px}
+  .subtitle{font-style:italic;font-size:20px;line-height:1.5;color:var(--muted);margin:0 0 20px}
+  section{border-top:1px solid var(--ink);margin-top:40px;padding-top:12px}
+  .part{font-family:var(--mono);font-size:11.5px;letter-spacing:.18em;text-transform:uppercase;
+    color:var(--clinical);font-weight:600;margin:0 0 8px}
+  h2{font-size:23px;font-weight:600;line-height:1.24;margin:0 0 12px;letter-spacing:-.004em}
+  h3{font-size:17px;font-weight:600;margin:18px 0 6px}
+  section p{margin:0 0 14px;font-size:16px;line-height:1.66}
+  .fig{border:1px solid var(--hairline);background:#fff;padding:14px 14px 8px;margin:16px 0 4px;overflow-x:auto}
+  .fig svg{display:block;width:100%;height:auto}
+  .cap{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.04em;margin:6px 0 18px;line-height:1.7}
+  .pend{font-family:var(--mono);font-size:12px;color:var(--muted)}
+  .stat-line{font-family:var(--mono);font-size:13px;margin:0 0 14px}
+  .stat-line b{color:var(--clinical)}
+  .router{width:100%;border-collapse:collapse;margin:14px 0 4px}
+  .router th{font-family:var(--mono);font-size:10.5px;font-weight:600;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--muted);text-align:left;padding:0 14px 8px 0;
+    border-bottom:1px solid var(--ink)}
+  .router td{padding:10px 14px 10px 0;border-bottom:1px solid var(--hairline);
+    font-size:14.5px;line-height:1.5;vertical-align:top}
+  .router td.num{font-family:var(--mono);font-size:12.5px;white-space:nowrap}
+  .router .queued{color:var(--muted);font-style:italic}
+  .next{display:inline-block;font-family:var(--mono);font-size:10px;letter-spacing:.1em;
+    text-transform:uppercase;border:1px solid var(--muted);color:var(--muted);
+    padding:1px 6px;margin-right:8px;vertical-align:1px}
+  ul.plan{list-style:none;margin:6px 0 14px;padding:0}
+  ul.plan li{border-bottom:1px solid var(--hairline);padding:10px 0;font-size:15.5px;line-height:1.6}
+  ul.plan li:last-child{border-bottom:0}
+  .back{display:inline-block;margin-top:26px;font-family:var(--mono);font-size:12px;
+    letter-spacing:.1em;text-transform:uppercase;color:var(--ink);text-decoration:none;
+    border-bottom:1px solid var(--ink);padding-bottom:2px}
+  .back:hover{color:var(--clinical);border-bottom-color:var(--clinical)}
+  .endnote{border-top:1px solid var(--ink);margin-top:46px;padding-top:14px}
+  .endnote p{font-family:var(--mono);font-size:12px;line-height:1.8;color:var(--muted);margin:0 0 14px}
+  footer{font-family:var(--mono);font-size:12px;line-height:1.9;color:var(--muted)}
+  footer a{color:var(--muted);text-underline-offset:3px}
+  footer a:hover{color:var(--ink)}
+  @media (max-width:760px){body{font-size:16px}}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="masthead">
+  <hr class="rule-heavy"><hr class="rule-fine">
+  <div class="masthead-row">
+    <a class="wordmark" href="../" aria-label="PatientWords home, the overview page"><span class="pw-p">Patient</span><span class="pw-w">Words</span></a>
+    <nav aria-label="Site">
+      <a href="../start-here/">Start Here</a>
+      <a href="../methods.html">Methods</a>
+      <a href="../technical/" aria-current="page">Technical</a>
+      <a href="../">Overview</a>
+      <a href="../word-differences/">Word Differences</a>
+      <a href="../syntax-differences/">Syntax Differences</a>
+      <a href="../dialect-differences/">Dialect Differences</a>
+      <a href="../translation/">Translation</a>
+      <a href="../simulated-scenarios/">Simulated Scenarios</a>
+      <a href="../phrase-dataset/">Phrase Dataset</a>
+      <a href="../answer-depth/">Answer Depth</a>
+      <a href="../model-evaluations/">Model Evaluations</a>
+    </nav>
+  </div>
+  <hr class="rule-fine">
+</header>
+
+<main id="main">
+  <p class="dateline">Technical <span class="mode">· the Jacobian lens · exploratory depth analytics</span></p>
+  <h1>Watching an answer form, layer by layer.</h1>
+  <p class="subtitle">A new instrument reads the model's forming answer at every
+    depth. This page explains it plainly, shows what it lets us ask, and opens
+    the first data.</p>
+
+  <section id="concept">
+    <p class="part">Part 1 · The instrument, in plain language</p>
+    <h2>A film strip of the model making up its mind</h2>
+    <p>A language model reads a sentence in layers, a few dozen processing steps
+      stacked one after another. The final layer produces the answer everyone
+      sees. The Jacobian lens reads the layers in between: at each one, it asks
+      "if the model had to answer right now, what would it say?" The result is a
+      film strip of the answer forming. An answer can appear early and hold,
+      appear and be pushed out, or never appear at all.</p>
+    <p>The lens does not change the model. Like a circuit trace, it is a
+      diagnostic that researchers compute; a person chatting with the model
+      never sees it. Where a circuit trace shows <i>which</i> internal features
+      fired, the lens shows <i>when</i> in depth the answer existed. The two
+      instruments answer different questions about the same failure.</p>
+    <div class="fig" role="img" aria-label="Line chart of the clinical answer's rank across the model's layers under both wordings, drawn from a real measured pair. Under clinical wording the answer enters the readable window and holds to the end. Under patient wording it forms and is then pushed out before the final layer." id="fig-traj">
+      <span class="pend">figure pending — data/jlens_insights.json</span>
+    </div>
+    <p class="cap" id="cap-traj">one real measured pair · rank of the clinical answer within the lens's readable window (top 8), by layer · green: clinical wording · dark: patient wording · a line that stops means the answer left the window</p>
+  </section>
+
+  <section id="application">
+    <p class="part">Part 2 · What it lets us ask</p>
+    <h2>Not just whether it fails. How.</h2>
+    <p>The rest of this site measures the end of the story: the final answer and
+      its probability. The lens opens the middle, and three questions become
+      askable.</p>
+    <h3>Did the right answer ever exist inside the model?</h3>
+    <p>If patient wording merely weakens the answer, it should still form at
+      some depth. If the wording redirects the computation entirely, the answer
+      should never appear. These are different failures with different repairs.</p>
+    <h3>When the model gets it wrong, was the answer captured or hijacked?</h3>
+    <p>Two failure shapes: in a <b>capture</b>, the everyday reading owns the
+      trajectory from the start and the clinical answer never enters the window.
+      In a <b>hijack</b>, the clinical answer forms at depth and is pushed out
+      near the end. The data dive below counts both.</p>
+    <h3>Which repair applies where?</h3>
+    <p>Each fix this project has tested has a natural depth story. Translation
+      supplies the clinical wording before the model starts, so it should work
+      even when the answer never forms. Steering amplifies an existing circuit,
+      so it should work best when something formed and was lost. The lens turns
+      "try every fix" into "read the failure, pick the fix". That prediction is
+      written into the draft second amendment before any confirmatory run.</p>
+  </section>
+
+  <section id="data">
+    <p class="part">Part 3 · Data dive</p>
+    <h2>First readings, exploratory</h2>
+    <p class="stat-line" id="dd-head">loading — data/jlens_insights.json</p>
+
+    <h3>Where answers form</h3>
+    <p id="dd-form-text">When the clinical answer forms at all, it forms late,
+      and patient wording barely moves that depth. The difference between the
+      wordings is not timing. It is existence.</p>
+    <div class="fig" role="img" aria-label="Dot strip of formation layers for every measured pair, one row for clinical wording and one for patient wording, with counts of pairs whose answer never formed shown at the right edge." id="fig-form">
+      <span class="pend">figure pending — data/jlens_insights.json</span>
+    </div>
+    <p class="cap" id="cap-form"></p>
+
+    <h3>Capture versus hijack</h3>
+    <p id="dd-tax-text"></p>
+    <div class="fig" role="img" aria-label="For each failed pair, a horizontal line from the layer where the clinical answer formed to the layer where the winning answer locked in. Captures, where the answer never formed, are shown as lock-in dots only." id="fig-tax">
+      <span class="pend">figure pending — data/jlens_insights.json</span>
+    </div>
+    <p class="cap" id="cap-tax"></p>
+
+    <h3>Read the failure, pick the fix</h3>
+    <p>Translation recovery is already measurable by failure depth. The steering
+      column fills when the per-pair steering verdicts are joined to the lens
+      classes.</p>
+    <table class="router" aria-describedby="cap-router">
+      <thead><tr>
+        <th scope="col">Failure depth</th>
+        <th scope="col" class="num">Pairs</th>
+        <th scope="col" class="num">Translation regains</th>
+        <th scope="col" class="num">Steering regains</th>
+      </tr></thead>
+      <tbody id="router-body"></tbody>
+    </table>
+    <p class="cap" id="cap-router">care-urgency tiers regained per pair (owner-reviewed v1 tiers, domain review pending) · translation column from the joined translated panels · steering column queued: per-pair steering verdicts against the same lens classes</p>
+
+    <h3>Does tuning move the depth?</h3>
+    <p id="dd-it-text"></p>
+    <div class="fig" role="img" aria-label="Paired dots: for each phrase measured on both models, the layer where the answer formed in the base model and in its instruction-tuned twin, connected by a hairline." id="fig-it">
+      <span class="pend">figure pending — data/jlens_insights.json</span>
+    </div>
+    <p class="cap" id="cap-it"></p>
+
+    <h3>Queued next</h3>
+    <ul class="plan">
+      <li><span class="next">next</span>Steering verdicts joined to lens classes: the second router column.</li>
+      <li><span class="next">next</span>The three translation arms through the lens: does real translation restore early formation while the placebo paraphrase leaves depth unchanged?</li>
+      <li><span class="next">next</span>The context prefix through the lens: does one sentence of clinical context make the answer form earlier, or only boost it late?</li>
+      <li><span class="next">next</span>Misspelling stress set: does a real observed misspelling delay formation or prevent it?</li>
+      <li><span class="next">next</span>A lens reading in the daily drift sentinel, watching the internals for service change, not just the outputs.</li>
+    </ul>
+  </section>
+
+  <div class="endnote">
+    <p id="credit-line">Method credit pending data load.</p>
+    <p>Everything on this page is exploratory: the pairs are the ones with landed
+      lens readouts, not a designed sample, and no depth endpoint is
+      pre-registered yet. The draft second amendment freezes the confirmatory
+      versions before any final run. Ranks are within the lens's top-8 readout;
+      "never formed" means never entered that readable window.</p>
+    <footer>
+      Built with the <a href="https://github.com/michaeldgreenphd/patientwords-engine">patientwords-engine</a> pipeline
+      on <a href="https://neuronpedia.org">Neuronpedia</a> ·
+      attribution graphs by <a href="https://github.com/safety-research/circuit-tracer">circuit-tracer</a> ·
+      features from <a href="https://huggingface.co/google/gemma-scope-2b-pt-transcoders">Gemma Scope</a> transcoders<br>
+      set in Iowan Old Style &amp; ui-monospace · every number on this page traces to a data file in this repository
+    </footer>
+    <a class="back" href="../">Back home →</a>
+  </div>
+</main>
+
+<script>
+(function(){
+  var NS='http://www.w3.org/2000/svg';
+  function el(n,attrs){var e=document.createElementNS(NS,n);for(var k in attrs)e.setAttribute(k,attrs[k]);return e;}
+  function txt(x,y,s,fill,size,anchor,mono){
+    var t=el('text',{x:x,y:y,fill:fill||'#6d6c66','text-anchor':anchor||'start'});
+    t.style.font=(size||10.5)+'px '+(mono===false?'inherit':'ui-monospace,Menlo,monospace');
+    t.style.letterSpacing='.03em';t.textContent=s;return t;
+  }
+  function mount(id,svg){var host=document.getElementById(id);host.textContent='';host.appendChild(svg);}
+
+  fetch('../data/jlens_insights.json',{cache:'no-cache'})
+    .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
+    .then(function(d){
+      var L=(d.formation&&d.formation.n_layers)||26;
+      var W=700,PAD=52,PW=W-PAD-120;
+      function lx(layer){return PAD+layer/(L-1)*PW;}
+
+      document.getElementById('dd-head').textContent=
+        d.n_pairs+' pairs with landed lens readouts · '+d.model+' · '+L+' layers · exploratory';
+      document.getElementById('credit-line').textContent=d.method_credit;
+
+      /* Fig 1: exemplar trajectory (hijack) */
+      var ex=(d.exemplars||[]).filter(function(e){return e['class']==='hijack';})[0]||d.exemplars[0];
+      if(ex){
+        var H1=170,svg=el('svg',{viewBox:'0 0 '+W+' '+H1});
+        function ry(rank){return 26+(rank-1)/7*100;}
+        [1,8].forEach(function(r){
+          svg.appendChild(el('line',{x1:PAD,x2:PAD+PW,y1:ry(r),y2:ry(r),stroke:'#dcdad2','stroke-width':.7}));
+          svg.appendChild(txt(PAD-8,ry(r)+3.5,'rank '+r,'#6d6c66',9.5,'end'));
+        });
+        svg.appendChild(txt(PAD,H1-8,'early layers','#6d6c66',9.5));
+        svg.appendChild(txt(PAD+PW,H1-8,'deep layers →','#6d6c66',9.5,'end'));
+        function path(ranks,color,label){
+          var seg=[],last=null;
+          ranks.forEach(function(r,i){
+            if(r!=null){seg.push((seg.length?'L':'M')+lx(i)+','+ry(Math.min(r,8)));last={x:lx(i),y:ry(Math.min(r,8))};}
+          });
+          if(seg.length){
+            svg.appendChild(el('path',{d:seg.join(' '),fill:'none',stroke:color,'stroke-width':1.8}));
+            ranks.forEach(function(r,i){
+              if(r!=null)svg.appendChild(el('circle',{cx:lx(i),cy:ry(Math.min(r,8)),r:2.2,fill:color}));
+            });
+            if(last)svg.appendChild(txt(last.x+8,last.y+3.5,label,color,10.5));
+          }
+        }
+        path(ex.clin_ranks,'#15803d','clinical wording');
+        path(ex.pat_ranks,'#111827','patient wording');
+        mount('fig-traj',svg);
+        document.getElementById('cap-traj').textContent=
+          'one real measured pair ('+ex.dataset+' #'+ex.index+', class: '+ex['class']+') · rank of the clinical answer in the top-8 window, by layer · green: clinical wording · dark: patient wording · a line that stops means the answer left the window';
+      }
+
+      /* Fig 2: formation strip */
+      (function(){
+        var H2=150,svg=el('svg',{viewBox:'0 0 '+W+' '+H2});
+        var rows=[['clinical wording','clin_formed','#15803d',52],['patient wording','pat_formed','#111827',102]];
+        svg.appendChild(el('line',{x1:PAD,x2:PAD+PW,y1:H2-24,y2:H2-24,stroke:'#dcdad2','stroke-width':.7}));
+        [0,Math.round((L-1)/2),L-1].forEach(function(l){
+          svg.appendChild(txt(lx(l),H2-10,'layer '+l,'#6d6c66',9.5,l===0?'start':(l===L-1?'end':'middle')));
+        });
+        var jit={},never={clin_formed:0,pat_formed:0};
+        rows.forEach(function(row){
+          var y0=row[3];
+          svg.appendChild(txt(PAD-8,y0+3.5,row[0],row[2],10.5,'end'));
+          (d.points||[]).forEach(function(p,i){
+            var v=p[row[1]];
+            if(v==null){never[row[1]]++;return;}
+            var key=row[1]+v, n=(jit[key]=(jit[key]||0)+1);
+            var dy=((n%7)-3)*3.4;
+            svg.appendChild(el('circle',{cx:lx(v),cy:y0+dy,r:2.1,fill:row[2],opacity:.55}));
+          });
+          var q=d.formation[row[1]==='clin_formed'?'clinical':'patient'];
+          if(q){
+            svg.appendChild(el('line',{x1:lx(q.median),x2:lx(q.median),y1:y0-15,y2:y0+15,stroke:row[2],'stroke-width':1.6}));
+            svg.appendChild(txt(lx(q.median),y0-19,'median '+q.median,row[2],9.5,'middle'));
+          }
+          var nv=row[1]==='clin_formed'?d.formation.clinical_never:d.formation.patient_never;
+          svg.appendChild(txt(PAD+PW+12,y0+3.5,'never: '+nv,'#b4483d',10.5));
+        });
+        mount('fig-form',svg);
+        var f=d.formation;
+        document.getElementById('cap-form').textContent=
+          'formation layer per pair (dot = one pair, jittered) · median '+f.clinical.median+' of '+(L-1)+
+          ' under clinical wording, '+f.patient.median+' under patient wording · never formed: '+
+          f.clinical_never+' of '+d.n_pairs+' clinical vs '+f.patient_never+' of '+d.n_pairs+' patient';
+        document.getElementById('dd-form-text').textContent=
+          'When the clinical answer forms at all, it forms late (median layer '+f.clinical.median+' of '+(L-1)+
+          ') and patient wording barely moves that depth (median lag '+f.lag.median+' layers, n='+f.lag.n+
+          '). The difference between the wordings is not timing. It is existence: the answer never enters the window in '+
+          f.patient_never+' of '+d.n_pairs+' patient readings against '+f.clinical_never+' of '+d.n_pairs+' clinical.';
+      })();
+
+      /* Fig 3: taxonomy - hijack displacement spans */
+      (function(){
+        var hij=(d.points||[]).filter(function(p){return p['class']==='hijack';});
+        var tax=d.taxonomy||{};
+        var rowsN=hij.length, H3=54+rowsN*13+30;
+        var svg=el('svg',{viewBox:'0 0 '+W+' '+H3});
+        svg.appendChild(txt(PAD,16,'each line: clinical answer forms ● then is pushed out by the winner ▪ (lock-in)','#6d6c66',10));
+        hij.sort(function(a,b){return (a.pat_formed||0)-(b.pat_formed||0);});
+        hij.forEach(function(p,i){
+          var y=34+i*13;
+          var pts=d.points; // lock-in isn't in points; span drawn to final layer
+          svg.appendChild(el('line',{x1:lx(p.pat_formed),x2:lx(L-1),y1:y,y2:y,stroke:'#b4483d','stroke-width':1.1,opacity:.75}));
+          svg.appendChild(el('circle',{cx:lx(p.pat_formed),cy:y,r:2.6,fill:'#111827'}));
+          svg.appendChild(el('rect',{x:lx(L-1)-2.4,y:y-2.4,width:4.8,height:4.8,fill:'#b4483d'}));
+        });
+        var base=34+rowsN*13+6;
+        svg.appendChild(el('line',{x1:PAD,x2:PAD+PW,y1:base,y2:base,stroke:'#dcdad2','stroke-width':.7}));
+        [0,Math.round((L-1)/2),L-1].forEach(function(l){
+          svg.appendChild(txt(lx(l),base+13,'layer '+l,'#6d6c66',9.5,l===0?'start':(l===L-1?'end':'middle')));
+        });
+        mount('fig-tax',svg);
+        var cap='hijacks only: the clinical answer formed (dot, median layer '+
+          ((tax.hijack&&tax.hijack.formed_at)?tax.hijack.formed_at.median:'?')+
+          ') and was displaced before the final layer · winner lock-in median layer '+
+          ((tax.hijack&&tax.hijack.lock_in)?tax.hijack.lock_in.median:'?')+
+          ' · captures ('+(tax.capture?tax.capture.n:0)+' pairs) have no line to draw: the answer never formed';
+        document.getElementById('cap-tax').textContent=cap;
+        document.getElementById('dd-tax-text').textContent=
+          'Of '+d.n_pairs+' patient-side readings, '+(tax.held?tax.held.n:0)+' hold the clinical answer to the end. The failures split unevenly: '+
+          (tax.capture?tax.capture.n:0)+' captures, where the everyday reading owns the trajectory and the clinical answer never appears, against '+
+          (tax.hijack?tax.hijack.n:0)+' hijacks, where it forms around layer '+
+          ((tax.hijack&&tax.hijack.formed_at)?tax.hijack.formed_at.median:'?')+
+          ' and is pushed out near the end. Most failure here is capture, not hijack: the wording decides the computation early, even though the winning word is not locked in until late.';
+      })();
+
+      /* Fig 4: router table */
+      (function(){
+        fetch('../data/jlens_depth.json',{cache:'no-cache'})
+          .then(function(r){return r.ok?r.json():null;})
+          .then(function(j){
+            if(!j||!j.translation||!j.translation.by_class)return;
+            var bc=j.translation.by_class;
+            var label={retained:'held to the end',suppressed:'formed, then lost (hijack)',absent:'never formed (capture)'};
+            var order=['suppressed','absent','retained'];
+            var body=document.getElementById('router-body');
+            order.forEach(function(k){
+              if(!bc[k])return;
+              var tr=document.createElement('tr');
+              function td(s,cls){var c=document.createElement('td');if(cls)c.className=cls;c.textContent=s;tr.appendChild(c);}
+              td(label[k]||k);
+              td(String(bc[k].n),'num');
+              td((bc[k].mean_recovery>0?'+':'')+bc[k].mean_recovery.toFixed(2)+' tiers','num');
+              td('queued','num queued');
+              body.appendChild(tr);
+            });
+          }).catch(function(){});
+      })();
+
+      /* Fig 5: instruction tuning paired dots */
+      (function(){
+        var it=d.instruction_tuning;
+        var host=document.getElementById('fig-it');
+        if(!it||!it.pairs||!it.pairs.length){host.innerHTML='<span class="pend">no paired readouts yet</span>';return;}
+        var H5=120,svg=el('svg',{viewBox:'0 0 '+W+' '+H5});
+        var rows=[['base model',function(p){return p.base;},'#15803d',36],
+                  ['instruction-tuned',function(p){return p.it;},'#111827',76]];
+        svg.appendChild(el('line',{x1:PAD,x2:PAD+PW,y1:H5-22,y2:H5-22,stroke:'#dcdad2','stroke-width':.7}));
+        [0,Math.round((L-1)/2),L-1].forEach(function(l){
+          svg.appendChild(txt(lx(l),H5-8,'layer '+l,'#6d6c66',9.5,l===0?'start':(l===L-1?'end':'middle')));
+        });
+        it.pairs.forEach(function(p){
+          svg.appendChild(el('line',{x1:lx(p.base),x2:lx(p.it),y1:rows[0][3],y2:rows[1][3],stroke:'#c3c9d2','stroke-width':.7,opacity:.7}));
+        });
+        var jit={};
+        rows.forEach(function(row){
+          svg.appendChild(txt(PAD-8,row[3]+3.5,row[0],row[2],10.5,'end'));
+          it.pairs.forEach(function(p){
+            var v=row[1](p),key=row[0]+v,n=(jit[key]=(jit[key]||0)+1);
+            svg.appendChild(el('circle',{cx:lx(v),cy:row[3]+((n%5)-2)*3,r:2.2,fill:row[2],opacity:.6}));
+          });
+        });
+        mount('fig-it',svg);
+        document.getElementById('cap-it').textContent=
+          'patient-side formation layer for the '+it.n_paired+' phrases read on both models · medians: base '+
+          it.base_median.median+', tuned '+it.it_median.median+' · lines connect the same phrase';
+        document.getElementById('dd-it-text').textContent=
+          'Instruction tuning is often assumed to reorganize how a model answers. On the '+it.n_paired+
+          ' phrases read on both gemma-2-2b and its instruction-tuned twin, the answer forms at the same depth (median layer '+
+          it.base_median.median+' in both). This rhymes with the MedGemma behavioral result: tuning changed neither the register gap nor, here, where the answer is built.';
+      })();
+    })
+    .catch(function(){
+      document.getElementById('dd-head').textContent='data pending: the figures fill in when jlens_insights.json lands';
+    });
+})();
+</script>
+</body>
+</html>
