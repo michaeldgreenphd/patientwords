@@ -3,21 +3,21 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Syntax differences — PatientWords</title>
+<title>Grammar differences — PatientWords</title>
 <meta name="description" content="The generic 2×2: patient-derived language vs. medical lexicon crossed with standard vs. nonstandard morphosyntax, live-traced on gemma-2-2b.">
 <link rel="canonical" href="https://michaeldgreenphd.github.io/patientwords/syntax-differences/">
 <meta name="theme-color" content="#faf9f5">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="PatientWords">
-<meta property="og:title" content="Syntax differences — PatientWords">
+<meta property="og:title" content="Grammar differences — PatientWords">
 <meta property="og:description" content="The words surrounding clinical words can be the same. Register and variety shifts, factorized in one live-traced 2×2 matrix.">
 <meta property="og:url" content="https://michaeldgreenphd.github.io/patientwords/syntax-differences/">
 <meta property="og:image" content="https://michaeldgreenphd.github.io/patientwords/modes/4quadrant/preview.png">
 <meta property="og:image:width" content="2343">
 <meta property="og:image:height" content="2643">
-<meta property="og:image:alt" content="Four-quadrant matrix factorizing vocabulary and syntax effects in gemma-2-2b">
+<meta property="og:image:alt" content="Four-quadrant matrix factorizing vocabulary and grammar effects in gemma-2-2b">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Syntax differences — PatientWords">
+<meta name="twitter:title" content="Grammar differences — PatientWords">
 <meta name="twitter:description" content="The words surrounding clinical words can be the same.">
 <meta name="twitter:image" content="https://michaeldgreenphd.github.io/patientwords/modes/4quadrant/preview.png">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23faf9f5'/%3E%3Crect x='9' y='9' width='30' height='30' fill='%23111827'/%3E%3Crect x='25' y='25' width='30' height='30' fill='%2315803d'/%3E%3C/svg%3E">
@@ -173,7 +173,7 @@
       <a href="../technical/">Technical</a>
       <a href="../">Overview</a>
       <a href="../word-differences/">Word Differences</a>
-      <a href="./" aria-current="page">Syntax Differences</a>
+      <a href="./" aria-current="page">Grammar Differences</a>
       <a href="../dialect-differences/">Dialect Differences</a>
       <a href="../translation/">Translation</a>
       <a href="../simulated-scenarios/">Simulated Scenarios</a>
@@ -184,9 +184,9 @@
   <hr class="rule-fine">
 </header>
 <main id="main">
-  <p class="dateline">Fig. 2 <span class="mode">· syntax × lexicon matrix · live render · simulated scenario</span></p>
-  <h1>Syntax differences</h1>
-  <p class="subtitle">The medical word can stay fixed; the surrounding syntax still moves the prediction.</p>
+  <p class="dateline">Fig. 2 <span class="mode">· grammar × lexicon matrix · live render · simulated scenario</span></p>
+  <h1>Grammar differences</h1>
+  <p class="subtitle">The medical word can stay fixed; the surrounding grammar still moves the prediction.</p>
   <p class="explainer">A 2×2 crossing wording (medical vs. patient, columns) with grammar (standard vs. nonstandard, rows). The first live-traced item is a simulated insomnia case. Both changes push toward that everyday reading: changing the grammar alone adds +11–13% to “it”, changing the words another +4–5%.</p>
   <span class="stat penalty">Variety shift Δ: +11% (C → D, 0.26 → 0.37) and +13% (A → B, 0.21 → 0.34) toward the everyday continuation · Register shift Δ: +4–5% (measured on “it”)</span>
   <p class="traced" data-mode="4quadrant" data-traced="gemma-2-2b">
@@ -215,7 +215,7 @@
       </tbody>
     </table>
   </div>
-  <p class="qm-note">rows show the syntax, columns show the phrasing. The traced item:
+  <p class="qm-note">rows show the grammar, columns show the phrasing. The traced item:
      A&nbsp;“Every night this week I've had insomnia, so tomorrow I think I'll finally call&nbsp;__” ·
      C&nbsp;the same frame with “trouble sleeping” ·
      B&nbsp;“Every night this week I been having insomnia, so tomorrow I think I'ma finally call&nbsp;__” ·
@@ -224,12 +224,12 @@
   <div class="quad-wrap">
     <div class="embed">
       <iframe class="live" src="../modes/4quadrant/index.html" loading="lazy"
-              title="Interactive four-quadrant matrix factorizing vocabulary and syntax effects"></iframe>
+              title="Interactive four-quadrant matrix factorizing vocabulary and grammar effects"></iframe>
     </div>
-    <button class="quad-hit qh-tl" type="button" aria-label="Expand quadrant C (patient language, standard syntax)"><span>⤢</span></button>
-    <button class="quad-hit qh-tr" type="button" aria-label="Expand quadrant A (medical lexicon, standard syntax)"><span>⤢</span></button>
-    <button class="quad-hit qh-bl" type="button" aria-label="Expand quadrant D (patient language, nonstandard syntax)"><span>⤢</span></button>
-    <button class="quad-hit qh-br" type="button" aria-label="Expand quadrant B (medical lexicon, nonstandard syntax)"><span>⤢</span></button>
+    <button class="quad-hit qh-tl" type="button" aria-label="Expand quadrant C (patient language, standard grammar)"><span>⤢</span></button>
+    <button class="quad-hit qh-tr" type="button" aria-label="Expand quadrant A (medical lexicon, standard grammar)"><span>⤢</span></button>
+    <button class="quad-hit qh-bl" type="button" aria-label="Expand quadrant D (patient language, nonstandard grammar)"><span>⤢</span></button>
+    <button class="quad-hit qh-br" type="button" aria-label="Expand quadrant B (medical lexicon, nonstandard grammar)"><span>⤢</span></button>
   </div>
   <p class="embed-caption">The matrix is scaled to fit the page; click any quadrant to expand it full screen. Each box traces one cell’s prompt.</p>
 
