@@ -34,23 +34,23 @@
   ]
  },
  "summary": {
-  "measurements": 3570,
-  "flips": 1584,
+  "measurements": 3590,
+  "flips": 1587,
   "flip_classes": {
-   "downgrade": 306,
+   "downgrade": 307,
    "upgrade": 53,
-   "lateral": 258,
-   "uninformative": 967
+   "lateral": 259,
+   "uninformative": 968
   },
   "per_model": {
    "gemma-2-2b": {
-    "n": 1022,
-    "flips": 464,
+    "n": 1027,
+    "flips": 465,
     "downgrades": 137,
     "upgrades": 16,
     "sign_test_p": 0.0,
     "confident_downgrades_p>=0.2": 93,
-    "mean_tier_shift": -0.147
+    "mean_tier_shift": -0.148
    },
    "gemma-2-2b-it": {
     "n": 122,
@@ -62,13 +62,13 @@
     "mean_tier_shift": -0.0589
    },
    "gemma-3-4b-it": {
-    "n": 701,
-    "flips": 345,
+    "n": 706,
+    "flips": 346,
     "downgrades": 47,
     "upgrades": 8,
     "sign_test_p": 0.0,
     "confident_downgrades_p>=0.2": 39,
-    "mean_tier_shift": -0.1259
+    "mean_tier_shift": -0.1249
    },
    "llama-3.2-3b": {
     "n": 122,
@@ -98,31 +98,31 @@
     "mean_tier_shift": -0.0638
    },
    "qwen3-1.7b": {
-    "n": 681,
-    "flips": 309,
-    "downgrades": 41,
+    "n": 686,
+    "flips": 310,
+    "downgrades": 42,
     "upgrades": 17,
-    "sign_test_p": 0.00223,
-    "confident_downgrades_p>=0.2": 26,
-    "mean_tier_shift": -0.093
+    "sign_test_p": 0.00155,
+    "confident_downgrades_p>=0.2": 27,
+    "mean_tier_shift": -0.0941
    },
    "qwen3-4b": {
-    "n": 681,
+    "n": 686,
     "flips": 304,
     "downgrades": 48,
     "upgrades": 7,
     "sign_test_p": 0.0,
     "confident_downgrades_p>=0.2": 38,
-    "mean_tier_shift": -0.0931
+    "mean_tier_shift": -0.0922
    }
   },
   "per_model_deduped": {
    "gemma-2-2b": {
-    "n_phrases": 811,
-    "flips": 332,
+    "n_phrases": 816,
+    "flips": 333,
     "downgrades": 55,
     "upgrades": 13,
-    "mean_penalty": -0.0352
+    "mean_penalty": -0.0348
    },
    "gemma-2-2b-it": {
     "n_phrases": 122,
@@ -132,11 +132,11 @@
     "mean_penalty": -0.0623
    },
    "gemma-3-4b-it": {
-    "n_phrases": 677,
-    "flips": 326,
+    "n_phrases": 682,
+    "flips": 327,
     "downgrades": 42,
     "upgrades": 8,
-    "mean_penalty": -0.0472
+    "mean_penalty": -0.0465
    },
    "llama-3.2-3b": {
     "n_phrases": 122,
@@ -160,23 +160,23 @@
     "mean_penalty": -0.0723
    },
    "qwen3-1.7b": {
-    "n_phrases": 672,
-    "flips": 306,
-    "downgrades": 41,
+    "n_phrases": 677,
+    "flips": 307,
+    "downgrades": 42,
     "upgrades": 16,
-    "mean_penalty": -0.0496
+    "mean_penalty": -0.0487
    },
    "qwen3-4b": {
-    "n_phrases": 672,
+    "n_phrases": 677,
     "flips": 299,
     "downgrades": 46,
     "upgrades": 7,
-    "mean_penalty": -0.05
+    "mean_penalty": -0.049
    }
   },
   "concordance": {
-   "phrases_measured_by_2plus_models": 701,
-   "downgrade_on_any_model": 134,
+   "phrases_measured_by_2plus_models": 706,
+   "downgrade_on_any_model": 135,
    "downgrade_on_2plus_models": 51,
    "flip_on_2plus_models": 409,
    "pairwise_downgrade_overlap": {
@@ -187,7 +187,7 @@
      "jaccard": 0.125
     },
     "gemma-2-2b & gemma-3-4b-it": {
-     "phrases": 626,
+     "phrases": 631,
      "either": 77,
      "both": 16,
      "jaccard": 0.208
@@ -211,13 +211,13 @@
      "jaccard": 0.273
     },
     "gemma-2-2b & qwen3-1.7b": {
-     "phrases": 606,
-     "either": 62,
+     "phrases": 611,
+     "either": 63,
      "both": 15,
-     "jaccard": 0.242
+     "jaccard": 0.238
     },
     "gemma-2-2b & qwen3-4b": {
-     "phrases": 606,
+     "phrases": 611,
      "either": 62,
      "both": 20,
      "jaccard": 0.323
@@ -277,13 +277,13 @@
      "jaccard": 0.222
     },
     "gemma-3-4b-it & qwen3-1.7b": {
-     "phrases": 681,
-     "either": 72,
+     "phrases": 686,
+     "either": 73,
      "both": 12,
-     "jaccard": 0.167
+     "jaccard": 0.164
     },
     "gemma-3-4b-it & qwen3-4b": {
-     "phrases": 681,
+     "phrases": 686,
      "either": 79,
      "both": 12,
      "jaccard": 0.152
@@ -343,10 +343,10 @@
      "jaccard": 0.077
     },
     "qwen3-1.7b & qwen3-4b": {
-     "phrases": 681,
-     "either": 71,
+     "phrases": 686,
+     "either": 72,
      "both": 18,
-     "jaccard": 0.254
+     "jaccard": 0.25
     }
    }
   },
@@ -31354,7 +31354,7 @@
    "tier_top_clinical": 2,
    "tier_top_patient": 2,
    "flip_class": null,
-   "tier_shift": -0.116,
+   "tier_shift": -0.081,
    "urgency_recovery": null
   },
   {
@@ -31405,6 +31405,166 @@
    "tier_top_patient": 2,
    "flip_class": "upgrade",
    "tier_shift": 1.169,
+   "urgency_recovery": null
+  },
+  {
+   "batch": "pairs_20260713T135755Z",
+   "index": 2,
+   "model": "gemma-2-2b",
+   "tier_top_clinical": 2,
+   "tier_top_patient": 2,
+   "flip_class": null,
+   "tier_shift": -0.176,
+   "urgency_recovery": null
+  },
+  {
+   "batch": "pairs_20260713T135755Z",
+   "index": 3,
+   "model": "gemma-2-2b",
+   "tier_top_clinical": 4,
+   "tier_top_patient": 4,
+   "flip_class": null,
+   "tier_shift": -0.131,
+   "urgency_recovery": null
+  },
+  {
+   "batch": "pairs_20260713T135755Z",
+   "index": 4,
+   "model": "gemma-2-2b",
+   "tier_top_clinical": 2,
+   "tier_top_patient": null,
+   "flip_class": "uninformative",
+   "tier_shift": -0.838,
+   "urgency_recovery": null
+  },
+  {
+   "batch": "pairs_20260713T135755Z",
+   "index": 5,
+   "model": "gemma-2-2b",
+   "tier_top_clinical": 4,
+   "tier_top_patient": 4,
+   "flip_class": null,
+   "tier_shift": -0.184,
+   "urgency_recovery": null
+  },
+  {
+   "batch": "pairs_20260713T135755Z",
+   "index": 2,
+   "model": "gemma-3-4b-it",
+   "tier_top_clinical": 2,
+   "tier_top_patient": 2,
+   "flip_class": null,
+   "tier_shift": -0.017,
+   "urgency_recovery": null
+  },
+  {
+   "batch": "pairs_20260713T135755Z",
+   "index": 3,
+   "model": "gemma-3-4b-it",
+   "tier_top_clinical": 4,
+   "tier_top_patient": 4,
+   "flip_class": null,
+   "tier_shift": -0.016,
+   "urgency_recovery": null
+  },
+  {
+   "batch": "pairs_20260713T135755Z",
+   "index": 4,
+   "model": "gemma-3-4b-it",
+   "tier_top_clinical": 2,
+   "tier_top_patient": 2,
+   "flip_class": null,
+   "tier_shift": 0.251,
+   "urgency_recovery": null
+  },
+  {
+   "batch": "pairs_20260713T135755Z",
+   "index": 5,
+   "model": "gemma-3-4b-it",
+   "tier_top_clinical": 4,
+   "tier_top_patient": 4,
+   "flip_class": "lateral",
+   "tier_shift": -0.31,
+   "urgency_recovery": null
+  },
+  {
+   "batch": "pairs_20260713T135755Z",
+   "index": 2,
+   "model": "qwen3-1.7b",
+   "tier_top_clinical": 3,
+   "tier_top_patient": 2,
+   "flip_class": "downgrade",
+   "tier_shift": -0.554,
+   "urgency_recovery": null
+  },
+  {
+   "batch": "pairs_20260713T135755Z",
+   "index": 3,
+   "model": "qwen3-1.7b",
+   "tier_top_clinical": 4,
+   "tier_top_patient": 4,
+   "flip_class": null,
+   "tier_shift": -0.103,
+   "urgency_recovery": null
+  },
+  {
+   "batch": "pairs_20260713T135755Z",
+   "index": 4,
+   "model": "qwen3-1.7b",
+   "tier_top_clinical": 2,
+   "tier_top_patient": 2,
+   "flip_class": null,
+   "tier_shift": -0.005,
+   "urgency_recovery": null
+  },
+  {
+   "batch": "pairs_20260713T135755Z",
+   "index": 5,
+   "model": "qwen3-1.7b",
+   "tier_top_clinical": 4,
+   "tier_top_patient": 4,
+   "flip_class": null,
+   "tier_shift": -0.195,
+   "urgency_recovery": null
+  },
+  {
+   "batch": "pairs_20260713T135755Z",
+   "index": 2,
+   "model": "qwen3-4b",
+   "tier_top_clinical": 2,
+   "tier_top_patient": 2,
+   "flip_class": null,
+   "tier_shift": 0.03,
+   "urgency_recovery": null
+  },
+  {
+   "batch": "pairs_20260713T135755Z",
+   "index": 3,
+   "model": "qwen3-4b",
+   "tier_top_clinical": 4,
+   "tier_top_patient": 4,
+   "flip_class": null,
+   "tier_shift": -0.027,
+   "urgency_recovery": null
+  },
+  {
+   "batch": "pairs_20260713T135755Z",
+   "index": 4,
+   "model": "qwen3-4b",
+   "tier_top_clinical": 2,
+   "tier_top_patient": 2,
+   "flip_class": null,
+   "tier_shift": 0.089,
+   "urgency_recovery": null
+  },
+  {
+   "batch": "pairs_20260713T135755Z",
+   "index": 5,
+   "model": "qwen3-4b",
+   "tier_top_clinical": 4,
+   "tier_top_patient": 4,
+   "flip_class": null,
+   "tier_shift": -0.057,
    "urgency_recovery": null
   },
   {
