@@ -103,6 +103,38 @@
   .fold>summary:hover{color:var(--ink)}
   .fold>summary:focus-visible{outline:2px solid var(--clinical);outline-offset:2px}
   .fold[open]>summary{color:var(--ink);margin-bottom:6px}
+  .defs{margin:14px 0 6px;max-width:640px}
+  .defs div{display:flex;gap:12px;align-items:baseline;padding:6px 0;border-bottom:1px solid var(--hairline)}
+  .defs div:last-child{border-bottom:0}
+  .defs dt{flex:0 0 110px}
+  .defs dd{margin:0;font-size:14.5px;line-height:1.55}
+  .cls{font-family:var(--mono);font-size:11px;letter-spacing:.06em;padding:1px 7px;border:1px solid var(--hairline)}
+  .cls-retained{color:var(--clinical);border-color:var(--clinical)}
+  .cls-suppressed{color:var(--penalty);border-color:var(--penalty)}
+  .cls-absent{color:var(--muted)}
+  .scroll{overflow-x:auto}
+  details{margin:10px 0 0}
+  summary{font-family:var(--mono);font-size:12px;color:var(--muted);cursor:pointer}
+  summary:focus-visible{outline:2px solid var(--clinical);outline-offset:2px}
+  .ex{border:1px solid var(--hairline);padding:10px 14px;margin:10px 0}
+  .ex summary{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:baseline;color:var(--ink)}
+  .ex .ex-snip{font-style:italic;font-family:var(--serif);font-size:14.5px}
+  .ex .ex-sw{font-family:var(--mono);font-size:12px}
+  .ex .ex-sw .t{color:var(--clinical);font-weight:600}
+  .ex .ex-sw .w{color:var(--penalty);font-weight:600}
+  .ex-body{margin-top:12px;border-top:1px solid var(--hairline);padding-top:10px}
+  .ex-line{font-size:15px;line-height:1.6;margin:0 0 6px}
+  .ex-line .lbl{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--muted);display:inline-block;min-width:74px}
+  .ex-line .out-t{color:var(--clinical);font-weight:600}
+  .ex-line .out-w{color:var(--penalty);font-weight:600}
+  .ex-strip{margin:10px 0 4px;overflow-x:auto}
+  .ex-story{font-size:13px;color:var(--muted);margin:6px 0 0;max-width:640px}
+  .endnote{border-top:1px solid var(--ink);margin-top:46px;padding-top:14px}
+  footer{font-family:var(--mono);font-size:12px;line-height:1.9;color:var(--muted)}
+  footer a{color:var(--muted);text-underline-offset:3px}
+  footer a:hover{color:var(--ink)}
+
   .back{display:inline-block;margin-top:26px;font-family:var(--mono);font-size:12px;
     letter-spacing:.1em;text-transform:uppercase;color:var(--ink);text-decoration:none;
     border-bottom:1px solid var(--ink);padding-bottom:2px}
@@ -132,7 +164,6 @@
       <a href="../translation/">Translation</a>
       <a href="../simulated-scenarios/">Simulated Scenarios</a>
       <a href="../phrase-dataset/">Phrase Dataset</a>
-      <a href="../answer-depth/">Answer Depth</a>
     </nav>
   </div>
   <hr class="rule-fine">
@@ -209,6 +240,30 @@
       <span class="pend">figure pending — data/jlens_insights.json</span>
     </div>
     <p class="cap" id="cap-tax"></p>
+
+    <h3>The census, set by set</h3>
+    <p>Every measured set, one row of squares per outcome class, one square per
+      pair. New sets join as the nightly cycle measures them.</p>
+    <dl class="defs">
+      <div><dt class="cls cls-retained">kept</dt><dd>the answer is still readable at the output layer.</dd></div>
+      <div><dt class="cls cls-suppressed">lost late</dt><dd>the answer becomes readable in the middle layers, then drops out before the model speaks. The model did the work and lost the result.</dd></div>
+      <div><dt class="cls cls-absent">never formed</dt><dd>the answer is not readable at any layer.</dd></div>
+    </dl>
+    <div id="ad-blocks"><span class="pend">figure pending — data/jlens_depth.json</span></div>
+    <p class="cap">hover a square for its clinical target · the pairs live in the
+      <a href="../simulated-scenarios/">scenario gallery</a></p>
+    <details class="fold">
+      <summary>Every pair: depth class and care-urgency tiers regained by translation, where measured</summary>
+      <div class="scroll" id="ad-pairs"></div>
+    </details>
+    <details class="fold">
+      <summary>The switch, close up: six rule-selected pairs, sentence by sentence</summary>
+      <p style="font-size:14.5px;color:var(--muted)">Selection rule: every lost-late pair, strongest
+        clinical hold first, capped at four, plus the two never-formed pairs whose
+        clinical wording holds best at the output. All sentences are generated
+        stress-test stimuli.</p>
+      <div id="ad-examples"><span class="pend">examples pending — data/jlens_depth.json</span></div>
+    </details>
 
     <h3>Read the failure, pick the fix</h3>
     <p>Translation recovery is already measurable by failure depth. The steering
@@ -691,6 +746,206 @@
         'Where the penalty concentrates: per-specialty penalty on the base model, '+rows.length+' specialties, exploratory';
       document.getElementById('sp-block').hidden=false;
     }).catch(function(){});
+})();
+</script>
+<script>
+(function(){
+  var NS='http://www.w3.org/2000/svg';
+  function el(tag,attrs,parent){var n=document.createElementNS(NS,tag);
+    for(var k in attrs)n.setAttribute(k,attrs[k]);if(parent)parent.appendChild(n);return n;}
+  function txt(parent,x,y,str,attrs){var t=el('text',Object.assign({x:x,y:y,
+    'font-size':11,'font-family':'ui-monospace,SF Mono,Menlo,Consolas,monospace',
+    fill:'#6d6c66'},attrs||{}),parent);t.textContent=str;return t;}
+  function h(tag,cls,text){var e=document.createElement(tag);if(cls)e.className=cls;
+    if(text!=null)e.textContent=text;return e;}
+  var CLASSES=[['retained','#15803d'],['suppressed','#b4483d'],['absent','#c3c9d2']];
+
+  fetch('../data/jlens_depth.json',{cache:'no-cache'})
+    .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
+    .then(function(data){
+      var labels=data.class_labels||{retained:'kept',suppressed:'lost late',absent:'never formed'};
+      var blocks=data.blocks||(data.units?[data.units]:[]);
+      if(!blocks.length)return;
+
+      // --- unit rows per measured set -----------------------------------
+      var mount=document.getElementById('ad-blocks');
+      mount.textContent='';
+      blocks.forEach(function(b){
+        var wrap=h('div','block');
+        wrap.appendChild(h('p','block-label',b.label||b.id));
+        var CELL=17,GAP=3,LEFT=118,ROW_GAP=14,TOP=6;
+        var maxRow=Math.max.apply(null,CLASSES.map(function(c){
+          return b.pairs.filter(function(u){return u['class']===c[0];}).length;}));
+        var W=LEFT+Math.max(maxRow,1)*(CELL+GAP)+260, H=TOP+3*(CELL+ROW_GAP)+4;
+        var fig=h('div','figwrap');
+        var counts=b.counts||{};
+        var svg=el('svg',{viewBox:'0 0 '+W+' '+H,width:W,role:'img',
+          'aria-label':b.pairs.length+' pairs: '+(counts.retained||0)+' kept, '+
+            (counts.suppressed||0)+' lost late, '+(counts.absent||0)+' never formed'},null);
+        fig.appendChild(svg);
+        CLASSES.forEach(function(cls,row){
+          var members=b.pairs.filter(function(u){return u['class']===cls[0];});
+          var y=TOP+row*(CELL+ROW_GAP);
+          txt(svg,0,y+CELL-4,labels[cls[0]]+' '+members.length,
+            {fill:cls[0]==='absent'?'#6d6c66':cls[1]});
+          members.forEach(function(u,k){
+            var rect=el('rect',{x:LEFT+k*(CELL+GAP),y:y,width:CELL,height:CELL,fill:cls[1]},svg);
+            var title=document.createElementNS(NS,'title');
+            title.textContent='pair '+u.index+' · '+u.target;
+            rect.appendChild(title);
+          });
+          if(cls[0]==='suppressed'&&b.annotation&&b.annotation.text)
+            txt(svg,LEFT+members.length*(CELL+GAP)+10,y+CELL-4,b.annotation.text,{fill:cls[1]});
+        });
+        wrap.appendChild(fig);
+        mount.appendChild(wrap);
+      });
+
+      // --- translation by failure kind (retired here: Part 3's router
+      // table carries these numbers; mounts absent on this page) ----------
+      var tr=data.translation;
+      var tmount=document.getElementById('ad-trans');
+      if(tmount&&tr&&tr.pairs&&tr.pairs.length){
+        tmount.textContent='';
+        var table=h('table');
+        table.setAttribute('aria-label','Translation recovery by depth class');
+        var thead=h('thead'),hrow=h('tr');
+        [['depth class',''],['pairs','num'],['mean recovery (tiers)','num']].forEach(function(c){
+          var th=h('th',c[1],c[0]);th.setAttribute('scope','col');hrow.appendChild(th);});
+        thead.appendChild(hrow);table.appendChild(thead);
+        var tbody=h('tbody');
+        var small=[];
+        CLASSES.forEach(function(cls){
+          var cell=tr.by_class[cls[0]];
+          if(!cell)return;
+          if(cell.n<3){small.push(labels[cls[0]]+' (n='+cell.n+')');return;}
+          var row=h('tr');
+          var td0=h('td');var chip=h('span','cls cls-'+cls[0],labels[cls[0]]);td0.appendChild(chip);
+          row.appendChild(td0);
+          row.appendChild(h('td','num mono',String(cell.n)));
+          row.appendChild(h('td','num mono',cell.mean_recovery.toFixed(3)));
+          tbody.appendChild(row);
+        });
+        table.appendChild(tbody);
+        tmount.appendChild(table);
+        var capBits=['n = '+tr.pairs.length+' pairs with a translated panel; exploratory, small sample.'];
+        if(small.length)capBits.push('Held back until n reaches 3: '+small.join(', ')+'.');
+        capBits.push('The table grows as translated panels for newer batches land.');
+        var tcap=document.getElementById('ad-trans-cap');
+        if(tcap)tcap.textContent=capBits.join(' ');
+      }else if(document.getElementById('ad-trans-cap')){
+        document.getElementById('ad-trans-cap').textContent=
+          'No translated panels overlap the lens-measured sets yet.';
+      }
+
+      // --- per-pair table ------------------------------------------------
+      var rec={};
+      ((tr&&tr.pairs)||[]).forEach(function(p){rec[p.set+'#'+p.index]=p.recovery;});
+      var pmount=document.getElementById('ad-pairs');
+      var pt=h('table');
+      pt.setAttribute('aria-label','Every lens-measured pair');
+      var pth=h('thead'),phr=h('tr');
+      [['set',''],['pair','num'],['clinical answer',''],['depth class',''],['recovery (tiers)','num']].forEach(function(c){
+        var th=h('th',c[1],c[0]);th.setAttribute('scope','col');phr.appendChild(th);});
+      pth.appendChild(phr);pt.appendChild(pth);
+      var ptb=h('tbody');
+      blocks.forEach(function(b){
+        var setName=(b.label||b.id).split('·')[0].trim();  // human name, not the file stem
+        b.pairs.forEach(function(u){
+          var row=h('tr');
+          row.appendChild(h('td',null,setName));
+          row.appendChild(h('td','num mono',String(u.index)));
+          row.appendChild(h('td',null,u.target));
+          var td=h('td');td.appendChild(h('span','cls cls-'+u['class'],labels[u['class']]));
+          row.appendChild(td);
+          var rv=rec[b.id+'#'+u.index];
+          row.appendChild(h('td','num mono',rv==null?'—':rv.toFixed(3)));
+          ptb.appendChild(row);
+        });
+      });
+      pt.appendChild(ptb);
+      pmount.appendChild(pt);
+
+      // --- worked examples ----------------------------------------------
+      var exs=data.examples||[];
+      if(exs.length){
+        var emount=document.getElementById('ad-examples');
+        emount.textContent='';
+        exs.forEach(function(ex){
+          var det=h('details','ex');
+          var sum=h('summary');
+          sum.appendChild(h('span','ex-snip','“'+ex.snippet+'”'));
+          var sw=h('span','ex-sw');
+          sw.appendChild(h('span','t',ex.target));
+          sw.appendChild(document.createTextNode(' → '));
+          sw.appendChild(h('span','w',ex.winner||'?'));
+          sum.appendChild(sw);
+          var chip=h('span','cls cls-'+ex['class'],labels[ex['class']]);
+          sum.appendChild(chip);
+          det.appendChild(sum);
+
+          var body=h('div','ex-body');
+          [['clinical',ex.prompts.clinical,ex.target,'out-t'],
+           ['everyday',ex.prompts.patient,ex.winner||'?','out-w']].forEach(function(l){
+            var p=h('p','ex-line');
+            p.appendChild(h('span','lbl',l[0]));
+            p.appendChild(document.createTextNode(l[1]+' '));
+            p.appendChild(h('span',l[3],l[2]));
+            if(l[0]==='clinical'&&ex.clin_last_rank>1){
+              var note=h('span',null,' (rank '+ex.clin_last_rank+' at the output)');
+              note.style.cssText='font-size:12px;color:#6d6c66';
+              p.appendChild(note);
+            }
+            body.appendChild(p);
+          });
+
+          // compact two-lane strip: where the clinical answer was readable
+          var CELL=12,GAP=1,LEFT=72,TOP=4,LANE_GAP=10;
+          var W=LEFT+26*(CELL+GAP)+10, H=TOP+2*(CELL+LANE_GAP)+16;
+          var strip=h('div','ex-strip');
+          var svg=el('svg',{viewBox:'0 0 '+W+' '+H,width:W,role:'img',
+            'aria-label':'Layers where the clinical answer is readable under each wording'},null);
+          strip.appendChild(svg);
+          [['clinical',ex.clin_ranks,'#15803d'],['everyday',ex.pat_ranks,'#111827']]
+            .forEach(function(lane,idx){
+              var y=TOP+idx*(CELL+LANE_GAP);
+              txt(svg,0,y+CELL-2,lane[0],{'font-size':9.5});
+              el('line',{x1:LEFT,y1:y+CELL/2,x2:LEFT+26*(CELL+GAP)-GAP,y2:y+CELL/2,
+                stroke:'#dcdad2','stroke-width':1},svg);
+              for(var l=0;l<26;l++){
+                var rank=lane[1][String(l)];
+                if(rank)el('rect',{x:LEFT+l*(CELL+GAP),y:y,width:CELL,height:CELL,
+                  fill:lane[2],'fill-opacity':(1.05-rank*0.115).toFixed(2)},svg);
+              }
+              if(!lane[1]['25']){
+                var lx=LEFT+25*(CELL+GAP)+CELL/2, cy=y+CELL/2;
+                el('line',{x1:lx-4,y1:cy-4,x2:lx+4,y2:cy+4,stroke:'#b4483d','stroke-width':1.6},svg);
+                el('line',{x1:lx-4,y1:cy+4,x2:lx+4,y2:cy-4,stroke:'#b4483d','stroke-width':1.6},svg);
+              }
+            });
+          var ay=TOP+2*(CELL+LANE_GAP)+8;
+          txt(svg,LEFT,ay,'layer 0',{'font-size':9});
+          txt(svg,LEFT+26*(CELL+GAP)-GAP,ay,'output',{'font-size':9,'text-anchor':'end'});
+          body.appendChild(strip);
+
+          var pl=Object.keys(ex.pat_ranks).map(Number);
+          var story;
+          if(ex['class']==='suppressed'){
+            story='Under the everyday wording the answer enters the readout at layer '+
+              Math.min.apply(null,pl)+', is last readable at layer '+Math.max.apply(null,pl)+
+              ', and is gone at the output, where “'+(ex.winner||'?')+'” wins.';
+          }else{
+            story='Under the everyday wording the answer never enters any layer’s readout. '+
+              'Under the clinical wording it holds rank '+ex.clin_last_rank+
+              ' at the output. “'+(ex.winner||'?')+'” wins instead.';
+          }
+          body.appendChild(h('p','ex-story',story));
+          det.appendChild(body);
+          emount.appendChild(det);
+        });
+      }
+    })
+    .catch(function(){/* pending states stay */});
 })();
 </script>
 </body>
