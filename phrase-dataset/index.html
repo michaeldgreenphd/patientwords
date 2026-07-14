@@ -106,8 +106,7 @@ body{font-size:16px}}
       <a href="../methods.html">Methods</a>
       <a href="../technical/">Technical</a>
       <a href="../">Overview</a>
-      <a href="../word-differences/">Word Differences</a>
-      <a href="../syntax-differences/">Grammar Differences</a>
+      <a href="../wording-differences/">Wording Differences</a>
       <a href="../dialect-differences/">Dialect Differences</a>
       <a href="../translation/">Translation</a>
       <a href="../simulated-scenarios/">Simulated Scenarios</a>
@@ -122,6 +121,7 @@ body{font-size:16px}}
   <h1>Phrase dataset</h1>
   <p class="subtitle">Every hand-built sentence pair.</p>
   <p class="explainer">Each pair was built by hand and measured on gemma-2-2b via the Neuronpedia circuit tracer; the table records the observed next token, its probability, and, where captured, a link to the live trace. The <a href="../simulated-scenarios/">simulated scenarios</a> extend this set by machine.</p>
+  <p class="explainer">The starkest case in the set illustrates a change in the recommended clinical advice. “Since her urinary tract was completely blocked up, they had to urgently call a” continues with uro(logist) at 20%; phrase it as “her water was completely blocked up” and the model calls a plumber — at 68%. The patient language changed what was recommended. (Pair 16 below.)</p>
   <section id="phrase-dataset" hidden>
     <div class="section-head" style="border-top:1px solid var(--ink);margin-top:26px;padding-top:10px;display:flex;justify-content:space-between;align-items:baseline">
       <h2 style="font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;margin:0">All pairs</h2>
