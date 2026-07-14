@@ -71,7 +71,7 @@
   .specimen{border:1px solid var(--ink);background:#fff;margin:26px 0 8px}
   .spec-head{border-bottom:1px solid var(--hairline);padding:14px 18px 12px;margin:0}
   .spec-eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
-  .spec-head h2{font-size:22px;margin:4px 0 0;letter-spacing:-.005em;text-wrap:balance}
+  .spec-head h2,.spec-head h3{font-size:22px;margin:4px 0 0;letter-spacing:-.005em;text-wrap:balance}
   .spec-rows{padding:4px 0}
   .spec-row{display:grid;grid-template-columns:186px 1fr max-content;gap:14px;align-items:baseline;
     padding:8px 18px;border-bottom:1px solid #f0eee7}
@@ -310,7 +310,7 @@
 <main id="main">
   <p class="dateline">Research bulletin · mechanistic interpretability of medical language · <b>gemma-2-2b</b></p>
   <h1><span class="patient">Patients</span> don’t speak like doctors.<br><span class="clinical">Medical&nbsp;AI</span> must be ready to interpret them.</h1>
-  <p class="lede">We trace how gemma-2-2b reads clinical terms versus the everyday words patients use. Wording can change what the model suggests in addition to its confidence: “my asthma flares, so at work I keep a spare” continues with inhaler at 69% probability; “my chest gets all tight” makes the top word shirt, and inhaler falls to 4% probability. Rewriting the sentence in clinical terms restores it. (Scenario 85 of the simulated series.)</p>
+  <p class="lede">We trace how gemma-2-2b reads clinical terms versus the everyday words patients use. Wording can change what the model suggests in addition to its confidence, and rewriting the sentence in clinical terms restores it. Try the live case below.</p>
   <p class="lede">Every figure is a live render: columns are the prompt’s words in order; height is depth in the model; the predicted next word sits at the top. Nodes (the dots) are features — size is contribution, color is category. Curves are paths of influence; the spread at the top shows the competing recommendations ranked by probability. Hover any node for its identity and mass.</p>
 
   <div class="tg" id="home-tg">
@@ -330,15 +330,6 @@
     <span class="swatch" style="background:#b4483d"></span>language penalty
   </p>
 
-  <figure class="specimen" id="dialect-specimen" hidden>
-    <figcaption class="spec-head">
-      <span class="spec-eyebrow">the theme in one panel · live measurements</span>
-      <h2>Same medical situation. Different dialect. Different prediction.</h2>
-    </figcaption>
-    <div class="spec-rows" id="spec-rows"></div>
-    <p class="spec-note" id="spec-note"></p>
-  </figure>
-
   <div class="section-head">
     <h2>Four comparison engines</h2>
     <span class="count">Figs. 1–4</span>
@@ -355,8 +346,7 @@
     <div class="fig-body">
       <p class="fig-no">Fig. 1 <span class="mode">· one-word swap</span></p>
       <h3>Word Differences</h3>
-      <p>One phrase swapped — “asthma flares” vs. “chest gets all tight” — as two stacked graphs. Clinical wording gives inhaler at 69%; the patient phrasing makes "shirt" the top word and drops "inhaler" to 4%.</p>
-      <span class="stat penalty">Language Penalty: −65% probability (0.69 → 0.04)</span>
+      <p>One phrase swapped — “asthma flares” vs. “chest gets all tight” — as two stacked graphs. The numbers are in the demo above; the trace shows where the probability goes.</p>
       <p class="traced" data-mode="2panel" data-traced="gemma-2-2b">
         <span class="tm"><b>live trace:</b> gemma-2-2b · gemma scope transcoders</span>
         <span class="tp">hosted circuit-tracer via Neuronpedia · traced July 7, 2026 · scenario 85 of the simulated series</span>
@@ -386,25 +376,19 @@
     </div>
   </a>
 
-  <a class="fig" href="dialect-differences/">
-    <figure class="fig-media">
-      <div class="embed preview pending" data-live-src="modes/dialect/index.html"
-           data-live-title="Live preview: dialect-mode attribution graphs">
-        <div class="pending-inner"><span class="pending-mark"></span>loading · dialect mode</div>
-      </div>
-      <figcaption>live render · traced 2026-07-08</figcaption>
-    </figure>
-    <div class="fig-body">
-      <p class="fig-no">Fig. 3 <span class="mode">· dialect</span></p>
-      <h3>Dialect Differences</h3>
-      <p>Clinical terms stay fixed while the sentence around them is re-traced across dialect and register framings, so any shift comes from framing alone. A minority of framings move the top word off the standard-English target — the full matrix shows which.</p>
-      <p class="traced" data-mode="dialect" data-traced="2026-07-08">
-        <span class="tm"><b>traced model:</b> gemma-2-2b · gemma scope transcoders</span>
-        <span class="tp">45 graphs · 5 baselines + 40 framings · batch dialects_20260708T120729Z</span>
-      </p>
-      <span class="open">Open the dialect study →</span>
-    </div>
-  </a>
+  <figure class="specimen" id="dialect-specimen" hidden>
+    <figcaption class="spec-head">
+      <p class="fig-no">Fig. 3 <span class="mode">· dialect · live specimen</span></p>
+      <h3>Same medical situation. Different dialect. Different prediction.</h3>
+    </figcaption>
+    <div class="spec-rows" id="spec-rows"></div>
+    <p class="spec-note" id="spec-note"></p>
+    <p class="traced" data-mode="dialect" data-traced="gemma-2-2b" style="padding:0 18px">
+      <span class="tm"><b>traced model:</b> gemma-2-2b · gemma scope transcoders</span>
+      <span class="tp">45 graphs · 5 baselines + 40 framings · batch dialects_20260708T120729Z</span>
+    </p>
+    <a class="open" href="dialect-differences/" style="margin:0 18px 14px;display:inline-block">Open the dialect study →</a>
+  </figure>
 
   <a class="fig" href="translation/">
     <figure class="fig-media">
@@ -458,29 +442,10 @@
       <h2>Safety view — urgency of the predicted action<span class="draft-flag">tiers owner-reviewed v1 · domain review pending</span></h2>
       <span class="count" id="sv-count"></span>
     </div>
-    <p class="lede" style="font-size:16px">Not every flip is equal. Sometimes the model <em>hedges</em> (e.g. the clinical answer stays on top but loses probability). Sometimes it <em>redirects</em>: the top answer changes, and when it lands on a lower tier of care (specialist → generalist, medication → nothing) we call that a recommendation <em>downgrade</em>. The tiers, with example words from the model’s measured predictions:</p>
-    <details class="fold">
-      <summary>The five care tiers, with measured example words at each rung.</summary>
-    <div class="sp-scroll">
-      <table class="tier-table" id="tier-table" hidden>
-        <thead><tr>
-          <th scope="col">tier</th>
-          <th scope="col">meaning</th>
-          <th scope="col">measured examples</th>
-        </tr></thead>
-        <tbody id="tier-body"></tbody>
-      </table>
-    </div>
-    <p class="tier-cap" id="tier-cap" hidden>care-urgency tiers, owner-reviewed v1 · domain review pending · predicted words with no urgency information are excluded · a redirect that lands on a lower tier is a downgrade</p>
-    </details>
+    <p class="lede" style="font-size:16px">Not every flip is equal: the model <em>hedges</em> (top answer holds, loses probability) or <em>redirects</em>; a redirect down the care ladder is a <em>downgrade</em>. Definitions and the five-tier ladder live in <a href="methods.html#step-4">methods step 4</a>.</p>
     <div class="sv-asym" id="sv-asym" hidden></div>
     <p class="safety-note" id="sv-asym-cap" hidden>when a wording change moves the top answer across care tiers, the move is mostly down · red arrows: answers landing on a lower tier · grey: a higher one · phrase-deduped counts per model</p>
-    <details class="fold">
-      <summary>The counts behind the arrows, model by model, with the sign test.</summary>
-    <div class="safety-grid" id="sv-grid"></div>
-    <p class="safety-note" id="sv-dedup-note" hidden>counts are phrase-deduped — each phrase counted once per model; re-traces collapsed</p>
-    <p class="safety-note" id="sv-note"></p>
-    </details>
+    <p class="safety-note">Per-model statistics with multiple-comparison correction: <a href="technical/#models">the claim-grade table on the Technical page</a>.</p>
   </section>
 
   <section id="phrase-dataset" hidden>
@@ -512,33 +477,11 @@
     <p class="sp-foot">preview: observed-token flips and biggest probability gaps first · <a href="phrase-dataset/">full dataset (all pairs) →</a></p>
   </section>
 
-  <section id="model-evaluations" hidden>
+  <section id="model-evaluations">
     <div class="section-head">
       <h2>Model evaluations</h2>
-      <span class="count" id="me-count"></span>
     </div>
-    <p class="traced">
-      <span class="tm"><b>model under test:</b> listed per row</span>
-      <span class="tp">accuracy on the same extraction task before and after translation (behavioral scores; the figures above trace circuits)</span>
-    </p>
-    <details class="fold">
-      <summary>Accuracy per model on the same extraction task, before and after translation.</summary>
-    <div class="me-scroll">
-      <table class="me-table">
-        <thead><tr>
-          <th scope="col">Model</th>
-          <th scope="col" class="num">Patient phrasing</th>
-          <th scope="col" class="num">Clinician phrasing</th>
-          <th scope="col" class="num">Δ</th>
-          <th scope="col">Audit flags</th>
-        </tr></thead>
-        <tbody id="me-body"></tbody>
-      </table>
-    </div>
-    <p class="me-caption">Each model extracts clinical concepts from patient phrasing. An LLM then translates that phrasing into clinician language and the identical task is re-scored on the same expected terms. Δ isolates the effect of the translation step alone.</p>
-    <p class="me-foot" id="me-foot"></p>
-    </details>
-    <p><a class="open" href="methods.html#generation-eval">What the percentages mean →</a> · <a class="open" href="technical/#models">Compare the measured models →</a></p>
+    <p class="lede" style="font-size:16px">One set of AIs writes the test, another takes it, and translating patient words into clinician language loses information. The full audit lives on the <a href="methods.html#generation-eval">methods page</a>; the measured models compare on the <a href="technical/#models">Technical page</a>.</p>
   </section>
 
   <div class="endnote">
@@ -703,91 +646,19 @@
     .catch(function(){sec.hidden=true;});
 })();
 (function(){
-  var sec=document.getElementById('model-evaluations');
-  if(!sec||!window.fetch)return;
-  function fmtPct(v){
-    if(typeof v!=='number')return null;
-    return (Math.abs(v)<=1?v*100:v).toFixed(1)+'%';
-  }
-  function cell(cls,text,muted){
-    var td=document.createElement('td');
-    var list=cls.split(' ').filter(Boolean);
-    if(list.indexOf('num')>=0){
-      td.className='num';
-      list=list.filter(function(c){return c!=='num';});
-    }
-    if(muted)list.push('me-null');
-    var s=document.createElement('span');
-    s.className=list.join(' ');
-    s.textContent=text;
-    td.appendChild(s);
-    return td;
-  }
-  // maker / release / spec link per model (data/model_provenance.json);
-  // era transparency, not ranking. Pages render fine if the file is absent.
-  window.PW_PROV={};
-  window.PW_PROV_READY=fetch('data/model_provenance.json',{cache:'no-cache'})
-    .then(function(r){return r.ok?r.json():{};})
-    .then(function(p){window.PW_PROV=(p&&p.models)||{};})
-    .catch(function(){});
-  function pwProvLine(id){
-    var pv=window.PW_PROV[id];
-    if(!pv||!pv.maker)return null;
-    var M=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    var when='';
-    if(pv.released){var p=String(pv.released).split('-');
-      when=' · '+(p[1]?M[parseInt(p[1],10)-1]+' ':'')+p[0];}
-    var div=document.createElement('div');div.className='prov';
-    div.appendChild(document.createTextNode(pv.maker+when+' · '));
-    var a=document.createElement('a');a.href=pv.spec;a.rel='noopener';a.textContent='spec';
-    div.appendChild(a);
-    return div;
-  }
+  if(!window.fetch)return;
   fetch('data/urgency_shift.json',{cache:'no-cache'})
     .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
-    .then(function(u){return window.PW_PROV_READY.then(function(){return u;});})
     .then(function(u){
       var s=u.summary||{}, pm=s.per_model||{};
       // phrase-deduped headline counts (engine collector, mirrors paired_stats_rigor):
       // re-traced phrases collapse to one record per model, so counts are not
       // inflated by pseudoreplication. Older payloads lack the field — fall back.
       var pmd=(s.per_model_deduped&&Object.keys(s.per_model_deduped).length)?s.per_model_deduped:null;
-      var grid=document.getElementById('sv-grid');
       var models=Object.keys(pm);
       if(!models.length)return;
-      function el(tag,cls,text){var e=document.createElement(tag);if(cls)e.className=cls;if(text!=null)e.textContent=text;return e;}
-      function row(dl,label,val,cls){
-        dl.appendChild(el('dt',null,label));
-        var dd=el('dd',cls||null,val);dl.appendChild(dd);
-      }
-      function signTest(kd,ku){
-        // exact two-sided sign test (binomial p=0.5), same formula as the engine;
-        // terms built incrementally so nothing overflows at these counts
-        var n=kd+ku;
-        if(!n)return null;
-        var k=Math.min(kd,ku);
-        var term=Math.pow(0.5,n),tail=term;
-        for(var i=1;i<=k;i++){term=term*(n-i+1)/i;tail+=term;}
-        return Math.round(Math.min(1,2*tail)*1e5)/1e5;
-      }
-      var mit=s.mitigation||null;
-      // tier table: definitions + measured example words, straight from the data
-      var tiersDef=u.tiers||{}, tex=u.tier_examples||{};
-      var tb=document.getElementById('tier-body');
-      if(tb&&Object.keys(tiersDef).length){
-        ['4','3','2','1','0'].forEach(function(k){
-          if(!(k in tiersDef))return;
-          var tr=document.createElement('tr');
-          tr.appendChild(el('td','tn',k));
-          tr.appendChild(el('td',null,String(tiersDef[k])));
-          tr.appendChild(el('td','tex',(tex[k]&&tex[k].length)?tex[k].join(' · '):'—'));
-          tb.appendChild(tr);
-        });
-        if(tb.children.length){
-          document.getElementById('tier-table').hidden=false;
-          var tcap=document.getElementById('tier-cap');if(tcap)tcap.hidden=false;
-        }
-      }
+      // per-model statistics live on technical/#models (claim-grade, corrected);
+      // this section keeps the concept, the deduped counts, and one graphic.
       // direction of error: one down/up arrow pair per model, deduped counts.
       // Older payloads without per_model_deduped simply skip the figure.
       if(pmd){
@@ -822,64 +693,6 @@
           var acap=document.getElementById('sv-asym-cap');if(acap)acap.hidden=false;
         }
       }
-      models.forEach(function(mid){
-        var v=pm[mid];
-        var d=(pmd&&pmd[mid])||null;
-        var card=el('div','safety-card');
-        card.appendChild(el('h3',null,mid));
-        var provLine=pwProvLine(mid);
-        if(provLine)card.appendChild(provLine);
-        var dl=document.createElement('dl');
-        row(dl,'measurements',String(v.n));
-        if(d){
-          // deduped: one record per phrase per model; the confident-downgrade
-          // sub-count is row-level and would exceed the deduped tally, so it
-          // is omitted here; the sign test recomputes from the deduped split
-          function nOrDash(x){return typeof x==='number'?String(x):'—';}
-          var dg=typeof d.downgrades==='number'?d.downgrades:null;
-          var ug=typeof d.upgrades==='number'?d.upgrades:null;
-          if(d.n_phrases!=null)row(dl,'unique phrases',String(d.n_phrases));
-          row(dl,'redirects (flips)',nOrDash(d.flips));
-          row(dl,'downgrades',nOrDash(d.downgrades),dg?'bad':null);
-          row(dl,'upgrades',nOrDash(d.upgrades),ug?'ok':null);
-          row(dl,'mean urgency shift',typeof v.mean_tier_shift==='number'?v.mean_tier_shift.toFixed(3):'—',
-              (v.mean_tier_shift<0?'bad':null));
-          var sp=(dg!=null&&ug!=null)?signTest(dg,ug):null;
-          row(dl,'sign test p',sp!=null?String(sp):'—');
-        }else{
-          row(dl,'redirects (flips)',String(v.flips));
-          row(dl,'downgrades',String(v.downgrades),v.downgrades?'bad':null);
-          row(dl,'· confident (p ≥ 0.2)',String(v['confident_downgrades_p>=0.2']!=null?v['confident_downgrades_p>=0.2']:'—'),'bad');
-          row(dl,'upgrades',String(v.upgrades),v.upgrades?'ok':null);
-          row(dl,'mean urgency shift',typeof v.mean_tier_shift==='number'?v.mean_tier_shift.toFixed(3):'—',
-              (v.mean_tier_shift<0?'bad':null));
-          row(dl,'sign test p',v.sign_test_p!=null?String(v.sign_test_p):'—');
-        }
-        card.appendChild(dl);
-        grid.appendChild(card);
-      });
-      if(pmd){
-        var dn=document.getElementById('sv-dedup-note');
-        if(dn)dn.hidden=false;
-      }
-      var note=document.getElementById('sv-note');
-      var conc=s.concordance||{};
-      var pieces=[];
-      if(conc.pairwise_downgrade_overlap){
-        var js=Object.keys(conc.pairwise_downgrade_overlap).map(function(k){
-          var o=conc.pairwise_downgrade_overlap[k];return o.jaccard;
-        }).filter(function(x){return x!=null;});
-        if(js.length)pieces.push('Non-transferability: downgrades barely overlap across models '+
-          '(pairwise Jaccard ≤ '+Math.max.apply(null,js).toFixed(2)+
-          ') — testing one model cannot certify a phrasing as safe.');
-      }
-      if(mit){
-        pieces.push('Mitigation: of '+mit.n+' downgrade phrases re-traced with an LLM translation, '+
-          mit.restored_top_tier+' recovered the clinical urgency tier.');
-      }else{
-        pieces.push('Recoverable vs unrecoverable downgrades: mitigation trace pending — values will appear here.');
-      }
-      note.textContent=pieces.join(' ');
       var flag=document.querySelector('#safety-view .draft-flag');
       if(flag&&u.vocabulary_status)flag.textContent=u.vocabulary_status.indexOf('draft')>=0
         ?'draft · tiers pending domain review':u.vocabulary_status;
@@ -895,55 +708,6 @@
     })
     .catch(function(){/* section stays hidden without data */});
 
-  fetch('data/model_evaluations.json',{cache:'no-cache'})
-    .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
-    .then(function(data){return window.PW_PROV_READY.then(function(){return data;});})
-    .then(function(data){
-      var models=data.models||[];
-      if(!models.length){sec.hidden=true;return;}  // no data: stay hidden, not a half-built skeleton
-      var tb=document.getElementById('me-body');
-      models.forEach(function(m){
-        var tr=document.createElement('tr');
-        var pending=m.status==='pending';
-        tr.title=pending
-          ?'evaluation pending · awaiting backend export'
-          :'mitigated: '+(m.mitigated==null?'—':m.mitigated)
-            +' · regressions: '+(m.regressions==null?'—':m.regressions)
-            +(m.cost_usd==null?'':' · cost: $'+m.cost_usd);
-        var tdm=document.createElement('td');
-        var idspan=document.createElement('span');
-        idspan.className='me-model';
-        idspan.textContent=m.id||'—';
-        tdm.appendChild(idspan);
-        var provLine2=pwProvLine(m.id);
-        if(provLine2)tdm.appendChild(provLine2);
-        if(pending){
-          var note=document.createElement('span');
-          note.className='me-pending-note';
-          note.textContent='evaluation pending';
-          tdm.appendChild(note);
-        }
-        tr.appendChild(tdm);
-        var pa=fmtPct(m.patient_accuracy), ca=fmtPct(m.clinician_accuracy);
-        tr.appendChild(cell('me-num me-patient num',pa||'—',pa==null));
-        tr.appendChild(cell('me-num me-clin num',ca||'—',ca==null));
-        var d=m.delta, dt=fmtPct(d==null?null:Math.abs(d));
-        var dcls='me-num me-delta num'+(d>0?' pos':(d<0?' neg':''));
-        tr.appendChild(cell(dcls,d==null?'—':((d>0?'+':(d<0?'−':''))+dt),d==null));
-        var audit=(m.mitigated==null&&m.regressions==null)?'—'
-          :('mitigated '+(m.mitigated==null?'—':m.mitigated)
-            +' · regressions '+(m.regressions==null?'—':m.regressions));
-        tr.appendChild(cell('me-audit',audit,false));
-        tb.appendChild(tr);
-      });
-      document.getElementById('me-count').textContent=models.length+' translation models';
-      document.getElementById('me-foot').textContent=
-        'updated '+(data.updated||'—')+' · task: '+(data.task||'—')
-        +' · from the live evaluation runs';
-      sec.hidden=false;
-      if(location.hash==='#'+sec.id)sec.scrollIntoView();
-    })
-    .catch(function(){sec.hidden=true;});
 })();
 (function(){
   var stat=document.getElementById('sim-stat');

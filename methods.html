@@ -122,30 +122,20 @@
     letter-spacing:.04em;margin:8px 0 0}
   .me-legend .sw{display:inline-block;width:9px;height:9px;margin:0 5px 0 0;
     vertical-align:baseline;transform:translateY(1px)}
-  .conv-xlab{font-family:var(--mono);font-size:10.5px;color:var(--muted);
-    text-align:center;letter-spacing:.06em;margin:-2px 0 4px}
 
-  /* Fig. 5 · convergence small multiples (drawn at load from data/convergence.json) */
-  .conv-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:18px 26px;margin:18px 0 6px}
-  .conv-panel h3{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--ink);margin:0 0 2px;letter-spacing:.02em}
-  .conv-panel svg{width:100%;height:auto;display:block}
-  .conv-final{font-family:var(--mono);font-size:11px;color:var(--muted)}
-  .conv-cap{font-family:var(--mono);font-size:12px;color:var(--muted);line-height:1.8;margin:10px 0 0}
-  .conv-pending{font-family:var(--mono);font-size:12px;color:var(--muted);border:1px dashed var(--structural);padding:14px;margin:16px 0}
-  .conv-tip{position:fixed;pointer-events:none;background:var(--paper);border:1px solid var(--ink);padding:5px 8px;font-family:var(--mono);font-size:11px;color:var(--ink);z-index:20;display:none;max-width:300px}
   .fold{margin:14px 0 6px}
   .fold>summary{font-family:var(--mono);font-size:12px;color:var(--muted);cursor:pointer;
     letter-spacing:.02em;line-height:1.7}
   .fold>summary:hover{color:var(--ink)}
   .fold>summary:focus-visible{outline:2px solid var(--clinical);outline-offset:2px}
   .fold[open]>summary{color:var(--ink);margin-bottom:6px}
-  .conv-table{margin-top:10px}
-  .conv-table summary{font-family:var(--mono);font-size:12px;color:var(--muted);cursor:pointer}
-  .conv-table summary:focus-visible{outline:2px solid var(--clinical);outline-offset:2px}
-  .conv-table table{border-collapse:collapse;font-family:var(--mono);font-size:11px;margin-top:8px;width:100%}
-  .conv-table th,.conv-table td{text-align:right;padding:3px 8px;border-bottom:1px solid var(--hairline);color:var(--ink)}
-  .conv-table th{color:var(--muted);font-weight:600}
-  .conv-table th:first-child,.conv-table td:first-child{text-align:left}
+  .tier-table{border-collapse:collapse;margin:14px 0 6px;font-size:14.5px}
+  .tier-table th{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--muted);text-align:left;padding:0 22px 6px 0;border-bottom:1px solid var(--ink)}
+  .tier-table td{padding:6px 22px 6px 0;border-bottom:1px solid var(--hairline);vertical-align:baseline}
+  .tier-table .tn{font-family:var(--mono);font-weight:600}
+  .tier-table .tex{font-family:var(--mono);font-size:13px;color:var(--muted)}
+  .tier-cap{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.04em;margin:0 0 18px}
 
   @media (max-width:760px){
     .masthead nav{gap:8px 22px}
@@ -263,7 +253,7 @@
     </p>
   </section>
 
-  <section>
+  <section id="step-4">
     <p class="step-no">Step 4 · Comparison</p>
     <h2>Four views put the two phrasings side by side</h2>
     <p>
@@ -297,9 +287,48 @@
       for a week, so before dinner she took a”</em> continues with <em>laxative</em>.
       Rephrase it as <em>“all bunged up”</em> and the top word becomes <em>nap</em>
       (30%, against the laxative’s 26% under clinical wording). The advice changed,
-      not just its probability. Tiers follow the owner-reviewed v1 vocabulary (domain review pending); the home
-      page’s safety view lists them with measured examples.
+      not just its probability. Tiers follow the owner-reviewed v1 vocabulary
+      (domain review pending), listed below with measured example words.
     </p>
+    <details class="fold">
+      <summary>The five care tiers, with measured example words at each rung.</summary>
+      <div style="overflow-x:auto">
+        <table class="tier-table" id="tier-table" hidden>
+          <thead><tr>
+            <th scope="col">tier</th>
+            <th scope="col">meaning</th>
+            <th scope="col">measured examples</th>
+          </tr></thead>
+          <tbody id="tier-body"></tbody>
+        </table>
+      </div>
+      <p class="tier-cap" id="tier-cap" hidden>care-urgency tiers, owner-reviewed v1 · domain review pending · predicted words with no urgency information are excluded · a redirect that lands on a lower tier is a downgrade</p>
+    </details>
+    <script>
+    (function(){
+      if(!window.fetch)return;
+      fetch('data/urgency_shift.json',{cache:'no-cache'})
+        .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
+        .then(function(u){
+          var tiersDef=u.tiers||{}, tex=u.tier_examples||{};
+          var tb=document.getElementById('tier-body');
+          if(!tb||!Object.keys(tiersDef).length)return;
+          function el(tag,cls,text){var e=document.createElement(tag);if(cls)e.className=cls;if(text!=null)e.textContent=text;return e;}
+          ['4','3','2','1','0'].forEach(function(k){
+            if(!(k in tiersDef))return;
+            var tr=document.createElement('tr');
+            tr.appendChild(el('td','tn',k));
+            tr.appendChild(el('td',null,String(tiersDef[k])));
+            tr.appendChild(el('td','tex',(tex[k]&&tex[k].length)?tex[k].join(' · '):'—'));
+            tb.appendChild(tr);
+          });
+          if(tb.children.length){
+            document.getElementById('tier-table').hidden=false;
+            var tcap=document.getElementById('tier-cap');if(tcap)tcap.hidden=false;
+          }
+        }).catch(function(){/* fold stays empty without data */});
+    })();
+    </script>
     <a class="back" href="./">Back home →</a>
   </section>
 
@@ -468,173 +497,15 @@
     <p class="step-no">Step 6 · Accumulation</p>
     <h2>Confidence grows as the data accumulates</h2>
     <p>
-      Each panel follows one model as it reads more phrase pairs. The red line is the
-      average language penalty: the percentage points of probability the clinical
-      answer loses when the wording turns colloquial. The band around it starts wide,
-      because a handful of phrases could mislead, and narrows as hundreds accumulate.
-      For every model measured in the hundreds of phrases, the band settles below
-      zero; the newest additions, at about 120 phrases each, have settled below zero
-      as well. Not every model got there at the same speed: at 36 phrases the downgrade pattern
-      in gemma-3-4b-it could still have been chance; by 155 it could not. One honesty rule: a random tenth of new
-      phrases is locked away untouched, so conclusions can be checked once, at the
-      end, against data no interim analysis has seen.
+      Each model's average language penalty starts uncertain and narrows as hundreds
+      of phrase pairs accumulate. One honesty rule: a random tenth of new phrases is
+      locked away untouched, so conclusions can be checked once, at the end, against
+      data no interim analysis has seen. The accumulation figure, one panel per model
+      with its data table, moved to the
+      <a href="technical/#models">cross-model section of the Technical page</a>
+      (2026-07-14, owner decision); the claim-grade endpoint lives there too.
     </p>
-    <div class="conv-grid" id="conv-grid" aria-describedby="conv-caption"></div>
-    <details class="fold" id="conv-more" hidden>
-      <summary id="conv-more-sum"></summary>
-      <div class="conv-grid" id="conv-grid-more" aria-describedby="conv-caption"></div>
-    </details>
-    <div class="conv-xlab" aria-hidden="true">phrases tested →</div>
-    <p class="conv-cap" id="conv-caption">Fig. 5: mean language penalty per model as
-      measurement accumulates, batch by batch. Shaded band: bootstrap 95% confidence
-      interval (seed 7, phrase-deduped, Tier B exploration split only). Grey hairline:
-      zero penalty. Drawn at load time from the convergence data file in this
-      repository.</p>
-    <details class="conv-table"><summary>Data table (every point)</summary>
-      <div id="conv-table-wrap"></div></details>
   </section>
-  <div class="conv-tip" id="conv-tip" aria-hidden="true"></div>
-  <script>
-  (function(){
-    var grid = document.getElementById('conv-grid');
-    var tip = document.getElementById('conv-tip');
-    var NS = 'http://www.w3.org/2000/svg';
-    function pp(v){ return (v*100).toFixed(1).replace('-', '−'); }
-    function el(name, attrs, style){
-      var e = document.createElementNS(NS, name);
-      for (var k in attrs) e.setAttribute(k, attrs[k]);
-      if (style) e.setAttribute('style', style);
-      return e;
-    }
-    function pending(){
-      grid.outerHTML = '<p class="conv-pending">Convergence data pending: this figure draws itself once the data file lands.</p>';
-    }
-    fetch('data/convergence.json')
-      .then(function(r){ if(!r.ok) throw new Error('missing'); return r.json(); })
-      .then(draw).catch(pending);
-    function draw(payload){
-      var models = payload.models || {};
-      var ids = Object.keys(models);
-      if (!ids.length) return pending();
-      // the base model headlines regardless of payload key order
-      if (ids.indexOf('gemma-2-2b') > 0) {
-        ids.splice(ids.indexOf('gemma-2-2b'), 1);
-        ids.unshift('gemma-2-2b');
-      }
-      var xmax = 0, ymin = 0, ymax = 0.005;
-      ids.forEach(function(id){ models[id].points.forEach(function(p){
-        xmax = Math.max(xmax, p.n_phrases);
-        if (p.ci95 && p.ci95[0] != null) ymin = Math.min(ymin, p.ci95[0]);
-        if (p.ci95 && p.ci95[1] != null) ymax = Math.max(ymax, p.ci95[1]);
-      }); });
-      ymin -= 0.008;
-      var W = 300, H = 150, m = {l:38, r:10, t:8, b:20};
-      function X(n){ return m.l + (W - m.l - m.r) * (n / xmax); }
-      function Y(v){ return m.t + (H - m.t - m.b) * (1 - (v - ymin) / (ymax - ymin)); }
-      var rows = [];
-      ids.forEach(function(id, panelIndex){
-        var pts = models[id].points.filter(function(p){ return p.ci95 && p.ci95[0] != null; });
-        if (!pts.length) return;
-        var fin = pts[pts.length - 1];
-        var panel = document.createElement('div');
-        panel.className = 'conv-panel';
-        var h3 = document.createElement('h3'); h3.textContent = id; panel.appendChild(h3);
-        var lab = document.createElement('div'); lab.className = 'conv-final';
-        lab.textContent = pp(fin.mean_penalty) + ' pp · n = ' + fin.n_phrases +
-          ' · [' + pp(fin.ci95[0]) + ', ' + pp(fin.ci95[1]) + ']';
-        var svg = el('svg', {viewBox: '0 0 ' + W + ' ' + H, role: 'img',
-          'aria-label': id + ': mean language penalty with 95% interval as measurement accumulates; final ' +
-          pp(fin.mean_penalty) + ' percentage points at n=' + fin.n_phrases + '. Full values in the data table below.'});
-        // zero hairline + y labels
-        svg.appendChild(el('line', {x1: m.l, x2: W - m.r, y1: Y(0), y2: Y(0)},
-          'stroke:var(--structural);stroke-width:1'));
-        [0, -0.10].forEach(function(v){
-          if (v < ymin) return;
-          var t = el('text', {x: m.l - 5, y: Y(v) + 3.5, 'text-anchor': 'end'},
-            'font-family:var(--mono);font-size:10px;fill:var(--muted)');
-          t.textContent = v === 0 ? '0' : pp(v);
-          svg.appendChild(t);
-        });
-        // end ticks only (no baseline - the zero rule is the anchor)
-        [[0, '0'], [xmax, xmax + ' phrases']].forEach(function(tk){
-          var t = el('text', {x: X(tk[0]), y: H - m.b + 14,
-            'text-anchor': tk[0] === 0 ? 'start' : 'end'},
-            'font-family:var(--mono);font-size:10px;fill:var(--muted)');
-          t.textContent = tk[1];
-          svg.appendChild(t);
-        });
-        // CI band
-        var d = 'M' + pts.map(function(p){ return X(p.n_phrases) + ',' + Y(p.ci95[1]); }).join('L') +
-                'L' + pts.slice().reverse().map(function(p){ return X(p.n_phrases) + ',' + Y(p.ci95[0]); }).join('L') + 'Z';
-        svg.appendChild(el('path', {d: d}, 'fill:var(--penalty);fill-opacity:.13;stroke:none'));
-        // mean line + final dot
-        svg.appendChild(el('path', {d: 'M' + pts.map(function(p){
-          return X(p.n_phrases) + ',' + Y(p.mean_penalty); }).join('L'), fill: 'none'},
-          'stroke:var(--penalty);stroke-width:2;stroke-linejoin:round'));
-        svg.appendChild(el('circle', {cx: X(fin.n_phrases), cy: Y(fin.mean_penalty), r: 3},
-          'fill:var(--penalty)'));
-        if (panelIndex === 0) {
-          // one-time axis label + direct annotation (Tufte: integrate text and data)
-          var ylab = el('text', {x: 2, y: m.t + 6},
-            'font-family:var(--mono);font-size:9.5px;fill:var(--muted);letter-spacing:.04em');
-          ylab.textContent = 'penalty (percentage points)';
-          svg.appendChild(ylab);
-          var note = el('text', {x: W - m.r, y: m.t + 20, 'text-anchor': 'end'},
-            'font-family:var(--mono);font-size:9.5px;fill:var(--muted)');
-          note.textContent = 'band tightens as more phrases are measured \u2193';
-          svg.appendChild(note);
-        }
-        // hover hit targets
-        pts.forEach(function(p){
-          var text = 'through ' + p.through_batch + ' · n=' + p.n_phrases + ' · ' +
-            pp(p.mean_penalty) + ' pp [' + pp(p.ci95[0]) + ', ' + pp(p.ci95[1]) + '] · ' +
-            p.downgrades + '↓ ' + p.upgrades + '↑';
-          var hit = el('circle', {cx: X(p.n_phrases), cy: Y(p.mean_penalty), r: 10, 'aria-hidden': 'true'},
-            'fill:transparent;stroke:none');
-          var ti = document.createElementNS(NS, 'title'); ti.textContent = text; hit.appendChild(ti);
-          hit.addEventListener('mousemove', function(ev){
-            tip.textContent = text; tip.style.display = 'block';
-            tip.style.left = Math.min(ev.clientX + 12, window.innerWidth - 310) + 'px';
-            tip.style.top = (ev.clientY + 14) + 'px';
-          });
-          hit.addEventListener('mouseleave', function(){ tip.style.display = 'none'; });
-          svg.appendChild(hit);
-          rows.push([id, p.through_batch, p.n_phrases, pp(p.mean_penalty),
-            '[' + pp(p.ci95[0]) + ', ' + pp(p.ci95[1]) + ']', p.downgrades, p.upgrades]);
-        });
-        panel.appendChild(svg);
-        panel.appendChild(lab);
-        // the first model's panel carries the story; the repeats confirm it
-        // and fold away (owner request 2026-07-13: keep methods scannable)
-        if (panelIndex === 0) grid.appendChild(panel);
-        else document.getElementById('conv-grid-more').appendChild(panel);
-      });
-      if (ids.length > 1) {
-        var others = ids.slice(1);
-        // only claim the settling pattern when every folded band actually
-        // ends below zero at its final point
-        var allBelow = others.every(function(id){
-          var pts = models[id].points || [];
-          var last = pts[pts.length - 1];
-          return last && last.ci95 && last.ci95[1] != null && last.ci95[1] < 0;
-        });
-        document.getElementById('conv-more-sum').textContent =
-          'The other ' + others.length + ' models, drawn the same way' +
-          (allBelow ? ': every band settles below zero.' : '.');
-        document.getElementById('conv-more').hidden = false;
-      }
-      // data table (accessible view)
-      var wrap = document.getElementById('conv-table-wrap');
-      var tbl = document.createElement('table');
-      var thead = '<thead><tr><th scope="col">model</th><th scope="col">through batch</th>' +
-        '<th scope="col">n phrases</th><th scope="col">mean (pp)</th><th scope="col">95% CI (pp)</th>' +
-        '<th scope="col">downgrades</th><th scope="col">upgrades</th></tr></thead>';
-      tbl.innerHTML = thead + '<tbody>' + rows.map(function(r){
-        return '<tr><td>' + r.join('</td><td>') + '</td></tr>'; }).join('') + '</tbody>';
-      wrap.appendChild(tbl);
-    }
-  })();
-  </script>
 
   <section id="limitations">
     <p class="step-no">Limitations</p>

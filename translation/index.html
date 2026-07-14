@@ -223,13 +223,10 @@
 
   <h2>What the depth readout adds</h2>
   <p class="explainer">A layer-by-layer readout splits the penalty into two failure
-     kinds. When the answer forms in the middle layers and is lost late, translation
-     recovers work the model already did. When the answer never forms, translation
-     supplies the clinical wording itself. At 35 joined pairs the class means sit
-     close: 0.13 tiers regained where the answer survived in depth, 0.16 where it
-     never formed. The early 17-pair gap favoring survived answers did not persist.
-     Exploratory, owner-reviewed v1 tiers (domain review pending). The running test lives in the
-     data section of the <a href="../technical/#data">Technical page</a>.</p>
+     kinds: answers that form and are lost late, which translation recovers, and
+     answers that never form, which translation supplies. The running numbers, class
+     by class, live in the data section of the
+     <a href="../technical/#data">Technical page</a>.</p>
 
   <details class="meth" id="trace-fold">
     <summary>View the live three-panel trace (clinical / patient / translated)</summary>
