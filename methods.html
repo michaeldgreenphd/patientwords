@@ -285,8 +285,8 @@
       lands on a lower tier of care. A worked case: <em>“Grandma’s been constipated
       for a week, so before dinner she took a”</em> continues with <em>laxative</em>.
       Rephrase it as <em>“all bunged up”</em> and the top word becomes <em>nap</em>
-      (30%, against the laxative’s 26% under clinical wording). The advice changed,
-      not just its probability. Tiers follow the owner-reviewed v1 vocabulary
+      (30%, against the laxative’s 26% under clinical wording). The predicted word
+      changed, not just its probability. Tiers follow the owner-reviewed v1 vocabulary
       (domain review pending), listed below with measured example words.
     </p>
     <details class="fold">
@@ -498,11 +498,12 @@
     <p>
       Each model's average language penalty starts uncertain and narrows as hundreds
       of phrase pairs accumulate. One honesty rule: a random tenth of new phrases is
-      locked away untouched, so conclusions can be checked once, at the end, against
-      data no interim analysis has seen. The accumulation figure, one panel per model
+      locked away untouched, and since July 14 also withheld from this site's data
+      files, so conclusions can be checked once, at the end, against data no interim
+      analysis has seen. The accumulation figure, one panel per model
       with its data table, moved to the
       <a href="technical/#models">cross-model section of the Technical page</a>
-      (2026-07-14, owner decision); the claim-grade endpoint lives there too.
+      (2026-07-14, owner decision); the interim cross-model statistics live there too.
     </p>
   </section>
 
@@ -511,7 +512,7 @@
     <h2>What this evidence does and does not show</h2>
     <p>This project measures one narrow thing: how the probability of a single next word changes when clinical wording is replaced by patient wording. That is a probe of model behavior, not a clinical outcome. A lower probability for “antacid” isn’t a measure of harm; it’s a sign the model treats the two phrasings differently.</p>
     <ul class="engines">
-      <li><p><b>One small model carries the circuit evidence.</b> Every graph here comes from gemma-2-2b, chosen because its transcoders are public. The behavioral checks on the other seven models measure next-word probabilities only, no circuits. None of this shows how larger systems behave. The one medically tuned model measured, medgemma-4b-it (4B parameters, next-word behavior only), still shows a below-zero penalty.</p></li>
+      <li><p><b>One small model carries the circuit evidence.</b> Every graph here comes from gemma-2-2b, chosen because its transcoders are public. The behavioral checks on the other seven models measure next-word probabilities only, no circuits. None of this shows how larger systems behave. The one medically tuned model measured, medgemma-4b-it (4B parameters, next-word behavior only), still shows a below-zero penalty: −3.4 pp, 95% CI [−6.9, −0.2], on 119 phrases. That reading is exploratory; the model is a post-registration addition, and its interval crosses zero under the stricter simultaneous correction.</p></li>
       <li><p><b>Attribution graphs are an interpretive tool.</b> They reconstruct the model’s computation through features and prune heavily; error nodes absorb what’s missed.</p></li>
       <li><p><b>Feature labels are machine-generated.</b> The clinical / off-target
         categories come from keyword-matching auto-interp descriptions. Both steps can be

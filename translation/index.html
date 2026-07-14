@@ -201,8 +201,9 @@
   <h1>Translation</h1>
   <p class="subtitle">Translating the patient sentence back into clinical terms restores the prediction.</p>
   <p class="explainer">The mitigation: an LLM rewrites the patient sentence in standard terms, and that rewrite is traced directly. The clinical features reappear and the target probability recovers.</p>
-  <p class="explainer">Translation matters most when it changes the <em>advice</em>. In the downgraded
-     clinical advice set, <em>“Grandma’s been all bunged up for a week, so before dinner
+  <p class="explainer">Translation matters most when it changes the predicted next word, not just
+     its probability. In the reviewed downgrade set,
+     <em>“Grandma’s been all bunged up for a week, so before dinner
      she took a”</em> continues with <em>nap</em> (30%); rewritten in clinical terms, the
      top word becomes <em>lax(ative)</em>, above the original clinical phrasing (26%):
      45% in the July 7 study trace, 41% on the July 9 re-trace shown below.
@@ -270,6 +271,7 @@
 
   <div class="endnote">
     <p>The traces here are live gemma-2-2b runs.</p>
+    <p>SIMULATED DATA: the sentence pairs measured across this site are written by an LLM and checked automatically. The scenarios are simulated; the testing is real. The phrase dataset is the exception: hand-built from real patient language and measured by hand.</p>
     <footer>
       Built with the <a href="https://github.com/michaeldgreenphd/patientwords-engine">patientwords-engine</a> pipeline
       on <a href="https://neuronpedia.org">Neuronpedia</a> ·

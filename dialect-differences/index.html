@@ -10,7 +10,7 @@
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="PatientWords">
 <meta property="og:title" content="Dialect differences — PatientWords">
-<meta property="og:description" content="The same clinical phrases, framed the way different communities actually speak; a minority of framings move the model's top prediction.">
+<meta property="og:description" content="The same clinical phrases under LLM-approximated dialect and register framings; a minority of framings move the model's top prediction.">
 <meta property="og:url" content="https://michaeldgreenphd.github.io/patientwords/dialect-differences/">
 <meta property="og:image" content="https://michaeldgreenphd.github.io/patientwords/modes/2panel/preview.png">
 <meta property="og:image:width" content="1690">
@@ -18,7 +18,7 @@
 <meta property="og:image:alt" content="Attribution graphs comparing clinical and patient wording in gemma-2-2b">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Dialect differences — PatientWords">
-<meta name="twitter:description" content="The clinical term held fixed while the sentence shifts across dialect and register framings.">
+<meta name="twitter:description" content="The clinical term held fixed while the sentence shifts across LLM-approximated dialect and register framings.">
 <meta name="twitter:image" content="https://michaeldgreenphd.github.io/patientwords/modes/2panel/preview.png">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23faf9f5'/%3E%3Crect x='9' y='9' width='30' height='30' fill='%23111827'/%3E%3Crect x='25' y='25' width='30' height='30' fill='%2315803d'/%3E%3C/svg%3E">
 <style>
@@ -131,6 +131,8 @@
   .dlm .term{font-weight:600}
   .dlm .tgt{display:block;color:var(--muted);font-weight:400;font-size:10.5px}
   .dlm .flipmark{color:var(--penalty);margin-left:3px}
+  .functag{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.04em;
+    color:var(--muted);white-space:nowrap;margin-top:1px}
   .dlm a{font-size:10.5px;color:var(--muted)}
   .dlm a:hover{color:var(--ink)}
 
@@ -210,8 +212,8 @@
 <main id="main">
   <p class="dateline">Fig. 3 <span class="mode">· dialect & register sweep · live render · traced July 8, 2026</span></p>
   <h1>Dialect differences</h1>
-  <p class="subtitle">The clinical term held fixed while the surrounding sentence shifts across eight dialect and register framings per term.</p>
-  <p class="explainer">The clinical term stays fixed while the sentence around it is re-traced across dialect and register variants, so any shift comes from framing. The sweep below holds a set of clinical terms fixed, one per row, and re-traces each across several dialect and register framings; the matrix reports the exact counts. A minority of framings move the top word.</p>
+  <p class="subtitle">The clinical term held fixed while the surrounding sentence shifts across eight LLM-approximated dialect and register framings per term.</p>
+  <p class="explainer">The clinical term stays fixed while the sentence around it is re-traced across dialect and register variants, so any shift comes from framing. The framings are Claude-written approximations: each column label is the instruction given to the generating model, not a recording of how any community speaks, and no speaker of any variety reviewed them. The sweep below holds a set of clinical terms fixed, one per row, and re-traces each across several framings; the matrix reports the exact counts. A minority of framings move the top word.</p>
   <p class="traced" data-mode="dialect" data-traced="gemma-2-2b">
     <span class="tm"><b>model:</b> gemma-2-2b · <b>features:</b> Gemma Scope transcoders (16k) · <b>graphs:</b> 45 (5 baselines + 40 framings)</span><br>
     <span class="tm"><b>held fixed:</b> clinical terms from the hand-measured dataset · <b>framings:</b> dialect + register variants per term</span><br>
@@ -227,10 +229,13 @@
         <tbody id="dlm-body"></tbody>
       </table>
     </div>
-    <p class="dl-caption">Each cell is the change in p(target) when that framing replaces
-       standard English. A red
+    <p class="dl-caption">Each cell is one traced sentence (n=1): the change in p(target) when
+       that framing replaces standard English. Column labels are the instructions given to the
+       generating LLM, not community samples. A red
        <span class="flipmark">&#9679;</span> marks a framing that also flips the model&rsquo;s top
-       prediction away from the baseline target; hover a cell for the new top prediction. Click any row to open that
+       prediction away from the baseline target; hover a cell for the new top prediction. Rows whose
+       target is a function word (&ldquo;my&rdquo;, &ldquo;the&rdquo;) are tagged and their flips sit
+       outside the headline count. <span id="dl-noise"></span>Click any row to open that
        term&rsquo;s standalone render.</p>
   </section>
 
@@ -357,20 +362,25 @@
       tr.appendChild(hth(null,'Term (target)'));
       var thb=hth('num','baseline p');tr.appendChild(thb);
       dialects.forEach(function(d){var th=hth('num',shortName(d));
-        th.title=d;tr.appendChild(th);});
+        th.title='LLM instruction: '+d;tr.appendChild(th);});
       var thc=hth('num','core');
       thc.title='clinical features surviving every framing / clinical features in the baseline trace';
       tr.appendChild(thc);
       tr.appendChild(hth(null,''));
       head.appendChild(tr);
       var body=document.getElementById('dlm-body');
-      var flips=0,cells=0;
+      // rows whose target is a function word measure sentence frame, not the
+      // clinical concept; their flips stay visible but leave the headline count
+      var FUNC={'my':1,'the':1,'a':1,'an':1,'his':1,'her':1,'their':1,'this':1,'that':1,'it':1};
+      var flips=0,funcFlips=0,cells=0;
       items.forEach(function(it){
+        var isFunc=FUNC[String(it.target_token||'').trim().toLowerCase()]===1;
         var row=el('tr');
         var td=el('td');
         var tspan=el('span','term',it.term);
         td.appendChild(tspan);
         td.appendChild(el('span','tgt',String.fromCharCode(8594)+' '+(it.target_token||'?')));
+        if(isFunc)td.appendChild(el('span','functag','function-word target'));
         row.appendChild(td);
         var bp=el('td','num',it.baseline_p==null?String.fromCharCode(8212):pct(it.baseline_p));
         row.appendChild(bp);
@@ -384,7 +394,8 @@
           c.appendChild(s);
           c.title=v.prompt+' '+String.fromCharCode(8594)+' top: '+(v.top_token||'?')+
             (v.top_p!=null?' ('+pct(v.top_p)+')':'');
-          if(v.flip){flips++;var fm=el('span','flipmark',String.fromCharCode(9679));c.appendChild(fm);}
+          if(v.flip){if(isFunc)funcFlips++;else flips++;
+            var fm=el('span','flipmark',String.fromCharCode(9679));c.appendChild(fm);}
           c.setAttribute('aria-label',fmtD(v.delta)+(v.flip?' (flips top prediction)':'')+
             ' '+String.fromCharCode(183)+' '+c.title);
           row.appendChild(c);
@@ -412,10 +423,20 @@
       });
       document.getElementById('dl-matrix-sub').textContent=
         items.length+' clinical terms '+String.fromCharCode(183)+' '+dialects.length+
-        ' framing varieties '+String.fromCharCode(183)+' '+cells+' re-traced sentences '+String.fromCharCode(183)+' '+flips+
-        ' top-pick flips '+String.fromCharCode(183)+' '+pwBatch(data.batch)+
+        ' framing varieties (LLM instructions) '+String.fromCharCode(183)+' '+cells+' re-traced sentences '+String.fromCharCode(183)+' '+flips+
+        ' top-pick flips on content-word targets'+
+        (funcFlips?(' '+String.fromCharCode(183)+' '+funcFlips+' more on function-word targets'):'')+
+        ' '+String.fromCharCode(183)+' '+pwBatch(data.batch)+
         ' '+String.fromCharCode(183)+' '+(data.graph_model||'');
       document.getElementById('dl-matrix').hidden=false;
+      // scale reference for single cells, fetched so it can never go stale
+      fetch('../data/provenance.json',{cache:'no-cache'}).then(function(r){return r.json();})
+        .then(function(p){
+          var m=p&&p.paraphrase_robustness&&p.paraphrase_robustness.mean_abs_delta_vs_baseline;
+          var nn=document.getElementById('dl-noise');
+          if(typeof m==='number'&&nn)nn.textContent='For scale: meaning-preserving paraphrases alone move these '+
+            'single-sentence probabilities by ±'+(m*100).toFixed(1)+' pp on average, so a small cell is within paraphrase noise. ';
+        }).catch(function(){});
 
       var feat=null;
       for(var i=0;i<items.length;i++){

@@ -167,7 +167,7 @@
   <section>
     <p class="step-no">2 · The model diverges</p>
     <h2>Same three phrasings, three different answers</h2>
-    <p>We gave a language model the same sentences and read off its most likely next word. The clinical phrasing makes a medical recommendation. The casually framed phrasings make a food recommendation, even the one that uses the clinical term.</p>
+    <p>We gave a language model the same sentences and read off its most likely next word. Under the clinical phrasing, the top next word is the medical answer. Under the casual framings, it is a food word, even in the one that uses the clinical term.</p>
     <div class="fig" role="img" aria-label="The same three phrasings pass through a language model and come out as three different answers: antacid, ice cream, and apple.">
     <svg viewBox="0 0 800 190">
       <text x="0" y="28" class="sv-q">“I have <tspan style="fill:var(--teal);font-weight:700">acid reflux</tspan>.”</text>
@@ -208,7 +208,7 @@
   <section>
     <p class="step-no">4 · What we measure</p>
     <h2>Two numbers per sentence pair</h2>
-    <p><b>How far the right answer's probability falls</b> when the wording turns casual, and <b>whether the top answer changes</b>. When it changes toward less help, like "inhaler" becoming "shirt" in step 3, we count a downgrade.</p>
+    <p><b>How far the right answer's probability falls</b> when the wording turns casual, and <b>whether the top answer changes</b>. When it changes to a word lower on the care ladder, like "inhaler" becoming "shirt" in step 3, we count a downgrade.</p>
     <div class="ladder-fig" id="care-ladder"><span class="ladder-pend">figure pending: the urgency measurements have not loaded</span></div>
     <p class="cap" id="ladder-cap" hidden></p>
   </section>
@@ -219,7 +219,7 @@
     <p>A trace is not a later stage: it is a look inside the guess you watched in
       step 3. Inside the model, small units called "features" switch on as it reads.
       Some respond to medical ideas; others to everyday ones. A circuit trace records
-      which features fired and how strongly each fed the final recommendation.
+      which features fired and how strongly each fed the predicted next word.
       Clinical wording lights the medical features; patient wording lights the
       everyday ones. A person chatting with a model never sees any of this: the
       trace is a diagnostic that researchers compute from the model's internals
@@ -396,6 +396,7 @@
     The clinician panel is illustrative, not a measurement.
   </div>
   <div class="endnote" style="border-top:1px solid var(--ink);margin-top:42px;padding-top:14px">
+    <p style="font-family:var(--mono);font-size:12px;line-height:1.8;color:var(--muted);margin:0 0 10px">SIMULATED DATA: the sentence pairs measured across this site are written by an LLM and checked automatically. The scenarios are simulated; the testing is real. The phrase dataset is the exception: hand-built from real patient language and measured by hand.</p>
     <footer style="font-family:var(--mono);font-size:11px;line-height:1.9;color:var(--muted)">
       Built with the <a href="https://github.com/michaeldgreenphd/patientwords-engine">patientwords-engine</a> pipeline
       on <a href="https://neuronpedia.org">Neuronpedia</a> ·

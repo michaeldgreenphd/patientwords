@@ -10,15 +10,15 @@
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="PatientWords">
 <meta property="og:title" content="PatientWords — clinical vs. patient language in medical AI circuits">
-<meta property="og:description" content="Patients don’t speak like doctors. Medical AI must be ready to interpret them. Attribution-graph comparisons of clinical vs. patient language in gemma-2-2b.">
+<meta property="og:description" content="Patients don’t speak like doctors. Small open language models change their next-word predictions when the wording does. Attribution-graph comparisons of clinical vs. patient language in gemma-2-2b.">
 <meta property="og:url" content="https://michaeldgreenphd.github.io/patientwords/">
 <meta property="og:image" content="https://michaeldgreenphd.github.io/patientwords/assets/share_card.png">
 <meta property="og:image:width" content="2400">
 <meta property="og:image:height" content="1260">
-<meta property="og:image:alt" content="Patients don't speak like doctors. Medical AI must be ready to interpret them. Scenario 85: the clinical wording predicts inhaler at 69%; the everyday wording predicts shirt, and inhaler falls to 4%.">
+<meta property="og:image:alt" content="Patients don't speak like doctors. Small open language models change their next-word predictions when the wording does. Scenario 85: the clinical wording predicts inhaler at 69%; the everyday wording predicts shirt, and inhaler falls to 4%.">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="PatientWords — clinical vs. patient language in medical AI circuits">
-<meta name="twitter:description" content="Patients don’t speak like doctors. Medical AI must be ready to interpret them.">
+<meta name="twitter:description" content="Patients don’t speak like doctors. Small open language models change their next-word predictions when the wording does.">
 <meta name="twitter:image" content="https://michaeldgreenphd.github.io/patientwords/assets/share_card.png">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23faf9f5'/%3E%3Crect x='9' y='9' width='30' height='30' fill='%23111827'/%3E%3Crect x='25' y='25' width='30' height='30' fill='%2315803d'/%3E%3C/svg%3E">
 <style>
@@ -308,9 +308,9 @@
 </header>
 <main id="main">
   <p class="dateline">Research bulletin · mechanistic interpretability of medical language · <b>gemma-2-2b</b></p>
-  <h1><span class="patient">Patients</span> don’t speak like doctors.<br><span class="clinical">Medical&nbsp;AI</span> must be ready to interpret them.</h1>
+  <h1><span class="patient">Patients</span> don’t speak like doctors.<br><span class="clinical">Small open models</span> change their next-word predictions when the wording does.</h1>
   <p class="lede">We trace how gemma-2-2b reads clinical terms versus the everyday words patients use. Wording can change what the model suggests in addition to its confidence, and rewriting the sentence in clinical terms restores it. Try the live case below.</p>
-  <p class="lede">Every figure is a live render: columns are the prompt’s words in order; height is depth in the model; the predicted next word sits at the top. Nodes (the dots) are features — size is contribution, color is category. Curves are paths of influence; the spread at the top shows the competing recommendations ranked by probability. Hover any node for its identity and mass.</p>
+  <p class="lede">Every figure is a live render: columns are the prompt’s words in order; height is depth in the model; the predicted next word sits at the top. Nodes (the dots) are features — size is contribution, color is category. Curves are paths of influence; the spread at the top shows the competing next-word continuations ranked by probability. Hover any node for its identity and mass.</p>
 
   <div class="tg" id="home-tg">
     <p class="tg-sentence">“When the dust kicks up my
@@ -378,7 +378,7 @@
   <figure class="specimen" id="dialect-specimen" hidden>
     <figcaption class="spec-head">
       <p class="fig-no">Fig. 3 <span class="mode">· dialect · live specimen</span></p>
-      <h3>Same medical situation. Different dialect. Different prediction.</h3>
+      <h3>Same medical situation. Different framing. Different prediction.</h3>
     </figcaption>
     <div class="spec-rows" id="spec-rows"></div>
     <p class="spec-note" id="spec-note"></p>
@@ -441,10 +441,10 @@
       <h2>Safety view — urgency of the predicted action<span class="draft-flag">tiers owner-reviewed v1 · domain review pending</span></h2>
       <span class="count" id="sv-count"></span>
     </div>
-    <p class="lede" style="font-size:16px">Not every flip is equal: the model <em>hedges</em> (top answer holds, loses probability) or <em>redirects</em>; a redirect down the care ladder is a <em>downgrade</em>. Definitions and the five-tier ladder live in <a href="methods.html#step-4">methods step 4</a>.</p>
+    <p class="lede" style="font-size:16px">Not every flip is equal: the model <em>hedges</em> (top answer holds, loses probability) or <em>redirects</em>; a redirect down the care ladder is a <em>downgrade</em>. Definitions and the five-tier ladder live in <a href="methods.html#step-4">methods step 4</a>. These are next-word probabilities in small open models on LLM-written test sentences, not clinical outcomes; scope and caveats are on the <a href="methods.html#limitations">methods page</a>.</p>
     <div class="sv-asym" id="sv-asym" hidden></div>
-    <p class="safety-note" id="sv-asym-cap" hidden>when a wording change moves the top answer across care tiers, the move is mostly down · red arrows: answers landing on a lower tier · grey: a higher one · phrase-deduped counts per model</p>
-    <p class="safety-note">Per-model statistics with multiple-comparison correction: <a href="technical/#models">the claim-grade table on the Technical page</a>.</p>
+    <p class="safety-note" id="sv-asym-cap" hidden>when a wording change moves the top answer across care tiers, the move is mostly down · red arrows: answers landing on a lower tier · grey: a higher one · phrase-deduped counts per model · LLM-authored stimuli</p>
+    <p class="safety-note">Per-model statistics with multiple-comparison correction: <a href="technical/#models">the interim table on the Technical page</a>.</p>
   </section>
 
   <section id="phrase-dataset" hidden>
@@ -485,6 +485,7 @@
 
   <div class="endnote">
     <p>Figs. 1–4, the simulated scenarios, and the phrase-dataset measurements are live gemma-2-2b traces.</p>
+    <p>SIMULATED DATA: the sentence pairs measured across this site are written by an LLM and checked automatically. The scenarios are simulated; the testing is real. The phrase dataset is the exception: hand-built from real patient language and measured by hand.</p>
     <footer>
       Built with the <a href="https://github.com/michaeldgreenphd/patientwords-engine">patientwords-engine</a> pipeline
       on <a href="https://neuronpedia.org">Neuronpedia</a> ·
@@ -656,7 +657,7 @@
       var pmd=(s.per_model_deduped&&Object.keys(s.per_model_deduped).length)?s.per_model_deduped:null;
       var models=Object.keys(pm);
       if(!models.length)return;
-      // per-model statistics live on technical/#models (claim-grade, corrected);
+      // per-model statistics live on technical/#models (interim, corrected);
       // this section keeps the concept, the deduped counts, and one graphic.
       // direction of error: one down/up arrow pair per model, deduped counts.
       // Older payloads without per_model_deduped simply skip the figure.
@@ -791,12 +792,22 @@
     var note=document.getElementById('spec-note');
     var bm=/^dialects_(\d{4})(\d{2})(\d{2})/.exec(d.batch||'');
     var bWhen=bm?(['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][+bm[2]-1]+' '+(+bm[3])+', '+bm[1]):'';
-    note.textContent='one instruction \u00b7 '+it.variants.length+' dialect framings measured, '
-      +vs.length+' shown \u00b7 '+flips+' change the top prediction (red) \u00b7 gemma-2-2b live'
+    note.textContent='one instruction \u00b7 '+it.variants.length+' LLM-approximated framings measured, '
+      +vs.length+' shown \u00b7 '+flips+' change the top prediction (red) \u00b7 each framing is a Claude-written approximation of the variety, not a recording of a speaker \u00b7 gemma-2-2b live'
       +(bWhen?(' \u00b7 framings batch of '+bWhen):'')+' \u00b7 this panel picks its example from the measured dialect data and updates with the study \u00b7 ';
     var a=el('a',null,'full study \u2192 Dialect Differences');
     a.href='dialect-differences/';
     note.appendChild(a);
+    // scale reference: innocuous paraphrases alone move these single-sentence
+    // probabilities; number fetched so it can never go stale
+    fetch('data/provenance.json',{cache:'no-cache'}).then(function(r){return r.json();})
+      .then(function(p){
+        var m=p&&p.paraphrase_robustness&&p.paraphrase_robustness.mean_abs_delta_vs_baseline;
+        if(typeof m!=='number')return;
+        note.insertBefore(document.createTextNode('for scale: meaning-preserving paraphrases '+
+          'alone move these single-sentence probabilities by \u00b1'+(m*100).toFixed(1)+
+          ' pp on average \u00b7 '),a);
+      }).catch(function(){});
     document.getElementById('dialect-specimen').hidden=false;
   }).catch(function(){});
 })();

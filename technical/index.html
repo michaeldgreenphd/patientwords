@@ -114,6 +114,8 @@
   #conv-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
   .prov a{color:var(--muted);text-underline-offset:3px}
   .prov a:hover{color:var(--ink)}
+  .reg-tag{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.04em;
+    color:var(--muted);white-space:nowrap;margin-top:1px}
   /* convergence small multiples (moved from methods 2026-07-14, owner decision) */
   .conv-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:18px 26px;margin:18px 0 6px}
   .conv-panel h3{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--ink);margin:0 0 2px;letter-spacing:.02em}
@@ -341,18 +343,25 @@
     <p class="explainer">The lens results above come from one model. The behavioral
       finding they explain generalizes: the same two-phrasing probe, run on eight
       measured open-weights models across four model families, with the probability
-      of the clinical next word measured under both wordings. Phrase counts differ
-      by model; the claim-grade table below lists each. Every count uses each
-      phrase once per model, and the asymmetry tests are adjusted for multiple
-      comparisons. One tenth of newly
-      collected data is sealed in advance and never touched by these interim
-      numbers. The models here are the measured subjects; the stimuli they read are
+      of the clinical next word measured under both wordings. These are interim
+      numbers from the exploration split. They use the plain generated scenario
+      batches only; steered, screened, and re-traced rows sit in a labeled
+      sensitivity analysis inside the statistics file. Phrase counts differ
+      by model; the table below lists each. Every count uses each
+      phrase once per model. Four models were named in the pre-registration; the
+      other four are later additions, marked exploratory below, and the asymmetry
+      tests are corrected for multiple comparisons within each of those two
+      groups. One tenth of newly
+      collected phrases is sealed for the confirmatory endpoint and withheld from
+      this site's data files. The models here are the measured subjects; the stimuli they read are
       written by Claude models and audited on the <a href="../methods.html#generation-eval">methods page</a>.</p>
 
     <h3>The penalty, model by model</h3>
     <p>Mean language penalty: the percentage points of next-word probability the
-      clinical answer loses when the wording turns colloquial, with its confidence
-      band. Every band sits below zero.</p>
+      clinical answer loses when the wording turns colloquial. The thick band is
+      each model's own 95% interval; the hairline extends it to a stricter
+      simultaneous interval, sized so all eight bands can be read at once.
+      <span id="forest-sim"></span></p>
     <div id="forest"></div>
     <p class="me-caption" id="forest-cap"></p>
 
@@ -361,11 +370,10 @@
       <p style="font-size:15px;line-height:1.6">
         Each panel follows one model as it reads more phrase pairs. The red line is the
         average language penalty; the band around it starts wide, because a handful of
-        phrases could mislead, and narrows as hundreds accumulate. For every model
-        measured in the hundreds of phrases, the band settles below zero; the newest
-        additions, at about 120 phrases each, have settled below zero as well. Not
-        every model got there at the same speed: at 36 phrases the downgrade pattern
-        in gemma-3-4b-it could still have been chance; by 155 it could not.
+        phrases could mislead, and narrows as hundreds accumulate. The four
+        post-registration additions have read about 120 phrases so far, so their bands
+        stay wider. Early points in any panel are unstable by construction; read where
+        each band ends, not the path it took.
       </p>
       <div class="conv-grid" id="conv-grid" aria-describedby="conv-caption"></div>
       <details class="fold" id="conv-more" hidden>
@@ -384,12 +392,13 @@
     <h3>When the answer changes, it goes down the care ladder</h3>
     <p>Among phrases where the top prediction changes under patient wording,
       downgrades outnumber upgrades on every model. Asterisks mark asymmetry that
-      survives multiple-comparison correction; hover a row for the exact value.</p>
+      survives multiple-comparison correction within the model's registration
+      family; hover a row for the exact value.</p>
     <div id="dumbbells"></div>
     <p class="me-caption">filled red = downgrades · hollow = upgrades · * significant after correction (q &lt; 0.05)</p>
 
     <details class="fold">
-      <summary>The claim-grade table: every model with its maker, release month, evidence kind, and exact statistics</summary>
+      <summary>The interim table: every model with its maker, release month, registration, evidence kind, and exact statistics</summary>
       <p class="scroll-hint" aria-hidden="true">table scrolls sideways →</p>
       <div class="me-scroll">
         <table class="me-table" id="ev-table">
@@ -408,10 +417,13 @@
       <p class="me-caption" id="ev-cap"></p>
       <p class="sm-h">Statistical methods</p>
       <ul class="sm-l">
+        <li>Population: plain generated scenario batches only; steered, screened, imported, and re-traced rows are reported as a labeled sensitivity analysis in the statistics file.</li>
         <li>One record per (model, clinical phrase); re-traces collapse by majority vote.</li>
-        <li>Penalty intervals: cluster bootstrap, percentile 95%, seed 7, cluster = phrase.</li>
+        <li>Penalty intervals: phrase-level bootstrap after dedupe, percentile 95%, seed 7; the file also carries simultaneous (Bonferroni) intervals and batch- and topic-clustered sensitivity intervals.</li>
         <li>Downgrade rates: Clopper&ndash;Pearson exact 95%.</li>
-        <li>Asymmetry: exact sign tests, Benjamini&ndash;Hochberg corrected across models.</li>
+        <li>Asymmetry: exact two-sided sign tests, Benjamini&ndash;Hochberg corrected within registration family; the merged eight-model correction stays in the file for comparison.</li>
+        <li>Registration: four models pre-registered, four post-registration exploratory; departures are recorded in <a href="https://github.com/michaeldgreenphd/patientwords-engine/blob/claude/gemma-clinical-colloquial-interp-mavx04/docs/prereg_divergence_log.md">the divergence log in the engine repository</a>.</li>
+        <li>Confirmatory holdout: one tenth of Tier B phrases, withheld from this site's data files until the registered endpoint runs.</li>
         <li>Circuit evidence: gemma-2-2b only; the rest behavioral, fixed open weights, a point in time.</li>
         <li>Care-urgency tiers: owner-reviewed v1, domain review pending.</li>
         <li>Source: <a href="https://github.com/michaeldgreenphd/patientwords/blob/main/data/model_stats.json">the per-model statistics file on GitHub</a>.</li>
@@ -577,7 +589,7 @@
         });
         document.getElementById('conv-more-sum').textContent =
           'The other ' + others.length + ' models, drawn the same way' +
-          (allBelow ? ': every band settles below zero.' : '.');
+          (allBelow ? ': every band ends below zero.' : '.');
         document.getElementById('conv-more').hidden = false;
       }
       // data table (accessible view)
@@ -599,9 +611,10 @@
       are the ones with landed lens readouts, not a designed sample, and no depth
       endpoint is pre-registered yet. The draft second amendment freezes the
       confirmatory versions before any final run. Part 4's cross-model statistics
-      are the claim-grade interim numbers, with a pre-registered holdout still
-      sealed. Ranks are within the lens's top-8 readout; "never formed" means
-      never entered that readable window.</p>
+      are interim numbers from the exploration split; the pre-registered
+      confirmatory holdout is withheld from this site's data files until the
+      registered endpoint runs. Ranks are within the lens's top-8 readout;
+      "never formed" means never entered that readable window.</p>
     <footer>
       Built with the <a href="https://github.com/michaeldgreenphd/patientwords-engine">patientwords-engine</a> pipeline
       on <a href="https://neuronpedia.org">Neuronpedia</a> ·
@@ -823,6 +836,12 @@
   function el(name,attrs,style){var e=document.createElementNS(NS,name);
     for(var k in attrs)e.setAttribute(k,attrs[k]);if(style)e.setAttribute('style',style);return e;}
   function pp(v){return (v*100).toFixed(1).replace('-','−');}
+  // q values arrive unrounded (2026-07-14); two significant figures for display,
+  // exponent form below 0.001
+  function fq(q){
+    if(typeof q!=='number')return '—';
+    return q<0.001?q.toExponential(1):String(Number(q.toPrecision(2)));
+  }
   var PROV={};
   var provReady=fetch('../data/model_provenance.json',{cache:'no-cache'})
     .then(function(r){return r.ok?r.json():{};})
@@ -842,12 +861,27 @@
     if(c2)c2.textContent=w.charAt(0).toUpperCase()+w.slice(1);
 
     var lo=0,hi=0.005;
-    ids.forEach(function(id){var ci=per[id].penalty.ci95;lo=Math.min(lo,ci[0]);hi=Math.max(hi,ci[1]);});
+    ids.forEach(function(id){
+      var q=per[id].penalty,ci=q.ci95,sc=q.ci95_simultaneous;
+      lo=Math.min(lo,ci[0]);hi=Math.max(hi,ci[1]);
+      if(sc){lo=Math.min(lo,sc[0]);hi=Math.max(hi,sc[1]);}
+    });
     lo-=0.01;
+    // interval-aware framing: zero-crossers computed from the file, so the
+    // sentence can never outlive the data
+    var perAbove=ids.filter(function(id){return per[id].penalty.ci95[1]>=0;});
+    var simAbove=ids.filter(function(id){
+      var sc=per[id].penalty.ci95_simultaneous;return sc&&sc[1]>=0;});
+    var simText;
+    if(perAbove.length){simText='Under per-model intervals, '+perAbove.join(', ')+' crosses zero.';}
+    else if(simAbove.length){simText='Every per-model band sits below zero; under the stricter simultaneous interval, '+
+      simAbove.join(', ')+' crosses zero.';}
+    else{simText='Every band sits below zero, under both.';}
+    var fs=document.getElementById('forest-sim'); if(fs)fs.textContent=simText;
     var W=680,R=34,ML=170,MR=90,H=ids.length*R+42;
     function X(v){return ML+(W-ML-MR)*((v-lo)/(hi-lo));}
     var svg=el('svg',{viewBox:'0 0 '+W+' '+H,role:'img',
-      'aria-label':'Mean language penalty with 95 percent interval per model; every interval below zero. Values in the table below.'});
+      'aria-label':'Mean language penalty per model with 95 percent and simultaneous intervals. '+simText+' Values in the table below.'});
     svg.appendChild(el('line',{x1:X(0),x2:X(0),y1:10,y2:H-26},'stroke:var(--structural);stroke-width:1'));
     var zl=el('text',{x:X(0),y:H-12,'text-anchor':'middle'},'font-family:var(--mono);font-size:10px;fill:var(--muted)');
     zl.textContent='no penalty'; svg.appendChild(zl);
@@ -857,18 +891,22 @@
       var p=per[id].penalty, y=24+i*R, g=el('g',{});
       var name=el('text',{x:ML-10,y:y+4,'text-anchor':'end'},'font-family:var(--mono);font-size:12px;fill:var(--ink)');
       name.textContent=id; g.appendChild(name);
+      var sc=p.ci95_simultaneous;
+      if(sc)g.appendChild(el('line',{x1:X(sc[0]),x2:X(sc[1]),y1:y,y2:y},
+        'stroke:var(--penalty);stroke-width:1;opacity:.45'));
       g.appendChild(el('line',{x1:X(p.ci95[0]),x2:X(p.ci95[1]),y1:y,y2:y},'stroke:var(--penalty);stroke-width:2'));
       g.appendChild(el('circle',{cx:X(p.mean),cy:y,r:4},'fill:var(--penalty)'));
       var v=el('text',{x:W-MR+8,y:y+4},'font-family:var(--mono);font-size:11px;fill:var(--muted)');
       v.textContent=pp(p.mean)+' pp'; g.appendChild(v);
       var t=document.createElementNS(NS,'title');
-      t.textContent=id+': '+pp(p.mean)+' pp ['+pp(p.ci95[0])+', '+pp(p.ci95[1])+'], n='+p.n_phrases;
+      t.textContent=id+': '+pp(p.mean)+' pp ['+pp(p.ci95[0])+', '+pp(p.ci95[1])+']'+
+        (sc?(', simultaneous ['+pp(sc[0])+', '+pp(sc[1])+']'):'')+', n='+p.n_phrases;
       g.appendChild(t);
       svg.appendChild(g);
     });
     document.getElementById('forest').appendChild(svg);
     document.getElementById('forest-cap').textContent=
-      'phrase-deduped, cluster bootstrap seed '+d.seed+' × '+d.boot+' · source: the per-model statistics file';
+      'phrase-deduped bootstrap, seed '+d.seed+' × '+d.boot+' · hairline: simultaneous (Bonferroni) interval · source: the per-model statistics file';
 
     var maxC=0; ids.forEach(function(id){var s=per[id].sign_test;maxC=Math.max(maxC,s.downgrades,s.upgrades);});
     var W2=680,H2=ids.length*R+30;
@@ -886,7 +924,7 @@
       var cd=el('text',{x:X2(s.downgrades)+10,y:y+4},'font-family:var(--mono);font-size:11.5px;fill:var(--ink)');
       cd.textContent=s.downgrades+'↓ v '+s.upgrades+'↑'+sig;g2.appendChild(cd);
       var t2=document.createElementNS(NS,'title');
-      t2.textContent=id+': '+s.downgrades+' downgrades vs '+s.upgrades+' upgrades, BH q='+s.p_bh;
+      t2.textContent=id+': '+s.downgrades+' downgrades vs '+s.upgrades+' upgrades, BH q='+fq(s.p_bh);
       g2.appendChild(t2);
       svg2.appendChild(g2);
     });
@@ -921,13 +959,17 @@
       function td(cls,txt){var c=document.createElement('td');if(cls)c.className=cls;c.textContent=txt;tr.appendChild(c);}
       var mc=document.createElement('td');mc.className='mono';
       mc.appendChild(document.createTextNode(m.label||id));
+      if(p.registration&&p.registration!=='pre-registered'){
+        var rg=document.createElement('span');rg.className='reg-tag';
+        rg.textContent='post-registration, exploratory';mc.appendChild(rg);
+      }
       provCell(mc,id);tr.appendChild(mc);
       td(null,m.graphs?'hosted attribution graphs':'CPU next-token behavior only');
       td(null,m.features?'tagged (Gemma Scope)':'—');
       td('num',String(p.penalty.n_phrases));
       td('num',pp(p.penalty.mean)+' ['+pp(p.penalty.ci95[0])+', '+pp(p.penalty.ci95[1])+']');
       td('num',p.sign_test.downgrades+' v '+p.sign_test.upgrades);
-      td('num',String(p.sign_test.p_bh));
+      td('num',fq(p.sign_test.p_bh));
       body.appendChild(tr);
     });
     (d.below_floor||[]).forEach(function(bf){
@@ -960,7 +1002,7 @@
       body.appendChild(tr);
     });
     document.getElementById('ev-cap').textContent=
-      'dedupe: '+d.dedupe+' · downgrade-rate CI: '+d.ci_method_downgrade+' · sign tests BH-corrected across models'+
+      'dedupe: '+d.dedupe+' · downgrade-rate CI: '+d.ci_method_downgrade+' · sign tests two-sided, BH-corrected within registration family'+
       ((d.below_floor&&d.below_floor.length)?' · greyed models enter the comparison at '+(d.site_floor_n_phrases||30)+' measured phrases':'');
   }
 })();
