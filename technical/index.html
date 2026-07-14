@@ -245,7 +245,11 @@
     <p>Two failure shapes: in a <b>capture</b>, the everyday reading owns the
       trajectory from the start and the clinical answer never enters the window.
       In a <b>hijack</b>, the clinical answer forms at depth and is pushed out
-      near the end. The data dive below counts both.</p>
+      near the end. Two counting rules, adopted July 14: the split is only
+      scored on pairs whose clinical side is lens-readable (pairs where neither
+      wording ever reads out are their own class), and formation requires two
+      consecutive readable layers, so a one-layer blip does not count. The data
+      dive below counts all of it.</p>
     <h3>Which repair applies where?</h3>
     <p>Each fix this project has tested has a natural depth story. Translation
       supplies the clinical wording before the model starts, so it can act
@@ -616,7 +620,8 @@
       are interim numbers from the exploration split; the pre-registered
       confirmatory holdout is withheld from this site's data files until the
       registered endpoint runs. Ranks are within the lens's top-8 readout;
-      "never formed" means never entered that readable window.</p>
+      "never formed" means never entered that readable window for two
+      consecutive layers (one-layer blips do not count, rule adopted July 14).</p>
     <footer>
       Built with the <a href="https://github.com/michaeldgreenphd/patientwords-engine">patientwords-engine</a> pipeline
       on <a href="https://neuronpedia.org">Neuronpedia</a> ·
@@ -756,14 +761,35 @@
           ((tax.hijack&&tax.hijack.formed_at)?tax.hijack.formed_at.median:'?')+
           ') and was displaced before the final layer · winner lock-in median layer '+
           ((tax.hijack&&tax.hijack.lock_in)?tax.hijack.lock_in.median:'?')+
-          ' · captures ('+(tax.capture?tax.capture.n:0)+' pairs) have no line to draw: the answer never formed';
+          ' · captures ('+(tax.capture?tax.capture.n:0)+' pairs) have no line to draw: the answer never formed'+
+          (tax.unreadable?(' · '+tax.unreadable.n+' pairs are unreadable (neither wording ever reads out) and sit outside both classes'):'')+
+          (d.persistence_layers?(' · formation requires '+d.persistence_layers+' consecutive readable layers'):'');
+        // window check: does the capture-vs-hijack ordering survive narrower top-K windows?
+        var ws=d.window_sensitivity;
+        if(ws){
+          var parts=[],holds=true;
+          ['1','2','4','8'].forEach(function(k){
+            if(!ws[k])return;
+            parts.push('top-'+k+': '+ws[k].capture+' v '+ws[k].hijack);
+            if(!(ws[k].capture>ws[k].hijack))holds=false;
+          });
+          if(parts.length)cap+=' · window check ('+parts.join(', ')+'): capture '+
+            (holds?'exceeds':'does not always exceed')+' hijack at '+(holds?'every':'the top-8')+' window';
+        }
         document.getElementById('cap-tax').textContent=cap;
+        // capture-vs-hijack comparative computed from the live counts, never asserted
+        var nc=tax.capture?tax.capture.n:0, nh=tax.hijack?tax.hijack.n:0;
+        var compare=(nc>nh)?
+          ' Most classified failure here is capture, not hijack: the wording decides the computation early, even though the winning word is not locked in until late.':
+          ((nh>nc)?' Most classified failure here is hijack: the answer forms and is displaced late.':'');
         document.getElementById('dd-tax-text').textContent=
-          'Of '+d.n_pairs+' patient-side readings, '+(tax.held?tax.held.n:0)+' hold the clinical answer to the end. The failures split unevenly: '+
-          (tax.capture?tax.capture.n:0)+' captures, where the everyday reading owns the trajectory and the clinical answer never appears, against '+
-          (tax.hijack?tax.hijack.n:0)+' hijacks, where it forms around layer '+
+          'Of '+d.n_pairs+' patient-side readings, '+(tax.held?tax.held.n:0)+' hold the clinical answer to the end'+
+          (tax.unreadable?(', and '+tax.unreadable.n+' are unreadable: neither wording ever reads out, so the lens cannot say what was lost'):'')+
+          '. Among pairs whose clinical side is readable, the failures split: '+
+          nc+' captures, where the everyday reading owns the trajectory and the clinical answer never appears, against '+
+          nh+' hijacks, where it forms around layer '+
           ((tax.hijack&&tax.hijack.formed_at)?tax.hijack.formed_at.median:'?')+
-          ' and is pushed out near the end. Most failure here is capture, not hijack: the wording decides the computation early, even though the winning word is not locked in until late.';
+          ' and is pushed out near the end.'+compare;
       })();
 
       /* Fig 4: router table */
