@@ -224,7 +224,7 @@
       fired, the lens shows <i>when</i> in depth the answer existed. The two
       instruments answer different questions about the same failure.</p>
     <div class="fig" role="img" aria-label="Line chart of the clinical answer's rank across the model's layers under both wordings, drawn from a real measured pair. Under clinical wording the answer enters the readable window and holds to the end. Under patient wording it forms and is then pushed out before the final layer." id="fig-traj">
-      <span class="pend">figure pending — data/jlens_insights.json</span>
+      <span class="pend">figure pending: the lens readouts have not loaded</span>
     </div>
     <p class="cap" id="cap-traj"></p>
   </section>
@@ -258,33 +258,35 @@
   <section id="data">
     <p class="part">Part 3 · Data dive</p>
     <h2>First readings, exploratory</h2>
-    <p class="stat-line" id="dd-head">loading — data/jlens_insights.json</p>
+    <p class="stat-line" id="dd-head">loading the lens readouts</p>
 
     <h3>Where answers form</h3>
     <p id="dd-form-text">When the clinical answer forms at all, it forms late,
       and patient wording barely moves that depth. The difference between the
       wordings is not timing. It is existence.</p>
     <div class="fig" role="img" aria-label="Dot strip of formation layers for every measured pair, one row for clinical wording and one for patient wording, with counts of pairs whose answer never formed shown at the right edge." id="fig-form">
-      <span class="pend">figure pending — data/jlens_insights.json</span>
+      <span class="pend">figure pending: the lens readouts have not loaded</span>
     </div>
     <p class="cap" id="cap-form"></p>
 
     <h3>Capture versus hijack</h3>
     <p id="dd-tax-text"></p>
     <div class="fig" role="img" aria-label="For each hijacked pair, a horizontal line from the layer where the clinical answer formed under patient wording to the output layer, where another word has won. Captures, where the answer never formed, have nothing to draw and are counted in the caption." id="fig-tax">
-      <span class="pend">figure pending — data/jlens_insights.json</span>
+      <span class="pend">figure pending: the lens readouts have not loaded</span>
     </div>
     <p class="cap" id="cap-tax"></p>
 
     <h3>The census, set by set</h3>
     <p>Every measured set, one row of squares per outcome class, one square per
-      pair. New sets join as the nightly cycle measures them.</p>
+      pair. New sets join as the nightly cycle measures them. The reviewed
+      downgrade set holds the pairs whose predicted action fell to a lower tier
+      of care.</p>
     <dl class="defs">
       <div><dt class="cls cls-retained">kept</dt><dd>the answer is still readable at the output layer.</dd></div>
       <div><dt class="cls cls-suppressed">lost late</dt><dd>the answer becomes readable in the middle layers, then drops out before the model speaks. The model did the work and lost the result.</dd></div>
       <div><dt class="cls cls-absent">never formed</dt><dd>the answer is not readable at any layer.</dd></div>
     </dl>
-    <div id="ad-blocks"><span class="pend">figure pending — data/jlens_depth.json</span></div>
+    <div id="ad-blocks"><span class="pend">figure pending: the depth census has not loaded</span></div>
     <p class="cap">hover a square for its clinical target · the generated sets live in the
       <a href="../simulated-scenarios/">scenario gallery</a>; the reviewed downgrade set is
       separate</p>
@@ -298,7 +300,7 @@
         clinical hold first, capped at four, plus the two never-formed pairs whose
         clinical wording holds best at the output. All sentences are generated
         stress-test stimuli.</p>
-      <div id="ad-examples"><span class="pend">examples pending — data/jlens_depth.json</span></div>
+      <div id="ad-examples"><span class="pend">examples pending: the depth census has not loaded</span></div>
     </details>
 
     <h3>Read the failure, pick the fix</h3>
@@ -319,7 +321,7 @@
     <h3>Does tuning move the depth?</h3>
     <p id="dd-it-text"></p>
     <div class="fig" role="img" aria-label="Paired dots: for each phrase measured under both model ids, the layer where the answer formed under the base id and under the instruction-tuned id, connected by a hairline. The readouts are identical on every pair." id="fig-it">
-      <span class="pend">figure pending — data/jlens_insights.json</span>
+      <span class="pend">figure pending: the lens readouts have not loaded</span>
     </div>
     <p class="cap" id="cap-it"></p>
 
@@ -374,8 +376,7 @@
       <p class="conv-cap" id="conv-caption">Mean language penalty per model as
         measurement accumulates, batch by batch. Shaded band: bootstrap 95% confidence
         interval (seed 7, phrase-deduped, Tier B exploration split only). Grey hairline:
-        zero penalty. Drawn at load time from the convergence data file in this
-        repository.</p>
+        zero penalty. Drawn at load time from <a href="https://github.com/michaeldgreenphd/patientwords/blob/main/data/convergence.json">the convergence data file on GitHub</a>.</p>
       <details class="conv-table"><summary>Data table (every point)</summary>
         <div id="conv-table-wrap"></div></details>
     </details>
@@ -413,7 +414,7 @@
         <li>Asymmetry: exact sign tests, Benjamini&ndash;Hochberg corrected across models.</li>
         <li>Circuit evidence: gemma-2-2b only; the rest behavioral, fixed open weights, a point in time.</li>
         <li>Care-urgency tiers: owner-reviewed v1, domain review pending.</li>
-        <li>Source: data/model_stats.json.</li>
+        <li>Source: <a href="https://github.com/michaeldgreenphd/patientwords/blob/main/data/model_stats.json">the per-model statistics file on GitHub</a>.</li>
       </ul>
     </details>
 
@@ -448,7 +449,7 @@
     if(!m)return stem||'';
     var mo=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][+m[3]-1];
     if(short)return mo+' '+(+m[4])+((m[5]&&m[6])?(' '+m[5]+':'+m[6]):'');
-    var kind={pairs:'generated batch',dialects:'dialect framings batch',
+    var kind={pairs:'generated scenario batch',dialects:'dialect framings batch',
       urgency_downgrades:'reviewed downgrade set',drift_sentinel:'drift sentinel'}[m[1]];
     return kind+' of '+mo+' '+(+m[4])+', '+m[2]+((m[5]&&m[6])?(' '+m[5]+':'+m[6]+' UTC'):'');
   }
@@ -606,7 +607,7 @@
       on <a href="https://neuronpedia.org">Neuronpedia</a> ·
       attribution graphs by <a href="https://github.com/safety-research/circuit-tracer">circuit-tracer</a> ·
       features from <a href="https://huggingface.co/google/gemma-scope-2b-pt-transcoders">Gemma Scope</a> transcoders<br>
-      set in Iowan Old Style &amp; ui-monospace · every number on this page traces to a data file in this repository
+      set in Iowan Old Style &amp; ui-monospace · every number on this page traces to a data file <a href="https://github.com/michaeldgreenphd/patientwords/tree/main/data">in this repository</a>
     </footer>
     <a class="back" href="../">Back home →</a>
   </div>
@@ -619,7 +620,7 @@
     if(!m)return stem||'';
     var mo=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][+m[3]-1];
     if(short)return mo+' '+(+m[4])+((m[5]&&m[6])?(' '+m[5]+':'+m[6]):'');
-    var kind={pairs:'generated batch',dialects:'dialect framings batch',
+    var kind={pairs:'generated scenario batch',dialects:'dialect framings batch',
       urgency_downgrades:'reviewed downgrade set',drift_sentinel:'drift sentinel'}[m[1]];
     return kind+' of '+mo+' '+(+m[4])+', '+m[2]+((m[5]&&m[6])?(' '+m[5]+':'+m[6]+' UTC'):'');
   }
@@ -867,7 +868,7 @@
     });
     document.getElementById('forest').appendChild(svg);
     document.getElementById('forest-cap').textContent=
-      'phrase-deduped, cluster bootstrap seed '+d.seed+' × '+d.boot+' · source: data/model_stats.json';
+      'phrase-deduped, cluster bootstrap seed '+d.seed+' × '+d.boot+' · source: the per-model statistics file';
 
     var maxC=0; ids.forEach(function(id){var s=per[id].sign_test;maxC=Math.max(maxC,s.downgrades,s.upgrades);});
     var W2=680,H2=ids.length*R+30;

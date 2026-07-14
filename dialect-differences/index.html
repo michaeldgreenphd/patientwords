@@ -310,7 +310,7 @@
       on <a href="https://neuronpedia.org">Neuronpedia</a> ·
       attribution graphs by <a href="https://github.com/safety-research/circuit-tracer">circuit-tracer</a> ·
       features from <a href="https://huggingface.co/google/gemma-scope-2b-pt-transcoders">Gemma Scope</a> transcoders<br>
-      set in Iowan Old Style &amp; ui-monospace · every number on this page traces to a data file in this repository
+      set in Iowan Old Style &amp; ui-monospace · every number on this page traces to a data file <a href="https://github.com/michaeldgreenphd/patientwords/tree/main/data">in this repository</a>
     </footer>
   </div>
 </main>
@@ -321,7 +321,7 @@
     if(!m)return stem||'';
     var mo=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][+m[3]-1];
     if(short)return mo+' '+(+m[4])+((m[5]&&m[6])?(' '+m[5]+':'+m[6]):'');
-    var kind={pairs:'generated batch',dialects:'dialect framings batch',
+    var kind={pairs:'generated scenario batch',dialects:'dialect framings batch',
       urgency_downgrades:'reviewed downgrade set',drift_sentinel:'drift sentinel'}[m[1]];
     return kind+' of '+mo+' '+(+m[4])+', '+m[2]+((m[5]&&m[6])?(' '+m[5]+':'+m[6]+' UTC'):'');
   }
