@@ -2,11 +2,37 @@
  "_": "EXPLORATORY translation recovery at scale: haiku-translated corpus (txcorpus batches) joined to the original patient logits rows per phrase and model. recovery = p(target|translated) - p(target|patient); gap_closed clipped to [-2, 2] and computed only where the clinical-patient gap exceeds 1pp. top_restored / top_lost count top-prediction changes relative to the clinical top. Owner request 2026-07-14.",
  "corpora": [
   "txcorpus_20260714T224455Z",
+  "txcorpus_priority2_20260714T224455Z",
   "txcorpus_priority_20260714T224455Z"
  ],
- "per_model": {},
+ "per_model": {
+  "gemma-2-2b": {
+   "n": 5,
+   "mean_recovery": 0.0068,
+   "median_recovery": 0.047,
+   "share_recovery_positive": 0.8,
+   "n_with_headroom": 3,
+   "mean_gap_closed": 1.2924,
+   "top_restored": 2,
+   "top_lost": 0
+  },
+  "gemma-3-4b-it": {
+   "n": 154,
+   "mean_recovery": 0.0054,
+   "median_recovery": 0.0,
+   "share_recovery_positive": 0.4935,
+   "n_with_headroom": 54,
+   "mean_gap_closed": 0.3513,
+   "top_restored": 27,
+   "top_lost": 24
+  }
+ },
  "lens_recovery": {
-  "n_paired": 0,
-  "_": "no translated-side lens readouts landed yet"
+  "_": "Lens view of translation, gemma-2-2b, EXPLORATORY (phrases predate amendment 2 adoption): formation = readable for 2 consecutive layers in the top-8 window, per the adopted counting rules.",
+  "n_paired": 25,
+  "patient_never_formed": 7,
+  "recovered_to_formed": 3,
+  "formed_both": 16,
+  "lost_by_translation": 2
  }
 }
