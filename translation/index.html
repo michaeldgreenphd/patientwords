@@ -95,6 +95,19 @@
     border-bottom:1px solid var(--ink);padding-bottom:2px}
   .back:hover{color:var(--clinical);border-bottom-color:var(--clinical)}
 
+  #tx-scale{border-top:1px solid var(--ink);margin-top:34px;padding-top:12px}
+  #tx-scale h2{font-size:23px;font-weight:600;margin:0 0 10px}
+  .txs-wrap{overflow-x:auto;margin:14px 0 6px;-webkit-overflow-scrolling:touch}
+  .txs{width:100%;min-width:480px;border-collapse:collapse}
+  .txs th{font-family:var(--mono);font-size:10.5px;font-weight:600;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--muted);text-align:left;white-space:nowrap;
+    padding:0 16px 8px 0;border-bottom:1px solid var(--ink)}
+  .txs th.num,.txs td.num{text-align:right}
+  .txs td{padding:9px 16px 9px 0;border-bottom:1px solid var(--hairline);
+    font-size:14.5px;line-height:1.5}
+  .txs td.num{font-family:var(--mono);font-size:12.5px;white-space:nowrap}
+  .txs td.mono{font-family:var(--mono);font-size:12.5px}
+  .txs tr:last-child td{border-bottom:1px solid var(--ink)}
   .flow{border:1px solid var(--hairline);background:#fff;padding:16px 18px;margin:18px 0 8px}
   .flow-step{display:grid;grid-template-columns:112px 1fr;gap:12px;padding:7px 0;align-items:baseline}
   .flow-lbl{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
@@ -223,6 +236,24 @@
      placebo paraphrase that keeps the casual register. The terminology does the work, not the
      rewriting.</p>
 
+  <section id="tx-scale" hidden>
+    <h2>At scale</h2>
+    <p class="explainer" id="tx-scale-text"></p>
+    <div class="txs-wrap"><table class="txs" id="tx-scale-table" aria-describedby="tx-scale-cap">
+      <thead><tr>
+        <th scope="col">Model</th>
+        <th scope="col" class="num">Phrases</th>
+        <th scope="col" class="num">Mean recovery</th>
+        <th scope="col" class="num">Helped</th>
+        <th scope="col" class="num">Top restored</th>
+        <th scope="col" class="num">Top lost</th>
+      </tr></thead>
+      <tbody id="tx-scale-body"></tbody>
+    </table></div>
+    <p class="embed-caption" id="tx-scale-cap"></p>
+    <p class="explainer" id="tx-lens-line" hidden></p>
+  </section>
+
   <span class="stat recovery">Recovered target probability: 41% after translation (clinical baseline 26%) · July 9 re-trace</span>
 
   <h2>What the depth readout adds</h2>
@@ -272,6 +303,55 @@
   </details>
 
   <a class="back" href="../">← Back home</a>
+
+  <script>
+  (function(){
+    // At-scale block: every number rendered from the fetched file, so the
+    // section updates as the nightly cycle measures more of the corpus and
+    // stays hidden until the data file first publishes.
+    fetch('../data/translation_scale.json',{cache:'no-cache'})
+      .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
+      .then(function(d){
+        var per=d.per_model||{}; var ids=Object.keys(per).sort();
+        if(!ids.length)return;
+        function pp(v){return (v>=0?'+':'−')+Math.abs(v*100).toFixed(1)+' pp';}
+        var body=document.getElementById('tx-scale-body');
+        var maxN=0;
+        ids.forEach(function(id){
+          var s=per[id];maxN=Math.max(maxN,s.n);
+          var tr=document.createElement('tr');
+          function td(cls,txt){var c=document.createElement('td');if(cls)c.className=cls;c.textContent=txt;tr.appendChild(c);}
+          td('mono',id);
+          td('num',String(s.n));
+          td('num',pp(s.mean_recovery));
+          td('num',Math.round(s.share_recovery_positive*100)+'%');
+          td('num',String(s.top_restored));
+          td('num',String(s.top_lost));
+          body.appendChild(tr);
+        });
+        document.getElementById('tx-scale-text').textContent=
+          'The same LLM translation, applied to every measured phrase ('+maxN+
+          ' so far) and scored by next-word probability on each model. Mean recovery is what the '+
+          'clinical answer gains under the translated sentence versus the patient one; helped is the '+
+          'share of phrases where it gains at all; the top columns count phrases whose top prediction '+
+          'returned to the clinical answer, or left it.';
+        document.getElementById('tx-scale-cap').textContent=
+          'translated sentences measured by CPU next-word inference · exploratory, grows with the nightly cycle · source: data/translation_scale.json';
+        var lr=d.lens_recovery||{};
+        if(lr.n_paired){
+          var line=document.getElementById('tx-lens-line');
+          line.textContent='The depth view (gemma-2-2b, exploratory): of '+lr.patient_never_formed+
+            ' phrases here where the clinical answer never formed inside the model under patient wording, '+
+            'the translated sentence makes it form in '+lr.recovered_to_formed+'; '+lr.lost_by_translation+
+            ' formed answers were lost by translation. How formation is read: ';
+          var a=document.createElement('a');a.href='../technical/';a.textContent='the Technical page';
+          line.appendChild(a);line.appendChild(document.createTextNode('.'));
+          line.hidden=false;
+        }
+        document.getElementById('tx-scale').hidden=false;
+      }).catch(function(){});
+  })();
+  </script>
 
   <div class="endnote">
     <p>The traces here are live gemma-2-2b runs.</p>
