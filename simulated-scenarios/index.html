@@ -1147,12 +1147,13 @@
       document.getElementById('sim-pending').hidden=true;
       var accepted=batches.reduce(function(a,b){
         return a+((b.generated&&b.generated.accepted)||0);
-      },0);
+      },0)-(data.holdout_withheld||0);
       if(accepted>scenarios.length){
         var pline=el('div');
-        pline.appendChild(el('span',null,'In progress — '));
+        pline.appendChild(el('span',null,'In progress: '));
         pline.appendChild(el('b',null,(accepted-scenarios.length)+' of '+accepted+' accepted scenarios are still tracing'));
-        pline.appendChild(el('span',null,'; the table grows as chunks land.'));
+        pline.appendChild(el('span',null,'; the table grows as chunks land.'
+          +(data.holdout_withheld?(' '+data.holdout_withheld+' confirmatory-holdout pairs are withheld until the registered endpoint runs.'):'')));
         prov.appendChild(pline);
       }
     })

@@ -393,7 +393,11 @@
       var currentModel=qs.get('model')||baseModel;
       if(modelList.indexOf(currentModel)<0)currentModel=baseModel;
       function hasModelFor(mid){return mid===baseModel||!!(s.models&&s.models[mid]);}
-      function cur(){return (s.models&&s.models[currentModel])||s;}
+      // F-H11 (audit 1, 2026-07-17): a &model= URL for an untraced phrase must
+      // not render the base model's numbers under the other model's chip -
+      // normalize to the base model instead of borrowing its data.
+      if(!hasModelFor(currentModel))currentModel=baseModel;
+      function cur(){return hasModelFor(currentModel)?((s.models&&s.models[currentModel])||s):{};}
       function archiveUrlFor(){
         var a=data.archive; if(!a)return null;
         if(a.models&&a.models[currentModel]&&a.models[currentModel].release_url)
