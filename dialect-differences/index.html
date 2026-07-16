@@ -210,14 +210,14 @@
   <hr class="rule-fine">
 </header>
 <main id="main">
-  <p class="dateline">Fig. 3 <span class="mode">· dialect & register sweep · live render · traced July 8, 2026</span></p>
+  <p class="dateline">Fig. 3 <span class="mode">· dialect & register sweep · live render · traced July 16 and 17, 2026</span></p>
   <h1>Dialect differences</h1>
   <p class="subtitle">The clinical term held fixed while the surrounding sentence shifts across eight LLM-approximated dialect and register framings per term.</p>
   <p class="explainer">The clinical term stays fixed while the sentence around it is re-traced across dialect and register variants, so any shift comes from framing. The framings are Claude-written approximations: each column label is the instruction given to the generating model, not a recording of how any community speaks, and no speaker of any variety reviewed them. The sweep below holds a set of clinical terms fixed, one per row, and re-traces each across several framings; the matrix reports the exact counts. A minority of framings move the top word.</p>
   <p class="traced" data-mode="dialect" data-traced="gemma-2-2b">
-    <span class="tm"><b>model:</b> gemma-2-2b · <b>features:</b> Gemma Scope transcoders (16k) · <b>graphs:</b> 45 (5 baselines + 40 framings)</span><br>
+    <span class="tm"><b>model:</b> gemma-2-2b · <b>features:</b> Gemma Scope transcoders (16k) · <b>graphs:</b> 153 (17 baselines + 136 framings; 3 of 20 terms pend a re-trace)</span><br>
     <span class="tm"><b>held fixed:</b> clinical terms from the hand-measured dataset · <b>framings:</b> dialect + register variants per term</span><br>
-    <span class="tp">framings authored by claude-sonnet-5 ($0.189, 64 accepted / 2 rejected) · traced via Neuronpedia</span>
+    <span class="tp">framings authored by claude-sonnet-5 ($0.413, 160 accepted / 5 rejected) · traced via Neuronpedia</span>
   </p>
 
   <section id="dl-matrix" hidden>
@@ -440,7 +440,7 @@
 
       var feat=null;
       for(var i=0;i<items.length;i++){
-        if(/clinical depression/i.test(items[i].term)){feat=items[i];break;}
+        if(/seizure/i.test(items[i].term)){feat=items[i];break;}
       }
       feat=feat||items[0];
       document.getElementById('dlf-head').textContent='Featured term: '+String.fromCharCode(8220)+feat.term+String.fromCharCode(8221);

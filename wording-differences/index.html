@@ -205,11 +205,11 @@
 
   <section id="grammar">
   <h2 class="view-head">Swap the grammar · Fig. 2</h2>
-  <p class="explainer">A 2×2 crossing wording (medical vs. patient, columns) with grammar (standard vs. nonstandard, rows). The first live-traced item is a simulated insomnia case. Both changes push toward that everyday reading: changing the grammar alone adds +11–13% to “it”, changing the words another +4–5%.</p>
-  <span class="stat penalty">Variety shift Δ: +11% (C → D, 0.26 → 0.37) and +13% (A → B, 0.21 → 0.34) toward the everyday continuation · Register shift Δ: +4–5% (measured on “it”)</span>
+  <p class="explainer">A 2×2 crossing wording (medical vs. patient, columns) with grammar (standard vs. nonstandard, rows). The live-traced item is a simulated palpitations case ending “driving him to the&nbsp;__”. Changing only the grammar adds +10–13% to “hospital”; changing only the words removes 10–13%.</p>
+  <span class="stat penalty">Variety shift Δ: +13% (A → B, 0.39 → 0.52) and +10% (C → D, 0.29 → 0.39) toward “hospital” · Register shift Δ: −10% (A → C) and −13% (B → D)</span>
   <p class="traced" data-mode="4quadrant" data-traced="gemma-2-2b">
     <span class="tm"><b>traced model:</b> gemma-2-2b · gemma scope transcoders</span>
-    <span class="tp">hosted circuit-tracer via Neuronpedia</span>
+    <span class="tp">hosted circuit-tracer via Neuronpedia · traced July 15, 2026</span>
   </p>
 
   <div class="qm-scroll">
@@ -234,14 +234,14 @@
     </table>
   </div>
   <p class="qm-note">rows show the grammar, columns show the phrasing. The traced item:
-     A&nbsp;“Every night this week I've had insomnia, so tomorrow I think I'll finally call&nbsp;__” ·
-     C&nbsp;the same frame with “trouble sleeping” ·
-     B&nbsp;“Every night this week I been having insomnia, so tomorrow I think I'ma finally call&nbsp;__” ·
-     D&nbsp;the nonstandard frame with “trouble sleeping”.</p>
+     A&nbsp;“My father says his heart has been experiencing palpitations again, so we are driving him to the&nbsp;__” ·
+     C&nbsp;the same frame with “fluttering and skipping” ·
+     B&nbsp;“My father say his heart been experiencing palpitations again, so we driving him to the&nbsp;__” ·
+     D&nbsp;the nonstandard frame with “fluttering and skipping”.</p>
   <h3 class="view-head">The full matrix: all four cells at once</h3>
   <div class="quad-wrap">
     <div class="embed">
-      <iframe class="live" src="../modes/4quadrant/index.html" loading="lazy"
+      <iframe class="live" src="../modes/4quadrant2/index_06.html" loading="lazy"
               title="Interactive four-quadrant matrix factorizing vocabulary and grammar effects"></iframe>
     </div>
     <button class="quad-hit qh-tl" type="button" aria-label="Expand quadrant C (patient language, standard grammar)"><span>⤢</span></button>
@@ -254,22 +254,22 @@
   <details class="meth">
     <summary>More views: one swap at a time</summary>
   <h3 class="view-head">The four edges, one swap at a time</h3>
-  <p class="view-sub">Each comparison isolates ONE cell swap. Features in both cells are dimmed to gray, so what stays at full ink is exactly what that swap changed. The grammar swaps rewire more of the circuit (217–277 features per side) than the word swaps (164–191), matching their larger probability shifts.</p>
+  <p class="view-sub">Each comparison isolates ONE cell swap. Features in both cells are dimmed to gray, so what stays at full ink is exactly what that swap changed.</p>
 
-  <p class="edge-head">Register shift, standard row · A → C (“insomnia” → “trouble sleeping”) · Δ +5% on “it” · 164 features only in A, 191 only in C</p>
-  <div class="embed"><iframe class="live" src="../modes/4quadrant/edge_register_standard.html" loading="lazy"
+  <p class="edge-head">Register shift, standard row · A → C (“experiencing palpitations” → “fluttering and skipping”) · Δ −10% on “hospital”</p>
+  <div class="embed"><iframe class="live" src="../modes/4quadrant2/index_06_register_standard.html" loading="lazy"
        title="Register shift within the standard-morphosyntax row, shared circuit dimmed"></iframe></div>
 
-  <p class="edge-head">Register shift, nonstandard row · B → D · Δ +4% · 176 only in B, 178 only in D</p>
-  <div class="embed"><iframe class="live" src="../modes/4quadrant/edge_register_nonstandard.html" loading="lazy"
+  <p class="edge-head">Register shift, nonstandard row · B → D · Δ −13%</p>
+  <div class="embed"><iframe class="live" src="../modes/4quadrant2/index_06_register_nonstandard.html" loading="lazy"
        title="Register shift within the nonstandard-morphosyntax row, shared circuit dimmed"></iframe></div>
 
-  <p class="edge-head">Variety shift, medical column · A → B (“I've had … I'll” → “I been having … I'ma”) · Δ +13% · 217 only in A, 277 only in B</p>
-  <div class="embed"><iframe class="live" src="../modes/4quadrant/edge_variety_medical.html" loading="lazy"
+  <p class="edge-head">Variety shift, medical column · A → B (“says … has been … we are” → “say … been … we”) · Δ +13%</p>
+  <div class="embed"><iframe class="live" src="../modes/4quadrant2/index_06_variety_medical.html" loading="lazy"
        title="Morphosyntax shift within the medical-lexicon column, shared circuit dimmed"></iframe></div>
 
-  <p class="edge-head">Variety shift, patient column · C → D · Δ +11% · 220 only in C, 255 only in D</p>
-  <div class="embed"><iframe class="live" src="../modes/4quadrant/edge_variety_patient.html" loading="lazy"
+  <p class="edge-head">Variety shift, patient column · C → D · Δ +10%</p>
+  <div class="embed"><iframe class="live" src="../modes/4quadrant2/index_06_variety_patient.html" loading="lazy"
        title="Morphosyntax shift within the patient-language column, shared circuit dimmed"></iframe></div>
   </details>
 
@@ -287,7 +287,7 @@
   <a class="back" href="../">← Back home</a>
 
   <div class="endnote">
-    <p>SIMULATED DATA · the phrasings here (scenario 85 and the four insomnia cells) were written by an LLM and passed the engine's automatic validators; they are not patient statements and contain no real personal or clinical data. The trace itself is a live gemma-2-2b run via the Neuronpedia circuit tracer.</p>
+    <p>SIMULATED DATA · the phrasings here (scenario 85 and the four palpitations cells) were written by an LLM and passed the engine's automatic validators; they are not patient statements and contain no real personal or clinical data. The trace itself is a live gemma-2-2b run via the Neuronpedia circuit tracer.</p>
     <footer>
       Built with the <a href="https://github.com/michaeldgreenphd/patientwords-engine">patientwords-engine</a> pipeline
       on <a href="https://neuronpedia.org">Neuronpedia</a> ·
@@ -385,7 +385,7 @@
   function open(){
     if(!modal.querySelector('iframe')){
       var f=document.createElement('iframe');
-      f.src='../modes/4quadrant/index.html';
+      f.src='../modes/4quadrant2/index_06.html';
       f.title='Four-quadrant matrix, full screen';
       modal.appendChild(f);
     }

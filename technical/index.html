@@ -282,8 +282,9 @@
       "try every fix" into "read the failure, pick the fix". The second
       amendment, adopted July 14, registers one directional test on batches
       generated after adoption: translation recovering more
-      where the answer formed and was lost than where it never formed; the
-      steering-by-class test is piloted and not yet registered.</p>
+      where the answer formed and was lost than where it never formed. The
+      fourth amendment, adopted July 17, registers the steering-by-class
+      test on post-adoption batches.</p>
   </section>
 
   <section id="data">
@@ -358,12 +359,10 @@
 
     <h3>Queued next</h3>
     <ul class="plan">
-      <li><span class="next">next</span>Steering verdicts joined to lens classes: the second router column.</li>
       <li><span class="next">next</span>The three translation arms through the lens: does real translation restore early formation while the placebo paraphrase leaves depth unchanged?</li>
       <li><span class="next">next</span>The context prefix through the lens: does one sentence of clinical context make the answer form earlier, or only boost it late?</li>
       <li><span class="next">next</span>Misspelling stress set: does a real observed misspelling delay formation or prevent it?</li>
-      <li><span class="next">next</span>A lens reading in the daily drift sentinel, watching the internals for service change, not just the outputs (fires daily since July 14; the first day-over-day comparison lands with day 2).</li>
-      <li><span class="next">next</span>Where in the sentence the concept lives: per-position lens readouts, asking whether patient phrasings hold the concept mid-sentence and lose it at the answer position.</li>
+      <li><span class="next">next</span>A lens reading in the daily drift sentinel, watching the internals for service change, not just the outputs (fires daily since July 14; every day-over-day lens comparison so far reads out identical).</li>
       <li><span class="next">next</span>The same depth profiles under the plain logit lens: a robustness arm for the formation story.</li>
     </ul>
   </section>
@@ -830,6 +829,7 @@
             var label={retained:'held to the end',suppressed:'formed, then lost (hijack)',absent:'never formed (capture)'};
             var order=['suppressed','absent','retained'];
             var body=document.getElementById('router-body'),small=[];
+            var st=(j.steering&&j.steering.by_class)||null;
             order.forEach(function(k){
               if(!bc[k])return;
               var tr=document.createElement('tr');
@@ -838,9 +838,20 @@
               td(String(bc[k].n),'num');
               if(bc[k].n<3){small.push(label[k]||k);td('held back until n reaches 3','num queued');}
               else{td((bc[k].mean_recovery>0?'+':'')+bc[k].mean_recovery.toFixed(2)+' tiers','num');}
-              td('queued','num queued');
+              if(st&&st[k]&&st[k].n>0){
+                td('rank 1 back in '+st[k].restored+' of '+st[k].n+' (pilot)','num');
+              }else if(st&&k==='retained'){td('not swap-eligible','num queued');}
+              else{td('queued','num queued');}
               body.appendChild(tr);
             });
+            if(st){
+              var cap0=document.getElementById('cap-router');
+              if(cap0)cap0.textContent=cap0.textContent.replace(
+                'steering column queued: per-pair steering verdicts against the same lens classes',
+                'steering column: exploratory swap pilot, target back at rank 1 at either frozen layer; '+
+                ((st.absent&&st.absent.unresolvable)||0)+' capture pairs excluded as multi-wordpiece; '+
+                'Amendment 4 (adopted July 17) registers the confirmatory version');
+            }
             if(small.length){
               var cap=document.getElementById('cap-router');
               if(cap)cap.textContent+=' · means held back under n = 3: '+small.join(', ');
