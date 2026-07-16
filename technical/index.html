@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Technical · PatientWords — watching answers form, layer by layer</title>
+<title>Technical · PatientWords: watching answers form, layer by layer</title>
 <meta name="description" content="The Jacobian lens in plain language, what it lets us ask about how a language model fails on patient phrasing, and a data dive: formation depth, capture versus hijack, and where each repair applies.">
 <link rel="canonical" href="https://michaeldgreenphd.github.io/patientwords/technical/">
 <meta name="theme-color" content="#faf9f5">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="PatientWords">
-<meta property="og:title" content="Technical — PatientWords">
+<meta property="og:title" content="Technical · PatientWords">
 <meta property="og:description" content="Watching a model's answer form layer by layer: the lens in plain language, the capture-versus-hijack failure taxonomy, and which repair applies where.">
 <meta property="og:url" content="https://michaeldgreenphd.github.io/patientwords/technical/">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23faf9f5'/%3E%3Crect x='9' y='9' width='30' height='30' fill='%23111827'/%3E%3Crect x='25' y='25' width='30' height='30' fill='%2315803d'/%3E%3C/svg%3E">
@@ -60,7 +60,7 @@
   h2{font-size:23px;font-weight:600;line-height:1.24;margin:0 0 12px;letter-spacing:-.004em}
   h3{font-size:17px;font-weight:600;margin:18px 0 6px}
   section p{margin:0 0 14px;font-size:16px;line-height:1.66}
-  .fig{border:1px solid var(--hairline);background:#fff;padding:14px 14px 8px;margin:16px 0 4px;overflow-x:auto}
+  .fig{margin:16px 0 4px;overflow-x:auto}
   .fig svg{display:block;width:100%;height:auto}
   .cap{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.04em;margin:6px 0 18px;line-height:1.7}
   .pend{font-family:var(--mono);font-size:12px;color:var(--muted)}
@@ -143,11 +143,17 @@
   .defs div:last-child{border-bottom:0}
   .defs dt{flex:0 0 110px}
   .defs dd{margin:0;font-size:14.5px;line-height:1.55}
-  .cls{font-family:var(--mono);font-size:11px;letter-spacing:.06em;padding:1px 7px;border:1px solid var(--hairline)}
-  .cls-retained{color:var(--clinical);border-color:var(--clinical)}
-  .cls-suppressed{color:var(--penalty);border-color:var(--penalty)}
+  .cls{font-family:var(--mono);font-size:11px;letter-spacing:.06em}
+  .cls-retained{color:var(--clinical)}
+  .cls-suppressed{color:var(--penalty)}
   .cls-absent{color:var(--muted)}
   .scroll{overflow-x:auto}
+  #ad-pairs table{border-collapse:collapse;width:100%}
+  #ad-pairs th{font-family:var(--mono);font-size:10.5px;font-weight:600;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--muted);text-align:left;white-space:nowrap;
+    padding:0 12px 8px 0;border-bottom:1px solid var(--ink)}
+  #ad-pairs td{padding:8px 12px 8px 0;border-bottom:1px solid var(--hairline);
+    font-size:14px;line-height:1.5}
   details{margin:10px 0 0}
   summary{font-family:var(--mono);font-size:12px;color:var(--muted);cursor:pointer}
   summary:focus-visible{outline:2px solid var(--clinical);outline-offset:2px}
@@ -208,14 +214,14 @@
   <p class="dateline">Technical <span class="mode">· the Jacobian lens · exploratory depth analytics</span></p>
   <h1>Watching an answer form, layer by layer.</h1>
   <p class="subtitle">A new instrument reads the model's forming answer at every
-    depth. This page explains it plainly, shows what it lets us ask, and opens
-    the first data.</p>
+    depth. This page explains it, shows what it lets us ask, and opens the
+    first data.</p>
 
   <section id="concept">
     <p class="part">Part 1 · The instrument, in plain language</p>
     <h2>A film strip of the model making up its mind</h2>
-    <p>A language model reads a sentence in layers, a few dozen processing steps
-      stacked one after another. The final layer produces the answer everyone
+    <p>A language model reads a sentence in layers, a few dozen stacked
+      processing steps. The final layer produces the answer everyone
       sees. The Jacobian lens reads the layers in between: at each one, it asks
       "if the model had to answer right now, what would it say?" The result is a
       film strip of the answer forming. An answer can appear early and hold,
@@ -234,8 +240,8 @@
   <section id="application">
     <p class="part">Part 2 · What it lets us ask</p>
     <h2>Not just whether it fails. How.</h2>
-    <p>The rest of this site measures the end of the story: the final answer and
-      its probability. The lens opens the middle, and three questions become
+    <p>The rest of this site measures the end: the final answer and its
+      probability. The lens opens the middle. Three questions become
       askable.</p>
     <h3>Did the right answer ever exist inside the model?</h3>
     <p>If patient wording merely weakens the answer, it should still form at
@@ -248,10 +254,10 @@
       near the end. Two counting rules, adopted July 14: the split is only
       scored on pairs whose clinical side is lens-readable (pairs where neither
       wording ever reads out are their own class), and formation requires two
-      consecutive readable layers, so a one-layer blip does not count. The data
-      dive below counts all of it.</p>
+      consecutive readable layers, so a one-layer blip does not count. Part 3
+      counts all of it.</p>
     <h3>Which repair applies where?</h3>
-    <p>Each fix this project has tested has a natural depth story. Translation
+    <p>Each tested fix acts at a depth. Translation
       supplies the clinical wording before the model starts, so it can act
       even when the answer never forms. Steering amplifies an existing circuit,
       so it should work best when something formed and was lost. The lens turns
@@ -354,8 +360,8 @@
       numbers from the exploration split. They use the plain generated scenario
       batches only; steered, screened, and re-traced rows sit in a labeled
       sensitivity analysis inside the statistics file. Phrase counts differ
-      by model; the table below lists each. Every count uses each
-      phrase once per model. Four models were named in the pre-registration; the
+      by model; the table lists each. Every count uses a phrase once
+      per model. Four models were named in the pre-registration; the
       other four are later additions, marked exploratory below, and the asymmetry
       tests are corrected for multiple comparisons within each of those two
       groups. One tenth of newly
@@ -376,8 +382,8 @@
       <summary>How confidence accumulated: each model's estimate, batch by batch (moved from methods, formerly Fig. 5)</summary>
       <p style="font-size:15px;line-height:1.6">
         Each panel follows one model as it reads more phrase pairs. The red line is the
-        average language penalty; the band around it starts wide, because a handful of
-        phrases could mislead, and narrows as hundreds accumulate. The four
+        average language penalty; the band around it starts wide and narrows as
+        hundreds of phrases accumulate. The four
         post-registration additions have read about 120 phrases so far, so their bands
         stay wider. Early points in any panel are unstable by construction; read where
         each band ends, not the path it took.
@@ -660,7 +666,7 @@
     .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
     .then(function(d){
       var L=(d.formation&&d.formation.n_layers)||26;
-      var W=700,PAD=52,PW=W-PAD-120;
+      var W=700,PAD=124,PW=W-PAD-120;
       function lx(layer){return PAD+layer/(L-1)*PW;}
 
       document.getElementById('dd-head').textContent=
@@ -742,18 +748,20 @@
       (function(){
         var hij=(d.points||[]).filter(function(p){return p['class']==='hijack';});
         var tax=d.taxonomy||{};
-        var rowsN=hij.length, H3=54+rowsN*13+30;
+        var rowsN=hij.length, H3=40+rowsN*13+30;
         var svg=el('svg',{viewBox:'0 0 '+W+' '+H3});
-        svg.appendChild(txt(PAD,16,'each line: clinical answer forms ● then runs to the output layer ▪ where another word has won','#6d6c66',10));
         hij.sort(function(a,b){return (a.pat_formed||0)-(b.pat_formed||0);});
         hij.forEach(function(p,i){
-          var y=34+i*13;
-          var pts=d.points; // lock-in isn't in points; span drawn to final layer
+          var y=20+i*13;
           svg.appendChild(el('line',{x1:lx(p.pat_formed),x2:lx(L-1),y1:y,y2:y,stroke:'#b4483d','stroke-width':1.1,opacity:.75}));
           svg.appendChild(el('circle',{cx:lx(p.pat_formed),cy:y,r:2.6,fill:'#111827'}));
           svg.appendChild(el('rect',{x:lx(L-1)-2.4,y:y-2.4,width:4.8,height:4.8,fill:'#b4483d'}));
+          if(i===0){
+            svg.appendChild(txt(lx(p.pat_formed)-8,y+3.5,'forms','#6d6c66',9.5,'end'));
+            svg.appendChild(txt(lx(L-1)+8,y+3.5,'lock-in','#b4483d',9.5));
+          }
         });
-        var base=34+rowsN*13+6;
+        var base=20+rowsN*13+6;
         svg.appendChild(el('line',{x1:PAD,x2:PAD+PW,y1:base,y2:base,stroke:'#dcdad2','stroke-width':.7}));
         [0,Math.round((L-1)/2),L-1].forEach(function(l){
           svg.appendChild(txt(lx(l),base+13,'layer '+l,'#6d6c66',9.5,l===0?'start':(l===L-1?'end':'middle')));
@@ -916,7 +924,7 @@
     var zl=el('text',{x:X(0),y:H-12,'text-anchor':'middle'},'font-family:var(--mono);font-size:10px;fill:var(--muted)');
     zl.textContent='no penalty'; svg.appendChild(zl);
     var al=el('text',{x:X(lo)+2,y:H-12},'font-family:var(--mono);font-size:10px;fill:var(--muted)');
-    al.textContent='← more of the clinical answer\u2019s probability lost'; svg.appendChild(al);
+    al.textContent='← larger penalty'; svg.appendChild(al);
     ids.forEach(function(id,i){
       var p=per[id].penalty, y=24+i*R, g=el('g',{});
       var name=el('text',{x:ML-10,y:y+4,'text-anchor':'end'},'font-family:var(--mono);font-size:12px;fill:var(--ink)');
