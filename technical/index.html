@@ -60,16 +60,28 @@
   h2{font-size:23px;font-weight:600;line-height:1.24;margin:0 0 12px;letter-spacing:-.004em}
   h3{font-size:17px;font-weight:600;margin:18px 0 6px}
   section p{margin:0 0 14px;font-size:16px;line-height:1.66}
-  .fig{margin:16px 0 4px;overflow-x:auto}
+  .fig{margin:6px 0 4px;overflow-x:auto}
   .fig svg{display:block;width:100%;height:auto}
+  /* charts float in negative space: no frame survives, whatever draws them */
+  .fig,.fig svg,.figwrap,.figwrap svg,#forest,#forest svg,#dumbbells,#dumbbells svg,
+  #ad-blocks,#ad-blocks svg,.conv-panel svg{
+    border:none !important;box-shadow:none !important;background:transparent !important;outline:none !important}
+  /* the data sits directly beneath the sentence that introduces it */
+  section p:has(+ .fig),section p:has(+ #forest),section p:has(+ #dumbbells),
+  section p:has(+ .router){margin-bottom:6px}
+  #forest,#dumbbells{margin-top:2px}
   .cap{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.04em;margin:6px 0 18px;line-height:1.7}
   .pend{font-family:var(--mono);font-size:12px;color:var(--muted)}
   .stat-line{font-family:var(--mono);font-size:13px;margin:0 0 14px}
   .stat-line b{color:var(--clinical)}
-  .router{width:100%;border-collapse:collapse;margin:14px 0 4px}
+  .router{width:100%;border-collapse:collapse;margin:8px 0 4px;table-layout:fixed}
   .router th{font-family:var(--mono);font-size:10.5px;font-weight:600;letter-spacing:.14em;
     text-transform:uppercase;color:var(--muted);text-align:left;padding:0 14px 8px 0;
-    border-bottom:1px solid var(--ink)}
+    border-bottom:1px solid var(--ink);vertical-align:bottom;
+    overflow-wrap:normal;word-break:keep-all;hyphens:none}
+  .router th:nth-child(1){width:32%}
+  .router th:nth-child(2){width:14%}
+  .router th:nth-child(3),.router th:nth-child(4){width:27%;min-width:92px}
   .router td{padding:10px 14px 10px 0;border-bottom:1px solid var(--hairline);
     font-size:14.5px;line-height:1.5;vertical-align:top}
   .router td.num{font-family:var(--mono);font-size:12.5px;white-space:nowrap}
@@ -143,10 +155,16 @@
   .defs div:last-child{border-bottom:0}
   .defs dt{flex:0 0 110px}
   .defs dd{margin:0;font-size:14.5px;line-height:1.55}
-  .cls{font-family:var(--mono);font-size:11px;letter-spacing:.06em}
+  .cls{font-family:var(--mono);font-size:11px;letter-spacing:.06em;
+    border:none !important;position:relative;padding:0 0 0 13px}
+  .cls::before{content:'';position:absolute;left:0;top:50%;margin-top:-3.5px;
+    width:7px;height:7px}
   .cls-retained{color:var(--clinical)}
   .cls-suppressed{color:var(--penalty)}
   .cls-absent{color:var(--muted)}
+  .cls-retained::before{background:var(--clinical)}
+  .cls-suppressed::before{background:var(--penalty)}
+  .cls-absent::before{background:var(--structural)}
   .scroll{overflow-x:auto}
   #ad-pairs table{border-collapse:collapse;width:100%}
   #ad-pairs th{font-family:var(--mono);font-size:10.5px;font-weight:600;letter-spacing:.14em;
@@ -171,7 +189,7 @@
   .ex-line .out-w{color:var(--penalty);font-weight:600}
   .ex-strip{margin:10px 0 4px;overflow-x:auto}
   .ex-story{font-size:13px;color:var(--muted);margin:6px 0 0;max-width:640px}
-  .block{margin:20px 0 8px}
+  .block{margin:12px 0 8px}
   .block-label{font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:0 0 6px}
   .figwrap{margin:8px 0 4px;overflow-x:auto}
   .figwrap svg{display:block}
@@ -372,8 +390,8 @@
     <h3>The penalty, model by model</h3>
     <p>Mean language penalty: the percentage points of next-word probability the
       clinical answer loses when the wording turns colloquial. The thick band is
-      each model's own 95% interval; the hairline extends it to a stricter
-      simultaneous interval, sized so all eight bands can be read at once.
+      each model's own 95% interval; the hairline is the stricter simultaneous
+      interval, sized for reading all eight at once.
       <span id="forest-sim"></span></p>
     <div id="forest"></div>
     <p class="me-caption" id="forest-cap"></p>
@@ -534,7 +552,7 @@
         [0, -0.10].forEach(function(v){
           if (v < ymin) return;
           var t = el('text', {x: m.l - 5, y: Y(v) + 3.5, 'text-anchor': 'end'},
-            'font-family:var(--mono);font-size:10px;fill:var(--muted)');
+            'font-family:var(--mono);font-size:10px;fill:#4b5563');
           t.textContent = v === 0 ? '0' : pp(v);
           svg.appendChild(t);
         });
@@ -542,7 +560,7 @@
         [[0, '0'], [xmax, xmax + ' phrases']].forEach(function(tk){
           var t = el('text', {x: X(tk[0]), y: H - m.b + 14,
             'text-anchor': tk[0] === 0 ? 'start' : 'end'},
-            'font-family:var(--mono);font-size:10px;fill:var(--muted)');
+            'font-family:var(--mono);font-size:10px;fill:#4b5563');
           t.textContent = tk[1];
           svg.appendChild(t);
         });
@@ -559,11 +577,11 @@
         if (panelIndex === 0) {
           // one-time axis label + direct annotation (Tufte: integrate text and data)
           var ylab = el('text', {x: 2, y: m.t + 6},
-            'font-family:var(--mono);font-size:9.5px;fill:var(--muted);letter-spacing:.04em');
+            'font-family:var(--mono);font-size:9.5px;fill:#4b5563;letter-spacing:.04em');
           ylab.textContent = 'penalty (percentage points)';
           svg.appendChild(ylab);
           var note = el('text', {x: W - m.r, y: m.t + 20, 'text-anchor': 'end'},
-            'font-family:var(--mono);font-size:9.5px;fill:var(--muted)');
+            'font-family:var(--mono);font-size:9.5px;fill:#4b5563');
           note.textContent = 'band tightens as more phrases are measured ↓';
           svg.appendChild(note);
         }
@@ -656,7 +674,7 @@
   var NS='http://www.w3.org/2000/svg';
   function el(n,attrs){var e=document.createElementNS(NS,n);for(var k in attrs)e.setAttribute(k,attrs[k]);return e;}
   function txt(x,y,s,fill,size,anchor,mono){
-    var t=el('text',{x:x,y:y,fill:fill||'#6d6c66','text-anchor':anchor||'start'});
+    var t=el('text',{x:x,y:y,fill:fill||'#4b5563','text-anchor':anchor||'start'});
     t.style.font=(size||10.5)+'px '+(mono===false?'inherit':'ui-monospace,Menlo,monospace');
     t.style.letterSpacing='.03em';t.textContent=s;return t;
   }
@@ -680,10 +698,10 @@
         function ry(rank){return 26+(rank-1)/7*100;}
         [1,8].forEach(function(r){
           svg.appendChild(el('line',{x1:PAD,x2:PAD+PW,y1:ry(r),y2:ry(r),stroke:'#dcdad2','stroke-width':.7}));
-          svg.appendChild(txt(PAD-8,ry(r)+3.5,'rank '+r,'#6d6c66',9.5,'end'));
+          svg.appendChild(txt(PAD-8,ry(r)+3.5,'rank '+r,'#4b5563',9.5,'end'));
         });
-        svg.appendChild(txt(PAD,H1-8,'early layers','#6d6c66',9.5));
-        svg.appendChild(txt(PAD+PW,H1-8,'deep layers →','#6d6c66',9.5,'end'));
+        svg.appendChild(txt(PAD,H1-8,'early layers','#4b5563',9.5));
+        svg.appendChild(txt(PAD+PW,H1-8,'deep layers →','#4b5563',9.5,'end'));
         function path(ranks,color,label){
           var seg=[],last=null;
           ranks.forEach(function(r,i){
@@ -710,7 +728,7 @@
         var rows=[['clinical wording','clin_formed','#15803d',52],['patient wording','pat_formed','#111827',102]];
         svg.appendChild(el('line',{x1:PAD,x2:PAD+PW,y1:H2-24,y2:H2-24,stroke:'#dcdad2','stroke-width':.7}));
         [0,Math.round((L-1)/2),L-1].forEach(function(l){
-          svg.appendChild(txt(lx(l),H2-10,'layer '+l,'#6d6c66',9.5,l===0?'start':(l===L-1?'end':'middle')));
+          svg.appendChild(txt(lx(l),H2-10,'layer '+l,'#4b5563',9.5,l===0?'start':(l===L-1?'end':'middle')));
         });
         var jit={},never={clin_formed:0,pat_formed:0};
         rows.forEach(function(row){
@@ -757,14 +775,14 @@
           svg.appendChild(el('circle',{cx:lx(p.pat_formed),cy:y,r:2.6,fill:'#111827'}));
           svg.appendChild(el('rect',{x:lx(L-1)-2.4,y:y-2.4,width:4.8,height:4.8,fill:'#b4483d'}));
           if(i===0){
-            svg.appendChild(txt(lx(p.pat_formed)-8,y+3.5,'forms','#6d6c66',9.5,'end'));
+            svg.appendChild(txt(lx(p.pat_formed)-8,y+3.5,'forms','#4b5563',9.5,'end'));
             svg.appendChild(txt(lx(L-1)+8,y+3.5,'lock-in','#b4483d',9.5));
           }
         });
         var base=20+rowsN*13+6;
         svg.appendChild(el('line',{x1:PAD,x2:PAD+PW,y1:base,y2:base,stroke:'#dcdad2','stroke-width':.7}));
         [0,Math.round((L-1)/2),L-1].forEach(function(l){
-          svg.appendChild(txt(lx(l),base+13,'layer '+l,'#6d6c66',9.5,l===0?'start':(l===L-1?'end':'middle')));
+          svg.appendChild(txt(lx(l),base+13,'layer '+l,'#4b5563',9.5,l===0?'start':(l===L-1?'end':'middle')));
         });
         mount('fig-tax',svg);
         var cap='hijacks only: the clinical answer formed (dot, median layer '+
@@ -840,7 +858,7 @@
                   ['instruction-tuned',function(p){return p.it;},'#111827',76]];
         svg.appendChild(el('line',{x1:PAD,x2:PAD+PW,y1:H5-22,y2:H5-22,stroke:'#dcdad2','stroke-width':.7}));
         [0,Math.round((L-1)/2),L-1].forEach(function(l){
-          svg.appendChild(txt(lx(l),H5-8,'layer '+l,'#6d6c66',9.5,l===0?'start':(l===L-1?'end':'middle')));
+          svg.appendChild(txt(lx(l),H5-8,'layer '+l,'#4b5563',9.5,l===0?'start':(l===L-1?'end':'middle')));
         });
         it.pairs.forEach(function(p){
           svg.appendChild(el('line',{x1:lx(p.base),x2:lx(p.it),y1:rows[0][3],y2:rows[1][3],stroke:'#c3c9d2','stroke-width':.7,opacity:.7}));
@@ -921,9 +939,9 @@
     var svg=el('svg',{viewBox:'0 0 '+W+' '+H,role:'img',
       'aria-label':'Mean language penalty per model with 95 percent and simultaneous intervals. '+simText+' Values in the table below.'});
     svg.appendChild(el('line',{x1:X(0),x2:X(0),y1:10,y2:H-26},'stroke:var(--structural);stroke-width:1'));
-    var zl=el('text',{x:X(0),y:H-12,'text-anchor':'middle'},'font-family:var(--mono);font-size:10px;fill:var(--muted)');
+    var zl=el('text',{x:X(0),y:H-12,'text-anchor':'middle'},'font-family:var(--mono);font-size:10px;fill:#4b5563');
     zl.textContent='no penalty'; svg.appendChild(zl);
-    var al=el('text',{x:X(lo)+2,y:H-12},'font-family:var(--mono);font-size:10px;fill:var(--muted)');
+    var al=el('text',{x:X(lo)+2,y:H-12},'font-family:var(--mono);font-size:10px;fill:#4b5563');
     al.textContent='← larger penalty'; svg.appendChild(al);
     ids.forEach(function(id,i){
       var p=per[id].penalty, y=24+i*R, g=el('g',{});
@@ -934,7 +952,7 @@
         'stroke:var(--penalty);stroke-width:1;opacity:.45'));
       g.appendChild(el('line',{x1:X(p.ci95[0]),x2:X(p.ci95[1]),y1:y,y2:y},'stroke:var(--penalty);stroke-width:2'));
       g.appendChild(el('circle',{cx:X(p.mean),cy:y,r:4},'fill:var(--penalty)'));
-      var v=el('text',{x:W-MR+8,y:y+4},'font-family:var(--mono);font-size:11px;fill:var(--muted)');
+      var v=el('text',{x:W-MR+8,y:y+4},'font-family:var(--mono);font-size:11px;fill:#4b5563');
       v.textContent=pp(p.mean)+' pp'; g.appendChild(v);
       var t=document.createElementNS(NS,'title');
       t.textContent=id+': '+pp(p.mean)+' pp ['+pp(p.ci95[0])+', '+pp(p.ci95[1])+']'+
@@ -1081,7 +1099,7 @@
     for(var k in attrs)n.setAttribute(k,attrs[k]);if(parent)parent.appendChild(n);return n;}
   function txt(parent,x,y,str,attrs){var t=el('text',Object.assign({x:x,y:y,
     'font-size':11,'font-family':'ui-monospace,SF Mono,Menlo,Consolas,monospace',
-    fill:'#6d6c66'},attrs||{}),parent);t.textContent=str;return t;}
+    fill:'#4b5563'},attrs||{}),parent);t.textContent=str;return t;}
   function h(tag,cls,text){var e=document.createElement(tag);if(cls)e.className=cls;
     if(text!=null)e.textContent=text;return e;}
   var CLASSES=[['retained','#15803d'],['suppressed','#b4483d'],['absent','#c3c9d2']];
@@ -1113,7 +1131,7 @@
           var members=b.pairs.filter(function(u){return u['class']===cls[0];});
           var y=TOP+row*(CELL+ROW_GAP);
           txt(svg,0,y+CELL-4,labels[cls[0]]+' '+members.length,
-            {fill:cls[0]==='absent'?'#6d6c66':cls[1]});
+            {fill:cls[0]==='absent'?'#4b5563':cls[1]});
           members.forEach(function(u,k){
             var rect=el('rect',{x:LEFT+k*(CELL+GAP),y:y,width:CELL,height:CELL,fill:cls[1]},svg);
             var title=document.createElementNS(NS,'title');
