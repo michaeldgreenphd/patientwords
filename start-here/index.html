@@ -77,7 +77,31 @@
   .paths{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin:14px 0 8px}
   .cycle-svg{margin:16px 0 4px}
   .cycle-svg svg{width:100%;height:auto;display:block;max-width:400px;margin:0 auto}
-  .cycle{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:0 26px;margin:6px 0 10px;max-width:640px}
+  .cycle{margin:8px 0 10px;max-width:560px}
+  /* interactive cycle: the SVG stage labels act as tabs; one panel shows at a time */
+  .cyc-tabs{font-family:var(--mono);font-size:13px;font-weight:600;letter-spacing:.14em}
+  .cyc-tab{cursor:pointer}
+  .cyc-tab text{fill:var(--muted);transition:fill .2s ease}
+  .cyc-tab[aria-selected="true"] text{fill:var(--teal);text-decoration:underline;text-underline-offset:4px}
+  .cyc-tab:hover text{fill:var(--ink)}
+  .cyc-tab:focus{outline:none}
+  .cyc-tab:focus-visible{outline:2px solid var(--clinical);outline-offset:2px}
+  .cyc-hint{margin:0 auto 2px;max-width:420px;text-align:center}
+  .cyc-panel[hidden]{display:none}
+  .cyc-panel{animation:cycfade .28s ease}
+  @keyframes cycfade{from{opacity:0}to{opacity:1}}
+  /* collapsible explainer (step 5) */
+  details.explain{margin:2px 0 14px}
+  details.explain>summary{font-family:var(--mono);font-size:12px;letter-spacing:.04em;color:var(--teal);
+    cursor:pointer;list-style:none;display:inline-flex;align-items:center;gap:6px;padding:2px 0}
+  details.explain>summary::-webkit-details-marker{display:none}
+  details.explain>summary::before{content:'\25B8';font-size:10px;transition:transform .18s ease}
+  details.explain[open]>summary::before{transform:rotate(90deg)}
+  details.explain>summary:hover{text-decoration:underline;text-underline-offset:3px}
+  details.explain>summary:focus-visible{outline:2px solid var(--clinical);outline-offset:3px}
+  details.explain p{margin:8px 0 0;font-size:16px;line-height:1.64}
+  @media (prefers-reduced-motion:reduce){.cyc-tab text{transition:none}.cyc-panel{animation:none}
+    details.explain>summary::before{transition:none}}
   .cycle h3{font-family:var(--mono);font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;
     color:var(--ink);font-weight:600;margin:10px 0 4px;border-bottom:1px solid var(--ink);padding-bottom:5px}
   .cycle ul{list-style:none;margin:0;padding:0}
@@ -102,7 +126,7 @@
   .depth h3{font-family:var(--mono);font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;
     color:var(--ink);font-weight:600;margin:10px 0 8px;border-bottom:1px solid var(--ink);padding-bottom:5px}
   .depth p{font-size:14.5px;line-height:1.6;margin:0 0 8px}
-  .ladder-fig{max-width:620px;margin:14px 0 0}
+  .ladder-fig{max-width:470px;margin:14px 0 0}
   .ladder-fig svg{width:100%;height:auto;display:block}
   .ladder-pend{font-family:var(--mono);font-size:12px;color:var(--muted);border:1px dashed var(--structural);padding:14px;display:inline-block}
   .ladder-sent{margin:0 0 14px}
@@ -138,7 +162,7 @@
   <hr class="rule-fine">
 </header>
 <main id="main">
-  <p class="dateline">Start here · the whole idea in simplified</p>
+  <p class="dateline">Start here · the whole idea, simplified</p>
   <h1>People say the same thing many ways. What does a machine "hear"?</h1>
   <p class="subtitle">What happens inside a language model when the same medical
     question is asked in patient words instead of clinical words.</p>
@@ -178,11 +202,11 @@
       <path class="sv-line" d="M232,142 L430,142"/>
       <rect x="430" y="6" width="70" height="152" fill="none" stroke="#6d6c66" stroke-width="1.2" stroke-dasharray="5 5"/>
       <text x="465" y="180" class="sv-m" text-anchor="middle">language model</text>
-      <path class="sv-line" d="M500,82 C516,82 518,24 540,22" stroke="#0f766e" stroke-width="2.2"/>
+      <path class="sv-line" d="M500,22 L540,22" stroke="#0f766e" stroke-width="2.2"/>
       <text x="552" y="27" class="sv-a" fill="#0f766e">antacid</text>
       <path class="sv-line" d="M500,82 L540,82" stroke="#b45309" stroke-width="2.2"/>
       <text x="552" y="87" class="sv-a" fill="#b45309">ice cream</text>
-      <path class="sv-line" d="M500,82 C516,82 518,140 540,142" stroke="#b45309" stroke-width="2.2"/>
+      <path class="sv-line" d="M500,142 L540,142" stroke="#b45309" stroke-width="2.2"/>
       <text x="552" y="147" class="sv-a" fill="#b45309">apple</text>
     </svg>
     </div>
@@ -216,14 +240,17 @@
   <section>
     <p class="step-no">5 · Look inside</p>
     <h2>Circuit tracing photographs the reasoning</h2>
-    <p>A trace is a look inside the guess you watched in
-      step 3. Inside the model, small units called "features" switch on as it reads.
+    <p>A trace is a look inside the guess you watched in step 3.</p>
+    <details class="explain">
+      <summary>Read more about circuit traces</summary>
+      <p>Inside the model, small units called "features" switch on as it reads.
       Some respond to medical ideas; others to everyday ones. A circuit trace records
       which features fired and how strongly each fed the predicted next word.
       Clinical wording lights the medical features; patient wording lights the
       everyday ones. A person chatting with a model never sees any of this: the
       trace is a diagnostic that researchers compute from the model's internals
       after it answers.</p>
+    </details>
     <div class="fig" role="img" aria-label="Two parallel tracks of feature nodes reading left to right through the network, from early layers to deep layers, each with a scatter of faint weak-firing features behind a handful of strong ones. The clinical term dyspepsia lights up teal medical nodes and leads to antacid. The casual phrase stomach on fire lights up dark everyday nodes and leads to ice cream.">
     <svg viewBox="0 0 720 136">
       <text x="0" y="40" class="sv-q">“dyspepsia”</text>
@@ -321,10 +348,19 @@
     <div class="cycle-svg">
       <svg viewBox="0 0 360 268" role="img"
         aria-label="A circular three-stage cycle. Measure leads to mend, labelled penalty quantified. Mend leads to maintain, labelled baseline set. A teal return curve labelled language drifts, re-measure leads from maintain back to measure.">
-        <g style="font-family:var(--mono);font-size:13px;font-weight:600;letter-spacing:.14em;fill:var(--ink)">
-          <text x="180" y="52" text-anchor="middle">MEASURE</text>
-          <text x="270" y="208" text-anchor="middle">MEND</text>
-          <text x="90" y="208" text-anchor="middle">MAINTAIN</text>
+        <g class="cyc-tabs" role="tablist" aria-label="Choose a loop stage to read its steps">
+          <g class="cyc-tab" id="tab-measure" role="tab" aria-selected="true" aria-controls="panel-measure" tabindex="0">
+            <rect x="132" y="37" width="96" height="22" rx="3" fill="transparent"/>
+            <text x="180" y="52" text-anchor="middle">MEASURE</text>
+          </g>
+          <g class="cyc-tab" id="tab-mend" role="tab" aria-selected="false" aria-controls="panel-mend" tabindex="-1">
+            <rect x="234" y="193" width="72" height="22" rx="3" fill="transparent"/>
+            <text x="270" y="208" text-anchor="middle">MEND</text>
+          </g>
+          <g class="cyc-tab" id="tab-maintain" role="tab" aria-selected="false" aria-controls="panel-maintain" tabindex="-1">
+            <rect x="42" y="193" width="96" height="22" rx="3" fill="transparent"/>
+            <text x="90" y="208" text-anchor="middle">MAINTAIN</text>
+          </g>
         </g>
         <g style="stroke:var(--ink);stroke-width:1.2;fill:none">
           <path d="M222.3,57.0 A104,104 0 0 1 283.0,166.5"/>
@@ -350,25 +386,23 @@
         </text>
       </svg>
     </div>
+    <p class="cap cyc-hint">Select a stage on the cycle — <b>Measure</b>, <b>Mend</b>, or <b>Maintain</b> — to read its steps.</p>
     <div class="cycle">
-      <div>
-        <h3>Measure</h3>
+      <div class="cyc-panel" id="panel-measure" role="tabpanel" aria-labelledby="tab-measure">
         <ul>
           <li>Pair each clinical phrasing with its patient phrasing. Count how often the answer drops in urgency.</li>
           <li><span class="now">now</span>simulated phrases, pre-registered, a tenth sealed for checking.</li>
           <li><span class="next">next</span>real patient language, clinician-checked, community-validated dialects.</li>
         </ul>
       </div>
-      <div>
-        <h3>Mend</h3>
+      <div class="cyc-panel" id="panel-mend" role="tabpanel" aria-labelledby="tab-mend" hidden>
         <ul>
           <li>Fortify the model: put a line of medical context in front of the question.</li>
           <li>Train on patient language: include the way people actually speak in the training data. Models learn idioms, misspellings, and dialects the way clinicians do.</li>
           <li>Translate only behind a regression check: re-test every rewrite, because rewrites can lose clinical content.</li>
         </ul>
       </div>
-      <div>
-        <h3>Maintain</h3>
+      <div class="cyc-panel" id="panel-maintain" role="tabpanel" aria-labelledby="tab-maintain" hidden>
         <ul>
           <li>Re-run the audit on a schedule.</li>
           <li>Refresh the phrase sets and urgency of recommendations with clinician and community review.</li>
@@ -441,7 +475,36 @@
 })();
 </script>
 <script>
-
+(function(){
+  // Step 7 cycle: the SVG stage labels are an ARIA tablist; selecting one
+  // reveals only that stage's steps. Default is Measure (set in markup).
+  var tabs=[].slice.call(document.querySelectorAll('.cyc-tab'));
+  if(!tabs.length)return;
+  function panelFor(tab){return document.getElementById(tab.getAttribute('aria-controls'));}
+  function select(tab,focus){
+    tabs.forEach(function(t){
+      var on=(t===tab);
+      t.setAttribute('aria-selected',on?'true':'false');
+      t.setAttribute('tabindex',on?'0':'-1');
+      var p=panelFor(t);
+      if(p)p.hidden=!on;
+    });
+    if(focus&&tab.focus)tab.focus();
+  }
+  tabs.forEach(function(tab,i){
+    tab.addEventListener('click',function(){select(tab,false);});
+    tab.addEventListener('keydown',function(e){
+      var k=e.key,idx=i;
+      if(k==='Enter'||k===' '||k==='Spacebar'){e.preventDefault();select(tab,false);return;}
+      if(k==='ArrowRight'||k==='ArrowDown')idx=(i+1)%tabs.length;
+      else if(k==='ArrowLeft'||k==='ArrowUp')idx=(i-1+tabs.length)%tabs.length;
+      else if(k==='Home')idx=0;
+      else if(k==='End')idx=tabs.length-1;
+      else return;
+      e.preventDefault();select(tabs[idx],true);
+    });
+  });
+})();
 </script>
 <script>
 (function(){
@@ -483,15 +546,20 @@
     if(!resolved.length)return;
     var tiers=u.tiers||{};
     var order=['4','3','2','1','0'].filter(function(t){return tiers[t];});
-    var W=620,rowH=40,top=24,H=top+order.length*rowH;
+    // Spatial adjacency: the two example pairs occupy disjoint rungs, so they
+    // share one node column. Tier labels are right-anchored immediately left of
+    // that column and value labels sit just right of the dots, so the eye reads
+    // tier -> dot -> word without tracking across an empty gridline.
+    var LABEL_R=214,NODE_X=246,GRID_L=224,VLAB=NODE_X+13;
+    var W=372,rowH=40,top=24,H=top+order.length*rowH;
     var svg=el('svg',{viewBox:'0 0 '+W+' '+H,role:'img',
       'aria-label':'Care-urgency ladder: in each measured pair the everyday wording\u2019s top answer lands on a lower tier than the clinical wording\u2019s'});
     var yFor={};
     order.forEach(function(t,i){
       var y=top+i*rowH;yFor[t]=y;
-      svg.appendChild(el('line',{x1:150,y1:y,x2:W,y2:y,stroke:'#dcdad2','stroke-width':1}));
-      svg.appendChild(el('text',{x:0,y:y+3.5,'font-family':'ui-monospace,Menlo,monospace',
-        'font-size':'10.5',fill:'#6d6c66'},tiers[t]));
+      svg.appendChild(el('line',{x1:GRID_L,y1:y,x2:W-8,y2:y,stroke:'#dcdad2','stroke-width':1}));
+      svg.appendChild(el('text',{x:LABEL_R,y:y+3.5,'text-anchor':'end','font-family':'ui-monospace,Menlo,monospace',
+        'font-size':'10',fill:'#6d6c66'},tiers[t]));
     });
     var sent=document.createElement('div');sent.className='ladder-sent';
     function sentence(prompt,term,cls,word,pct,ansCls){
@@ -512,7 +580,7 @@
     }
     var lastModel=null;
     resolved.forEach(function(item){
-      var m=item.m,row=item.row,sc=item.sc,x=item.ref.x;
+      var m=item.m,row=item.row,sc=item.sc,x=NODE_X;
       var yC=yFor[String(row.tier_top_clinical)], yP=yFor[String(row.tier_top_patient)];
       if(yC==null||yP==null)return;
       var wC=m.top_clinical[0]||'', pC=Math.round((m.top_clinical[1]||0)*100);
@@ -526,12 +594,12 @@
       sent.appendChild(sentence(sc.clinical_prompt,sc.clinical_term,'term-c',wC,pC,'c'));
       sent.appendChild(sentence(sc.patient_prompt,sc.patient_term,'term-p',wP,pP,'p'));
       svg.appendChild(el('circle',{cx:x,cy:yC,r:5,fill:'#15803d'}));
-      svg.appendChild(el('text',{x:x-14,y:yC-8,'text-anchor':'end',
-        'font-family':'ui-monospace,Menlo,monospace','font-size':'11.5',fill:'#15803d'},
+      svg.appendChild(el('text',{x:VLAB,y:yC+3.5,'text-anchor':'start',
+        'font-family':'ui-monospace,Menlo,monospace','font-size':'11',fill:'#15803d'},
         '\u201c'+wC+'\u201d '+pC+'%'));
       svg.appendChild(el('circle',{cx:x,cy:yP,r:5,fill:'#111827'}));
-      svg.appendChild(el('text',{x:x-14,y:yP+18,'text-anchor':'end',
-        'font-family':'ui-monospace,Menlo,monospace','font-size':'11.5',fill:'#111827'},
+      svg.appendChild(el('text',{x:VLAB,y:yP+3.5,'text-anchor':'start',
+        'font-family':'ui-monospace,Menlo,monospace','font-size':'11',fill:'#111827'},
         '\u201c'+wP+'\u201d '+pP+'%'));
       svg.appendChild(el('line',{x1:x,y1:yC+8,x2:x,y2:yP-9,stroke:'#b4483d','stroke-width':1.5}));
       svg.appendChild(el('path',{d:'M '+(x-4)+' '+(yP-9)+' L '+x+' '+(yP-3)+' L '+(x+4)+' '+(yP-9)+' Z',
