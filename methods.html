@@ -137,6 +137,18 @@
   .tier-table .tex{font-family:var(--mono);font-size:13px;color:var(--muted)}
   .tier-cap{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.04em;margin:0 0 18px}
 
+  /* Step 4 · the four comparison views as a 2×2 grid (non-link headers) */
+  .four-views{display:grid;grid-template-columns:1fr 1fr;gap:16px 28px;margin:10px 0 14px;padding:0;list-style:none}
+  .four-views li{margin:0;padding:0}
+  .four-views .eng-name{font-weight:600;display:block;margin:0 0 3px}
+  .four-views p{margin:0;font-size:15.5px;line-height:1.55}
+  @media (max-width:560px){.four-views{grid-template-columns:1fr;gap:14px}}
+  /* Limitations · a divider list; whitespace and rules carry the structure, not bold leads */
+  .limits{list-style:none;margin:10px 0 16px;padding:0}
+  .limits li{border-bottom:1px solid var(--hairline);padding:16px 0;font-size:16px;line-height:1.66}
+  .limits li:first-child{padding-top:4px}
+  .limits li:last-child{border-bottom:0}
+
   @media (max-width:760px){
     .masthead nav{gap:8px 22px}
     .masthead nav a{padding:7px 0}
@@ -161,6 +173,7 @@
   #reading-layers svg{display:block}
   .rl-cap,.rl-credit{font-size:13px;color:var(--muted);max-width:640px}
   .rl-credit{border-top:1px solid var(--hairline);padding-top:8px;margin-top:14px}
+  .fold>.rl-credit{border-top:0;padding-top:0;margin-top:0}
   .rl-pend{font-family:var(--mono);font-size:12px;color:var(--muted);border:1px dashed var(--structural);padding:14px;display:inline-block}
 </style>
 </head>
@@ -196,15 +209,18 @@
 
   <section>
     <p class="step-no">Step 1 · Model &amp; features</p>
-    <h2>A prism splits the model’s activity into readable features</h2>
+    <h2>Splitting the model’s activity into readable features</h2>
     <p>The study’s subject is <code>gemma-2-2b</code>, a small open language model
       (<a href="https://huggingface.co/google/gemma-2-2b" rel="noopener">Google DeepMind, released July 2024</a>). Watched
-      directly, its inner workings are millions of undifferentiated numbers.
-      Google DeepMind’s <a href="https://huggingface.co/google/gemma-scope-2b-pt-transcoders">Gemma
+      directly, its inner workings are millions of undifferentiated numbers.</p>
+    <details class="fold">
+      <summary>How transcoders split numbers into features</summary>
+      <p>Google DeepMind’s <a href="https://huggingface.co/google/gemma-scope-2b-pt-transcoders">Gemma
       Scope</a> transcoders split those numbers into distinct, readable
       categories called <em>features</em>. Each feature fires for one recognizable thing.
       These features help us see which parts of the model’s thinking
       a sentence switches on.</p>
+    </details>
   </section>
 
   <section>
@@ -216,7 +232,9 @@
       the sentence, pushed the model toward its next word. Each connection carries a
       <em>weight</em>: the influence one feature’s firing had on another’s, and on the
       word the model chose. The technical term for that weight is attribution mass.</p>
-    <p id="retrace-note" hidden>The instrument repeats itself, within the record we have.
+    <details id="retrace-fold" class="fold" hidden>
+      <summary>View repeatability and validation metrics</summary>
+      <p id="retrace-note">The instrument repeats itself, within the record we have.
       <span id="rt-n">—</span> phrase pairs were traced two or more times on different
       days: the pairs that happened to be re-traced. At the
       precision the files record (three decimals), every repeat reproduced identical
@@ -226,9 +244,11 @@
       (<span id="rt-stable">—</span> pairs). Different graph settings do change the
       feature-level numbers; that is parameter sensitivity, not noise. Zero repeat
       variation was observed through July 14, 2026. On July 15 the daily sentinel
-      recorded its first movement: probabilities shifted by at most 0.027 across the
+      recorded its first movement: probabilities shifted by at most
+      <span id="rt-sentinel-max">0.027</span> across the
       three sentinel pairs, and every top word held.
       Source: <a href="https://github.com/michaeldgreenphd/patientwords/blob/main/data/retrace_consistency.json">the repeatability measurements file on GitHub</a>.</p>
+    </details>
   </section>
 
   <section>
@@ -259,19 +279,23 @@
     <p>
       The tagged graphs feed four comparison views:
     </p>
-    <ul class="engines">
+    <ul class="four-views">
       <li>
-        <span class="eng-name"><a href="wording-differences/#word">Wording: the word swap</a></span>
+        <span class="eng-name">Wording: the word swap</span>
         <p>Two stacked traces of the same sentence.</p>
       </li>
       <li>
-        <span class="eng-name"><a href="wording-differences/#grammar">Wording: the grammar swap</a></span>
-        <p>A 2×2 grid crossing the medical
-           keyword with the surrounding frame, separating the vocabulary effect from the
-           grammar effect.</p>
+        <span class="eng-name">Wording: the grammar swap</span>
+        <p>A 2×2 grid crossing the medical keyword with the surrounding frame, separating the vocabulary effect from the grammar effect.</p>
       </li>
-      <li><span class="eng-name">Dialect Differences</span> The clinical term is held fixed while the surrounding syntax is re-traced across dialect and register variants.</li>
-      <li><span class="eng-name">Translation</span> An LLM rewrites the patient sentence in clinical terms, and the rewrite is traced to show the circuit and prediction recover together.</li>
+      <li>
+        <span class="eng-name">Dialect Differences</span>
+        <p>The clinical term is held fixed while the surrounding syntax is re-traced across dialect and register variants.</p>
+      </li>
+      <li>
+        <span class="eng-name">Translation</span>
+        <p>An LLM rewrites the patient sentence in clinical terms, and the rewrite is traced to show the circuit and prediction recover together.</p>
+      </li>
     </ul>
     <p>
       Every render is a self-contained HTML file.
@@ -346,7 +370,9 @@
       patched with the clinical state at that single layer, best position per layer,
       against the two measured levels.
     </p>
-    <p class="rl-credit">
+    <details class="fold">
+      <summary>How the Jacobian lens reads layers</summary>
+      <p class="rl-credit">
       Layer readouts use the Jacobian lens (Gurnee et&nbsp;al., Transformer Circuits,
       2026), applied through Neuronpedia&rsquo;s hosted deployment of the authors&rsquo;
       reference implementation
@@ -355,6 +381,7 @@
       from the activation-patching check above and the steering experiments. The
       readout is exploratory and reported for one model.
     </p>
+    </details>
   </section>
 
   <section id="generation-eval">
@@ -395,11 +422,6 @@
       slope = clinical content lost in translation &nbsp;·&nbsp;
       <span class="sw" style="background:#9aa1ad" aria-hidden="true"></span>grey = no loss</p>
     </details>
-    <p>
-      That is the same regression the engine flags automatically, and the reason the
-      <a href="translation/">Translation</a> fix can&rsquo;t be assumed safe without
-      checking its output.
-    </p>
   </section>
   <script>
   (function(){
@@ -495,25 +517,19 @@
     <p class="step-no">Limitations</p>
     <h2>What this evidence does and does not show</h2>
     <p>This project measures how the probability of a single next word changes when clinical wording is replaced by patient wording. That is a probe of model behavior, not a clinical outcome.</p>
-    <ul class="engines">
-      <li><p><b>One small model carries the circuit evidence.</b> Every graph here comes from gemma-2-2b, chosen because its transcoders are public. The behavioral checks on the other seven models measure next-word probabilities only, no circuits. None of this shows how larger systems behave. The one medically tuned model measured, medgemma-4b-it (4B parameters, next-word behavior only), still shows a below-zero penalty: −3.9 pp, 95% CI [−5.9, −2.0], on 337 phrases.</p></li>
-      <li><p><b>Attribution graphs are an interpretive tool.</b> They reconstruct the model’s computation through features and prune heavily; error nodes absorb what’s missed.</p></li>
-      <li><p><b>Feature labels are machine-generated.</b> The clinical / off-target
-        categories come from keyword-matching auto-interp descriptions. Both steps can be
-        wrong, and a mislabeled feature shifts the clinical-mass numbers.</p></li>
-      <li><p><b>Measurements are a point in time.</b> The probabilities were observed on
-        specific dates against a hosted service. The <span id="lim-rt-n">52</span> pairs re-traced so far reproduce
-        exactly at the recorded three-decimal precision (see step 2), but that is the
-        set that happened to be repeated, not a guarantee. Future drift would come from
-        service changes; a daily three-pair sentinel re-trace watches for that.</p></li>
-      <li><p><b>Translation can fail.</b> The fix in the Translation figure is itself an LLM step.</p></li>
-      <li><p><b>The stimuli are constructed.</b> Most phrase pairs were written by a language model and checked automatically, not collected from patients.</p></li>
+    <ul class="limits">
+      <li>One small model carries the circuit evidence. Every graph here comes from gemma-2-2b, chosen because its transcoders are public. The behavioral checks on the other seven models measure next-word probabilities only, no circuits. None of this shows how larger systems behave. The one medically tuned model measured, medgemma-4b-it (4B parameters, next-word behavior only), still shows a below-zero penalty: −3.9 pp, 95% CI [−5.9, −2.0], on 337 phrases.</li>
+      <li>Attribution graphs are an interpretive tool. They reconstruct the model’s computation through features and prune heavily; error nodes absorb what’s missed.</li>
+      <li>Feature labels are machine-generated. The clinical / off-target categories come from keyword-matching auto-interp descriptions. Both steps can be wrong, and a mislabeled feature shifts the clinical-mass numbers.</li>
+      <li>Measurements are a point in time. The probabilities were observed on specific dates against a hosted service. The <span id="lim-rt-n">52</span> pairs re-traced so far reproduce exactly at the recorded three-decimal precision (see step 2), but that is the set that happened to be repeated, not a guarantee. Future drift would come from service changes; a daily three-pair sentinel re-trace watches for that.</li>
+      <li>Translation can fail. The fix in the Translation figure is itself an LLM step.</li>
+      <li>The stimuli are constructed. Most phrase pairs were written by a language model and checked automatically, not collected from patients.</li>
     </ul>
     <p>Nothing here is medical advice, and no part of this pipeline is a deployed clinical tool. The claim is narrower: on the models measured, the same situation phrased in patient words is measurably less likely to reach the clinical answer than in clinical terms — and the circuit view shows where that difference arises.</p>
   </section>
 
   <div class="endnote">
-    <p>Two kinds of provenance appear in the gallery. Figs. 1–4 and the simulated scenarios use prompts written by an LLM and checked automatically: the scenarios are simulated, but the testing is real. The phrase dataset is the other kind: hand-built from real patient language and measured by hand.</p>
+    <p>Two kinds of provenance appear in the gallery. The comparison figures and the simulated scenarios use prompts written by an LLM and checked automatically: the scenarios are simulated, but the testing is real. The phrase dataset is the other kind: hand-built from real patient language and measured by hand.</p>
     <footer>
       Built with the <a href="https://github.com/michaeldgreenphd/patientwords-engine">patientwords-engine</a> pipeline
       on <a href="https://neuronpedia.org">Neuronpedia</a> ·
@@ -625,7 +641,19 @@
       if(lists)lists.textContent=(d.spread_lists_identical_pairs!=null?d.spread_lists_identical_pairs:'—')+' of '+d.pairs_retraced;
       var limN=document.getElementById('lim-rt-n');
       if(limN)limN.textContent=String(d.pairs_retraced);
-      document.getElementById('retrace-note').hidden=false;
+      var fold=document.getElementById('retrace-fold');
+      if(fold)fold.hidden=false;
+    }).catch(function(){});
+  // sentinel first-movement shift (step 2): the largest daily delta on the day the
+  // drift sentinel first moved, from data/drift_series.json (falls back to the
+  // written value if the file is absent).
+  fetch('data/drift_series.json',{cache:'no-cache'})
+    .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
+    .then(function(d){
+      var moved=(d.deltas||[]).filter(function(x){return x&&x.max_abs_delta>0;});
+      if(!moved.length)return;
+      var span=document.getElementById('rt-sentinel-max');
+      if(span)span.textContent=String(moved[0].max_abs_delta);
     }).catch(function(){});
 })();
 </script>
