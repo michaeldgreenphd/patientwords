@@ -307,10 +307,10 @@
   <hr class="rule-fine">
 </header>
 <main id="main">
-  <p class="dateline">Research bulletin · mechanistic interpretability of medical language · <b>gemma-2-2b</b></p>
+  <p class="dateline">mechanistic interpretability of medical language</p>
   <h1><span class="patient">Patients</span> don’t speak like doctors.<br><span class="clinical">Small open models</span> change their next-word predictions when the wording does.</h1>
-  <p class="lede">We trace how gemma-2-2b reads clinical terms versus the everyday words patients use. Wording can change the model's top next word in addition to its confidence, and rewriting the sentence in clinical terms restores it in 8 of the 20 hardest cases. Try the live case below.</p>
-  <p class="lede">Every figure is a live render: columns are the prompt’s words in order; height is depth in the model; the predicted next word sits at the top. Nodes (the dots) are features — size is contribution, color is category. Curves are paths of influence; the spread at the top shows the competing next-word continuations ranked by probability. Hover any node for its identity and mass.</p>
+  <p class="lede">We trace how gemma-2-2b reads clinical terms versus the everyday words patients use. Wording can change the model's top next word in addition to its confidence, and rewriting the sentence in clinical terms restores it sometimes in the hardest cases. Try the live case below.</p>
+  <p class="lede">Columns are the prompt’s words in order; height is depth in the model; the predicted next word sits at the top. Nodes (the dots) are features — size is contribution, color is category. Curves are paths of influence; the spread at the top shows the different next-word predictions ranked by probability. Hover any node for its identity and mass.</p>
 
   <div class="tg" id="home-tg">
     <p class="tg-sentence">“When the dust kicks up my
@@ -347,8 +347,8 @@
       <h3>Swap the word</h3>
       <p>One phrase swapped — “asthma flares” vs. “chest gets all tight” — as two stacked graphs. The numbers are in the demo above; the trace shows where the probability goes.</p>
       <p class="traced" data-mode="2panel" data-traced="gemma-2-2b">
-        <span class="tm"><b>live trace:</b> gemma-2-2b · gemma scope transcoders</span>
-        <span class="tp">hosted circuit-tracer via Neuronpedia · traced July 7, 2026 · scenario 85 of the simulated series</span>
+        <span class="tm"><b>live trace:</b> gemma-2-2b</span>
+        <span class="tp">circuit-tracer via Neuronpedia · traced July 7, 2026 · scenario 85 of the simulated series</span>
       </p>
       <span class="open">Open the comparison →</span>
     </div>
@@ -365,7 +365,7 @@
     <div class="fig-body">
       <p class="fig-no">Fig. 2 <span class="mode">· wording: grammar × lexicon</span></p>
       <h3>Swap the grammar</h3>
-      <p>A 2×2 grid crossing wording (patient vs. medical) with grammar (standard vs. nonstandard). From our analysis, changing the grammar alone shifts +11–13% toward the everyday continuation, even when the medical word stays (Box B).</p>
+      <p>A 2×2 grid crossing wording (patient vs. medical) with grammar (standard vs. nonstandard). From our analysis, changing the grammar alone shifts toward the everyday continuation, even when the medical word stays (Box B).</p>
       <span class="stat penalty">Variety shift Δ: +11% and +13% toward the everyday continuation · Register shift Δ: +4–5%</span>
       <p class="traced" data-mode="4quadrant" data-traced="gemma-2-2b">
         <span class="tm"><b>traced model:</b> gemma-2-2b · gemma scope transcoders</span>
@@ -383,8 +383,8 @@
     <div class="spec-rows" id="spec-rows"></div>
     <p class="spec-note" id="spec-note"></p>
     <p class="traced" data-mode="dialect" data-traced="gemma-2-2b" style="padding:0 18px">
-      <span class="tm"><b>traced model:</b> gemma-2-2b · gemma scope transcoders</span>
-      <span class="tp">45 graphs · 5 baselines + 40 framings · from the <a href="https://github.com/michaeldgreenphd/patientwords-engine/blob/main/data/simulated/dialects_20260708T120729Z.json">dialect framings batch of July 8, 2026</a></span>
+      <span class="tm"><b>traced model:</b> gemma-2-2b</span>
+      <span class="tp">from the <a href="https://github.com/michaeldgreenphd/patientwords-engine/blob/main/data/simulated/dialects_20260708T120729Z.json">dialect framings batch of July 8, 2026</a></span>
     </p>
     <a class="open" href="dialect-differences/" style="margin:0 18px 14px;display:inline-block">Open the dialect study →</a>
   </figure>
@@ -426,7 +426,7 @@
     <div class="fig-body">
       <p class="fig-no">Sim series <span class="mode">· generated pairs · simulated data</span></p>
       <h3>Simulated Scenarios</h3>
-      <p>Claude writes new patient-vs-clinical pairs in the hand-built dataset’s format — one term swapped per pair — and automatic validators accept or reject each. Accepted pairs are traced on gemma-2-2b and published with the generator’s rationale and cost. Kept separate from the hand-measured set.</p>
+      <p>Claude writes new patient-vs-clinical pairs in the hand-built dataset’s format — one term swapped per pair — and LLM validators accept or reject each. Accepted pairs are traced on gemma-2-2b and published with the generator’s rationale and cost.</p>
       <span class="stat penalty" id="sim-stat" hidden></span>
       <p class="traced" data-mode="simulated" data-traced="gemma-2-2b">
         <span class="tm"><b>traced model:</b> gemma-2-2b · gemma scope transcoders</span>
@@ -484,7 +484,7 @@
   </section>
 
   <div class="endnote">
-    <p>Figs. 1–4, the simulated scenarios, and the phrase-dataset measurements are live gemma-2-2b traces.</p>
+    <p>Figs. 1–4, the simulated scenarios, and the phrase-dataset measurements are gemma-2-2b traces.</p>
     <p>SIMULATED DATA: the sentence pairs measured across this site are written by an LLM and checked automatically. The scenarios are simulated; the testing is real. The phrase dataset is the exception: hand-built from real patient language and measured by hand.</p>
     <footer>
       Built with the <a href="https://github.com/michaeldgreenphd/patientwords-engine">patientwords-engine</a> pipeline

@@ -138,7 +138,7 @@
   <hr class="rule-fine">
 </header>
 <main id="main">
-  <p class="dateline">Start here · the whole idea in five minutes</p>
+  <p class="dateline">Start here · the whole idea in simplified</p>
   <h1>People say the same thing many ways. What does a machine "hear"?</h1>
   <p class="subtitle">What happens inside a language model when the same medical
     question is asked in patient words instead of clinical words.</p>
@@ -166,8 +166,8 @@
 
   <section>
     <p class="step-no">2 · The model diverges</p>
-    <h2>Same three phrasings, three different answers</h2>
-    <p>We gave a language model the same sentences and read off its most likely next word. Under the clinical phrasing, the top next word is the medical answer. Under the casual framings, it is a food word, even in the one that uses the clinical term.</p>
+    <h2>Three phrasings, three different answers</h2>
+    <p>We gave a language model the same sentences and found its most likely next word. Under the clinical phrasing, the top next word is a medical answer. Under the patient phrasing, it is a food word, even in the one that uses the clinical term.</p>
     <div class="fig" role="img" aria-label="The same three phrasings pass through a language model and come out as three different answers: antacid, ice cream, and apple.">
     <svg viewBox="0 0 800 190">
       <text x="0" y="28" class="sv-q">“I have <tspan style="fill:var(--teal);font-weight:700">acid reflux</tspan>.”</text>
@@ -216,7 +216,7 @@
   <section>
     <p class="step-no">5 · Look inside</p>
     <h2>Circuit tracing photographs the reasoning</h2>
-    <p>A trace is not a later stage: it is a look inside the guess you watched in
+    <p>A trace is a look inside the guess you watched in
       step 3. Inside the model, small units called "features" switch on as it reads.
       Some respond to medical ideas; others to everyday ones. A circuit trace records
       which features fired and how strongly each fed the predicted next word.
@@ -269,7 +269,7 @@
     </svg>
     </div>
     <p class="cap">larger node = stronger influence · faint = barely fired · the real traces of the matching acid-reflux pair fire 732 and 787 features and share 465; the sketch draws the strongest few</p>
-    <p>Most figures elsewhere on PatientWords are real circuit traces like this sketch.</p>
+    <p>Most figures on PatientWords are circuit traces like this sketch.</p>
   </section>
 
   <section>
@@ -362,7 +362,7 @@
       <div>
         <h3>Mend</h3>
         <ul>
-          <li>Fortify the model: put a line of medical context in front of the question. One sentence of explicit medical context roughly halves the penalty measured under casual framing.</li>
+          <li>Fortify the model: put a line of medical context in front of the question.</li>
           <li>Train on patient language: include the way people actually speak in the training data. Models learn idioms, misspellings, and dialects the way clinicians do.</li>
           <li>Translate only behind a regression check: re-test every rewrite, because rewrites can lose clinical content.</li>
         </ul>
@@ -371,7 +371,7 @@
         <h3>Maintain</h3>
         <ul>
           <li>Re-run the audit on a schedule.</li>
-          <li>Refresh the phrase sets and urgency tiers with clinician and community review.</li>
+          <li>Refresh the phrase sets and urgency of recommendations with clinician and community review.</li>
           <li>Stress-test the edges with supplementary sets. A small emergency-scenario set (7 pairs) is generated and being measured; further emergency rounds are paused. Kept outside the pre-registered run.</li>
           <li><span class="next">next</span>More edge sets: alarm-sounding wording, misspellings.</li>
           <li>Watch the circuit for drift as models update.</li>
