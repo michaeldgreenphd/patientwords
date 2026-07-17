@@ -86,9 +86,8 @@
     font-size:14.5px;line-height:1.5;vertical-align:top}
   .router td.num{font-family:var(--mono);font-size:12.5px;white-space:nowrap}
   .router .queued{color:var(--muted);font-style:italic}
-  .next{display:inline-block;font-family:var(--mono);font-size:10px;letter-spacing:.1em;
-    text-transform:uppercase;border:1px solid var(--muted);color:var(--muted);
-    padding:1px 6px;margin-right:8px;vertical-align:1px}
+  .next{font-family:var(--mono);font-size:10px;letter-spacing:.1em;font-weight:700;
+    text-transform:uppercase;color:var(--muted);margin-right:10px}
   ul.plan{list-style:none;margin:6px 0 14px;padding:0}
   ul.plan li{border-bottom:1px solid var(--hairline);padding:10px 0;font-size:15.5px;line-height:1.6}
   ul.plan li:last-child{border-bottom:0}
@@ -117,9 +116,10 @@
     letter-spacing:.04em;margin:6px 0 0}
   .sm-h{font-family:var(--mono);font-size:10.5px;font-weight:600;letter-spacing:.14em;
     text-transform:uppercase;color:var(--muted);margin:14px 0 2px}
-  .sm-l{list-style:none;margin:0;padding:0}
-  .sm-l li{font-family:var(--mono);font-size:11px;color:var(--muted);
-    letter-spacing:.04em;line-height:1.75;padding:1px 0}
+  .sm-l{list-style:disc;margin:6px 0 0;padding:0 0 0 20px}
+  .sm-l li{font-family:var(--serif);font-size:14.5px;color:var(--ink);
+    line-height:1.6;padding:3px 0;margin:0}
+  .sm-l li code{font-family:var(--mono);font-size:.86em;color:var(--muted)}
   .prov{display:flex;flex-wrap:wrap;gap:0 6px;font-family:var(--mono);font-size:10.5px;
     color:var(--muted);margin-top:3px;letter-spacing:.02em}
   .prov span:last-child{white-space:nowrap}
@@ -194,6 +194,26 @@
   .figwrap{margin:8px 0 4px;overflow-x:auto}
   .figwrap svg{display:block}
 
+  /* table filter + pagination (Data table, interim table) */
+  .table-filter{margin:8px 0 6px}
+  .tf-ctrl{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;margin:8px 0 6px}
+  .tf-search{font-family:var(--mono);font-size:12px;padding:5px 9px;border:1px solid var(--hairline);
+    background:var(--paper);color:var(--ink);min-width:180px}
+  .tf-search:focus-visible{outline:2px solid var(--clinical);outline-offset:1px}
+  .chip-g{display:flex;flex-wrap:wrap;gap:6px}
+  .chip{font-family:var(--mono);font-size:11px;letter-spacing:.04em;padding:3px 10px;
+    border:1px solid var(--structural);background:var(--paper);color:var(--muted);cursor:pointer;border-radius:11px}
+  .chip:hover{color:var(--ink);border-color:var(--muted)}
+  .chip.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+  .chip:focus-visible{outline:2px solid var(--clinical);outline-offset:2px}
+  .tf-pager{display:flex;gap:16px;align-items:baseline;margin:8px 0 2px;
+    font-family:var(--mono);font-size:11.5px}
+  .tf-nav{font-family:var(--mono);font-size:11.5px;background:none;border:0;color:var(--clinical);
+    cursor:pointer;padding:2px 0;letter-spacing:.02em}
+  .tf-nav[disabled]{color:var(--structural);cursor:default}
+  .tf-nav:focus-visible{outline:2px solid var(--clinical);outline-offset:2px}
+  .tf-status{color:var(--muted)}
+
   .back{display:inline-block;margin-top:26px;font-family:var(--mono);font-size:12px;
     letter-spacing:.1em;text-transform:uppercase;color:var(--ink);text-decoration:none;
     border-bottom:1px solid var(--ink);padding-bottom:2px}
@@ -265,10 +285,12 @@
       some depth. If the wording redirects the computation entirely, the answer
       should never appear. These are different failures with different repairs.</p>
     <h3>When the model gets it wrong, was the answer captured or hijacked?</h3>
-    <p>Two failure shapes: in a <b>capture</b>, the everyday reading owns the
-      trajectory from the start and the clinical answer never enters the window.
-      In a <b>hijack</b>, the clinical answer forms at depth and is pushed out
-      near the end. Two counting rules, adopted July 14: the split is only
+    <p>Two failure shapes:</p>
+    <dl class="defs">
+      <div><dt><b>Capture</b></dt><dd>the everyday reading owns the trajectory from the start and the clinical answer never enters the window.</dd></div>
+      <div><dt><b>Hijack</b></dt><dd>the clinical answer forms at depth and is pushed out near the end.</dd></div>
+    </dl>
+    <p>Two counting rules, adopted July 14: the split is only
       scored on pairs whose clinical side is lens-readable (pairs where neither
       wording ever reads out are their own class), and formation requires two
       consecutive readable layers, so a one-layer blip does not count. Part 3
@@ -298,14 +320,12 @@
     <div class="fig" role="img" aria-label="Dot strip of formation layers for every measured pair, one row for clinical wording and one for patient wording, with counts of pairs whose answer never formed shown at the right edge." id="fig-form">
       <span class="pend">figure pending: the lens readouts have not loaded</span>
     </div>
-    <p class="cap" id="cap-form"></p>
 
     <h3>Capture versus hijack</h3>
     <p id="dd-tax-text"></p>
-    <div class="fig" role="img" aria-label="For each hijacked pair, a horizontal line from the layer where the clinical answer formed under patient wording to the output layer, where another word has won. Captures, where the answer never formed, have nothing to draw and are counted in the caption." id="fig-tax">
+    <div class="fig" role="img" aria-label="For each hijacked pair, a horizontal line from the layer where the clinical answer formed under patient wording to the output layer, where another word has won. Captures, where the answer never formed, have nothing to draw and are counted in the text above." id="fig-tax">
       <span class="pend">figure pending: the lens readouts have not loaded</span>
     </div>
-    <p class="cap" id="cap-tax"></p>
 
     <h3>The census, set by set</h3>
     <p>Every measured set, one row of squares per outcome class, one square per
@@ -395,7 +415,7 @@
     <p class="me-caption" id="forest-cap"></p>
 
     <details class="fold">
-      <summary>How confidence accumulated: each model's estimate, batch by batch (moved from methods, formerly Fig. 5)</summary>
+      <summary>How confidence accumulated: each model's estimate, batch by batch (moved from methods)</summary>
       <p style="font-size:15px;line-height:1.6">
         Each panel follows one model as it reads more phrase pairs. The red line is the
         average language penalty; the band around it starts wide and narrows as
@@ -448,7 +468,7 @@
       <ul class="sm-l">
         <li>Population: plain generated scenario batches only; steered, screened, imported, and re-traced rows are reported as a labeled sensitivity analysis in the statistics file.</li>
         <li>One record per (model, clinical phrase); re-traces collapse by majority vote.</li>
-        <li>Penalty intervals: phrase-level bootstrap after dedupe, percentile 95%, seed 7; the file also carries simultaneous (Bonferroni) intervals and batch- and topic-clustered sensitivity intervals.</li>
+        <li>Penalty intervals: phrase-level bootstrap after dedupe, percentile 95%, <code>seed 7</code>; the file also carries simultaneous (Bonferroni) intervals and batch- and topic-clustered sensitivity intervals.</li>
         <li>Downgrade rates: Clopper&ndash;Pearson exact 95%.</li>
         <li>Asymmetry: exact two-sided sign tests, Benjamini&ndash;Hochberg corrected within registration family; the merged eight-model correction stays in the file for comparison.</li>
         <li>Registration: four models pre-registered, four post-registration exploratory; departures are recorded in <a href="https://github.com/michaeldgreenphd/patientwords-engine/blob/claude/gemma-clinical-colloquial-interp-mavx04/docs/prereg_divergence_log.md">the divergence log in the engine repository</a>.</li>
@@ -483,6 +503,91 @@
   </section>
 
   <div class="conv-tip" id="conv-tip" aria-hidden="true"></div>
+  <script>
+  /* Shared: turn a populated data table into a filterable, paginated view.
+     opts: {pageSize, container, searchLabel, placeholder, pills:[{label,test(row)}]}.
+     The filter fold is inserted before `container` and the pager after it, so
+     both sit outside any horizontal-scroll wrapper. Pager hides itself at one page. */
+  function pwEnhanceTable(table, opts){
+    opts = opts || {};
+    if(!table || !table.tBodies || !table.tBodies[0]) return;
+    var pageSize = opts.pageSize || 15;
+    var container = opts.container || table;
+    var pills = opts.pills || [];
+    var allRows = [].slice.call(table.tBodies[0].rows);
+    if(allRows.length <= pageSize && !pills.length) return; // nothing to gain
+    var page = 0, query = '', active = {};
+
+    var det = document.createElement('details');
+    det.className = 'fold table-filter';
+    var sum = document.createElement('summary'); sum.textContent = 'Filter Data';
+    det.appendChild(sum);
+    var ctrl = document.createElement('div'); ctrl.className = 'tf-ctrl';
+    var input = document.createElement('input');
+    input.type = 'search'; input.className = 'tf-search';
+    input.placeholder = opts.placeholder || 'Search…';
+    input.setAttribute('aria-label', opts.searchLabel || 'Search table rows');
+    ctrl.appendChild(input);
+    if(pills.length){
+      var grp = document.createElement('div');
+      grp.className = 'chip-g'; grp.setAttribute('role','group');
+      grp.setAttribute('aria-label','Category filters');
+      pills.forEach(function(pill, pi){
+        var b = document.createElement('button');
+        b.type = 'button'; b.className = 'chip';
+        b.textContent = pill.label; b.setAttribute('aria-pressed','false');
+        b.addEventListener('click', function(){
+          active[pi] = !active[pi];
+          b.classList.toggle('on', active[pi]);
+          b.setAttribute('aria-pressed', active[pi] ? 'true' : 'false');
+          page = 0; render();
+        });
+        grp.appendChild(b);
+      });
+      ctrl.appendChild(grp);
+    }
+    det.appendChild(ctrl);
+    container.parentNode.insertBefore(det, container);
+
+    var pager = document.createElement('div'); pager.className = 'tf-pager';
+    var prev = document.createElement('button');
+    prev.type = 'button'; prev.className = 'tf-nav'; prev.textContent = '← Prev';
+    var status = document.createElement('span'); status.className = 'tf-status';
+    status.setAttribute('aria-live','polite');
+    var next = document.createElement('button');
+    next.type = 'button'; next.className = 'tf-nav'; next.textContent = 'Next →';
+    prev.addEventListener('click', function(){ if(page>0){ page--; render(); } });
+    next.addEventListener('click', function(){ page++; render(); });
+    pager.appendChild(prev); pager.appendChild(status); pager.appendChild(next);
+    container.parentNode.insertBefore(pager, container.nextSibling);
+
+    input.addEventListener('input', function(){ query = input.value.toLowerCase(); page = 0; render(); });
+
+    function ok(row){
+      if(query && row.textContent.toLowerCase().indexOf(query) === -1) return false;
+      for(var pi in active){ if(active[pi] && !pills[pi].test(row)) return false; }
+      return true;
+    }
+    function render(){
+      var shown = allRows.filter(ok);
+      var pages = Math.max(1, Math.ceil(shown.length / pageSize));
+      if(page > pages-1) page = pages-1;
+      if(page < 0) page = 0;
+      var start = page*pageSize, end = start+pageSize;
+      allRows.forEach(function(r){ r.style.display = 'none'; });
+      shown.slice(start, end).forEach(function(r){ r.style.display = ''; });
+      status.textContent = shown.length
+        ? ('rows ' + (start+1) + '–' + Math.min(end, shown.length) + ' of ' + shown.length
+           + (pages>1 ? (' · page ' + (page+1) + '/' + pages) : ''))
+        : 'no matching rows';
+      var multi = pages > 1;
+      prev.disabled = page <= 0; next.disabled = page >= pages-1;
+      prev.style.visibility = multi ? 'visible' : 'hidden';
+      next.style.visibility = multi ? 'visible' : 'hidden';
+    }
+    render();
+  }
+  </script>
   <script>
   (function(){
   function pwBatch(stem,short){
@@ -546,7 +651,7 @@
           pp(fin.mean_penalty) + ' percentage points at n=' + fin.n_phrases + '. Full values in the data table below.'});
         // zero hairline + y labels
         svg.appendChild(el('line', {x1: m.l, x2: W - m.r, y1: Y(0), y2: Y(0)},
-          'stroke:var(--structural);stroke-width:1'));
+          'stroke:var(--structural);stroke-width:.75;stroke-opacity:.5'));
         [0, -0.10].forEach(function(v){
           if (v < ymin) return;
           var t = el('text', {x: m.l - 5, y: Y(v) + 3.5, 'text-anchor': 'end'},
@@ -599,7 +704,7 @@
           hit.addEventListener('mouseleave', function(){ tip.style.display = 'none'; });
           svg.appendChild(hit);
           rows.push([id, pwBatch(p.through_batch,1), p.n_phrases, pp(p.mean_penalty),
-            '[' + pp(p.ci95[0]) + ', ' + pp(p.ci95[1]) + ']', p.downgrades, p.upgrades]);
+            '[' + pp(p.ci95[0]) + ', ' + pp(p.ci95[1]) + ']', p.downgrades, p.upgrades, (p === fin ? 1 : 0)]);
         });
         panel.appendChild(svg);
         panel.appendChild(lab);
@@ -621,15 +726,30 @@
           (allBelow ? ': every band ends below zero.' : '.');
         document.getElementById('conv-more').hidden = false;
       }
-      // data table (accessible view)
+      // data table (accessible view) — DOM rows so each carries filter tags
       var wrap = document.getElementById('conv-table-wrap');
       var tbl = document.createElement('table');
-      var thead = '<thead><tr><th scope="col">model</th><th scope="col">through batch (generated, UTC)</th>' +
+      tbl.innerHTML = '<thead><tr><th scope="col">model</th><th scope="col">through batch (generated, UTC)</th>' +
         '<th scope="col">n phrases</th><th scope="col">mean (pp)</th><th scope="col">95% CI (pp)</th>' +
         '<th scope="col">downgrades</th><th scope="col">upgrades</th></tr></thead>';
-      tbl.innerHTML = thead + '<tbody>' + rows.map(function(r){
-        return '<tr><td>' + r.join('</td><td>') + '</td></tr>'; }).join('') + '</tbody>';
+      var tb = document.createElement('tbody');
+      rows.forEach(function(r){
+        var tr = document.createElement('tr');
+        for (var ci = 0; ci < 7; ci++) { var c = document.createElement('td'); c.textContent = r[ci]; tr.appendChild(c); }
+        tr.setAttribute('data-model', r[0]);
+        if (r[7]) tr.setAttribute('data-final', '1');
+        tb.appendChild(tr);
+      });
+      tbl.appendChild(tb);
       wrap.appendChild(tbl);
+      pwEnhanceTable(tbl, {
+        pageSize: 15, container: wrap,
+        placeholder: 'Search model or batch…', searchLabel: 'Search convergence points',
+        pills: [
+          {label: 'gemma-2-2b', test: function(row){ return row.getAttribute('data-model') === 'gemma-2-2b'; }},
+          {label: 'Final estimate', test: function(row){ return row.getAttribute('data-final') === '1'; }}
+        ]
+      });
     }
   })();
   </script>
@@ -749,10 +869,6 @@
         });
         mount('fig-form',svg);
         var f=d.formation;
-        document.getElementById('cap-form').textContent=
-          'formation layer per pair (dot = one pair, jittered) · median '+f.clinical.median+' of '+(L-1)+
-          ' under clinical wording, '+f.patient.median+' under patient wording · never formed: '+
-          f.clinical_never+' of '+d.n_pairs+' clinical vs '+f.patient_never+' of '+d.n_pairs+' patient';
         document.getElementById('dd-form-text').textContent=
           'When the clinical answer forms at all, it forms late (median layer '+f.clinical.median+' of '+(L-1)+
           ') and patient wording barely moves that depth (median lag '+f.lag.median+' layers, n='+f.lag.n+
@@ -783,14 +899,9 @@
           svg.appendChild(txt(lx(l),base+13,'layer '+l,'#4b5563',9.5,l===0?'start':(l===L-1?'end':'middle')));
         });
         mount('fig-tax',svg);
-        var cap='hijacks only: the clinical answer formed (dot, median layer '+
-          ((tax.hijack&&tax.hijack.formed_at)?tax.hijack.formed_at.median:'?')+
-          ') and was displaced before the final layer · winner lock-in median layer '+
-          ((tax.hijack&&tax.hijack.lock_in)?tax.hijack.lock_in.median:'?')+
-          ' · captures ('+(tax.capture?tax.capture.n:0)+' pairs) have no line to draw: the answer never formed'+
-          (tax.unreadable?(' · '+tax.unreadable.n+' pairs are unreadable (neither wording ever reads out) and sit outside both classes'):'')+
-          (d.persistence_layers?(' · formation requires '+d.persistence_layers+' consecutive readable layers'):'');
-        // window check: does the capture-vs-hijack ordering survive narrower top-K windows?
+        // window check (moved off the removed caption into the narrative): does the
+        // capture-vs-hijack ordering survive narrower top-K windows?
+        var winNote='';
         var ws=d.window_sensitivity;
         if(ws){
           var parts=[],holds=true;
@@ -799,12 +910,12 @@
             parts.push('top-'+k+': '+ws[k].capture+' v '+ws[k].hijack);
             if(!(ws[k].capture>ws[k].hijack))holds=false;
           });
-          if(parts.length)cap+=' · window check ('+parts.join(', ')+'): capture '+
-            (holds?'exceeds':'does not always exceed')+' hijack at '+(holds?'every':'the top-8')+' window';
+          if(parts.length)winNote=' Window check ('+parts.join(', ')+'): capture '+
+            (holds?'exceeds':'does not always exceed')+' hijack at '+(holds?'every':'the top-8')+' window.';
         }
-        document.getElementById('cap-tax').textContent=cap;
         // capture-vs-hijack comparative computed from the live counts, never asserted
         var nc=tax.capture?tax.capture.n:0, nh=tax.hijack?tax.hijack.n:0;
+        var lockMed=(tax.hijack&&tax.hijack.lock_in)?tax.hijack.lock_in.median:null;
         var compare=(nc>nh)?
           ' Most classified failure here is capture, not hijack: the wording decides the computation early, even though the winning word is not locked in until late.':
           ((nh>nc)?' Most classified failure here is hijack: the answer forms and is displaced late.':'');
@@ -815,7 +926,7 @@
           nc+' captures, where the everyday reading owns the trajectory and the clinical answer never appears, against '+
           nh+' hijacks, where it forms around layer '+
           ((tax.hijack&&tax.hijack.formed_at)?tax.hijack.formed_at.median:'?')+
-          ' and is pushed out near the end.'+compare;
+          ' and is pushed out near the end'+(lockMed!=null?(', the winner locking in around layer '+lockMed):'')+'.'+compare+winNote;
       })();
 
       /* Fig 4: router table */
@@ -1022,6 +1133,9 @@
     ids.forEach(function(id){
       var p=per[id],m=meta[id]||{};
       var tr=document.createElement('tr');
+      tr.setAttribute('data-sig',(p.sign_test&&typeof p.sign_test.p_bh==='number'&&p.sign_test.p_bh<0.05)?'1':'0');
+      tr.setAttribute('data-reg',(p.registration==='pre-registered')?'pre':'post');
+      tr.setAttribute('data-graphs',m.graphs?'1':'0');
       function td(cls,txt){var c=document.createElement('td');if(cls)c.className=cls;c.textContent=txt;tr.appendChild(c);}
       var mc=document.createElement('td');mc.className='mono';
       mc.appendChild(document.createTextNode(m.label||id));
@@ -1070,6 +1184,16 @@
     document.getElementById('ev-cap').textContent=
       'dedupe: '+d.dedupe+' · downgrade-rate CI: '+d.ci_method_downgrade+' · sign tests two-sided, BH-corrected within registration family'+
       ((d.below_floor&&d.below_floor.length)?' · greyed models enter the comparison at '+(d.site_floor_n_phrases||30)+' measured phrases':'');
+    var evTable=document.getElementById('ev-table');
+    pwEnhanceTable(evTable, {
+      pageSize: 15, container: evTable.closest('.me-scroll') || evTable,
+      placeholder: 'Search models…', searchLabel: 'Search the interim table',
+      pills: [
+        {label: 'Significant asymmetry', test: function(r){ return r.getAttribute('data-sig') === '1'; }},
+        {label: 'Pre-registered', test: function(r){ return r.getAttribute('data-reg') === 'pre'; }},
+        {label: 'Circuit models', test: function(r){ return r.getAttribute('data-graphs') === '1'; }}
+      ]
+    });
   }
 })();
 </script>
