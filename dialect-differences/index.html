@@ -72,7 +72,7 @@
   .traced .tm b{color:var(--clinical);font-weight:600}
   .traced .tp{color:var(--muted)}
 
-  .dl-scroll{overflow-x:auto;margin:28px 0 8px}
+  .dl-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:28px 0 8px}
   .dl-scroll{background:
     linear-gradient(90deg,var(--paper) 35%,rgba(250,249,245,0)),
     linear-gradient(270deg,var(--paper) 35%,rgba(250,249,245,0)) 100% 0,
@@ -95,7 +95,7 @@
   .dl .framing{white-space:nowrap;font-weight:600}
   .dl tr.base .framing{color:var(--clinical)}
   .dl .prompt{font-family:var(--serif);font-style:italic;font-size:14.5px;color:var(--ink);
-    min-width:280px}
+    white-space:normal;min-width:240px}
   .dl .prompt .kept{font-style:normal;color:var(--clinical);font-weight:600}
   .dl .pbar{position:relative;display:block;width:150px;height:11px;background:none;border:1px solid var(--hairline);box-sizing:border-box;
     margin-top:3px}
@@ -129,7 +129,8 @@
     margin:4px 0 10px}
   .dlm th,.dlm td{white-space:nowrap}
   .dlm .term{font-weight:600}
-  .dlm .tgt{display:block;color:var(--muted);font-weight:400;font-size:10.5px}
+  /* target inline beside the term (was a forced line break) to halve the term column's height */
+  .dlm .tgt{color:var(--muted);font-weight:400;font-size:10.5px;margin-left:6px;white-space:nowrap}
   .dlm .flipmark{color:var(--penalty);margin-left:3px}
   .functag{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.04em;
     color:var(--muted);white-space:nowrap;margin-top:1px}
@@ -145,13 +146,24 @@
   .pending-mark{display:block;width:9px;height:9px;background:var(--structural);margin:0 auto 10px}
   .embed-caption{font-family:var(--mono);font-size:11px;color:var(--muted);
     letter-spacing:.04em;margin:0 0 26px}
-  .embed-shell{position:relative;margin:26px 0 10px}
+  /* the full-screen button sits in the whitespace above the graph, never over its title */
+  .embed-shell{position:relative;margin:34px 0 10px}
   .embed-shell .embed{margin:0;overflow:hidden}
   .embed-shell .zframe{transform-origin:top left}
-  .zoom-btn{position:absolute;top:-1px;right:-1px;z-index:6;font-family:var(--mono);
+  .zoom-btn{position:absolute;top:-28px;right:0;z-index:6;font-family:var(--mono);
     font-size:10px;letter-spacing:.12em;text-transform:uppercase;background:#fff;
     border:1px solid var(--hairline);color:var(--muted);padding:5px 9px;cursor:pointer}
   .zoom-btn:hover{color:var(--ink);border-color:var(--ink)}
+  /* trace metadata collapsed by default so the figure stays above the fold on mobile */
+  .trace-fold{margin:2px 0 12px}
+  .trace-fold>summary{font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--muted);
+    cursor:pointer;list-style:none;padding:2px 0}
+  .trace-fold>summary::-webkit-details-marker{display:none}
+  .trace-fold>summary::before{content:'\25B8\00a0'}
+  .trace-fold[open]>summary::before{content:'\25BE\00a0'}
+  .trace-fold>summary:hover{color:var(--ink)}
+  .trace-fold>summary:focus-visible{outline:2px solid var(--clinical);outline-offset:2px}
+  .trace-fold .traced{margin-top:6px}
   .embed-shell.fs-fallback{position:fixed;inset:0;z-index:60;background:#fff;
     margin:0;overflow:hidden}
   .embed-shell.fs-fallback .embed{max-height:100vh;height:100vh;border:0;overflow:auto}
@@ -210,15 +222,18 @@
   <hr class="rule-fine">
 </header>
 <main id="main">
-  <p class="dateline">Fig. 3 <span class="mode">· dialect & register sweep · live render · traced July 16 and 17, 2026</span></p>
+  <p class="dateline"><span class="mode">dialect & register sweep · live render · traced July 16 and 17, 2026</span></p>
   <h1>Dialect differences</h1>
   <p class="subtitle">The clinical term held fixed while the surrounding sentence shifts across eight LLM-approximated dialect and register framings per term.</p>
   <p class="explainer">The clinical term stays fixed while the sentence around it is re-traced across dialect and register variants, so any shift comes from framing. The framings are Claude-written approximations: each column label is the instruction given to the generating model, not a recording of how any community speaks, and no speaker of any variety reviewed them. The sweep below holds a set of clinical terms fixed, one per row, and re-traces each across several framings; the matrix reports the exact counts. A minority of framings move the top word.</p>
-  <p class="traced" data-mode="dialect" data-traced="gemma-2-2b">
-    <span class="tm"><b>model:</b> gemma-2-2b · <b>features:</b> Gemma Scope transcoders (16k) · <b>graphs:</b> 180 (20 baselines + 160 framings)</span><br>
-    <span class="tm"><b>held fixed:</b> clinical terms from the hand-measured dataset · <b>framings:</b> dialect + register variants per term</span><br>
-    <span class="tp">framings authored by claude-sonnet-5 ($0.413, 160 accepted / 5 rejected) · traced via Neuronpedia</span>
-  </p>
+  <details class="trace-fold">
+    <summary>Trace details</summary>
+    <p class="traced" data-mode="dialect" data-traced="gemma-2-2b">
+      <span class="tm"><b>model:</b> gemma-2-2b · <b>features:</b> Gemma Scope transcoders (16k) · <b>graphs:</b> 180 (20 baselines + 160 framings)</span><br>
+      <span class="tm"><b>held fixed:</b> clinical terms from the hand-measured dataset · <b>framings:</b> dialect + register variants per term</span><br>
+      <span class="tp">framings authored by claude-sonnet-5 ($0.413, 160 accepted / 5 rejected) · traced via Neuronpedia</span>
+    </p>
+  </details>
 
   <section id="dl-matrix" hidden>
     <p class="view-head">Change in p(target), by term and framing</p>
@@ -293,7 +308,7 @@
   <details class="meth">
     <summary>The register ladder: one clinical term held fixed while the sentence slides from formal to casual</summary>
   <p class="traced" data-mode="dialect" data-traced="gemma-2-2b">
-    <span class="tm"><b>live trace (dose-response ladder):</b> gemma-2-2b · gemma scope transcoders</span>
+    <span class="tm"><b>live trace (dose-response ladder):</b> gemma-2-2b</span>
     <span class="tp">hosted circuit-tracer via Neuronpedia · traced July 8, 2026 · “dyspepsia” held
       verbatim across five register rungs · next-token probabilities read directly
       from the trace</span>
