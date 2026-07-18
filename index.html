@@ -147,11 +147,12 @@
   .sp-table th{font-family:var(--mono);font-size:10.5px;font-weight:600;letter-spacing:.14em;
     text-transform:uppercase;color:var(--muted);text-align:left;
     padding:0 18px 8px 0;border-bottom:1px solid var(--ink)}
-  .sp-table th.sp-w-idx{width:86px}
+  .sp-table th.sp-w-idx{width:112px}
   .sp-table td{padding:14px 18px 14px 0;border-bottom:1px solid var(--hairline);vertical-align:top}
   .sp-table tr:last-child td{border-bottom:1px solid var(--ink)}
   .sp-idx{font-family:var(--mono);font-size:11px;color:var(--muted);white-space:nowrap}
-  .sp-target{display:block;font-family:var(--mono);font-size:10.5px;color:var(--muted);margin-top:4px}
+  .sp-target{font-family:var(--mono);font-size:10.5px;color:var(--muted)}
+  .sp-target::before{content:'· ';color:var(--muted)}
   .sp-side{display:none}
   .sp-prompt{font-size:15.5px;line-height:1.5;margin:0}
   .sp-p .sp-prompt{color:var(--patient)}
@@ -217,15 +218,18 @@
     .sp-table{min-width:0}
     .sp-table thead{display:none}
     .sp-table,.sp-table tbody,.sp-table tr,.sp-table td{display:block}
-    .sp-table td{border:0;padding:6px 0}
+    .sp-table td{border:0;padding:5px 0}
     .sp-table tr{border-bottom:1px solid var(--hairline);padding:14px 0}
     .sp-table tr:last-child{border-bottom:1px solid var(--ink)}
+    /* label hugs its sentence so patient/clinical each read as one block */
     .sp-side{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.14em;
-      text-transform:uppercase;color:var(--muted);margin-bottom:2px}
+      text-transform:uppercase;color:var(--muted);margin-bottom:1px}
+    .sp-obs{margin-top:3px}
     .fig-media{order:2}
     .fig-body{order:1}
     .fig p{max-width:none}
     p.lede{font-size:17px}
+    .sv-asym svg{min-width:var(--sv-natural)}
   }
   @media print{
     html,body{background:#fff;color:#000}
@@ -245,7 +249,19 @@
   .fold>summary:hover{color:var(--ink)}
   .fold>summary:focus-visible{outline:2px solid var(--clinical);outline-offset:2px}
   .fold[open]>summary{color:var(--ink);margin-bottom:6px}
-  .sv-asym{margin:22px 0 0;max-width:680px}
+  /* trace metadata collapsed by default so figures stay above the fold on mobile */
+  .trace-fold{margin:8px 0 2px}
+  .trace-fold>summary{font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--muted);
+    cursor:pointer;list-style:none;padding:2px 0}
+  .trace-fold>summary::-webkit-details-marker{display:none}
+  .trace-fold>summary::before{content:'\25B8\00a0'}
+  .trace-fold[open]>summary::before{content:'\25BE\00a0'}
+  .trace-fold>summary:hover{color:var(--ink)}
+  .trace-fold>summary:focus-visible{outline:2px solid var(--clinical);outline-offset:2px}
+  .trace-fold .traced{margin-top:6px}
+  .stat .pen{color:var(--penalty)}
+  /* safety-view chart swipes horizontally on narrow screens instead of compressing labels */
+  .sv-asym{margin:22px 0 0;max-width:680px;overflow-x:auto;-webkit-overflow-scrolling:touch}
   .sv-asym svg{width:100%;height:auto;display:block}
   .safety-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin:20px 0 8px}
   .safety-card{border:1px solid var(--hairline);background:#fff;padding:14px 16px}
@@ -331,7 +347,6 @@
 
   <div class="section-head">
     <h2>Four comparison engines</h2>
-    <span class="count">Figs. 1–4</span>
   </div>
 
   <a class="fig" href="wording-differences/#word">
@@ -343,13 +358,16 @@
       <figcaption>live trace</figcaption>
     </figure>
     <div class="fig-body">
-      <p class="fig-no">Fig. 1 <span class="mode">· wording: one-word swap</span></p>
+      <p class="fig-no">Wording <span class="mode">· one-word swap</span></p>
       <h3>Swap the word</h3>
       <p>One phrase swapped — “asthma flares” vs. “chest gets all tight” — as two stacked graphs. The numbers are in the demo above; the trace shows where the probability goes.</p>
-      <p class="traced" data-mode="2panel" data-traced="gemma-2-2b">
-        <span class="tm"><b>live trace:</b> gemma-2-2b</span>
-        <span class="tp">circuit-tracer via Neuronpedia · traced July 7, 2026 · scenario 85 of the simulated series</span>
-      </p>
+      <details class="trace-fold">
+        <summary>Trace details</summary>
+        <p class="traced" data-mode="2panel" data-traced="gemma-2-2b">
+          <span class="tm"><b>live trace:</b> gemma-2-2b</span>
+          <span class="tp">circuit-tracer via Neuronpedia · traced July 7, 2026 · scenario 85 of the simulated series</span>
+        </p>
+      </details>
       <span class="open">Open the comparison →</span>
     </div>
   </a>
@@ -363,29 +381,35 @@
       <figcaption>live render · simulated scenario</figcaption>
     </figure>
     <div class="fig-body">
-      <p class="fig-no">Fig. 2 <span class="mode">· wording: grammar × lexicon</span></p>
+      <p class="fig-no">Wording <span class="mode">· grammar × lexicon</span></p>
       <h3>Swap the grammar</h3>
       <p>A 2×2 grid crossing wording (patient vs. medical) with grammar (standard vs. nonstandard). From our analysis, changing the grammar alone shifts toward the everyday continuation, even when the medical word stays (Box B).</p>
       <span class="stat penalty">Variety shift Δ: +11% and +13% toward the everyday continuation · Register shift Δ: +4–5%</span>
-      <p class="traced" data-mode="4quadrant" data-traced="gemma-2-2b">
-        <span class="tm"><b>traced model:</b> gemma-2-2b · gemma scope transcoders</span>
-        <span class="tp">hosted circuit-tracer via Neuronpedia</span>
-      </p>
+      <details class="trace-fold">
+        <summary>Trace details</summary>
+        <p class="traced" data-mode="4quadrant" data-traced="gemma-2-2b">
+          <span class="tm"><b>traced model:</b> gemma-2-2b</span>
+          <span class="tp">hosted circuit-tracer via Neuronpedia</span>
+        </p>
+      </details>
       <span class="open">Open the matrix →</span>
     </div>
   </a>
 
   <figure class="specimen" id="dialect-specimen" hidden>
     <figcaption class="spec-head">
-      <p class="fig-no">Fig. 3 <span class="mode">· dialect · live specimen</span></p>
+      <p class="fig-no">Dialect <span class="mode">· live specimen</span></p>
       <h3>Same medical situation. Different framing. Different prediction.</h3>
     </figcaption>
     <div class="spec-rows" id="spec-rows"></div>
     <p class="spec-note" id="spec-note"></p>
-    <p class="traced" data-mode="dialect" data-traced="gemma-2-2b" style="padding:0 18px">
-      <span class="tm"><b>traced model:</b> gemma-2-2b</span>
-      <span class="tp">from the <a href="https://github.com/michaeldgreenphd/patientwords-engine/blob/main/data/simulated/dialects_20260708T120729Z.json">dialect framings batch of July 8, 2026</a></span>
-    </p>
+    <details class="trace-fold" style="padding:0 18px">
+      <summary>Trace details</summary>
+      <p class="traced" data-mode="dialect" data-traced="gemma-2-2b">
+        <span class="tm"><b>traced model:</b> gemma-2-2b</span>
+        <span class="tp">from the <a href="https://github.com/michaeldgreenphd/patientwords-engine/blob/main/data/simulated/dialects_20260708T120729Z.json">dialect framings batch of July 8, 2026</a></span>
+      </p>
+    </details>
     <a class="open" href="dialect-differences/" style="margin:0 18px 14px;display:inline-block">Open the dialect study →</a>
   </figure>
 
@@ -398,14 +422,17 @@
       <figcaption>live trace</figcaption>
     </figure>
     <div class="fig-body">
-      <p class="fig-no">Fig. 4 <span class="mode">· translation recovery</span></p>
+      <p class="fig-no">Translation <span class="mode">· recovery</span></p>
       <h3>Translation</h3>
       <p>An LLM rewrites the patient sentence into clinical terms, and the rewrite is evaluated. The clinical features and the target probability often both come back.</p>
       <span class="stat recovery">Recovered target probability: 0.45 after translation (clinical baseline 0.26) · July 7 trace</span>
-      <p class="traced" data-mode="translation" data-traced="gemma-2-2b">
-        <span class="tm"><b>live trace:</b> gemma-2-2b · gemma scope transcoders</span>
-        <span class="tp">hosted circuit-tracer via Neuronpedia · traced July 7, 2026 · phrase 17 of the reviewed downgrade set (predictions that fell to a lower care tier)</span>
-      </p>
+      <details class="trace-fold">
+        <summary>Trace details</summary>
+        <p class="traced" data-mode="translation" data-traced="gemma-2-2b">
+          <span class="tm"><b>live trace:</b> gemma-2-2b</span>
+          <span class="tp">hosted circuit-tracer via Neuronpedia · traced July 7, 2026 · phrase 17 of the reviewed downgrade set (predictions that fell to a lower care tier)</span>
+        </p>
+      </details>
       <span class="open">Open the mitigation chain →</span>
     </div>
   </a>
@@ -427,11 +454,14 @@
       <p class="fig-no">Sim series <span class="mode">· generated pairs · simulated data</span></p>
       <h3>Simulated Scenarios</h3>
       <p>Claude writes new patient-vs-clinical pairs in the hand-built dataset’s format — one term swapped per pair — and LLM validators accept or reject each. Accepted pairs are traced on gemma-2-2b and published with the generator’s rationale and cost.</p>
-      <span class="stat penalty" id="sim-stat" hidden></span>
-      <p class="traced" data-mode="simulated" data-traced="gemma-2-2b">
-        <span class="tm"><b>traced model:</b> gemma-2-2b · gemma scope transcoders</span>
-        <span class="tp">simulated data · generating model and cost in the per-batch sidecar</span>
-      </p>
+      <span class="stat" id="sim-stat" hidden></span>
+      <details class="trace-fold">
+        <summary>Trace details</summary>
+        <p class="traced" data-mode="simulated" data-traced="gemma-2-2b">
+          <span class="tm"><b>traced model:</b> gemma-2-2b</span>
+          <span class="tp">simulated data · generating model and cost in the per-batch sidecar</span>
+        </p>
+      </details>
       <span class="open">Open the simulated series →</span>
     </div>
   </a>
@@ -452,10 +482,13 @@
       <h2>Phrase dataset</h2>
       <span class="count" id="sp-count"></span>
     </div>
-    <p class="traced">
-      <span class="tm"><b>measured on:</b> <span id="sp-model">gemma-2-2b · gemma scope transcoders</span></span>
-      <span class="tp">→ observed next token · p = observed next-token probability · via the neuronpedia circuit tracer</span>
-    </p>
+    <details class="trace-fold">
+      <summary>Measurement details</summary>
+      <p class="traced">
+        <span class="tm"><b>measured on:</b> <span id="sp-model">gemma-2-2b · gemma scope transcoders</span></span>
+        <span class="tp">→ observed next token · p = observed next-token probability · via the neuronpedia circuit tracer</span>
+      </p>
+    </details>
     <details class="fold">
       <summary>The five pairs with the largest observed effect, from the hand-built set.</summary>
     <div class="sp-scroll">
@@ -484,7 +517,7 @@
   </section>
 
   <div class="endnote">
-    <p>Figs. 1–4, the simulated scenarios, and the phrase-dataset measurements are gemma-2-2b traces.</p>
+    <p>The comparison figures above, the simulated scenarios, and the phrase-dataset measurements are gemma-2-2b traces.</p>
     <p>SIMULATED DATA: the sentence pairs measured across this site are written by an LLM and checked automatically. The scenarios are simulated; the testing is real. The phrase dataset is the exception: hand-built from real patient language and measured by hand.</p>
     <footer>
       Built with the <a href="https://github.com/michaeldgreenphd/patientwords-engine">patientwords-engine</a> pipeline
@@ -625,7 +658,7 @@
         if(pr.target_clinical_token!=null){
           var t=document.createElement('span');
           t.className='sp-target';
-          t.textContent='target:'+pr.target_clinical_token;
+          t.textContent='target: '+pr.target_clinical_token;
           idx.appendChild(t);
         }
         tr.appendChild(idx);
@@ -676,6 +709,10 @@
           var H2=base+maxLen+46;
           var svg2=sel('svg',{viewBox:'0 0 '+W2+' '+H2,role:'img',
             'aria-label':'For every measured model, more answers move down the care ladder than up when the wording turns colloquial.'});
+          // record the chart's natural width; on phones (media query below) the
+          // svg holds this width and the .sv-asym wrapper swipes horizontally
+          // instead of squeezing the labels. Desktop keeps its fit-to-column look.
+          svg2.style.setProperty('--sv-natural',W2+'px');
           svg2.appendChild(sel('line',{x1:6,y1:base,x2:W2-6,y2:base,stroke:'#dcdad2','stroke-width':1}));
           ams.forEach(function(m,i){
             var d=pmd[m],x0=i*slot+slot/2;
@@ -735,14 +772,24 @@
         return !(s.screening&&s.screening.status==='screened_out');
       });
       var flips=measured.filter(function(s){return s.flipped;}).length;
-      var text='Top prediction flipped in '+flips+' of '+measured.length+' measured pairs';
+      // paragraph text stays default ink; red highlights only the data points
+      // (the penalty and the flip count) so the sentence doesn't read as one alarm.
+      stat.className='stat';
+      stat.textContent='';
+      function pen(t){var s=document.createElement('span');s.className='pen';s.textContent=t;return s;}
+      function txt(t){return document.createTextNode(t);}
       if(scored.length){
         var mean=scored.reduce(function(a,s){return a+s.language_penalty;},0)/scored.length;
-        text='Mean Language Penalty: '+(mean>0?'+':'−')+Math.abs(mean*100).toFixed(0)
-          +'% across '+scored.length+' scored pairs · top prediction flipped in '
-          +flips+' of '+measured.length+' measured';
+        stat.appendChild(txt('Mean Language Penalty: '));
+        stat.appendChild(pen((mean>0?'+':'−')+Math.abs(mean*100).toFixed(0)+'%'));
+        stat.appendChild(txt(' across '+scored.length+' scored pairs · top prediction flipped in '));
+        stat.appendChild(pen(flips+' of '+measured.length));
+        stat.appendChild(txt(' measured'));
+      }else{
+        stat.appendChild(txt('Top prediction flipped in '));
+        stat.appendChild(pen(flips+' of '+measured.length));
+        stat.appendChild(txt(' measured pairs'));
       }
-      stat.textContent=text;
       stat.hidden=false;
     })
     .catch(function(){});
@@ -810,6 +857,19 @@
       }).catch(function(){});
     document.getElementById('dialect-specimen').hidden=false;
   }).catch(function(){});
+})();
+(function(){
+  // The four comparison figures are whole-card links, so a trace-fold summary
+  // sits inside an <a>. Toggle the fold on click/Enter without letting the click
+  // bubble up and navigate the card. Folds outside a link keep native behavior.
+  document.querySelectorAll('a.fig .trace-fold>summary').forEach(function(sum){
+    sum.addEventListener('click',function(e){
+      e.preventDefault();
+      e.stopPropagation();
+      var d=sum.parentNode;
+      d.open=!d.open;
+    });
+  });
 })();
 </script>
 <script>
