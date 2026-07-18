@@ -883,11 +883,11 @@
     if(!scored.length)return;
     var mean=scored.reduce(function(a,s){return a+s.language_penalty;},0)/scored.length;
     el.textContent='';
-    el.appendChild(document.createTextNode('One of the largest cases. Across all '+scored.length+' scored pairs the average move is '));
-    var b1=document.createElement('b');b1.textContent=(mean>0?'+':'−')+Math.abs(mean*100).toFixed(0)+'%';el.appendChild(b1);
+    el.appendChild(document.createTextNode('One of the largest cases. Across all '+scored.length+' scored pairs the average signed move is '));
+    var b1=document.createElement('b');b1.textContent=(mean>0?'+':'−')+Math.abs(mean*100).toFixed(0)+' pp';el.appendChild(b1);
     var floor=prov&&prov.paraphrase_robustness&&prov.paraphrase_robustness.mean_abs_delta_vs_baseline;
     if(typeof floor==='number'){
-      el.appendChild(document.createTextNode(', and meaning-preserving rewording alone shifts a single measurement by ±'));
+      el.appendChild(document.createTextNode('; a single measurement is itself noisy — meaning-preserving rewording alone shifts it by ±'));
       var b2=document.createElement('b');b2.textContent=(floor*100).toFixed(1)+' pp';el.appendChild(b2);
     }
     el.appendChild(document.createTextNode('.'));
