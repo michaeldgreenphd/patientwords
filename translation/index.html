@@ -239,6 +239,7 @@
 
   <section id="tx-scale" hidden>
     <h2>At scale</h2>
+    <p class="explainer" id="tx-scale-finding"></p>
     <p class="explainer" id="tx-scale-text"></p>
     <div class="txs-wrap"><table class="txs" id="tx-scale-table" aria-describedby="tx-scale-cap">
       <thead><tr>
@@ -330,6 +331,18 @@
           td('num',String(s.top_lost));
           body.appendChild(tr);
         });
+        var base=per['gemma-2-2b'];
+        var others=ids.filter(function(id){return id!=='gemma-2-2b';});
+        if(base&&others.length){
+          var oParts=others.map(function(id){return id+' '+pp(per[id].mean_recovery);});
+          document.getElementById('tx-scale-finding').textContent=
+            'Read across the corpus, the recovery is uneven. On the base model gemma-2-2b it is strong ('+
+            pp(base.mean_recovery)+', '+Math.round(base.share_recovery_positive*100)+
+            '% of phrases helped, '+base.top_restored+' top predictions restored and '+base.top_lost+
+            ' lost). On the larger instruction-tuned models it is weak and uneven ('+oParts.join(', ')+
+            ') — so the recovery seen on the curated downgrade set holds at scale for gemma-2-2b, yet '+
+            'does not generalize uniformly across models.';
+        }
         document.getElementById('tx-scale-text').textContent=
           'The same LLM translation, applied to every measured phrase ('+maxN+
           ' so far) and scored by next-word probability on each model. Mean recovery is what the '+
