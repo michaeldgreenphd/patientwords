@@ -369,10 +369,9 @@
         var g=per['gemma-2-2b'];
         if(g&&typeof g.mean_recovery==='number'){
           var cav=document.getElementById('tx-lead-caveat');
-          cav.textContent='That 41% is one of the hardest cases. Across the exploratory at-scale run ('
+          cav.textContent='That 41% is one of the hardest cases. At scale ('
             +g.n+' cases) translation lifts the clinical answer’s probability by a mean of '+pp(g.mean_recovery)
-            +(typeof g.median_recovery==='number'?' (median '+pp(g.median_recovery)+')':'')
-            +', positive in '+Math.round(g.share_recovery_positive*100)+'% of them.';
+            +(typeof g.median_recovery==='number'?' (median '+pp(g.median_recovery)+')':'')+'.';
           cav.hidden=false;
         }
         document.getElementById('tx-scale').hidden=false;
