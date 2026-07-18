@@ -114,16 +114,17 @@
   .flow-txt{font-size:16.5px;font-style:italic}
   .flow-txt .chg{border-bottom:2px solid #0f766e;font-style:normal}
   .flow-txt .tgt{color:#0f766e;font-weight:700;font-style:normal;font-family:var(--mono);font-size:14px}
-  .tx-g{display:grid;grid-template-columns:repeat(auto-fill,minmax(255px,1fr));gap:8px;margin:12px 0 4px;align-items:start}
-  .tx{position:relative;border:1px solid var(--hairline);background:#fff;perspective:700px}
-  .tx.rec{border-left:3px solid #0f766e}
-  .tx.unrec{border-left:3px solid #9aa1ad}
-  .tx.wors{border-left:3px solid #b45309}
+  /* patch-holds cards de-boxed: a single color-coded top rule per outcome; grid gap separates them */
+  .tx-g{display:grid;grid-template-columns:repeat(auto-fill,minmax(255px,1fr));gap:16px 22px;margin:12px 0 4px;align-items:start}
+  .tx{position:relative;background:none;border:0;border-top:3px solid var(--hairline);perspective:700px}
+  .tx.rec{border-top-color:#0f766e}
+  .tx.unrec{border-top-color:#9aa1ad}
+  .tx.wors{border-top-color:#b45309}
   .tx-inner{display:grid;position:relative;transform-style:preserve-3d;transition:transform .45s cubic-bezier(.2,.7,.3,1)}
   .tx.flipped .tx-inner{transform:rotateY(180deg)}
   @media (prefers-reduced-motion:reduce){.tx-inner{transition:none}}
   .tx-face{grid-area:1/1;backface-visibility:hidden;-webkit-backface-visibility:hidden;
-    padding:9px 30px 9px 12px;min-width:0}
+    padding:9px 30px 9px 2px;min-width:0}
   /* only the showing face sets the card height: compact front, roomy back */
   .tx:not(.flipped) .tx-back{position:absolute;inset:0}
   .tx.flipped .tx-front{position:absolute;inset:0;pointer-events:none}
@@ -210,7 +211,7 @@
   <hr class="rule-fine">
 </header>
 <main id="main">
-  <p class="dateline">Fig. 4 <span class="mode">· translation recovery · live trace · traced July 7, 2026 · re-traced July 9, 2026</span></p>
+  <p class="dateline"><span class="mode">translation recovery · live trace · traced July 7, 2026 · re-traced July 9, 2026</span></p>
   <h1>Translation</h1>
   <p class="subtitle">Translating the patient sentence back into clinical terms restores the prediction in 8 of the 20 hardest cases.</p>
   <p class="explainer">The mitigation: an LLM rewrites the patient sentence in standard terms, and that rewrite is traced directly. In the cases translation fixes, the clinical features reappear and the target probability recovers; in 7 of the 20 it changes nothing, and 3 rewrites made the prediction worse.</p>
@@ -266,7 +267,7 @@
   <details class="meth" id="trace-fold">
     <summary>View the live three-panel trace (clinical / patient / translated)</summary>
   <p class="traced" data-mode="translation" data-traced="gemma-2-2b">
-    <span class="tm"><b>live trace:</b> gemma-2-2b · gemma scope transcoders</span>
+    <span class="tm"><b>live trace:</b> gemma-2-2b</span>
     <span class="tp" id="fold-meta">hosted circuit-tracer via Neuronpedia · re-traced July 9, 2026 · phrase 17 of the
       reviewed downgrade set (predictions that fell to a lower care tier), three panels (clinical / patient / LLM-translated)</span>
   </p>
@@ -554,7 +555,7 @@
       function ys(f){return Y0-f*(Y0-Y1);}
       [0,0.5,1].forEach(function(f){
         svg.appendChild(sv('line',{x1:X0-4,y1:ys(f),x2:X1,y2:ys(f),
-          'stroke-dasharray':f===0.5?'2 3':'',
+          'stroke-dasharray':'2 3',
           style:'stroke:var(--hairline);stroke-width:1'}));
         var yl=sv('text',{x:X0-8,y:ys(f)+3.5,'text-anchor':'end',
           style:'font:10px var(--mono);fill:var(--muted)'});
@@ -593,11 +594,14 @@
         var l=el('span',null,pair[0]);
         l.style.cssText='font:12px ui-monospace,monospace;min-width:14ch;text-align:right';
         row.appendChild(l);
-        var track=el('div');track.style.cssText='flex:1;height:13px;border:1px solid var(--hairline)';
+        var isPlacebo=pair[0].indexOf('random')>=0;
+        // placebo control recedes: a faint solid grey fill, no outline; the real
+        // arms keep an outlined track with a teal recovery fill
+        var track=el('div');track.style.cssText='flex:1;height:13px;'+(isPlacebo?'background:#e5e5e5':'border:1px solid var(--hairline)');
         var v=pair[1];
         if(v&&typeof v.recovered==='number'){
           var fill=el('div');
-          fill.style.cssText='height:100%;width:'+(v.recovered/v.n*100)+'%;background:'+(pair[0].indexOf('random')>=0?'#9aa1ad':'#0f766e');
+          fill.style.cssText='height:100%;width:'+(v.recovered/v.n*100)+'%;background:'+(isPlacebo?'#9aa1ad':'#0f766e');
           track.appendChild(fill);row.appendChild(track);
           row.appendChild(el('span',null,v.recovered+'/'+v.n));
         }else{
