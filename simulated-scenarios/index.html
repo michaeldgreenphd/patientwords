@@ -137,7 +137,29 @@
     background:#fff;border:1px solid var(--hairline);padding:7px 10px;min-width:34ch}
   .sum-controls input:focus{border-color:var(--clinical)}
   .sum-controls input:focus-visible{outline:2px solid var(--clinical);outline-offset:2px}
-  .sum-chips{display:flex;flex-direction:column;gap:8px;margin:22px 0 0}
+  .sum-chips{display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px;margin:22px 0 0}
+  /* compact filter dropdowns (replacing the pill arrays) */
+  .sel-g{display:flex;align-items:center;gap:6px}
+  .sel-lbl{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  .sum-sel{font-family:var(--mono);font-size:12px;color:var(--ink);background:#fff;
+    border:1px solid var(--hairline);padding:5px 8px;cursor:pointer;border-radius:2px;max-width:46ch}
+  .sum-sel:hover{border-color:var(--muted)}
+  .sum-sel:focus-visible{outline:2px solid var(--clinical);outline-offset:2px}
+  /* generation log: minimalist borderless table inside a light fold */
+  details.gen-det{margin:4px 0 6px}
+  details.gen-det>summary{font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--muted);
+    cursor:pointer;list-style:none;padding:2px 0}
+  details.gen-det>summary::-webkit-details-marker{display:none}
+  details.gen-det>summary::before{content:'\25B8\00a0'}
+  details.gen-det[open]>summary::before{content:'\25BE\00a0'}
+  details.gen-det>summary:hover{color:var(--ink)}
+  details.gen-det>summary:focus-visible{outline:2px solid var(--clinical);outline-offset:2px}
+  .gen-log{border-collapse:collapse;width:100%;margin:8px 0 4px;font-family:var(--mono);font-size:11.5px}
+  .gen-log th{text-align:left;color:var(--muted);font-weight:600;letter-spacing:.08em;text-transform:uppercase;
+    font-size:9.5px;padding:0 14px 6px 0;border-bottom:1px solid var(--hairline);white-space:nowrap}
+  .gen-log th.num,.gen-log td.num{text-align:right}
+  .gen-log td{padding:4px 14px 4px 0;color:var(--ink);border:0;white-space:nowrap}
+  .gen-log-note{font-family:var(--mono);font-size:10.5px;color:var(--muted);margin:5px 0 0;white-space:normal}
   .chip-g{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
   .chip-lbl{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;
     color:var(--muted);margin-right:4px;min-width:74px}
@@ -249,8 +271,14 @@
   .kx .kx-nums .pen{color:var(--penalty)}
   .kx .kx-steer{font-size:13.5px;color:var(--muted);margin:6px 0 0}
   .kx .kx-steer b{color:var(--clinical)}
-  .rx-g{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:8px;margin:10px 0 4px}
-  .rx{border:1px solid var(--hairline);background:#fff;padding:10px 12px}
+  /* advice swaps: de-boxed — a clean 2-col grid; a hairline divides the columns */
+  .rx-g{display:grid;grid-template-columns:1fr 1fr;gap:14px 0;margin:12px 0 4px}
+  .rx{border:0;background:none;padding:8px 0}
+  .rx:nth-child(odd){padding-right:28px}
+  .rx:nth-child(even){padding-left:28px;border-left:1px solid var(--hairline)}
+  @media(max-width:620px){.rx-g{grid-template-columns:1fr}
+    .rx:nth-child(odd){padding-right:0}
+    .rx:nth-child(even){padding-left:0;border-left:0}}
   .rx .rx-swap{font-family:var(--mono);font-size:12.5px;margin:0 0 6px}
   .rx .rx-arrow{color:var(--muted)}
   .rx .rx-c{color:var(--clinical);font-weight:600}
@@ -618,25 +646,34 @@
       document.getElementById('sim-traced').hidden=false;
 
       var prov=document.getElementById('sim-provenance');
-      batches.forEach(function(b,i){
-        var gen=b.generated||{};
-        var when=(gen.run_timestamp||'').slice(0,10);
-        var total=(gen.accepted!=null&&gen.rejected!=null)?(gen.accepted+gen.rejected):null;
-        var line=el('div');
-        line.appendChild(el('span',null,'Round '+(i+1)+' — '));
-        line.appendChild(el('b',null,gen.model||'—'));
-        if(when)line.appendChild(el('span',null,', '+when));
-        line.appendChild(el('span',null,': wrote '+(total!=null?total:'—')+' candidate pairs, '));
-        line.appendChild(el('b',null,(gen.accepted!=null?gen.accepted:'—')+' passed the validators'));
-        if(typeof gen.cost_usd==='number')
-          line.appendChild(el('span','pv-cost',' (cost $'+gen.cost_usd.toFixed(2)+')'));
-        line.appendChild(el('span',null,
-          b.screen_targets!=null
-            ? '. Only pairs whose target token reached at least '
-              +Math.round(b.screen_targets*100)+'% probability were kept for tracing.'
-            : '.'));
-        prov.appendChild(line);
-      });
+      // generation log, round by round — a minimalist borderless table in a light fold
+      (function(){
+        var det=el('details','gen-det');
+        det.appendChild(el('summary',null,'Generation log · round by round'));
+        var tbl=el('table','gen-log');
+        tbl.innerHTML='<thead><tr><th scope="col">Round</th><th scope="col">Model</th>'
+          +'<th scope="col">Date</th><th scope="col" class="num">Candidates</th>'
+          +'<th scope="col" class="num">Passed</th><th scope="col" class="num">Cost</th></tr></thead>';
+        var tb=el('tbody'), screenNotes=[];
+        batches.forEach(function(b,i){
+          var gen=b.generated||{};
+          var when=(gen.run_timestamp||'').slice(0,10);
+          var total=(gen.accepted!=null&&gen.rejected!=null)?(gen.accepted+gen.rejected):null;
+          var tr=el('tr');
+          tr.appendChild(el('td',null,String(i+1)));
+          tr.appendChild(el('td',null,gen.model||'—'));
+          tr.appendChild(el('td',null,when||'—'));
+          tr.appendChild(el('td','num',total!=null?String(total):'—'));
+          tr.appendChild(el('td','num',gen.accepted!=null?String(gen.accepted):'—'));
+          tr.appendChild(el('td','num',typeof gen.cost_usd==='number'?('$'+gen.cost_usd.toFixed(2)):'—'));
+          tb.appendChild(tr);
+          if(b.screen_targets!=null)screenNotes.push('round '+(i+1)+' ≥'+Math.round(b.screen_targets*100)+'%');
+        });
+        tbl.appendChild(tb); det.appendChild(tbl);
+        if(screenNotes.length)
+          det.appendChild(el('p','gen-log-note','Traced only above a target-probability screen: '+screenNotes.join(', ')+'.'));
+        prov.appendChild(det);
+      })();
       if(urg&&urg.summary){
         var uline=el('div');
         uline.appendChild(el('span',null,'Urgency view — '));
@@ -960,71 +997,59 @@
       }
       renderTable();
 
-      // Model selector: one chip per circuit-tracer model that traced these
-      // phrases. Clicking swaps which model's measurements the whole table shows.
-      // Suppressed when only one model is present (today's single-model payload).
-      (function buildModelChips(){
+      // Model selector: a dropdown over the circuit-tracer models that traced
+      // these phrases. Changing it swaps which model's measurements the table
+      // shows. Suppressed when only one model is present.
+      (function buildModelSelect(){
         var wrap=document.getElementById('sim-chips');
         if(!wrap||modelList.length<2)return;
-        var g=el('div','chip-g');
-        g.setAttribute('role','group');
-        g.setAttribute('aria-label','select model');
-        g.appendChild(el('span','chip-lbl','model'));
+        var g=el('div','sel-g'), id='sim-model-sel';
+        var lab=el('label','sel-lbl','model'); lab.setAttribute('for',id);
+        var sel=el('select','sum-sel'); sel.id=id;
+        sel.setAttribute('aria-label','Select model');
         modelsMeta.forEach(function(mm){
           var n=mm.n_traced||0;
-          var c=el('button','chip'+(mm.id===currentModel?' on':''),mm.label||mm.id);
-          c.type='button';
-          c.setAttribute('aria-pressed',mm.id===currentModel?'true':'false');
-          if(n)c.appendChild(el('span','chip-ct',' · '+n));
-          if(!n||mm.available===false){c.disabled=true;c.title='not traced on this model yet';}
-          else c.title=n+' phrases traced on '+mm.id
-            +(mm.graphs===false?' · next-token behavior only (no circuit graph)'
-              :(mm.features===false?' · structure only (no clinical-feature meter)':''));
-          c.addEventListener('click',function(){
-            if(c.disabled)return;
-            currentModel=mm.id;
-            g.querySelectorAll('.chip').forEach(function(x){
-              x.classList.remove('on');x.setAttribute('aria-pressed','false');});
-            c.classList.add('on');
-            c.setAttribute('aria-pressed','true');
-            setTracedLabel();
-            renderTable();
-          });
-          g.appendChild(c);
+          var suffix=mm.graphs===false?' (next-token only)'
+            :(mm.features===false?' (structure only)':'');
+          var o=el('option',null,(mm.label||mm.id)+(n?(' · '+n):'')+suffix);
+          o.value=mm.id;
+          if(!n||mm.available===false)o.disabled=true;
+          if(mm.id===currentModel)o.selected=true;
+          sel.appendChild(o);
         });
+        sel.addEventListener('change',function(){
+          currentModel=sel.value;
+          setTracedLabel();
+          renderTable();
+        });
+        g.appendChild(lab); g.appendChild(sel);
         wrap.appendChild(g);
       })();
 
-      (function buildChips(){
+      (function buildFilters(){
         var wrap=document.getElementById('sim-chips');
         if(!wrap)return;
         var topics=[];
         scenarios.forEach(function(s){if(s.topic&&topics.indexOf(s.topic)<0)topics.push(s.topic);});
         topics.sort();
         function group(label,items,get,set,parent){
-          var g=el('div','chip-g');
-          g.setAttribute('role','group');
-          g.setAttribute('aria-label','filter by '+label);
-          g.appendChild(el('span','chip-lbl',label));
+          var g=el('div','sel-g'), id='sim-fsel-'+label.replace(/[^a-z]/gi,'');
+          var lab=el('label','sel-lbl',label); lab.setAttribute('for',id);
+          var sel=el('select','sum-sel'); sel.id=id;
+          sel.setAttribute('aria-label','Filter by '+label);
           items.forEach(function(it){
-            var c=el('button','chip'+(it.val===get()?' on':''),it.name);
-            c.type='button';
-            c.setAttribute('aria-pressed',it.val===get()?'true':'false');
-            c.addEventListener('click',function(){
-              set(it.val);
-              g.querySelectorAll('.chip').forEach(function(x){
-                x.classList.remove('on');x.setAttribute('aria-pressed','false');});
-              c.classList.add('on');
-              c.setAttribute('aria-pressed','true');
-              renderTable();
-            });
-            g.appendChild(c);
+            var o=el('option',null,it.name); o.value=it.val;
+            if(it.val===get())o.selected=true;
+            sel.appendChild(o);
           });
+          sel.addEventListener('change',function(){ set(sel.value); renderTable(); });
+          g.appendChild(lab); g.appendChild(sel);
           (parent||wrap).appendChild(g);
+          return sel;
         }
         if(topicSpec){
-          // two-level taxonomy: specialty chips, then a subcategory row for
-          // the selected specialty (only when it actually narrows anything)
+          // two-level taxonomy: a specialty dropdown, then a subcategory dropdown
+          // for the selected specialty (only when it actually narrows anything)
           var counts={},subCounts={};
           scenarios.forEach(function(s){
             var m=specOf(s);
@@ -1032,13 +1057,14 @@
             (subCounts[m[0]]=subCounts[m[0]]||{})[m[1]]=(subCounts[m[0]][m[1]]||0)+1;
           });
           var specNames=Object.keys(counts).sort(function(a,b){return counts[b]-counts[a];});
-          var subWrap=el('div','');
+          var subWrap=el('div',''); subWrap.style.display='none';
           function renderSubRow(){
-            subWrap.innerHTML='';
+            subWrap.innerHTML=''; subWrap.style.display='none';
             if(!filterSpec||!subCounts[filterSpec])return;
             var subs=Object.keys(subCounts[filterSpec]);
             if(subs.length<2)return;
             subs.sort(function(a,b){return subCounts[filterSpec][b]-subCounts[filterSpec][a];});
+            subWrap.style.display='';
             group('subcategory',
               [{val:'',name:'all '+filterSpec.toLowerCase()}].concat(subs.map(function(x){
                 return {val:x,name:x.toLowerCase()+' · '+subCounts[filterSpec][x]};})),
@@ -1066,15 +1092,10 @@
         filterSpec='';subRowReset();
         var fb=document.getElementById('sim-filter');
         if(fb)fb.value='';
-        // filter chip groups reset to their first ("all") chip; the model
+        // filter dropdowns reset to their first ("all") option; the model
         // selector is a view choice, not a filter, so it stays put
-        document.querySelectorAll('#sim-chips .chip-g').forEach(function(g){
-          if((g.getAttribute('aria-label')||'').indexOf('filter by')!==0)return;
-          g.querySelectorAll('.chip').forEach(function(c,i){
-            c.classList.toggle('on',i===0);
-            c.setAttribute('aria-pressed',i===0?'true':'false');
-          });
-        });
+        ['sim-fsel-specialty','sim-fsel-condition','sim-fsel-subcategory','sim-fsel-outcome']
+          .forEach(function(id){var s=document.getElementById(id);if(s)s.value='';});
         document.querySelectorAll('.sum-table th[data-key]').forEach(function(th){
           th.classList.remove('sorted','asc');
           th.removeAttribute('aria-sort');
