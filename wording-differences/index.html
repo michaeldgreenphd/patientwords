@@ -10,16 +10,16 @@
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="PatientWords">
 <meta property="og:title" content="Wording differences — PatientWords">
-<meta property="og:description" content="The words surrounding clinical words can be the same. Register and variety shifts, factorized in one live-traced 2×2 matrix.">
+<meta property="og:description" content="Swap one word — “asthma flares” vs. “chest gets all tight” — and gemma-2-2b’s top next word falls from inhaler at 69% to 4%. Or hold the words and change only the grammar; the prediction still moves.">
 <meta property="og:url" content="https://michaeldgreenphd.github.io/patientwords/wording-differences/">
-<meta property="og:image" content="https://michaeldgreenphd.github.io/patientwords/modes/4quadrant/preview.png">
-<meta property="og:image:width" content="2343">
-<meta property="og:image:height" content="2643">
-<meta property="og:image:alt" content="Four-quadrant matrix factorizing vocabulary and grammar effects in gemma-2-2b">
+<meta property="og:image" content="https://michaeldgreenphd.github.io/patientwords/assets/share_card.png">
+<meta property="og:image:width" content="2400">
+<meta property="og:image:height" content="1260">
+<meta property="og:image:alt" content="Scenario 85: clinical wording predicts inhaler at 69%; the everyday wording “chest gets all tight” predicts shirt, and inhaler falls to 4%.">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Wording differences — PatientWords">
-<meta name="twitter:description" content="The words surrounding clinical words can be the same.">
-<meta name="twitter:image" content="https://michaeldgreenphd.github.io/patientwords/modes/4quadrant/preview.png">
+<meta name="twitter:description" content="Swap one word and gemma-2-2b’s top next word falls from inhaler at 69% to 4%; hold the words and change only the grammar, and the prediction still moves.">
+<meta name="twitter:image" content="https://michaeldgreenphd.github.io/patientwords/assets/share_card.png">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23faf9f5'/%3E%3Crect x='9' y='9' width='30' height='30' fill='%23111827'/%3E%3Crect x='25' y='25' width='30' height='30' fill='%2315803d'/%3E%3C/svg%3E">
 <style>
   :root{
@@ -65,6 +65,9 @@
   .explainer{font-size:17px;line-height:1.66;margin:0 0 14px}
   .stat{font-family:var(--mono);font-size:13px;font-weight:600;letter-spacing:.01em}
   .stat.penalty{color:var(--penalty)}
+  /* live aggregate caveat beside the extreme-case lead */
+  .lead-caveat{font-family:var(--mono);font-size:11.5px;color:var(--muted);margin:6px 0 14px;max-width:640px;line-height:1.7}
+  .lead-caveat b{color:var(--ink);font-weight:600}
   .stat.recovery{color:var(--clinical)}
 
   .traced{margin:12px 0 0;font-family:var(--mono);font-size:11px;letter-spacing:.03em;
@@ -185,7 +188,6 @@
       <a href="../start-here/">Start Here</a>
       <a href="../methods.html">Methods</a>
       <a href="../technical/">Technical</a>
-      <a href="../">Overview</a>
       <a href="./" aria-current="page">Wording Differences</a>
       <a href="../dialect-differences/">Dialect Differences</a>
       <a href="../translation/">Translation</a>
@@ -204,6 +206,7 @@
   <h2 class="view-head">Swap the word</h2>
   <p class="explainer">A single phrase swapped — “asthma flares” vs. “chest gets all tight” — as two stacked traces. Clinical wording gives inhaler at 69%; the patient wording drops it to 4%, and the top guess becomes “shirt”.</p>
   <span class="stat penalty">Language Penalty: −65% probability (0.69 → 0.04)</span>
+  <p class="lead-caveat" id="word-caveat" hidden></p>
   <details class="trace-fold">
     <summary>Trace details</summary>
     <p class="traced" data-mode="2panel" data-traced="gemma-2-2b">
@@ -438,6 +441,36 @@
     if(!modal.classList.contains('open'))return;
     if(!modal.contains(e.target))closeBtn.focus();
   });
+})();
+</script>
+<script>
+(function(){
+  // Live aggregate caveat beside the −65% single-case lead: the corpus mean
+  // language penalty and the paraphrase-noise floor, both computed at runtime
+  // so the extreme case isn't read as typical. Sources: simulated_scenarios.json
+  // (language_penalty) and provenance.json (paraphrase_robustness.mean_abs_delta_vs_baseline).
+  var el=document.getElementById('word-caveat');
+  if(!el||!window.fetch)return;
+  Promise.all([
+    fetch('../data/simulated_scenarios.json',{cache:'no-cache'}).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;}),
+    fetch('../data/provenance.json',{cache:'no-cache'}).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;})
+  ]).then(function(res){
+    var sim=res[0], prov=res[1];
+    if(!sim||!Array.isArray(sim.scenarios))return;
+    var scored=sim.scenarios.filter(function(s){return typeof s.language_penalty==='number';});
+    if(!scored.length)return;
+    var mean=scored.reduce(function(a,s){return a+s.language_penalty;},0)/scored.length;
+    el.textContent='';
+    el.appendChild(document.createTextNode('One of the largest cases. Across all '+scored.length+' scored pairs the average move is '));
+    var b1=document.createElement('b');b1.textContent=(mean>0?'+':'−')+Math.abs(mean*100).toFixed(0)+'%';el.appendChild(b1);
+    var floor=prov&&prov.paraphrase_robustness&&prov.paraphrase_robustness.mean_abs_delta_vs_baseline;
+    if(typeof floor==='number'){
+      el.appendChild(document.createTextNode(', and meaning-preserving rewording alone shifts a single measurement by ±'));
+      var b2=document.createElement('b');b2.textContent=(floor*100).toFixed(1)+' pp';el.appendChild(b2);
+    }
+    el.appendChild(document.createTextNode('.'));
+    el.hidden=false;
+  }).catch(function(){});
 })();
 </script>
 </body>

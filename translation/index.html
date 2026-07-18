@@ -66,6 +66,8 @@
   .stat{font-family:var(--mono);font-size:13px;font-weight:600;letter-spacing:.01em}
   .stat.penalty{color:var(--penalty)}
   .stat.recovery{color:var(--clinical)}
+  /* live at-scale caveat beside the single-case recovery lead */
+  .lead-caveat{font-family:var(--mono);font-size:11.5px;color:var(--muted);margin:6px 0 14px;max-width:640px;line-height:1.7}
 
   .traced{margin:12px 0 0;font-family:var(--mono);font-size:11px;letter-spacing:.03em;
     line-height:1.9;font-weight:400}
@@ -199,7 +201,6 @@
       <a href="../start-here/">Start Here</a>
       <a href="../methods.html">Methods</a>
       <a href="../technical/">Technical</a>
-      <a href="../">Overview</a>
       <a href="../wording-differences/">Wording Differences</a>
       <a href="../dialect-differences/">Dialect Differences</a>
       <a href="./" aria-current="page">Translation</a>
@@ -257,6 +258,7 @@
   </section>
 
   <span class="stat recovery">Recovered target probability: 41% after translation (clinical baseline 26%) · July 9 re-trace</span>
+  <p class="lead-caveat" id="tx-lead-caveat" hidden></p>
 
   <h2>What the depth readout adds</h2>
   <p class="explainer">A layer-by-layer readout splits the penalty into two failure
@@ -361,6 +363,17 @@
           var a=document.createElement('a');a.href='../technical/';a.textContent='the Technical page';
           line.appendChild(a);line.appendChild(document.createTextNode('.'));
           line.hidden=false;
+        }
+        // live caveat beside the single-case "41%" lead: the same model's
+        // corpus-average lift, so the showcase case isn't read as typical
+        var g=per['gemma-2-2b'];
+        if(g&&typeof g.mean_recovery==='number'){
+          var cav=document.getElementById('tx-lead-caveat');
+          cav.textContent='That 41% is the showcased hardest case. Across the exploratory at-scale run ('
+            +g.n+' cases) translation lifts the clinical answer’s probability by a mean of '+pp(g.mean_recovery)
+            +(typeof g.median_recovery==='number'?' (median '+pp(g.median_recovery)+')':'')
+            +', positive in '+Math.round(g.share_recovery_positive*100)+'% of them.';
+          cav.hidden=false;
         }
         document.getElementById('tx-scale').hidden=false;
       }).catch(function(){});

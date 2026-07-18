@@ -187,7 +187,6 @@
       <a href="start-here/">Start Here</a>
       <a href="methods.html" aria-current="page">Methods</a>
       <a href="technical/">Technical</a>
-      <a href="./">Overview</a>
       <a href="wording-differences/">Wording Differences</a>
       <a href="dialect-differences/">Dialect Differences</a>
       <a href="translation/">Translation</a>
@@ -200,7 +199,7 @@
 </header>
 <main id="main">
   <p class="dateline">Methods · how the pipeline works</p>
-  <h1>From a sentence to a circuit, in six steps.</h1>
+  <h1>From a sentence to a circuit, step by step.</h1>
   <p class="lede">
     Every figure starts as two (or four) plain sentences, one in clinician wording and
     one in patient wording, and ends as an interactive map of the computation gemma-2-2b
@@ -349,6 +348,7 @@
   </section>
 
   <section id="reading-layers">
+    <p class="step-no">Depth</p>
     <h2>Reading the layers</h2>
     <p>
       The circuit view names which features fire. The Jacobian lens reads what the
@@ -382,6 +382,16 @@
       readout is exploratory and reported for one model.
     </p>
     </details>
+    <p>
+      The depth readout splits the penalty into two failure kinds. When the answer
+      never forms, translation supplies the clinical wording up front. When the answer
+      forms and is lost, translation recovers work the model already did. The running
+      census lives on the <a href="technical/#data">Technical page</a>.
+    </p>
+    <p>
+      The loop for a deployed system: read the layers to see which kind dominates,
+      mend with translation, verify with patching, re-measure as language drifts.
+    </p>
   </section>
 
   <section id="generation-eval">
@@ -400,7 +410,8 @@
       We audited the tests Claude wrote. The audit asks a
       Claude model to pull the clinical concepts out of a sentence twice: once from the
       patient&rsquo;s own words, once after translating those words into clinical
-      language. The models read patient wording perfectly, but
+      language. On a 10-item probe the models scored the patient wording at ceiling
+      (10/10); their own clinical rewrite dropped 0&ndash;2 items (haiku none), so
       <em>translating patient words into clinical words can lose information</em>. The
       losses appear at the translation step, not before it.
     </p>
@@ -487,20 +498,6 @@
   })();
   </script>
 
-  <section id="translation-fixes">
-    <h2>What translation fixes</h2>
-    <p>
-      The depth readout splits the penalty into two failure kinds. When the answer
-      never forms, translation supplies the clinical wording up front. When the answer
-      forms and is lost, translation recovers work the model already did. The running
-      census lives on the <a href="technical/#data">Technical page</a>.
-    </p>
-    <p>
-      The loop for a deployed system: read the layers to see which kind dominates,
-      mend with translation, verify with patching, re-measure as language drifts.
-    </p>
-  </section>
-
   <section id="convergence">
     <p class="step-no">Step 6 · Accumulation</p>
     <h2>Confidence grows as the data accumulates</h2>
@@ -510,6 +507,10 @@
       locked away untouched, and since July 14 also withheld from this site's data
       files, so conclusions can be checked once, at the end, against data no interim
       analysis has seen.
+    </p>
+    <p>
+      The per-model accumulation curves now live in
+      <a href="technical/#models">Part&nbsp;4 of the Technical page</a>.
     </p>
   </section>
 

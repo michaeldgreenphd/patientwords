@@ -334,7 +334,6 @@
       <a href="../start-here/">Start Here</a>
       <a href="../methods.html">Methods</a>
       <a href="../technical/">Technical</a>
-      <a href="../">Overview</a>
       <a href="../wording-differences/">Wording Differences</a>
       <a href="../dialect-differences/">Dialect Differences</a>
       <a href="../translation/">Translation</a>
@@ -393,7 +392,6 @@
           <th scope="col">Swap (patient → clinical)</th>
           <th scope="col">Target</th>
           <th scope="col" data-key="shift"><button type="button" class="th-tip" title="target-token likelihood, clinical wording → patient wording — click to sort by size of change">Likelihood shift</button></th>
-          <th scope="col" class="num" data-key="net"><button type="button" class="th-tip" title="which wording holds the target more strongly, and by how much — click to sort">Net effect ⓘ</button></th>
           <th scope="col" class="num" data-key="urgency"><button type="button" class="th-tip" title="flags when the top prediction moves to a lower tier of care under patient wording (owner-reviewed v1 tiers, domain review pending) — click to sort">Urgency ⓘ</button></th>
           <th scope="col" data-key="mass"><button type="button" title="sort by the clinical phrasing’s clinical-circuit share">Clinical circuit</button></th>
           <th scope="col" data-key="flip"><button type="button" title="sort: flips first">Top prediction</button></th>
@@ -646,34 +644,6 @@
       document.getElementById('sim-traced').hidden=false;
 
       var prov=document.getElementById('sim-provenance');
-      // generation log, round by round — a minimalist borderless table in a light fold
-      (function(){
-        var det=el('details','gen-det');
-        det.appendChild(el('summary',null,'Generation log · round by round'));
-        var tbl=el('table','gen-log');
-        tbl.innerHTML='<thead><tr><th scope="col">Round</th><th scope="col">Model</th>'
-          +'<th scope="col">Date</th><th scope="col" class="num">Candidates</th>'
-          +'<th scope="col" class="num">Passed</th><th scope="col" class="num">Cost</th></tr></thead>';
-        var tb=el('tbody'), screenNotes=[];
-        batches.forEach(function(b,i){
-          var gen=b.generated||{};
-          var when=(gen.run_timestamp||'').slice(0,10);
-          var total=(gen.accepted!=null&&gen.rejected!=null)?(gen.accepted+gen.rejected):null;
-          var tr=el('tr');
-          tr.appendChild(el('td',null,String(i+1)));
-          tr.appendChild(el('td',null,gen.model||'—'));
-          tr.appendChild(el('td',null,when||'—'));
-          tr.appendChild(el('td','num',total!=null?String(total):'—'));
-          tr.appendChild(el('td','num',gen.accepted!=null?String(gen.accepted):'—'));
-          tr.appendChild(el('td','num',typeof gen.cost_usd==='number'?('$'+gen.cost_usd.toFixed(2)):'—'));
-          tb.appendChild(tr);
-          if(b.screen_targets!=null)screenNotes.push('round '+(i+1)+' ≥'+Math.round(b.screen_targets*100)+'%');
-        });
-        tbl.appendChild(tb); det.appendChild(tbl);
-        if(screenNotes.length)
-          det.appendChild(el('p','gen-log-note','Traced only above a target-probability screen: '+screenNotes.join(', ')+'.'));
-        prov.appendChild(det);
-      })();
       if(urg&&urg.summary){
         var uline=el('div');
         uline.appendChild(el('span',null,'Urgency view — '));
@@ -845,13 +815,6 @@
           +(typeof m.prob_patient==='number'?p2(m.prob_patient):'—'));
         shift.appendChild(nums);
         tr.appendChild(shift);
-        // Net effect: one signed cell instead of two mostly-empty columns
-        var lp=m.language_penalty;
-        var net=el('td','num');
-        if(typeof lp==='number'&&lp<0)net.appendChild(el('span','dir-cli',mag(lp)+' clinical'));
-        else if(typeof lp==='number'&&lp>0)net.appendChild(el('span','dir-pat',mag(lp)+' patient'));
-        else net.textContent='—';
-        tr.appendChild(net);
         var uc=el('td','num');
         var u=urgFor(s);
         if(u&&u.flip_class==='downgrade'){
@@ -902,7 +865,6 @@
         switch(sortKey){
           case 'index':return s.index;
           case 'shift':return typeof m.language_penalty==='number'?Math.abs(m.language_penalty):null;
-          case 'net':return typeof m.language_penalty==='number'?m.language_penalty:null;
           case 'urgency':{var u=urgFor(s);
             // descending (first click) = most safety-relevant first:
             // downgrade flips, biggest tier drop, then most-negative shifts
@@ -977,7 +939,7 @@
         if(!list.length){
           var tr=document.createElement('tr');
           var td=el('td','sum-empty','no scenarios match; clear the filters');
-          td.colSpan=8;
+          td.colSpan=7;
           tr.appendChild(td);
           sumBody.appendChild(tr);
           return;
@@ -1047,7 +1009,11 @@
           (parent||wrap).appendChild(g);
           return sel;
         }
-        if(topicSpec){
+        // Two-level specialty/subcategory taxonomy is draft (owner-reviewed v1,
+        // domain review pending); gated off until reviewed. specialties.json still
+        // loads and topicSpec still builds, so re-enabling is a one-flag change.
+        var TWO_LEVEL_SPECIALTY=false;
+        if(topicSpec&&TWO_LEVEL_SPECIALTY){
           // two-level taxonomy: a specialty dropdown, then a subcategory dropdown
           // for the selected specialty (only when it actually narrows anything)
           var counts={},subCounts={};

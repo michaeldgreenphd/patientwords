@@ -259,7 +259,11 @@
   .trace-fold>summary:hover{color:var(--ink)}
   .trace-fold>summary:focus-visible{outline:2px solid var(--clinical);outline-offset:2px}
   .trace-fold .traced{margin-top:6px}
+  .trace-fold .read-graph{font-size:14px;line-height:1.6;color:var(--muted);margin:6px 0 0}
   .stat .pen{color:var(--penalty)}
+  /* live aggregate caveat beside the extreme-case hero demo */
+  .hero-caveat{font-family:var(--mono);font-size:11.5px;color:var(--muted);margin:10px 0 0;max-width:640px;line-height:1.75}
+  .hero-caveat b{color:var(--ink);font-weight:600}
   /* safety-view chart swipes horizontally on narrow screens instead of compressing labels */
   .sv-asym{margin:22px 0 0;max-width:680px;overflow-x:auto;-webkit-overflow-scrolling:touch}
   .sv-asym svg{width:100%;height:auto;display:block}
@@ -306,12 +310,11 @@
 <header class="masthead">
   <hr class="rule-heavy"><hr class="rule-fine">
   <div class="masthead-row">
-    <a class="wordmark" href="./" aria-label="PatientWords home, the overview page"><span class="pw-p">Patient</span><span class="pw-w">Words</span></a>
+    <a class="wordmark" href="./" aria-current="page" aria-label="PatientWords home, the overview page"><span class="pw-p">Patient</span><span class="pw-w">Words</span></a>
     <nav aria-label="Site">
       <a href="start-here/">Start Here</a>
       <a href="methods.html">Methods</a>
       <a href="technical/">Technical</a>
-      <a href="./" aria-current="page">Overview</a>
       <a href="wording-differences/">Wording Differences</a>
       <a href="dialect-differences/">Dialect Differences</a>
       <a href="translation/">Translation</a>
@@ -326,7 +329,6 @@
   <p class="dateline">mechanistic interpretability of medical language</p>
   <h1><span class="patient">Patients</span> don’t speak like doctors.<br><span class="clinical">Small open models</span> change their next-word predictions when the wording does.</h1>
   <p class="lede">We trace how gemma-2-2b reads clinical terms versus the everyday words patients use. Wording can change the model's top next word in addition to its confidence, and rewriting the sentence in clinical terms restores it sometimes in the hardest cases. Try the live case below.</p>
-  <p class="lede">Columns are the prompt’s words in order; height is depth in the model; the predicted next word sits at the top. Nodes (the dots) are features — size is contribution, color is category. Curves are paths of influence; the spread at the top shows the different next-word predictions ranked by probability. Hover any node for its identity and mass.</p>
 
   <div class="tg" id="home-tg">
     <p class="tg-sentence">“When the dust kicks up my
@@ -336,7 +338,8 @@
     <div class="bar-head" aria-hidden="true">model’s next-word guesses</div>
     <div id="tg-bars" aria-live="polite"></div>
   </div>
-  <p class="tg-cap">live measurements, scenario 85 · <a href="modes/simulated/pairs_20260707T171223Z/index_49.html">open the full trace</a> · <a href="simulated-scenarios/">browse all scenarios</a></p>
+  <p class="tg-cap">live measurements, scenario 85 · <a href="modes/simulated/pairs_20260707T171223Z/index_49.html">open the full trace</a> · <a href="simulated-scenarios/">browse all scenarios</a> · <a href="start-here/">new to this? start here →</a></p>
+  <p class="hero-caveat" id="hero-caveat" hidden></p>
 
   <p class="keyline">
     <span class="swatch" style="background:#15803d"></span>clinical / recovery &nbsp;&nbsp;
@@ -362,6 +365,10 @@
       <h3>Swap the word</h3>
       <p>One phrase swapped — “asthma flares” vs. “chest gets all tight” — as two stacked graphs. The numbers are in the demo above; the trace shows where the probability goes.</p>
       <details class="trace-fold">
+        <summary>How to read this graph</summary>
+        <p class="read-graph">Columns are the prompt’s words in order; height is depth in the model; the predicted next word sits at the top. Nodes (the dots) are features — size is contribution, color is category. Curves are paths of influence; the spread at the top shows the different next-word predictions ranked by probability. Hover any node for its identity and mass.</p>
+      </details>
+      <details class="trace-fold">
         <summary>Trace details</summary>
         <p class="traced" data-mode="2panel" data-traced="gemma-2-2b">
           <span class="tm"><b>live trace:</b> gemma-2-2b</span>
@@ -375,7 +382,7 @@
   <a class="fig" href="wording-differences/#grammar">
     <figure class="fig-media">
       <div class="embed preview wide"><div class="frame">
-        <iframe class="live" src="modes/4quadrant/index.html" loading="lazy"
+        <iframe class="live" src="modes/4quadrant2/index_06.html" loading="lazy"
                 title="Live preview: four-quadrant matrix factorizing vocabulary and grammar effects" tabindex="-1" aria-hidden="true"></iframe>
       </div></div>
       <figcaption>live render · simulated scenario</figcaption>
@@ -383,8 +390,8 @@
     <div class="fig-body">
       <p class="fig-no">Wording <span class="mode">· grammar × lexicon</span></p>
       <h3>Swap the grammar</h3>
-      <p>A 2×2 grid crossing wording (patient vs. medical) with grammar (standard vs. nonstandard). From our analysis, changing the grammar alone shifts toward the everyday continuation, even when the medical word stays (Box B).</p>
-      <span class="stat penalty">Variety shift Δ: +11% and +13% toward the everyday continuation · Register shift Δ: +4–5%</span>
+      <p>A 2×2 grid crossing wording (patient vs. medical) with grammar (standard vs. nonstandard). From the live trace, changing the grammar alone adds probability to “hospital” even when the medical word stays (Box B); swapping to patient words removes it.</p>
+      <span class="stat penalty">Variety shift Δ: +13% and +10% toward “hospital” · Register shift Δ: −10% and −13%</span>
       <details class="trace-fold">
         <summary>Trace details</summary>
         <p class="traced" data-mode="4quadrant" data-traced="gemma-2-2b">
@@ -856,6 +863,35 @@
           ' pp on average \u00b7 '),a);
       }).catch(function(){});
     document.getElementById('dialect-specimen').hidden=false;
+  }).catch(function(){});
+})();
+(function(){
+  // Live aggregate caveat under the hero demo. The demo shows one of the
+  // largest single cases; this frames it against the corpus mean and the
+  // paraphrase-noise floor, both computed at runtime so they never go stale.
+  // Sources: simulated_scenarios.json (language_penalty) and
+  // provenance.json (paraphrase_robustness.mean_abs_delta_vs_baseline).
+  var el=document.getElementById('hero-caveat');
+  if(!el||!window.fetch)return;
+  Promise.all([
+    fetch('data/simulated_scenarios.json',{cache:'no-cache'}).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;}),
+    fetch('data/provenance.json',{cache:'no-cache'}).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;})
+  ]).then(function(res){
+    var sim=res[0], prov=res[1];
+    if(!sim||!Array.isArray(sim.scenarios))return;
+    var scored=sim.scenarios.filter(function(s){return typeof s.language_penalty==='number';});
+    if(!scored.length)return;
+    var mean=scored.reduce(function(a,s){return a+s.language_penalty;},0)/scored.length;
+    el.textContent='';
+    el.appendChild(document.createTextNode('One of the largest cases. Across all '+scored.length+' scored pairs the average move is '));
+    var b1=document.createElement('b');b1.textContent=(mean>0?'+':'−')+Math.abs(mean*100).toFixed(0)+'%';el.appendChild(b1);
+    var floor=prov&&prov.paraphrase_robustness&&prov.paraphrase_robustness.mean_abs_delta_vs_baseline;
+    if(typeof floor==='number'){
+      el.appendChild(document.createTextNode(', and meaning-preserving rewording alone shifts a single measurement by ±'));
+      var b2=document.createElement('b');b2.textContent=(floor*100).toFixed(1)+' pp';el.appendChild(b2);
+    }
+    el.appendChild(document.createTextNode('.'));
+    el.hidden=false;
   }).catch(function(){});
 })();
 (function(){

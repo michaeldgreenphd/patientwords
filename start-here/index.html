@@ -151,12 +151,12 @@
       <a href="./" aria-current="page">Start Here</a>
       <a href="../methods.html">Methods</a>
       <a href="../technical/">Technical</a>
-      <a href="../">Overview</a>
       <a href="../wording-differences/">Wording Differences</a>
       <a href="../dialect-differences/">Dialect Differences</a>
       <a href="../translation/">Translation</a>
       <a href="../simulated-scenarios/">Simulated Scenarios</a>
       <a href="../phrase-dataset/">Phrase Dataset</a>
+      <a href="https://github.com/michaeldgreenphd/patientwords">GitHub</a>
     </nav>
   </div>
   <hr class="rule-fine">
@@ -444,8 +444,8 @@
 (function(){
   // scenario 85, live-traced: bars re-rank when the wording flips
   var states={
-    clinical:{swap:'asthma flares',bars:[['inhaler',0.69,'#0f766e'],['mask',0.06,'#c3c9d2'],['set',0.03,'#c3c9d2']]},
-    patient:{swap:'chest gets all tight',bars:[['shirt',0.18,'#b45309'],['t-',0.07,'#c3c9d2'],['pair',0.06,'#c3c9d2']]}
+    clinical:{swap:'asthma flares',bars:[['inhaler',0.692,'#0f766e'],['mask',0.059,'#c3c9d2'],['set',0.028,'#c3c9d2']]},
+    patient:{swap:'chest gets all tight',bars:[['shirt',0.183,'#b45309'],['t-',0.068,'#c3c9d2'],['inhaler (5th)',0.043,'#0f766e']]}
   };
   var cur='clinical';
   var wrap=document.getElementById('tg-bars');

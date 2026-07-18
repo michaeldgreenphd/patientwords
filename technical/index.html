@@ -236,7 +236,6 @@
       <a href="../start-here/">Start Here</a>
       <a href="../methods.html">Methods</a>
       <a href="../technical/" aria-current="page">Technical</a>
-      <a href="../">Overview</a>
       <a href="../wording-differences/">Wording Differences</a>
       <a href="../dialect-differences/">Dialect Differences</a>
       <a href="../translation/">Translation</a>
@@ -369,12 +368,14 @@
     </table>
     <p class="cap" id="cap-router">care-urgency tiers regained per pair (owner-reviewed v1 tiers, domain review pending) · translation column from the joined translated panels · steering column queued: per-pair steering verdicts against the same lens classes</p>
 
-    <h3>Does tuning move the depth?</h3>
+    <details class="fold">
+      <summary>Does tuning move the depth?</summary>
     <p id="dd-it-text"></p>
     <div class="fig" role="img" aria-label="Paired dots: for each phrase measured under both model ids, the layer where the answer formed under the base id and under the instruction-tuned id, connected by a hairline. The readouts are identical on every pair." id="fig-it">
       <span class="pend">figure pending: the lens readouts have not loaded</span>
     </div>
     <p class="cap" id="cap-it"></p>
+    </details>
 
     <h3>Queued next</h3>
     <ul class="plan">
@@ -392,18 +393,10 @@
     <p class="explainer">The lens results above come from one model. The behavioral
       finding they explain generalizes: the same two-phrasing probe, run on eight
       measured open-weights models across four model families, with the probability
-      of the clinical next word measured under both wordings. These are interim
-      numbers from the exploration split. They use the plain generated scenario
-      batches only; steered, screened, and re-traced rows sit in a labeled
-      sensitivity analysis inside the statistics file. Phrase counts differ
-      by model; the table lists each. Every count uses a phrase once
-      per model. Four models were named in the pre-registration; the
-      other four are later additions, marked exploratory below, and the asymmetry
-      tests are corrected for multiple comparisons within each of those two
-      groups. One tenth of newly
-      collected phrases is sealed for the confirmatory endpoint and withheld from
-      this site's data files. The models here are the measured subjects; the stimuli they read are
-      written by Claude models and audited on the <a href="../methods.html#generation-eval">methods page</a>.</p>
+      of the clinical next word measured under both wordings — interim numbers from
+      the exploration split, phrase counts per model in the table. The models here are
+      the measured subjects; the stimuli they read are written by Claude models and
+      audited on the <a href="../methods.html#generation-eval">methods page</a>. Population, dedupe, correction, and holdout details are in the statistics fold below.</p>
 
     <h3>The penalty, model by model</h3>
     <p>Mean language penalty: the percentage points of next-word probability the
@@ -996,10 +989,7 @@
         document.getElementById('cap-it').textContent=
           'patient-side formation layer for the '+it.n_paired+' phrases read under both model ids · every pair identical, so the two rows mirror each other exactly · not yet a tuning comparison';
         document.getElementById('dd-it-text').textContent=
-          'Instruction tuning is often assumed to reorganize how a model answers. The '+it.n_paired+
-          ' phrases read under both the gemma-2-2b and gemma-2-2b-it ids return identical lens readouts on every pair, layer by layer. '+
-          'Identity that exact is consistent with the hosted service resolving both ids to the same model, so this is reported as one model, '+
-          'not a tuning comparison, until Neuronpedia confirms the two ids serve separate hosts.';
+          'The '+it.n_paired+' phrases read under both the gemma-2-2b and gemma-2-2b-it ids return identical lens readouts on every pair, so this is reported as one model — not a tuning comparison — until Neuronpedia confirms the two ids serve separate hosts.';
       })();
     })
     .catch(function(){
