@@ -100,13 +100,24 @@
   .embed iframe{width:100%;border:0;display:block;min-height:400px}
   .embed-caption{font-family:var(--mono);font-size:11px;color:var(--muted);
     letter-spacing:.04em;margin:0 0 26px}
-  .embed-shell{position:relative;margin:26px 0 10px}
+  /* the full-screen button sits in the whitespace above the graph, never over its title */
+  .embed-shell{position:relative;margin:34px 0 10px}
   .embed-shell .embed{margin:0;overflow:hidden}
   .embed-shell .zframe{transform-origin:top left}
-  .zoom-btn{position:absolute;top:-1px;right:-1px;z-index:6;font-family:var(--mono);
+  .zoom-btn{position:absolute;top:-28px;right:0;z-index:6;font-family:var(--mono);
     font-size:10px;letter-spacing:.12em;text-transform:uppercase;background:#fff;
     border:1px solid var(--hairline);color:var(--muted);padding:5px 9px;cursor:pointer}
   .zoom-btn:hover{color:var(--ink);border-color:var(--ink)}
+  /* trace metadata collapsed by default so the figure stays above the fold on mobile */
+  .trace-fold{margin:2px 0 10px}
+  .trace-fold>summary{font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--muted);
+    cursor:pointer;list-style:none;padding:2px 0}
+  .trace-fold>summary::-webkit-details-marker{display:none}
+  .trace-fold>summary::before{content:'\25B8\00a0'}
+  .trace-fold[open]>summary::before{content:'\25BE\00a0'}
+  .trace-fold>summary:hover{color:var(--ink)}
+  .trace-fold>summary:focus-visible{outline:2px solid var(--clinical);outline-offset:2px}
+  .trace-fold .traced{margin-top:6px}
   .embed-shell.fs-fallback{position:fixed;inset:0;z-index:60;background:#fff;
     margin:0;overflow:hidden}
   .embed-shell.fs-fallback .embed{max-height:100vh;height:100vh;border:0;overflow:auto}
@@ -124,6 +135,9 @@
     opacity:0;background:#fff;border:1px solid var(--hairline);padding:2px 7px}
   .quad-hit:hover{background:rgba(28,28,25,.045)}
   .quad-hit:hover span,.quad-hit:focus-visible span{opacity:1}
+  /* touch/small screens can't hover: reveal the "expand" affordance so the dense
+     matrix is reachable full screen where its four cells are legible */
+  @media (hover:none),(max-width:768px){.quad-hit span{opacity:.9}}
   .qmodal{position:fixed;inset:0;z-index:70;background:#fff;display:none}
   .qmodal.open{display:block}
   .qmodal iframe{width:100%;height:100%;border:0}
@@ -183,19 +197,22 @@
   <hr class="rule-fine">
 </header>
 <main id="main">
-  <p class="dateline">Figs. 1–2 <span class="mode">· one-word swap + grammar × lexicon · live renders · simulated scenarios</span></p>
+  <p class="dateline"><span class="mode">one-word swap + grammar × lexicon · live renders · simulated scenarios</span></p>
   <h1>Wording differences</h1>
   <p class="subtitle">Swap one word, or only the grammar around it; either moves the prediction.</p>
   <section id="word">
-  <h2 class="view-head">Swap the word · Fig. 1</h2>
+  <h2 class="view-head">Swap the word</h2>
   <p class="explainer">A single phrase swapped — “asthma flares” vs. “chest gets all tight” — as two stacked traces. Clinical wording gives inhaler at 69%; the patient wording drops it to 4%, and the top guess becomes “shirt”.</p>
   <span class="stat penalty">Language Penalty: −65% probability (0.69 → 0.04)</span>
-  <p class="traced" data-mode="2panel" data-traced="gemma-2-2b">
-    <span class="tm"><b>live trace:</b> gemma-2-2b · gemma scope transcoders</span>
-    <span class="tp">hosted circuit-tracer via Neuronpedia · traced July 7, 2026 · scenario 85 of the
-      simulated series · next-token probabilities read directly from the trace ·
-      “asthma flares” vs. “chest gets all tight”, target “ inhaler”</span>
-  </p>
+  <details class="trace-fold">
+    <summary>Trace details</summary>
+    <p class="traced" data-mode="2panel" data-traced="gemma-2-2b">
+      <span class="tm"><b>live trace:</b> gemma-2-2b</span>
+      <span class="tp">hosted circuit-tracer via Neuronpedia · traced July 7, 2026 · scenario 85 of the
+        simulated series · next-token probabilities read directly from the trace ·
+        “asthma flares” vs. “chest gets all tight”, target “ inhaler”</span>
+    </p>
+  </details>
   <div class="embed">
     <iframe class="live" src="../modes/simulated/featured_sim85/index_01.html" loading="lazy"
             title="Live attribution-graph comparison: asthma flares vs. chest gets all tight"></iframe>
@@ -204,13 +221,16 @@
   </section>
 
   <section id="grammar">
-  <h2 class="view-head">Swap the grammar · Fig. 2</h2>
+  <h2 class="view-head">Swap the grammar</h2>
   <p class="explainer">A 2×2 crossing wording (medical vs. patient, columns) with grammar (standard vs. nonstandard, rows). The live-traced item is a simulated palpitations case ending “driving him to the&nbsp;__”. Changing only the grammar adds +10–13% to “hospital”; changing only the words removes 10–13%.</p>
   <span class="stat penalty">Variety shift Δ: +13% (A → B, 0.39 → 0.52) and +10% (C → D, 0.29 → 0.39) toward “hospital” · Register shift Δ: −10% (A → C) and −13% (B → D)</span>
-  <p class="traced" data-mode="4quadrant" data-traced="gemma-2-2b">
-    <span class="tm"><b>traced model:</b> gemma-2-2b · gemma scope transcoders</span>
-    <span class="tp">hosted circuit-tracer via Neuronpedia · traced July 15, 2026</span>
-  </p>
+  <details class="trace-fold">
+    <summary>Trace details</summary>
+    <p class="traced" data-mode="4quadrant" data-traced="gemma-2-2b">
+      <span class="tm"><b>traced model:</b> gemma-2-2b</span>
+      <span class="tp">hosted circuit-tracer via Neuronpedia · traced July 15, 2026</span>
+    </p>
+  </details>
 
   <div class="qm-scroll">
     <table class="qm-table">
