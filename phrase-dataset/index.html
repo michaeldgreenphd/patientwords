@@ -67,15 +67,16 @@
     text-transform:uppercase;color:var(--muted);text-align:left;
     padding:0 18px 8px 0;border-bottom:1px solid var(--ink)}
   .sp-table th.sp-w-idx{width:86px}
-  .sp-table td{padding:14px 18px 14px 0;border-bottom:1px solid var(--hairline);vertical-align:top}
+  .sp-table td{padding:9px 18px 9px 0;border-bottom:1px solid var(--hairline);vertical-align:top}
   .sp-table tr:last-child td{border-bottom:1px solid var(--ink)}
+  /* pending: no probability measured either side — dimmed so the eye skips it */
+  .sp-table tr.sp-pending{opacity:.5}
   .sp-idx{font-family:var(--mono);font-size:11px;color:var(--muted);white-space:nowrap}
-  .sp-target{display:block;font-family:var(--mono);font-size:10.5px;color:var(--muted);margin-top:4px}
   .sp-side{display:none}
   .sp-prompt{font-size:15.5px;line-height:1.5;margin:0}
   .sp-p .sp-prompt{color:var(--patient)}
   .sp-c .sp-prompt{color:var(--clinical)}
-  .sp-obs{font-family:var(--mono);font-size:12px;color:var(--muted);margin-top:6px}
+  .sp-obs{font-family:var(--mono);font-size:12px;color:var(--muted);margin-top:2px}
   .sp-p .sp-obs b{color:var(--patient);font-weight:600}
   .sp-c .sp-obs b{color:var(--clinical);font-weight:600}
   .sp-link{font-family:var(--mono);font-size:11px;color:var(--clinical);text-decoration:none;
@@ -213,17 +214,18 @@ body{font-size:16px}}
         var prov=pr.provenance||{};
         var tr=document.createElement('tr');
         if(typeof prov.notes==='string'&&prov.notes)tr.title=prov.notes;
+        // demote rows with no probability measured on either side (pending items)
+        var patM=prov.patient&&typeof prov.patient.observed_prob==='number';
+        var cliM=prov.clinical&&typeof prov.clinical.observed_prob==='number';
+        if(!patM&&!cliM)tr.className='sp-pending';
         var idx=document.createElement('td');
         var n=document.createElement('span');
         n.className='sp-idx';
-        n.textContent='#'+(prov.source_row!=null?prov.source_row:(i+1));
+        // ID and target on one line: "#2 · target: break" (token carries its leading space)
+        var idTxt='#'+(prov.source_row!=null?prov.source_row:(i+1));
+        if(pr.target_clinical_token!=null)idTxt+=' · target:'+pr.target_clinical_token;
+        n.textContent=idTxt;
         idx.appendChild(n);
-        if(pr.target_clinical_token!=null){
-          var t=document.createElement('span');
-          t.className='sp-target';
-          t.textContent='target:'+pr.target_clinical_token;
-          idx.appendChild(t);
-        }
         tr.appendChild(idx);
         tr.appendChild(cellFor('sp-p','patient phrasing',pr.bottom_prompt,'patient',prov.patient));
         tr.appendChild(cellFor('sp-c','clinical phrasing',pr.top_prompt,'clinical',prov.clinical));
