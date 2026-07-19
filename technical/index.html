@@ -398,6 +398,18 @@
       <span class="pend">figure pending: the lens readouts have not loaded</span>
     </div>
 
+    <h3>Where in the sentence</h3>
+    <p id="dd-tr-text">The layer axis above asks <em>when</em> the clinical answer forms.
+      This asks <em>where</em>: the same readout taken at every token position, not only
+      the last. A concept can be legible inside the sentence and still be absent at the
+      answer position — present internally, not carried to the point where the model
+      commits to its next word.</p>
+    <div class="fig" role="img" aria-label="Two stacked grids, one per wording, of token position by model layer for one measured pair. A cell is filled where the clinical answer appears in the top-8 lens readout at that position and layer, shaded darker for a stronger rank. The final row of each grid is the answer position; the patient grid shows whether the answer becomes legible at all under everyday wording." id="fig-transport">
+      <span class="pend">figure pending: the transport readout has not loaded</span>
+    </div>
+    <p class="stat-line" id="dd-tr-census"></p>
+    <p class="cap" id="cap-transport">exploratory · one measured pair, hosted Jacobian lens, top-8 readout per layer and position · darker = stronger rank · a blank cell is measured, not missing: the answer is simply not in the top-8 window there · coverage limited to runs saved with raw responses</p>
+
     <h3>The census, set by set</h3>
     <p>Every measured set, one row of squares per outcome class, one square per
       pair. New sets join as the nightly cycle measures them. The reviewed
@@ -1077,6 +1089,73 @@
     .catch(function(){
       document.getElementById('dd-head').textContent='data pending: the figures fill in when jlens_insights.json lands';
     });
+})();
+</script>
+<script>
+/* Part 3 · transport: per-position (position x layer) legibility for one exemplar pair.
+   Reads data/jlens_transport.json (engine export_jlens_transport.py). Exploratory;
+   self-contained (helpers re-declared per house convention). */
+(function(){
+  var NS='http://www.w3.org/2000/svg';
+  function el(n,a){var e=document.createElementNS(NS,n);for(var k in a)e.setAttribute(k,a[k]);return e;}
+  function txt(x,y,s,fill,size,anchor,mono){var t=el('text',{x:x,y:y,fill:fill,'font-size':size,
+    'text-anchor':anchor||'start','font-family':mono?'var(--mono)':'var(--serif)'});t.textContent=s;return t;}
+  function mount(id,svg){var h=document.getElementById(id);if(!h)return;h.textContent='';h.appendChild(svg);}
+  var CLIN='#15803d',PAT='#111827',MUT='#6d6c66',RED='#b4483d',RULE='#e7e5dd';
+  fetch('../data/jlens_transport.json',{cache:'no-cache'})
+    .then(function(r){if(!r.ok)throw 0;return r.json();})
+    .then(function(d){
+      var ex=d.exemplar; if(!ex||!ex.sides)throw 0;
+      var layers=(ex.layers&&ex.layers.length)?ex.layers:[]; if(!layers.length)throw 0;
+      var Lmax=layers[layers.length-1];
+      var W=700,LABEL=140,RPAD=60,gx0=LABEL,gx1=W-RPAD,gw=gx1-gx0,rowH=11;
+      function lx(layer){return gx0+(Lmax?layer/Lmax:0)*gw;}
+      function rows(side){
+        var out=[],t=side.tokens||[],g=side.grid||[],ans=side.answer_position;
+        for(var i=0;i<t.length;i++){
+          if(((t[i].token||'').trim())==='<bos>')continue;
+          out.push({label:t[i].token||'',ranks:g[i]||[],answer:(i===ans)});
+        }
+        return out;
+      }
+      var clinRows=rows(ex.sides.clinical),patRows=rows(ex.sides.patient);
+      var H=100+(clinRows.length+patRows.length)*rowH;
+      var svg=el('svg',{viewBox:'0 0 '+W+' '+H,role:'img'});
+      svg.appendChild(txt(0,14,'clinical answer: '+(ex.target||'—'),MUT,11,'start',true));
+      var y=34;
+      function drawSide(rws,title,color){
+        svg.appendChild(txt(LABEL-8,y,title,color,11.5,'end'));
+        y+=6;
+        rws.forEach(function(r){
+          var cy=y+rowH/2;
+          svg.appendChild(el('line',{x1:lx(0),x2:lx(Lmax),y1:cy,y2:cy,stroke:RULE,'stroke-width':0.7}));
+          svg.appendChild(txt(LABEL-8,cy+3,(r.label||'').replace(/^ /,'·'),MUT,9.5,'end',true));
+          for(var li=0;li<r.ranks.length;li++){
+            var rk=r.ranks[li]; if(rk==null)continue;
+            var op=0.9-(rk-1)/7*0.58, cw=Math.max(2.4,gw/Math.max(1,layers.length-1)*0.86);
+            svg.appendChild(el('rect',{x:lx(layers[li])-cw/2,y:cy-rowH*0.4,width:cw,height:rowH*0.8,
+              fill:color,opacity:op,rx:0.6}));
+          }
+          if(r.answer)svg.appendChild(txt(lx(Lmax)+7,cy+3,'answer',RED,9,'start',true));
+          y+=rowH;
+        });
+        y+=16;
+      }
+      drawSide(clinRows,'clinical wording',CLIN);
+      drawSide(patRows,'patient wording',PAT);
+      [0,Math.round(Lmax/2),Lmax].forEach(function(l){
+        svg.appendChild(txt(lx(l),y,'layer '+l,MUT,9.5,l===0?'start':(l===Lmax?'end':'middle'),true));
+      });
+      mount('fig-transport',svg);
+      var c=(d.census&&d.census.patient)||{n:0,reaches_answer:0,transport_gap:0,never_readable:0};
+      var tail=(c.never_readable>c.transport_gap)?' The failure is more often absence than lost transport.':'';
+      document.getElementById('dd-tr-census').textContent=
+        'Across '+c.n+' patient reading'+(c.n===1?'':'s')+' with saved per-position traces, the '+
+        'clinical answer reaches the answer position in '+c.reaches_answer+', is legible earlier in '+
+        'the sentence but gone by the answer in '+c.transport_gap+' (a transport gap), and never '+
+        'legible at any position in '+c.never_readable+'.'+tail;
+    })
+    .catch(function(){/* leave the pending span; graceful fallback */});
 })();
 </script>
 <script>
