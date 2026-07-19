@@ -227,8 +227,8 @@
 
   <section id="grammar">
   <h2 class="view-head">Swap the grammar</h2>
-  <p class="explainer">A 2×2 crossing wording (medical vs. patient, columns) with grammar (standard vs. nonstandard, rows). The live-traced item is a simulated palpitations case ending “driving him to the&nbsp;__”. Changing only the grammar adds +10–13% to “hospital”; changing only the words removes 10–13%.</p>
-  <span class="stat penalty">Variety shift Δ: +13% (A → B, 0.39 → 0.52) and +10% (C → D, 0.29 → 0.39) toward “hospital” · Register shift Δ: −10% (A → C) and −13% (B → D)</span>
+  <p class="explainer">A 2×2 crossing wording (medical vs. patient, columns) with grammar (standard vs. nonstandard, rows). The live-traced item is a simulated tachycardia case ending “heading to the&nbsp;__”. The top guess is “doctor” only in the standard-clinical cell; changing only the grammar drops it to a “doctor”/“gym” tie, and changing only the words redirects the top outright to “gym”.</p>
+  <span class="stat penalty">Top token by cell — A “doctor” 0.295 · B “gym” 0.177 (tied with “doctor” 0.177) · C “gym” 0.355 · D “gym” 0.289. “doctor” tops only cell A; the grammar swap (A → B) and the wording swap (A → C) each redirect the top toward “gym”.</span>
   <details class="trace-fold">
     <summary>Trace details</summary>
     <p class="traced" data-mode="4quadrant" data-traced="gemma-2-2b">
@@ -259,14 +259,14 @@
     </table>
   </div>
   <p class="qm-note">rows show the grammar, columns show the phrasing. The traced item:
-     A&nbsp;“My father says his heart has been experiencing palpitations again, so we are driving him to the&nbsp;__” ·
-     C&nbsp;the same frame with “fluttering and skipping” ·
-     B&nbsp;“My father say his heart been experiencing palpitations again, so we driving him to the&nbsp;__” ·
-     D&nbsp;the nonstandard frame with “fluttering and skipping”.</p>
+     A&nbsp;“Every time I climb the stairs I feel tachycardia, so this afternoon I am heading to the&nbsp;__” ·
+     C&nbsp;the same frame with “my heart racing” ·
+     B&nbsp;“Every time I be climbing them stairs I feel tachycardia, so this afternoon I be heading to the&nbsp;__” ·
+     D&nbsp;the nonstandard frame with “my heart racing”.</p>
   <h3 class="view-head">The full matrix: all four cells at once</h3>
   <div class="quad-wrap">
     <div class="embed">
-      <iframe class="live" src="../modes/4quadrant2/index_06.html" loading="lazy"
+      <iframe class="live" src="../modes/4quadrant2/index_07.html" loading="lazy"
               title="Interactive four-quadrant matrix factorizing vocabulary and grammar effects"></iframe>
     </div>
     <button class="quad-hit qh-tl" type="button" aria-label="Expand quadrant C (patient language, standard grammar)"><span>⤢</span></button>
@@ -281,20 +281,20 @@
   <h3 class="view-head">The four edges, one swap at a time</h3>
   <p class="view-sub">Each comparison isolates ONE cell swap. Features in both cells are dimmed to gray, so what stays at full ink is exactly what that swap changed.</p>
 
-  <p class="edge-head">Register shift, standard row · A → C (“experiencing palpitations” → “fluttering and skipping”) · Δ −10% on “hospital”</p>
-  <div class="embed"><iframe class="live" src="../modes/4quadrant2/index_06_register_standard.html" loading="lazy"
+  <p class="edge-head">Register shift, standard row · A → C (“tachycardia” → “my heart racing”) · top redirects “doctor” → “gym”</p>
+  <div class="embed"><iframe class="live" src="../modes/4quadrant2/index_07_register_standard.html" loading="lazy"
        title="Register shift within the standard-morphosyntax row, shared circuit dimmed"></iframe></div>
 
-  <p class="edge-head">Register shift, nonstandard row · B → D · Δ −13%</p>
-  <div class="embed"><iframe class="live" src="../modes/4quadrant2/index_06_register_nonstandard.html" loading="lazy"
+  <p class="edge-head">Register shift, nonstandard row · B → D · top holds “gym” (0.177 → 0.289)</p>
+  <div class="embed"><iframe class="live" src="../modes/4quadrant2/index_07_register_nonstandard.html" loading="lazy"
        title="Register shift within the nonstandard-morphosyntax row, shared circuit dimmed"></iframe></div>
 
-  <p class="edge-head">Variety shift, medical column · A → B (“says … has been … we are” → “say … been … we”) · Δ +13%</p>
-  <div class="embed"><iframe class="live" src="../modes/4quadrant2/index_06_variety_medical.html" loading="lazy"
+  <p class="edge-head">Variety shift, medical column · A → B (“I climb … I am heading” → “I be climbing … I be heading”) · top “doctor” → “gym”/“doctor” tie</p>
+  <div class="embed"><iframe class="live" src="../modes/4quadrant2/index_07_variety_medical.html" loading="lazy"
        title="Morphosyntax shift within the medical-lexicon column, shared circuit dimmed"></iframe></div>
 
-  <p class="edge-head">Variety shift, patient column · C → D · Δ +10%</p>
-  <div class="embed"><iframe class="live" src="../modes/4quadrant2/index_06_variety_patient.html" loading="lazy"
+  <p class="edge-head">Variety shift, patient column · C → D · top holds “gym” (0.355 → 0.289)</p>
+  <div class="embed"><iframe class="live" src="../modes/4quadrant2/index_07_variety_patient.html" loading="lazy"
        title="Morphosyntax shift within the patient-language column, shared circuit dimmed"></iframe></div>
   </details>
 
@@ -312,7 +312,7 @@
   <a class="back" href="../">← Back home</a>
 
   <div class="endnote">
-    <p>SIMULATED DATA · the phrasings here (scenario 85 and the four palpitations cells) were written by an LLM and passed the engine's automatic validators; they are not patient statements and contain no real personal or clinical data. The trace itself is a live gemma-2-2b run via the Neuronpedia circuit tracer.</p>
+    <p>SIMULATED DATA · the phrasings here (scenario 85 and the four tachycardia cells) were written by an LLM and passed the engine's automatic validators; they are not patient statements and contain no real personal or clinical data. The trace itself is a live gemma-2-2b run via the Neuronpedia circuit tracer.</p>
     <footer>
       Built with the <a href="https://github.com/michaeldgreenphd/patientwords-engine">patientwords-engine</a> pipeline
       on <a href="https://neuronpedia.org">Neuronpedia</a> ·
@@ -410,7 +410,7 @@
   function open(){
     if(!modal.querySelector('iframe')){
       var f=document.createElement('iframe');
-      f.src='../modes/4quadrant2/index_06.html';
+      f.src='../modes/4quadrant2/index_07.html';
       f.title='Four-quadrant matrix, full screen';
       modal.appendChild(f);
     }
