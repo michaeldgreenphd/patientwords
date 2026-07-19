@@ -52,6 +52,8 @@
     text-transform:uppercase;color:var(--muted);text-decoration:none;padding:2px 0}
   .masthead nav a:hover{color:var(--ink);text-decoration:underline;text-underline-offset:4px}
   .masthead nav a[aria-current=page]{color:var(--ink);border-bottom:1px solid var(--ink)}
+  /* 3 + 5 + 1 nav grouping by pure whitespace: after Technical and Phrase Dataset */
+  .masthead nav a:nth-child(3),.masthead nav a:nth-child(8){margin-right:2vw}
   .rule-heavy{border:0;border-top:2px solid var(--ink);margin:0}
   .rule-fine{border:0;border-top:1px solid var(--hairline);margin:3px 0 0}
 
@@ -118,20 +120,18 @@
   .flow-txt .tgt{color:#0f766e;font-weight:700;font-style:normal;font-family:var(--mono);font-size:14px}
   /* patch-holds cards de-boxed: a single color-coded top rule per outcome; grid gap separates them */
   .tx-g{display:grid;grid-template-columns:repeat(auto-fill,minmax(255px,1fr));gap:16px 22px;margin:12px 0 4px;align-items:start}
-  .tx{position:relative;background:none;border:0;border-top:3px solid var(--hairline);perspective:700px}
+  .tx{position:relative;background:none;border:0;border-top:3px solid var(--hairline)}
   .tx.rec{border-top-color:#0f766e}
   .tx.unrec{border-top-color:#9aa1ad}
   .tx.wors{border-top-color:#b45309}
-  .tx-inner{display:grid;position:relative;transform-style:preserve-3d;transition:transform .45s cubic-bezier(.2,.7,.3,1)}
-  .tx.flipped .tx-inner{transform:rotateY(180deg)}
-  @media (prefers-reduced-motion:reduce){.tx-inner{transition:none}}
-  .tx-face{grid-area:1/1;backface-visibility:hidden;-webkit-backface-visibility:hidden;
-    padding:9px 30px 9px 2px;min-width:0}
-  /* only the showing face sets the card height: compact front, roomy back */
-  .tx:not(.flipped) .tx-back{position:absolute;inset:0}
-  .tx.flipped .tx-front{position:absolute;inset:0;pointer-events:none}
+  /* flat in-place cross-fade: faces share one footprint; the visible face sets the card height */
+  .tx-inner{display:grid;position:relative}
+  .tx-face{grid-area:1/1;padding:9px 30px 9px 2px;min-width:0;transition:opacity .2s ease}
+  @media (prefers-reduced-motion:reduce){.tx-face{transition:none}}
+  /* the hidden face is lifted out of flow (compact front, roomy back) and faded out */
+  .tx:not(.flipped) .tx-back{position:absolute;inset:0;opacity:0;pointer-events:none}
+  .tx.flipped .tx-front{position:absolute;inset:0;opacity:0;pointer-events:none}
   .tx-front{display:flex;flex-direction:column;justify-content:center;min-height:52px;cursor:pointer}
-  .tx-back{transform:rotateY(180deg)}
   .tx .tx-k{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0 0 3px}
   .tx .tx-swap{font-family:var(--mono);font-size:12px;margin:0}
   .tx-flip{position:absolute;top:4px;right:4px;z-index:1;width:22px;height:22px;padding:0;border:0;

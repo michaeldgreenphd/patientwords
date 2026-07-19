@@ -51,6 +51,8 @@
     text-transform:uppercase;color:var(--muted);text-decoration:none;padding:2px 0}
   .masthead nav a:hover{color:var(--ink);text-decoration:underline;text-underline-offset:4px}
   .masthead nav a[aria-current=page]{color:var(--ink);border-bottom:1px solid var(--ink)}
+  /* 3 + 5 + 1 nav grouping by pure whitespace: after Technical and Phrase Dataset */
+  .masthead nav a:nth-child(3),.masthead nav a:nth-child(8){margin-right:2vw}
   .rule-heavy{border:0;border-top:2px solid var(--ink);margin:0}
   .rule-fine{border:0;border-top:1px solid var(--hairline);margin:3px 0 0}
 
@@ -59,7 +61,7 @@
     color:var(--muted);margin:34px 0 20px}
   .dateline b{color:var(--clinical);font-weight:600}
   h1{font-size:clamp(31px,5.4vw,46px);line-height:1.14;font-weight:600;
-    letter-spacing:-.006em;margin:0 0 26px}
+    letter-spacing:-.006em;margin:0 0 1rem}
   h1 .patient{color:var(--patient);font-weight:700}
   h1 .clinical{color:var(--clinical);font-weight:700}
   p.lede{font-size:18.5px;line-height:1.66;margin:0 0 16px}
@@ -67,6 +69,8 @@
   .keyline{font-family:var(--mono);font-size:12.5px;color:var(--muted);
     letter-spacing:.02em;margin:26px 0 0;line-height:2}
   .keyline .swatch{display:inline-block;width:9px;height:9px;margin:0 7px 0 0;vertical-align:baseline}
+  /* keyline lives as the color legend atop the first figure card */
+  .fig .keyline{grid-column:1/-1;margin:0 0 1.5rem}
 
   .specimen{border:1px solid var(--ink);background:#fff;margin:26px 0 8px}
   .spec-head{border-bottom:1px solid var(--hairline);padding:14px 18px 12px;margin:0}
@@ -284,7 +288,7 @@
   .skip:focus{left:8px}
   /* say-it-two-ways demo (front door; same widget pattern as start-here step 3,
      colors mapped to this page's semantic keyline) */
-  .tg{border:1px solid var(--hairline);background:#fff;padding:18px 20px;margin:18px 0 6px;max-width:640px}
+  .tg{border:1px solid var(--hairline);background:#fff;padding:18px 20px;margin:18px 0 2rem;max-width:640px}
   .tg-sentence{font-size:17px;line-height:1.6;margin:0 0 4px}
   .tg-swap{display:inline-block;border-bottom:2px solid var(--clinical);cursor:default}
   .tg.pat .tg-swap{border-bottom-color:var(--patient)}
@@ -341,18 +345,17 @@
   <p class="tg-cap">live measurements, scenario 85 · <a href="modes/simulated/pairs_20260707T171223Z/index_49.html">open the full trace</a> · <a href="simulated-scenarios/">browse all scenarios</a> · <a href="start-here/">new to this? start here →</a></p>
   <p class="hero-caveat" id="hero-caveat" hidden></p>
 
-  <p class="keyline">
-    <span class="swatch" style="background:#15803d"></span>clinical / recovery &nbsp;&nbsp;
-    <span class="swatch" style="background:#111827"></span>off-target (the patient-language direction) &nbsp;&nbsp;
-    <span class="swatch" style="background:#c3c9d2"></span>structural / context &nbsp;&nbsp;
-    <span class="swatch" style="background:#b4483d"></span>language penalty
-  </p>
-
   <div class="section-head">
     <h2>Four comparison engines</h2>
   </div>
 
   <a class="fig" href="wording-differences/#word">
+    <p class="keyline">
+      <span class="swatch" style="background:#15803d"></span>clinical / recovery &nbsp;&nbsp;
+      <span class="swatch" style="background:#111827"></span>off-target (the patient-language direction) &nbsp;&nbsp;
+      <span class="swatch" style="background:#c3c9d2"></span>structural / context &nbsp;&nbsp;
+      <span class="swatch" style="background:#b4483d"></span>language penalty
+    </p>
     <figure class="fig-media">
       <div class="embed preview"><div class="frame">
         <iframe class="live" src="modes/simulated/featured_sim85/index_01.html" loading="lazy"
