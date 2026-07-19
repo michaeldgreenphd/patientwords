@@ -98,6 +98,16 @@
   .retrace-line{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.04em;margin:6px 0 0}
   .retrace-line a{color:var(--muted)}
   .provenance .pv-cost{color:var(--clinical);font-weight:600}
+  /* urgency-by-model: dense borderless table (Model · Downgrades · Upgrades) */
+  .urg-tbl{border-collapse:collapse;margin:9px 0 12px;font-family:var(--mono);font-size:11.5px;
+    font-variant-numeric:tabular-nums}
+  .urg-tbl th{color:var(--muted);font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+    font-size:9.5px;padding:0 0 5px;border-bottom:1px solid var(--hairline);white-space:nowrap;text-align:left}
+  .urg-tbl td{padding:3px 0;color:var(--ink);border:0;white-space:nowrap}
+  .urg-tbl th.num,.urg-tbl td.num{text-align:right;padding-left:30px}
+  .urg-tbl td.dn{color:var(--penalty);font-weight:600}
+  .urg-tbl td.up{color:var(--clinical);font-weight:600}
+  .urg-tbl tr:last-child td{padding-bottom:0}
 
   /* study timeline strip (drawn at load from ../data/timeline.json) */
   .tl{margin:8px 0 0;padding:10px 16px 8px;border:1px solid var(--hairline);background:#fff}
@@ -192,11 +202,24 @@
   .sum-table th[data-key].sorted::after{content:" ▾";color:var(--clinical)}
   .sum-table th[data-key].sorted.asc::after{content:" ▴"}
   .sum-empty{font-family:var(--mono);font-size:12px;color:var(--muted);padding:14px 0}
-  .sum-pages{font-family:var(--mono);font-size:12px;margin:14px 0 0;display:flex;gap:8px;flex-wrap:wrap}
-  .sum-pages a{color:var(--muted);text-decoration:none;border:1px solid var(--hairline);
-    padding:3px 9px}
-  .sum-pages a:hover{color:var(--ink);border-color:var(--ink)}
-  .sum-pages a[aria-current=page]{color:#fff;background:var(--clinical);border-color:var(--clinical)}
+  /* pager: clean text-based prev/next, no bordered blocks */
+  .sum-pages{font-family:var(--mono);font-size:12px;margin:18px 0 0;display:flex;gap:12px;
+    flex-wrap:wrap;align-items:baseline;justify-content:center}
+  .sum-pages a{color:var(--clinical);text-decoration:none;letter-spacing:.02em}
+  .sum-pages a:hover{text-decoration:underline;text-underline-offset:3px}
+  .sum-pages a:focus-visible{outline:2px solid var(--clinical);outline-offset:2px;border-radius:1px}
+  .sum-pages .sum-pg-off{color:var(--structural)}
+  .sum-pages .sum-pg-range{color:var(--muted)}
+  .sum-pages .sum-pg-sep{color:var(--structural)}
+  /* SIM-column expander (+ / −) and the revealed full-prompt detail row */
+  .sim-exp{all:unset;cursor:pointer;font-family:var(--mono);font-size:13px;line-height:1;
+    color:var(--structural);margin-right:8px;padding:0 1px}
+  .sim-exp:hover,.sim-exp[aria-expanded=true]{color:var(--clinical)}
+  .sim-exp:focus-visible{outline:2px solid var(--clinical);outline-offset:2px;border-radius:1px}
+  .sum-table .sim-detail td{position:static;left:auto;background:var(--paper);
+    border-bottom:1px solid var(--hairline);padding:2px 16px 12px 0}
+  .sim-detail .sd-body{border-left:2px solid var(--hairline);padding:6px 0 2px 14px;max-width:96ch}
+  .sd-tgt{font-family:var(--mono);font-size:11px;color:var(--muted);margin:6px 0 0;letter-spacing:.02em}
   .sum-mass{min-width:120px}
   .mass-line{display:grid;grid-template-columns:3ch 1fr 4ch;gap:0 6px;align-items:center;
     font-family:var(--mono);font-size:10px;color:var(--muted)}
@@ -273,19 +296,30 @@
   .kx .kx-nums .pen{color:var(--penalty)}
   .kx .kx-steer{font-size:13.5px;color:var(--muted);margin:6px 0 0}
   .kx .kx-steer b{color:var(--clinical)}
-  /* advice swaps: de-boxed — a clean 2-col grid; a hairline divides the columns */
-  .rx-g{display:grid;grid-template-columns:1fr 1fr;gap:14px 0;margin:12px 0 4px}
-  .rx{border:0;background:none;padding:8px 0}
+  /* advice-changes gallery: de-boxed — a clean 2-col grid; a hairline divides the columns */
+  .rx-g{display:grid;grid-template-columns:1fr 1fr;gap:18px 0;margin:14px 0 4px}
+  .rx{border:0;background:none;padding:2px 0}
   .rx:nth-child(odd){padding-right:28px}
   .rx:nth-child(even){padding-left:28px;border-left:1px solid var(--hairline)}
   @media(max-width:620px){.rx-g{grid-template-columns:1fr}
     .rx:nth-child(odd){padding-right:0}
     .rx:nth-child(even){padding-left:0;border-left:0}}
-  .rx .rx-swap{font-family:var(--mono);font-size:12.5px;margin:0 0 6px}
-  .rx .rx-arrow{color:var(--muted)}
+  /* shared bracketed-pivot sentence (gallery + SIM detail rows) */
+  .rx-sent{display:block;font-size:14px;line-height:1.5;color:var(--ink);margin:0 0 5px}
+  .rx-role{font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--muted);margin-right:7px}
+  .rx-sent-c .rx-role{color:var(--clinical)}
+  .rx-sent-p .rx-role{color:var(--patient)}
+  .rx-piv{font-family:var(--mono);font-size:13px;font-weight:600}
+  .rx-sent-c .rx-piv{color:var(--clinical)}
+  .rx-sent-p .rx-piv{color:var(--penalty)}
+  .rx-blank{color:var(--structural);letter-spacing:.05em}
+  .rx .rx-out{font-family:var(--mono);font-size:12.5px;margin:7px 0 0;line-height:1.55}
+  .rx .rx-arrowd{color:var(--muted)}
   .rx .rx-c{color:var(--clinical);font-weight:600}
   .rx .rx-p{color:var(--penalty);font-weight:600}
-  .rx .rx-why{font-size:12.5px;color:var(--muted);line-height:1.45}
+  .rx .rx-tier{color:var(--muted)}
+  .rx .rx-sim{color:var(--structural)}
   .embed-caption{font-family:var(--mono);font-size:11px;color:var(--muted);
     letter-spacing:.04em;margin:0 0 8px}
   .embed-caption a{color:var(--muted)}
@@ -524,7 +558,7 @@
   function mag(x){return Math.round(Math.abs(x)*100)+'%';}  // unsigned magnitude for directional columns
   function p2(x){return typeof x==='number'?x.toFixed(2):'—';}
   function pad(n){return String(n).padStart(2,'0');}
-  var PAGE_SIZE=15;
+  var PAGE_SIZE=50;
 
   // Med-circuit meter: share of feature attribution on clinical-tagged
   // features, one bar per phrasing on a shared 0-1 scale - the quantitative
@@ -647,28 +681,55 @@
 
       var prov=document.getElementById('sim-provenance');
       if(urg&&urg.summary){
-        var uline=el('div');
-        uline.appendChild(el('span',null,'Urgency view — '));
         // phrase-deduped per-model tallies (engine collector): each phrase counts
         // once per model, so re-traces cannot inflate the headline split. Older
         // payloads lack the field — fall back to the pooled flip_classes tally.
         var updm=urg.summary.per_model_deduped;
         var uids=(updm&&Object.keys(updm).length)?Object.keys(updm):null;
         if(uids){
-          uids.forEach(function(mid,i){
-            var d=updm[mid]||{};
-            if(i)uline.appendChild(el('span',null,' · '));
-            uline.appendChild(el('b',null,mid+': '+(d.downgrades||0)+' downgrades vs '+(d.upgrades||0)+' upgrades'));
+          var uIntro=el('div');
+          uIntro.appendChild(el('b',null,'Urgency view'));
+          uIntro.appendChild(el('span',null,' — downgrades vs upgrades by model (phrase-deduped: each phrase counted once per model, re-traces collapsed).'));
+          prov.appendChild(uIntro);
+          // dense, borderless table; most downgrades first (safety-relevant first)
+          var uorder=uids.slice().sort(function(a,b){
+            var da=updm[a]||{},db=updm[b]||{};
+            return (db.downgrades||0)-(da.downgrades||0)
+              ||(db.upgrades||0)-(da.upgrades||0)||(a<b?-1:a>b?1:0);
           });
-          uline.appendChild(el('span',null,' (phrase-deduped — each phrase counted once per model; re-traces collapsed). Care-urgency tier vocabulary: '));
+          var utbl=el('table','urg-tbl');
+          var uhead=el('tr');
+          var uthM=el('th',null,'Model'); uthM.setAttribute('scope','col');
+          var uthD=el('th','num','Downgrades'); uthD.setAttribute('scope','col');
+          var uthU=el('th','num','Upgrades'); uthU.setAttribute('scope','col');
+          uhead.appendChild(uthM);uhead.appendChild(uthD);uhead.appendChild(uthU);
+          var uthead=el('thead');uthead.appendChild(uhead);utbl.appendChild(uthead);
+          var utbody=el('tbody');
+          uorder.forEach(function(mid){
+            var d=updm[mid]||{};
+            var r=el('tr');
+            r.appendChild(el('td',null,mid));
+            r.appendChild(el('td','num dn',String(d.downgrades||0)));
+            r.appendChild(el('td','num up',String(d.upgrades||0)));
+            utbody.appendChild(r);
+          });
+          utbl.appendChild(utbody);
+          prov.appendChild(utbl);
+          var uOut=el('div');
+          uOut.appendChild(el('span',null,'Care-urgency tier vocabulary: '));
+          uOut.appendChild(el('b',null,urg.vocabulary_status||'owner-reviewed v1 · domain review pending'));
+          uOut.appendChild(el('span',null,'; the Urgency column reads from the measured urgency data.'));
+          prov.appendChild(uOut);
         }else{
+          var uline=el('div');
+          uline.appendChild(el('span',null,'Urgency view — '));
           var fc=urg.summary.flip_classes||{};
           uline.appendChild(el('b',null,(fc.downgrade||0)+' downgrade flips vs '+(fc.upgrade||0)+' upgrades'));
           uline.appendChild(el('span',null,' across models. Care-urgency tier vocabulary: '));
+          uline.appendChild(el('b',null,urg.vocabulary_status||'owner-reviewed v1 · domain review pending'));
+          uline.appendChild(el('span',null,'; the Urgency column reads from the measured urgency data.'));
+          prov.appendChild(uline);
         }
-        uline.appendChild(el('b',null,urg.vocabulary_status||'owner-reviewed v1 · domain review pending'));
-        uline.appendChild(el('span',null,'; the Urgency column reads from the measured urgency data.'));
-        prov.appendChild(uline);
       }
       prov.hidden=false;
 
@@ -717,6 +778,27 @@
         }
       }
 
+      // Full bracketed-pivot sentence: the shared frame with the swapped span
+      // in [brackets], ending at the next-token probe. Used by the advice-changes
+      // gallery and the SIM-column detail rows. (function decl → hoisted.)
+      function pivotSentence(role,prompt,term,cls){
+        var p=el('span','rx-sent rx-sent-'+cls);
+        p.appendChild(el('span','rx-role',role));
+        p.appendChild(el('span',null,'“'));
+        var i=(prompt||'').indexOf(term||'');
+        if(term&&i>=0){
+          if(i>0)p.appendChild(el('span',null,prompt.slice(0,i)));
+          p.appendChild(el('span','rx-piv','['+term+']'));
+          p.appendChild(el('span',null,prompt.slice(i+term.length)));
+        }else{
+          p.appendChild(el('span',null,prompt||''));
+        }
+        p.appendChild(el('span',null,' '));
+        p.appendChild(el('span','rx-blank','___'));
+        p.appendChild(el('span',null,'”'));
+        return p;
+      }
+
       // Redirect gallery — flips where the patient top lands on a lower-tier
       // (or untiered) object than the clinical top: the advice itself changed.
       if(urg&&urg.rows){
@@ -736,22 +818,28 @@
           picks.forEach(function(u){
             var s=byKey[u.batch+'#'+u.index];
             var c=el('div','rx');
-            var sw=el('p','rx-swap');
-            sw.appendChild(el('span','rx-c','“'+s.spread_clinical[0][0]+'”'));
-            sw.appendChild(el('span','rx-arrow',' → '));
-            sw.appendChild(el('span','rx-p','“'+s.spread_patient[0][0]+'”'));
-            c.appendChild(sw);
-            var why=el('p','rx-why');
-            why.appendChild(el('span',null,'“'+(s.patient_term||'')+'” for “'+(s.clinical_term||'')+'”: '));
-            var tierTxt='tier '+u.tier_top_clinical+' → '
-              +(typeof u.tier_top_patient==='number'?('tier '+u.tier_top_patient):'untiered');
-            var tt=el('span','tip',tierTxt);
+            // full bracketed sentence template — the linguistic pivot in context
+            c.appendChild(pivotSentence('clinical',s.clinical_prompt,s.clinical_term,'c'));
+            c.appendChild(pivotSentence('patient',s.patient_prompt,s.patient_term,'p'));
+            // outcome: ↳ "patient top" / "clinical top" (Tier p: word ← Tier c: word) · Sim N
+            var clinTop=(s.spread_clinical&&s.spread_clinical[0]&&s.spread_clinical[0][0])||'—';
+            var patTop=(s.spread_patient&&s.spread_patient[0]&&s.spread_patient[0][0])||'—';
+            var clinT=u.tier_top_clinical, patT=u.tier_top_patient;
+            var out=el('p','rx-out');
+            out.appendChild(el('span','rx-arrowd','↳ '));
+            out.appendChild(el('b','rx-p','“'+patTop+'”'));
+            out.appendChild(el('span',null,' / '));
+            out.appendChild(el('b','rx-c','“'+clinTop+'”'));
+            out.appendChild(el('span',null,' '));
+            var tierStr=(typeof patT==='number'?('Tier '+patT+': '+patTop):('untiered: '+patTop))
+              +' ← Tier '+clinT+': '+clinTop;
+            var tt=el('span','rx-tier tip','('+tierStr+')');
             tt.setAttribute('tabindex','0');
             tt.setAttribute('data-tip','Care-urgency tiers (owner-reviewed v1, domain review pending): 4 emergency · 3 specialist · '
               +'2 general doctor · 1 self-treatment or medication · 0 no care action');
-            why.appendChild(tt);
-            why.appendChild(el('span',null,' · Sim '+s.index));
-            c.appendChild(why);
+            out.appendChild(tt);
+            out.appendChild(el('span','rx-sim',' · Sim '+s.index));
+            c.appendChild(out);
             rg.appendChild(c);
           });
           document.getElementById('redir-ex').hidden=false;
@@ -760,6 +848,7 @@
 
       var sumBody=document.getElementById('sim-sum-body');
       var pages=document.getElementById('sim-pages');
+      var currentPage=1,pageCount=1,totalRows=0;
       var sortKey=null,sortDir=-1,filterText='',filterTopic='',filterStatus='';
       var filterSpec='',filterSub='',subRowReset=function(){};
 
@@ -792,11 +881,54 @@
       }
       setTracedLabel();
 
+      // SIM-column expander: build (once) and toggle a detail row with the two
+      // full prompts, revealed directly beneath the row. Lazily inserted so the
+      // 748-row table stays light; shares data-page so pagination hides it too.
+      function detailFor(s){
+        var dtr=el('tr','sim-detail');
+        var td=el('td'); td.colSpan=7;
+        var body=el('div','sd-body');
+        body.appendChild(pivotSentence('clinical',s.clinical_prompt,s.clinical_term,'c'));
+        body.appendChild(pivotSentence('patient',s.patient_prompt,s.patient_term,'p'));
+        if(s.intended_target)
+          body.appendChild(el('p','sd-tgt','next-token probe · intended target “'+String(s.intended_target).trim()+'”'));
+        td.appendChild(body);
+        dtr.appendChild(td);
+        return dtr;
+      }
+      function toggleDetail(tr,s,btn){
+        var nx=tr.nextElementSibling;
+        if(nx&&nx.classList.contains('sim-detail')){
+          var open=nx.getAttribute('data-open')==='1';
+          nx.setAttribute('data-open',open?'0':'1');
+          nx.style.display=open?'none':'';
+          btn.textContent=open?'+':'–';
+          btn.setAttribute('aria-expanded',open?'false':'true');
+          return;
+        }
+        var dtr=detailFor(s);
+        dtr.setAttribute('data-page',tr.getAttribute('data-page'));
+        dtr.setAttribute('data-open','1');
+        tr.parentNode.insertBefore(dtr,tr.nextSibling);
+        btn.textContent='–';
+        btn.setAttribute('aria-expanded','true');
+      }
+
       function rowFor(s){
         var tr=document.createElement('tr');
         var has=hasModel(s);
         var m=has?cur(s):{};   // measurements for the selected model
         var idx=el('td','sum-idx');
+        // lightweight expander for the full prompts (does not navigate the row)
+        var exp=el('button','sim-exp','+');
+        exp.type='button';
+        exp.setAttribute('aria-expanded','false');
+        exp.setAttribute('aria-label','Show the full clinical and patient prompts for Sim '+pad(s.index));
+        exp.addEventListener('click',function(ev){
+          ev.stopPropagation();ev.preventDefault();
+          toggleDetail(tr,s,exp);
+        });
+        idx.appendChild(exp);
         var jump=el('a',null,'Sim '+pad(s.index));
         jump.href='scenario.html?sim='+s.index
           +(currentModel!==baseModel?'&model='+encodeURIComponent(currentModel):'');
@@ -804,7 +936,7 @@
         idx.appendChild(jump);
         tr.appendChild(idx);
         tr.addEventListener('click',function(e){
-          if(e.target.closest&&e.target.closest('a'))return;
+          if(e.target.closest&&(e.target.closest('a')||e.target.closest('.sim-exp')))return;
           location.href=jump.href;
         });
         // the swapped wording is the phrase itself - identical across models
@@ -921,42 +1053,62 @@
         return list;
       }
       function showPage(n){
-        sumBody.querySelectorAll('tr').forEach(function(tr){
-          tr.style.display=tr.getAttribute('data-page')===String(n)?'':'none';
+        currentPage=n;
+        Array.prototype.forEach.call(sumBody.children,function(tr){
+          var onPage=tr.getAttribute('data-page')===String(n);
+          if(tr.classList.contains('sim-detail')){
+            // a revealed detail row shows only on its page and while expanded
+            tr.style.display=(onPage&&tr.getAttribute('data-open')==='1')?'':'none';
+          }else{
+            tr.style.display=onPage?'':'none';
+          }
         });
-        pages.querySelectorAll('a').forEach(function(a){
-          if(a.textContent===String(n))a.setAttribute('aria-current','page');
-          else a.removeAttribute('aria-current');
-        });
+        renderPager();
+      }
+      // clean text-based pager: ← Previous 50 · n–m of T · Next 50 →
+      function renderPager(){
+        pages.textContent='';
+        if(pageCount<=1)return;
+        function nav(label,target,enabled){
+          if(!enabled)return el('span','sum-pg-off',label);
+          var a=el('a',null,label);
+          a.href='#sim-summary';
+          a.addEventListener('click',function(ev){
+            ev.preventDefault();
+            showPage(target);
+            var top=document.getElementById('sim-summary');
+            if(top)top.scrollIntoView({block:'start'});
+          });
+          return a;
+        }
+        var lo=(currentPage-1)*PAGE_SIZE+1, hi=Math.min(currentPage*PAGE_SIZE,totalRows);
+        pages.appendChild(nav('← Previous '+PAGE_SIZE,currentPage-1,currentPage>1));
+        pages.appendChild(el('span','sum-pg-sep','·'));
+        pages.appendChild(el('span','sum-pg-range',lo+'–'+hi+' of '+totalRows));
+        pages.appendChild(el('span','sum-pg-sep','·'));
+        pages.appendChild(nav('Next '+PAGE_SIZE+' →',currentPage+1,currentPage<pageCount));
       }
       function renderTable(){
         var list=visibleScenarios();
         sumBody.textContent='';
         pages.textContent='';
-        list.forEach(function(s,i){
-          var tr=rowFor(s);
-          tr.setAttribute('data-page',String(Math.floor(i/PAGE_SIZE)+1));
-          sumBody.appendChild(tr);
-        });
         if(!list.length){
           var tr=document.createElement('tr');
           var td=el('td','sum-empty','no scenarios match; clear the filters');
           td.colSpan=7;
           tr.appendChild(td);
           sumBody.appendChild(tr);
+          totalRows=0;pageCount=1;currentPage=1;
           return;
         }
-        var pageCount=Math.ceil(list.length/PAGE_SIZE);
-        if(pageCount>1){
-          for(var n=1;n<=pageCount;n++){
-            (function(n){
-              var a=el('a',null,String(n));
-              a.href='#sim-summary';
-              a.addEventListener('click',function(ev){ev.preventDefault();showPage(n);});
-              pages.appendChild(a);
-            })(n);
-          }
-        }
+        list.forEach(function(s,i){
+          var tr=rowFor(s);
+          tr.setAttribute('data-page',String(Math.floor(i/PAGE_SIZE)+1));
+          sumBody.appendChild(tr);
+        });
+        totalRows=list.length;
+        pageCount=Math.ceil(list.length/PAGE_SIZE);
+        currentPage=1;
         showPage(1);
       }
       renderTable();
