@@ -333,18 +333,23 @@
           td('num',String(s.top_lost));
           body.appendChild(tr);
         });
-        var base=per['gemma-2-2b'];
-        var others=ids.filter(function(id){return id!=='gemma-2-2b';});
-        if(base&&others.length){
-          var oParts=others.map(function(id){return id+' '+pp(per[id].mean_recovery);});
-          document.getElementById('tx-scale-finding').textContent=
-            'Read across the corpus, the recovery is uneven. On the base model gemma-2-2b it is strong ('+
-            pp(base.mean_recovery)+', '+Math.round(base.share_recovery_positive*100)+
-            '% of phrases helped, '+base.top_restored+' top predictions restored and '+base.top_lost+
-            ' lost). On the larger instruction-tuned models it is weak and uneven ('+oParts.join(', ')+
-            ') — so the recovery seen on the curated downgrade set holds at scale for gemma-2-2b, yet '+
-            'does not generalize uniformly across models.';
+        // family-aware, data-driven summary; names only measured models, states
+        // medical models only when present, every number from d.per_model at runtime.
+        function famIds(f){return ids.filter(function(id){return (per[id].family||'other')===f;});}
+        function say(id){var s=per[id];return id+' '+pp(s.mean_recovery)+' (median '+pp(s.median_recovery)
+          +', '+Math.round(s.share_recovery_positive*100)+'% helped, n='+s.n+')';}
+        var baseIds=famIds('base'), itIds=famIds('instruction-tuned'), medIds=famIds('medical');
+        var parts=['Measured across the translated corpus (exploratory), the same rewrite produces a small average lift that varies by model.'];
+        if(baseIds.length) parts.push('Base models — '+baseIds.map(say).join('; ')+'.');
+        if(itIds.length){
+          var it='Instruction-tuned models — '+itIds.map(say).join('; ')+'.';
+          if(itIds.every(function(id){return per[id].mean_recovery>0&&Math.abs(per[id].median_recovery)<0.01;}))
+            it='Instruction-tuned models — '+itIds.map(say).join('; ')
+              +' — the mean lift is positive but the median is near zero, so it concentrates in a minority of phrases rather than shifting the corpus.';
+          parts.push(it);
         }
+        if(medIds.length) parts.push('Medically tuned models — '+medIds.map(say).join('; ')+'.');
+        document.getElementById('tx-scale-finding').textContent=parts.join(' ');
         document.getElementById('tx-scale-text').textContent=
           'The same LLM translation, applied to every measured phrase ('+maxN+
           ' so far) and scored by next-word probability on each model. Mean recovery is what the '+
