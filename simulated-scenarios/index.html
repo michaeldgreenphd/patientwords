@@ -784,7 +784,7 @@
       function pivotSentence(role,prompt,term,cls){
         var p=el('span','rx-sent rx-sent-'+cls);
         p.appendChild(el('span','rx-role',role));
-        p.appendChild(el('span',null,'“'));
+        p.appendChild(el('span',null,'"'));   // straight quotes: these are verbatim examples
         var i=(prompt||'').indexOf(term||'');
         if(term&&i>=0){
           if(i>0)p.appendChild(el('span',null,prompt.slice(0,i)));
@@ -795,7 +795,7 @@
         }
         p.appendChild(el('span',null,' '));
         p.appendChild(el('span','rx-blank','___'));
-        p.appendChild(el('span',null,'”'));
+        p.appendChild(el('span',null,'"'));
         return p;
       }
 
@@ -803,16 +803,37 @@
       // (or untiered) object than the clinical top: the advice itself changed.
       if(urg&&urg.rows){
         var byKey={};scenarios.forEach(function(s){byKey[s.batch+'#'+s.batch_index]=s;});
+        // Feature the strongest, most legible downgrades: rank by tier drop first,
+        // then favor clean whole-word predictions (not wordpiece fragments like
+        // "ant" for antacid) and decisive redirects (higher patient-top prob), and
+        // cap repeats of the same downgraded answer so the gallery isn't six
+        // near-identical "→ doctor" cards. Every pick is a real measured flip.
+        var FRAG={ant:1,anti:1,inhal:1,lax:1,sed:1,xan:1,amb:1,gi:1};
+        function tokClean(t){t=(t||'').trim();
+          return /^[A-Za-z][A-Za-z'’-]{2,}$/.test(t)&&!FRAG[t.toLowerCase()];}
         var picks=urg.rows.filter(function(u){
           var s=byKey[u.batch+'#'+u.index];
           return u.model==='gemma-2-2b'&&u.flip_class==='downgrade'
             &&typeof u.tier_top_clinical==='number'
             &&s&&(s.spread_clinical||[]).length&&(s.spread_patient||[]).length;
-        }).sort(function(a,b){
-          var ta=(typeof a.tier_top_patient==='number')?a.tier_top_patient:-0.5;
-          var tb=(typeof b.tier_top_patient==='number')?b.tier_top_patient:-0.5;
-          return (ta-a.tier_top_clinical)-(tb-b.tier_top_clinical);
-        }).slice(0,6);
+        }).map(function(u){
+          var s=byKey[u.batch+'#'+u.index];
+          var ct=s.spread_clinical[0][0], pt=s.spread_patient[0][0];
+          var pp=(typeof s.spread_patient[0][1]==='number')?s.spread_patient[0][1]:0;
+          var patT=(typeof u.tier_top_patient==='number')?u.tier_top_patient:-0.5;
+          var clean=tokClean(ct)&&tokClean(pt);
+          return {u:u,pt:(pt||'').toLowerCase(),ctl:(ct||'').toLowerCase(),
+            score:(u.tier_top_clinical-patT)*100+(clean?40:0)+pp*10, idx:s.index};
+        }).sort(function(a,b){return (b.score-a.score)||(a.idx-b.idx);});
+        // diversity: ≤2 cards sharing the same downgraded answer, and one card per
+        // clinical answer, so the six are distinct advice-changes, not variations.
+        var capPt={}, capCt={}, chosen=[];
+        picks.forEach(function(x){
+          if(chosen.length>=6)return;
+          if((capPt[x.pt]||0)>=2||(capCt[x.ctl]||0)>=1)return;
+          capPt[x.pt]=(capPt[x.pt]||0)+1; capCt[x.ctl]=(capCt[x.ctl]||0)+1; chosen.push(x.u);
+        });
+        picks=chosen;
         if(picks.length){
           var rg=document.getElementById('rx-cards');
           picks.forEach(function(u){
@@ -827,9 +848,9 @@
             var clinT=u.tier_top_clinical, patT=u.tier_top_patient;
             var out=el('p','rx-out');
             out.appendChild(el('span','rx-arrowd','↳ '));
-            out.appendChild(el('b','rx-p','“'+patTop+'”'));
+            out.appendChild(el('b','rx-p','"'+patTop+'"'));
             out.appendChild(el('span',null,' / '));
-            out.appendChild(el('b','rx-c','“'+clinTop+'”'));
+            out.appendChild(el('b','rx-c','"'+clinTop+'"'));
             out.appendChild(el('span',null,' '));
             var tierStr=(typeof patT==='number'?('Tier '+patT+': '+patTop):('untiered: '+patTop))
               +' ← Tier '+clinT+': '+clinTop;
@@ -891,7 +912,7 @@
         body.appendChild(pivotSentence('clinical',s.clinical_prompt,s.clinical_term,'c'));
         body.appendChild(pivotSentence('patient',s.patient_prompt,s.patient_term,'p'));
         if(s.intended_target)
-          body.appendChild(el('p','sd-tgt','next-token probe · intended target “'+String(s.intended_target).trim()+'”'));
+          body.appendChild(el('p','sd-tgt','next-token probe · intended target "'+String(s.intended_target).trim()+'"'));
         td.appendChild(body);
         dtr.appendChild(td);
         return dtr;
