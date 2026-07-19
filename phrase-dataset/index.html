@@ -84,6 +84,15 @@
   .sp-link:hover,.sp-link:focus-visible{border-color:var(--clinical)}
   .sp-caption{font-size:15.5px;line-height:1.62;margin:0 0 10px}
   .sp-foot{font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--muted);margin:0 0 46px}
+  /* pagination: text-only, no chrome (Tufte) */
+  .sp-pager{font-family:var(--mono);font-size:12px;margin:16px 0 4px;display:flex;gap:12px;
+    flex-wrap:wrap;align-items:baseline;justify-content:center}
+  .sp-pager a{color:var(--clinical);text-decoration:none;letter-spacing:.02em;cursor:pointer}
+  .sp-pager a:hover{text-decoration:underline;text-underline-offset:3px}
+  .sp-pager a:focus-visible{outline:2px solid var(--clinical);outline-offset:2px;border-radius:1px}
+  .sp-pager .sp-pg-off{color:var(--structural)}
+  .sp-pager .sp-pg-state{color:var(--muted)}
+  .sp-pager .sp-pg-sep{color:var(--structural)}
   .back{display:inline-block;margin-top:18px;font-family:var(--mono);font-size:12px;
     letter-spacing:.1em;text-transform:uppercase;color:var(--ink);text-decoration:none;
     border-bottom:1px solid var(--ink);padding-bottom:2px}
@@ -143,6 +152,7 @@ body{font-size:16px}}
         <tbody id="sp-body"></tbody>
       </table>
     </div>
+    <nav class="sp-pager" id="sp-pager" aria-label="Phrase table pages"></nav>
     <p class="sp-caption">
       Next-token probabilities as observed at measurement time.
     </p>
@@ -232,6 +242,41 @@ body{font-size:16px}}
         tb.appendChild(tr);
       });
       document.getElementById('sp-count').textContent=pairs.length+' hand-measured pairs';
+
+      // Pagination — 10 rows per page; text-only nav, no chrome (Tufte).
+      (function paginate(){
+        var rowsPerPage=10;
+        var rows=Array.prototype.slice.call(tb.querySelectorAll('tr'));
+        var pageCount=Math.max(1,Math.ceil(rows.length/rowsPerPage));
+        var currentPage=1;
+        var pager=document.getElementById('sp-pager');
+        function mk(tag,cls,txt){var e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e;}
+        function showPage(nn){
+          currentPage=Math.min(Math.max(1,nn),pageCount);
+          var start=(currentPage-1)*rowsPerPage,end=start+rowsPerPage;
+          rows.forEach(function(tr,i){tr.style.display=(i>=start&&i<end)?'':'none';});
+          renderPager();
+        }
+        function renderPager(){
+          if(!pager)return;
+          pager.textContent='';
+          if(pageCount<=1)return;   // a single page needs no controls
+          function nav(label,target,enabled){
+            if(!enabled)return mk('span','sp-pg-off',label);
+            var a=mk('a',null,label);
+            a.href='#phrase-dataset';
+            a.addEventListener('click',function(ev){ev.preventDefault();showPage(target);});
+            return a;
+          }
+          pager.appendChild(nav('← Previous',currentPage-1,currentPage>1));
+          pager.appendChild(mk('span','sp-pg-sep','·'));
+          pager.appendChild(mk('span','sp-pg-state','Page '+currentPage+' of '+pageCount));
+          pager.appendChild(mk('span','sp-pg-sep','·'));
+          pager.appendChild(nav('Next →',currentPage+1,currentPage<pageCount));
+        }
+        showPage(1);
+      })();
+
       sec.hidden=false;
     })
     .catch(function(){sec.hidden=true;});
