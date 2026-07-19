@@ -1147,6 +1147,9 @@
       function render(ex){
         var layers=ex.layers,Lmax=layers[layers.length-1];
         function lx(layer){return gx0+(Lmax?layer/Lmax:0)*gw;}
+        // link the predicted token to the pair's circuit-tracer graph when one is
+        // committed; otherwise to the live Neuronpedia lens for the prompt
+        var renderUrl=ex.render?('../'+ex.render):null;
         var clinRows=rows(ex.sides.clinical),patRows=rows(ex.sides.patient);
         var H=100+(clinRows.length+patRows.length)*rowH;
         var svg=el('svg',{viewBox:'0 0 '+W+' '+H});
@@ -1182,18 +1185,19 @@
             }
             if(r.answer){
               if(ans&&ans.token){
-                // the model's ACTUAL top prediction here: green if it is the clinical
-                // target, penalty red if off-target; linked to the live lens trace
-                var oc=ans.on_target?CLIN:RED;
+                // the model's ACTUAL top prediction here: clinical green if it is the
+                // clinical target, muted grey if off-target; linked to its trace
+                var oc=ans.on_target?CLIN:MUT;
                 var pct=(typeof ans.prob==='number')?' ('+Math.round(ans.prob*100)+'%)':'';
                 var lbl=el('text',{x:lx(Lmax)+10,y:cy+3,fill:oc,'font-size':9,'text-anchor':'start','font-family':'var(--mono)'});
                 lbl.appendChild(document.createTextNode('→ “'+ans.token+'”'+pct));
                 var arw=el('tspan',{'class':'tr-arrow'});arw.appendChild(document.createTextNode(' ↗'));
                 lbl.appendChild(arw);
-                if(ans.trace_url){
+                var href=renderUrl||ans.trace_url;
+                if(href){
                   var a=el('a',{'class':'tr-ans'});
-                  a.setAttribute('href',ans.trace_url);a.setAttribute('target','_blank');a.setAttribute('rel','noopener');
-                  a.setAttribute('aria-label','Live Neuronpedia lens for this prompt — model predicts “'+ans.token+'”'+pct);
+                  a.setAttribute('href',href);a.setAttribute('target','_blank');a.setAttribute('rel','noopener');
+                  a.setAttribute('aria-label',(renderUrl?'Open the circuit-tracer graph for this pair':'Live Neuronpedia lens for this prompt')+' — model predicts “'+ans.token+'”'+pct);
                   a.appendChild(lbl);svg.appendChild(a);
                 }else{svg.appendChild(lbl);}
               }else{
