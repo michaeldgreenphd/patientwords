@@ -242,6 +242,28 @@
   footer{font-family:var(--mono);font-size:12px;line-height:1.9;color:var(--muted)}
   footer a{color:var(--muted);text-underline-offset:3px}
   footer a:hover{color:var(--ink)}
+  /* J-space illustrative schematic — hand-authored concept diagram, NOT a live trace */
+  .jspace{margin:20px 0 12px}
+  .jspace-cap{font-family:var(--mono);font-size:11.5px;color:var(--muted);line-height:1.7;max-width:680px;margin:0 0 15px}
+  .jspace-cap b{color:var(--ink);font-weight:600}
+  .jspace-grid{display:grid;gap:18px 22px}
+  .jspace-3{grid-template-columns:repeat(3,1fr)}
+  .jspace-2{grid-template-columns:repeat(2,1fr)}
+  .jspanel{display:flex;flex-direction:column;align-items:center;text-align:center}
+  .jspanel-head{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:0 0 9px}
+  .jspanel-in{font-size:14px;line-height:1.45;margin:0;font-style:italic;color:var(--ink);max-width:200px}
+  .jspanel-in .trig{font-style:normal;font-weight:600;border-bottom:2px solid var(--structural)}
+  .jsflow{width:0;height:15px;border-left:1px dashed var(--structural);margin:6px 0}
+  .jsxlate{font-family:var(--mono);font-size:10px;letter-spacing:.05em;color:var(--muted);border:1px solid var(--hairline);border-radius:11px;padding:2px 10px}
+  .jsspace{position:relative;border:1px dashed var(--structural);border-radius:9px;padding:12px 11px 10px;display:flex;flex-wrap:wrap;gap:5px;justify-content:center;max-width:210px}
+  .jsspace-lbl{position:absolute;top:-8px;left:11px;background:var(--paper);padding:0 5px;font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+  .jspill{font-family:var(--mono);font-size:11px;letter-spacing:.03em;padding:2px 9px;border:1px solid var(--structural);border-radius:11px;color:var(--muted);white-space:nowrap}
+  .jspill-clin{border-color:var(--clinical);color:var(--clinical)}
+  .jspill-off{border-color:var(--muted);color:var(--muted)}
+  .jsout{font-family:var(--mono);font-size:12.5px;padding:4px 14px;border-radius:13px;border:1px solid var(--hairline);font-weight:600}
+  .jsout-ok{border-color:var(--clinical);color:var(--clinical)}
+  .jsout-off{border-color:var(--penalty);color:var(--penalty)}
+  @media (max-width:560px){.jspace-3,.jspace-2{grid-template-columns:1fr}}
   @media (max-width:760px){body{font-size:16px}}
 </style>
 </head>
@@ -324,6 +346,37 @@
       where the answer formed and was lost than where it never formed. The
       fourth amendment, adopted July 17, registers the steering-by-class
       test on post-adoption batches.</p>
+    <figure class="jspace">
+      <p class="jspace-cap"><b>Why translation works: it changes which concepts are active.</b> Illustrative schematic — the example words and concept tags are hand-authored, not a measurement; the live readings are in Part 3. Clinical wording lights up medical concepts inside the model (the “J-space” the Jacobian lens reads) and the answer forms; patient wording lights up everyday concepts and the answer is redirected; rewriting the wording back into clinical terms restores the medical concepts, and the answer recovers.</p>
+      <div class="jspace-grid jspace-3" role="img" aria-label="Three panels. A, clinical wording ‘my dyspepsia flared up’ activates the concepts medical, gastrointestinal and treatment, and the model outputs antacid. B, patient wording ‘my stomach’s on fire’ activates food, spicy and casual, and the model outputs ice cream. C, translation rewrites the patient wording into clinical terms, which re-activates the medical and antacid concepts, and the model recovers the output antacid.">
+        <div class="jspanel">
+          <div class="jspanel-head">A · Clinical wording</div>
+          <p class="jspanel-in">“My <span class="trig">dyspepsia</span> flared up.”</p>
+          <div class="jsflow"></div>
+          <div class="jsspace"><span class="jsspace-lbl">J-space</span><span class="jspill jspill-clin">medical</span><span class="jspill jspill-clin">gastrointestinal</span><span class="jspill jspill-clin">treatment</span></div>
+          <div class="jsflow"></div>
+          <div class="jsout jsout-ok">antacid</div>
+        </div>
+        <div class="jspanel">
+          <div class="jspanel-head">B · Patient wording</div>
+          <p class="jspanel-in">“My stomach’s on <span class="trig">fire</span>.”</p>
+          <div class="jsflow"></div>
+          <div class="jsspace"><span class="jsspace-lbl">J-space</span><span class="jspill jspill-off">food</span><span class="jspill jspill-off">spicy</span><span class="jspill jspill-off">casual</span></div>
+          <div class="jsflow"></div>
+          <div class="jsout jsout-off">ice cream</div>
+        </div>
+        <div class="jspanel">
+          <div class="jspanel-head">C · Translation</div>
+          <p class="jspanel-in">“My stomach’s on <span class="trig">fire</span>.”</p>
+          <div class="jsflow"></div>
+          <div class="jsxlate">rewrite → clinical terms</div>
+          <div class="jsflow"></div>
+          <div class="jsspace"><span class="jsspace-lbl">J-space</span><span class="jspill jspill-clin">medical</span><span class="jspill jspill-clin">antacid</span></div>
+          <div class="jsflow"></div>
+          <div class="jsout jsout-ok">antacid</div>
+        </div>
+      </div>
+    </figure>
   </section>
 
   <section id="data">

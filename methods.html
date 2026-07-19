@@ -75,6 +75,17 @@
   .tags li.t-offtarget::before{background:var(--penalty)}
   .tags li.t-structural::before{background:var(--structural)}
   .tags b{font-weight:600}
+  /* Step 3 · circuit-share sparkline (schematic of the measured direction, not exact proportions) */
+  .cshare{margin:6px 0 4px;max-width:560px}
+  .cshare-row{display:grid;grid-template-columns:116px 1fr;gap:12px;align-items:center;margin:0 0 7px}
+  .cshare-lbl{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.02em;text-align:right}
+  .cshare-bar{display:flex;height:14px}
+  .cshare-seg{height:100%}
+  .cs-clin{background:var(--clinical)}
+  .cs-off{background:var(--penalty)}
+  .cs-struct{background:var(--structural)}
+  .cshare-cap{font-family:var(--mono);font-size:11px;color:var(--muted);line-height:1.65;margin:8px 0 14px;max-width:560px}
+  @media (max-width:560px){.cshare-row{grid-template-columns:1fr;gap:2px}.cshare-lbl{text-align:left}}
   .engines{margin:6px 0 14px;padding:0;list-style:none}
   .engines li{border-bottom:1px solid var(--hairline);padding:12px 0}
   .engines li:last-child{border-bottom:0}
@@ -145,11 +156,48 @@
   .four-views .eng-name{font-weight:600;display:block;margin:0 0 3px}
   .four-views p{margin:0;font-size:15.5px;line-height:1.55}
   @media (max-width:560px){.four-views{grid-template-columns:1fr;gap:14px}}
-  /* Limitations · a divider list; whitespace and rules carry the structure, not bold leads */
-  .limits{list-style:none;margin:10px 0 16px;padding:0}
-  .limits li{border-bottom:1px solid var(--hairline);padding:16px 0;font-size:16px;line-height:1.66}
-  .limits li:first-child{padding-top:4px}
-  .limits li:last-child{border-bottom:0}
+  /* Step 4 · tiny spark-graphics abstracting each view's layout (the header names the view) */
+  .four-views .spark{height:30px;display:flex;align-items:center;gap:5px;margin:3px 0 0}
+  .spark-stack{flex-direction:column;align-items:flex-start;gap:4px;width:92px}
+  .spark-stack span{height:9px;border-radius:2px}
+  .spark-stack .sp-clin{background:var(--clinical);opacity:.85;width:100%}
+  .spark-stack .sp-pat{background:var(--patient);opacity:.65;width:78%}
+  .four-views .spark-grid{display:grid;grid-template-columns:15px 15px;grid-template-rows:12px 12px;gap:3px;align-items:stretch}
+  .spark-grid span{background:var(--structural);opacity:.4;border-radius:1px}
+  .spark-grid span:first-child{background:var(--clinical);opacity:.8}
+  .spark-fan .sp-anchor{width:4px;height:26px;background:var(--clinical);border-radius:2px}
+  .spark-fan .sp-vars{display:flex;flex-direction:column;gap:4px}
+  .spark-fan .sp-var{height:5px;background:var(--structural);border-radius:2px}
+  .spark-xlate .sp-from{width:26px;height:9px;background:var(--patient);opacity:.65;border-radius:2px}
+  .spark-xlate .sp-arrow{width:0;height:0;border-top:5px solid transparent;border-bottom:5px solid transparent;border-left:7px solid var(--muted)}
+  .spark-xlate .sp-to{width:26px;height:9px;background:var(--clinical);opacity:.85;border-radius:2px}
+  /* J-space illustrative schematic — hand-authored concept diagram, NOT a live trace */
+  .jspace{margin:20px 0 12px}
+  .jspace-cap{font-family:var(--mono);font-size:11.5px;color:var(--muted);line-height:1.7;max-width:680px;margin:0 0 15px}
+  .jspace-cap b{color:var(--ink);font-weight:600}
+  .jspace-grid{display:grid;gap:18px 22px}
+  .jspace-3{grid-template-columns:repeat(3,1fr)}
+  .jspace-2{grid-template-columns:repeat(2,1fr)}
+  .jspanel{display:flex;flex-direction:column;align-items:center;text-align:center}
+  .jspanel-head{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:0 0 9px}
+  .jspanel-in{font-size:14px;line-height:1.45;margin:0;font-style:italic;color:var(--ink);max-width:200px}
+  .jspanel-in .trig{font-style:normal;font-weight:600;border-bottom:2px solid var(--structural)}
+  .jsflow{width:0;height:15px;border-left:1px dashed var(--structural);margin:6px 0}
+  .jsxlate{font-family:var(--mono);font-size:10px;letter-spacing:.05em;color:var(--muted);border:1px solid var(--hairline);border-radius:11px;padding:2px 10px}
+  .jsspace{position:relative;border:1px dashed var(--structural);border-radius:9px;padding:12px 11px 10px;display:flex;flex-wrap:wrap;gap:5px;justify-content:center;max-width:210px}
+  .jsspace-lbl{position:absolute;top:-8px;left:11px;background:var(--paper);padding:0 5px;font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+  .jspill{font-family:var(--mono);font-size:11px;letter-spacing:.03em;padding:2px 9px;border:1px solid var(--structural);border-radius:11px;color:var(--muted);white-space:nowrap}
+  .jspill-clin{border-color:var(--clinical);color:var(--clinical)}
+  .jspill-off{border-color:var(--muted);color:var(--muted)}
+  .jsout{font-family:var(--mono);font-size:12.5px;padding:4px 14px;border-radius:13px;border:1px solid var(--hairline);font-weight:600}
+  .jsout-ok{border-color:var(--clinical);color:var(--clinical)}
+  .jsout-off{border-color:var(--penalty);color:var(--penalty)}
+  @media (max-width:560px){.jspace-3,.jspace-2{grid-template-columns:1fr}}
+  /* Limitations · a scannable run-in list; whitespace and bold leads carry the structure, no rules */
+  .limits{list-style:none;margin:12px 0 16px;padding:0}
+  .limits li{margin:0 0 15px;font-size:16px;line-height:1.66}
+  .limits li:last-child{margin-bottom:0}
+  .limits li b{font-weight:600}
 
   @media (max-width:760px){
     .masthead nav{gap:8px 22px}
@@ -268,10 +316,25 @@
       <li class="t-structural"><b>Structural</b>: scaffolding features for syntax,
         position, and punctuation that appear in every trace and carry no medical content.</li>
     </ul>
-    <p>
-      The three-way split makes two graphs comparable: when the wording is how
-      patients speak, the clinical share of the circuit falls and the off-target share rises.
-    </p>
+    <div class="cshare" role="img" aria-label="Schematic: under patient wording the clinical share of the circuit falls and the off-target share rises, while the structural scaffolding stays roughly constant.">
+      <div class="cshare-row">
+        <span class="cshare-lbl">clinical phrasing</span>
+        <span class="cshare-bar">
+          <span class="cshare-seg cs-clin" style="width:34%"></span>
+          <span class="cshare-seg cs-off" style="width:15%"></span>
+          <span class="cshare-seg cs-struct" style="width:51%"></span>
+        </span>
+      </div>
+      <div class="cshare-row">
+        <span class="cshare-lbl">patient phrasing</span>
+        <span class="cshare-bar">
+          <span class="cshare-seg cs-clin" style="width:27%"></span>
+          <span class="cshare-seg cs-off" style="width:22%"></span>
+          <span class="cshare-seg cs-struct" style="width:51%"></span>
+        </span>
+      </div>
+    </div>
+    <p class="cshare-cap">Schematic of the direction, not exact proportions: under patient wording the clinical share of the circuit (green) falls and the off-target share (red) rises; the structural scaffolding (grey) stays roughly constant. Only the clinical share is measured — it falls in most re-traced pairs.</p>
   </section>
 
   <section id="step-4">
@@ -283,21 +346,51 @@
     <ul class="four-views">
       <li>
         <span class="eng-name">Wording: the word swap</span>
-        <p>Two stacked traces of the same sentence.</p>
+        <div class="spark spark-stack" role="img" aria-label="Shown as two stacked traces of the same sentence.">
+          <span class="sp-clin"></span><span class="sp-pat"></span>
+        </div>
       </li>
       <li>
         <span class="eng-name">Wording: the grammar swap</span>
-        <p>A 2×2 grid crossing the medical keyword with the surrounding frame, separating the vocabulary effect from the grammar effect.</p>
+        <div class="spark spark-grid" role="img" aria-label="Shown as a 2 by 2 grid crossing the medical keyword with the surrounding frame, separating the vocabulary effect from the grammar effect.">
+          <span></span><span></span><span></span><span></span>
+        </div>
       </li>
       <li>
         <span class="eng-name">Dialect Differences</span>
-        <p>The clinical term is held fixed while the surrounding syntax is re-traced across dialect and register variants.</p>
+        <div class="spark spark-fan" role="img" aria-label="The clinical term held fixed while the surrounding syntax is re-traced across dialect and register variants.">
+          <span class="sp-anchor"></span>
+          <span class="sp-vars"><span class="sp-var" style="width:32px"></span><span class="sp-var" style="width:22px"></span><span class="sp-var" style="width:36px"></span><span class="sp-var" style="width:26px"></span></span>
+        </div>
       </li>
       <li>
         <span class="eng-name">Translation</span>
-        <p>An LLM rewrites the patient sentence in clinical terms, and the rewrite is traced to show the circuit and prediction recover together.</p>
+        <div class="spark spark-xlate" role="img" aria-label="The patient sentence rewritten in clinical terms until the circuit and prediction recover together.">
+          <span class="sp-from"></span><span class="sp-arrow"></span><span class="sp-to"></span>
+        </div>
       </li>
     </ul>
+    <figure class="jspace">
+      <p class="jspace-cap"><b>What the wording changes, before the answer.</b> Illustrative schematic — the example words and concept tags are hand-authored, not a measurement. Clinical wording lights up medical concepts inside the model (the “J-space” the Jacobian lens reads); the same situation in patient words lights up everyday ones, and that redirects the next word. The <a href="technical/#application">technical page</a> adds a third panel, where translating the wording back restores the medical concepts.</p>
+      <div class="jspace-grid jspace-2" role="img" aria-label="Two panels. A, clinical wording ‘my dyspepsia flared up’ activates the concepts medical, gastrointestinal and treatment, and the model outputs antacid. B, patient wording ‘my stomach’s on fire’ activates food, spicy and casual, and the model outputs ice cream.">
+        <div class="jspanel">
+          <div class="jspanel-head">A · Clinical wording</div>
+          <p class="jspanel-in">“My <span class="trig">dyspepsia</span> flared up.”</p>
+          <div class="jsflow"></div>
+          <div class="jsspace"><span class="jsspace-lbl">J-space</span><span class="jspill jspill-clin">medical</span><span class="jspill jspill-clin">gastrointestinal</span><span class="jspill jspill-clin">treatment</span></div>
+          <div class="jsflow"></div>
+          <div class="jsout jsout-ok">antacid</div>
+        </div>
+        <div class="jspanel">
+          <div class="jspanel-head">B · Patient wording</div>
+          <p class="jspanel-in">“My stomach’s on <span class="trig">fire</span>.”</p>
+          <div class="jsflow"></div>
+          <div class="jsspace"><span class="jsspace-lbl">J-space</span><span class="jspill jspill-off">food</span><span class="jspill jspill-off">spicy</span><span class="jspill jspill-off">casual</span></div>
+          <div class="jsflow"></div>
+          <div class="jsout jsout-off">ice cream</div>
+        </div>
+      </div>
+    </figure>
     <p>
       Every render is a self-contained HTML file.
     </p>
@@ -357,12 +450,6 @@
       model would say if forced to answer at each of its 26 layers: ranked words, one
       list per layer. Two questions per pair: where does the clinical answer become
       readable, and does it survive to the output.
-    </p>
-    <p>
-      The pair below asks for a word after &ldquo;so I might need to take a&rdquo;.
-      Under the clinical wording the answer is readable from layer 10 and reaches
-      first place by layer 19. Under the everyday wording it appears 9 layers later,
-      never rises past second place, and is gone at the output.
     </p>
     <div class="rl-figwrap"><div id="rl-fig"><span class="rl-pend">figure pending: the depth census has not loaded</span></div></div>
     <p class="rl-cap">
@@ -521,12 +608,12 @@
     <h2>What this evidence does and does not show</h2>
     <p>This project measures how the probability of a single next word changes when clinical wording is replaced by patient wording. That is a probe of model behavior, not a clinical outcome.</p>
     <ul class="limits">
-      <li>One small model carries the circuit evidence. Every graph here comes from gemma-2-2b, chosen because its transcoders are public. The behavioral checks on the other seven models measure next-word probabilities only, no circuits. None of this shows how larger systems behave. The one medically tuned model measured, medgemma-4b-it (4B parameters, next-word behavior only), still shows a below-zero penalty: −3.9 pp, 95% CI [−5.9, −2.0], on 337 phrases.</li>
-      <li>Attribution graphs are an interpretive tool. They reconstruct the model’s computation through features and prune heavily; error nodes absorb what’s missed.</li>
-      <li>Feature labels are machine-generated. The clinical / off-target categories come from keyword-matching auto-interp descriptions. Both steps can be wrong, and a mislabeled feature shifts the clinical-mass numbers.</li>
-      <li>Measurements are a point in time. The probabilities were observed on specific dates against a hosted service. The <span id="lim-rt-n">52</span> pairs re-traced so far reproduce exactly at the recorded three-decimal precision (see step 2), but that is the set that happened to be repeated, not a guarantee. Future drift would come from service changes; a daily three-pair sentinel re-trace watches for that.</li>
-      <li>Translation can fail. The fix in the Translation figure is itself an LLM step.</li>
-      <li>The stimuli are constructed. Most phrase pairs were written by a language model and checked automatically, not collected from patients.</li>
+      <li><b>One small model carries the circuit evidence.</b> Every graph here comes from gemma-2-2b, chosen because its transcoders are public. The behavioral checks on the other seven models measure next-word probabilities only, no circuits. None of this shows how larger systems behave. The one medically tuned model measured, medgemma-4b-it (4B parameters, next-word behavior only), still shows a below-zero penalty: −3.9 pp, 95% CI [−5.9, −2.0], on 337 phrases.</li>
+      <li><b>Attribution graphs are an interpretive tool.</b> They reconstruct the model’s computation through features and prune heavily; error nodes absorb what’s missed.</li>
+      <li><b>Feature labels are machine-generated.</b> The clinical / off-target categories come from keyword-matching auto-interp descriptions. Both steps can be wrong, and a mislabeled feature shifts the clinical-mass numbers.</li>
+      <li><b>Measurements are a point in time.</b> The probabilities were observed on specific dates against a hosted service. The <span id="lim-rt-n">52</span> pairs re-traced so far reproduce exactly at the recorded three-decimal precision (see step 2), but that is the set that happened to be repeated, not a guarantee. Future drift would come from service changes; a daily three-pair sentinel re-trace watches for that.</li>
+      <li><b>Translation can fail.</b> The fix in the Translation figure is itself an LLM step.</li>
+      <li><b>The stimuli are constructed.</b> Most phrase pairs were written by a language model and checked automatically, not collected from patients.</li>
     </ul>
     <p>Nothing here is medical advice, and no part of this pipeline is a deployed clinical tool. The claim is narrower: on the models measured, the same situation phrased in patient words is measurably less likely to reach the clinical answer than in clinical terms — and the circuit view shows where that difference arises.</p>
   </section>
@@ -594,6 +681,20 @@
           el('line',{x1:lx-6,y1:cy+6,x2:lx+6,y2:cy-6,stroke:'#b4483d','stroke-width':2},svg);
         }
       });
+      // direct annotations, positioned from the data (not hardcoded): where the
+      // clinical answer first reaches rank 1, and where the everyday answer is gone.
+      var firstPlace=null;
+      for(var fp=0;fp<L;fp++){if(ex.clin_ranks[String(fp)]===1){firstPlace=fp;break;}}
+      if(firstPlace!=null){
+        var fx=xAt(firstPlace)+CELL/2, fy=laneY[0]+CELL;
+        el('line',{x1:fx,y1:fy+3,x2:fx,y2:fy+15,stroke:'#c3c9d2','stroke-width':1},svg);
+        txt(svg,fx,fy+26,'clinical answer reaches first place',{'font-size':9.5,fill:'#15803d','text-anchor':'middle'});
+      }
+      if(!ex.pat_ranks[String(L-1)]){
+        var gx=xAt(L-1)+CELL/2, gy=laneY[1]+CELL;
+        el('line',{x1:gx,y1:gy+3,x2:gx,y2:gy+13,stroke:'#c3c9d2','stroke-width':1},svg);
+        txt(svg,gx,gy+24,'gone at output',{'font-size':9.5,fill:'#b4483d','text-anchor':'end'});
+      }
       var PMAX=Math.max(ex.clean_prob*1.2,Math.max.apply(null,ex.patched.filter(function(v){return v!=null;}))*1.08);
       function py(p){return probTop+PLOT_H*(1-p/PMAX);}
       txt(svg,0,probTop-24,'patch each layer',{'font-size':12,fill:'#1c1c19',
