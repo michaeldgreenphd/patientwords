@@ -133,7 +133,12 @@
   .dlm .term{font-weight:600}
   /* target inline beside the term (was a forced line break) to halve the term column's height */
   .dlm .tgt{color:var(--muted);font-weight:400;font-size:10.5px;margin-left:6px;white-space:nowrap}
-  .dlm .flipmark{color:var(--penalty);margin-left:3px}
+  /* baseline sentence frame under the term (mono, muted) — shows what generated the row */
+  .dlm .dl-base{display:block;font-family:var(--mono);font-size:10px;line-height:1.45;
+    color:var(--muted);letter-spacing:.01em;white-space:normal;max-width:38ch;margin:3px 0 0}
+  /* a flip (top prediction changed) is marked by a hairline underline on the value itself, no extra glyph */
+  .dlm .dl-flip{text-decoration:underline;text-decoration-color:var(--penalty);
+    text-decoration-thickness:1px;text-underline-offset:2px}
   .functag{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.04em;
     color:var(--muted);white-space:nowrap;margin-top:1px}
   .dlm a{font-size:10.5px;color:var(--muted)}
@@ -246,13 +251,13 @@
       </table>
     </div>
     <p class="dl-caption">Each cell is one traced sentence (n=1): the change in p(target) when
-       that framing replaces standard English. Column labels are the instructions given to the
-       generating LLM, not community samples. A red
-       <span class="flipmark">&#9679;</span> marks a framing that also flips the model&rsquo;s top
-       prediction away from the baseline target; hover a cell for the new top prediction. Rows whose
-       target is a function word (&ldquo;my&rdquo;, &ldquo;the&rdquo;) are tagged and their flips sit
-       outside the headline count. <span id="dl-noise"></span>Click any row to open that
-       term&rsquo;s standalone render.</p>
+       that framing replaces standard English &mdash; clinical green for a gain, penalty red for a
+       loss. Column labels are the instructions given to the generating LLM, not community samples.
+       An underlined value marks a framing that also flips the model&rsquo;s top prediction away
+       from the baseline target; hover any cell for its exact sentence and the new top prediction.
+       Rows whose target is a function word (&ldquo;my&rdquo;, &ldquo;the&rdquo;) are tagged and
+       their flips sit outside the headline count. <span id="dl-noise"></span>Click any row to open
+       that term&rsquo;s standalone render.</p>
   </section>
 
   <section id="dl-featured" hidden>
@@ -397,6 +402,8 @@
         td.appendChild(tspan);
         td.appendChild(el('span','tgt',String.fromCharCode(8594)+' '+(it.target_token||'?')));
         if(isFunc)td.appendChild(el('span','functag','function-word target'));
+        // baseline sentence frame, pulled verbatim from the data (the ___ is the next-token probe)
+        if(it.baseline_prompt)td.appendChild(el('span','dl-base','base: '+String.fromCharCode(8220)+it.baseline_prompt+' ___'+String.fromCharCode(8221)));
         row.appendChild(td);
         var bp=el('td','num',it.baseline_p==null?String.fromCharCode(8212):pct(it.baseline_p));
         row.appendChild(bp);
@@ -408,10 +415,11 @@
           cells++;
           var s=el('span',v.delta>0?'dpos':(v.delta<0?'dneg':null),fmtD(v.delta));
           c.appendChild(s);
-          c.title=v.prompt+' '+String.fromCharCode(8594)+' top: '+(v.top_token||'?')+
+          // hover shows the exact framed sentence the LLM evaluated for this term × dialect cell
+          c.title=String.fromCharCode(8220)+v.prompt+String.fromCharCode(8221)+' '+String.fromCharCode(8594)+' top: '+(v.top_token||'?')+
             (v.top_p!=null?' ('+pct(v.top_p)+')':'');
-          if(v.flip){if(isFunc)funcFlips++;else flips++;
-            var fm=el('span','flipmark',String.fromCharCode(9679));c.appendChild(fm);}
+          // flip carried by underlining the value itself (color + sign already carry the delta)
+          if(v.flip){if(isFunc)funcFlips++;else flips++;s.classList.add('dl-flip');}
           c.setAttribute('aria-label',fmtD(v.delta)+(v.flip?' (flips top prediction)':'')+
             ' '+String.fromCharCode(183)+' '+c.title);
           row.appendChild(c);
