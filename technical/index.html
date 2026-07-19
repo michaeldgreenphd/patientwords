@@ -64,6 +64,11 @@
   section p{margin:0 0 14px;font-size:16px;line-height:1.66}
   .fig{margin:6px 0 4px;overflow-x:auto}
   .fig svg{display:block;width:100%;height:auto}
+  /* transport figure: the predicted-token deep-link (minimal; arrow reveals on hover) */
+  #fig-transport a.tr-ans{text-decoration:none;cursor:pointer}
+  #fig-transport a.tr-ans:focus-visible{outline:2px solid var(--clinical);outline-offset:2px}
+  #fig-transport .tr-arrow{opacity:0}
+  #fig-transport a.tr-ans:hover .tr-arrow,#fig-transport a.tr-ans:focus-visible .tr-arrow{opacity:.75}
   /* charts float in negative space: no frame survives, whatever draws them */
   .fig,.fig svg,.figwrap,.figwrap svg,#forest,#forest svg,#dumbbells,#dumbbells svg,
   #ad-blocks,#ad-blocks svg,.conv-panel svg{
@@ -415,7 +420,7 @@
       answer position — present internally, not carried to the point where the model
       commits to its next word.</p>
     <div id="tr-tabs" class="chip-g" role="group" aria-label="Choose an example pair"></div>
-    <div class="fig" role="img" aria-label="Two stacked grids, one per wording, of token position by model layer for one measured pair. A cell is filled where the clinical answer appears in the top-8 lens readout at that position and layer, shaded darker for a stronger rank. The final row of each grid is the answer position; the patient grid shows whether the answer becomes legible at all under everyday wording." id="fig-transport">
+    <div class="fig" id="fig-transport">
       <span class="pend">figure pending: the transport readout has not loaded</span>
     </div>
     <p class="stat-line" id="dd-tr-census"></p>
@@ -1130,7 +1135,7 @@
       var exs=(d.exemplars&&d.exemplars.length)?d.exemplars:(d.exemplar?[d.exemplar]:[]);
       exs=exs.filter(function(e){return e&&e.sides&&e.layers&&e.layers.length;});
       if(!exs.length)throw 0;
-      var W=700,LABEL=140,RPAD=60,gx0=LABEL,gx1=W-RPAD,gw=gx1-gx0,rowH=11;
+      var W=800,LABEL=140,RPAD=160,gx0=LABEL,gx1=W-RPAD,gw=gx1-gx0,rowH=11;
       function rows(side){
         var out=[],t=side.tokens||[],g=side.grid||[],ans=side.answer_position;
         for(var i=0;i<t.length;i++){
@@ -1144,10 +1149,14 @@
         function lx(layer){return gx0+(Lmax?layer/Lmax:0)*gw;}
         var clinRows=rows(ex.sides.clinical),patRows=rows(ex.sides.patient);
         var H=100+(clinRows.length+patRows.length)*rowH;
-        var svg=el('svg',{viewBox:'0 0 '+W+' '+H,role:'img'});
-        svg.appendChild(txt(0,14,'clinical answer: '+(ex.target||'—'),MUT,11,'start',true));
-        var y=34;
-        function drawSide(rws,title,color){
+        var svg=el('svg',{viewBox:'0 0 '+W+' '+H});
+        var ttl=el('title',{});
+        ttl.textContent='Token position by model layer for the pair whose clinical answer is '+
+          (ex.target||'this pair')+', under clinical then patient wording. The right edge of each grid '+
+          'shows the model’s actual top prediction and its probability.';
+        svg.appendChild(ttl);
+        var y=20;
+        function drawSide(rws,title,color,ans){
           svg.appendChild(txt(LABEL-8,y,title,color,11.5,'end'));
           y+=6;
           rws.forEach(function(r){
@@ -1171,22 +1180,36 @@
               svg.appendChild(el('rect',{x:lx(layers[li])-cw/2,y:cy-rowH*0.4,width:cw,height:rowH*0.8,
                 fill:color,opacity:op,rx:0.6}));
             }
-            if(r.answer)svg.appendChild(txt(lx(Lmax)+7,cy+3,'answer',RED,9,'start',true));
+            if(r.answer){
+              if(ans&&ans.token){
+                // the model's ACTUAL top prediction here: green if it is the clinical
+                // target, penalty red if off-target; linked to the live lens trace
+                var oc=ans.on_target?CLIN:RED;
+                var pct=(typeof ans.prob==='number')?' ('+Math.round(ans.prob*100)+'%)':'';
+                var lbl=el('text',{x:lx(Lmax)+10,y:cy+3,fill:oc,'font-size':9,'text-anchor':'start','font-family':'var(--mono)'});
+                lbl.appendChild(document.createTextNode('→ “'+ans.token+'”'+pct));
+                var arw=el('tspan',{'class':'tr-arrow'});arw.appendChild(document.createTextNode(' ↗'));
+                lbl.appendChild(arw);
+                if(ans.trace_url){
+                  var a=el('a',{'class':'tr-ans'});
+                  a.setAttribute('href',ans.trace_url);a.setAttribute('target','_blank');a.setAttribute('rel','noopener');
+                  a.setAttribute('aria-label','Live Neuronpedia lens for this prompt — model predicts “'+ans.token+'”'+pct);
+                  a.appendChild(lbl);svg.appendChild(a);
+                }else{svg.appendChild(lbl);}
+              }else{
+                svg.appendChild(txt(lx(Lmax)+10,cy+3,'answer',MUT,9,'start',true));
+              }
+            }
             y+=rowH;
           });
           y+=16;
         }
-        drawSide(clinRows,'clinical wording',CLIN);
-        drawSide(patRows,'patient wording',PAT);
+        drawSide(clinRows,'clinical wording',CLIN,ex.sides.clinical.answer);
+        drawSide(patRows,'patient wording',PAT,ex.sides.patient.answer);
         [0,Math.round(Lmax/2),Lmax].forEach(function(l){
           svg.appendChild(txt(lx(l),y,'layer '+l,MUT,9.5,l===0?'start':(l===Lmax?'end':'middle'),true));
         });
         mount('fig-transport',svg);
-        var fig=document.getElementById('fig-transport');
-        if(fig)fig.setAttribute('aria-label','Token position by model layer for the pair whose clinical '+
-          'answer is '+(ex.target||'this pair')+', under clinical then patient wording. A cell is filled '+
-          'where that answer is in the top-8 lens readout at that position and layer; the final row of each '+
-          'grid is the answer position.');
       }
       // clickable selector: one chip per strong example, target-labelled
       var tabs=document.getElementById('tr-tabs');
