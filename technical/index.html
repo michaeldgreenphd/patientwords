@@ -461,6 +461,18 @@
     <p class="cap" id="cap-it"></p>
     </details>
 
+    <details class="fold">
+      <summary>Under the plain logit lens: does the finding survive?</summary>
+      <p id="dd-ll-text">A robustness check: the same pairs read through the plain logit
+        lens instead of the Jacobian lens. If the formation story were an artifact of the
+        Jacobian transport, the two lenses would disagree.</p>
+      <div class="fig" role="img" aria-label="Two dot strips of patient-side formation layers for the same pairs, one read through the Jacobian lens and one through the plain logit lens, each with a median tick and a count of pairs whose answer never formed." id="fig-loglens">
+        <span class="pend">figure pending: the logit-lens arm has not loaded</span>
+      </div>
+      <p class="stat-line" id="dd-ll-stat"></p>
+      <p class="cap" id="cap-loglens">exploratory · gemma-2-2b · patient-side formation layer per pair (persistence 2 layers) · median tick · pairs whose answer never forms counted at right · coverage limited to pairs measured under both lenses</p>
+    </details>
+
     <h3>Queued next</h3>
     <ul class="plan">
       <li><span class="next">next</span>The three translation arms through the lens: does real translation restore early formation while the placebo paraphrase leaves depth unchanged?</li>
@@ -1154,6 +1166,59 @@
         'clinical answer reaches the answer position in '+c.reaches_answer+', is legible earlier in '+
         'the sentence but gone by the answer in '+c.transport_gap+' (a transport gap), and never '+
         'legible at any position in '+c.never_readable+'.'+tail;
+    })
+    .catch(function(){/* leave the pending span; graceful fallback */});
+})();
+</script>
+<script>
+/* Part 3 · logit-lens robustness arm: the same pairs read through the plain logit
+   lens vs the Jacobian lens. Reads data/jlens_loglens.json (export_jlens_loglens.py).
+   Exploratory; self-contained. The two lenses use non-semantic colours (ink vs grey),
+   never the reserved clinical/patient hues. */
+(function(){
+  var NS='http://www.w3.org/2000/svg';
+  function el(n,a){var e=document.createElementNS(NS,n);for(var k in a)e.setAttribute(k,a[k]);return e;}
+  function txt(x,y,s,fill,size,anchor,mono){var t=el('text',{x:x,y:y,fill:fill,'font-size':size,
+    'text-anchor':anchor||'start','font-family':mono?'var(--mono)':'var(--serif)'});t.textContent=s;return t;}
+  function mount(id,svg){var h=document.getElementById(id);if(!h)return;h.textContent='';h.appendChild(svg);}
+  var INK='#111827',BASE='#6d6c66',RED='#b4483d',RULE='#dcdad2';
+  fetch('../data/jlens_loglens.json',{cache:'no-cache'})
+    .then(function(r){if(!r.ok)throw 0;return r.json();})
+    .then(function(d){
+      var pp=d.per_pair||[]; if(!pp.length)throw 0;
+      var L=26,W=700,PAD=124,PW=W-PAD-96,H=150;
+      function lx(l){return PAD+l/(L-1)*PW;}
+      var svg=el('svg',{viewBox:'0 0 '+W+' '+H,role:'img'});
+      svg.appendChild(el('line',{x1:PAD,x2:PAD+PW,y1:H-24,y2:H-24,stroke:RULE,'stroke-width':0.7}));
+      [0,Math.round((L-1)/2),L-1].forEach(function(l){
+        svg.appendChild(txt(lx(l),H-10,'layer '+l,'#4b5563',9.5,l===0?'start':(l===L-1?'end':'middle'),true));
+      });
+      var rows=[['Jacobian lens','jacobian',INK,52],['plain logit lens','logit',BASE,102]];
+      var jit={};
+      rows.forEach(function(row){
+        var y0=row[3];
+        svg.appendChild(txt(PAD-8,y0+3.5,row[0],row[2],10.5,'end'));
+        pp.forEach(function(p){
+          var side=p[row[1]], v=side&&side.pat_formed;
+          if(v==null)return;
+          var key=row[1]+v,n=(jit[key]=(jit[key]||0)+1),dy=((n%7)-3)*3.4;
+          svg.appendChild(el('circle',{cx:lx(v),cy:y0+dy,r:2.1,fill:row[2],opacity:.55}));
+        });
+        var q=d[row[1]]&&d[row[1]].formation;
+        if(q&&typeof q.median==='number'){
+          svg.appendChild(el('line',{x1:lx(q.median),x2:lx(q.median),y1:y0-15,y2:y0+15,stroke:row[2],'stroke-width':1.6}));
+          svg.appendChild(txt(lx(q.median),y0-19,'median '+q.median,row[2],9.5,'middle',true));
+        }
+        var nv=d[row[1]]&&d[row[1]].never_formed;
+        svg.appendChild(txt(PAD+PW+12,y0+3.5,'never: '+(nv==null?'—':nv),RED,10.5,'start',true));
+      });
+      mount('fig-loglens',svg);
+      var ag=d.agreement||{},np=ag.n_paired||pp.length;
+      document.getElementById('dd-ll-stat').textContent=
+        'The same '+np+' pair'+(np===1?'':'s')+' read through the plain logit lens agree with the '+
+        'Jacobian lens on whether the clinical answer forms at all in '+
+        (ag.formed_agree==null?'—':ag.formed_agree)+' of '+np+', and on the failure class in '+
+        (ag.class_agree==null?'—':ag.class_agree)+'.';
     })
     .catch(function(){/* leave the pending span; graceful fallback */});
 })();
