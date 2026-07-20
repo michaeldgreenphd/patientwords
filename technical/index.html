@@ -1303,10 +1303,13 @@
         var host=document.getElementById('tr-readout'); if(!host)return;
         host.textContent='';
         var leg=document.createElement('div'); leg.className='ro-legend';
-        leg.textContent='Shaded: “'+(ex.target||'the clinical answer')+
-          '” in the model’s top-8 readout at that position and layer — darker = higher rank; '+
-          'hover any cell for its layer and rank. Small grey type on the answer row names what '+
-          'the lens was reading out before the answer settled.';
+        leg.textContent='Two traces per answer row. The shaded cells track the clinical answer “'+
+          (ex.target||'target')+'”: shaded where it is in the model’s top-8 at that position and '+
+          'layer, darker = higher rank (hover any cell for the exact rank); the green “forms” tick '+
+          'marks where it first enters the top-8. Separately, “→ top” is the model’s actual top '+
+          'prediction at the answer, and the small grey “was …” below the row names the top word '+
+          'earlier in depth, before it settled. When the clinical answer never enters the top-8 '+
+          'here, the row says so.';
         host.appendChild(leg);
       }
       function render(ex){
@@ -1355,29 +1358,39 @@
               rc.appendChild(rct);
               svg.appendChild(rc);
             }
-            // per-position concept marginalia, near the first block (graceful:
-            // renders only once the backend adds pos_readout per position)
-            if(r.concepts&&r.concepts.length&&firstIdx>=0){
-              var mel=txt(lx(layers[firstIdx])-cw/2,cy-rowH*0.55,
-                '['+r.concepts.slice(0,3).join(', ')+']',MUT,7,'start',true);
-              mel.setAttribute('class','marginalia');mel.setAttribute('opacity','.8');
-              svg.appendChild(mel);
-            }
+            // (per-position concept marginalia from pos_readout are intentionally
+            // omitted here — at most positions they are function-word noise and they
+            // crowd the answer-row traces below; the answer position is covered by the
+            // top-token trace instead. Re-enable if a per-position view is wanted.)
             if(r.answer){
+              // (a) CLINICAL-token trace on this answer row: where “[target]” forms
+              // (first enters the top-8) and whether it reaches rank 1 — green, above
+              // the row; or, when it never enters the top-8 here, a muted absence note.
+              var ff=-1,rk1=-1;
+              for(var q=0;q<r.ranks.length;q++){var vv=r.ranks[q];if(vv!=null){if(ff<0)ff=q;if(vv===1&&rk1<0)rk1=q;}}
+              var ty=cy-rowH*1.05;
+              if(ff>=0){
+                var fxc=lx(layers[ff]);
+                svg.appendChild(el('line',{x1:fxc,y1:ty+4,x2:fxc,y2:cy-rowH*0.42,stroke:'#c3c9d2','stroke-width':1}));
+                // end-anchored just left of the first cell, into the empty pre-legible space
+                svg.appendChild(txt(fxc-4,ty,'forms: “'+(ex.target||'answer')+'”'+(rk1>=0?' → rank 1':''),CLIN,8,'end',true));
+              }else{
+                svg.appendChild(txt(lx(Lmax),ty,'“'+(ex.target||'answer')+'” never reaches the answer',MUT,8,'end',true));
+              }
+              // (b) TOP token: the model's ACTUAL top prediction here — green if it IS
+              // the clinical target, muted grey if off-target; linked to its trace.
               if(ans&&ans.token){
-                // the model's ACTUAL top prediction here: clinical green if it is the
-                // clinical target, muted grey if off-target; linked to its trace
                 var oc=ans.on_target?CLIN:MUT;
                 var pct=(typeof ans.prob==='number')?' ('+Math.round(ans.prob*100)+'%)':'';
                 var lbl=el('text',{x:lx(Lmax)+10,y:cy+3,fill:oc,'font-size':9,'text-anchor':'start','font-family':'var(--mono)'});
-                lbl.appendChild(document.createTextNode('→ “'+ans.token+'”'+pct));
+                lbl.appendChild(document.createTextNode('→ top “'+ans.token+'”'+pct));
                 var arw=el('tspan',{'class':'tr-arrow'});arw.appendChild(document.createTextNode(' ↗'));
                 lbl.appendChild(arw);
                 var href=renderUrl||ans.trace_url;
                 if(href){
                   var a=el('a',{'class':'tr-ans'});
                   a.setAttribute('href',href);a.setAttribute('target','_blank');a.setAttribute('rel','noopener');
-                  a.setAttribute('aria-label',(renderUrl?'Open the circuit-tracer graph for this pair':'Live Neuronpedia lens for this prompt')+' — model predicts “'+ans.token+'”'+pct);
+                  a.setAttribute('aria-label',(renderUrl?'Open the circuit-tracer graph for this pair':'Live Neuronpedia lens for this prompt')+' — model’s top prediction “'+ans.token+'”'+pct);
                   a.appendChild(lbl);svg.appendChild(a);
                 }else{svg.appendChild(lbl);}
               }else{
@@ -1386,27 +1399,27 @@
             }
             y+=rowH;
           });
-          // map the per-layer answer readout onto the answer row: name the word(s)
+          // map the per-layer answer readout onto the answer row: name the ONE word
           // the lens decoded BEFORE the answer settled (the → label already shows the
-          // final), at the earliest sampled layer each distinct pre-answer word appears
+          // final), at the earliest sampled layer whose top word differs from the final.
+          // One label only — two crowd into each other on adjacent sampled layers.
           if(roData&&roData.length&&answerCy!=null){
             var asc=roData.slice().sort(function(a,b){return a.layer-b.layer;});
             var finTop=((asc[asc.length-1].tokens||[])[0]||'');
-            var yy=roAbove?answerCy-rowH*0.7:answerCy+rowH*0.95;
-            var shown={},placed=0;
-            for(var ri=0;ri<asc.length&&placed<2;ri++){
+            var yy=answerCy+rowH*0.95;
+            for(var ri=0;ri<asc.length;ri++){
               var toks=(asc[ri].tokens||[]).filter(function(w){return w&&w.length>1;});
-              var t0=toks[0]; if(!t0||t0===finTop||shown[t0])continue;
-              shown[t0]=1;placed++;
+              var t0=toks[0]; if(!t0||t0===finTop)continue;
               var lyr=asc[ri].layer;
-              var mel=txt(lx(lyr),yy,toks.slice(0,2).join(', '),MUT,7,lyr>=Lmax?'end':'middle',true);
+              var mel=txt(lx(lyr),yy,'was “'+t0+'”',MUT,7,lyr>=Lmax?'end':'middle',true);
               mel.setAttribute('class','marginalia');mel.setAttribute('opacity','.85');
               svg.appendChild(mel);
+              break;
             }
           }
           y+=16;
         }
-        drawSide(clinRows,'clinical wording',CLIN,ex.sides.clinical.answer,ex.sides.clinical.readout,true);
+        drawSide(clinRows,'clinical wording',CLIN,ex.sides.clinical.answer,ex.sides.clinical.readout,false);
         drawSide(patRows,'patient wording',PAT,ex.sides.patient.answer,ex.sides.patient.readout,false);
         [0,Math.round(Lmax/2),Lmax].forEach(function(l){
           svg.appendChild(txt(lx(l),y,'layer '+l,MUT,9.5,l===0?'start':(l===Lmax?'end':'middle'),true));
