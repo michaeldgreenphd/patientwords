@@ -35,13 +35,13 @@
   ]
  },
  "summary": {
-  "measurements": 6842,
-  "flips": 3074,
+  "measurements": 6844,
+  "flips": 3075,
   "flip_classes": {
    "downgrade": 473,
    "upgrade": 103,
    "lateral": 436,
-   "uninformative": 2062
+   "uninformative": 2063
   },
   "per_model": {
    "apertus-8b-meditronfo": {
@@ -64,7 +64,7 @@
    },
    "gemma-2-2b": {
     "n": 1335,
-    "flips": 630,
+    "flips": 631,
     "downgrades": 185,
     "upgrades": 22,
     "sign_test_p": 0.0,
@@ -135,13 +135,13 @@
     }
    },
    "medgemma-4b-it": {
-    "n": 749,
+    "n": 751,
     "flips": 301,
     "downgrades": 28,
     "upgrades": 6,
     "sign_test_p": 0.0002,
     "confident_downgrades_p>=0.2": 19,
-    "mean_tier_shift": -0.0913,
+    "mean_tier_shift": -0.0906,
     "representative": {
      "base": "I have anxiety, so I should probably see a",
      "from": "therapist",
@@ -262,11 +262,11 @@
     "mean_penalty": -0.0314
    },
    "medgemma-4b-it": {
-    "n_phrases": 732,
+    "n_phrases": 734,
     "flips": 292,
     "downgrades": 27,
     "upgrades": 6,
-    "mean_penalty": -0.0382
+    "mean_penalty": -0.0384
    },
    "meditron3-8b": {
     "n_phrases": 3,
@@ -298,7 +298,7 @@
    }
   },
   "concordance": {
-   "phrases_measured_by_2plus_models": 892,
+   "phrases_measured_by_2plus_models": 894,
    "downgrade_on_any_model": 189,
    "downgrade_on_2plus_models": 79,
    "flip_on_2plus_models": 607,
@@ -376,7 +376,7 @@
      "jaccard": 0.266
     },
     "gemma-2-2b & medgemma-4b-it": {
-     "phrases": 716,
+     "phrases": 718,
      "either": 65,
      "both": 11,
      "jaccard": 0.169
@@ -1410,6 +1410,26 @@
    "tier_top_patient": 2,
    "flip_class": null,
    "tier_shift": -0.117,
+   "urgency_recovery": null
+  },
+  {
+   "batch": "pairs_20260706T172135Z",
+   "index": 1,
+   "model": "medgemma-4b-it",
+   "tier_top_clinical": 2,
+   "tier_top_patient": 2,
+   "flip_class": null,
+   "tier_shift": -0.002,
+   "urgency_recovery": null
+  },
+  {
+   "batch": "pairs_20260706T172135Z",
+   "index": 2,
+   "model": "medgemma-4b-it",
+   "tier_top_clinical": 2,
+   "tier_top_patient": 2,
+   "flip_class": null,
+   "tier_shift": 0.104,
    "urgency_recovery": null
   },
   {
@@ -28625,6 +28645,16 @@
   {
    "batch": "pairs_20260711T051145Z",
    "index": 46,
+   "model": "gemma-2-2b",
+   "tier_top_clinical": null,
+   "tier_top_patient": null,
+   "flip_class": "uninformative",
+   "tier_shift": null,
+   "urgency_recovery": null
+  },
+  {
+   "batch": "pairs_20260711T051145Z",
+   "index": 50,
    "model": "gemma-2-2b",
    "tier_top_clinical": null,
    "tier_top_patient": null,
