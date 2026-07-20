@@ -64,12 +64,23 @@
   section p{margin:0 0 14px;font-size:16px;line-height:1.66}
   .fig{margin:6px 0 4px;overflow-x:auto}
   .fig svg{display:block;width:100%;height:auto}
+  /* Part-1 trajectory: the two verbatim sentences above the chart, pivot words lit */
+  .traj-sents{margin:6px 0 2px;max-width:780px}
+  .traj-sents .ts-row{font-size:15.5px;line-height:1.5;margin:0 0 3px}
+  .traj-sents .ts-lab{font-family:var(--mono);font-size:9.5px;letter-spacing:.13em;
+    text-transform:uppercase;color:var(--muted);margin-right:9px}
+  .traj-sents .ts-c .ts-piv{color:var(--clinical);font-weight:600}
+  .traj-sents .ts-p .ts-piv{color:var(--penalty);font-weight:600}
+  .traj-sents a.ts-trace{text-decoration:none;color:var(--muted);font-family:var(--mono);
+    font-size:11px;margin-left:10px;white-space:nowrap}
+  .traj-sents a.ts-trace:hover,.traj-sents a.ts-trace:focus-visible{color:var(--clinical)}
   /* transport figure: the predicted-token deep-link (minimal; arrow reveals on hover) */
   #fig-transport a.tr-ans{text-decoration:none;cursor:pointer}
   #fig-transport a.tr-ans:focus-visible{outline:2px solid var(--clinical);outline-offset:2px}
   #fig-transport .tr-arrow{opacity:0}
   #fig-transport a.tr-ans:hover .tr-arrow,#fig-transport a.tr-ans:focus-visible .tr-arrow{opacity:.75}
   #fig-transport rect{cursor:default}
+  #fig-transport .marginalia{font-family:var(--mono);fill:var(--muted);letter-spacing:-.02em}
   /* transport figure: per-layer open-vocabulary readout table (paper-style) */
   #tr-readout{margin:4px 0 0}
   #tr-readout .ro-legend{font-size:13px;line-height:1.5;color:var(--muted);margin:0 0 8px}
@@ -198,6 +209,17 @@
   #ad-pairs td{padding:8px 12px 8px 0;border-bottom:1px solid var(--hairline);
     font-size:14px;line-height:1.5}
   #ad-pairs td.tsw{vertical-align:top}
+  /* pair-number expander → the pair's verbatim base sentence, revealed inline */
+  #ad-pairs .ad-exp{all:unset;cursor:pointer;font:inherit;color:inherit}
+  #ad-pairs .ad-exp:hover,#ad-pairs .ad-exp[aria-expanded=true]{color:var(--clinical)}
+  #ad-pairs .ad-exp:focus-visible{outline:2px solid var(--clinical);outline-offset:2px;border-radius:1px}
+  #ad-pairs .ad-exp::before{content:'▸ ';color:var(--muted);font-size:9px}
+  #ad-pairs .ad-exp[aria-expanded=true]::before{content:'▾ '}
+  #ad-pairs tr.ad-detail td{border-bottom:1px solid var(--hairline);padding-top:0}
+  #ad-pairs .ad-detail-body{border-left:2px solid var(--hairline);padding:4px 0 7px 12px;
+    font-size:14px;color:var(--muted);line-height:1.55;max-width:94ch}
+  #ad-pairs .ad-detail-lab{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;
+    text-transform:uppercase;color:var(--muted);margin-right:9px}
   #ad-pairs .tsw-swap{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:1px;
     max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   /* sortable headers: button inherits the header look; a tiny SVG caret reveals on hover / active sort */
@@ -339,6 +361,7 @@
       never sees it. Where a circuit trace shows <i>which</i> internal features
       fired, the lens shows <i>when</i> in depth the answer existed. The two
       instruments answer different questions about the same failure.</p>
+    <div id="traj-sents" class="traj-sents"></div>
     <div class="fig" role="img" aria-label="Line chart of the clinical answer's rank across the model's layers under both wordings, drawn from a real measured pair. Under clinical wording the answer enters the readable window and holds to the end. Under patient wording it forms and is then pushed out before the final layer." id="fig-traj">
       <span class="pend">figure pending: the lens readouts have not loaded</span>
     </div>
@@ -969,6 +992,32 @@
         mount('fig-traj',svg);
         document.getElementById('cap-traj').textContent=
           'one real measured pair (pair '+ex.index+' of the '+pwBatch(ex.dataset)+', class: '+ex['class']+') · rank of the clinical answer in the top-8 window, by layer · green: clinical wording · dark: patient wording · a line that stops means the answer left the window';
+        // verbatim sentences above the chart, pivot words lit, with a trace link —
+        // populated once the exemplar carries prompts (graceful no-op until then)
+        (function(){
+          var host=document.getElementById('traj-sents'); if(!host)return; host.textContent='';
+          var pr=ex.prompts; if(!pr||!pr.clinical||!pr.patient)return;
+          function pivot(a,b){var A=a.split(' '),B=b.split(' ');
+            var i=0;while(i<A.length&&i<B.length&&A[i]===B[i])i++;
+            var j=0;while(j<A.length-i&&j<B.length-i&&A[A.length-1-j]===B[B.length-1-j])j++;
+            return [A.slice(0,i).join(' '),A.slice(i,A.length-j).join(' '),A.slice(A.length-j).join(' ')];}
+          function row(text,other,cls,lab){
+            var p=document.createElement('p');p.className='ts-row '+cls;
+            var l=document.createElement('span');l.className='ts-lab';l.textContent=lab;p.appendChild(l);
+            var seg=pivot(text,other);
+            p.appendChild(document.createTextNode(seg[0]?seg[0]+' ':''));
+            if(seg[1]){var b=document.createElement('span');b.className='ts-piv';b.textContent=seg[1];p.appendChild(b);}
+            p.appendChild(document.createTextNode(seg[2]?' '+seg[2]:''));
+            return p;
+          }
+          var cRow=row(pr.clinical,pr.patient,'ts-c','clinical');
+          var href=ex.render?('../'+ex.render):(ex.trace_url||null);
+          if(href){var a=document.createElement('a');a.className='ts-trace';a.href=href;
+            a.target='_blank';a.rel='noopener';a.setAttribute('aria-label','Open the trace for this pair');
+            a.appendChild(document.createTextNode('↗ trace'));cRow.appendChild(a);}
+          host.appendChild(cRow);
+          host.appendChild(row(pr.patient,pr.clinical,'ts-p','patient'));
+        })();
       }
 
       /* Fig 2: formation strip */
@@ -996,7 +1045,9 @@
             svg.appendChild(txt(lx(q.median),y0-19,'median '+q.median,row[2],9.5,'middle'));
           }
           var nv=row[1]==='clin_formed'?d.formation.clinical_never:d.formation.patient_never;
-          svg.appendChild(txt(PAD+PW+12,y0+3.5,'never: '+nv,'#b4483d',10.5));
+          // share of all readings, computed live from n_pairs (never hardcoded)
+          var nvp=d.n_pairs?' ('+Math.round(nv/d.n_pairs*100)+'%)':'';
+          svg.appendChild(txt(PAD+PW+12,y0+3.5,'never: '+nv+nvp,'#b4483d',10.5));
         });
         mount('fig-form',svg);
         var f=d.formation;
@@ -1014,22 +1065,56 @@
         var rowsN=hij.length, H3=40+rowsN*13+30;
         var svg=el('svg',{viewBox:'0 0 '+W+' '+H3});
         hij.sort(function(a,b){return (a.pat_formed||0)-(b.pat_formed||0);});
+        var lineRefs=[];
         hij.forEach(function(p,i){
           var y=20+i*13;
-          svg.appendChild(el('line',{x1:lx(p.pat_formed),x2:lx(L-1),y1:y,y2:y,stroke:'#b4483d','stroke-width':1.1,opacity:.75}));
+          var line=el('line',{x1:lx(p.pat_formed),x2:lx(L-1),y1:y,y2:y,stroke:'#b4483d','stroke-width':1.1,opacity:.75});
+          // every track carries a hover title (enriched below with the verbatim sentence)
+          var tt=el('title',{});
+          tt.textContent='forms at layer '+p.pat_formed+', pushed out by the output layer';
+          line.appendChild(tt);svg.appendChild(line);
           svg.appendChild(el('circle',{cx:lx(p.pat_formed),cy:y,r:2.6,fill:'#111827'}));
           svg.appendChild(el('rect',{x:lx(L-1)-2.4,y:y-2.4,width:4.8,height:4.8,fill:'#b4483d'}));
           if(i===0){
             svg.appendChild(txt(lx(p.pat_formed)-8,y+3.5,'forms','#4b5563',9.5,'end'));
             svg.appendChild(txt(lx(L-1)+8,y+3.5,'lock-in','#b4483d',9.5));
           }
+          lineRefs.push({p:p,y:y,tt:tt});
         });
-        var base=20+rowsN*13+6;
+        var base=20+rowsN*13+18;
         svg.appendChild(el('line',{x1:PAD,x2:PAD+PW,y1:base,y2:base,stroke:'#dcdad2','stroke-width':.7}));
         [0,Math.round((L-1)/2),L-1].forEach(function(l){
           svg.appendChild(txt(lx(l),base+13,'layer '+l,'#4b5563',9.5,l===0?'start':(l===L-1?'end':'middle')));
         });
+        // captures have no line to draw (the answer never forms); name them in the
+        // empty lower-left so the 28 plotted tracks aren't mistaken for the whole story
+        var nCap=(tax.capture&&tax.capture.n)||0;
+        if(nCap)svg.appendChild(txt(PAD,base-56,'Note: '+nCap+' captures (answer never forms) not plotted','#6d6c66',9.5,'start',true));
         mount('fig-tax',svg);
+        // enrich track tooltips + label the two extreme tracks with the verbatim swap,
+        // where the pair carries a committed base sentence (graceful when it does not)
+        fetch('../data/jlens_swaps.json',{cache:'no-cache'}).then(function(r){return r.ok?r.json():null;}).then(function(s){
+          var SW=(s&&s.swaps)||{};
+          lineRefs.forEach(function(o){
+            var sw=SW[o.p.dataset+'#'+o.p.index];
+            if(sw&&sw.baseline)o.tt.textContent='“'+sw.baseline+' ___” · clinical “'+sw.target+
+              '” hijacked by the everyday wording'+(sw.swap?' (“'+sw.swap+'”)':'');
+          });
+          // label the two extreme tracks with one compact annotation each, placed
+          // in clear space (above the earliest-forming line, below the latest) so
+          // it never collides with the tracks or the forms/lock-in axis labels
+          function outlier(o,above){
+            if(!o)return;var sw=SW[o.p.dataset+'#'+o.p.index];if(!sw||!sw.target)return;
+            var swp=sw.swap?(sw.swap.length>16?sw.swap.slice(0,16)+'…':sw.swap):'';
+            var yy=above?o.y-7:o.y+9, anchor=above?'start':'end', xx=above?lx(o.p.pat_formed):lx(L-1);
+            var tEl=el('text',{x:xx,y:yy,'text-anchor':anchor,'font-size':8.5,'font-family':'var(--mono)',fill:'#6d6c66'});
+            tEl.appendChild(document.createTextNode('forms “'+sw.target+'”'));
+            if(swp){var ts=el('tspan',{fill:'#b4483d'});ts.appendChild(document.createTextNode(' → “'+swp+'”'));tEl.appendChild(ts);}
+            svg.appendChild(tEl);
+          }
+          outlier(lineRefs[0],true);
+          outlier(lineRefs[lineRefs.length-1],false);
+        }).catch(function(){});
         // window check (moved off the removed caption into the narrative): does the
         // capture-vs-hijack ordering survive narrower top-K windows?
         var winNote='';
@@ -1155,9 +1240,11 @@
       var W=800,LABEL=140,RPAD=160,gx0=LABEL,gx1=W-RPAD,gw=gx1-gx0,rowH=11;
       function rows(side){
         var out=[],t=side.tokens||[],g=side.grid||[],ans=side.answer_position;
+        var pr=side.pos_readout||{};   // future field: {position: [top-3 decoded concepts]}
         for(var i=0;i<t.length;i++){
           if(((t[i].token||'').trim())==='<bos>')continue;
-          out.push({label:t[i].token||'',ranks:g[i]||[],answer:(i===ans)});
+          out.push({label:t[i].token||'',ranks:g[i]||[],answer:(i===ans),
+                    concepts:(pr[i]||pr[String(i)]||null)});
         }
         return out;
       }
@@ -1261,6 +1348,14 @@
               rct.textContent='layer '+layers[li]+' · “'+(ex.target||'target')+'” rank '+rk+' of 8';
               rc.appendChild(rct);
               svg.appendChild(rc);
+            }
+            // per-position concept marginalia, near the first block (graceful:
+            // renders only once the backend adds pos_readout per position)
+            if(r.concepts&&r.concepts.length&&firstIdx>=0){
+              var mel=txt(lx(layers[firstIdx])-cw/2,cy-rowH*0.55,
+                '['+r.concepts.slice(0,3).join(', ')+']',MUT,7,'start',true);
+              mel.setAttribute('class','marginalia');mel.setAttribute('opacity','.8');
+              svg.appendChild(mel);
             }
             if(r.answer){
               if(ans&&ans.token){
@@ -1432,8 +1527,14 @@
     svg.appendChild(el('line',{x1:X(0),x2:X(0),y1:10,y2:H-26},'stroke:var(--structural);stroke-width:1'));
     var zl=el('text',{x:X(0),y:H-12,'text-anchor':'middle'},'font-family:var(--mono);font-size:10px;fill:#4b5563');
     zl.textContent='no penalty'; svg.appendChild(zl);
-    var al=el('text',{x:X(lo)+2,y:H-12},'font-family:var(--mono);font-size:10px;fill:#4b5563');
-    al.textContent='← larger penalty'; svg.appendChild(al);
+    // faint pp ticks ground the physical distance; direct numeric labels (−2/−4/−6)
+    // replace the vague "← larger penalty" arrow
+    [-0.02,-0.04,-0.06].forEach(function(v){
+      if(v<lo||v>hi)return;
+      svg.appendChild(el('line',{x1:X(v),x2:X(v),y1:H-30,y2:H-25},'stroke:var(--structural);stroke-width:1;opacity:.7'));
+      var tk=el('text',{x:X(v),y:H-12,'text-anchor':'middle'},'font-family:var(--mono);font-size:9.5px;fill:#8a8a84');
+      tk.textContent='−'+Math.abs(Math.round(v*100)); svg.appendChild(tk);
+    });
     ids.forEach(function(id,i){
       var p=per[id].penalty, y=24+i*R, g=el('g',{});
       var name=el('text',{x:ML-10,y:y+4,'text-anchor':'end'},'font-family:var(--mono);font-size:12px;fill:var(--ink)');
@@ -1453,6 +1554,7 @@
     });
     document.getElementById('forest').appendChild(svg);
     document.getElementById('forest-cap').textContent=
+      '−5 pp ≈ the clinical answer’s probability dropping from, say, 20% to 15% · '+
       'phrase-deduped bootstrap, seed '+d.seed+' × '+d.boot+' · hairline: simultaneous (Bonferroni) interval · source: the per-model statistics file';
 
     var maxC=0; ids.forEach(function(id){var s=per[id].sign_test;maxC=Math.max(maxC,s.downgrades,s.upgrades);});
@@ -1638,7 +1740,9 @@
         CLASSES.forEach(function(cls){
           var members=g.pairs.filter(function(u){return u['class']===cls[0];});
           var rowEl=h('div','ucensus-row');
-          var lab=h('span','ucensus-clabel',labels[cls[0]]+' '+members.length);
+          // relative share within the group, computed live from the counts
+          var gpct=g.pairs.length?' ('+Math.round(members.length/g.pairs.length*100)+'%)':'';
+          var lab=h('span','ucensus-clabel',labels[cls[0]]+' '+members.length+gpct);
           lab.style.color=(cls[0]==='absent'?'#4b5563':cls[1]);
           rowEl.appendChild(lab);
           var sqwrap=h('span','ucensus-squares');
@@ -1689,7 +1793,29 @@
       function buildRow(r){
         var row=h('tr');
         var setTd=h('td'),sp=h('span',null,r.setAbbr);sp.title=r.set;setTd.appendChild(sp);row.appendChild(setTd);
-        row.appendChild(h('td','num mono',String(r.pair)));
+        // pair number expands to the pair's verbatim base sentence when one is committed
+        var pairTd=h('td','num mono');
+        var base=(SWAPS[r.setId+'#'+r.pair]||{}).baseline;
+        if(base){
+          var eb=h('button','ad-exp');eb.type='button';eb.textContent=String(r.pair);
+          eb.setAttribute('aria-expanded','false');
+          eb.setAttribute('aria-label','pair '+r.pair+' — show the base sentence');
+          eb.addEventListener('click',function(){
+            var tr=eb.closest('tr'),open=eb.getAttribute('aria-expanded')==='true';
+            var nx=tr.nextSibling;
+            if(open){if(nx&&nx.classList&&nx.classList.contains('ad-detail'))nx.remove();
+              eb.setAttribute('aria-expanded','false');return;}
+            var dtr=h('tr','ad-detail'),dtd=h('td');dtd.colSpan=5;
+            var body=h('div','ad-detail-body');
+            body.appendChild(h('span','ad-detail-lab','base sentence'));
+            body.appendChild(document.createTextNode('“'+base+' ___”'));
+            dtd.appendChild(body);dtr.appendChild(dtd);
+            tr.parentNode.insertBefore(dtr,tr.nextSibling);
+            eb.setAttribute('aria-expanded','true');
+          });
+          pairTd.appendChild(eb);
+        }else{pairTd.textContent=String(r.pair);}
+        row.appendChild(pairTd);
         var tcell=h('td','tsw');
         tcell.appendChild(h('div','tsw-target',r.clinical));
         var sw=SWAPS[r.setId+'#'+r.pair];
