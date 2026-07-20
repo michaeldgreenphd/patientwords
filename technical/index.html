@@ -81,21 +81,9 @@
   #fig-transport a.tr-ans:hover .tr-arrow,#fig-transport a.tr-ans:focus-visible .tr-arrow{opacity:.75}
   #fig-transport rect{cursor:default}
   #fig-transport .marginalia{font-family:var(--mono);fill:var(--muted);letter-spacing:-.02em}
-  /* transport figure: per-layer open-vocabulary readout table (paper-style) */
+  /* transport figure: one-line legend (the per-layer readout is drawn on the graph) */
   #tr-readout{margin:4px 0 0}
   #tr-readout .ro-legend{font-size:13px;line-height:1.5;color:var(--muted);margin:0 0 8px}
-  #tr-readout .ro-scroll{overflow-x:auto}
-  #tr-readout table{border-collapse:collapse;font-family:var(--mono);font-size:11.5px;
-    max-width:560px}
-  #tr-readout caption{font-family:var(--serif);font-size:12.5px;color:var(--muted);
-    text-align:left;padding:0 0 5px}
-  #tr-readout th,#tr-readout td{padding:2px 12px 2px 0;text-align:left;vertical-align:top;
-    white-space:nowrap}
-  #tr-readout thead th{color:var(--muted);font-weight:600;border-bottom:1px solid #e7e5dd}
-  #tr-readout tbody th{color:var(--muted);font-weight:400;text-align:right;padding-right:14px}
-  #tr-readout tr.ro-final th,#tr-readout tr.ro-final td{border-top:1px solid #e7e5dd}
-  #tr-readout .ro-hit{color:var(--clinical);font-weight:600}
-  #tr-readout .ro-off{color:var(--ink)}
   /* charts float in negative space: no frame survives, whatever draws them */
   .fig,.fig svg,.figwrap,.figwrap svg,#forest,#forest svg,#dumbbells,#dumbbells svg,
   #ad-blocks,#ad-blocks svg,.conv-panel svg{
@@ -403,7 +391,7 @@
     <figure class="jspace">
       <p class="jspace-cap"><b>Why translation works: it changes which concepts are active.</b> Illustrative schematic — the example words and concept tags are hand-authored, not a measurement; the live readings are in Part 3. Clinical wording lights up medical concepts inside the model (the “J-space” the Jacobian lens reads) and the answer forms; patient wording lights up everyday concepts and the answer is redirected; rewriting the wording back into clinical terms restores the medical concepts, and the answer recovers.</p>
       <div class="jspace-grid jspace-3" role="img" aria-label="Three panels. A, clinical wording ‘my dyspepsia flared up’ activates the concepts medical, gastrointestinal and treatment, and the model outputs antacid. B, patient wording ‘my stomach’s on fire’ activates food, spicy and casual, and the model outputs ice cream. C, translation rewrites the patient wording into clinical terms, which re-activates the medical and antacid concepts, and the model recovers the output antacid.">
-        <div class="jspanel">
+        <div class="jspanel" data-jsrole="clinical">
           <div class="jspanel-head">A · Clinical wording</div>
           <p class="jspanel-in">“My <span class="trig">dyspepsia</span> flared up.”</p>
           <div class="jsflow"></div>
@@ -411,7 +399,7 @@
           <div class="jsflow"></div>
           <div class="jsout jsout-ok">antacid</div>
         </div>
-        <div class="jspanel">
+        <div class="jspanel" data-jsrole="patient">
           <div class="jspanel-head">B · Patient wording</div>
           <p class="jspanel-in">“My stomach’s on <span class="trig">fire</span>.”</p>
           <div class="jsflow"></div>
@@ -419,7 +407,7 @@
           <div class="jsflow"></div>
           <div class="jsout jsout-off">ice cream</div>
         </div>
-        <div class="jspanel">
+        <div class="jspanel" data-jsrole="translation">
           <div class="jspanel-head">C · Translation</div>
           <p class="jspanel-in">“My stomach’s on <span class="trig">fire</span>.”</p>
           <div class="jsflow"></div>
@@ -431,6 +419,44 @@
         </div>
       </div>
     </figure>
+    <script>
+    (function(){
+      // Hand-authored ("Illustrative") by default; if the backend commits an
+      // empirical readout (data/jspace.json: {empirical:true, panels:{clinical|
+      // patient|translation:{input,trigger,concepts:[...],output,on_target}}, note}),
+      // swap in the real tokens AND relabel. The disclaimer flips to "Empirical"
+      // only when the content is actually a measurement.
+      fetch('../data/jspace.json',{cache:'no-cache'}).then(function(r){return r.ok?r.json():null;}).then(function(d){
+        if(!d||!d.empirical||!d.panels)return;
+        var fig=document.querySelector('.jspace'); if(!fig)return;
+        [].forEach.call(fig.querySelectorAll('.jspanel'),function(panel){
+          var p=d.panels[panel.getAttribute('data-jsrole')]; if(!p)return;
+          var off=(p.on_target===false);
+          var inEl=panel.querySelector('.jspanel-in');
+          if(inEl&&p.input){inEl.textContent='';
+            if(p.trigger&&p.input.indexOf(p.trigger)>=0){
+              var parts=p.input.split(p.trigger);
+              inEl.appendChild(document.createTextNode('“'+parts[0]));
+              var tg=document.createElement('span');tg.className='trig';tg.textContent=p.trigger;inEl.appendChild(tg);
+              inEl.appendChild(document.createTextNode(parts.slice(1).join(p.trigger)+'”'));
+            }else{inEl.textContent='“'+p.input+'”';}
+          }
+          var space=panel.querySelector('.jsspace');
+          if(space&&p.concepts&&p.concepts.length){
+            [].forEach.call(space.querySelectorAll('.jspill'),function(x){x.remove();});
+            p.concepts.forEach(function(c){var s=document.createElement('span');
+              s.className='jspill '+(off?'jspill-off':'jspill-clin');s.textContent=c;space.appendChild(s);});
+          }
+          var out=panel.querySelector('.jsout');
+          if(out&&p.output){out.textContent=p.output;out.className='jsout '+(off?'jsout-off':'jsout-ok');}
+        });
+        var cap=fig.querySelector('.jspace-cap');
+        if(cap){cap.textContent='';var b=document.createElement('b');
+          b.textContent='Empirical J-lens residual stream readout at middle layers.';cap.appendChild(b);
+          if(d.note)cap.appendChild(document.createTextNode(' '+d.note));}
+      }).catch(function(){});
+    })();
+    </script>
   </section>
 
   <section id="data">
@@ -956,7 +982,7 @@
       /* Fig 1: exemplar trajectory (hijack) — layers 0..24 = internal workspace, 25 = final output */
       var ex=(d.exemplars||[]).filter(function(e){return e['class']==='hijack';})[0]||d.exemplars[0];
       if(ex){
-        var H1=176,svg=el('svg',{viewBox:'0 0 '+(W+30)+' '+H1});  // +30 so the far-right endpoint label isn't clipped
+        var H1=186,svg=el('svg',{viewBox:'0 0 '+(W+30)+' '+H1});  // +30 so the far-right endpoint label isn't clipped
         var OUT_GAP=18;                                  // visually detach the final-output layer (25)
         function tx(i){return lx(i)+(i>=L-1?OUT_GAP:0);} // local x with the output gap
         var AXIS=140;                                    // y of the layer-axis brackets
@@ -965,6 +991,8 @@
           svg.appendChild(el('line',{x1:tx(0),x2:tx(L-1),y1:ry(r),y2:ry(r),stroke:'#dcdad2','stroke-width':.7}));
           svg.appendChild(txt(PAD-8,ry(r)+3.5,'rank '+r,'#4b5563',9.5,'end'));
         });
+        // clarify the y-axis: rank 1 is the model's top vocabulary prediction
+        svg.appendChild(txt(PAD-8,ry(1)+13,'top prediction','#8a8a84',7.5,'end'));
         // subtle dashed hairline marking the final-output column (layer 25 read-out nodes)
         svg.appendChild(el('line',{x1:tx(L-1),x2:tx(L-1),y1:20,y2:AXIS-3,
           stroke:'#c3c9d2','stroke-width':1,'stroke-dasharray':'2 3'}));
@@ -974,6 +1002,10 @@
         svg.appendChild(txt((tx(0)+tx(L-2))/2,AXIS+14,'Internal Workspace','#6d6c66',9.5,'middle'));
         svg.appendChild(el('line',{x1:tx(L-1),x2:tx(L-1),y1:AXIS-4,y2:AXIS,stroke:'#c3c9d2','stroke-width':1}));
         svg.appendChild(txt(tx(L-1),AXIS+14,'Final Output','#6d6c66',9.5,'middle'));
+        // faint layer ticks anchor the depth axis under the workspace/output span
+        [[0,'layer 0','start'],[13,'layer 13','middle'],[L-1,'layer 25','end']].forEach(function(t){
+          svg.appendChild(txt(tx(t[0]),AXIS+28,t[1],'#8a8a84',8,t[2],true));
+        });
         function path(ranks,color,label){
           var seg=[],last=null;
           ranks.forEach(function(r,i){
@@ -1062,12 +1094,12 @@
       (function(){
         var hij=(d.points||[]).filter(function(p){return p['class']==='hijack';});
         var tax=d.taxonomy||{};
-        var rowsN=hij.length, H3=40+rowsN*13+30;
+        var rowsN=hij.length, H3=54+rowsN*13+30;   // extra top headroom for the stacked outlier label
         var svg=el('svg',{viewBox:'0 0 '+W+' '+H3});
         hij.sort(function(a,b){return (a.pat_formed||0)-(b.pat_formed||0);});
         var lineRefs=[];
         hij.forEach(function(p,i){
-          var y=20+i*13;
+          var y=34+i*13;
           var line=el('line',{x1:lx(p.pat_formed),x2:lx(L-1),y1:y,y2:y,stroke:'#b4483d','stroke-width':1.1,opacity:.75});
           // every track carries a hover title (enriched below with the verbatim sentence)
           var tt=el('title',{});
@@ -1081,7 +1113,7 @@
           }
           lineRefs.push({p:p,y:y,tt:tt});
         });
-        var base=20+rowsN*13+18;
+        var base=34+rowsN*13+18;
         svg.appendChild(el('line',{x1:PAD,x2:PAD+PW,y1:base,y2:base,stroke:'#dcdad2','stroke-width':.7}));
         [0,Math.round((L-1)/2),L-1].forEach(function(l){
           svg.appendChild(txt(lx(l),base+13,'layer '+l,'#4b5563',9.5,l===0?'start':(l===L-1?'end':'middle')));
@@ -1100,16 +1132,24 @@
             if(sw&&sw.baseline)o.tt.textContent='“'+sw.baseline+' ___” · clinical “'+sw.target+
               '” hijacked by the everyday wording'+(sw.swap?' (“'+sw.swap+'”)':'');
           });
-          // label the two extreme tracks with one compact annotation each, placed
-          // in clear space (above the earliest-forming line, below the latest) so
-          // it never collides with the tracks or the forms/lock-in axis labels
+          // truncate at a word boundary (never mid-word) so labels read cleanly
+          function wbTrunc(s,max){
+            if(!s||s.length<=max)return s||'';
+            var cut=s.slice(0,max),sp=cut.lastIndexOf(' ');
+            return (sp>max*0.5?cut.slice(0,sp):cut.replace(/\s+$/,''))+'…';
+          }
+          // label the two extreme tracks, each stacked on two lines in clear space
+          // (above the earliest-forming line, below the latest) — no ellipsis mid-word
           function outlier(o,above){
             if(!o)return;var sw=SW[o.p.dataset+'#'+o.p.index];if(!sw||!sw.target)return;
-            var swp=sw.swap?(sw.swap.length>16?sw.swap.slice(0,16)+'…':sw.swap):'';
-            var yy=above?o.y-7:o.y+9, anchor=above?'start':'end', xx=above?lx(o.p.pat_formed):lx(L-1);
-            var tEl=el('text',{x:xx,y:yy,'text-anchor':anchor,'font-size':8.5,'font-family':'var(--mono)',fill:'#6d6c66'});
-            tEl.appendChild(document.createTextNode('forms “'+sw.target+'”'));
-            if(swp){var ts=el('tspan',{fill:'#b4483d'});ts.appendChild(document.createTextNode(' → “'+swp+'”'));tEl.appendChild(ts);}
+            var swp=wbTrunc(sw.swap||'',22);
+            var anchor=above?'start':'end', xx=above?lx(o.p.pat_formed):lx(L-1);
+            var y1=above?o.y-17:o.y+9;
+            var tEl=el('text',{x:xx,y:y1,'text-anchor':anchor,'font-size':8.5,'font-family':'var(--mono)'});
+            var l1=el('tspan',{x:xx,fill:'#6d6c66'});l1.appendChild(document.createTextNode('forms: “'+sw.target+'”'));
+            tEl.appendChild(l1);
+            if(swp){var l2=el('tspan',{x:xx,dy:'10',fill:'#b4483d'});
+              l2.appendChild(document.createTextNode('↳ hijacked by: “'+swp+'”'));tEl.appendChild(l2);}
             svg.appendChild(tEl);
           }
           outlier(lineRefs[0],true);
@@ -1257,53 +1297,17 @@
         if(w.length<3||t.length<3)return false;   // avoid "a" counting as "ADHD"
         return w.indexOf(t)===0||t.indexOf(w)===0;
       }
-      // paper-style readout: what the lens actually decodes at the answer position,
-      // layer by layer (open vocabulary), for both wordings side by side
-      function readoutTable(ex){
+      // the per-layer answer readout is drawn ONTO the graph (marginalia on the
+      // answer rows, in drawSide); this keeps only the one-line legend
+      function readoutLegend(ex){
         var host=document.getElementById('tr-readout'); if(!host)return;
         host.textContent='';
         var leg=document.createElement('div'); leg.className='ro-legend';
-        leg.textContent='Shaded above: “'+(ex.target||'the clinical answer')+
-          '” in the model’s top-8 readout at that position and layer — darker = higher rank. '+
-          'Hover any cell for its layer and rank.';
+        leg.textContent='Shaded: “'+(ex.target||'the clinical answer')+
+          '” in the model’s top-8 readout at that position and layer — darker = higher rank; '+
+          'hover any cell for its layer and rank. Small grey type on the answer row names what '+
+          'the lens was reading out before the answer settled.';
         host.appendChild(leg);
-        var cl=(ex.sides.clinical&&ex.sides.clinical.readout)||[];
-        var pt=(ex.sides.patient&&ex.sides.patient.readout)||[];
-        if(!cl.length&&!pt.length)return;            // older payloads carry no readout
-        var byLayer={};
-        cl.forEach(function(r){(byLayer[r.layer]=byLayer[r.layer]||{}).clin=r;});
-        pt.forEach(function(r){(byLayer[r.layer]=byLayer[r.layer]||{}).pat=r;});
-        var order=Object.keys(byLayer).map(Number).sort(function(a,b){return b-a;});
-        var wrap=document.createElement('div'); wrap.className='ro-scroll';
-        var table=document.createElement('table');
-        var cap=document.createElement('caption');
-        cap.textContent='What the lens reads out at the answer position, layer by layer — the model’s actual top words, not just the target.';
-        table.appendChild(cap);
-        var thead=document.createElement('thead'),htr=document.createElement('tr');
-        ['layer','clinical wording','patient wording'].forEach(function(h){
-          var th=document.createElement('th'); th.scope='col'; th.textContent=h; htr.appendChild(th);});
-        thead.appendChild(htr); table.appendChild(thead);
-        function cell(r){
-          var td=document.createElement('td');
-          if(!r||!r.tokens||!r.tokens.length){td.textContent='—';return td;}
-          r.tokens.slice(0,2).forEach(function(w,i){
-            if(i)td.appendChild(document.createTextNode(', '));
-            var sp=document.createElement('span');
-            sp.className=matchTarget(w,ex.target)?'ro-hit':'ro-off';
-            sp.textContent=w; td.appendChild(sp);
-          });
-          return td;
-        }
-        var tbody=document.createElement('tbody');
-        order.forEach(function(L){
-          var rec=byLayer[L],isFinal=(rec.clin&&rec.clin.final)||(rec.pat&&rec.pat.final);
-          var tr=document.createElement('tr'); if(isFinal)tr.className='ro-final';
-          var lh=document.createElement('th'); lh.scope='row';
-          lh.textContent=isFinal?'final':('layer '+L); tr.appendChild(lh);
-          tr.appendChild(cell(rec.clin)); tr.appendChild(cell(rec.pat));
-          tbody.appendChild(tr);
-        });
-        table.appendChild(tbody); wrap.appendChild(table); host.appendChild(wrap);
       }
       function render(ex){
         var layers=ex.layers,Lmax=layers[layers.length-1];
@@ -1320,11 +1324,13 @@
           'shows the model’s actual top prediction and its probability.';
         svg.appendChild(ttl);
         var y=20;
-        function drawSide(rws,title,color,ans){
+        function drawSide(rws,title,color,ans,roData,roAbove){
           svg.appendChild(txt(LABEL-8,y,title,color,11.5,'end'));
           y+=6;
+          var answerCy=null;
           rws.forEach(function(r){
             var cy=y+rowH/2;
+            if(r.answer)answerCy=cy;
             svg.appendChild(txt(LABEL-8,cy+3,(r.label||'').replace(/^ /,'·'),MUT,9.5,'end',true));
             var cw=Math.max(2.4,gw/Math.max(1,layers.length-1)*0.86);
             var firstIdx=-1;
@@ -1380,15 +1386,33 @@
             }
             y+=rowH;
           });
+          // map the per-layer answer readout onto the answer row: name the word(s)
+          // the lens decoded BEFORE the answer settled (the → label already shows the
+          // final), at the earliest sampled layer each distinct pre-answer word appears
+          if(roData&&roData.length&&answerCy!=null){
+            var asc=roData.slice().sort(function(a,b){return a.layer-b.layer;});
+            var finTop=((asc[asc.length-1].tokens||[])[0]||'');
+            var yy=roAbove?answerCy-rowH*0.7:answerCy+rowH*0.95;
+            var shown={},placed=0;
+            for(var ri=0;ri<asc.length&&placed<2;ri++){
+              var toks=(asc[ri].tokens||[]).filter(function(w){return w&&w.length>1;});
+              var t0=toks[0]; if(!t0||t0===finTop||shown[t0])continue;
+              shown[t0]=1;placed++;
+              var lyr=asc[ri].layer;
+              var mel=txt(lx(lyr),yy,toks.slice(0,2).join(', '),MUT,7,lyr>=Lmax?'end':'middle',true);
+              mel.setAttribute('class','marginalia');mel.setAttribute('opacity','.85');
+              svg.appendChild(mel);
+            }
+          }
           y+=16;
         }
-        drawSide(clinRows,'clinical wording',CLIN,ex.sides.clinical.answer);
-        drawSide(patRows,'patient wording',PAT,ex.sides.patient.answer);
+        drawSide(clinRows,'clinical wording',CLIN,ex.sides.clinical.answer,ex.sides.clinical.readout,true);
+        drawSide(patRows,'patient wording',PAT,ex.sides.patient.answer,ex.sides.patient.readout,false);
         [0,Math.round(Lmax/2),Lmax].forEach(function(l){
           svg.appendChild(txt(lx(l),y,'layer '+l,MUT,9.5,l===0?'start':(l===Lmax?'end':'middle'),true));
         });
         mount('fig-transport',svg);
-        readoutTable(ex);
+        readoutLegend(ex);
       }
       // clickable selector: one chip per strong example, target-labelled
       var tabs=document.getElementById('tr-tabs');

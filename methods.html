@@ -373,7 +373,7 @@
     <figure class="jspace">
       <p class="jspace-cap"><b>What the wording changes, before the answer.</b> Illustrative schematic — the example words and concept tags are hand-authored, not a measurement. Clinical wording lights up medical concepts inside the model (the “J-space” the Jacobian lens reads); the same situation in patient words lights up everyday ones, and that redirects the next word. The <a href="technical/#application">technical page</a> adds a third panel, where translating the wording back restores the medical concepts.</p>
       <div class="jspace-grid jspace-2" role="img" aria-label="Two panels. A, clinical wording ‘my dyspepsia flared up’ activates the concepts medical, gastrointestinal and treatment, and the model outputs antacid. B, patient wording ‘my stomach’s on fire’ activates food, spicy and casual, and the model outputs ice cream.">
-        <div class="jspanel">
+        <div class="jspanel" data-jsrole="clinical">
           <div class="jspanel-head">A · Clinical wording</div>
           <p class="jspanel-in">“My <span class="trig">dyspepsia</span> flared up.”</p>
           <div class="jsflow"></div>
@@ -381,7 +381,7 @@
           <div class="jsflow"></div>
           <div class="jsout jsout-ok">antacid</div>
         </div>
-        <div class="jspanel">
+        <div class="jspanel" data-jsrole="patient">
           <div class="jspanel-head">B · Patient wording</div>
           <p class="jspanel-in">“My stomach’s on <span class="trig">fire</span>.”</p>
           <div class="jsflow"></div>
@@ -391,6 +391,44 @@
         </div>
       </div>
     </figure>
+    <script>
+    (function(){
+      // The J-space schematic is hand-authored ("Illustrative") by default. If the
+      // backend commits an empirical readout (data/jspace.json: {empirical:true,
+      // panels:{clinical|patient|translation:{input,trigger,concepts:[...],output,
+      // on_target}}, note}), swap the real tokens in AND relabel. The disclaimer
+      // only flips to "Empirical" when the content is actually a measurement.
+      fetch('data/jspace.json',{cache:'no-cache'}).then(function(r){return r.ok?r.json():null;}).then(function(d){
+        if(!d||!d.empirical||!d.panels)return;
+        var fig=document.querySelector('.jspace'); if(!fig)return;
+        [].forEach.call(fig.querySelectorAll('.jspanel'),function(panel){
+          var p=d.panels[panel.getAttribute('data-jsrole')]; if(!p)return;
+          var off=(p.on_target===false);
+          var inEl=panel.querySelector('.jspanel-in');
+          if(inEl&&p.input){inEl.textContent='';
+            if(p.trigger&&p.input.indexOf(p.trigger)>=0){
+              var parts=p.input.split(p.trigger);
+              inEl.appendChild(document.createTextNode('“'+parts[0]));
+              var tg=document.createElement('span');tg.className='trig';tg.textContent=p.trigger;inEl.appendChild(tg);
+              inEl.appendChild(document.createTextNode(parts.slice(1).join(p.trigger)+'”'));
+            }else{inEl.textContent='“'+p.input+'”';}
+          }
+          var space=panel.querySelector('.jsspace');
+          if(space&&p.concepts&&p.concepts.length){
+            [].forEach.call(space.querySelectorAll('.jspill'),function(x){x.remove();});
+            p.concepts.forEach(function(c){var s=document.createElement('span');
+              s.className='jspill '+(off?'jspill-off':'jspill-clin');s.textContent=c;space.appendChild(s);});
+          }
+          var out=panel.querySelector('.jsout');
+          if(out&&p.output){out.textContent=p.output;out.className='jsout '+(off?'jsout-off':'jsout-ok');}
+        });
+        var cap=fig.querySelector('.jspace-cap');
+        if(cap){cap.textContent='';var b=document.createElement('b');
+          b.textContent='Empirical J-lens residual stream readout at middle layers.';cap.appendChild(b);
+          if(d.note)cap.appendChild(document.createTextNode(' '+d.note));}
+      }).catch(function(){});
+    })();
+    </script>
     <p>
       Every render is a self-contained HTML file.
     </p>
@@ -645,7 +683,7 @@
     .then(function(data){
       var ex=data.exemplar;
       if(!ex||!ex.patched)return;
-      var L=ex.layers||26, CELL=21, GAP=2, LEFT=96, TOP=30, LANE_GAP=40, PLOT_H=96;
+      var L=ex.layers||26, CELL=21, GAP=2, LEFT=96, TOP=44, LANE_GAP=40, PLOT_H=96;
       var W=LEFT+L*(CELL+GAP)+8;
       var laneY=[TOP,TOP+CELL+LANE_GAP];
       var probTop=laneY[1]+CELL+LANE_GAP+4;
@@ -655,6 +693,9 @@
       var svg=el('svg',{viewBox:'0 0 '+W+' '+H,width:W,role:'img',
         'aria-label':'Lens readout for both wordings and, on the same layer axis, the probability of the answer when the everyday run is patched at each layer'},null);
       mount.appendChild(svg);
+      // legend: the lane shade encodes the answer's RANK at each layer (not probability)
+      txt(svg,0,18,'shade = the answer’s rank at each layer · darker = nearer rank 1',
+        {'font-size':9,fill:'#8a8a84','font-family':'ui-monospace,SF Mono,Menlo,Consolas,monospace'});
       function xAt(l){return LEFT+l*(CELL+GAP);}
       var lanes=[['clinical wording',ex.labels.clinical,ex.clin_ranks,'#15803d',ex.clean_prob],
                  ['everyday wording',ex.labels.patient,ex.pat_ranks,'#111827',ex.corrupt_prob]];
@@ -688,12 +729,12 @@
       if(firstPlace!=null){
         var fx=xAt(firstPlace)+CELL/2, fy=laneY[0]+CELL;
         el('line',{x1:fx,y1:fy+3,x2:fx,y2:fy+15,stroke:'#c3c9d2','stroke-width':1},svg);
-        txt(svg,fx,fy+26,'clinical answer reaches first place',{'font-size':9.5,fill:'#15803d','text-anchor':'middle'});
+        txt(svg,fx,fy+26,'“'+(ex.target||'clinical answer')+'” reaches first place',{'font-size':9.5,fill:'#15803d','text-anchor':'middle'});
       }
       if(!ex.pat_ranks[String(L-1)]){
         var gx=xAt(L-1)+CELL/2, gy=laneY[1]+CELL;
         el('line',{x1:gx,y1:gy+3,x2:gx,y2:gy+13,stroke:'#c3c9d2','stroke-width':1},svg);
-        txt(svg,gx,gy+24,'gone at output',{'font-size':9.5,fill:'#b4483d','text-anchor':'end'});
+        txt(svg,gx,gy+24,'“'+(ex.target||'answer')+'” gone at output',{'font-size':9.5,fill:'#b4483d','text-anchor':'end'});
       }
       var PMAX=Math.max(ex.clean_prob*1.2,Math.max.apply(null,ex.patched.filter(function(v){return v!=null;}))*1.08);
       function py(p){return probTop+PLOT_H*(1-p/PMAX);}
