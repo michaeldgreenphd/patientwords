@@ -79,11 +79,18 @@
   .cshare{margin:6px 0 4px;max-width:560px}
   .cshare-row{display:grid;grid-template-columns:116px 1fr;gap:12px;align-items:center;margin:0 0 7px}
   .cshare-lbl{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.02em;text-align:right}
+  .cshare-barwrap{display:flex;flex-direction:column;gap:2px;min-width:0}
   .cshare-bar{display:flex;height:14px}
   .cshare-seg{height:100%}
   .cs-clin{background:var(--clinical)}
   .cs-off{background:var(--penalty)}
   .cs-struct{background:var(--structural)}
+  .cshare-nums{display:flex}
+  .cshare-nums .cs-n{font-family:var(--mono);font-size:9px;line-height:1;text-align:center;
+    white-space:nowrap;overflow:hidden;box-sizing:border-box;padding:0 1px}
+  .cshare-nums .cs-n-clin{color:var(--clinical)}
+  .cshare-nums .cs-n-off{color:var(--penalty)}
+  .cshare-nums .cs-n-struct{color:#4b5563}
   .cshare-cap{font-family:var(--mono);font-size:11px;color:var(--muted);line-height:1.65;margin:8px 0 14px;max-width:560px}
   @media (max-width:560px){.cshare-row{grid-template-columns:1fr;gap:2px}.cshare-lbl{text-align:left}}
   .engines{margin:6px 0 14px;padding:0;list-style:none}
@@ -171,6 +178,11 @@
   .spark-xlate .sp-from{width:26px;height:9px;background:var(--patient);opacity:.65;border-radius:2px}
   .spark-xlate .sp-arrow{width:0;height:0;border-top:5px solid transparent;border-bottom:5px solid transparent;border-left:7px solid var(--muted)}
   .spark-xlate .sp-to{width:26px;height:9px;background:var(--clinical);opacity:.85;border-radius:2px}
+  /* Step 4 · micro-labels naming the spark-graphic components */
+  .four-views .spark-wrap{display:flex;align-items:center;gap:7px}
+  .four-views .spark-tags{display:flex;flex-direction:column;justify-content:center;gap:6px;
+    font-family:var(--mono);font-size:8px;letter-spacing:.03em;color:var(--muted);line-height:1}
+  .four-views .spark-note{font-family:var(--mono);font-size:8px;letter-spacing:.03em;color:var(--muted)}
   /* J-space illustrative schematic — hand-authored concept diagram, NOT a live trace */
   .jspace{margin:20px 0 12px}
   .jspace-cap{font-family:var(--mono);font-size:11.5px;color:var(--muted);line-height:1.7;max-width:680px;margin:0 0 15px}
@@ -316,25 +328,43 @@
       <li class="t-structural"><b>Structural</b>: scaffolding features for syntax,
         position, and punctuation that appear in every trace and carry no medical content.</li>
     </ul>
-    <div class="cshare" role="img" aria-label="Schematic: under patient wording the clinical share of the circuit falls and the off-target share rises, while the structural scaffolding stays roughly constant.">
-      <div class="cshare-row">
-        <span class="cshare-lbl">clinical phrasing</span>
-        <span class="cshare-bar">
-          <span class="cshare-seg cs-clin" style="width:34%"></span>
-          <span class="cshare-seg cs-off" style="width:15%"></span>
-          <span class="cshare-seg cs-struct" style="width:51%"></span>
-        </span>
-      </div>
-      <div class="cshare-row">
-        <span class="cshare-lbl">patient phrasing</span>
-        <span class="cshare-bar">
-          <span class="cshare-seg cs-clin" style="width:27%"></span>
-          <span class="cshare-seg cs-off" style="width:22%"></span>
-          <span class="cshare-seg cs-struct" style="width:51%"></span>
-        </span>
-      </div>
+    <div class="cshare" id="cshare" role="img" aria-label="Attribution mass per phrasing: clinical (green), off-target (red), and structural (grey) shares, for clinical then patient wording.">
+      <span class="pend">figure pending</span>
     </div>
-    <p class="cshare-cap">Schematic of the direction, not exact proportions: under patient wording the clinical share of the circuit (green) falls and the off-target share (red) rises; the structural scaffolding (grey) stays roughly constant. Only the clinical share is measured; it falls in most traced pairs.</p>
+    <p class="cshare-cap" id="cshare-cap"></p>
+    <script>
+    (function(){
+      // Circuit-share bars, data-driven. The placeholder proportions encode the
+      // MEASURED direction (the clinical share falls under patient wording); the
+      // corpus-mean attribution mass fills in from data/tag_mass.json when the
+      // backend lands it, and ONLY then does the caption become the empirical
+      // claim — labeling placeholder numbers "measured" would break provenance.
+      var PLACEHOLDER={clinical:{clin:34,off:15,struct:51},patient:{clin:27,off:22,struct:51}};
+      var CAP_PENDING='Illustrative proportions — the measured finding is directional (the clinical share of the circuit falls under patient wording; the off-target share rises). Corpus-mean attribution mass fills in when the aggregation lands.';
+      var CAP_EMPIRICAL='Mean attribution mass across the measured corpus.';
+      function seg(cls,w){var s=document.createElement('span');s.className='cshare-seg '+cls;s.style.width=w+'%';return s;}
+      function num(cls,w){var s=document.createElement('span');s.className='cs-n '+cls;s.style.width=w+'%';s.textContent=w+'%';return s;}
+      function row(label,d){
+        var r=document.createElement('div');r.className='cshare-row';
+        var l=document.createElement('span');l.className='cshare-lbl';l.textContent=label;r.appendChild(l);
+        var wrap=document.createElement('span');wrap.className='cshare-barwrap';
+        var bar=document.createElement('span');bar.className='cshare-bar';
+        bar.appendChild(seg('cs-clin',d.clin));bar.appendChild(seg('cs-off',d.off));bar.appendChild(seg('cs-struct',d.struct));
+        var nums=document.createElement('span');nums.className='cshare-nums';
+        nums.appendChild(num('cs-n-clin',d.clin));nums.appendChild(num('cs-n-off',d.off));nums.appendChild(num('cs-n-struct',d.struct));
+        wrap.appendChild(bar);wrap.appendChild(nums);r.appendChild(wrap);return r;
+      }
+      function render(data,empirical){
+        var host=document.getElementById('cshare'); if(!host)return; host.textContent='';
+        host.appendChild(row('clinical phrasing',data.clinical));
+        host.appendChild(row('patient phrasing',data.patient));
+        var cap=document.getElementById('cshare-cap'); if(cap)cap.textContent=empirical?CAP_EMPIRICAL:CAP_PENDING;
+      }
+      fetch('data/tag_mass.json',{cache:'no-cache'}).then(function(r){return r.ok?r.json():null;}).then(function(d){
+        if(d&&d.empirical&&d.clinical&&d.patient)render(d,true);else render(PLACEHOLDER,false);
+      }).catch(function(){render(PLACEHOLDER,false);});
+    })();
+    </script>
   </section>
 
   <section id="step-4">
@@ -346,8 +376,11 @@
     <ul class="four-views">
       <li>
         <span class="eng-name">Wording: the word swap</span>
-        <div class="spark spark-stack" role="img" aria-label="Shown as two stacked traces of the same sentence.">
-          <span class="sp-clin"></span><span class="sp-pat"></span>
+        <div class="spark-wrap">
+          <div class="spark spark-stack" role="img" aria-label="Shown as two stacked traces of the same sentence: clinical wording on top, patient wording below.">
+            <span class="sp-clin"></span><span class="sp-pat"></span>
+          </div>
+          <div class="spark-tags"><span>clin</span><span>pat</span></div>
         </div>
       </li>
       <li>
@@ -367,6 +400,7 @@
         <span class="eng-name">Translation</span>
         <div class="spark spark-xlate" role="img" aria-label="The patient sentence rewritten in clinical terms until the circuit and prediction recover together.">
           <span class="sp-from"></span><span class="sp-arrow"></span><span class="sp-to"></span>
+          <span class="spark-note">pat → clin</span>
         </div>
       </li>
     </ul>
@@ -722,6 +756,14 @@
           el('line',{x1:lx-6,y1:cy+6,x2:lx+6,y2:cy-6,stroke:'#b4483d','stroke-width':2},svg);
         }
       });
+      // name the token forming at the very first legible (green) square on the clinical track
+      var firstLeg=null;
+      for(var flg=0;flg<L;flg++){if(ex.clin_ranks[String(flg)]){firstLeg=flg;break;}}
+      if(firstLeg!=null){
+        var flx=xAt(firstLeg)+CELL/2, fly=laneY[0];
+        el('line',{x1:flx,y1:fly-9,x2:flx,y2:fly-2,stroke:'#c3c9d2','stroke-width':1},svg);
+        txt(svg,flx,fly-12,'forms: “'+(ex.target||'answer')+'”',{'font-size':9,fill:'#15803d','text-anchor':'middle'});
+      }
       // direct annotations, positioned from the data (not hardcoded): where the
       // clinical answer first reaches rank 1, and where the everyday answer is gone.
       var firstPlace=null;
@@ -738,9 +780,14 @@
       }
       var PMAX=Math.max(ex.clean_prob*1.2,Math.max.apply(null,ex.patched.filter(function(v){return v!=null;}))*1.08);
       function py(p){return probTop+PLOT_H*(1-p/PMAX);}
-      txt(svg,0,probTop-24,'patch each layer',{'font-size':12,fill:'#1c1c19',
+      // name what the patch actually injects — the clinical translation of the pair —
+      // and rename the axis to state the mechanism (falls back to the clinical
+      // wording until the backend adds a dedicated translated_sentence)
+      txt(svg,LEFT,probTop-30,'translated: “'+(ex.translated_sentence||ex.labels.clinical||'')+'”',
+        {'font-size':9,fill:'#8a8a84','font-family':'ui-monospace,SF Mono,Menlo,Consolas,monospace'});
+      txt(svg,0,probTop-18,'patch: inject',{'font-size':11,fill:'#1c1c19',
         'font-family':'Iowan Old Style,Palatino,Georgia,serif'});
-      txt(svg,0,probTop-11,'causal check',{'font-size':10});
+      txt(svg,0,probTop-6,'clinical translation',{'font-size':8.5,fill:'#6d6c66'});
       var best=0;
       ex.patched.forEach(function(p,l){
         if(p==null)return;

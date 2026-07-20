@@ -118,6 +118,8 @@
   .tl svg{width:100%;height:auto;display:block}
   .tl-sum{font-family:var(--mono);font-size:11.5px;line-height:1.9;color:var(--muted);margin:4px 0 0}
   .tl-sum b{color:var(--ink);font-weight:600}
+  /* legend marginalia tied to the axis (SVG text) */
+  .tl .marginalia{font-family:var(--mono);font-size:9px;letter-spacing:.04em;fill:var(--muted)}
 
   /* concise summary table (one row per scenario, rows jump to the full card) */
   .sum-scroll{overflow-x:auto;margin:26px 0 0}
@@ -207,14 +209,17 @@
   .sum-table th[data-key].sorted.asc::after{content:" ▴"}
   .sum-empty{font-family:var(--mono);font-size:12px;color:var(--muted);padding:14px 0}
   /* pager: clean text-based prev/next, no bordered blocks */
-  .sum-pages{font-family:var(--mono);font-size:12px;margin:18px 0 0;display:flex;gap:12px;
+  .sum-pages{font-family:var(--mono);font-size:12px;margin:18px 0 0;display:flex;gap:7px;
     flex-wrap:wrap;align-items:baseline;justify-content:center}
-  .sum-pages a{color:var(--clinical);text-decoration:none;letter-spacing:.02em}
+  .sum-pages a{color:var(--clinical);text-decoration:none;letter-spacing:.02em;cursor:pointer}
   .sum-pages a:hover{text-decoration:underline;text-underline-offset:3px}
   .sum-pages a:focus-visible{outline:2px solid var(--clinical);outline-offset:2px;border-radius:1px}
   .sum-pages .sum-pg-off{color:var(--structural)}
   .sum-pages .sum-pg-range{color:var(--muted)}
   .sum-pages .sum-pg-sep{color:var(--structural)}
+  .sum-pages .sum-pg-lbl{color:var(--muted)}
+  .sum-pages .sum-pg-on{color:var(--ink);font-weight:600}
+  .sum-pages .sum-pg-bar{color:var(--structural);margin:0 4px}
   /* SIM-column expander (+ / −) and the revealed full-prompt detail row */
   .sim-exp{all:unset;cursor:pointer;font-family:var(--mono);font-size:13px;line-height:1;
     color:var(--structural);margin-right:8px;padding:0 1px}
@@ -473,7 +478,7 @@
       if (batches.length < 2) return;
       var t0 = Date.parse(batches[0].utc), t1 = Date.parse(batches[batches.length - 1].utc);
       var span = Math.max(t1 - t0, 1);
-      var W = 720, H = 74, ml = 8, mr = 8, axisY = 46;
+      var W = 720, H = 86, ml = 8, mr = 8, axisY = 46;   // extra height for the axis legend marginalia
       function X(iso){ return ml + (W - ml - mr) * ((Date.parse(iso) - t0) / span); }
       function day(iso){ return iso.slice(5, 10).replace('-', ' / '); }
       var svg = el('svg', {viewBox: '0 0 ' + W + ' ' + H, role: 'img',
@@ -518,13 +523,17 @@
         lb.textContent = day(e[0]);
         svg.appendChild(lb);
       });
+      // legend as marginalia, tied to the axis by the start date (not floated in the summary)
+      var leg = el('text', {x: ml, y: axisY + 30, 'text-anchor': 'start', 'class': 'marginalia'});
+      leg.textContent = 'hollow = Tier A · filled = Tier B';
+      svg.appendChild(leg);
       box.appendChild(svg);
       var sum = document.createElement('p');
       sum.className = 'tl-sum';
       sum.innerHTML = '<b>' + t.totals.generation_batches + '</b> generation batches · <b>' +
         t.totals.accepted_pairs + '</b> accepted pairs (<b>' + t.totals.tierb_accepted +
         '</b> Tier B so far) · generation <b>$' + t.totals.generation_usd.toFixed(2) +
-        '</b> total · tracing and inference $0 on public CI · hollow = Tier A, filled = Tier B';
+        '</b> total · tracing and inference $0 on public CI';
       box.appendChild(sum);
       box.hidden = false;
     }
@@ -562,7 +571,7 @@
   function mag(x){return Math.round(Math.abs(x)*100)+'%';}  // unsigned magnitude for directional columns
   function p2(x){return typeof x==='number'?x.toFixed(2):'—';}
   function pad(n){return String(n).padStart(2,'0');}
-  var PAGE_SIZE=50;
+  var rowsPerPage=10;   // dynamic: 10 / 25 / 50, chosen via the Show: toggle
 
   // Med-circuit meter: share of feature attribution on clinical-tagged
   // features, one bar per phrasing on a shared 0-1 scale - the quantitative
@@ -1198,28 +1207,39 @@
         });
         renderPager();
       }
-      // clean text-based pager: ← Previous 50 · n–m of T · Next 50 →
+      // text-based control: Show: 10 · 25 · 50 | ← Previous · Page X of Y · Next →
+      function toTop(){var top=document.getElementById('sim-summary');if(top)top.scrollIntoView({block:'start'});}
       function renderPager(){
         pages.textContent='';
-        if(pageCount<=1)return;
+        // rows-per-page toggle — always shown so the reader can change page size
+        pages.appendChild(el('span','sum-pg-lbl','Show:'));
+        [10,25,50].forEach(function(nn,i){
+          if(i)pages.appendChild(el('span','sum-pg-sep','·'));
+          if(nn===rowsPerPage){
+            pages.appendChild(el('span','sum-pg-on','['+nn+']'));
+          }else{
+            var a=el('a',null,String(nn));
+            a.href='#sim-summary';
+            a.setAttribute('aria-label','show '+nn+' rows per page');
+            a.addEventListener('click',function(ev){ev.preventDefault();
+              rowsPerPage=nn;renderTable();toTop();});   // changing size resets to page 1
+            pages.appendChild(a);
+          }
+        });
+        pages.appendChild(el('span','sum-pg-bar','|'));
+        // page navigation
         function nav(label,target,enabled){
           if(!enabled)return el('span','sum-pg-off',label);
           var a=el('a',null,label);
           a.href='#sim-summary';
-          a.addEventListener('click',function(ev){
-            ev.preventDefault();
-            showPage(target);
-            var top=document.getElementById('sim-summary');
-            if(top)top.scrollIntoView({block:'start'});
-          });
+          a.addEventListener('click',function(ev){ev.preventDefault();showPage(target);toTop();});
           return a;
         }
-        var lo=(currentPage-1)*PAGE_SIZE+1, hi=Math.min(currentPage*PAGE_SIZE,totalRows);
-        pages.appendChild(nav('← Previous '+PAGE_SIZE,currentPage-1,currentPage>1));
+        pages.appendChild(nav('← Previous',currentPage-1,currentPage>1));
         pages.appendChild(el('span','sum-pg-sep','·'));
-        pages.appendChild(el('span','sum-pg-range',lo+'–'+hi+' of '+totalRows));
+        pages.appendChild(el('span','sum-pg-range','Page '+currentPage+' of '+pageCount));
         pages.appendChild(el('span','sum-pg-sep','·'));
-        pages.appendChild(nav('Next '+PAGE_SIZE+' →',currentPage+1,currentPage<pageCount));
+        pages.appendChild(nav('Next →',currentPage+1,currentPage<pageCount));
       }
       function renderTable(){
         var list=visibleScenarios();
@@ -1232,15 +1252,16 @@
           tr.appendChild(td);
           sumBody.appendChild(tr);
           totalRows=0;pageCount=1;currentPage=1;
+          renderPager();   // keep the Show: toggle available even with no matches
           return;
         }
         list.forEach(function(s,i){
           var tr=rowFor(s);
-          tr.setAttribute('data-page',String(Math.floor(i/PAGE_SIZE)+1));
+          tr.setAttribute('data-page',String(Math.floor(i/rowsPerPage)+1));
           sumBody.appendChild(tr);
         });
         totalRows=list.length;
-        pageCount=Math.ceil(list.length/PAGE_SIZE);
+        pageCount=Math.ceil(list.length/rowsPerPage);
         currentPage=1;
         showPage(1);
       }
