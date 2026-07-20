@@ -108,6 +108,10 @@
   .urg-tbl td.dn{color:var(--penalty);font-weight:600}
   .urg-tbl td.up{color:var(--clinical);font-weight:600}
   .urg-tbl tr:last-child td{padding-bottom:0}
+  /* per-model tier-shift forest (#11): one dot per model, shared axis, zero line */
+  .urg-forest{display:block;margin:8px 0 2px}
+  .urg-fhead{margin:14px 0 2px}
+  .urg-foot{font-size:10px;color:var(--muted);line-height:1.6;margin:0 0 2px}
 
   /* study timeline strip (drawn at load from ../data/timeline.json) */
   .tl{margin:8px 0 0;padding:10px 16px 8px;border:1px solid var(--hairline);background:#fff}
@@ -632,6 +636,90 @@
     return td;
   }
 
+  // Per-model care-urgency tier-shift forest (#11, owner 2026-07-20). One dot
+  // per model at summary.per_model[m].mean_tier_shift on a shared axis; the
+  // vertical rule is the no-shift reference (a forest zero line). The axis is
+  // scaled to the models with n>=100 so the two n=3 medical models don't
+  // squash it; those fall left of the scale and are drawn hollow with a caret.
+  // The representative-redirect annotation is gated to the strongest reliable
+  // downgrader so a tiny-n model can never headline. Returns null (chart
+  // skipped) whenever the data is absent or too thin.
+  function tierForest(summary){
+    var pm=summary&&summary.per_model;
+    if(!pm)return null;
+    var GATE=100, NS='http://www.w3.org/2000/svg';
+    var rows=Object.keys(pm).map(function(id){
+      var v=pm[id]||{};
+      return {id:id,mts:v.mean_tier_shift,n:v.n||0,dn:v.downgrades||0,
+              up:v.upgrades||0,rep:v.representative,ok:(v.n||0)>=GATE};
+    }).filter(function(r){return typeof r.mts==='number';});
+    if(rows.length<2)return null;
+    // reliable group first, most-negative (biggest downgrade) first within each
+    rows.sort(function(a,b){return (a.ok!==b.ok)?(a.ok?-1:1):(a.mts-b.mts);});
+    var rel=rows.filter(function(r){return r.ok;});
+    var extreme=rel.length?rel.reduce(function(a,b){return b.mts<a.mts?b:a;}):null;
+    var scale=rel.length?rel:rows;
+    var lo=Math.min.apply(null,scale.map(function(r){return r.mts;}));
+    var dmin=Math.min(lo*1.15,-0.02), dmax=0.015;  // include 0 for the zero line
+    var W=568,labW=150,padR=14,rh=17,top=8,botAxis=20;
+    var plotL=labW, plotR=W-padR, plotW=plotR-plotL;
+    var H=top+rows.length*rh+botAxis;
+    function X(v){return plotL+(Math.max(dmin,Math.min(dmax,v))-dmin)/(dmax-dmin)*plotW;}
+    function svgel(name,attrs,style){var e=document.createElementNS(NS,name);
+      for(var k in attrs)e.setAttribute(k,attrs[k]);if(style)e.setAttribute('style',style);return e;}
+    var svg=svgel('svg',{'class':'urg-forest',viewBox:'0 0 '+W+' '+H,role:'img',
+      'aria-label':'Mean care-urgency tier shift by model. Negative means patient phrasing '
+        +'predicts less-urgent care. '+rows.map(function(r){
+          return r.id+' '+(r.mts<0?'minus ':'')+Math.abs(r.mts).toFixed(3)
+            +(r.ok?'':' (n='+r.n+', below the n=100 gate)');}).join('; ')+'.'},
+      'width:100%;height:auto;max-width:'+W+'px');
+    var plotBot=top+rows.length*rh;
+    // faint dashed gridlines at each 0.05 tick (never between rows)
+    for(var tv=Math.ceil(dmin*20)/20; tv<dmax-1e-9; tv+=0.05){
+      var t=Math.round(tv*100)/100; if(Math.abs(t)<1e-9)continue;
+      var gx=X(t);
+      svg.appendChild(svgel('line',{x1:gx,x2:gx,y1:top,y2:plotBot},
+        'stroke:var(--hairline);stroke-width:1;stroke-dasharray:1 4'));
+      var gl=svgel('text',{x:gx,y:H-6,'text-anchor':'middle'},
+        'font-family:var(--mono);font-size:9px;fill:var(--muted)');
+      gl.textContent='−'+Math.abs(t).toFixed(2);
+      svg.appendChild(gl);
+    }
+    // the zero reference line (decision a): solid, a touch stronger than ticks
+    var zx=X(0);
+    svg.appendChild(svgel('line',{x1:zx,x2:zx,y1:top-2,y2:plotBot+2},
+      'stroke:var(--muted);stroke-width:1'));
+    var z0=svgel('text',{x:zx,y:H-6,'text-anchor':'middle'},
+      'font-family:var(--mono);font-size:9px;fill:var(--muted)');
+    z0.textContent='0';svg.appendChild(z0);
+    rows.forEach(function(r,i){
+      var cy=top+i*rh+rh/2;
+      var lab=svgel('text',{x:plotL-8,y:cy+3,'text-anchor':'end'},
+        'font-family:var(--mono);font-size:10.5px;fill:'+(r.ok?'var(--ink)':'var(--muted)'));
+      lab.textContent=r.id;svg.appendChild(lab);
+      var cx=X(r.mts), off=r.mts<dmin;
+      var dot=svgel('circle',{cx:cx,cy:cy,r:r.ok?4:3},
+        r.ok?'fill:var(--penalty);stroke:none'
+            :'fill:#fff;stroke:var(--muted);stroke-width:1.2');
+      var ti=document.createElementNS(NS,'title');
+      ti.textContent=r.id+' · tier shift '+(r.mts<0?'−':'+')+Math.abs(r.mts).toFixed(3)
+        +' · n='+r.n+' · '+r.dn+' downgrades / '+r.up+' upgrades'+(r.ok?'':' · below the n≥100 gate');
+      dot.appendChild(ti);svg.appendChild(dot);
+      if(off){  // pinned at the edge: tag the true magnitude so the clamp can't mislead
+        var car=svgel('text',{x:cx+8,y:cy+3},
+          'font-family:var(--mono);font-size:9.5px;fill:var(--muted)');
+        car.textContent='‹ −'+Math.abs(r.mts).toFixed(2);svg.appendChild(car);
+      }
+      if(extreme&&r.id===extreme.id&&r.rep&&r.rep.from&&r.rep.to){
+        var an=svgel('text',{x:cx+9,y:cy+3},
+          'font-family:var(--mono);font-size:10px;fill:var(--penalty)');
+        an.textContent='“'+r.rep.from+'” → “'+r.rep.to+'”';
+        svg.appendChild(an);
+      }
+    });
+    return {svg:svg,extreme:extreme,off:rows.filter(function(r){return r.mts<dmin;})};
+  }
+
   Promise.all([
     fetch('../data/simulated_scenarios.json',{cache:'no-cache'})
       .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();}),
@@ -729,6 +817,30 @@
           uline.appendChild(el('b',null,urg.vocabulary_status||'owner-reviewed v1 · domain review pending'));
           uline.appendChild(el('span',null,'; the Urgency column reads from the measured urgency data.'));
           prov.appendChild(uline);
+        }
+        // per-model tier-shift forest, below the table (#11, owner 2026-07-20)
+        var forest=tierForest(urg.summary);
+        if(forest){
+          var fh=el('div','urg-fhead');
+          fh.appendChild(el('b',null,'Tier shift by model'));
+          fh.appendChild(el('span',null,' — mean care-urgency change from clinical to '
+            +'patient wording (negative = patient phrasing predicts less-urgent care); '
+            +'the vertical rule is no shift.'));
+          prov.appendChild(fh);
+          prov.appendChild(forest.svg);
+          var fnbits=[];
+          if(forest.extreme)fnbits.push('“'+(forest.extreme.rep&&forest.extreme.rep.from||'—')
+            +'” → “'+(forest.extreme.rep&&forest.extreme.rep.to||'—')+'” annotates '
+            +forest.extreme.id+', the strongest downgrader at n ≥ 100 ('
+            +forest.extreme.n.toLocaleString()+' pairs)');
+          if(forest.off.length)fnbits.push(forest.off.map(function(r){
+            return r.id+' (−'+Math.abs(r.mts).toFixed(2)+', n='+r.n+')';}).join(' and ')
+            +' fall left of the scale — too few pairs to weight');
+          if(fnbits.length){
+            var fn=el('div','urg-foot');
+            fn.appendChild(el('span',null,fnbits.join('; ')+'.'));
+            prov.appendChild(fn);
+          }
         }
       }
       prov.hidden=false;
