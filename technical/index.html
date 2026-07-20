@@ -69,6 +69,22 @@
   #fig-transport a.tr-ans:focus-visible{outline:2px solid var(--clinical);outline-offset:2px}
   #fig-transport .tr-arrow{opacity:0}
   #fig-transport a.tr-ans:hover .tr-arrow,#fig-transport a.tr-ans:focus-visible .tr-arrow{opacity:.75}
+  #fig-transport rect{cursor:default}
+  /* transport figure: per-layer open-vocabulary readout table (paper-style) */
+  #tr-readout{margin:4px 0 0}
+  #tr-readout .ro-legend{font-size:13px;line-height:1.5;color:var(--muted);margin:0 0 8px}
+  #tr-readout .ro-scroll{overflow-x:auto}
+  #tr-readout table{border-collapse:collapse;font-family:var(--mono);font-size:11.5px;
+    max-width:560px}
+  #tr-readout caption{font-family:var(--serif);font-size:12.5px;color:var(--muted);
+    text-align:left;padding:0 0 5px}
+  #tr-readout th,#tr-readout td{padding:2px 12px 2px 0;text-align:left;vertical-align:top;
+    white-space:nowrap}
+  #tr-readout thead th{color:var(--muted);font-weight:600;border-bottom:1px solid #e7e5dd}
+  #tr-readout tbody th{color:var(--muted);font-weight:400;text-align:right;padding-right:14px}
+  #tr-readout tr.ro-final th,#tr-readout tr.ro-final td{border-top:1px solid #e7e5dd}
+  #tr-readout .ro-hit{color:var(--clinical);font-weight:600}
+  #tr-readout .ro-off{color:var(--ink)}
   /* charts float in negative space: no frame survives, whatever draws them */
   .fig,.fig svg,.figwrap,.figwrap svg,#forest,#forest svg,#dumbbells,#dumbbells svg,
   #ad-blocks,#ad-blocks svg,.conv-panel svg{
@@ -423,8 +439,9 @@
     <div class="fig" id="fig-transport">
       <span class="pend">figure pending: the transport readout has not loaded</span>
     </div>
+    <div id="tr-readout" aria-live="polite"></div>
     <p class="stat-line" id="dd-tr-census"></p>
-    <p class="cap" id="cap-transport">exploratory · one measured pair, hosted Jacobian lens, top-8 readout per layer and position · darker = stronger rank · a blank cell is measured, not missing: the answer is simply not in the top-8 window there · coverage limited to runs saved with raw responses</p>
+    <p class="cap" id="cap-transport">exploratory · hosted Jacobian lens, top-8 readout at every position × layer · a shaded cell = the pair’s clinical answer is in the top-8 there (hover for its layer and rank); darker = higher rank · a blank cell is measured, not missing: the answer is simply not in the top-8 window there · the table below reads out the model’s actual top words per layer at the answer position (open vocabulary, not just the target) · coverage limited to runs saved with raw responses</p>
 
     <h3>The census, set by set</h3>
     <p>Every measured set, one row of squares per outcome class, one square per
@@ -1144,6 +1161,63 @@
         }
         return out;
       }
+      // a decoded word "counts as" the target when one is a prefix of the other
+      // ("cardio" for "cardiologist"); used to colour the readout, not to filter it
+      function matchTarget(word,target){
+        if(!word||!target)return false;
+        var w=word.toLowerCase(),t=target.toLowerCase();
+        if(w===t)return true;
+        if(w.length<3||t.length<3)return false;   // avoid "a" counting as "ADHD"
+        return w.indexOf(t)===0||t.indexOf(w)===0;
+      }
+      // paper-style readout: what the lens actually decodes at the answer position,
+      // layer by layer (open vocabulary), for both wordings side by side
+      function readoutTable(ex){
+        var host=document.getElementById('tr-readout'); if(!host)return;
+        host.textContent='';
+        var leg=document.createElement('div'); leg.className='ro-legend';
+        leg.textContent='Shaded above: “'+(ex.target||'the clinical answer')+
+          '” in the model’s top-8 readout at that position and layer — darker = higher rank. '+
+          'Hover any cell for its layer and rank.';
+        host.appendChild(leg);
+        var cl=(ex.sides.clinical&&ex.sides.clinical.readout)||[];
+        var pt=(ex.sides.patient&&ex.sides.patient.readout)||[];
+        if(!cl.length&&!pt.length)return;            // older payloads carry no readout
+        var byLayer={};
+        cl.forEach(function(r){(byLayer[r.layer]=byLayer[r.layer]||{}).clin=r;});
+        pt.forEach(function(r){(byLayer[r.layer]=byLayer[r.layer]||{}).pat=r;});
+        var order=Object.keys(byLayer).map(Number).sort(function(a,b){return b-a;});
+        var wrap=document.createElement('div'); wrap.className='ro-scroll';
+        var table=document.createElement('table');
+        var cap=document.createElement('caption');
+        cap.textContent='What the lens reads out at the answer position, layer by layer — the model’s actual top words, not just the target.';
+        table.appendChild(cap);
+        var thead=document.createElement('thead'),htr=document.createElement('tr');
+        ['layer','clinical wording','patient wording'].forEach(function(h){
+          var th=document.createElement('th'); th.scope='col'; th.textContent=h; htr.appendChild(th);});
+        thead.appendChild(htr); table.appendChild(thead);
+        function cell(r){
+          var td=document.createElement('td');
+          if(!r||!r.tokens||!r.tokens.length){td.textContent='—';return td;}
+          r.tokens.slice(0,2).forEach(function(w,i){
+            if(i)td.appendChild(document.createTextNode(', '));
+            var sp=document.createElement('span');
+            sp.className=matchTarget(w,ex.target)?'ro-hit':'ro-off';
+            sp.textContent=w; td.appendChild(sp);
+          });
+          return td;
+        }
+        var tbody=document.createElement('tbody');
+        order.forEach(function(L){
+          var rec=byLayer[L],isFinal=(rec.clin&&rec.clin.final)||(rec.pat&&rec.pat.final);
+          var tr=document.createElement('tr'); if(isFinal)tr.className='ro-final';
+          var lh=document.createElement('th'); lh.scope='row';
+          lh.textContent=isFinal?'final':('layer '+L); tr.appendChild(lh);
+          tr.appendChild(cell(rec.clin)); tr.appendChild(cell(rec.pat));
+          tbody.appendChild(tr);
+        });
+        table.appendChild(tbody); wrap.appendChild(table); host.appendChild(wrap);
+      }
       function render(ex){
         var layers=ex.layers,Lmax=layers[layers.length-1];
         function lx(layer){return gx0+(Lmax?layer/Lmax:0)*gw;}
@@ -1180,8 +1254,13 @@
             for(var li=0;li<r.ranks.length;li++){
               var rk=r.ranks[li]; if(rk==null)continue;
               var op=0.9-(rk-1)/7*0.58;
-              svg.appendChild(el('rect',{x:lx(layers[li])-cw/2,y:cy-rowH*0.4,width:cw,height:rowH*0.8,
-                fill:color,opacity:op,rx:0.6}));
+              var rc=el('rect',{x:lx(layers[li])-cw/2,y:cy-rowH*0.4,width:cw,height:rowH*0.8,
+                fill:color,opacity:op,rx:0.6});
+              // hover names exactly what lit up: which layer, and the target's rank there
+              var rct=document.createElementNS(NS,'title');
+              rct.textContent='layer '+layers[li]+' · “'+(ex.target||'target')+'” rank '+rk+' of 8';
+              rc.appendChild(rct);
+              svg.appendChild(rc);
             }
             if(r.answer){
               if(ans&&ans.token){
@@ -1214,6 +1293,7 @@
           svg.appendChild(txt(lx(l),y,'layer '+l,MUT,9.5,l===0?'start':(l===Lmax?'end':'middle'),true));
         });
         mount('fig-transport',svg);
+        readoutTable(ex);
       }
       // clickable selector: one chip per strong example, target-labelled
       var tabs=document.getElementById('tr-tabs');
