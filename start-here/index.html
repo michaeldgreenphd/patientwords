@@ -41,6 +41,15 @@
   .dateline{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--teal);font-weight:600;margin:34px 0 14px}
   h1{font-size:clamp(28px,4.6vw,38px);line-height:1.16;font-weight:600;margin:0 0 12px}
   .subtitle{font-style:italic;font-size:19px;color:var(--muted);margin:0 0 8px}
+  /* intro framing: core inquiry + proxy caveat (whitespace + typography, no boxes) */
+  .core-q{margin:14px 0 16px}
+  .core-q-lbl{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--teal);font-weight:600;margin:0 0 6px}
+  .core-q-body{font-size:16.5px;line-height:1.66;margin:0 0 8px}
+  .core-q-body b{font-weight:600}
+  .core-q-scope{font-family:var(--mono);font-size:12px;line-height:1.72;color:var(--muted);margin:0}
+  .proxy{font-size:16.5px;line-height:1.66;margin:2px 0 20px}
+  .proxy b{font-weight:600}
   section{border-top:1px solid var(--ink);margin-top:42px;padding-top:12px}
   .step-no{font-family:var(--mono);font-size:11.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--teal);font-weight:600;margin:0 0 8px}
   h2{font-size:22px;font-weight:600;margin:0 0 10px}
@@ -169,6 +178,28 @@
   <p class="subtitle">What happens inside a language model when the same medical
     question is asked in patient words instead of clinical words.</p>
 
+  <div class="core-q">
+    <p class="core-q-lbl">Research question</p>
+    <p class="core-q-body"><b>Does the everyday language patients actually use change how a
+      language model reasons about their situation &mdash; and how safely it answers &mdash;
+      compared with standard clinical wording?</b> To find out, we pair colloquial patient
+      phrasings with their medical equivalents, trace which internal features each one
+      activates, and measure whether the casual wording pulls the model&rsquo;s next word away
+      from the medically appropriate answer and down the care ladder.</p>
+    <p class="core-q-scope">Scope: the models studied here are open-weight, chosen so their
+      internal reasoning can be traced directly. Whether the same effects hold in larger
+      closed-source models &mdash; whose internals cannot be observed &mdash; is an open question.</p>
+  </div>
+
+  <p class="proxy"><b>Is the next predicted word a proxy for clinical reasoning?</b> Fairly
+    asked: when the model&rsquo;s next word is &ldquo;ice cream,&rdquo; the idea of acid reflux
+    might still sit in its wider context, unspoken. Our claim is deliberately narrow. The next
+    token is where the model commits &mdash; in a deployed system it <em>is</em> the advice, and
+    every later word is conditioned on it &mdash; so if patient wording makes the clinical answer
+    less probable at that first, decisive step, that is a real, measurable, safety-relevant
+    shift. The circuit view (step&nbsp;5) then shows the shift is mechanical, not cosmetic: the
+    medical features themselves fire less.</p>
+
   <section>
     <p class="step-no">1 · A doctor converges</p>
     <h2>Three phrasings, one interpretation</h2>
@@ -242,7 +273,11 @@
   <section>
     <p class="step-no">5 · Look inside</p>
     <h2>Circuit tracing photographs the reasoning</h2>
-    <p>A trace is a look inside the guess you watched in step 3.</p>
+    <p>A trace is a look inside the guess you watched in step&nbsp;3 &mdash; think of it as an
+      <b>fMRI for the model</b>. An fMRI shows which regions of a brain light up during a task;
+      a circuit trace shows which internal concepts fire as the model reads, in the instant
+      before it commits to a word. In the sketch below, the clinical term lights up medical
+      concepts (teal); the casual phrase lights up everyday ones (dark).</p>
     <details class="explain">
       <summary>Read more about circuit traces</summary>
       <p>Inside the model, small units called "features" switch on as it reads.
@@ -304,7 +339,13 @@
   <section>
     <p class="step-no">6 · The patch</p>
     <h2>A translation layer, for now</h2>
-    <p>Put a translator between the patient and the model: it rewrites the sentence into clinical wording before the model answers.</p>
+    <p>The patch is a <b>clinical translator</b>. It sits between the patient and the model and,
+      before the model ever answers, rewrites the casual sentence into medical wording &mdash;
+      &ldquo;my stomach&rsquo;s on fire&rdquo; becomes &ldquo;I have acid reflux.&rdquo;
+      <b>How:</b> a second language model does the rewrite, swapping the everyday phrasing for
+      the clinical term. <b>Why:</b> if restoring the medical vocabulary restores the
+      model&rsquo;s clinical answer, then the wording &mdash; not a gap in what the model knows
+      &mdash; was what made it unsafe.</p>
     <div class="fig" role="img" aria-label="Without translation: the two everyday phrasings go straight into the language model and come out as ice cream at 29% and apple.">
     <svg viewBox="0 0 800 150">
       <text x="0" y="14" class="sv-m" style="letter-spacing:.14em;text-transform:uppercase">without translation</text>

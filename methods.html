@@ -234,6 +234,8 @@
   #reading-layers .rl-figwrap{margin:18px 0 6px;overflow-x:auto}
   #reading-layers svg{display:block}
   .rl-cap,.rl-credit{font-size:13px;color:var(--muted);max-width:640px}
+  /* inline echo of the figure's on-track labels, tying prose to the graphic */
+  .rl-lbl{font-family:var(--mono);font-size:.82em;color:var(--ink)}
   .rl-credit{border-top:1px solid var(--hairline);padding-top:8px;margin-top:14px}
   .fold>.rl-credit{border-top:0;padding-top:0;margin-top:0}
   .rl-pend{font-family:var(--mono);font-size:12px;color:var(--muted);border:1px dashed var(--structural);padding:14px;display:inline-block}
@@ -315,18 +317,18 @@
   <section>
     <p class="step-no">Step 3 · Tagging</p>
     <h2>Every feature gets sorted: clinical, off-target, or structural</h2>
-    <p>
-      Each feature is tagged by what it responds to, read from its machine-written
-      description and from the kinds of text that make it fire:
-    </p>
+    <p>Every feature that fires while the model reads gets one of three tags, by what makes it
+      light up:</p>
     <ul class="tags">
-      <li class="t-clinical"><b>Clinical</b>: features in the medical
-        computation we want.</li>
-      <li class="t-offtarget"><b>Off-target</b>: features dragged in by patient
-        wording. These
-        are the mechanism of the language penalty.</li>
-      <li class="t-structural"><b>Structural</b>: scaffolding features for syntax,
-        position, and punctuation that appear in every trace and carry no medical content.</li>
+      <li class="t-clinical"><b>Clinical</b> &mdash; fires on the medical idea, the reasoning we
+        want (a feature for <em>acid</em>, <em>reflux</em>, <em>heartburn</em>).</li>
+      <li class="t-offtarget"><b>Off-target</b> &mdash; fires on something the casual wording
+        dragged in, not the medicine. Say a patient writes &ldquo;my stomach&rsquo;s on
+        fire&rdquo;: a feature for <em>heat</em> or <em>spicy food</em> lights up and tugs the
+        next word toward &ldquo;ice cream.&rdquo; That feature is off-target &mdash; it is the
+        mechanism of the language penalty.</li>
+      <li class="t-structural"><b>Structural</b> &mdash; scaffolding for syntax, position, and
+        punctuation. It fires in every trace and carries no medical content.</li>
     </ul>
     <div class="cshare" id="cshare" role="img" aria-label="Attribution mass per phrasing: clinical (green), off-target (red), and structural (grey) shares, for clinical then patient wording.">
       <span class="pend">figure pending</span>
@@ -530,6 +532,16 @@
       not readable. Bottom lane: the answer&rsquo;s probability when the everyday run is
       patched with the clinical state at that single layer, best position per layer,
       against the two measured levels.
+    </p>
+    <p>
+      The bottom lane is the causal check. <b>To test whether the patient&rsquo;s wording caused
+      the failure, we &ldquo;patch&rdquo; the model by injecting the translated clinical sentence
+      at specific layers, to see if the correct medical answer recovers.</b> The sentence we
+      inject is the one labeled on the figure &mdash;
+      <span class="rl-lbl">translated: &ldquo;I have essential tremor&hellip;&rdquo;</span> &mdash;
+      and each injection is what the <span class="rl-lbl">patch: inject</span> label marks on the
+      track. If the clinical state brings the answer back, the wording, not a gap in the
+      model&rsquo;s knowledge, was the problem.
     </p>
     <details class="fold">
       <summary>How the Jacobian lens reads layers</summary>
