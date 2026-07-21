@@ -391,11 +391,14 @@
       head.appendChild(tr);
       var body=document.getElementById('dlm-body');
       // rows whose target is a function word measure sentence frame, not the
-      // clinical concept; their flips stay visible but leave the headline count
+      // clinical concept; their flips stay visible but leave the headline count.
+      // prefer the exporter's classification (it.target_is_function, vocabulary
+      // in data/display_vocab.json — audit M5); inline FUNC is the fallback
       var FUNC={'my':1,'the':1,'a':1,'an':1,'his':1,'her':1,'their':1,'this':1,'that':1,'it':1};
       var flips=0,funcFlips=0,cells=0;
       items.forEach(function(it){
-        var isFunc=FUNC[String(it.target_token||'').trim().toLowerCase()]===1;
+        var isFunc=(typeof it.target_is_function==='boolean')?it.target_is_function
+          :FUNC[String(it.target_token||'').trim().toLowerCase()]===1;
         var row=el('tr');
         var td=el('td');
         var tspan=el('span','term',it.term);
@@ -445,11 +448,17 @@
         row.appendChild(lk);
         body.appendChild(row);
       });
+      // headline tallies prefer the exporter's counts (data.headline, audit
+      // M5); the loop's own tallies above stay as fallback
+      var hl=data.headline||{};
+      var hCells=(typeof hl.cells==='number')?hl.cells:cells;
+      var hFlips=(typeof hl.flips==='number')?hl.flips:flips;
+      var hFunc=(typeof hl.func_flips==='number')?hl.func_flips:funcFlips;
       document.getElementById('dl-matrix-sub').textContent=
         items.length+' clinical terms '+String.fromCharCode(183)+' '+dialects.length+
-        ' framing varieties (LLM instructions) '+String.fromCharCode(183)+' '+cells+' re-traced sentences '+String.fromCharCode(183)+' '+flips+
+        ' framing varieties (LLM instructions) '+String.fromCharCode(183)+' '+hCells+' re-traced sentences '+String.fromCharCode(183)+' '+hFlips+
         ' top-pick flips on content-word targets'+
-        (funcFlips?(' '+String.fromCharCode(183)+' '+funcFlips+' more on function-word targets'):'')+
+        (hFunc?(' '+String.fromCharCode(183)+' '+hFunc+' more on function-word targets'):'')+
         ' '+String.fromCharCode(183)+' '+pwBatch(data.batch)+
         ' '+String.fromCharCode(183)+' '+(data.graph_model||'');
       document.getElementById('dl-matrix').hidden=false;

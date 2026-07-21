@@ -656,7 +656,10 @@
   function tierForest(summary){
     var pm=summary&&summary.per_model;
     if(!pm)return null;
-    var GATE=100, NS='http://www.w3.org/2000/svg';
+    // gate from the collector when present (recorded analysis parameter,
+    // audit M4); 100 stays as fallback for older payloads
+    var GATE=(typeof summary.reliability_gate_n==='number')?summary.reliability_gate_n:100;
+    var NS='http://www.w3.org/2000/svg';
     var rows=Object.keys(pm).map(function(id){
       var v=pm[id]||{};
       return {id:id,mts:v.mean_tier_shift,n:v.n||0,dn:v.downgrades||0,
@@ -666,7 +669,11 @@
     // reliable group first, most-negative (biggest downgrade) first within each
     rows.sort(function(a,b){return (a.ok!==b.ok)?(a.ok?-1:1):(a.mts-b.mts);});
     var rel=rows.filter(function(r){return r.ok;});
-    var extreme=rel.length?rel.reduce(function(a,b){return b.mts<a.mts?b:a;}):null;
+    // prefer the collector's headline pick (summary.headline_downgrader,
+    // audit M4); the in-page reduce stays as fallback
+    var extreme=(summary.headline_downgrader
+      ?rel.filter(function(r){return r.id===summary.headline_downgrader;})[0]:null)
+      ||(rel.length?rel.reduce(function(a,b){return b.mts<a.mts?b:a;}):null);
     var scale=rel.length?rel:rows;
     var lo=Math.min.apply(null,scale.map(function(r){return r.mts;}));
     var dmin=Math.min(lo*1.15,-0.02), dmax=0.015;  // include 0 for the zero line
@@ -680,7 +687,7 @@
       'aria-label':'Mean care-urgency tier shift by model. Negative means patient phrasing '
         +'predicts less-urgent care. '+rows.map(function(r){
           return r.id+' '+(r.mts<0?'minus ':'')+Math.abs(r.mts).toFixed(3)
-            +(r.ok?'':' (n='+r.n+', below the n=100 gate)');}).join('; ')+'.'},
+            +(r.ok?'':' (n='+r.n+', below the n='+GATE+' gate)');}).join('; ')+'.'},
       'width:100%;height:auto;max-width:'+W+'px');
     var plotBot=top+rows.length*rh;
     // faint dashed gridlines at each 0.05 tick (never between rows)
