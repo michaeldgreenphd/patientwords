@@ -575,8 +575,16 @@
       if(model==='gemma-2-2b')return sc;
       return (sc.models||{})[model]||null;
     }
+    // prefer the engine-pinned ladder pairs (payload.featured.care_ladder,
+    // from the engine's pins data file); the inline PAIRS stay as fallback
+    var pins=(payload.featured&&Array.isArray(payload.featured.care_ladder))
+      ?payload.featured.care_ladder.map(function(p){
+        return {batch:p.batch,idx:p.batch_index,model:p.model||'gemma-2-2b',
+                x:(typeof p.x==='number')?p.x:330};
+      }):null;
+    var pairsToDraw=(pins&&pins.length)?pins:PAIRS;
     var resolved=[];
-    PAIRS.forEach(function(ref){
+    pairsToDraw.forEach(function(ref){
       var row=(u.rows||[]).find(function(r){
         return r.batch===ref.batch&&r.index===ref.idx&&r.model===ref.model;});
       var sc=(payload.scenarios||[]).find(function(s){

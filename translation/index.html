@@ -479,11 +479,16 @@
   function pct(p){return Math.round(p*100)+'%';}
   fetch('../data/provenance.json',{cache:'no-cache'}).then(function(r){return r.json();}).then(function(p){
     var tc=p.translation_cases||{};
+    // editorial pins prefer tc.featured (engine data, audit M3 tail); the
+    // hardcoded keys stay as fallback for older payloads
+    var feat=tc.featured||{};
     // phrase 17's embedded render is the July 9 re-trace; its caption must
     // show the numbers the figure displays, not the classification study's
-    retrace17=(tc.grandma_laxative&&tc.grandma_laxative.retrace_20260709)||null;
-    // 1. process flow from the ice-cream/antacid case (real texts + tokens)
-    var ic=tc.icecream_antacid;
+    var capPath=(Array.isArray(feat.caption_case)&&feat.caption_case.length===2)
+      ?feat.caption_case:['grandma_laxative','retrace_20260709'];
+    retrace17=(tc[capPath[0]]&&tc[capPath[0]][capPath[1]])||null;
+    // 1. process flow from the pinned case (real texts + tokens)
+    var ic=tc[feat.flow_case||'icecream_antacid'];
     if(ic&&ic.prompts){
       var pat=ic.prompts.patient||'', tr=ic.prompts.translated||'';
       document.getElementById('fl-pat').textContent='\u201C'+pat+'\u201D';
@@ -508,8 +513,15 @@
     if(all.length){
       var g=document.getElementById('tx-gal');
       var order={recovered:0,worsened:1,unrecovered:2,already_ok:3};
+      if(Array.isArray(feat.card_class_order)&&feat.card_class_order.length){
+        order={};feat.card_class_order.forEach(function(cl,i){order[cl]=i;});
+      }
+      var hidden={already_ok:1};
+      if(Array.isArray(feat.card_class_hidden)){
+        hidden={};feat.card_class_hidden.forEach(function(cl){hidden[cl]=1;});
+      }
       all.slice().sort(function(a,b){return order[a.class]-order[b.class];}).forEach(function(c){
-        if(c.class==='already_ok')return; // no downgrade to fix on that trace
+        if(hidden[c.class])return; // no downgrade to fix on that trace
         var d=el('div','tx '+(c.class==='recovered'?'rec':(c.class==='worsened'?'wors':'unrec')));
         var inner=el('div','tx-inner');
         // front: the high-level signal

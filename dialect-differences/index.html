@@ -462,9 +462,15 @@
             'single-sentence probabilities by ±'+(m*100).toFixed(1)+' pp on average, so a small cell is within paraphrase noise. ';
         }).catch(function(){});
 
-      var feat=null;
-      for(var i=0;i<items.length;i++){
-        if(/seizure/i.test(items[i].term)){feat=items[i];break;}
+      // prefer the engine-picked featured term (d.featured_term — the term
+      // pattern lives in the engine's pins data file); the in-page scan
+      // stays as fallback for older payloads
+      var ftPick=data&&data.featured_term;
+      var feat=(ftPick&&typeof ftPick.item==='number'&&items[ftPick.item])||null;
+      if(!feat){
+        for(var i=0;i<items.length;i++){
+          if(/seizure/i.test(items[i].term)){feat=items[i];break;}
+        }
       }
       feat=feat||items[0];
       document.getElementById('dlf-head').textContent='Featured term: '+String.fromCharCode(8220)+feat.term+String.fromCharCode(8221);

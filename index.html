@@ -640,7 +640,9 @@
       if(!pairs||!pairs.length)throw new Error('empty');
       // Home shows the most consequential switches: observed-token flips
       // first, then the largest observed-probability gaps. Full table on the
-      // Phrase Dataset page.
+      // Phrase Dataset page. Prefer the engine-computed featured ranking
+      // (data.featured.rows, same metric computed once at export); the
+      // in-page scoring below stays as fallback for the bare-list shape.
       var total=pairs.length;
       function consequence(pr){
         var prov=pr.provenance||{},p=prov.patient||{},c=prov.clinical||{};
@@ -650,7 +652,10 @@
           ?Math.abs(c.observed_prob-p.observed_prob):0;
         return flip*10+gap;
       }
-      pairs=pairs.slice().sort(function(a,b){return consequence(b)-consequence(a);}).slice(0,5);
+      var frows=(!Array.isArray(data)&&data.featured&&Array.isArray(data.featured.rows))
+        ?data.featured.rows.map(function(r){return pairs[r.row];}).filter(Boolean):null;
+      pairs=(frows&&frows.length)?frows.slice(0,5)
+        :pairs.slice().sort(function(a,b){return consequence(b)-consequence(a);}).slice(0,5);
       if(!Array.isArray(data)&&typeof data.model==='string'&&data.model){
         document.getElementById('sp-model').textContent=
           data.model+(typeof data.source_set==='string'&&data.source_set?' · '+data.source_set:'');
@@ -836,13 +841,20 @@
         return v.flip&&stem(v.top_token)!==stem(it.target_token);
       }).length;
     }
-    items=items.slice().sort(function(a,b){
-      var xa=crossFlips(a),xb=crossFlips(b);
-      var fa=a.variants.filter(function(v){return v.flip;}).length;
-      var fb=b.variants.filter(function(v){return v.flip;}).length;
-      return (xb-xa)||(fb-fa)||(spread(b)-spread(a));
-    });
-    var it=items[0];
+    // prefer the engine-picked specimen (d.featured_specimen, same rule
+    // computed once at export); the in-page sort stays as fallback
+    var fs=d&&d.featured_specimen;
+    var it=(fs&&typeof fs.item==='number'&&items[fs.item])||null;
+    if(!it){
+      items=items.slice().sort(function(a,b){
+        var xa=crossFlips(a),xb=crossFlips(b);
+        var fa=a.variants.filter(function(v){return v.flip;}).length;
+        var fb=b.variants.filter(function(v){return v.flip;}).length;
+        return (xb-xa)||(fb-fa)||(spread(b)-spread(a));
+      });
+      it=items[0];
+      fs=null;
+    }
     var rows=document.getElementById('spec-rows');
     function row(lbl,txt,out,isFlip){
       var r=el('div','spec-row');
@@ -853,7 +865,11 @@
     }
     row('baseline framing', it.baseline_prompt,
         '\u2192 '+it.target_token+' ('+Math.round(it.baseline_p*100)+'%)', false);
-    var vs=it.variants.slice().sort(function(a,b){
+    var vs=(fs&&Array.isArray(fs.show_variants))
+      ?fs.show_variants.map(function(n){
+        return it.variants.filter(function(v){return v.dialect===n;})[0];
+      }).filter(Boolean).slice(0,4):null;
+    if(!vs||!vs.length)vs=it.variants.slice().sort(function(a,b){
       function w(v){return (v.flip&&stem(v.top_token)!==stem(it.target_token))?2:(v.flip?1:0);}
       return w(b)-w(a)||Math.abs(b.delta||0)-Math.abs(a.delta||0);
     }).slice(0,4);
@@ -945,6 +961,21 @@
   var cur='clinical';
   var wrap=document.getElementById('tg-bars');
   if(!wrap)return;
+  // prefer the engine-derived demo (payload.featured.tap_demo: the pinned
+  // scenario's measured spreads, labels from the engine's pins data); the
+  // inline numbers above stay as fallback for older payloads. Roles map to
+  // the semantic palette: target green, redirected top red, context grey.
+  var ROLE_COLORS={target:'#15803d',top:'#b4483d',other:'#c3c9d2'};
+  fetch('data/simulated_scenarios.json',{cache:'no-cache'})
+    .then(function(r){return r.ok?r.json():null;})
+    .then(function(d){
+      var td=d&&d.featured&&d.featured.tap_demo;
+      if(!td||!td.clinical||!td.patient)return;
+      function side(sd){return {swap:sd.swap,bars:(sd.bars||[]).map(function(b){
+        return [b.label,b.p,ROLE_COLORS[b.role]||ROLE_COLORS.other];})};}
+      states={clinical:side(td.clinical),patient:side(td.patient)};
+      render();
+    }).catch(function(){});
   function render(){
     var st=states[cur];
     var tgWrap=document.getElementById('home-tg');

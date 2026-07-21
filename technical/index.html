@@ -980,7 +980,11 @@
       document.getElementById('credit-line').textContent=d.method_credit;
 
       /* Fig 1: exemplar trajectory (hijack) — layers 0..24 = internal workspace, 25 = final output */
-      var ex=(d.exemplars||[]).filter(function(e){return e['class']==='hijack';})[0]||d.exemplars[0];
+      // prefer the engine-picked exemplar (d.featured_exemplar); the class
+      // filter stays as fallback for older payloads
+      var exl=d.exemplars||[];
+      var ex=(typeof d.featured_exemplar==='number'&&exl[d.featured_exemplar])
+        ||exl.filter(function(e){return e['class']==='hijack';})[0]||exl[0];
       if(ex){
         var H1=186,svg=el('svg',{viewBox:'0 0 '+(W+30)+' '+H1});  // +30 so the far-right endpoint label isn't clipped
         var OUT_GAP=18;                                  // visually detach the final-output layer (25)
