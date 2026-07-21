@@ -1,0 +1,16 @@
+{
+ "_": "Display vocabulary for featured-example selection (audit 2026-07-21 M3). Extracted verbatim from the FRAG blocklist previously hardcoded in simulated-scenarios/index.html:932-934: wordpiece fragments of medical terms that must not be featured as whole-word predictions. Single writer: the engine repo (embed_scenario_joins.py consumes it); pages fetch it instead of inlining.",
+ "version": 1,
+ "match": "exact case-insensitive on the trimmed token",
+ "token_clean_regex": "^[A-Za-z][A-Za-z'’-]{2,}$",
+ "fragment_blocklist": [
+  "ant",
+  "anti",
+  "inhal",
+  "lax",
+  "sed",
+  "xan",
+  "amb",
+  "gi"
+ ]
+}
