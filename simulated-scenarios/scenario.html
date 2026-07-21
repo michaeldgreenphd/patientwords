@@ -535,12 +535,20 @@
           }else{
             pn.appendChild(document.createTextNode(
               'this scenario’s full circuit render isn’t in the public demonstration set '+
-              '(the site keeps the 25 largest-effect scenarios: prediction flips first, then '+
+              '(the site keeps the largest-effect scenarios: prediction flips first, then '+
               'largest language penalty). the full render set is not published on this site; '+
               'the scenario’s complete measurements are shown above and downloadable at '));
             var cx=el('a',null,'data/simulated_archive.csv');
             cx.href='../data/simulated_archive.csv';
             pn.appendChild(cx);
+            // engine-stamped link to this scenario's hosted render on the
+            // traces site (base-model renders only; absent on older payloads)
+            if(currentModel===baseModel&&s.trace_url){
+              pn.appendChild(document.createTextNode(' — or '));
+              var tv=el('a',null,'view this scenario’s interactive trace');
+              tv.href=String(s.trace_url);tv.target='_blank';tv.rel='noopener';
+              pn.appendChild(tv);
+            }
           }
           // a graph-less model has nothing to download; only offer the archive
           // link for models whose render exists but was left out of the demo

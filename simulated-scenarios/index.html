@@ -752,7 +752,14 @@
       if(urg&&urg.rows)urg.rows.forEach(function(u){
         urgMap[u.batch+'#'+u.index+'#'+u.model]=u;
       });
-      function urgFor(s){return urgMap[s.batch+'#'+s.batch_index+'#'+currentModel]||null;}
+      // prefer the urgency object the engine embeds on the scenario itself
+      // (s.models[m].urgency, base mirrored at s.urgency); the runtime join
+      // over urgency_shift.json rows stays as fallback for older payloads
+      function urgFor(s){
+        var em=s.models&&s.models[currentModel]&&s.models[currentModel].urgency;
+        if(!em&&currentModel===baseModel)em=s.urgency;
+        return em||urgMap[s.batch+'#'+s.batch_index+'#'+currentModel]||null;
+      }
       var scenarios=data.scenarios||[];
       var batches=data.batches||[];
       var traced=data.traced||{};
@@ -924,6 +931,14 @@
       // (or untiered) object than the clinical top: the advice itself changed.
       if(urg&&urg.rows){
         var byKey={};scenarios.forEach(function(s){byKey[s.batch+'#'+s.batch_index]=s;});
+        // Prefer the engine-selected gallery (payload.featured.redirect_gallery:
+        // the same scoring, computed once at publish time with the blocklist as
+        // data). Entries resolve back to their urgency rows so the cards render
+        // unchanged. The in-page scoring below stays as fallback.
+        var picks=((data.featured&&data.featured.redirect_gallery)||[])
+          .map(function(f){return urgMap[f.batch+'#'+f.batch_index+'#'+f.model];})
+          .filter(function(u){return u&&byKey[u.batch+'#'+u.index];});
+        if(!picks.length){
         // Feature the strongest, most legible downgrades: rank by tier drop first,
         // then favor clean whole-word predictions (not wordpiece fragments like
         // "ant" for antacid) and decisive redirects (higher patient-top prob), and
@@ -932,7 +947,7 @@
         var FRAG={ant:1,anti:1,inhal:1,lax:1,sed:1,xan:1,amb:1,gi:1};
         function tokClean(t){t=(t||'').trim();
           return /^[A-Za-z][A-Za-z'’-]{2,}$/.test(t)&&!FRAG[t.toLowerCase()];}
-        var picks=urg.rows.filter(function(u){
+        picks=urg.rows.filter(function(u){
           var s=byKey[u.batch+'#'+u.index];
           return u.model==='gemma-2-2b'&&u.flip_class==='downgrade'
             &&typeof u.tier_top_clinical==='number'
@@ -955,6 +970,7 @@
           capPt[x.pt]=(capPt[x.pt]||0)+1; capCt[x.ctl]=(capCt[x.ctl]||0)+1; chosen.push(x.u);
         });
         picks=chosen;
+        }
         if(picks.length){
           var rg=document.getElementById('rx-cards');
           picks.forEach(function(u){
@@ -1105,8 +1121,8 @@
         }else{
           uc.textContent='—';
         }
-        if(currentModel===(depthData&&depthData.model)){
-          var dcls=depthMap[s.batch+'#'+s.batch_index];
+        if(currentModel===(data.depth_model||(depthData&&depthData.model))){
+          var dcls=s.depth_class||depthMap[s.batch+'#'+s.batch_index];
           if(dcls&&depthLabels[dcls]){
             var db=el('span','dep-badge dep-'+dcls,depthLabels[dcls]);
             db.title='depth readout (Jacobian lens): the clinical answer '+
@@ -1440,15 +1456,21 @@
       // the loading box has done its job; trace-progress status (when some
       // accepted pairs have not landed yet) reads better as a provenance line
       document.getElementById('sim-pending').hidden=true;
-      var accepted=batches.reduce(function(a,b){
-        return a+((b.generated&&b.generated.accepted)||0);
-      },0)-(data.holdout_withheld||0);
+      // prefer the engine-computed totals (payload.summary.totals); the batch
+      // reduction stays as fallback for older payload shapes
+      var sTot=(data.summary&&data.summary.totals)||{};
+      var accepted=(typeof sTot.accepted_public==='number')?sTot.accepted_public
+        :batches.reduce(function(a,b){
+          return a+((b.generated&&b.generated.accepted)||0);
+        },0)-(data.holdout_withheld||0);
+      var hw=(typeof sTot.holdout_withheld==='number')?sTot.holdout_withheld
+        :(data.holdout_withheld||0);
       if(accepted>scenarios.length){
         var pline=el('div');
         pline.appendChild(el('span',null,'In progress: '));
         pline.appendChild(el('b',null,(accepted-scenarios.length)+' of '+accepted+' accepted scenarios are still tracing'));
         pline.appendChild(el('span',null,'; the table grows as chunks land.'
-          +(data.holdout_withheld?(' '+data.holdout_withheld+' confirmatory-holdout pairs are withheld until the registered endpoint runs.'):'')));
+          +(hw?(' '+hw+' confirmatory-holdout pairs are withheld until the registered endpoint runs.'):'')));
         prov.appendChild(pline);
       }
     })

@@ -764,40 +764,55 @@
     .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
     .then(function(data){
       var batches=data.batches||[];
-      var accepted=batches.reduce(function(a,b){
-        return a+((b.generated&&b.generated.accepted)||0);
-      },0);
+      // payload.summary is the engine's one definition of these headline
+      // numbers (phrase-deduped, population-labeled); the row-level
+      // computations remain as fallback for older payload shapes.
+      var sum=data.summary||{};
+      var tot=sum.totals||{};
+      var accepted=(typeof tot.accepted_public==='number')?tot.accepted_public
+        :batches.reduce(function(a,b){
+          return a+((b.generated&&b.generated.accepted)||0);
+        },0);
       var scenarios=data.scenarios||[];
       var scored=scenarios.filter(function(s){
         return typeof s.language_penalty==='number';
       });
-      var screened=scenarios.filter(function(s){
-        return s.screening&&s.screening.status==='screened_out';
-      }).length;
+      var screened=(typeof tot.screened_out==='number')?tot.screened_out
+        :scenarios.filter(function(s){
+          return s.screening&&s.screening.status==='screened_out';
+        }).length;
+      var nMeasured=(typeof tot.measured==='number')?tot.measured
+        :scenarios.length-screened;
       if(count)count.textContent=(accepted||scenarios.length)
-        +' generated pairs · '+(scenarios.length-screened)+' measured'
+        +' generated pairs · '+nMeasured+' measured'
         +(screened?' · '+screened+' screened out':'');
       if(!scenarios.length)return;
       var measured=scenarios.filter(function(s){
         return !(s.screening&&s.screening.status==='screened_out');
       });
-      var flips=measured.filter(function(s){return s.flipped;}).length;
+      var flips=(typeof tot.flipped_base==='number')?tot.flipped_base
+        :measured.filter(function(s){return s.flipped;}).length;
       // paragraph text stays default ink; red highlights only the data points
       // (the penalty and the flip count) so the sentence doesn't read as one alarm.
       stat.className='stat';
       stat.textContent='';
       function pen(t){var s=document.createElement('span');s.className='pen';s.textContent=t;return s;}
       function txt(t){return document.createTextNode(t);}
-      if(scored.length){
-        var mean=scored.reduce(function(a,s){return a+s.language_penalty;},0)/scored.length;
+      var sp=sum.penalty||{};
+      var useSum=typeof sp.mean_phrase_deduped==='number';
+      if(useSum||scored.length){
+        var mean=useSum?sp.mean_phrase_deduped
+          :scored.reduce(function(a,s){return a+s.language_penalty;},0)/scored.length;
         stat.appendChild(txt('Mean Language Penalty: '));
         stat.appendChild(pen((mean>0?'+':'−')+Math.abs(mean*100).toFixed(0)+'%'));
-        stat.appendChild(txt(' across '+scored.length+' scored pairs · top prediction flipped in '));
-        stat.appendChild(pen(flips+' of '+measured.length));
+        stat.appendChild(txt(useSum
+          ?(' across '+sp.n_phrases+' distinct phrases · top prediction flipped in ')
+          :(' across '+scored.length+' scored pairs · top prediction flipped in ')));
+        stat.appendChild(pen(flips+' of '+nMeasured));
         stat.appendChild(txt(' measured'));
       }else{
         stat.appendChild(txt('Top prediction flipped in '));
-        stat.appendChild(pen(flips+' of '+measured.length));
+        stat.appendChild(pen(flips+' of '+nMeasured));
         stat.appendChild(txt(' measured pairs'));
       }
       stat.hidden=false;
@@ -882,11 +897,18 @@
   ]).then(function(res){
     var sim=res[0], prov=res[1];
     if(!sim||!Array.isArray(sim.scenarios))return;
+    // prefer the engine-computed phrase-deduped mean (payload.summary);
+    // the row-level mean stays as fallback for older payloads
+    var sp=sim.summary&&sim.summary.penalty;
+    var useSum=!!(sp&&typeof sp.mean_phrase_deduped==='number');
     var scored=sim.scenarios.filter(function(s){return typeof s.language_penalty==='number';});
-    if(!scored.length)return;
-    var mean=scored.reduce(function(a,s){return a+s.language_penalty;},0)/scored.length;
+    if(!useSum&&!scored.length)return;
+    var mean=useSum?sp.mean_phrase_deduped
+      :scored.reduce(function(a,s){return a+s.language_penalty;},0)/scored.length;
     el.textContent='';
-    el.appendChild(document.createTextNode('One of the largest cases. Across all '+scored.length+' scored pairs the average signed move is '));
+    el.appendChild(document.createTextNode(useSum
+      ?('One of the largest cases. Across the '+sp.n_phrases+' distinct scored phrases the average signed move is ')
+      :('One of the largest cases. Across all '+scored.length+' scored pairs the average signed move is ')));
     var b1=document.createElement('b');b1.textContent=(mean>0?'+':'−')+Math.abs(mean*100).toFixed(0)+' pp';el.appendChild(b1);
     var floor=prov&&prov.paraphrase_robustness&&prov.paraphrase_robustness.mean_abs_delta_vs_baseline;
     if(typeof floor==='number'){

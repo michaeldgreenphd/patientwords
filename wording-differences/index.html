@@ -459,11 +459,18 @@
   ]).then(function(res){
     var sim=res[0], prov=res[1];
     if(!sim||!Array.isArray(sim.scenarios))return;
+    // prefer the engine-computed phrase-deduped mean (payload.summary);
+    // the row-level mean stays as fallback for older payloads
+    var sp=sim.summary&&sim.summary.penalty;
+    var useSum=!!(sp&&typeof sp.mean_phrase_deduped==='number');
     var scored=sim.scenarios.filter(function(s){return typeof s.language_penalty==='number';});
-    if(!scored.length)return;
-    var mean=scored.reduce(function(a,s){return a+s.language_penalty;},0)/scored.length;
+    if(!useSum&&!scored.length)return;
+    var mean=useSum?sp.mean_phrase_deduped
+      :scored.reduce(function(a,s){return a+s.language_penalty;},0)/scored.length;
     el.textContent='';
-    el.appendChild(document.createTextNode('One of the largest cases. Across all '+scored.length+' scored pairs the average signed move is '));
+    el.appendChild(document.createTextNode(useSum
+      ?('One of the largest cases. Across the '+sp.n_phrases+' distinct scored phrases the average signed move is ')
+      :('One of the largest cases. Across all '+scored.length+' scored pairs the average signed move is ')));
     var b1=document.createElement('b');b1.textContent=(mean>0?'+':'−')+Math.abs(mean*100).toFixed(0)+' pp';el.appendChild(b1);
     var floor=prov&&prov.paraphrase_robustness&&prov.paraphrase_robustness.mean_abs_delta_vs_baseline;
     if(typeof floor==='number'){
