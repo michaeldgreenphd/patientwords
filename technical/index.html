@@ -1786,14 +1786,20 @@
       // reviewed downgrade set stays separate. Squares pack densely per class.
       var mount=document.getElementById('ad-blocks');
       mount.textContent='';
+      // prefer the exporter's merged census grouping (data.census_groups,
+      // audit M9); the in-page merge stays as fallback for older payloads
       var groups=[],batchPairs=[];
-      blocks.forEach(function(b){
-        var name=b.label||b.id;
-        var tagged=b.pairs.map(function(u){return {index:u.index,'class':u['class'],target:u.target,set:name};});
-        if(/^pairs_/.test(b.id||''))batchPairs=batchPairs.concat(tagged);
-        else groups.push({label:name,pairs:tagged});
-      });
-      if(batchPairs.length)groups.unshift({label:'Simulated Scenarios (All Batches)',pairs:batchPairs});
+      if(Array.isArray(data.census_groups)&&data.census_groups.length){
+        groups=data.census_groups;
+      }else{
+        blocks.forEach(function(b){
+          var name=b.label||b.id;
+          var tagged=b.pairs.map(function(u){return {index:u.index,'class':u['class'],target:u.target,set:name};});
+          if(/^pairs_/.test(b.id||''))batchPairs=batchPairs.concat(tagged);
+          else groups.push({label:name,pairs:tagged});
+        });
+        if(batchPairs.length)groups.unshift({label:'Simulated Scenarios (All Batches)',pairs:batchPairs});
+      }
       groups.forEach(function(g){
         var wrap=h('div','ucensus-group');
         wrap.appendChild(h('p','block-label',g.label));

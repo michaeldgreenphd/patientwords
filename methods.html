@@ -768,9 +768,12 @@
           el('line',{x1:lx-6,y1:cy+6,x2:lx+6,y2:cy-6,stroke:'#b4483d','stroke-width':2},svg);
         }
       });
-      // name the token forming at the very first legible (green) square on the clinical track
-      var firstLeg=null;
-      for(var flg=0;flg<L;flg++){if(ex.clin_ranks[String(flg)]){firstLeg=flg;break;}}
+      // name the token forming at the very first legible (green) square on the
+      // clinical track. layer annotations prefer the exporter's values
+      // (ex.annotations, audit M8); the in-page scans stay as fallback
+      var ann=ex.annotations||{};
+      var firstLeg=(typeof ann.first_legible==='number')?ann.first_legible:null;
+      if(firstLeg==null)for(var flg=0;flg<L;flg++){if(ex.clin_ranks[String(flg)]){firstLeg=flg;break;}}
       if(firstLeg!=null){
         var flx=xAt(firstLeg)+CELL/2, fly=laneY[0];
         el('line',{x1:flx,y1:fly-9,x2:flx,y2:fly-2,stroke:'#c3c9d2','stroke-width':1},svg);
@@ -778,8 +781,8 @@
       }
       // direct annotations, positioned from the data (not hardcoded): where the
       // clinical answer first reaches rank 1, and where the everyday answer is gone.
-      var firstPlace=null;
-      for(var fp=0;fp<L;fp++){if(ex.clin_ranks[String(fp)]===1){firstPlace=fp;break;}}
+      var firstPlace=(typeof ann.first_rank1==='number')?ann.first_rank1:null;
+      if(firstPlace==null)for(var fp=0;fp<L;fp++){if(ex.clin_ranks[String(fp)]===1){firstPlace=fp;break;}}
       if(firstPlace!=null){
         var fx=xAt(firstPlace)+CELL/2, fy=laneY[0]+CELL;
         el('line',{x1:fx,y1:fy+3,x2:fx,y2:fy+15,stroke:'#c3c9d2','stroke-width':1},svg);
@@ -807,6 +810,8 @@
         el('rect',{x:xAt(l)+CELL*0.14,y:py(p),width:CELL*0.72,
           height:probTop+PLOT_H-py(p),fill:'#15803d','fill-opacity':0.8},svg);
       });
+      if(typeof ann.best_patch_layer==='number'&&ex.patched[ann.best_patch_layer]!=null)
+        best=ann.best_patch_layer;
       [[ex.clean_prob,'clinical','#15803d'],[ex.corrupt_prob,'everyday','#111827']]
         .forEach(function(ref){
           el('line',{x1:LEFT,y1:py(ref[0]),x2:LEFT+L*(CELL+GAP)-GAP,y2:py(ref[0]),
@@ -814,7 +819,8 @@
           txt(svg,LEFT-6,py(ref[0])-2,ref[1],{fill:ref[2],'text-anchor':'end'});
           txt(svg,LEFT-6,py(ref[0])+10,ref[0].toFixed(3),{fill:ref[2],'text-anchor':'end'});
         });
-      var full=ex.patched[best]>=ex.clean_prob*0.95;
+      var full=(typeof ann.patch_recovery_full==='boolean')
+        ?ann.patch_recovery_full:(ex.patched[best]>=ex.clean_prob*0.95);
       txt(svg,xAt(best)+CELL/2,py(ex.patched[best])-14,
         full?'patched here, the answer returns':'patched here, most of it returns',
         {fill:'#15803d','text-anchor':'end'});
@@ -854,10 +860,17 @@
   fetch('data/drift_series.json',{cache:'no-cache'})
     .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
     .then(function(d){
-      var moved=(d.deltas||[]).filter(function(x){return x&&x.max_abs_delta>0;});
-      if(!moved.length)return;
+      // prefer the generator's first_moved record (audit M8); the in-page
+      // scan of deltas stays as fallback
+      var fm=(d.first_moved&&typeof d.first_moved.max_abs_delta==='number')
+        ?d.first_moved.max_abs_delta:null;
+      if(fm==null){
+        var moved=(d.deltas||[]).filter(function(x){return x&&x.max_abs_delta>0;});
+        if(!moved.length)return;
+        fm=moved[0].max_abs_delta;
+      }
       var span=document.getElementById('rt-sentinel-max');
-      if(span)span.textContent=String(moved[0].max_abs_delta);
+      if(span)span.textContent=String(fm);
     }).catch(function(){});
 })();
 </script>
