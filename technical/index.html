@@ -885,12 +885,16 @@
       if (ids.length > 1) {
         var others = ids.slice(1);
         // only claim the settling pattern when every folded band actually
-        // ends below zero at its final point
-        var allBelow = others.every(function(id){
-          var pts = models[id].points || [];
-          var last = pts[pts.length - 1];
-          return last && last.ci95 && last.ci95[1] != null && last.ci95[1] < 0;
-        });
+        // ends below zero at its final point. prefer the generator's verdict
+        // (payload.claims, audit M7); the in-page check stays as fallback
+        var allBelow = (payload.claims &&
+            typeof payload.claims.all_secondary_end_below_zero === 'boolean')
+          ? payload.claims.all_secondary_end_below_zero
+          : others.every(function(id){
+            var pts = models[id].points || [];
+            var last = pts[pts.length - 1];
+            return last && last.ci95 && last.ci95[1] != null && last.ci95[1] < 0;
+          });
         document.getElementById('conv-more-sum').textContent =
           'The other ' + others.length + ' models, drawn the same way' +
           (allBelow ? ': every band ends below zero.' : '.');
@@ -1163,6 +1167,7 @@
         // capture-vs-hijack ordering survive narrower top-K windows?
         var winNote='';
         var ws=d.window_sensitivity;
+        var jcl=d.claims||{};
         if(ws){
           var parts=[],holds=true;
           ['1','2','4','8'].forEach(function(k){
@@ -1170,15 +1175,23 @@
             parts.push('top-'+k+': '+ws[k].capture+' v '+ws[k].hijack);
             if(!(ws[k].capture>ws[k].hijack))holds=false;
           });
+          // prefer the generator's verdict (d.claims, audit M7); the loop's
+          // own check above stays as fallback
+          if(typeof jcl.window_capture_exceeds_hijack_at_every_k==='boolean')
+            holds=jcl.window_capture_exceeds_hijack_at_every_k;
           if(parts.length)winNote=' Window check ('+parts.join(', ')+'): capture '+
             (holds?'exceeds':'does not always exceed')+' hijack at '+(holds?'every':'the top-8')+' window.';
         }
-        // capture-vs-hijack comparative computed from the live counts, never asserted
+        // capture-vs-hijack comparative computed from the live counts, never
+        // asserted; the generator's dominant_failure_class (audit M7) wins
+        // when present, with the count comparison as fallback
         var nc=tax.capture?tax.capture.n:0, nh=tax.hijack?tax.hijack.n:0;
+        var domClass=(jcl.dominant_failure_class==='capture'||jcl.dominant_failure_class==='hijack')
+          ?jcl.dominant_failure_class:((nc>nh)?'capture':((nh>nc)?'hijack':null));
         var lockMed=(tax.hijack&&tax.hijack.lock_in)?tax.hijack.lock_in.median:null;
-        var compare=(nc>nh)?
+        var compare=(domClass==='capture')?
           ' Most classified failure here is capture, not hijack: the wording decides the computation early, even though the winning word is not locked in until late.':
-          ((nh>nc)?' Most classified failure here is hijack: the answer forms and is displaced late.':'');
+          ((domClass==='hijack')?' Most classified failure here is hijack: the answer forms and is displaced late.':'');
         document.getElementById('dd-tax-text').textContent=
           'Of '+d.n_pairs+' patient-side readings, '+(tax.held?tax.held.n:0)+' hold the clinical answer to the end'+
           (tax.unreadable?(', and '+tax.unreadable.n+' are unreadable: neither wording ever reads out, so the lens cannot say what was lost'):'')+
@@ -1551,10 +1564,16 @@
     });
     lo-=0.01;
     // interval-aware framing: zero-crossers computed from the file, so the
-    // sentence can never outlive the data
-    var perAbove=ids.filter(function(id){return per[id].penalty.ci95[1]>=0;});
-    var simAbove=ids.filter(function(id){
-      var sc=per[id].penalty.ci95_simultaneous;return sc&&sc[1]>=0;});
+    // sentence can never outlive the data. prefer the generator's lists
+    // (d.claims, audit M7); the in-page filters stay as fallback
+    var zcl=d.claims||{};
+    var perAbove=Array.isArray(zcl.zero_crossers_per_model)
+      ?zcl.zero_crossers_per_model.filter(function(id){return ids.indexOf(id)>=0;})
+      :ids.filter(function(id){return per[id].penalty.ci95[1]>=0;});
+    var simAbove=Array.isArray(zcl.zero_crossers_simultaneous)
+      ?zcl.zero_crossers_simultaneous.filter(function(id){return ids.indexOf(id)>=0;})
+      :ids.filter(function(id){
+        var sc=per[id].penalty.ci95_simultaneous;return sc&&sc[1]>=0;});
     var simText;
     if(perAbove.length){simText='Under per-model intervals, '+perAbove.join(', ')+' crosses zero.';}
     else if(simAbove.length){simText='Every per-model band sits below zero; under the stricter simultaneous interval, '+

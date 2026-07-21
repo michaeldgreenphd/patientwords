@@ -343,7 +343,12 @@
         if(baseIds.length) parts.push('Base models — '+baseIds.map(say).join('; ')+'.');
         if(itIds.length){
           var it='Instruction-tuned models — '+itIds.map(say).join('; ')+'.';
-          if(itIds.every(function(id){return per[id].mean_recovery>0&&Math.abs(per[id].median_recovery)<0.01;}))
+          // prefer the generator's verdict (d.claims, audit M7); the inline
+          // threshold check stays as fallback
+          var minorityLift=(d.claims&&typeof d.claims.instruction_tuned_minority_lift==='boolean')
+            ?d.claims.instruction_tuned_minority_lift
+            :itIds.every(function(id){return per[id].mean_recovery>0&&Math.abs(per[id].median_recovery)<0.01;});
+          if(minorityLift)
             it='Instruction-tuned models — '+itIds.map(say).join('; ')
               +' — the mean lift is positive but the median is near zero, so it concentrates in a minority of phrases rather than shifting the corpus.';
           parts.push(it);
