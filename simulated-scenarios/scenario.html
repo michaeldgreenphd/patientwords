@@ -484,10 +484,10 @@
         }else{
           if(typeof m.language_penalty==='number'){
             statline.appendChild(el('span','stat '+(m.language_penalty<0?'penalty':'recovery'),
-              'Language Penalty: '+pct(m.language_penalty)+' probability ('
+              'Wording gap: '+pct(m.language_penalty)+' probability ('
               +p2(m.prob_clinical)+' → '+p2(m.prob_patient)+')'));
           }else{
-            statline.appendChild(el('span','stat neutral','Language Penalty: —'));
+            statline.appendChild(el('span','stat neutral','Wording gap: —'));
           }
           statline.appendChild(el('span','sim-flip '+(m.flipped?'flipped':'held'),
             m.flipped?'top prediction redirected':(typeof m.language_penalty==='number'&&m.language_penalty<0?'top prediction held — hedged':'top prediction unchanged')));
@@ -536,7 +536,7 @@
             pn.appendChild(document.createTextNode(
               'this scenario’s full circuit render isn’t in the public demonstration set '+
               '(the site keeps the largest-effect scenarios: prediction flips first, then '+
-              'largest language penalty). the full render set is not published on this site; '+
+              'largest wording gap). the full render set is not published on this site; '+
               'the scenario’s complete measurements are shown above and downloadable at '));
             var cx=el('a',null,'data/simulated_archive.csv');
             cx.href='../data/simulated_archive.csv';

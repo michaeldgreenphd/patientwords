@@ -551,8 +551,8 @@
       the measured subjects; the stimuli they read are written by Claude models and
       audited on the <a href="../methods.html#generation-eval">methods page</a>. Population, dedupe, correction, and holdout details are in the interim-table fold below, under Statistical methods.</p>
 
-    <h3>The penalty, model by model</h3>
-    <p>Mean language penalty: the percentage points of next-word probability the
+    <h3>The wording gap, model by model</h3>
+    <p>Mean wording gap: the percentage points of next-word probability the
       clinical answer loses when the wording turns colloquial. The thick band is
       each model's own 95% interval; the hairline is the stricter simultaneous
       interval, sized for reading all eight at once.
@@ -564,7 +564,7 @@
       <summary>How confidence accumulated: each model's estimate, batch by batch (moved from methods)</summary>
       <p style="font-size:15px;line-height:1.6">
         Each panel follows one model as it reads more phrase pairs. The red line is the
-        average language penalty; the band around it starts wide and narrows as
+        average wording gap; the band around it starts wide and narrows as
         hundreds of phrases accumulate. The four
         post-registration additions have read about 120 phrases so far, so their bands
         stay wider. Early points in any panel are unstable by construction; read where
@@ -576,10 +576,10 @@
         <div class="conv-grid" id="conv-grid-more" aria-describedby="conv-caption"></div>
       </details>
       <div class="conv-xlab" aria-hidden="true">phrases tested →</div>
-      <p class="conv-cap" id="conv-caption">Mean language penalty per model as
+      <p class="conv-cap" id="conv-caption">Mean wording gap per model as
         measurement accumulates. Shaded band: bootstrap 95% confidence
         interval (seed 7, phrase-deduped, Tier B exploration split only). Grey hairline:
-        zero penalty. Drawn at load time from <a href="https://github.com/michaeldgreenphd/patientwords/blob/main/data/convergence.json">the convergence data file on GitHub</a>.</p>
+        zero wording gap. Drawn at load time from <a href="https://github.com/michaeldgreenphd/patientwords/blob/main/data/convergence.json">the convergence data file on GitHub</a>.</p>
       <details class="conv-table"><summary>Data table (every point)</summary>
         <div id="conv-table-wrap"></div></details>
     </details>
@@ -602,7 +602,7 @@
             <th scope="col">Measurement</th>
             <th scope="col">Circuit<br>features</th>
             <th scope="col" class="num">n phrases</th>
-            <th scope="col" class="num">Penalty, pp<br>(95% CI)</th>
+            <th scope="col" class="num">Wording gap, pp<br>(95% CI)</th>
             <th scope="col" class="num">Down v up</th>
             <th scope="col" class="num">q</th>
           </tr></thead>
@@ -614,7 +614,7 @@
       <ul class="sm-l">
         <li>Population: plain generated scenario batches only; steered, screened, imported, and re-traced rows are reported as a labeled sensitivity analysis in the statistics file.</li>
         <li>One record per (model, clinical phrase); re-traces collapse by majority vote.</li>
-        <li>Penalty intervals: phrase-level bootstrap after dedupe, percentile 95%, <code>seed 7</code>; the file also carries simultaneous (Bonferroni) intervals and batch- and topic-clustered sensitivity intervals.</li>
+        <li>Wording-gap intervals: phrase-level bootstrap after dedupe, percentile 95%, <code>seed 7</code>; the file also carries simultaneous (Bonferroni) intervals and batch- and topic-clustered sensitivity intervals.</li>
         <li>Downgrade rates: Clopper&ndash;Pearson exact 95%.</li>
         <li>Asymmetry: exact two-sided sign tests, Benjamini&ndash;Hochberg corrected within registration family; the merged eight-model correction stays in the file for comparison.</li>
         <li>Registration: four models pre-registered, four post-registration exploratory; departures are recorded in <a href="https://github.com/michaeldgreenphd/patientwords-engine/blob/claude/gemma-clinical-colloquial-interp-mavx04/docs/prereg_divergence_log.md">the divergence log in the engine repository</a>.</li>
@@ -627,14 +627,14 @@
 
     <div id="sp-block" hidden>
       <details class="fold">
-        <summary id="sp-sum">Where the penalty concentrates: per-specialty, exploratory</summary>
+        <summary id="sp-sum">Where the wording gap concentrates: per-specialty, exploratory</summary>
         <p class="scroll-hint" aria-hidden="true">table scrolls sideways →</p>
         <div class="me-scroll">
           <table class="me-table" id="sp-table" aria-describedby="sp-caption">
             <thead><tr>
               <th scope="col">Specialty</th>
               <th scope="col" class="num">Phrases</th>
-              <th scope="col" class="num">Mean penalty</th>
+              <th scope="col" class="num">Mean wording gap</th>
               <th scope="col" class="num">Downgrades</th>
             </tr></thead>
             <tbody id="sp-body"></tbody>
@@ -790,7 +790,7 @@
         lab.textContent = pp(fin.mean_penalty) + ' pp · n = ' + fin.n_phrases +
           ' · [' + pp(fin.ci95[0]) + ', ' + pp(fin.ci95[1]) + ']';
         var svg = el('svg', {viewBox: '0 0 ' + W + ' ' + H, role: 'img',
-          'aria-label': id + ': mean language penalty with 95% interval as measurement accumulates; final ' +
+          'aria-label': id + ': mean wording gap with 95% interval as measurement accumulates; final ' +
           pp(fin.mean_penalty) + ' percentage points at n=' + fin.n_phrases + '. Full values in the data table below.'});
         // zero hairline + y labels
         svg.appendChild(el('line', {x1: m.l, x2: W - m.r, y1: Y(0), y2: Y(0)},
@@ -824,7 +824,7 @@
           // one-time axis label + direct annotation (Tufte: integrate text and data)
           var ylab = el('text', {x: 2, y: m.t + 6},
             'font-family:var(--mono);font-size:9.5px;fill:#4b5563;letter-spacing:.04em');
-          ylab.textContent = 'penalty (percentage points)';
+          ylab.textContent = 'wording gap (percentage points)';
           svg.appendChild(ylab);
           var note = el('text', {x: W - m.r, y: m.t + 20, 'text-anchor': 'end'},
             'font-family:var(--mono);font-size:9.5px;fill:#4b5563');
@@ -1555,10 +1555,10 @@
     var W=680,R=34,ML=170,MR=90,H=ids.length*R+42;
     function X(v){return ML+(W-ML-MR)*((v-lo)/(hi-lo));}
     var svg=el('svg',{viewBox:'0 0 '+W+' '+H,role:'img',
-      'aria-label':'Mean language penalty per model with 95 percent and simultaneous intervals. '+simText+' Values in the table below.'});
+      'aria-label':'Mean wording gap per model with 95 percent and simultaneous intervals. '+simText+' Values in the table below.'});
     svg.appendChild(el('line',{x1:X(0),x2:X(0),y1:10,y2:H-26},'stroke:var(--structural);stroke-width:1'));
     var zl=el('text',{x:X(0),y:H-12,'text-anchor':'middle'},'font-family:var(--mono);font-size:10px;fill:#4b5563');
-    zl.textContent='no penalty'; svg.appendChild(zl);
+    zl.textContent='no wording gap'; svg.appendChild(zl);
     // faint pp ticks ground the physical distance; direct numeric labels (−2/−4/−6)
     // replace the vague "← larger penalty" arrow
     [-0.02,-0.04,-0.06].forEach(function(v){
@@ -1725,7 +1725,7 @@
         body.appendChild(tr);
       });
       document.getElementById('sp-sum').textContent=
-        'Where the penalty concentrates: per-specialty penalty on the base model, '+rows.length+' specialties, exploratory';
+        'Where the wording gap concentrates: per-specialty wording gap on the base model, '+rows.length+' specialties, exploratory';
       document.getElementById('sp-block').hidden=false;
     }).catch(function(){});
 })();

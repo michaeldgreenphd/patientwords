@@ -396,12 +396,12 @@
   <details class="meth">
     <summary>View generation methodology</summary>
   <p class="explainer">This section adds simulated scenarios to the <a href="../#phrase-dataset">hand-measured dataset</a>. Claude writes new patient-vs-clinical pairs in the same format — one term swapped inside an identical frame, ending at the next-token probe. Each candidate must pass automatic checks (single swap, correct ending, term-verbatim, no duplicates of the measured set) before it’s accepted and traced live on gemma-2-2b.</p>
-  <p class="explainer">Each scenario shows the two phrasings, the traced probabilities with the language penalty, and the generator’s reason the swap should matter.</p>
+  <p class="explainer">Each scenario shows the two phrasings, the traced probabilities with the wording gap, and the generator’s reason the swap should matter.</p>
   </details>
   <p class="explainer">In the table, the model <em>hedges</em> (top answer holds, loses probability) or <em>redirects</em>; the urgency column marks a redirect down the care ladder as a <em>downgrade</em>.</p>
   <p class="traced" id="sim-traced" hidden>
     <span class="tm"><b>traced model:</b> <span id="sim-traced-model">gemma-2-2b · gemma scope transcoders</span></span>
-    <span class="tp">→ prob = target-token probability read from the live trace · penalty = patient − clinical</span>
+    <span class="tp">→ prob = target-token probability read from the live trace · wording gap = patient − clinical</span>
   </p>
 
   <section id="key-ex" hidden>
@@ -889,7 +889,7 @@
           nums.appendChild(el('span',null,'prob('+((ks.intended_target||'')+'').trim()+'): clinical '
             +(typeof pc==='number'?pc.toFixed(2):'—')+' → patient '
             +(typeof pp==='number'?pp.toFixed(2):'—')+' · '));
-          nums.appendChild(el('span','pen','penalty '
+          nums.appendChild(el('span','pen','wording gap '
             +(typeof ks.language_penalty==='number'?ks.language_penalty.toFixed(2):'—')));
           card.appendChild(nums);
           if(typeof steer.boost_recoveries==='number'){
