@@ -71,25 +71,36 @@
   .chip:hover{color:var(--ink);border-color:var(--muted)}
   .chip.on{color:var(--clinical);border-color:var(--clinical);font-weight:600}
   .chip-note{font-family:var(--mono);font-size:10.5px;color:var(--muted);margin-left:6px}
-  /* arm sections */
-  .arm{margin:0 0 30px}
+  /* side-by-side wordings: one column per arm, one row per model —
+     column alignment does the comparing, hairlines carry the structure */
+  #sc-body{display:grid;column-gap:30px;border-bottom:1px solid var(--ink);padding-bottom:8px}
+  #sc-body.cols-1{grid-template-columns:minmax(0,1fr)}
+  #sc-body.cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #sc-body.cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .arm-head{min-width:0;padding:0 0 14px}
   .arm-label{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.2em;
     text-transform:uppercase;margin:0 0 8px}
   .arm-c .arm-label{color:var(--clinical)}
   .arm-p .arm-label{color:var(--patient)}
   .arm-t .arm-label{color:var(--muted)}
-  .ask{font-size:19px;line-height:1.55;margin:0 0 14px;padding:10px 16px;border-left:3px solid}
+  .ask{font-size:16.5px;line-height:1.5;margin:0;padding:8px 12px;border-left:3px solid}
   .arm-c .ask{border-color:var(--clinical)}
   .arm-p .ask{border-color:var(--patient)}
   .arm-t .ask{border-color:var(--structural);color:var(--muted)}
-  .resp{border-top:1px solid var(--hairline);padding:12px 0 14px}
-  .resp:last-child{border-bottom:1px solid var(--ink)}
-  .resp-head{display:flex;flex-wrap:wrap;gap:6px 16px;align-items:baseline;margin:0 0 6px}
-  .resp-model{font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.04em}
+  .model-row{grid-column:1/-1;border-top:1px solid var(--hairline);margin:0;
+    padding:8px 0 2px;font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.04em}
+  .cell{min-width:0;padding:2px 0 14px}
+  .cell-arm{position:absolute;left:-9999px;font-family:var(--mono);font-size:10px;
+    letter-spacing:.14em;text-transform:uppercase;margin:0 0 4px}
+  .arm-c .cell-arm{color:var(--clinical)}
+  .arm-p .cell-arm{color:var(--patient)}
+  .arm-t .cell-arm{color:var(--muted)}
+  .span-all{grid-column:1/-1}
+  .resp-head{display:flex;flex-wrap:wrap;gap:4px 14px;align-items:baseline;margin:0 0 4px}
   .resp-tier{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
   .resp-tier b{color:var(--ink);font-weight:600}
   .resp-refusal{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--penalty)}
-  .resp-text{font-size:15.5px;line-height:1.6;margin:0;white-space:pre-wrap}
+  .resp-text{font-size:15px;line-height:1.55;margin:0;white-space:pre-wrap;overflow-wrap:break-word}
   .resp-text.missing{color:var(--muted)}
   .resp-foot{font-family:var(--mono);font-size:10.5px;letter-spacing:.04em;color:var(--muted);margin:6px 0 0}
   /* provenance panel */
@@ -109,6 +120,16 @@
   .endnote{border-top:1px solid var(--ink);margin-top:42px;padding-top:14px}
   footer{font-family:var(--mono);font-size:12px;line-height:1.9;color:var(--muted)}
   footer a{color:var(--muted);text-underline-offset:3px}
+  @media (max-width:900px){
+    /* stacked fallback: wordings first, then each model's answers together */
+    #sc-body{display:block}
+    .arm-head{padding:0 0 12px}
+    .model-row{margin-top:4px}
+    .cell{border-left:2px solid var(--structural);padding:4px 0 12px 12px;margin:2px 0 6px}
+    .cell.arm-c{border-color:var(--clinical)}
+    .cell.arm-p{border-color:var(--patient)}
+    .cell.arm-t{border-color:var(--structural)}
+    .cell-arm{position:static;left:auto}}
   @media (max-width:760px){
     .masthead nav{gap:8px 22px}
     .masthead nav a{padding:7px 0}
@@ -141,7 +162,7 @@
   <p class="dateline">Advice arm <span class="mode">· full model responses, verbatim</span></p>
   <h1>LLM responses</h1>
   <p class="subtitle">The same situation, asked two ways, across assistants.</p>
-  <p class="explainer">Each scenario below is one clinical situation phrased two ways. The clinical wording comes first, with every model's response beneath it; the everyday patient wording follows, with the same models' responses. Responses are shown verbatim. Each model was asked the same prompt several times — the attempt switcher moves between those repeat draws. Where a translation step ran, the machine-translated wording and its responses appear third.</p>
+  <p class="explainer">Each scenario below is one clinical situation phrased two ways. The clinical wording and the everyday patient wording run side by side, and each row shows one model's response to both. Responses are shown verbatim. Each model was asked the same prompt several times — the attempt switcher moves between those repeat draws. Where a translation step ran, the machine-translated wording and its responses appear as a third column.</p>
 
   <div class="sample-banner" id="sample-banner" hidden>SAMPLE DATA — synthetic placeholder payload for layout verification only. Nothing on this page is a measurement.</div>
 
@@ -262,16 +283,43 @@
     row.hidden=false;
   }
 
-  function respBlock(mb){
-    var wrap=el('div','resp');
+  function armDefs(s){
+    return [
+      {key:'clinical',cls:'arm-c',label:'Clinical wording',tag:'clinical'},
+      {key:'patient',cls:'arm-p',label:'Everyday patient wording',tag:'patient'},
+      {key:'translated',cls:'arm-t',label:'After LLM translation of the patient wording',tag:'translated'}
+    ].filter(function(d){
+      var a=s[d.key];
+      if(!a||(!a.message&&!(a.responses&&a.responses.length)))return false;
+      d.arm=a; return true;
+    });
+  }
+
+  function modelOrder(arms){
+    var seen={},order=[];
+    arms.forEach(function(d){
+      (d.arm.responses||[]).forEach(function(mb){
+        var m=dash(mb.model);
+        if(!seen[m]){seen[m]=1;order.push(m);}
+      });
+    });
+    return order;
+  }
+
+  function cellBlock(d,mb){
+    var wrap=el('div','cell '+d.cls);
+    wrap.appendChild(el('p','cell-arm',d.tag));
+    if(!mb){
+      wrap.appendChild(el('p','resp-text missing','— no response archived for this cell'));
+      return wrap;
+    }
     var samples=mb.samples||[];
     var s=null;
     for(var i=0;i<samples.length;i++){if(samples[i].k===attempt){s=samples[i];break;}}
-    var head=el('div','resp-head');
-    head.appendChild(el('span','resp-model',dash(mb.model)));
-    if(s&&s.tier){var t=el('span','resp-tier');t.appendChild(document.createTextNode('coded tier: '));var b=el('b',null,s.tier);t.appendChild(b);head.appendChild(t);}
-    if(s&&s.refusal)head.appendChild(el('span','resp-refusal','refusal'));
-    wrap.appendChild(head);
+    var head=null;
+    if(s&&s.tier){head=el('div','resp-head');var t=el('span','resp-tier');t.appendChild(document.createTextNode('coded tier: '));var b=el('b',null,s.tier);t.appendChild(b);head.appendChild(t);}
+    if(s&&s.refusal){if(!head)head=el('div','resp-head');head.appendChild(el('span','resp-refusal','refusal'));}
+    if(head)wrap.appendChild(head);
     if(s&&typeof s.text==='string'&&s.text){
       wrap.appendChild(el('p','resp-text',s.text));
     }else if(s){
@@ -279,23 +327,12 @@
     }else{
       wrap.appendChild(el('p','resp-text missing','— attempt '+attempt+' not archived for this cell'));
     }
-    var bits=['attempt '+attempt+' of '+maxK];
+    var bits=[];
     var served=(s&&s.model_returned)||mb.model_returned;
     if(served)bits.push('served as '+served);
     if(s&&s.sent_utc)bits.push(String(s.sent_utc).slice(0,10));
-    wrap.appendChild(el('p','resp-foot',bits.join(' · ')));
+    if(bits.length)wrap.appendChild(el('p','resp-foot',bits.join(' · ')));
     return wrap;
-  }
-
-  function armSection(cls,label,arm){
-    if(!arm||(!arm.message&&!(arm.responses&&arm.responses.length)))return null;
-    var sec=el('section','arm '+cls);
-    sec.appendChild(el('p','arm-label',label));
-    if(arm.message)sec.appendChild(el('p','ask',arm.message));
-    var rs=arm.responses||[];
-    if(!rs.length){sec.appendChild(el('p','resp-text missing','— no responses archived yet'));}
-    for(var i=0;i<rs.length;i++)sec.appendChild(respBlock(rs[i]));
-    return sec;
   }
 
   function render(){
@@ -308,9 +345,26 @@
     if(s.topic)meta.appendChild(document.createTextNode(' · topic: '+s.topic));
     var body=document.getElementById('sc-body');
     body.textContent='';
-    var a1=armSection('arm-c','Clinical wording',s.clinical); if(a1)body.appendChild(a1);
-    var a2=armSection('arm-p','Everyday patient wording',s.patient); if(a2)body.appendChild(a2);
-    var a3=armSection('arm-t','After LLM translation of the patient wording',s.translated); if(a3)body.appendChild(a3);
+    var arms=armDefs(s);
+    body.className='cols-'+(arms.length||1);
+    arms.forEach(function(d){
+      var head=el('div','arm-head '+d.cls);
+      head.appendChild(el('p','arm-label',d.label));
+      if(d.arm.message)head.appendChild(el('p','ask',d.arm.message));
+      body.appendChild(head);
+    });
+    var models=modelOrder(arms);
+    if(!models.length&&arms.length){
+      body.appendChild(el('p','resp-text missing span-all','— no responses archived yet'));
+    }
+    models.forEach(function(m){
+      body.appendChild(el('p','model-row',m));
+      arms.forEach(function(d){
+        var mb=null,rs=d.arm.responses||[];
+        for(var i=0;i<rs.length;i++){if(dash(rs[i].model)===m){mb=rs[i];break;}}
+        body.appendChild(cellBlock(d,mb));
+      });
+    });
   }
 
   function go(i){
