@@ -186,6 +186,10 @@
         <div id="fig-tiers-body"></div>
         <p class="fig-pending" id="fig-tiers-pending">Appears once each response is coded against the clinician-reviewed rubric.</p>
       </figure>
+      <figure class="fig" id="fig-sim" hidden>
+        <figcaption class="fig-cap">Same question, re-asked vs re-worded <span class="fig-sub">word overlap between answers · higher = more alike</span></figcaption>
+        <div id="fig-sim-body"></div>
+      </figure>
     </div>
     <nav class="sc-pager" id="sc-pager" aria-label="Scenario pages"></nav>
     <div class="chip-g" id="attempt-row" role="group" aria-label="Attempt" hidden>
@@ -408,10 +412,12 @@
     var vals=[];
     rows.forEach(function(r){if(r.a!=null)vals.push(r.a);if(r.b!=null)vals.push(r.b);});
     if(!vals.length)return null;
-    var lo=(opts.min!=null)?opts.min:(opts.zero?0:Math.min.apply(null,vals));
+    var lo=(opts.min!=null)?opts.min:(opts.zero?0:Math.min.apply(null,vals)*0.94);
     var hi=(opts.max!=null)?opts.max:Math.max.apply(null,vals)*1.06;
     function x(v){return L+(v-lo)/((hi-lo)||1)*(R-L);}
-    function fmt(v){return opts.decimals?v.toFixed(1):String(Math.round(v));}
+    function fmt(v){return opts.decimals?v.toFixed(opts.decimals):String(Math.round(v));}
+    var aColor=opts.aColor||'var(--clinical,#15803d)', bColor=opts.bColor||'var(--patient,#111827)';
+    var aLabel=opts.aLabel||'clinical', bLabel=opts.bLabel||'patient';
     var svg=document.createElementNS(NS,'svg');
     svg.setAttribute('viewBox','0 0 '+W+' '+H);
     svg.setAttribute('role','img');
@@ -435,8 +441,8 @@
       if(r.a==null&&r.b==null)return;
       var xa=r.a!=null?x(r.a):null, xb=r.b!=null?x(r.b):null;
       if(xa!=null&&xb!=null)svg.appendChild(n('line',{x1:xa,y1:y,x2:xb,y2:y,stroke:'var(--structural,#c3c9d2)','stroke-width':1}));
-      if(xa!=null)svg.appendChild(n('circle',{cx:xa,cy:y,r:3.5,fill:'var(--clinical,#15803d)'}));
-      if(xb!=null)svg.appendChild(n('circle',{cx:xb,cy:y,r:3.5,fill:'var(--patient,#111827)'}));
+      if(xa!=null)svg.appendChild(n('circle',{cx:xa,cy:y,r:3.5,fill:aColor}));
+      if(xb!=null)svg.appendChild(n('circle',{cx:xb,cy:y,r:3.5,fill:bColor}));
       // value labels sit outside their dots
       if(xa!=null&&xb!=null){
         var left=Math.min(xa,xb),right=Math.max(xa,xb);
@@ -457,10 +463,10 @@
         }
         svg.appendChild(n('text',{x:ca.x,y:y-9,'text-anchor':ca.anchor,
           'font-family':'ui-monospace,monospace','font-size':'10px',
-          fill:'var(--clinical,#15803d)'},'clinical'));
+          fill:aColor},aLabel));
         svg.appendChild(n('text',{x:pa.x,y:y-9,'text-anchor':pa.anchor,
           'font-family':'ui-monospace,monospace','font-size':'10px',
-          fill:'var(--patient,#111827)'},'patient'));
+          fill:bColor},bLabel));
       }
     });
     return svg;
@@ -494,14 +500,34 @@
     }
     if(trows.length&&data.tier_order){
       var to=data.tier_order;
-      var t=svgDumbbell(trows,{min:1,max:to.length,decimals:true,
+      var t=svgDumbbell(trows,{min:1,max:to.length,decimals:1,
         label:'Mean coded care-urgency tier by model, clinical versus patient wording'});
       if(t){
         document.getElementById('fig-tiers-body').appendChild(t);
         document.getElementById('fig-tiers-pending').hidden=true;
+        var provisional=/draft/i.test(String(data.rubric_version||''));
         document.getElementById('fig-tiers-sub').textContent=
           'mean coded tier · 1='+to[0]+' … '+to.length+'='+to[to.length-1]+
-          (data.rubric_version?(' · rubric '+data.rubric_version):'');
+          (data.rubric_version?(' · rubric '+data.rubric_version):'')+
+          (provisional?' · machine-coded, provisional until clinician review':'');
+      }
+    }
+    // answer stability vs wording: re-asking the identical wording vs switching wordings
+    var srows=[],maxSN=0;
+    ms.forEach(function(m){if(m.similarity)maxSN=Math.max(maxSN,m.similarity.n_stimuli||0);});
+    ms.forEach(function(m){
+      var s=m.similarity;
+      if(!s)return;
+      srows.push({label:shortName(m.model),a:s.reasked,b:s.reworded,
+        note:(s.n_stimuli<maxSN)?('n='+s.n_stimuli):null});
+    });
+    if(srows.length){
+      var sv=svgDumbbell(srows,{decimals:2,aLabel:'re-asked',bLabel:'re-worded',
+        aColor:'var(--muted,#6d6c66)',bColor:'var(--patient,#111827)',
+        label:'Answer word overlap by model: re-asking the same wording versus switching between clinical and patient wording'});
+      if(sv){
+        document.getElementById('fig-sim-body').appendChild(sv);
+        document.getElementById('fig-sim').hidden=false;
       }
     }
     document.getElementById('figs').hidden=false; // urgency slot always shows: graded dots or the pending line
