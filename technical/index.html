@@ -338,17 +338,11 @@
   <section id="concept">
     <p class="part">Part 1 · The instrument</p>
     <h2>A film strip of the model making up its mind</h2>
-    <p>A language model reads a sentence in layers, a few dozen stacked
-      processing steps. The final layer produces the answer everyone
-      sees. The Jacobian lens reads the layers in between: at each one, it asks
-      "if the model had to answer right now, what would it say?" The result is a
-      film strip of the answer forming. An answer can appear early and hold,
-      appear and be pushed out, or never appear at all.</p>
+    <p>A language model reads a sentence in layers. The final layer produces the answer everyone sees. The Jacobian lens reads the layers in between: at each one, it asks "if the model had to answer right now, what would it say?" An answer can appear early and hold, appear and be pushed out, or never appear at all.</p>
     <p>The lens does not change the model. Like a circuit trace, it is a
-      diagnostic that researchers compute; a person chatting with the model
-      never sees it. Where a circuit trace shows <i>which</i> internal features
-      fired, the lens shows <i>when</i> in depth the answer existed. The two
-      instruments answer different questions about the same failure.</p>
+      diagnostic that researchers compute. Where a circuit trace shows <i>which</i> internal features
+      fired, the lens shows <i>when</i> in depth the answer existed. The Jacobian Lens and the
+      Circuit Tracer answer different questions about the same failure.</p>
     <div id="traj-sents" class="traj-sents"></div>
     <div class="fig" role="img" aria-label="Line chart of the clinical answer's rank across the model's layers under both wordings, drawn from a real measured pair. Under clinical wording the answer enters the readable window and holds to the end. Under patient wording it forms and is then pushed out before the final layer." id="fig-traj">
       <span class="pend">figure pending: the lens readouts have not loaded</span>
@@ -378,18 +372,9 @@
       consecutive readable layers, so a one-layer blip does not count. Part 3
       counts all of it.</p>
     <h3>Which repair applies where?</h3>
-    <p>Translation
-      supplies the clinical wording before the model starts, so it can act
-      even when the answer never forms. Steering amplifies an existing circuit,
-      so it should work best when something formed and was lost. The lens turns
-      "try every fix" into "read the failure, pick the fix". The second
-      amendment, adopted July 14, registers one directional test on batches
-      generated after adoption: translation recovering more
-      where the answer formed and was lost than where it never formed. The
-      fourth amendment, adopted July 17, registers the steering-by-class
-      test on post-adoption batches.</p>
+    <p>Translation supplies the clinical wording before the model starts, so it can act even when the answer never forms. Steering amplifies an existing circuit, so it should work best when something formed and was lost. The lens turns "try every fix" into "read the failure, pick the fix".</p>
     <figure class="jspace">
-      <p class="jspace-cap"><b>Why translation works: it changes which concepts are active.</b> Illustrative schematic — the example words and concept tags are hand-authored, not a measurement; the live readings are in Part 3. Clinical wording lights up medical concepts inside the model (the “J-space” the Jacobian lens reads) and the answer forms; patient wording lights up everyday concepts and the answer is redirected; rewriting the wording back into clinical terms restores the medical concepts, and the answer recovers.</p>
+      <p class="jspace-cap"><b>Why translation works: it changes which concepts are active.</b> Illustrative schematic: the example words and concept tags are hand-authored, the live readings are in Part 3. Clinical wording lights up medical concepts inside the model (the “J-space” the Jacobian lens reads) and the answer forms; patient wording lights up everyday concepts and the answer is redirected; rewriting the wording back into clinical terms restores the medical concepts, and the answer recovers.</p>
       <div class="jspace-grid jspace-3" role="img" aria-label="Three panels. A, clinical wording ‘my dyspepsia flared up’ activates the concepts medical, gastrointestinal and treatment, and the model outputs antacid. B, patient wording ‘my stomach’s on fire’ activates food, spicy and casual, and the model outputs ice cream. C, translation rewrites the patient wording into clinical terms, which re-activates the medical and antacid concepts, and the model recovers the output antacid.">
         <div class="jspanel" data-jsrole="clinical">
           <div class="jspanel-head">A · Clinical wording</div>
@@ -480,9 +465,7 @@
 
     <h3>Where in the sentence</h3>
     <p id="dd-tr-text">The layer axis above asks <em>when</em> the clinical answer forms.
-      This asks <em>where</em>: the same readout taken at every token position, not only
-      the last. A concept can be legible inside the sentence and still be absent at the
-      answer position — present internally, not carried to the point where the model
+      This asks <em>where</em>: the same readout taken at every token position. A concept can be legible inside the sentence and still be absent at the answer position, not carried to the point where the model
       commits to its next word.</p>
     <div id="tr-tabs" class="chip-g" role="group" aria-label="Choose an example pair"></div>
     <div class="fig" id="fig-transport">
@@ -493,10 +476,7 @@
     <p class="cap" id="cap-transport">exploratory · hosted Jacobian lens, top-8 readout at every position × layer · a shaded cell = the pair’s clinical answer is in the top-8 there (hover for its layer and rank); darker = higher rank · a blank cell is measured, not missing: the answer is simply not in the top-8 window there · the table below reads out the model’s actual top words per layer at the answer position (open vocabulary, not just the target) · coverage limited to runs saved with raw responses</p>
 
     <h3>The census, set by set</h3>
-    <p>Every measured set, one row of squares per outcome class, one square per
-      pair. New sets join as the nightly cycle measures them. The reviewed
-      downgrade set holds the pairs whose predicted action fell to a lower tier
-      of care.</p>
+    <p></p>
     <dl class="defs">
       <div><dt class="cls cls-retained">kept</dt><dd>the answer is still readable at the output layer.</dd></div>
       <div><dt class="cls cls-suppressed">lost late</dt><dd>the answer becomes readable in the middle layers, then drops out before the model speaks. The model did the work and lost the result.</dd></div>
@@ -552,7 +532,7 @@
         <span class="pend">figure pending: the logit-lens arm has not loaded</span>
       </div>
       <p class="stat-line" id="dd-ll-stat"></p>
-      <p class="cap" id="cap-loglens">exploratory · gemma-2-2b · patient-side formation layer per pair (persistence 2 layers) · median tick · pairs whose answer never forms counted at right · coverage limited to pairs measured under both lenses</p>
+      <p class="cap" id="cap-loglens">exploratory · gemma-2-2b · pairs whose answer never forms counted at right · coverage limited to pairs measured under both lenses</p>
     </details>
 
     <h3>Queued next</h3>
@@ -567,11 +547,7 @@
   <section id="models">
     <p class="part">Part 4 · Across models</p>
     <h2><span id="me-count-h">Eight</span> models, one measurement.</h2>
-    <p class="explainer">The lens results above come from one model. The behavioral
-      finding they explain generalizes: the same two-phrasing probe, run on eight
-      measured open-weights models across four model families, with the probability
-      of the clinical next word measured under both wordings — interim numbers from
-      the exploration split, phrase counts per model in the table. The models here are
+    <p class="explainer">The  models here are
       the measured subjects; the stimuli they read are written by Claude models and
       audited on the <a href="../methods.html#generation-eval">methods page</a>. Population, dedupe, correction, and holdout details are in the interim-table fold below, under Statistical methods.</p>
 
@@ -601,7 +577,7 @@
       </details>
       <div class="conv-xlab" aria-hidden="true">phrases tested →</div>
       <p class="conv-cap" id="conv-caption">Mean language penalty per model as
-        measurement accumulates, batch by batch. Shaded band: bootstrap 95% confidence
+        measurement accumulates. Shaded band: bootstrap 95% confidence
         interval (seed 7, phrase-deduped, Tier B exploration split only). Grey hairline:
         zero penalty. Drawn at load time from <a href="https://github.com/michaeldgreenphd/patientwords/blob/main/data/convergence.json">the convergence data file on GitHub</a>.</p>
       <details class="conv-table"><summary>Data table (every point)</summary>
@@ -664,10 +640,7 @@
             <tbody id="sp-body"></tbody>
           </table>
         </div>
-        <p class="me-caption" id="sp-caption">gemma-2-2b · exploratory: phrase-deduped,
-          no correction for testing many specialties at once, cells under 10 phrases
-          suppressed · grouping follows the draft specialty taxonomy (owner review
-          pending) · hypothesis-generating only, not a pre-registered endpoint</p>
+        <p class="me-caption" id="sp-caption">gemma-2-2b · exploratory: cells under 10 phrases suppressed · grouping follows the draft specialty taxonomy (owner review pending) · hypothesis-generating only, not a pre-registered endpoint</p>
       </details>
     </div>
   </section>
@@ -944,8 +917,7 @@
       Built with the <a href="https://github.com/michaeldgreenphd/patientwords-engine">patientwords-engine</a> pipeline
       on <a href="https://neuronpedia.org">Neuronpedia</a> ·
       attribution graphs by <a href="https://github.com/safety-research/circuit-tracer">circuit-tracer</a> ·
-      features from <a href="https://huggingface.co/google/gemma-scope-2b-pt-transcoders">Gemma Scope</a> transcoders<br>
-      set in Iowan Old Style &amp; ui-monospace · every number on this page traces to a data file <a href="https://github.com/michaeldgreenphd/patientwords/tree/main/data">in this repository</a>
+      every number on this page traces to a data file <a href="https://github.com/michaeldgreenphd/patientwords/tree/main/data">in this repository</a>
     </footer>
     <a class="back" href="../">Back home →</a>
   </div>

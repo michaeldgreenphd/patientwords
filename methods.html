@@ -297,20 +297,7 @@
       word the model chose. The technical term for that weight is attribution mass.</p>
     <details id="retrace-fold" class="fold" hidden>
       <summary>View repeatability and validation metrics</summary>
-      <p id="retrace-note">The instrument repeats itself, within the record we have.
-      <span id="rt-n">—</span> phrase pairs were traced two or more times on different
-      days: the pairs that happened to be re-traced. At the
-      precision the files record (three decimals), every repeat reproduced identical
-      probabilities (largest spread <span id="rt-spread">—</span>), identical top-five
-      lists (<span id="rt-lists">—</span> pairs), and, under the same graph settings,
-      identical clinical-mass shares. The top word never changed
-      (<span id="rt-stable">—</span> pairs). Different graph settings do change the
-      feature-level numbers; that is parameter sensitivity, not noise. Zero repeat
-      variation was observed through July 14, 2026. On July 15 the daily sentinel
-      recorded its first movement: probabilities shifted by at most
-      <span id="rt-sentinel-max">0.027</span> across the
-      three sentinel pairs, and every top word held.
-      Source: <a href="https://github.com/michaeldgreenphd/patientwords/blob/main/data/retrace_consistency.json">the repeatability measurements file on GitHub</a>.</p>
+      <p id="retrace-note">The instrument repeats itself, within the record we have. Source: the repeatability measurements file on the patient words GitHub.</p>
     </details>
   </section>
 
@@ -325,10 +312,10 @@
       <li class="t-offtarget"><b>Off-target</b> &mdash; fires on something the casual wording
         dragged in, not the medicine. Say a patient writes &ldquo;my stomach&rsquo;s on
         fire&rdquo;: a feature for <em>heat</em> or <em>spicy food</em> lights up and tugs the
-        next word toward &ldquo;ice cream.&rdquo; That feature is off-target &mdash; it is the
+        next word toward &ldquo;ice cream.&rdquo; That feature is off-target from identifying a medical situation. It is the
         mechanism of the language penalty.</li>
       <li class="t-structural"><b>Structural</b> &mdash; scaffolding for syntax, position, and
-        punctuation. It fires in every trace and carries no medical content.</li>
+        punctuation. It fires in every trace since it is a part of complete sentences.</li>
     </ul>
     <div class="cshare" id="cshare" role="img" aria-label="Attribution mass per phrasing: clinical (green), off-target (red), and structural (grey) shares, for clinical then patient wording.">
       <span class="pend">figure pending</span>
@@ -407,7 +394,7 @@
       </li>
     </ul>
     <figure class="jspace">
-      <p class="jspace-cap"><b>What the wording changes, before the answer.</b> Illustrative schematic — the example words and concept tags are hand-authored, not a measurement. Clinical wording lights up medical concepts inside the model (the “J-space” the Jacobian lens reads); the same situation in patient words lights up everyday ones, and that redirects the next word. The <a href="technical/#application">technical page</a> adds a third panel, where translating the wording back restores the medical concepts.</p>
+      <p class="jspace-cap"><b>What the wording changes, before the answer.</b> Illustrative schematic — the example words and concept tags are hand-authored, not a measurement. Clinical wording lights up medical concepts inside the model (the “J-space” the Jacobian lens reads); the same situation in patient words lights up everyday ones, and that redirects the next word.</p>
       <div class="jspace-grid jspace-2" role="img" aria-label="Two panels. A, clinical wording ‘my dyspepsia flared up’ activates the concepts medical, gastrointestinal and treatment, and the model outputs antacid. B, patient wording ‘my stomach’s on fire’ activates food, spicy and casual, and the model outputs ice cream.">
         <div class="jspanel" data-jsrole="clinical">
           <div class="jspanel-head">A · Clinical wording</div>
@@ -486,7 +473,7 @@
           <tbody id="tier-body"></tbody>
         </table>
       </div>
-      <p class="tier-cap" id="tier-cap" hidden>care-urgency tiers, owner-reviewed v1 · domain review pending · predicted words with no urgency information are excluded · a redirect that lands on a lower tier is a downgrade</p>
+      <p class="tier-cap" id="tier-cap" hidden>care-urgency tiers · domain review pending · predicted words with no urgency information are excluded</p>
     </details>
     <script>
     (function(){
@@ -519,12 +506,7 @@
   <section id="reading-layers">
     <p class="step-no">Depth</p>
     <h2>Reading the layers</h2>
-    <p>
-      The circuit view names which features fire. The Jacobian lens reads what the
-      model would say if forced to answer at each of its 26 layers: ranked words, one
-      list per layer. Two questions per pair: where does the clinical answer become
-      readable, and does it survive to the output.
-    </p>
+    <p>The circuit view names which features fire. The Jacobian lens reads what the model would say if forced to answer at each of its 26 layers.</p>
     <div class="rl-figwrap"><div id="rl-fig"><span class="rl-pend">figure pending: the depth census has not loaded</span></div></div>
     <p class="rl-cap">
       One downgrade-set pair, one layer axis. Top lanes: the lens readout; darker cells
@@ -535,13 +517,10 @@
     </p>
     <p>
       The bottom lane is the causal check. <b>To test whether the patient&rsquo;s wording caused
-      the failure, we &ldquo;patch&rdquo; the model by injecting the translated clinical sentence
-      at specific layers, to see if the correct medical answer recovers.</b> The sentence we
-      inject is the one labeled on the figure &mdash;
-      <span class="rl-lbl">translated: &ldquo;I have essential tremor&hellip;&rdquo;</span> &mdash;
-      and each injection is what the <span class="rl-lbl">patch: inject</span> label marks on the
-      track. If the clinical state brings the answer back, the wording, not a gap in the
-      model&rsquo;s knowledge, was the problem.
+      the failure, we patch the model by injecting the translated clinical sentence
+      at specific layers, to see if the correct medical answer recovers.</b> If the clinical
+      state brings the answer back, the wording, not a gap in the model&rsquo;s knowledge, was
+      the problem.
     </p>
     <details class="fold">
       <summary>How the Jacobian lens reads layers</summary>
@@ -549,8 +528,7 @@
       Layer readouts use the Jacobian lens (Gurnee et&nbsp;al., Transformer Circuits,
       2026), applied through Neuronpedia&rsquo;s hosted deployment of the authors&rsquo;
       reference implementation
-      (<a href="https://github.com/anthropics/jacobian-lens">anthropics/jacobian-lens</a>,
-      Apache-2.0). The lens is a readout, not an intervention; causal evidence comes
+      (<a href="https://github.com/anthropics/jacobian-lens">Github: anthropics/jacobian-lens</a>). The lens is a readout, not an intervention; causal evidence comes
       from the activation-patching check above and the steering experiments. The
       readout is exploratory and reported for one model.
     </p>
@@ -558,8 +536,7 @@
     <p>
       The depth readout splits the penalty into two failure kinds. When the answer
       never forms, translation supplies the clinical wording up front. When the answer
-      forms and is lost, translation recovers work the model already did. The running
-      census lives on the <a href="technical/#data">Technical page</a>.
+      forms and is lost, translation recovers work the model already did.
     </p>
     <p>
       The loop for a deployed system: read the layers to see which kind dominates,
@@ -572,7 +549,7 @@
     <h2>One set of AIs writes the test; a different set takes it</h2>
     <p>
       For this project Anthropic&rsquo;s
-      Claude models do two jobs. They <em>write</em> the test questions (the
+       models do two jobs. They <em>write</em> the test questions (the
       phrase pairs; each batch&rsquo;s record names the exact model, currently
       <code>claude-haiku-4-5</code>, <a href="https://www.anthropic.com/news/claude-haiku-4-5" rel="noopener">Anthropic, released October 2025</a>) and they <em>translate</em> patient wording into
       clinical wording for the Translation figure. A different set of models
@@ -690,26 +667,25 @@
   <section id="limitations">
     <p class="step-no">Limitations</p>
     <h2>What this evidence does and does not show</h2>
-    <p>This project measures how the probability of a single next word changes when clinical wording is replaced by patient wording. That is a probe of model behavior, not a clinical outcome.</p>
+    <p>This project measures how the probability of a single next word changes when clinical wording is replaced by patient wording. That is not an observed clinical outcome.</p>
     <ul class="limits">
-      <li><b>One small model carries the circuit evidence.</b> Every graph here comes from gemma-2-2b, chosen because its transcoders are public. The behavioral checks on the other seven models measure next-word probabilities only, no circuits. None of this shows how larger systems behave. The one medically tuned model measured, medgemma-4b-it (4B parameters, next-word behavior only), still shows a below-zero penalty: −3.9 pp, 95% CI [−5.9, −2.0], on 337 phrases.</li>
+      <li><b>One small model carries the circuit evidence.</b> Every graph here comes from gemma-2-2b, chosen because its transcoders are public. The behavioral checks on the other seven models measure next-word probabilities only.</li>
       <li><b>Attribution graphs are an interpretive tool.</b> They reconstruct the model’s computation through features and prune heavily; error nodes absorb what’s missed.</li>
-      <li><b>Feature labels are machine-generated.</b> The clinical / off-target categories come from keyword-matching auto-interp descriptions. Both steps can be wrong, and a mislabeled feature shifts the clinical-mass numbers.</li>
-      <li><b>Measurements are a point in time.</b> The probabilities were observed on specific dates against a hosted service. The <span id="lim-rt-n">—</span> pairs re-traced so far reproduce exactly at the recorded three-decimal precision (see step 2), but that is the set that happened to be repeated, not a guarantee: a re-trace can move a probability slightly, and a value near zero can fall below what the trace resolves. Future drift would come from service changes; a daily three-pair sentinel re-trace watches for that.</li>
+      <li><b>Feature labels are machine-generated.</b> The clinical / off-target categories come from keyword-matching auto-interp descriptions. </li>
+      <li><b>Measurements are a point in time.</b> The probabilities were observed on specific dates against a hosted service. The pairs re-traced so far reproduce exactly at the recorded three-decimal precision, but that is the set that happened to be repeated, not a guarantee. A re-trace can move a probability slightly, and a value near zero can fall below what the trace resolves.</li>
       <li><b>Translation can fail.</b> The fix in the Translation figure is itself an LLM step.</li>
       <li><b>The stimuli are constructed.</b> Most phrase pairs were written by a language model and checked automatically, not collected from patients.</li>
     </ul>
-    <p>Nothing here is medical advice, and no part of this pipeline is a deployed clinical tool. The claim is narrower: on the models measured, the same situation phrased in patient words is measurably less likely to reach the clinical answer than in clinical terms — and the circuit view shows where that difference arises.</p>
+    <p>Nothing here is medical advice, and no part of this pipeline is a deployed clinical tool. The claim is narrower: on the models measured, the same situation phrased in patient words is measurably less likely to reach the clinical answer than in clinical terms.</p>
   </section>
 
   <div class="endnote">
-    <p>Two kinds of provenance appear in the gallery. The comparison figures and the simulated scenarios use prompts written by an LLM and checked automatically: the scenarios are simulated, but the testing is real. The phrase dataset is the other kind: hand-built from real patient language and measured by hand.</p>
+    <p>Two kinds of provenance appear in the gallery. The comparison figures and the simulated scenarios use prompts written by an LLM and checked automatically. The phrase dataset is the other kind: hand-built from real patient language and measured by hand.</p>
     <footer>
       Built with the <a href="https://github.com/michaeldgreenphd/patientwords-engine">patientwords-engine</a> pipeline
       on <a href="https://neuronpedia.org">Neuronpedia</a> ·
       attribution graphs by <a href="https://github.com/safety-research/circuit-tracer">circuit-tracer</a> ·
-      features from <a href="https://huggingface.co/google/gemma-scope-2b-pt-transcoders">Gemma Scope</a> transcoders<br>
-      set in Iowan Old Style &amp; ui-monospace · every number on this page traces to a data file <a href="https://github.com/michaeldgreenphd/patientwords/tree/main/data">in this repository</a>
+      every number on this page traces to a data file <a href="https://github.com/michaeldgreenphd/patientwords/tree/main/data">in this repository</a>
     </footer>
   </div>
 </main>
@@ -844,9 +820,12 @@
     .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
     .then(function(d){
       if(!d.pairs_retraced)return;
-      document.getElementById('rt-n').textContent=String(d.pairs_retraced);
-      document.getElementById('rt-spread').textContent=String(d.prob_spread_max);
-      document.getElementById('rt-stable').textContent=d.top_word_stable_pairs+' of '+d.pairs_retraced;
+      var rtN=document.getElementById('rt-n');
+      if(rtN)rtN.textContent=String(d.pairs_retraced);
+      var rtS=document.getElementById('rt-spread');
+      if(rtS)rtS.textContent=String(d.prob_spread_max);
+      var rtSt=document.getElementById('rt-stable');
+      if(rtSt)rtSt.textContent=d.top_word_stable_pairs+' of '+d.pairs_retraced;
       var lists=document.getElementById('rt-lists');
       if(lists)lists.textContent=(d.spread_lists_identical_pairs!=null?d.spread_lists_identical_pairs:'—')+' of '+d.pairs_retraced;
       var limN=document.getElementById('lim-rt-n');

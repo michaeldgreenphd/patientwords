@@ -330,9 +330,9 @@
   <hr class="rule-fine">
 </header>
 <main id="main">
-  <p class="dateline">mechanistic interpretability of medical language</p>
-  <h1><span class="patient">Patients</span> don’t speak like doctors.<br><span class="clinical">Small open models</span> change their next-word predictions when the wording does.</h1>
-  <p class="lede">We trace how gemma-2-2b reads clinical terms versus the everyday words patients use. Wording can change the model's top next word in addition to its confidence, and rewriting the sentence in clinical terms restores it sometimes in the hardest cases. Try the live case below.</p>
+  <p class="dateline">mechanistic interpretability of medical v. patient language</p>
+  <h1><span class="patient">Patients</span> don’t speak like doctors.<br><span class="clinical">Small open models</span> change their next-word predictions when the wording does. This might scale to LLMs</h1>
+  <p class="lede">We trace how gemma-2-2b reads clinical terms versus the everyday words patients use. Wording can change the model's top next word in addition to its confidence. Try the case below.</p>
 
   <div class="tg" id="home-tg">
     <p class="tg-sentence">“When the dust kicks up my
@@ -366,10 +366,10 @@
     <div class="fig-body">
       <p class="fig-no">Wording <span class="mode">· one-word swap</span></p>
       <h3>Swap the word</h3>
-      <p>One phrase swapped — “asthma flares” vs. “chest gets all tight” — as two stacked graphs. The numbers are in the demo above; the trace shows where the probability goes.</p>
+      <p></p>
       <details class="trace-fold">
         <summary>How to read this graph</summary>
-        <p class="read-graph">Columns are the prompt’s words in order; height is depth in the model; the predicted next word sits at the top. Nodes (the dots) are features — size is contribution, color is category. Curves are paths of influence; the spread at the top shows the different next-word predictions ranked by probability. Hover any node for its identity and mass.</p>
+        <p class="read-graph">Columns are the prompt’s words in order; height is depth in the model; the predicted next word sits at the top. Nodes (the dots) are features. For the features: size is contribution, color is category (patient or clinical). Curves are paths of influence; the spread at the top shows the different next-word predictions ranked by probability. Hover any dot for its identity and size.</p>
       </details>
       <details class="trace-fold">
         <summary>Trace details</summary>
@@ -391,9 +391,9 @@
       <figcaption>live render · simulated scenario</figcaption>
     </figure>
     <div class="fig-body">
-      <p class="fig-no">Wording <span class="mode">· grammar × lexicon</span></p>
+      <p class="fig-no">Wording <span class="mode">· grammar × medical wording</span></p>
       <h3>Swap the grammar</h3>
-      <p>A 2×2 grid crossing wording (patient vs. medical) with grammar (standard vs. nonstandard). From the live trace, the top guess is “doctor” only with the clinical word and standard grammar (Box A); changing the grammar alone (Box B) redirects it toward “gym”, and patient words make “gym” the outright top.</p>
+      <p>A 2×2 grid crossing wording (patient vs. medical) with grammar (standard vs. nonstandard). From the live trace, the top guess is “doctor” only with the clinical word and standard grammar (Box A); changing the grammar alone (Box B) redirects it toward “gym”, and patient words make “gym” the top prediction.</p>
       <span class="stat penalty">Top by cell: A “doctor” 0.295 · B “gym”/“doctor” tie 0.177 · C “gym” 0.355 · D “gym” 0.289</span>
       <details class="trace-fold">
         <summary>Trace details</summary>
@@ -408,7 +408,7 @@
 
   <figure class="specimen" id="dialect-specimen" hidden>
     <figcaption class="spec-head">
-      <p class="fig-no">Dialect <span class="mode">· live specimen</span></p>
+      <p class="fig-no">Dialect <span class="mode">· </span></p>
       <h3>Same medical situation. Different framing. Different prediction.</h3>
     </figcaption>
     <div class="spec-rows" id="spec-rows"></div>
@@ -434,7 +434,7 @@
     <div class="fig-body">
       <p class="fig-no">Translation <span class="mode">· recovery</span></p>
       <h3>Translation</h3>
-      <p>An LLM rewrites the patient sentence into clinical terms, and the rewrite is evaluated. The clinical features and the target probability often both come back.</p>
+      <p>An LLM rewrites the patient sentence into clinical terms, and the rewrite is evaluated. The clinical features and the target probability often both come back after the LLM "translates" the patient wording.</p>
       <span class="stat recovery">Recovered target probability: 0.45 after translation (clinical baseline 0.26) · July 7 trace</span>
       <details class="trace-fold">
         <summary>Trace details</summary>
@@ -463,13 +463,13 @@
     <div class="fig-body">
       <p class="fig-no">Sim series <span class="mode">· generated pairs · simulated data</span></p>
       <h3>Simulated Scenarios</h3>
-      <p>Claude writes new patient-vs-clinical pairs in the hand-built dataset’s format — one term swapped per pair — and LLM validators accept or reject each. Accepted pairs are traced on gemma-2-2b and published with the generator’s rationale and cost.</p>
+      <p>Claude writes new patient-vs-clinical pairs in the hand-built dataset’s format, and LLM validators accept or reject each. Accepted pairs are traced on gemma-2-2b and published with the generator’s rationale and cost.</p>
       <span class="stat" id="sim-stat" hidden></span>
       <details class="trace-fold">
         <summary>Trace details</summary>
         <p class="traced" data-mode="simulated" data-traced="gemma-2-2b">
           <span class="tm"><b>traced model:</b> gemma-2-2b</span>
-          <span class="tp">simulated data · generating model and cost in the per-batch sidecar</span>
+          <span class="tp">simulated data · </span>
         </p>
       </details>
       <span class="open">Open the simulated series →</span>
@@ -481,9 +481,9 @@
       <h2>Safety view — urgency of the predicted action<span class="draft-flag">tiers owner-reviewed v1 · domain review pending</span></h2>
       <span class="count" id="sv-count"></span>
     </div>
-    <p class="lede" style="font-size:16px">Not every flip is equal: the model <em>hedges</em> (top answer holds, loses probability) or <em>redirects</em>; a redirect down the care ladder is a <em>downgrade</em>. Definitions and the five-tier ladder live in <a href="methods.html#step-4">methods step 4</a>. These are next-word probabilities in small open models on LLM-written test sentences, not clinical outcomes; scope and caveats are on the <a href="methods.html#limitations">methods page</a>.</p>
+    <p class="lede" style="font-size:16px">Not every flip is equal: the model <em>hedges</em> (top answer holds, loses probability) or <em>redirects</em>. Sometimes the urgency of the recommended next word changes from situations which warrant more attention or specialized care to one that a patient can solve on their own. A redirect down the care ladder is a <em>downgrade</em>. Definitions for this care ladder that presents the tiers of medical care are presented in <a href="methods.html#step-4">methods step 4</a>. These are next-word probabilities in small open models on LLM-written test sentences, not clinical outcomes; scope and caveats are on the <a href="methods.html#limitations">methods page</a>.</p>
     <div class="sv-asym" id="sv-asym" hidden></div>
-    <p class="safety-note" id="sv-asym-cap" hidden>when a wording change moves the top answer across care tiers, the move is mostly down · red arrows: answers landing on a lower tier · grey: a higher one · phrase-deduped counts per model · LLM-authored stimuli</p>
+    <p class="safety-note" id="sv-asym-cap" hidden>when a wording change moves the top answer across care tiers, the move is mostly down · red arrows: answers landing on a lower tier of clinical urgency · grey: a higher one · LLM-authored stimuli</p>
     <p class="safety-note">Per-model statistics with multiple-comparison correction: <a href="technical/#models">the interim table on the Technical page</a>.</p>
   </section>
 
@@ -511,10 +511,7 @@
         <tbody id="sp-body"></tbody>
       </table>
     </div>
-    <p class="sp-caption">
-      Hand-measured on gemma-2-2b (Gemma Scope transcoders) via the Neuronpedia circuit
-      tracer; next-token probabilities as observed at measurement time.
-    </p>
+    <p class="sp-caption">Measured on gemma-2-2b (Gemma Scope transcoders) via the Neuronpedia circuit tracer; next-token probabilities as observed at measurement time.</p>
     </details>
     <p class="sp-foot">preview: observed-token flips and biggest probability gaps first · <a href="phrase-dataset/">full dataset (all pairs) →</a></p>
   </section>
@@ -523,18 +520,17 @@
     <div class="section-head">
       <h2>Model evaluations</h2>
     </div>
-    <p class="lede" style="font-size:16px">One set of AIs writes the test, another takes it, and translating patient words into clinician language loses information. The full audit lives on the <a href="methods.html#generation-eval">methods page</a>; the measured models compare on the <a href="technical/#models">Technical page</a>.</p>
+    <p class="lede" style="font-size:16px">One set of AIs writes the test, another takes it, and translating patient words into clinician language loses information.</p>
   </section>
 
   <div class="endnote">
     <p>The comparison figures above, the simulated scenarios, and the phrase-dataset measurements are gemma-2-2b traces.</p>
-    <p>SIMULATED DATA: the sentence pairs measured across this site are written by an LLM and checked automatically. The scenarios are simulated; the testing is real. The phrase dataset is the exception: hand-built from real patient language and measured by hand.</p>
+    <p>SIMULATED DATA: the sentence pairs measured across this site are written by an LLM and checked by an LLM. The scenarios are simulated, but the tracing and next-token predictions are real. The phrase dataset is the exception: hand-built from patient language and behavior was initially measured by hand.</p>
     <footer>
       Built with the <a href="https://github.com/michaeldgreenphd/patientwords-engine">patientwords-engine</a> pipeline
       on <a href="https://neuronpedia.org">Neuronpedia</a> ·
       attribution graphs by <a href="https://github.com/safety-research/circuit-tracer">circuit-tracer</a> ·
-      features from <a href="https://huggingface.co/google/gemma-scope-2b-pt-transcoders">Gemma Scope</a> transcoders<br>
-      set in Iowan Old Style &amp; ui-monospace · every number on this page traces to a data file <a href="https://github.com/michaeldgreenphd/patientwords/tree/main/data">in this repository</a> ·
+      every number on this page traces to a data file <a href="https://github.com/michaeldgreenphd/patientwords/tree/main/data">in this repository</a> ·
       <a href="methods.html">how the pipeline works</a>
     </footer>
   </div>

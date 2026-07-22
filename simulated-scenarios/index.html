@@ -396,9 +396,9 @@
   <details class="meth">
     <summary>View generation methodology</summary>
   <p class="explainer">This section adds simulated scenarios to the <a href="../#phrase-dataset">hand-measured dataset</a>. Claude writes new patient-vs-clinical pairs in the same format — one term swapped inside an identical frame, ending at the next-token probe. Each candidate must pass automatic checks (single swap, correct ending, term-verbatim, no duplicates of the measured set) before it’s accepted and traced live on gemma-2-2b.</p>
-  <p class="explainer">Each scenario shows the two phrasings, the traced probabilities with the language penalty, and the generator’s reason the swap should matter. The 25 largest-effect scenarios (prediction flips first, then largest penalty) include a full circuit comparison; every scenario’s measurements are downloadable below.</p>
+  <p class="explainer">Each scenario shows the two phrasings, the traced probabilities with the language penalty, and the generator’s reason the swap should matter.</p>
   </details>
-  <p class="explainer">In the table, the model <em>hedges</em> (top answer holds, loses probability) or <em>redirects</em>; the urgency column marks a redirect down the care ladder as a <em>downgrade</em>. Full definitions and the tier ladder: <a href="../methods.html#step-4">methods step 4</a>.</p>
+  <p class="explainer">In the table, the model <em>hedges</em> (top answer holds, loses probability) or <em>redirects</em>; the urgency column marks a redirect down the care ladder as a <em>downgrade</em>.</p>
   <p class="traced" id="sim-traced" hidden>
     <span class="tm"><b>traced model:</b> <span id="sim-traced-model">gemma-2-2b · gemma scope transcoders</span></span>
     <span class="tp">→ prob = target-token probability read from the live trace · penalty = patient − clinical</span>
@@ -548,13 +548,12 @@
   <a class="back" href="../">← Back home</a>
 
   <div class="endnote">
-    <p id="sim-endnote">SIMULATED DATA · these phrasings were written by an LLM (see the strip above) and passed the generator's automatic validators; they are not statements from patients and contain no real personal or clinical data. The traces are live gemma-2-2b runs via the Neuronpedia circuit tracer.</p>
+    <p id="sim-endnote">SIMULATED DATA · these phrasings were written by an LLM (see the strip above) and passed the generator's automatic validators; they are not statements from patients and contain no real personal or clinical data.</p>
     <footer>
       Built with the <a href="https://github.com/michaeldgreenphd/patientwords-engine">patientwords-engine</a> pipeline
       on <a href="https://neuronpedia.org">Neuronpedia</a> ·
       attribution graphs by <a href="https://github.com/safety-research/circuit-tracer">circuit-tracer</a> ·
-      features from <a href="https://huggingface.co/google/gemma-scope-2b-pt-transcoders">Gemma Scope</a> transcoders<br>
-      set in Iowan Old Style &amp; ui-monospace · every number on this page traces to a data file <a href="https://github.com/michaeldgreenphd/patientwords/tree/main/data">in this repository</a> ·
+      every number on this page traces to a data file <a href="https://github.com/michaeldgreenphd/patientwords/tree/main/data">in this repository</a> ·
       <a href="../methods.html">how the pipeline works</a>
     </footer>
   </div>

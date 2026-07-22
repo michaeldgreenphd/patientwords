@@ -173,37 +173,23 @@
   <hr class="rule-fine">
 </header>
 <main id="main">
-  <p class="dateline">Start here · the whole idea, simplified</p>
+  <p class="dateline">Start here · the whole idea simplified</p>
   <h1>People say the same thing many ways. What does a machine "hear"?</h1>
   <p class="subtitle">What happens inside a language model when the same medical
     question is asked in patient words instead of clinical words.</p>
 
   <div class="core-q">
     <p class="core-q-lbl">Research question</p>
-    <p class="core-q-body"><b>Does the everyday language patients actually use change how a
-      language model reasons about their situation &mdash; and how safely it answers &mdash;
-      compared with standard clinical wording?</b> To find out, we pair colloquial patient
-      phrasings with their medical equivalents, trace which internal features each one
-      activates, and measure whether the casual wording pulls the model&rsquo;s next word away
-      from the medically appropriate answer and down the care ladder.</p>
-    <p class="core-q-scope">Scope: the models studied here are open-weight, chosen so their
-      internal reasoning can be traced directly. Whether the same effects hold in larger
-      closed-source models &mdash; whose internals cannot be observed &mdash; is an open question.</p>
+    <p class="core-q-body"><b>Does the language patients use change how a language model reasons about their situation (and how safely it answers) compared with standard clinical wording?</b> To find out, we pair patient phrasings for healthcare issues with their medical equivalents, identify which internal features of the language model each phrasing activates, and measure whether the casual wording pulls the model&rsquo;s next word away from a medically appropriate answer.</p>
+    <p class="core-q-scope">Scope: The models studied here are open-weight, chosen so their internal reasoning can be traced directly. Whether the same effects hold in larger closed-source models (whose internals cannot be observed) is an open question we also are investigating.</p>
   </div>
 
-  <p class="proxy"><b>Is the next predicted word a proxy for clinical reasoning?</b> Fairly
-    asked: when the model&rsquo;s next word is &ldquo;ice cream,&rdquo; the idea of acid reflux
-    might still sit in its wider context, unspoken. Our claim is deliberately narrow. The next
-    token is where the model commits &mdash; in a deployed system it <em>is</em> the advice, and
-    every later word is conditioned on it &mdash; so if patient wording makes the clinical answer
-    less probable at that first, decisive step, that is a real, measurable, safety-relevant
-    shift. The circuit view (step&nbsp;5) then shows the shift is mechanical, not cosmetic: the
-    medical features themselves fire less.</p>
+  <p class="proxy"><b>Is the next predicted word a proxy for clinical reasoning?</b> Our claim is narrow. The next token is where the model commits (in a deployed system it <em>is</em> the advice, and every later word is conditioned on that advice) so if patient wording makes the clinical answer less probable that is a measurable, safety-relevant shift. The circuit view (step&nbsp;5) then shows the shift is mechanical because the medical features themselves fire less.</p>
 
   <section>
     <p class="step-no">1 · A doctor converges</p>
     <h2>Three phrasings, one interpretation</h2>
-    <p>Patients rarely use words that appear in medical textbooks. A clinician understands multiple different framings, recognizes the same stomach problem, and reaches the same recommendation.</p>
+    <p>Patients rarely use words that appear in medical textbooks. A clinician can understand multiple different wordings, recognizes the same stomach problem, and reaches the same recommendation.</p>
     <div class="fig" role="img" aria-label="Three patient phrasings converge through a clinician to one recommendation: an antacid.">
     <svg viewBox="0 0 800 190">
       <text x="0" y="28" class="sv-q">“I have <tspan style="fill:var(--teal);font-weight:700">acid reflux</tspan>.”</text>
@@ -224,7 +210,7 @@
   <section>
     <p class="step-no">2 · The model diverges</p>
     <h2>Three phrasings, three different answers</h2>
-    <p>We gave a language model the same sentences and found its most likely next word. Under the clinical phrasing, the top next word is a medical answer. Under the patient phrasing, it is a food word, even in the one that uses the clinical term.</p>
+    <p>We gave a language model the same sentences and identified its most likely next word. Under the clinical phrasing, the top next word is a medical answer. Under the patient phrasing, it is a food word, even in the one that uses the clinical term.</p>
     <div class="fig" role="img" aria-label="The same three phrasings pass through a language model and come out as three different answers: antacid, ice cream, and apple.">
     <svg viewBox="0 0 800 190">
       <text x="0" y="28" class="sv-q">“I have <tspan style="fill:var(--teal);font-weight:700">acid reflux</tspan>.”</text>
@@ -243,7 +229,7 @@
       <text x="552" y="147" class="sv-a" fill="#b45309">apple</text>
     </svg>
     </div>
-    <p class="cap">the wording chooses the answer — measured on gemma-2-2b · see the traces: <a href="../modes/simulated/pairs_20260707T171223Z/index_12.html">stomach’s on fire</a> · <a href="../modes/simulated/dialects_20260708T011831Z/index_01.html">dyspepsia ladder</a></p>
+    <p class="cap">the wording chooses the answer — measured on gemma-2-2b ·</p>
   </section>
 
   <section>
@@ -265,7 +251,7 @@
   <section>
     <p class="step-no">4 · What we measure</p>
     <h2>Two numbers per sentence pair</h2>
-    <p><b>How far the right answer's probability falls</b> when the wording turns casual, and <b>whether the top answer changes</b>. When it changes to a word lower on the care ladder, like "inhaler" becoming "shirt" in step 3, we count a downgrade.</p>
+    <p><b>How far the right answer's probability falls</b> when the wording turns casual, and <b>whether the top answer changes</b>. When it changes to a word lower on the care urgency tiers we created, (like "inhaler" becoming "shirt" in step 3) we count a downgrade.</p>
     <div class="ladder-fig" id="care-ladder"><span class="ladder-pend">figure pending: the urgency measurements have not loaded</span></div>
     <p class="cap" id="ladder-cap" hidden></p>
   </section>
@@ -273,20 +259,10 @@
   <section>
     <p class="step-no">5 · Look inside</p>
     <h2>Circuit tracing photographs the reasoning</h2>
-    <p>A trace is a look inside the guess you watched in step&nbsp;3 &mdash; think of it as an
-      <b>fMRI for the model</b>. An fMRI shows which regions of a brain light up during a task;
-      a circuit trace shows which internal concepts fire as the model reads, in the instant
-      before it commits to a word. In the sketch below, the clinical term lights up medical
-      concepts (teal); the casual phrase lights up everyday ones (dark).</p>
+    <p>A trace is a look inside the guess you see in step&nbsp;3. A circuit trace shows which internal concepts fire as the model reads, in the instant before it commits to a word. In the sketch below, the clinical term lights up medical concepts (teal); the patient term lights up more everyday ones (dark).</p>
     <details class="explain">
       <summary>Read more about circuit traces</summary>
-      <p>Inside the model, small units called "features" switch on as it reads.
-      Some respond to medical ideas; others to everyday ones. A circuit trace records
-      which features fired and how strongly each fed the predicted next word.
-      Clinical wording lights the medical features; patient wording lights the
-      everyday ones. A person chatting with a model never sees any of this: the
-      trace is a diagnostic that researchers compute from the model's internals
-      after it answers.</p>
+      <p>Inside the model, small units called "features" switch on as it reads. Some respond to medical ideas; others to non-medical ones. A circuit trace records which features fired and how strongly each fed the predicted next word. Clinical wording lights the medical features; patient wording lights the non-medical ones. The trace is a diagnostic that researchers compute from the model's internals after it answers.</p>
     </details>
     <div class="fig" role="img" aria-label="Two parallel tracks of feature nodes reading left to right through the network, from early layers to deep layers, each with a scatter of faint weak-firing features behind a handful of strong ones. The clinical term dyspepsia lights up teal medical nodes and leads to antacid. The casual phrase stomach on fire lights up dark everyday nodes and leads to ice cream.">
     <svg viewBox="0 0 720 136">
@@ -339,13 +315,9 @@
   <section>
     <p class="step-no">6 · The patch</p>
     <h2>A translation layer, for now</h2>
-    <p>The patch is a <b>clinical translator</b>. It sits between the patient and the model and,
+    <p>A temporary solution is a <b>clinical translator</b>. It sits between the patient and the model and,
       before the model ever answers, rewrites the casual sentence into medical wording &mdash;
-      &ldquo;my stomach&rsquo;s on fire&rdquo; becomes &ldquo;I have acid reflux.&rdquo;
-      <b>How:</b> a second language model does the rewrite, swapping the everyday phrasing for
-      the clinical term. <b>Why:</b> if restoring the medical vocabulary restores the
-      model&rsquo;s clinical answer, then the wording &mdash; not a gap in what the model knows
-      &mdash; was what made it unsafe.</p>
+      &ldquo;my stomach&rsquo;s on fire&rdquo; becomes &ldquo;I have acid reflux.&rdquo;</p>
     <div class="fig" role="img" aria-label="Without translation: the two everyday phrasings go straight into the language model and come out as ice cream at 29% and apple.">
     <svg viewBox="0 0 800 150">
       <text x="0" y="14" class="sv-m" style="letter-spacing:.14em;text-transform:uppercase">without translation</text>
@@ -379,15 +351,13 @@
       <text x="680" y="79" class="sv-a" fill="#0f766e">antacid 31%</text>
     </svg>
     </div>
-    <p>A patch, not a permanent solution: translation fixed 8 of the 20 hardest cases, left 7 unchanged, and three times made things worse. <a href="../translation/">See the live translation traces</a>.</p>
+    <p> <a href="../translation/">See the live translation traces</a>.</p>
   </section>
 
   <section>
     <p class="step-no">7 · The lasting fix</p>
     <h2>Measure, mend, maintain: a cycle, not a patch</h2>
-    <p>No single fix closes this gap. Language evolves; dialects, slang, and
-      communities change, and a test built once goes stale. The method has to be a
-      loop: measure, mend, maintain, repeat.</p>
+    <p>No single fix closes this gap. Language evolves; dialects, slang, and communities change, and a test built once goes stale. The method has to be a loop.</p>
     <div class="cycle-svg">
       <svg viewBox="0 0 360 268" role="img"
         aria-label="A circular three-stage cycle. Measure leads to mend, labelled penalty quantified. Mend leads to maintain, labelled baseline set. A teal return curve labelled language drifts, re-measure leads from maintain back to measure.">
@@ -429,7 +399,7 @@
         </text>
       </svg>
     </div>
-    <p class="cap cyc-hint">Select a stage on the cycle — <b>Measure</b>, <b>Mend</b>, or <b>Maintain</b> — to read its steps.</p>
+    <p class="cap cyc-hint"></p>
     <div class="cycle">
       <div class="cyc-panel" id="panel-measure" role="tabpanel" aria-labelledby="tab-measure">
         <ul>
@@ -449,7 +419,7 @@
         <ul>
           <li>Re-run the audit on a schedule.</li>
           <li>Refresh the phrase sets and urgency of recommendations with clinician and community review.</li>
-          <li>Stress-test the edges with supplementary sets. A small emergency-scenario set (7 pairs) is generated and being measured; further emergency rounds are paused. Kept outside the pre-registered run.</li>
+          <li>Stress-test the edges with supplementary sets.</li>
           <li><span class="next">next</span>More edge sets: alarm-sounding wording, misspellings.</li>
           <li>Watch the circuit for drift as models update.</li>
         </ul>
@@ -473,13 +443,11 @@
     The clinician panel is illustrative, not a measurement.
   </div>
   <div class="endnote" style="border-top:1px solid var(--ink);margin-top:42px;padding-top:14px">
-    <p style="font-family:var(--mono);font-size:12px;line-height:1.8;color:var(--muted);margin:0 0 10px">SIMULATED DATA: the sentence pairs measured across this site are written by an LLM and checked automatically. The scenarios are simulated; the testing is real. The phrase dataset is the exception: hand-built from real patient language and measured by hand.</p>
+    <p style="font-family:var(--mono);font-size:12px;line-height:1.8;color:var(--muted);margin:0 0 10px">SIMULATED DATA: the sentence pairs measured across this site are written by an LLM and checked automatically.</p>
     <footer style="font-family:var(--mono);font-size:11px;line-height:1.9;color:var(--muted)">
       Built with the <a href="https://github.com/michaeldgreenphd/patientwords-engine">patientwords-engine</a> pipeline
       on <a href="https://neuronpedia.org">Neuronpedia</a> ·
       attribution graphs by <a href="https://github.com/safety-research/circuit-tracer">circuit-tracer</a> ·
-      features from <a href="https://huggingface.co/google/gemma-scope-2b-pt-transcoders">Gemma Scope</a> transcoders<br>
-      set in Iowan Old Style &amp; ui-monospace · every number on this page traces to a data file <a href="https://github.com/michaeldgreenphd/patientwords/tree/main/data">in this repository</a>
     </footer>
   </div>
 </main>
