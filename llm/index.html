@@ -300,6 +300,12 @@
         b.addEventListener('click',function(){
           if(attempt===k)return;
           attempt=k; renderAttempts(); render();
+          // the responses are what changed - bring them into view if they aren't
+          var mr=document.querySelector('#sc-body .model-row');
+          if(mr){
+            var r=mr.getBoundingClientRect();
+            if(r.top>window.innerHeight*0.9||r.top<0)mr.scrollIntoView({behavior:'smooth',block:'start'});
+          }
         });
         row.insertBefore(b,note);
       })(k);
@@ -352,6 +358,7 @@
       wrap.appendChild(el('p','resp-text missing','— attempt '+attempt+' not archived for this cell'));
     }
     var bits=[];
+    if(maxK>1)bits.push('attempt '+attempt); // visible confirmation the switcher changed this cell
     var served=(s&&s.model_returned)||mb.model_returned;
     if(served)bits.push('served as '+served);
     if(s&&s.sent_utc)bits.push(String(s.sent_utc).slice(0,10));
