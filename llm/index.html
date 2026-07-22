@@ -52,6 +52,13 @@
   /* pending state */
   .pending{border:1px solid var(--hairline);border-left:3px solid var(--structural);
     padding:14px 16px;font-family:var(--mono);font-size:12.5px;line-height:1.8;color:var(--muted);margin:26px 0}
+  /* summary figures: dumbbell rows, hairline structure, direct labels */
+  .fig{margin:18px 0 4px}
+  .fig-cap{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--ink);margin:0 0 2px}
+  .fig-cap .fig-sub{font-weight:400;letter-spacing:.06em;text-transform:none;color:var(--muted)}
+  .fig svg{display:block;width:100%;height:auto;max-width:680px}
+  .fig-pending{font-family:var(--mono);font-size:11.5px;color:var(--muted);margin:4px 0 0}
   /* scenario pager: text-only (Tufte) */
   .sc-pager{font-family:var(--mono);font-size:12px;margin:22px 0 6px;display:flex;gap:12px;
     flex-wrap:wrap;align-items:baseline}
@@ -173,6 +180,17 @@
   </div>
 
   <section id="llm-viewer" hidden aria-live="polite">
+    <div id="figs" hidden>
+      <figure class="fig">
+        <figcaption class="fig-cap">Words per response <span class="fig-sub">mean per model · clinical vs everyday patient wording</span></figcaption>
+        <div id="fig-words-body"></div>
+      </figure>
+      <figure class="fig">
+        <figcaption class="fig-cap">Care-urgency of the advice <span class="fig-sub" id="fig-tiers-sub">coded tier, same scale per model</span></figcaption>
+        <div id="fig-tiers-body"></div>
+        <p class="fig-pending" id="fig-tiers-pending">Appears once each response is coded against the clinician-reviewed rubric.</p>
+      </figure>
+    </div>
     <nav class="sc-pager" id="sc-pager" aria-label="Scenario pages"></nav>
     <div class="chip-g" id="attempt-row" role="group" aria-label="Attempt" hidden>
       <span class="chip-lbl">attempt</span>
@@ -374,6 +392,121 @@
     render();
   }
 
+  function shortName(spec){
+    var m=String(spec).split(':').pop();
+    var i=m.lastIndexOf('/');
+    return i>=0?m.slice(i+1):m;
+  }
+
+  // dumbbell rows: one row per model, clinical dot (green) vs patient dot (ink),
+  // hairline connector, values printed at the dots — no axis, no legend box
+  function svgDumbbell(rows,opts){
+    opts=opts||{};
+    var NS='http://www.w3.org/2000/svg';
+    var W=680,L=190,R=640,rowH=27,top=20,H=top+rows.length*rowH+4;
+    var vals=[];
+    rows.forEach(function(r){if(r.a!=null)vals.push(r.a);if(r.b!=null)vals.push(r.b);});
+    if(!vals.length)return null;
+    var lo=(opts.min!=null)?opts.min:(opts.zero?0:Math.min.apply(null,vals));
+    var hi=(opts.max!=null)?opts.max:Math.max.apply(null,vals)*1.06;
+    function x(v){return L+(v-lo)/((hi-lo)||1)*(R-L);}
+    function fmt(v){return opts.decimals?v.toFixed(1):String(Math.round(v));}
+    var svg=document.createElementNS(NS,'svg');
+    svg.setAttribute('viewBox','0 0 '+W+' '+H);
+    svg.setAttribute('role','img');
+    if(opts.label)svg.setAttribute('aria-label',opts.label);
+    function n(tag,attrs,text){
+      var e=document.createElementNS(NS,tag);
+      for(var k in attrs)e.setAttribute(k,attrs[k]);
+      if(text!=null)e.textContent=text;
+      return e;
+    }
+    rows.forEach(function(r,i){
+      var y=top+i*rowH+rowH/2;
+      var lbl=n('text',{x:0,y:y+4,'font-family':'ui-monospace,monospace','font-size':'12px',fill:'var(--ink,#1c1c19)'},r.label);
+      if(r.note){
+        var ts=document.createElementNS(NS,'tspan');
+        ts.setAttribute('fill','var(--muted,#6d6c66)');ts.setAttribute('font-size','10px');
+        ts.textContent=' '+r.note;
+        lbl.appendChild(ts);
+      }
+      svg.appendChild(lbl);
+      if(r.a==null&&r.b==null)return;
+      var xa=r.a!=null?x(r.a):null, xb=r.b!=null?x(r.b):null;
+      if(xa!=null&&xb!=null)svg.appendChild(n('line',{x1:xa,y1:y,x2:xb,y2:y,stroke:'var(--structural,#c3c9d2)','stroke-width':1}));
+      if(xa!=null)svg.appendChild(n('circle',{cx:xa,cy:y,r:3.5,fill:'var(--clinical,#15803d)'}));
+      if(xb!=null)svg.appendChild(n('circle',{cx:xb,cy:y,r:3.5,fill:'var(--patient,#111827)'}));
+      // value labels sit outside their dots
+      if(xa!=null&&xb!=null){
+        var left=Math.min(xa,xb),right=Math.max(xa,xb);
+        var lv=(xa<=xb)?r.a:r.b, rv=(xa<=xb)?r.b:r.a;
+        svg.appendChild(n('text',{x:left-7,y:y+4,'text-anchor':'end','font-family':'ui-monospace,monospace','font-size':'10.5px',fill:'var(--muted,#6d6c66)'},fmt(lv)));
+        svg.appendChild(n('text',{x:right+7,y:y+4,'text-anchor':'start','font-family':'ui-monospace,monospace','font-size':'10.5px',fill:'var(--muted,#6d6c66)'},fmt(rv)));
+      }else{
+        var xo=(xa!=null)?xa:xb, vo=(r.a!=null)?r.a:r.b;
+        svg.appendChild(n('text',{x:xo+7,y:y+4,'text-anchor':'start','font-family':'ui-monospace,monospace','font-size':'10.5px',fill:'var(--muted,#6d6c66)'},fmt(vo)));
+      }
+      // direct labels on the first row instead of a legend — each label stays on ITS dot
+      if(i===0&&xa!=null&&xb!=null){
+        var apart=Math.abs(xa-xb)>=70;
+        var ca={x:xa,anchor:'middle'},pa={x:xb,anchor:'middle'};
+        if(!apart){
+          if(xa<=xb){ca={x:xa-7,anchor:'end'};pa={x:xb+7,anchor:'start'};}
+          else{ca={x:xa+7,anchor:'start'};pa={x:xb-7,anchor:'end'};}
+        }
+        svg.appendChild(n('text',{x:ca.x,y:y-9,'text-anchor':ca.anchor,
+          'font-family':'ui-monospace,monospace','font-size':'10px',
+          fill:'var(--clinical,#15803d)'},'clinical'));
+        svg.appendChild(n('text',{x:pa.x,y:y-9,'text-anchor':pa.anchor,
+          'font-family':'ui-monospace,monospace','font-size':'10px',
+          fill:'var(--patient,#111827)'},'patient'));
+      }
+    });
+    return svg;
+  }
+
+  function renderFigs(){
+    var ms=data.model_summary;
+    if(!ms||!ms.length)return;
+    var maxN=0;
+    ms.forEach(function(m){
+      maxN=Math.max(maxN,(m.clinical&&m.clinical.n)||0,(m.patient&&m.patient.n)||0);
+    });
+    var wrows=[],trows=[];
+    ms.forEach(function(m){
+      var c=m.clinical||{},p=m.patient||{};
+      if(c.mean_words!=null||p.mean_words!=null){
+        var note=null;
+        if(Math.min(c.n||0,p.n||0)<maxN)note='n='+((c.n===p.n)?c.n:(c.n+'·'+p.n));
+        wrows.push({label:shortName(m.model),a:c.mean_words,b:p.mean_words,note:note});
+      }
+      if(c.tier_mean_rank!=null||p.tier_mean_rank!=null){
+        trows.push({label:shortName(m.model),a:c.tier_mean_rank,b:p.tier_mean_rank,note:null});
+      }
+    });
+    var any=false;
+    if(wrows.length){
+      var w=svgDumbbell(wrows,{zero:true,label:'Mean words per response by model, clinical versus patient wording'});
+      if(w){document.getElementById('fig-words-body').appendChild(w);any=true;}
+    }
+    if(trows.length&&data.tier_order){
+      var to=data.tier_order;
+      var t=svgDumbbell(trows,{min:1,max:to.length,decimals:true,
+        label:'Mean coded care-urgency tier by model, clinical versus patient wording'});
+      if(t){
+        document.getElementById('fig-tiers-body').appendChild(t);
+        document.getElementById('fig-tiers-pending').hidden=true;
+        document.getElementById('fig-tiers-sub').textContent=
+          'mean coded tier · 1='+to[0]+' … '+to.length+'='+to[to.length-1]+
+          (data.rubric_version?(' · rubric '+data.rubric_version):'');
+        any=true;
+      }
+    }else if(wrows.length){
+      any=true; // words figure plus the pending line for tiers
+    }
+    if(any)document.getElementById('figs').hidden=false;
+  }
+
   function provRow(list,label,valueNode){
     list.appendChild(el('dt',null,label));
     var dd=el('dd');
@@ -433,6 +566,7 @@
       maxK=computeMaxK();
       current=scenarioFromHash();
       renderAttempts();
+      renderFigs();
       render();
       renderProv();
       window.addEventListener('hashchange',function(){var i=scenarioFromHash();if(i!==current){current=i;render();}});
