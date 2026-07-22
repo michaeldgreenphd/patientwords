@@ -312,8 +312,7 @@
       <li class="t-offtarget"><b>Off-target</b> &mdash; fires on something the casual wording
         dragged in, not the medicine. Say a patient writes &ldquo;my stomach&rsquo;s on
         fire&rdquo;: a feature for <em>heat</em> or <em>spicy food</em> lights up and tugs the
-        next word toward &ldquo;ice cream.&rdquo; That feature is off-target from identifying a medical situation. It is the
-        mechanism of the wording gap.</li>
+        next word toward &ldquo;ice cream.&rdquo; That feature is off-target &mdash; features like it produce the wording gap.</li>
       <li class="t-structural"><b>Structural</b> &mdash; scaffolding for syntax, position, and
         punctuation. It fires in every trace since it is a part of complete sentences.</li>
     </ul>
@@ -534,7 +533,7 @@
     </p>
     </details>
     <p>
-      The depth readout splits the wording gap into two failure kinds. When the answer
+      The depth readout splits the wording gap into two cases. When the answer
       never forms, translation supplies the clinical wording up front. When the answer
       forms and is lost, translation recovers work the model already did.
     </p>
@@ -668,6 +667,7 @@
     <p class="step-no">Limitations</p>
     <h2>What this evidence does and does not show</h2>
     <p>This project measures how the probability of a single next word changes when clinical wording is replaced by patient wording. That is not an observed clinical outcome.</p>
+    <p>A gap is not necessarily bad. The model may be tracking how people actually write, or it may be giving less clinical information to people who write informally. This site measures the gap. Telling the two apart requires testing the advice itself. Either way, a person who uses everyday wording gets different predictions from the model.</p>
     <ul class="limits">
       <li><b>One small model carries the circuit evidence.</b> Every graph here comes from gemma-2-2b, chosen because its transcoders are public. The behavioral checks on the other seven models measure next-word probabilities only.</li>
       <li><b>Attribution graphs are an interpretive tool.</b> They reconstruct the model’s computation through features and prune heavily; error nodes absorb what’s missed.</li>
