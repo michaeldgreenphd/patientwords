@@ -63,6 +63,14 @@
   .sc-pager .state{color:var(--muted)}
   .sc-meta{font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--muted);margin:2px 0 18px}
   .sc-meta b{color:var(--ink);font-weight:600}
+  /* attempt switcher: site chip conventions */
+  .chip-g{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:4px 0 14px}
+  .chip-lbl{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-right:4px}
+  .chip{font-family:var(--mono);font-size:11px;color:var(--muted);background:#fff;
+    border:1px solid var(--hairline);padding:4px 10px;cursor:pointer;border-radius:2px}
+  .chip:hover{color:var(--ink);border-color:var(--muted)}
+  .chip.on{color:var(--clinical);border-color:var(--clinical);font-weight:600}
+  .chip-note{font-family:var(--mono);font-size:10.5px;color:var(--muted);margin-left:6px}
   /* arm sections */
   .arm{margin:0 0 30px}
   .arm-label{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.2em;
@@ -133,7 +141,7 @@
   <p class="dateline">Advice arm <span class="mode">· full model responses, verbatim</span></p>
   <h1>LLM responses</h1>
   <p class="subtitle">The same situation, asked two ways, across assistants.</p>
-  <p class="explainer">Each scenario below is one clinical situation phrased two ways. The clinical wording comes first, with every model's response beneath it; the everyday patient wording follows, with the same models' responses. Responses are shown verbatim — one sample per model, with the full sample sets archived in the engine repository. Where a translation step ran, the machine-translated wording and its responses appear third.</p>
+  <p class="explainer">Each scenario below is one clinical situation phrased two ways. The clinical wording comes first, with every model's response beneath it; the everyday patient wording follows, with the same models' responses. Responses are shown verbatim. Each model was asked the same prompt several times — the attempt switcher moves between those repeat draws. Where a translation step ran, the machine-translated wording and its responses appear third.</p>
 
   <div class="sample-banner" id="sample-banner" hidden>SAMPLE DATA — synthetic placeholder payload for layout verification only. Nothing on this page is a measurement.</div>
 
@@ -145,6 +153,10 @@
 
   <section id="llm-viewer" hidden aria-live="polite">
     <nav class="sc-pager" id="sc-pager" aria-label="Scenario pages"></nav>
+    <div class="chip-g" id="attempt-row" role="group" aria-label="Attempt" hidden>
+      <span class="chip-lbl">attempt</span>
+      <span class="chip-note">same prompt, re-asked — switching shows how much each model's answer moves</span>
+    </div>
     <p class="sc-meta" id="sc-meta"></p>
     <div id="sc-body"></div>
     <nav class="sc-pager" id="sc-pager2" aria-label="Scenario pages (bottom)"></nav>
@@ -214,41 +226,80 @@
     node.appendChild(next);
   }
 
-  function respBlock(r,K){
-    var wrap=el('div','resp');
-    var head=el('div','resp-head');
-    head.appendChild(el('span','resp-model',dash(r.model)));
-    if(r.tier){var t=el('span','resp-tier');t.appendChild(document.createTextNode('coded tier: '));var b=el('b',null,r.tier);t.appendChild(b);head.appendChild(t);}
-    if(r.refusal)head.appendChild(el('span','resp-refusal','refusal'));
-    wrap.appendChild(head);
-    if(typeof r.text==='string'&&r.text){
-      wrap.appendChild(el('p','resp-text',r.text));
-    }else{
-      wrap.appendChild(el('p','resp-text missing','— no response archived for this cell'));
+  var attempt=1, maxK=1;
+
+  function computeMaxK(){
+    var m=1;
+    data.scenarios.forEach(function(s){
+      ['clinical','patient','translated'].forEach(function(a){
+        var arm=s[a]; if(!arm||!arm.responses)return;
+        arm.responses.forEach(function(mb){
+          (mb.samples||[]).forEach(function(sm){ if(sm.k&&sm.k>m)m=sm.k; });
+        });
+      });
+    });
+    return m;
+  }
+
+  function renderAttempts(){
+    var row=document.getElementById('attempt-row');
+    if(maxK<2){row.hidden=true;return;}
+    // rebuild the numbered chips (keep the label + note nodes)
+    Array.prototype.slice.call(row.querySelectorAll('button')).forEach(function(b){row.removeChild(b);});
+    var note=row.querySelector('.chip-note');
+    for(var k=1;k<=maxK;k++){
+      (function(k){
+        var b=el('button','chip'+(k===attempt?' on':''),String(k));
+        b.type='button';
+        b.setAttribute('aria-pressed',k===attempt?'true':'false');
+        b.addEventListener('click',function(){
+          if(attempt===k)return;
+          attempt=k; renderAttempts(); render();
+        });
+        row.insertBefore(b,note);
+      })(k);
     }
-    var bits=[];
-    var k=(r.sample_k!=null)?r.sample_k:null, nk=(r.n_samples!=null)?r.n_samples:(K||null);
-    if(k!=null&&nk!=null)bits.push('sample '+k+' of '+nk);
-    if(r.model_returned)bits.push('served as '+r.model_returned);
-    if(r.sent_utc)bits.push(String(r.sent_utc).slice(0,10));
-    if(bits.length)wrap.appendChild(el('p','resp-foot',bits.join(' · ')));
+    row.hidden=false;
+  }
+
+  function respBlock(mb){
+    var wrap=el('div','resp');
+    var samples=mb.samples||[];
+    var s=null;
+    for(var i=0;i<samples.length;i++){if(samples[i].k===attempt){s=samples[i];break;}}
+    var head=el('div','resp-head');
+    head.appendChild(el('span','resp-model',dash(mb.model)));
+    if(s&&s.tier){var t=el('span','resp-tier');t.appendChild(document.createTextNode('coded tier: '));var b=el('b',null,s.tier);t.appendChild(b);head.appendChild(t);}
+    if(s&&s.refusal)head.appendChild(el('span','resp-refusal','refusal'));
+    wrap.appendChild(head);
+    if(s&&typeof s.text==='string'&&s.text){
+      wrap.appendChild(el('p','resp-text',s.text));
+    }else if(s){
+      wrap.appendChild(el('p','resp-text missing','— no response archived for this cell'));
+    }else{
+      wrap.appendChild(el('p','resp-text missing','— attempt '+attempt+' not archived for this cell'));
+    }
+    var bits=['attempt '+attempt+' of '+maxK];
+    var served=(s&&s.model_returned)||mb.model_returned;
+    if(served)bits.push('served as '+served);
+    if(s&&s.sent_utc)bits.push(String(s.sent_utc).slice(0,10));
+    wrap.appendChild(el('p','resp-foot',bits.join(' · ')));
     return wrap;
   }
 
-  function armSection(cls,label,arm,K){
+  function armSection(cls,label,arm){
     if(!arm||(!arm.message&&!(arm.responses&&arm.responses.length)))return null;
     var sec=el('section','arm '+cls);
     sec.appendChild(el('p','arm-label',label));
     if(arm.message)sec.appendChild(el('p','ask',arm.message));
     var rs=arm.responses||[];
     if(!rs.length){sec.appendChild(el('p','resp-text missing','— no responses archived yet'));}
-    for(var i=0;i<rs.length;i++)sec.appendChild(respBlock(rs[i],K));
+    for(var i=0;i<rs.length;i++)sec.appendChild(respBlock(rs[i]));
     return sec;
   }
 
   function render(){
     var s=data.scenarios[current];
-    var K=data.run?data.run.samples_per_cell:null;
     renderPager(document.getElementById('sc-pager'));
     renderPager(document.getElementById('sc-pager2'));
     var meta=document.getElementById('sc-meta');
@@ -257,9 +308,9 @@
     if(s.topic)meta.appendChild(document.createTextNode(' · topic: '+s.topic));
     var body=document.getElementById('sc-body');
     body.textContent='';
-    var a1=armSection('arm-c','Clinical wording',s.clinical,K); if(a1)body.appendChild(a1);
-    var a2=armSection('arm-p','Everyday patient wording',s.patient,K); if(a2)body.appendChild(a2);
-    var a3=armSection('arm-t','After LLM translation of the patient wording',s.translated,K); if(a3)body.appendChild(a3);
+    var a1=armSection('arm-c','Clinical wording',s.clinical); if(a1)body.appendChild(a1);
+    var a2=armSection('arm-p','Everyday patient wording',s.patient); if(a2)body.appendChild(a2);
+    var a3=armSection('arm-t','After LLM translation of the patient wording',s.translated); if(a3)body.appendChild(a3);
   }
 
   function go(i){
@@ -324,7 +375,9 @@
       if(sample||d._sample)document.getElementById('sample-banner').hidden=false;
       pending.hidden=true;
       viewer.hidden=false;
+      maxK=computeMaxK();
       current=scenarioFromHash();
+      renderAttempts();
       render();
       renderProv();
       window.addEventListener('hashchange',function(){var i=scenarioFromHash();if(i!==current){current=i;render();}});
