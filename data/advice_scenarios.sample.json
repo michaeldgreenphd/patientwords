@@ -1,0 +1,71 @@
+{
+  "_sample": true,
+  "_readme": "SYNTHETIC layout-verification payload for llm/index.html (loaded only via ?sample=1, always bannered). Nothing here is a measurement. The live file, data/advice_scenarios.json, is written by patientwords-engine scripts/export_advice_scenarios.py from the hash-chained advice archive.",
+  "generated_utc": "2026-07-22T00:00:00Z",
+  "engine_sha": "sample000",
+  "source": {
+    "stimuli_file": "data/advice/stimuli_SAMPLE.json",
+    "responses_file": "data/advice/responses_stimuli_SAMPLE.jsonl",
+    "judgments_file": "data/advice/judgments_stimuli_SAMPLE.jsonl",
+    "archive_url": null
+  },
+  "run": {
+    "first_sent_utc": "2026-07-22T00:00:00Z",
+    "last_sent_utc": "2026-07-22T00:30:00Z",
+    "n_calls": 18,
+    "cost_usd": 0.12,
+    "cost_per_scenario": 0.04,
+    "samples_per_cell": 3,
+    "temperature": 1.0,
+    "models": [
+      {"spec": "example-a:demo-model", "provider": "example-a", "model_returned": "demo-model-0000", "n_responses": 9},
+      {"spec": "example-b:demo-model", "provider": "example-b", "model_returned": "demo-model-0000", "n_responses": 9}
+    ]
+  },
+  "chain_head": "samplechainheadsamplechainheadsamplechainheadsamplechainhead0000",
+  "rubric_version": "sample",
+  "tier_order": ["self_care", "routine", "urgent", "emergency"],
+  "scenarios": [
+    {
+      "id": "sample#1",
+      "topic": "sample topic",
+      "clinical": {
+        "message": "Sample clinical wording for layout verification — scenario one. What should I do?",
+        "responses": [
+          {"model": "example-a:demo-model", "provider": "example-a", "text": "This is sample response text used to verify the page layout. It is not a model output. It runs a few sentences long so the card's line wrapping, spacing, and footer row can be checked at realistic length.", "tier": "routine", "refusal": false, "sample_k": 1, "n_samples": 3, "sent_utc": "2026-07-22T00:01:00Z", "model_returned": "demo-model-0000"},
+          {"model": "example-b:demo-model", "provider": "example-b", "text": "Second sample response for layout verification only.", "tier": "urgent", "refusal": false, "sample_k": 1, "n_samples": 3, "sent_utc": "2026-07-22T00:02:00Z", "model_returned": "demo-model-0000"}
+        ]
+      },
+      "patient": {
+        "message": "Sample everyday wording for layout verification — scenario one. What should I do?",
+        "responses": [
+          {"model": "example-a:demo-model", "provider": "example-a", "text": "Sample response under the everyday wording, for layout verification only.", "tier": "self_care", "refusal": false, "sample_k": 1, "n_samples": 3, "sent_utc": "2026-07-22T00:03:00Z", "model_returned": "demo-model-0000"},
+          {"model": "example-b:demo-model", "provider": "example-b", "text": null, "tier": null, "refusal": false, "sample_k": 1, "n_samples": 3, "sent_utc": null, "model_returned": null}
+        ]
+      },
+      "translated": {
+        "message": "Sample machine-translated wording for layout verification. What should I do?",
+        "responses": [
+          {"model": "example-a:demo-model", "provider": "example-a", "text": "Sample response under the translated wording, for layout verification only.", "tier": "routine", "refusal": false, "sample_k": 1, "n_samples": 3, "sent_utc": "2026-07-22T00:04:00Z", "model_returned": "demo-model-0000"}
+        ]
+      }
+    },
+    {
+      "id": "sample#2",
+      "topic": null,
+      "clinical": {
+        "message": "Sample clinical wording — scenario two, exercising the pager. What should I do?",
+        "responses": [
+          {"model": "example-a:demo-model", "provider": "example-a", "text": "Sample response, scenario two, layout verification only.", "tier": "routine", "refusal": false, "sample_k": 1, "n_samples": 3, "sent_utc": "2026-07-22T00:05:00Z", "model_returned": "demo-model-0000"}
+        ]
+      },
+      "patient": {
+        "message": "Sample everyday wording — scenario two, exercising the pager. What should I do?",
+        "responses": [
+          {"model": "example-a:demo-model", "provider": "example-a", "text": "Sample refusal-flag exercise: this placeholder is marked as a refusal to verify the tag renders.", "tier": "self_care", "refusal": true, "sample_k": 1, "n_samples": 3, "sent_utc": "2026-07-22T00:06:00Z", "model_returned": "demo-model-0000"}
+        ]
+      },
+      "translated": null
+    }
+  ]
+}

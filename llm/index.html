@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LLM responses — PatientWords</title>
+<meta name="description" content="Full assistant responses to the same clinical situation asked two ways — clinical wording and everyday patient wording — across consumer LLMs, shown verbatim with provenance.">
+<link rel="canonical" href="https://michaeldgreenphd.github.io/patientwords/llm/">
+<meta name="theme-color" content="#faf9f5">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23faf9f5'/%3E%3Crect x='9' y='9' width='30' height='30' fill='%23111827'/%3E%3Crect x='25' y='25' width='30' height='30' fill='%2315803d'/%3E%3C/svg%3E">
+<style>
+  :root{
+    --paper:#faf9f5; --ink:#1c1c19; --patient:#111827; --clinical:#15803d;
+    --penalty:#b4483d; --muted:#6d6c66; --structural:#c3c9d2; --hairline:#dcdad2;
+    --serif:'Iowan Old Style','Palatino Linotype',Palatino,'Book Antiqua',Georgia,serif;
+    --mono:ui-monospace,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace;
+  }
+  html{background:var(--paper)}
+  body{margin:0;padding:0;background:var(--paper);color:var(--ink);
+    font-family:var(--serif);font-size:17px;line-height:1.62;
+    -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+  main{max-width:1100px;margin:0 auto;padding:0 22px 56px}
+  a{color:inherit}
+  a:focus-visible,button:focus-visible{outline:2px solid var(--clinical);outline-offset:3px;border-radius:1px}
+  .skip{position:absolute;left:-9999px;top:0;background:var(--paper);color:var(--ink);padding:8px 14px;border:1px solid var(--ink);z-index:10}
+  .skip:focus{left:8px}
+  ::selection{background:#dbe9df}
+  .masthead{max-width:1100px;margin:0 auto;padding:20px 22px 0}
+  .masthead-row{display:flex;align-items:baseline;justify-content:space-between;
+    flex-wrap:wrap;gap:8px 24px;padding:10px 0 12px}
+  .wordmark{font-family:var(--serif);font-size:19px;font-weight:600;letter-spacing:.02em;text-decoration:none}
+  .wordmark .pw-p{color:var(--patient)}
+  .wordmark .pw-w{color:var(--clinical);font-style:italic}
+  .wordmark .pw-w::before{content:'·';color:var(--muted);font-style:normal;font-weight:400;margin:0 3px 0 2px}
+  .masthead nav{display:flex;flex-wrap:wrap;gap:6px 20px}
+  .masthead nav a{font-family:var(--mono);font-size:11px;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--muted);text-decoration:none;padding:2px 0}
+  .masthead nav a:hover{color:var(--ink);text-decoration:underline;text-underline-offset:4px}
+  .masthead nav a[aria-current=page]{color:var(--ink);border-bottom:1px solid var(--ink)}
+  .masthead nav a:nth-child(3),.masthead nav a:nth-child(9){margin-right:2vw}
+  .rule-heavy{border:0;border-top:2px solid var(--ink);margin:0}
+  .rule-fine{border:0;border-top:1px solid var(--hairline);margin:3px 0 0}
+  .dateline{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--clinical);font-weight:600;margin:34px 0 14px}
+  .dateline .mode{color:var(--muted);font-weight:400;letter-spacing:.06em;text-transform:none}
+  h1{font-size:clamp(30px,4.8vw,42px);line-height:1.14;font-weight:600;letter-spacing:-.006em;margin:0 0 10px}
+  .subtitle{font-style:italic;font-size:20px;line-height:1.5;color:var(--muted);margin:0 0 20px}
+  .explainer{font-size:17px;line-height:1.66;margin:0 0 14px}
+  /* sample-data banner: unmissable, never confusable with measurement */
+  .sample-banner{font-family:var(--mono);font-size:12px;letter-spacing:.08em;
+    border:2px solid var(--penalty);color:var(--penalty);padding:8px 12px;margin:0 0 18px}
+  /* pending state */
+  .pending{border:1px solid var(--hairline);border-left:3px solid var(--structural);
+    padding:14px 16px;font-family:var(--mono);font-size:12.5px;line-height:1.8;color:var(--muted);margin:26px 0}
+  /* scenario pager: text-only (Tufte) */
+  .sc-pager{font-family:var(--mono);font-size:12px;margin:22px 0 6px;display:flex;gap:12px;
+    flex-wrap:wrap;align-items:baseline}
+  .sc-pager a,.sc-pager button{color:var(--clinical);background:none;border:0;padding:0;
+    font:inherit;text-decoration:none;letter-spacing:.02em;cursor:pointer}
+  .sc-pager a:hover,.sc-pager button:hover{text-decoration:underline;text-underline-offset:3px}
+  .sc-pager [aria-current=true]{color:var(--ink);border-bottom:1px solid var(--ink)}
+  .sc-pager .off{color:var(--structural);cursor:default}
+  .sc-pager .state{color:var(--muted)}
+  .sc-meta{font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--muted);margin:2px 0 18px}
+  .sc-meta b{color:var(--ink);font-weight:600}
+  /* arm sections */
+  .arm{margin:0 0 30px}
+  .arm-label{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.2em;
+    text-transform:uppercase;margin:0 0 8px}
+  .arm-c .arm-label{color:var(--clinical)}
+  .arm-p .arm-label{color:var(--patient)}
+  .arm-t .arm-label{color:var(--muted)}
+  .ask{font-size:19px;line-height:1.55;margin:0 0 14px;padding:10px 16px;border-left:3px solid}
+  .arm-c .ask{border-color:var(--clinical)}
+  .arm-p .ask{border-color:var(--patient)}
+  .arm-t .ask{border-color:var(--structural);color:var(--muted)}
+  .resp{border-top:1px solid var(--hairline);padding:12px 0 14px}
+  .resp:last-child{border-bottom:1px solid var(--ink)}
+  .resp-head{display:flex;flex-wrap:wrap;gap:6px 16px;align-items:baseline;margin:0 0 6px}
+  .resp-model{font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.04em}
+  .resp-tier{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+  .resp-tier b{color:var(--ink);font-weight:600}
+  .resp-refusal{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--penalty)}
+  .resp-text{font-size:15.5px;line-height:1.6;margin:0;white-space:pre-wrap}
+  .resp-text.missing{color:var(--muted)}
+  .resp-foot{font-family:var(--mono);font-size:10.5px;letter-spacing:.04em;color:var(--muted);margin:6px 0 0}
+  /* provenance panel */
+  .prov{border-top:1px solid var(--ink);margin-top:38px;padding-top:12px}
+  .prov h2{font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.2em;
+    text-transform:uppercase;margin:0 0 12px}
+  .prov dl{display:grid;grid-template-columns:auto 1fr;gap:5px 22px;margin:0 0 14px}
+  .prov dt{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+  .prov dd{font-family:var(--mono);font-size:12px;margin:0;overflow-wrap:anywhere}
+  .prov dd a{color:var(--clinical);text-decoration:none}
+  .prov dd a:hover{text-decoration:underline;text-underline-offset:3px}
+  .prov .note{font-size:15px;line-height:1.62;font-family:var(--serif);color:var(--ink);margin:0 0 12px}
+  .back{display:inline-block;margin-top:18px;font-family:var(--mono);font-size:12px;
+    letter-spacing:.1em;text-transform:uppercase;color:var(--ink);text-decoration:none;
+    border-bottom:1px solid var(--ink);padding-bottom:2px}
+  .back:hover{color:var(--clinical);border-bottom-color:var(--clinical)}
+  .endnote{border-top:1px solid var(--ink);margin-top:42px;padding-top:14px}
+  footer{font-family:var(--mono);font-size:12px;line-height:1.9;color:var(--muted)}
+  footer a{color:var(--muted);text-underline-offset:3px}
+  @media (max-width:760px){
+    .masthead nav{gap:8px 22px}
+    .masthead nav a{padding:7px 0}
+    .prov dl{grid-template-columns:1fr}
+    body{font-size:16px}}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="masthead">
+  <hr class="rule-heavy"><hr class="rule-fine">
+  <div class="masthead-row">
+    <a class="wordmark" href="../" aria-label="PatientWords home, the overview page"><span class="pw-p">Patient</span><span class="pw-w">Words</span></a>
+    <nav aria-label="Site">
+      <a href="../start-here/">Start Here</a>
+      <a href="../methods.html">Methods</a>
+      <a href="../technical/">Technical</a>
+      <a href="../wording-differences/">Wording Differences</a>
+      <a href="../dialect-differences/">Dialect Differences</a>
+      <a href="../translation/">Translation</a>
+      <a href="../simulated-scenarios/">Simulated Scenarios</a>
+      <a href="./" aria-current="page">LLM</a>
+      <a href="../phrase-dataset/">Phrase Dataset</a>
+      <a href="https://github.com/michaeldgreenphd/patientwords">GitHub</a>
+    </nav>
+  </div>
+  <hr class="rule-fine">
+</header>
+<main id="main">
+  <p class="dateline">Advice arm <span class="mode">· full model responses, verbatim</span></p>
+  <h1>LLM responses</h1>
+  <p class="subtitle">The same situation, asked two ways, across assistants.</p>
+  <p class="explainer">Each scenario below is one clinical situation phrased two ways. The clinical wording comes first, with every model's response beneath it; the everyday patient wording follows, with the same models' responses. Responses are shown verbatim — one sample per model, with the full sample sets archived in the engine repository. Where a translation step ran, the machine-translated wording and its responses appear third.</p>
+
+  <div class="sample-banner" id="sample-banner" hidden>SAMPLE DATA — synthetic placeholder payload for layout verification only. Nothing on this page is a measurement.</div>
+
+  <div class="pending" id="llm-pending">
+    No advice-arm payload is published yet. This page renders from
+    <code>data/advice_scenarios.json</code> once the exporter publishes it; every
+    response shown will be a logged, hash-chained archive record.
+  </div>
+
+  <section id="llm-viewer" hidden aria-live="polite">
+    <nav class="sc-pager" id="sc-pager" aria-label="Scenario pages"></nav>
+    <p class="sc-meta" id="sc-meta"></p>
+    <div id="sc-body"></div>
+    <nav class="sc-pager" id="sc-pager2" aria-label="Scenario pages (bottom)"></nav>
+  </section>
+
+  <section class="prov" id="llm-prov" hidden>
+    <h2>Provenance</h2>
+    <p class="note" id="prov-note"></p>
+    <dl id="prov-list"></dl>
+  </section>
+
+  <a class="back" href="../">← Back home</a>
+  <div class="endnote">
+    <footer>
+      Built with the patientwords-engine pipeline on <a href="https://neuronpedia.org">Neuronpedia</a> ·
+      attribution graphs by <a href="https://github.com/safety-research/circuit-tracer">circuit-tracer</a> ·
+      features from <a href="https://huggingface.co/google/gemma-scope-2b-pt-transcoders">Gemma Scope</a> transcoders<br>
+      set in Iowan Old Style &amp; ui-monospace · every number on this page traces to a data file <a href="https://github.com/michaeldgreenphd/patientwords/tree/main/data">in this repository</a> ·
+      <a href="../methods.html">how the pipeline works</a>
+    </footer>
+  </div>
+</main>
+<script>
+(function(){
+  if(!window.fetch)return;
+  var sample=/[?&]sample=1/.test(location.search);
+  var src=sample?'../data/advice_scenarios.sample.json':'../data/advice_scenarios.json';
+  var pending=document.getElementById('llm-pending');
+  var viewer=document.getElementById('llm-viewer');
+  var prov=document.getElementById('llm-prov');
+  var current=0, data=null;
+
+  function el(tag,cls,text){var e=document.createElement(tag);if(cls)e.className=cls;if(text!=null)e.textContent=text;return e;}
+  function dash(v){return (v==null||v==='')?'—':String(v);}
+
+  function scenarioFromHash(){
+    var m=/^#s(\d+)$/.exec(location.hash);
+    if(!m)return 0;
+    var i=parseInt(m[1],10)-1;
+    return (data&&i>=0&&i<data.scenarios.length)?i:0;
+  }
+
+  function renderPager(node){
+    node.textContent='';
+    var n=data.scenarios.length;
+    var prev=el('button',current>0?'':'off','← prev');
+    prev.type='button';
+    if(current>0){prev.addEventListener('click',function(){go(current-1);});}else{prev.disabled=true;}
+    node.appendChild(prev);
+    var state=el('span','state','scenario '+(current+1)+' of '+n);
+    node.appendChild(state);
+    // numbered links, capped: first, window around current, last
+    var shown={};
+    function addNum(i){
+      if(shown[i]||i<0||i>=n)return; shown[i]=1;
+      var a=el('a',null,String(i+1));
+      a.href='#s'+(i+1);
+      if(i===current)a.setAttribute('aria-current','true');
+      node.appendChild(a);
+    }
+    addNum(0);
+    for(var i=current-2;i<=current+2;i++)addNum(i);
+    addNum(n-1);
+    var next=el('button',current<n-1?'':'off','next →');
+    next.type='button';
+    if(current<n-1){next.addEventListener('click',function(){go(current+1);});}else{next.disabled=true;}
+    node.appendChild(next);
+  }
+
+  function respBlock(r,K){
+    var wrap=el('div','resp');
+    var head=el('div','resp-head');
+    head.appendChild(el('span','resp-model',dash(r.model)));
+    if(r.tier){var t=el('span','resp-tier');t.appendChild(document.createTextNode('coded tier: '));var b=el('b',null,r.tier);t.appendChild(b);head.appendChild(t);}
+    if(r.refusal)head.appendChild(el('span','resp-refusal','refusal'));
+    wrap.appendChild(head);
+    if(typeof r.text==='string'&&r.text){
+      wrap.appendChild(el('p','resp-text',r.text));
+    }else{
+      wrap.appendChild(el('p','resp-text missing','— no response archived for this cell'));
+    }
+    var bits=[];
+    var k=(r.sample_k!=null)?r.sample_k:null, nk=(r.n_samples!=null)?r.n_samples:(K||null);
+    if(k!=null&&nk!=null)bits.push('sample '+k+' of '+nk);
+    if(r.model_returned)bits.push('served as '+r.model_returned);
+    if(r.sent_utc)bits.push(String(r.sent_utc).slice(0,10));
+    if(bits.length)wrap.appendChild(el('p','resp-foot',bits.join(' · ')));
+    return wrap;
+  }
+
+  function armSection(cls,label,arm,K){
+    if(!arm||(!arm.message&&!(arm.responses&&arm.responses.length)))return null;
+    var sec=el('section','arm '+cls);
+    sec.appendChild(el('p','arm-label',label));
+    if(arm.message)sec.appendChild(el('p','ask',arm.message));
+    var rs=arm.responses||[];
+    if(!rs.length){sec.appendChild(el('p','resp-text missing','— no responses archived yet'));}
+    for(var i=0;i<rs.length;i++)sec.appendChild(respBlock(rs[i],K));
+    return sec;
+  }
+
+  function render(){
+    var s=data.scenarios[current];
+    var K=data.run?data.run.samples_per_cell:null;
+    renderPager(document.getElementById('sc-pager'));
+    renderPager(document.getElementById('sc-pager2'));
+    var meta=document.getElementById('sc-meta');
+    meta.textContent='';
+    meta.appendChild(el('b',null,dash(s.id)));
+    if(s.topic)meta.appendChild(document.createTextNode(' · topic: '+s.topic));
+    var body=document.getElementById('sc-body');
+    body.textContent='';
+    var a1=armSection('arm-c','Clinical wording',s.clinical,K); if(a1)body.appendChild(a1);
+    var a2=armSection('arm-p','Everyday patient wording',s.patient,K); if(a2)body.appendChild(a2);
+    var a3=armSection('arm-t','After LLM translation of the patient wording',s.translated,K); if(a3)body.appendChild(a3);
+  }
+
+  function go(i){
+    current=i;
+    if(('#s'+(i+1))!==location.hash){history.replaceState(null,'','#s'+(i+1));}
+    render();
+  }
+
+  function provRow(list,label,valueNode){
+    list.appendChild(el('dt',null,label));
+    var dd=el('dd');
+    if(typeof valueNode==='string'){dd.textContent=valueNode;}else{dd.appendChild(valueNode);}
+    list.appendChild(dd);
+  }
+
+  function renderProv(){
+    var run=data.run||{};
+    var srcInfo=data.source||{};
+    var note=document.getElementById('prov-note');
+    note.textContent='Every response above is one record in an append-only, hash-chained archive: '+
+      'the full request, the raw provider response, the exact model version served, and the '+
+      'timestamp are logged per call, and the chain head is committed beside the data.';
+    var list=document.getElementById('prov-list');
+    list.textContent='';
+    var win=(run.first_sent_utc||run.last_sent_utc)?
+      (dash(run.first_sent_utc)+' → '+dash(run.last_sent_utc)):'—';
+    provRow(list,'queries ran',win);
+    provRow(list,'scenarios shown',String(data.scenarios.length));
+    provRow(list,'samples per model per wording',dash(run.samples_per_cell));
+    provRow(list,'temperature',dash(run.temperature));
+    provRow(list,'total calls',dash(run.n_calls));
+    provRow(list,'total cost',typeof run.cost_usd==='number'?('$'+run.cost_usd.toFixed(2)):'—');
+    provRow(list,'cost per scenario',typeof run.cost_per_scenario==='number'?('$'+run.cost_per_scenario.toFixed(3)):'—');
+    var models=(run.models||[]).map(function(m){return m.spec+(m.model_returned?(' (served as '+m.model_returned+')'):'');}).join(' · ');
+    provRow(list,'models',models||'—');
+    if(data.rubric_version)provRow(list,'tier rubric',String(data.rubric_version)+' (coded by a blinded judge; see methods)');
+    function repoLink(path){
+      if(!path)return document.createTextNode('—');
+      var a=el('a',null,path);
+      a.href='https://github.com/michaeldgreenphd/patientwords-engine/tree/main/'+String(path).replace(/^\.\//,'');
+      a.target='_blank';a.rel='noopener';
+      return a;
+    }
+    provRow(list,'response archive',repoLink(srcInfo.responses_file));
+    provRow(list,'stimuli file',repoLink(srcInfo.stimuli_file));
+    if(srcInfo.judgments_file)provRow(list,'tier codings',repoLink(srcInfo.judgments_file));
+    if(data.chain_head){
+      var ch=el('span',null,String(data.chain_head).slice(0,16)+'…');
+      ch.title=data.chain_head;
+      provRow(list,'archive chain head',ch);
+    }
+    provRow(list,'payload generated',dash(data.generated_utc));
+    if(data.engine_sha)provRow(list,'engine commit',String(data.engine_sha).slice(0,9));
+    prov.hidden=false;
+  }
+
+  fetch(src,{cache:'no-cache'})
+    .then(function(r){return r.ok?r.json():null;})
+    .then(function(d){
+      if(!d||!Array.isArray(d.scenarios)||!d.scenarios.length)return; // pending stays
+      data=d;
+      if(sample||d._sample)document.getElementById('sample-banner').hidden=false;
+      pending.hidden=true;
+      viewer.hidden=false;
+      current=scenarioFromHash();
+      render();
+      renderProv();
+      window.addEventListener('hashchange',function(){var i=scenarioFromHash();if(i!==current){current=i;render();}});
+    })
+    .catch(function(){/* pending stays */});
+})();
+</script>
+</body>
+</html>
