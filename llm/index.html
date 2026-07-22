@@ -182,10 +182,6 @@
   <section id="llm-viewer" hidden aria-live="polite">
     <div id="figs" hidden>
       <figure class="fig">
-        <figcaption class="fig-cap">Words per response <span class="fig-sub">mean per model · clinical vs everyday patient wording</span></figcaption>
-        <div id="fig-words-body"></div>
-      </figure>
-      <figure class="fig">
         <figcaption class="fig-cap">Care-urgency of the advice <span class="fig-sub" id="fig-tiers-sub">coded tier, same scale per model</span></figcaption>
         <div id="fig-tiers-body"></div>
         <p class="fig-pending" id="fig-tiers-pending">Appears once each response is coded against the clinician-reviewed rubric.</p>
@@ -206,6 +202,11 @@
     <p class="note" id="prov-note"></p>
     <dl id="prov-list"></dl>
   </section>
+
+  <figure class="fig" id="fig-words" hidden>
+    <figcaption class="fig-cap">Words per response <span class="fig-sub">mean per model · clinical vs everyday patient wording</span></figcaption>
+    <div id="fig-words-body"></div>
+  </figure>
 
   <a class="back" href="../">← Back home</a>
   <div class="endnote">
@@ -484,10 +485,12 @@
         trows.push({label:shortName(m.model),a:c.tier_mean_rank,b:p.tier_mean_rank,note:null});
       }
     });
-    var any=false;
     if(wrows.length){
       var w=svgDumbbell(wrows,{zero:true,label:'Mean words per response by model, clinical versus patient wording'});
-      if(w){document.getElementById('fig-words-body').appendChild(w);any=true;}
+      if(w){
+        document.getElementById('fig-words-body').appendChild(w);
+        document.getElementById('fig-words').hidden=false;
+      }
     }
     if(trows.length&&data.tier_order){
       var to=data.tier_order;
@@ -499,12 +502,9 @@
         document.getElementById('fig-tiers-sub').textContent=
           'mean coded tier · 1='+to[0]+' … '+to.length+'='+to[to.length-1]+
           (data.rubric_version?(' · rubric '+data.rubric_version):'');
-        any=true;
       }
-    }else if(wrows.length){
-      any=true; // words figure plus the pending line for tiers
     }
-    if(any)document.getElementById('figs').hidden=false;
+    document.getElementById('figs').hidden=false; // urgency slot always shows: graded dots or the pending line
   }
 
   function provRow(list,label,valueNode){
