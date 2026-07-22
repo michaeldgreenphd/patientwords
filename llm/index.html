@@ -215,6 +215,7 @@
 
   function scenarioFromHash(){
     var m=/^#s(\d+)$/.exec(location.hash);
+    if(!m)m=/[?&]s=(\d+)/.exec(location.search); // email-safe deep link: ?s=N survives fragment-stripping
     if(!m)return 0;
     var i=parseInt(m[1],10)-1;
     return (data&&i>=0&&i<data.scenarios.length)?i:0;
