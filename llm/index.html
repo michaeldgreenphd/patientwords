@@ -66,6 +66,8 @@
   #fig-map-body svg .mapcell{cursor:pointer}
   .fig-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
   .fig-scroll svg{min-width:620px}
+  /* small-multiples profile: wider than the single-panel figures, scrolls on small screens */
+  #fig-profiles-body svg{max-width:840px;min-width:720px}
   /* scenario pager: text-only (Tufte) */
   .sc-pager{font-family:var(--mono);font-size:12px;margin:22px 0 6px;display:flex;gap:12px;
     flex-wrap:wrap;align-items:baseline}
@@ -117,13 +119,17 @@
   .resp-text{font-size:15px;line-height:1.55;margin:0;white-space:pre-wrap;overflow-wrap:break-word}
   .resp-text.missing{color:var(--muted)}
   .resp-foot{font-family:var(--mono);font-size:10.5px;letter-spacing:.04em;color:var(--muted);margin:6px 0 0}
-  /* provenance panel */
+  /* provenance panel: strict two-column key/value grid; a faint rule separates
+     the run metrics from the technical hashes */
   .prov{border-top:1px solid var(--ink);margin-top:38px;padding-top:12px}
   .prov h2{font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.2em;
     text-transform:uppercase;margin:0 0 12px}
-  .prov dl{display:grid;grid-template-columns:auto 1fr;gap:5px 22px;margin:0 0 14px}
+  .prov dl{display:grid;grid-template-columns:max-content 1fr;gap:6px 22px;margin:0 0 14px}
   .prov dt{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
   .prov dd{font-family:var(--mono);font-size:12px;margin:0;overflow-wrap:anywhere}
+  .prov dt.sep,.prov dd.sep{border-top:1px solid var(--hairline);padding-top:10px;margin-top:4px}
+  .prov dd ul.prov-models{margin:0;padding:0 0 0 18px;list-style:disc}
+  .prov dd ul.prov-models li{margin:1px 0}
   .prov dd a{color:var(--clinical);text-decoration:none}
   .prov dd a:hover{text-decoration:underline;text-underline-offset:3px}
   .prov .note{font-size:15px;line-height:1.62;font-family:var(--serif);color:var(--ink);margin:0 0 12px}
@@ -148,6 +154,7 @@
     .masthead nav{gap:8px 22px}
     .masthead nav a{padding:7px 0}
     .prov dl{grid-template-columns:1fr}
+    .prov dd.sep{border-top:0;padding-top:0;margin-top:0} /* stacked: the dt rule alone marks the break */
     body{font-size:16px}}
 </style>
 </head>
@@ -175,8 +182,8 @@
 <main id="main">
   <p class="dateline">Advice arm <span class="mode">· full model responses, verbatim</span></p>
   <h1>LLM responses</h1>
-  <p class="subtitle">The same situation, asked two ways, across assistants.</p>
-  <p class="explainer">Each scenario below is one clinical situation phrased two ways. The clinical wording and the everyday patient wording run side by side, and each row shows one model's response to both. Responses are shown verbatim. Each model was asked the same prompt several times — the attempt switcher moves between those repeat draws. Where a translation step ran, the machine-translated wording and its responses appear as a third column.</p>
+  <p class="subtitle">The same medical scenario, framed with patient language v. doctor language. Responses across frontier AI labs, queried using API calls.</p>
+  <p class="explainer">Each scenario below is one clinical situation phrased two ways. The clinical wording and the everyday patient wording run side by side, and each row shows one model's response to both. Responses are shown verbatim. Each model was asked the same prompt 3 times. When we asked an llm to translate the patient phrasing to clinical phrasing, the results appear as a third column.</p>
 
   <div class="sample-banner" id="sample-banner" hidden>SAMPLE DATA — synthetic placeholder payload for layout verification only. Nothing on this page is a measurement.</div>
 
@@ -214,21 +221,13 @@
     <dl id="prov-list"></dl>
   </section>
 
-  <figure class="fig" id="fig-tiers" hidden>
-    <figcaption class="fig-cap">Care-urgency of the advice <span class="fig-sub" id="fig-tiers-sub">coded tier, same scale per model</span></figcaption>
-    <div id="fig-tiers-body"></div>
-  </figure>
-  <figure class="fig" id="fig-sim" hidden>
-        <figcaption class="fig-cap">Same question, re-asked vs re-worded <span class="fig-sub">word overlap between answers · higher = more alike</span></figcaption>
-        <div id="fig-sim-body"></div>
+  <figure class="fig" id="fig-profiles" hidden>
+    <figcaption class="fig-cap">Model profiles <span class="fig-sub" id="fig-profiles-sub"></span></figcaption>
+    <div id="fig-profiles-body" class="fig-scroll"></div>
   </figure>
   <figure class="fig" id="fig-bridge" hidden>
-        <figcaption class="fig-cap">Next-word gap vs advice drop <span class="fig-sub">one dot per scenario per model · red = downgrade</span></figcaption>
+        <figcaption class="fig-cap">Next-word gap vs advice drop <span class="fig-sub">one ring per scenario per model · red = downgrade · overlaps darken</span></figcaption>
         <div id="fig-bridge-body"></div>
-  </figure>
-  <figure class="fig" id="fig-words" hidden>
-    <figcaption class="fig-cap">Words per response <span class="fig-sub">mean per model · clinical vs everyday patient wording</span></figcaption>
-    <div id="fig-words-body"></div>
   </figure>
 
   <a class="back" href="../">← Back home</a>
@@ -385,13 +384,28 @@
     return wrap;
   }
 
+  // "pairs_20260706T201750Z#1" -> "Scenario 1 — Run on July 6, 2026 at 8:17 PM";
+  // anything unparseable falls back to the raw id
+  function prettyId(id){
+    var m=/(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})Z#(\d+)$/.exec(String(id||''));
+    if(!m)return null;
+    var months=['January','February','March','April','May','June','July','August','September','October','November','December'];
+    var mo=months[parseInt(m[2],10)-1];
+    if(!mo)return null;
+    var h=parseInt(m[4],10),ap=h>=12?'PM':'AM',h12=h%12||12;
+    return 'Scenario '+m[7]+' — Run on '+mo+' '+parseInt(m[3],10)+', '+m[1]+' at '+h12+':'+m[5]+' '+ap;
+  }
+
   function render(){
     var s=data.scenarios[current];
     renderPager(document.getElementById('sc-pager'));
     renderPager(document.getElementById('sc-pager2'));
     var meta=document.getElementById('sc-meta');
     meta.textContent='';
-    meta.appendChild(el('b',null,dash(s.id)));
+    var pid=prettyId(s.id);
+    var idNode=el('b',null,pid||dash(s.id));
+    if(pid)idNode.title=String(s.id); // raw archive id stays one hover away
+    meta.appendChild(idNode);
     if(s.topic)meta.appendChild(document.createTextNode(' · topic: '+s.topic));
     var body=document.getElementById('sc-body');
     body.textContent='';
@@ -429,71 +443,68 @@
     return i>=0?m.slice(i+1):m;
   }
 
-  // dumbbell rows: one row per model, clinical dot (green) vs patient dot (ink),
-  // hairline connector, values printed at the dots — no axis, no legend box
-  function svgDumbbell(rows,opts){
-    opts=opts||{};
-    var NS='http://www.w3.org/2000/svg';
-    var W=680,L=190,R=640,rowH=27,top=20,H=top+rows.length*rowH+4;
-    var vals=[];
-    rows.forEach(function(r){if(r.a!=null)vals.push(r.a);if(r.b!=null)vals.push(r.b);});
-    if(!vals.length)return null;
-    var lo=(opts.min!=null)?opts.min:(opts.zero?0:Math.min.apply(null,vals)*0.94);
-    var hi=(opts.max!=null)?opts.max:Math.max.apply(null,vals)*1.06;
-    function x(v){return L+(v-lo)/((hi-lo)||1)*(R-L);}
-    function fmt(v){return opts.decimals?v.toFixed(opts.decimals):String(Math.round(v));}
-    var aColor=opts.aColor||'var(--clinical,#15803d)', bColor=opts.bColor||'var(--patient,#111827)';
-    var aLabel=opts.aLabel||'clinical', bLabel=opts.bLabel||'patient';
-    var svg=document.createElementNS(NS,'svg');
-    svg.setAttribute('viewBox','0 0 '+W+' '+H);
-    svg.setAttribute('role','img');
-    if(opts.label)svg.setAttribute('aria-label',opts.label);
-    function n(tag,attrs,text){
-      var e=document.createElementNS(NS,tag);
-      for(var k in attrs)e.setAttribute(k,attrs[k]);
-      if(text!=null)e.textContent=text;
-      return e;
-    }
-    rows.forEach(function(r,i){
+  // small multiples: the models are listed once on the left, each measure is a
+  // dumbbell panel beside them, so one horizontal read gives a model's profile.
+  // Per panel: a faint dashed line marks the pooled median; no gridlines, no boxes.
+  function svgProfiles(labelRows,panels){
+    var rowH=27, top=34, LW=150, PW=170, GAP=52;
+    var H=top+labelRows.length*rowH+6;
+    var W=LW+panels.length*(PW+GAP)-GAP+42;
+    var svg=svgNode('svg',{viewBox:'0 0 '+W+' '+H,role:'img',
+      'aria-label':'Per-model profiles: '+panels.map(function(p){return p.title;}).join(', ')+
+      ', two dots per model per measure'});
+    labelRows.forEach(function(r,i){
       var y=top+i*rowH+rowH/2;
-      var lbl=n('text',{x:0,y:y+4,'font-family':'ui-monospace,monospace','font-size':'12px',fill:'var(--ink,#1c1c19)'},r.label);
+      var lbl=svgNode('text',{x:0,y:y+4,'font-family':'ui-monospace,monospace','font-size':'12px',fill:'var(--ink,#1c1c19)'},r.label);
       if(r.note){
-        var ts=document.createElementNS(NS,'tspan');
+        var ts=document.createElementNS('http://www.w3.org/2000/svg','tspan');
         ts.setAttribute('fill','var(--muted,#6d6c66)');ts.setAttribute('font-size','10px');
         ts.textContent=' '+r.note;
         lbl.appendChild(ts);
       }
       svg.appendChild(lbl);
-      if(r.a==null&&r.b==null)return;
-      var xa=r.a!=null?x(r.a):null, xb=r.b!=null?x(r.b):null;
-      if(xa!=null&&xb!=null)svg.appendChild(n('line',{x1:xa,y1:y,x2:xb,y2:y,stroke:'var(--structural,#c3c9d2)','stroke-width':1}));
-      if(xa!=null)svg.appendChild(n('circle',{cx:xa,cy:y,r:3.5,fill:aColor}));
-      if(xb!=null)svg.appendChild(n('circle',{cx:xb,cy:y,r:3.5,fill:bColor}));
-      // value labels sit outside their dots
-      if(xa!=null&&xb!=null){
-        var left=Math.min(xa,xb),right=Math.max(xa,xb);
-        var lv=(xa<=xb)?r.a:r.b, rv=(xa<=xb)?r.b:r.a;
-        svg.appendChild(n('text',{x:left-7,y:y+4,'text-anchor':'end','font-family':'ui-monospace,monospace','font-size':'10.5px',fill:'var(--muted,#6d6c66)'},fmt(lv)));
-        svg.appendChild(n('text',{x:right+7,y:y+4,'text-anchor':'start','font-family':'ui-monospace,monospace','font-size':'10.5px',fill:'var(--muted,#6d6c66)'},fmt(rv)));
-      }else{
-        var xo=(xa!=null)?xa:xb, vo=(r.a!=null)?r.a:r.b;
-        svg.appendChild(n('text',{x:xo+7,y:y+4,'text-anchor':'start','font-family':'ui-monospace,monospace','font-size':'10.5px',fill:'var(--muted,#6d6c66)'},fmt(vo)));
-      }
-      // direct labels on the first row instead of a legend — each label stays on ITS dot
-      if(i===0&&xa!=null&&xb!=null){
-        var apart=Math.abs(xa-xb)>=70;
-        var ca={x:xa,anchor:'middle'},pa={x:xb,anchor:'middle'};
-        if(!apart){
-          if(xa<=xb){ca={x:xa-7,anchor:'end'};pa={x:xb+7,anchor:'start'};}
-          else{ca={x:xa+7,anchor:'start'};pa={x:xb-7,anchor:'end'};}
+    });
+    panels.forEach(function(p,pi){
+      var x0=LW+pi*(PW+GAP);
+      svg.appendChild(svgNode('text',{x:x0,y:10,'font-family':'ui-monospace,monospace','font-size':'10px','letter-spacing':'.08em',fill:'var(--muted,#6d6c66)'},p.title.toUpperCase()));
+      // colored-word key, one per panel — annotate once, no legend box
+      var key=svgNode('text',{x:x0,y:23,'font-family':'ui-monospace,monospace','font-size':'9.5px'});
+      [[p.aLabel,p.aColor],[' vs ','var(--muted,#6d6c66)'],[p.bLabel,p.bColor]].forEach(function(seg){
+        var ts=document.createElementNS('http://www.w3.org/2000/svg','tspan');
+        ts.setAttribute('fill',seg[1]);ts.textContent=seg[0];
+        key.appendChild(ts);
+      });
+      svg.appendChild(key);
+      var vals=[];
+      p.rows.forEach(function(r){if(r.a!=null)vals.push(r.a);if(r.b!=null)vals.push(r.b);});
+      if(!vals.length)return;
+      var lo=(p.min!=null)?p.min:(p.zero?0:Math.min.apply(null,vals));
+      var hi=(p.max!=null)?p.max:Math.max.apply(null,vals);
+      if(p.min==null&&!p.zero)lo-=((hi-lo)*0.08)||1;
+      if(p.max==null)hi+=((hi-lo)*0.08)||1;
+      function x(v){return x0+28+(v-lo)/((hi-lo)||1)*(PW-56);}
+      function fmt(v){return p.decimals?v.toFixed(p.decimals):String(Math.round(v));}
+      var sorted=vals.slice().sort(function(a,b){return a-b;});
+      var med=sorted.length%2?sorted[(sorted.length-1)/2]:(sorted[sorted.length/2-1]+sorted[sorted.length/2])/2;
+      svg.appendChild(svgNode('line',{x1:x(med),y1:top+4,x2:x(med),y2:top+labelRows.length*rowH-2,
+        stroke:'var(--structural,#c3c9d2)','stroke-width':1,'stroke-dasharray':'2 4',opacity:.8}));
+      p.rows.forEach(function(r,i){
+        if(r.a==null&&r.b==null)return;
+        var y=top+i*rowH+rowH/2;
+        var xa=r.a!=null?x(r.a):null, xb=r.b!=null?x(r.b):null;
+        if(xa!=null&&xb!=null)svg.appendChild(svgNode('line',{x1:xa,y1:y,x2:xb,y2:y,stroke:'var(--structural,#c3c9d2)','stroke-width':1}));
+        if(xa!=null)svg.appendChild(svgNode('circle',{cx:xa,cy:y,r:3.5,fill:p.aColor}));
+        if(xb!=null)svg.appendChild(svgNode('circle',{cx:xb,cy:y,r:3.5,fill:p.bColor}));
+        if(xa!=null&&xb!=null){
+          var left=Math.min(xa,xb),right=Math.max(xa,xb);
+          var lv=(xa<=xb)?r.a:r.b, rv=(xa<=xb)?r.b:r.a;
+          svg.appendChild(svgNode('text',{x:left-6,y:y+3.5,'text-anchor':'end','font-family':'ui-monospace,monospace','font-size':'9.5px',fill:'var(--muted,#6d6c66)'},fmt(lv)));
+          svg.appendChild(svgNode('text',{x:right+6,y:y+3.5,'text-anchor':'start','font-family':'ui-monospace,monospace','font-size':'9.5px',fill:'var(--muted,#6d6c66)'},fmt(rv)));
+        }else{
+          var xo=(xa!=null)?xa:xb, vo=(r.a!=null)?r.a:r.b;
+          svg.appendChild(svgNode('text',{x:xo+6,y:y+3.5,'text-anchor':'start','font-family':'ui-monospace,monospace','font-size':'9.5px',fill:'var(--muted,#6d6c66)'},fmt(vo)));
         }
-        svg.appendChild(n('text',{x:ca.x,y:y-9,'text-anchor':ca.anchor,
-          'font-family':'ui-monospace,monospace','font-size':'10px',
-          fill:aColor},aLabel));
-        svg.appendChild(n('text',{x:pa.x,y:y-9,'text-anchor':pa.anchor,
-          'font-family':'ui-monospace,monospace','font-size':'10px',
-          fill:bColor},bLabel));
-      }
+      });
     });
     return svg;
   }
@@ -530,10 +541,10 @@
         var iv=r[sp[0]+'_inner'];
         if(opts.inner&&iv!=null)svg.appendChild(svgNode('rect',{x:L,y:yy+1.25,width:Math.max(x(iv)-L,0),height:2.5,fill:'var(--paper,#faf9f5)',opacity:.5}));
         var lbl=Math.round(v*100)+'%';
-        if(x(v)+26>W){ // bar reaches the edge: label sits inside its end, in paper
-          svg.appendChild(svgNode('text',{x:x(v)-3,y:yy+4.6,'text-anchor':'end','font-family':'ui-monospace,monospace','font-size':'9px',fill:'var(--paper,#faf9f5)'},lbl));
-        }else{
-          svg.appendChild(svgNode('text',{x:x(v)+4,y:yy+4.6,'font-family':'ui-monospace,monospace','font-size':'9px',fill:'var(--muted,#6d6c66)'},lbl));
+        if(x(v)+24>W){ // bar reaches the edge: label sits inside its end, in paper
+          svg.appendChild(svgNode('text',{x:x(v)-2,y:yy+4.6,'text-anchor':'end','font-family':'ui-monospace,monospace','font-size':'9px',fill:'var(--paper,#faf9f5)'},lbl));
+        }else{ // label hugs the bar end — no gap
+          svg.appendChild(svgNode('text',{x:x(v)+2,y:yy+4.6,'font-family':'ui-monospace,monospace','font-size':'9px',fill:'var(--muted,#6d6c66)'},lbl));
         }
       });
     });
@@ -557,9 +568,11 @@
         var d=(s.byModel||{})[m.spec];
         var xx=L+si*(cell+gap);
         var attrs={x:xx,y:y,width:cell,height:cell,'class':'mapcell','data-s':String(si+1)};
-        if(d==null){attrs.fill='none';attrs.stroke='var(--hairline,#dcdad2)';}
+        // empty cells fade to near-paper so the red marks carry the figure;
+        // not-graded stays one step fainter than graded-clean
+        if(d==null){attrs.fill='none';attrs.stroke='#f5f5f5';}
         else if(d.downgrade){attrs.fill='var(--penalty,#b4483d)';}
-        else{attrs.fill='none';attrs.stroke='var(--structural,#c3c9d2)';}
+        else{attrs.fill='none';attrs.stroke='#eeeeee';}
         var rc=svgNode('rect',attrs);
         rc.addEventListener('click',function(){go(si);});
         var t=svgNode('title',{},'scenario '+(si+1)+(d?(': '+d.clinical+' → '+d.patient):': not graded'));
@@ -588,8 +601,10 @@
     svg.appendChild(svgNode('text',{x:R,y:H-4,'text-anchor':'end','font-family':'ui-monospace,monospace','font-size':'9.5px',fill:'var(--muted,#6d6c66)'},'next-word gap '+Math.round(hi*100)+' pp'));
     svg.appendChild(svgNode('text',{x:L,y:H-4,'font-family':'ui-monospace,monospace','font-size':'9.5px',fill:'var(--muted,#6d6c66)'},Math.round(lo*100)+' pp'));
     points.forEach(function(p){
-      svg.appendChild(svgNode('circle',{cx:px(p.x),cy:py(-p.drop)+p.j,r:3,
-        fill:p.drop>0?'var(--penalty,#b4483d)':'var(--muted,#6d6c66)',opacity:p.drop>0?0.9:0.55}));
+      // open rings + jitter: coincident points build visible density instead of hiding
+      svg.appendChild(svgNode('circle',{cx:px(p.x),cy:py(-p.drop)+p.j,r:3.2,fill:'none',
+        stroke:p.drop>0?'var(--penalty,#b4483d)':'var(--muted,#6d6c66)','stroke-width':1.2,
+        opacity:p.drop>0?0.9:0.5}));
     });
     return svg;
   }
@@ -654,69 +669,71 @@
   function renderFigs(){
     var ms=data.model_summary;
     if(!ms||!ms.length)return;
-    var maxN=0;
-    ms.forEach(function(m){
-      maxN=Math.max(maxN,(m.clinical&&m.clinical.n)||0,(m.patient&&m.patient.n)||0);
-    });
-    var wrows=[],trows=[];
-    ms.forEach(function(m){
+    var rows=ms.filter(function(m){
       var c=m.clinical||{},p=m.patient||{};
-      if(c.mean_words!=null||p.mean_words!=null){
-        var note=null;
-        if(Math.min(c.n||0,p.n||0)<maxN)note='n='+((c.n===p.n)?c.n:(c.n+'·'+p.n));
-        wrows.push({label:shortName(m.model),a:c.mean_words,b:p.mean_words,note:note});
-      }
-      if(c.tier_mean_rank!=null||p.tier_mean_rank!=null){
-        trows.push({label:shortName(m.model),a:c.tier_mean_rank,b:p.tier_mean_rank,note:null});
-      }
+      return c.mean_words!=null||p.mean_words!=null||c.tier_mean_rank!=null||p.tier_mean_rank!=null||!!m.similarity;
     });
-    if(wrows.length){
-      var w=svgDumbbell(wrows,{zero:true,label:'Mean words per response by model, clinical versus patient wording'});
-      if(w){
-        document.getElementById('fig-words-body').appendChild(w);
-        document.getElementById('fig-words').hidden=false;
-      }
-    }
-    if(trows.length&&data.tier_order){
+    if(rows.length){
+      // n moves to the subtitle when uniform; a per-model note appears only when it differs
+      var wn={},sn={};
+      rows.forEach(function(m){
+        var c=m.clinical||{},p=m.patient||{};
+        if(c.n!=null)wn[c.n]=1; if(p.n!=null)wn[p.n]=1;
+        if(m.similarity&&m.similarity.n_stimuli!=null)sn[m.similarity.n_stimuli]=1;
+      });
+      var wUniform=Object.keys(wn).length<=1, sUniform=Object.keys(sn).length<=1;
+      var labels=rows.map(function(m){
+        var c=m.clinical||{},p=m.patient||{},notes=[];
+        if(!wUniform&&(c.n!=null||p.n!=null))notes.push('n='+((c.n===p.n)?c.n:(dash(c.n)+'·'+dash(p.n))));
+        if(!sUniform&&m.similarity&&m.similarity.n_stimuli!=null)notes.push('overlap n='+m.similarity.n_stimuli);
+        return {label:shortName(m.model),note:notes.join(' ')||null};
+      });
+      var panels=[],subBits=[];
       var to=data.tier_order;
-      var t=svgDumbbell(trows,{min:1,max:to.length,decimals:1,
-        label:'Mean coded care-urgency tier by model, clinical versus patient wording'});
-      if(t){
-        document.getElementById('fig-tiers-body').appendChild(t);
-        document.getElementById('fig-tiers').hidden=false;
+      var trows=rows.map(function(m){
+        var c=m.clinical||{},p=m.patient||{};
+        return {a:(c.tier_mean_rank!=null)?c.tier_mean_rank:null,b:(p.tier_mean_rank!=null)?p.tier_mean_rank:null};
+      });
+      if(to&&trows.some(function(r){return r.a!=null||r.b!=null;})){
+        panels.push({title:'care-urgency',rows:trows,min:1,max:to.length,decimals:1,
+          aColor:'var(--clinical,#15803d)',bColor:'var(--patient,#111827)',aLabel:'clinical',bLabel:'patient'});
+        subBits.push('urgency: mean coded tier, 1='+to[0]+' … '+to.length+'='+to[to.length-1]);
+        if(data.rubric_version)subBits.push('rubric '+data.rubric_version);
+        if(/draft/i.test(String(data.rubric_version||'')))subBits.push('machine-coded, provisional until clinician review');
         document.getElementById('fig-tiers-pending').hidden=true;
-        var provisional=/draft/i.test(String(data.rubric_version||''));
-        document.getElementById('fig-tiers-sub').textContent=
-          'mean coded tier · 1='+to[0]+' … '+to.length+'='+to[to.length-1]+
-          (data.rubric_version?(' · rubric '+data.rubric_version):'')+
-          (provisional?' · machine-coded, provisional until clinician review':'');
       }
-    }
-    // answer stability vs wording: re-asking the identical wording vs switching wordings
-    var srows=[],maxSN=0;
-    ms.forEach(function(m){if(m.similarity)maxSN=Math.max(maxSN,m.similarity.n_stimuli||0);});
-    ms.forEach(function(m){
-      var s=m.similarity;
-      if(!s)return;
-      srows.push({label:shortName(m.model),a:s.reasked,b:s.reworded,
-        note:(s.n_stimuli<maxSN)?('n='+s.n_stimuli):null});
-    });
-    if(srows.length){
-      var sv=svgDumbbell(srows,{decimals:2,aLabel:'re-asked',bLabel:'re-worded',
-        aColor:'var(--muted,#6d6c66)',bColor:'var(--patient,#111827)',
-        label:'Answer word overlap by model: re-asking the same wording versus switching between clinical and patient wording'});
-      if(sv){
-        document.getElementById('fig-sim-body').appendChild(sv);
-        document.getElementById('fig-sim').hidden=false;
+      var srows=rows.map(function(m){
+        var s=m.similarity||{};
+        return {a:(s.reasked!=null)?s.reasked:null,b:(s.reworded!=null)?s.reworded:null};
+      });
+      if(srows.some(function(r){return r.a!=null||r.b!=null;})){
+        panels.push({title:'word overlap',rows:srows,decimals:2,
+          aColor:'var(--muted,#6d6c66)',bColor:'var(--patient,#111827)',aLabel:'re-asked',bLabel:'re-worded'});
+        subBits.push('overlap: higher = more alike');
+      }
+      var wrows=rows.map(function(m){
+        var c=m.clinical||{},p=m.patient||{};
+        return {a:(c.mean_words!=null)?c.mean_words:null,b:(p.mean_words!=null)?p.mean_words:null};
+      });
+      if(wrows.some(function(r){return r.a!=null||r.b!=null;})){
+        panels.push({title:'words per response',rows:wrows,zero:true,
+          aColor:'var(--clinical,#15803d)',bColor:'var(--patient,#111827)',aLabel:'clinical',bLabel:'patient'});
+        if(wUniform&&Object.keys(wn).length)subBits.push('n='+Object.keys(wn)[0]+' responses per wording per model');
+      }
+      if(panels.length){
+        subBits.push('dashed line = median across models');
+        document.getElementById('fig-profiles-body').appendChild(svgProfiles(labels,panels));
+        document.getElementById('fig-profiles-sub').textContent=subBits.join(' · ');
+        document.getElementById('fig-profiles').hidden=false;
       }
     }
     renderGradedFigs();
     document.getElementById('figs').hidden=false; // urgency slot always shows: graded dots or the pending line
   }
 
-  function provRow(list,label,valueNode){
-    list.appendChild(el('dt',null,label));
-    var dd=el('dd');
+  function provRow(list,label,valueNode,cls){
+    list.appendChild(el('dt',cls||null,label));
+    var dd=el('dd',cls||null);
     if(typeof valueNode==='string'){dd.textContent=valueNode;}else{dd.appendChild(valueNode);}
     list.appendChild(dd);
   }
@@ -739,8 +756,13 @@
     provRow(list,'total calls',dash(run.n_calls));
     provRow(list,'total cost',typeof run.cost_usd==='number'?('$'+run.cost_usd.toFixed(2)):'—');
     provRow(list,'cost per scenario',typeof run.cost_per_scenario==='number'?('$'+run.cost_per_scenario.toFixed(3)):'—');
-    var models=(run.models||[]).map(function(m){return m.spec+(m.model_returned?(' (served as '+m.model_returned+')'):'');}).join(' · ');
-    provRow(list,'models',models||'—');
+    // run metrics end here; the faint rule marks the break before the technical block.
+    // models render as a scannable list, one endpoint (and served build) per line
+    var mlist=el('ul','prov-models');
+    (run.models||[]).forEach(function(m){
+      mlist.appendChild(el('li',null,m.spec+(m.model_returned?(' (served as '+m.model_returned+')'):'')));
+    });
+    provRow(list,'models',mlist.children.length?mlist:'—','sep');
     // distinct served builds per model: model_returned + fingerprint + sent window
     (run.models||[]).forEach(function(m){
       if(!m.builds||!m.builds.length)return;
