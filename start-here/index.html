@@ -356,7 +356,32 @@
   </section>
 
   <section>
-    <p class="step-no">7 · The lasting fix</p>
+    <p class="step-no">7 · The smart patch</p>
+    <h2>Beyond translation: Orchestrating care</h2>
+    <p>A simple rewrite is fragile. A robust intermediary doesn&rsquo;t just translate; it orchestrates based on confidence and context, routing the query to the safest path.</p>
+    <div class="fig" role="img" aria-label="One patient query feeds an orchestration layer, which branches into three parallel paths: guideline concordance routes to a clinical model and starts guideline-concordant therapy such as an antacid; care navigation routes to real-world actions, suggesting an over-the-counter remedy and booking a primary-care follow-up; honest ambiguity routes to an uncertainty check, logging the amorphous input and referring to a human doctor.">
+    <svg viewBox="0 0 800 220">
+      <text x="0" y="115" class="sv-q">“My stomach’s on fire.”</text>
+      <path class="sv-line" d="M198,110 L226,110" stroke-width="1.2"/>
+      <rect x="226" y="88" width="128" height="44" rx="22" fill="#eceae3"/>
+      <text x="290" y="106" class="sv-m" text-anchor="middle" fill="#0f766e">orchestration</text>
+      <text x="290" y="120" class="sv-m" text-anchor="middle" fill="#0f766e">layer</text>
+      <path class="sv-line" d="M354,102 C392,100 396,48 424,44" stroke-width="1.2"/>
+      <path class="sv-line" d="M354,110 L424,110" stroke-width="1.2"/>
+      <path class="sv-line" d="M354,118 C392,120 396,172 424,176" stroke-width="1.2"/>
+      <text x="432" y="38" class="sv-m" style="letter-spacing:.12em;text-transform:uppercase">guideline concordance · clinical model</text>
+      <text x="432" y="58" class="sv-a" style="font-size:11.5px" fill="#0f766e">Start guideline-concordant therapy (e.g., antacid)</text>
+      <text x="432" y="104" class="sv-m" style="letter-spacing:.12em;text-transform:uppercase">care navigation · real-world actions</text>
+      <text x="432" y="124" class="sv-a" style="font-size:11.5px" fill="var(--ink)">Suggest OTC remedy + book PCP follow-up</text>
+      <text x="432" y="170" class="sv-m" style="letter-spacing:.12em;text-transform:uppercase">honest ambiguity · uncertainty check</text>
+      <text x="432" y="190" class="sv-a" style="font-size:11.5px" fill="#b45309">Amorphous input. Logged for tuning. See human doctor.</text>
+    </svg>
+    </div>
+    <p class="cap">illustrative routing sketch, not a measurement</p>
+  </section>
+
+  <section>
+    <p class="step-no">8 · The lasting fix</p>
     <h2>Measure, mend, maintain: a cycle, not a patch</h2>
     <p>No single fix closes this gap. Language evolves; dialects, slang, and communities change, and a test built once goes stale. The method has to be a loop.</p>
     <div class="cycle-svg">
@@ -437,11 +462,37 @@
     <a class="back" href="../wording-differences/">See the real traces →</a>
   </section>
 
+  <section>
+    <p class="step-no">9 · The engine</p>
+    <h2>Closing the loop: Tracing the patient voice</h2>
+    <p>To permanently mend the gap, the model&rsquo;s internal wiring must be evaluated against real-world dialects. By mapping linguistic variations directly to token probabilities, we can capture and correct systemic drops in urgency.</p>
+    <div class="fig" role="img" aria-label="Two rows on a shared probability axis from zero to forty percent. The medical lexicon wording, I have acid reflux, puts the safe target antacid on top at 31 percent, drawn in teal. Directly underneath, the patient-derived wording, my stomach's on fire, steers the top prediction away from the safe target: ice cream at 29 percent, drawn in amber, with the safe target displaced from the top entirely.">
+    <svg viewBox="0 0 800 160">
+      <line x1="300" y1="30" x2="300" y2="130" stroke="var(--hairline)" stroke-width="1"/>
+      <text x="300" y="146" class="sv-m" text-anchor="middle">0%</text>
+      <text x="760" y="146" class="sv-m" text-anchor="end">40%</text>
+      <text x="0" y="55" class="sv-q">“I have <tspan style="fill:var(--teal);font-weight:700">acid reflux</tspan>.”</text>
+      <line x1="300" y1="50" x2="646" y2="50" stroke="#9aa1ad" stroke-width="1"/>
+      <circle cx="656" cy="50" r="4.5" fill="#0f766e"/>
+      <text x="666" y="55" class="sv-a" style="font-size:12px" fill="#0f766e">antacid 31%</text>
+      <text x="0" y="105" class="sv-q">“My stomach’s on fire.”</text>
+      <line x1="300" y1="100" x2="623" y2="100" stroke="#9aa1ad" stroke-width="1"/>
+      <circle cx="633" cy="100" r="4.5" fill="#b45309"/>
+      <text x="643" y="105" class="sv-a" style="font-size:12px" fill="#b45309">ice cream 29%</text>
+      <path d="M656,57 C656,78 640,80 634,93" fill="none" stroke="#b45309" stroke-width="1" stroke-dasharray="3 3"/>
+      <text x="640" y="80" class="sv-m" text-anchor="end" fill="#b45309">prediction steered off the safe target</text>
+      <text x="300" y="122" class="sv-m">safe target displaced from the top entirely</text>
+    </svg>
+    </div>
+    <p class="cap">live pair, scenario 48 · these paired traces fuel the Civic Sample data extraction pipeline to continuously align the model</p>
+  </section>
+
   <div class="src">
     Sources: all model answers and probabilities are live gemma-2-2b measurements —
     scenario 48 (panel 2, first two rows; panel 5&rsquo;s feature counts are its circuit_diff) and scenario 85 (panel 3) in <a href="https://github.com/michaeldgreenphd/patientwords/blob/main/data/simulated_scenarios.json">the scenario measurements file on GitHub</a>;
-    the register ladder (panel 2, third row), panel 7&rsquo;s context result, and panel 6&rsquo;s translation outcomes in <a href="https://github.com/michaeldgreenphd/patientwords/blob/main/data/provenance.json">the provenance file on GitHub</a>.
-    The clinician panel is illustrative, not a measurement.
+    the register ladder (panel 2, third row), panel 8&rsquo;s context result, and panel 6&rsquo;s translation outcomes in <a href="https://github.com/michaeldgreenphd/patientwords/blob/main/data/provenance.json">the provenance file on GitHub</a>.
+    Panel 9 re-plots scenario 48&rsquo;s two measurements (antacid 31%, ice cream 29%).
+    The clinician and orchestration panels are illustrative, not measurements.
   </div>
   <div class="endnote" style="border-top:1px solid var(--ink);margin-top:42px;padding-top:14px">
     <p style="font-family:var(--mono);font-size:12px;line-height:1.8;color:var(--muted);margin:0 0 10px">SIMULATED DATA: the sentence pairs measured across this site are written by an LLM and checked automatically.</p>
