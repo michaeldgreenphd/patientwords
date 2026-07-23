@@ -64,6 +64,8 @@
   .fig-panel-cap{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:0 0 3px}
   .fig-panel svg{max-width:none}
   #fig-map-body svg .mapcell{cursor:pointer}
+  .fig-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .fig-scroll svg{min-width:620px}
   /* scenario pager: text-only (Tufte) */
   .sc-pager{font-family:var(--mono);font-size:12px;margin:22px 0 6px;display:flex;gap:12px;
     flex-wrap:wrap;align-items:baseline}
@@ -191,21 +193,13 @@
         <div id="fig-tiers-body"></div>
         <p class="fig-pending" id="fig-tiers-pending">Appears once each response is coded against the clinician-reviewed rubric.</p>
       </figure>
-      <figure class="fig" id="fig-sim" hidden>
-        <figcaption class="fig-cap">Same question, re-asked vs re-worded <span class="fig-sub">word overlap between answers · higher = more alike</span></figcaption>
-        <div id="fig-sim-body"></div>
-      </figure>
       <figure class="fig" id="fig-flags" hidden>
         <figcaption class="fig-cap">What the answers do <span class="fig-sub">share of graded responses · clinical vs patient wording</span></figcaption>
         <div class="fig-row" id="fig-flags-body"></div>
       </figure>
       <figure class="fig" id="fig-map" hidden>
         <figcaption class="fig-cap">Where the downgrades happen <span class="fig-sub">one mark per scenario · filled = patient wording graded less urgent · tap a mark to open it</span></figcaption>
-        <div id="fig-map-body"></div>
-      </figure>
-      <figure class="fig" id="fig-bridge" hidden>
-        <figcaption class="fig-cap">Next-word gap vs advice drop <span class="fig-sub">one dot per scenario per model · red = downgrade</span></figcaption>
-        <div id="fig-bridge-body"></div>
+        <div id="fig-map-body" class="fig-scroll"></div>
       </figure>
     </div>
     <nav class="sc-pager" id="sc-pager" aria-label="Scenario pages"></nav>
@@ -224,6 +218,14 @@
     <dl id="prov-list"></dl>
   </section>
 
+  <figure class="fig" id="fig-sim" hidden>
+        <figcaption class="fig-cap">Same question, re-asked vs re-worded <span class="fig-sub">word overlap between answers · higher = more alike</span></figcaption>
+        <div id="fig-sim-body"></div>
+  </figure>
+  <figure class="fig" id="fig-bridge" hidden>
+        <figcaption class="fig-cap">Next-word gap vs advice drop <span class="fig-sub">one dot per scenario per model · red = downgrade</span></figcaption>
+        <div id="fig-bridge-body"></div>
+  </figure>
   <figure class="fig" id="fig-words" hidden>
     <figcaption class="fig-cap">Words per response <span class="fig-sub">mean per model · clinical vs everyday patient wording</span></figcaption>
     <div id="fig-words-body"></div>
