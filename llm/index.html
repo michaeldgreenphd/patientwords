@@ -59,6 +59,11 @@
   .fig-cap .fig-sub{font-weight:400;letter-spacing:.06em;text-transform:none;color:var(--muted)}
   .fig svg{display:block;width:100%;height:auto;max-width:680px}
   .fig-pending{font-family:var(--mono);font-size:11.5px;color:var(--muted);margin:4px 0 0}
+  .fig-row{display:flex;gap:26px;flex-wrap:wrap;align-items:flex-start}
+  .fig-panel{flex:1 1 200px;min-width:180px;max-width:230px}
+  .fig-panel-cap{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:0 0 3px}
+  .fig-panel svg{max-width:none}
+  #fig-map-body svg .mapcell{cursor:pointer}
   /* scenario pager: text-only (Tufte) */
   .sc-pager{font-family:var(--mono);font-size:12px;margin:22px 0 6px;display:flex;gap:12px;
     flex-wrap:wrap;align-items:baseline}
@@ -189,6 +194,18 @@
       <figure class="fig" id="fig-sim" hidden>
         <figcaption class="fig-cap">Same question, re-asked vs re-worded <span class="fig-sub">word overlap between answers · higher = more alike</span></figcaption>
         <div id="fig-sim-body"></div>
+      </figure>
+      <figure class="fig" id="fig-flags" hidden>
+        <figcaption class="fig-cap">What the answers do <span class="fig-sub">share of graded responses · clinical vs patient wording</span></figcaption>
+        <div class="fig-row" id="fig-flags-body"></div>
+      </figure>
+      <figure class="fig" id="fig-map" hidden>
+        <figcaption class="fig-cap">Where the downgrades happen <span class="fig-sub">one mark per scenario · filled = patient wording graded less urgent · tap a mark to open it</span></figcaption>
+        <div id="fig-map-body"></div>
+      </figure>
+      <figure class="fig" id="fig-bridge" hidden>
+        <figcaption class="fig-cap">Next-word gap vs advice drop <span class="fig-sub">one dot per scenario per model · red = downgrade</span></figcaption>
+        <div id="fig-bridge-body"></div>
       </figure>
     </div>
     <nav class="sc-pager" id="sc-pager" aria-label="Scenario pages"></nav>
@@ -479,6 +496,147 @@
     return svg;
   }
 
+  function svgNode(tag,attrs,text){
+    var e=document.createElementNS('http://www.w3.org/2000/svg',tag);
+    for(var k in attrs)e.setAttribute(k,attrs[k]);
+    if(text!=null)e.textContent=text;
+    return e;
+  }
+
+  // one panel: per model, two thin bars (clinical green / patient ink), values at the ends;
+  // opts.inner names a second rate drawn as a darker segment inside each bar
+  function tinyName(spec){
+    var m=shortName(spec);
+    var fam=['haiku','gemini','grok','deepseek','kimi','gpt'];
+    for(var i=0;i<fam.length;i++)if(m.indexOf(fam[i])>=0)return fam[i]==='gpt'?m:fam[i];
+    return m;
+  }
+
+  function svgBarsPanel(rows,opts){
+    opts=opts||{};
+    var W=230,L=64,R=192,rowH=24,top=4,H=top+rows.length*rowH+2;
+    var svg=svgNode('svg',{viewBox:'0 0 '+W+' '+H,role:'img','aria-label':opts.label||''});
+    function x(v){return L+v*(R-L);}
+    rows.forEach(function(r,i){
+      var y=top+i*rowH;
+      svg.appendChild(svgNode('text',{x:0,y:y+13,'font-family':'ui-monospace,monospace','font-size':'10.5px',fill:'var(--ink,#1c1c19)'},r.label));
+      [['a','var(--clinical,#15803d)',3],['b','var(--patient,#111827)',12]].forEach(function(sp){
+        var v=r[sp[0]];
+        if(v==null)return;
+        var yy=y+sp[2];
+        svg.appendChild(svgNode('rect',{x:L,y:yy,width:Math.max(x(v)-L,0.5),height:6,fill:sp[1]}));
+        var iv=r[sp[0]+'_inner'];
+        if(opts.inner&&iv!=null)svg.appendChild(svgNode('rect',{x:L,y:yy+1.5,width:Math.max(x(iv)-L,0),height:3,fill:'var(--paper,#faf9f5)',opacity:.45}));
+        svg.appendChild(svgNode('text',{x:x(v)+4,y:yy+6,'font-family':'ui-monospace,monospace','font-size':'9.5px',fill:'var(--muted,#6d6c66)'},Math.round(v*100)+'%'));
+      });
+    });
+    return svg;
+  }
+
+  function svgDowngradeMap(models,scen){
+    var cell=13,gap=3,L=150,top=6;
+    var W=L+scen.length*(cell+gap)+6,H=top+models.length*(cell+gap)+16;
+    var svg=svgNode('svg',{viewBox:'0 0 '+W+' '+H,role:'img','aria-label':'Downgrade map: one mark per scenario per model'});
+    models.forEach(function(m,mi){
+      var y=top+mi*(cell+gap);
+      svg.appendChild(svgNode('text',{x:0,y:y+cell-3,'font-family':'ui-monospace,monospace','font-size':'10.5px',fill:'var(--ink,#1c1c19)'},m.label));
+      scen.forEach(function(s,si){
+        var d=(s.byModel||{})[m.spec];
+        var xx=L+si*(cell+gap);
+        var attrs={x:xx,y:y,width:cell,height:cell,'class':'mapcell','data-s':String(si+1)};
+        if(d==null){attrs.fill='none';attrs.stroke='var(--hairline,#dcdad2)';}
+        else if(d.downgrade){attrs.fill='var(--penalty,#b4483d)';}
+        else{attrs.fill='none';attrs.stroke='var(--structural,#c3c9d2)';}
+        var rc=svgNode('rect',attrs);
+        rc.addEventListener('click',function(){go(si);});
+        var t=svgNode('title',{},'scenario '+(si+1)+(d?(': '+d.clinical+' → '+d.patient):': not graded'));
+        rc.appendChild(t);
+        svg.appendChild(rc);
+      });
+    });
+    // scenario index ticks: first and last only
+    svg.appendChild(svgNode('text',{x:L,y:H-3,'font-family':'ui-monospace,monospace','font-size':'9px',fill:'var(--muted,#6d6c66)'},'1'));
+    svg.appendChild(svgNode('text',{x:L+(scen.length-1)*(cell+gap),y:H-3,'font-family':'ui-monospace,monospace','font-size':'9px',fill:'var(--muted,#6d6c66)'},String(scen.length)));
+    return svg;
+  }
+
+  function svgBridge(points){
+    var W=680,H=200,L=60,R=650,T=14,B=170;
+    var xs=points.map(function(p){return p.x;});
+    var lo=Math.min.apply(null,xs),hi=Math.max.apply(null,xs);
+    if(lo===hi){lo-=1;hi+=1;}
+    var ymin=-3,ymax=3;
+    function px(v){return L+(v-lo)/(hi-lo)*(R-L);}
+    function py(v){return B-(v-ymin)/(ymax-ymin)*(B-T);}
+    var svg=svgNode('svg',{viewBox:'0 0 '+W+' '+H,role:'img','aria-label':'Wording gap versus advice tier drop, one dot per scenario per model'});
+    svg.appendChild(svgNode('line',{x1:L,y1:py(0),x2:R,y2:py(0),stroke:'var(--hairline,#dcdad2)','stroke-width':1}));
+    svg.appendChild(svgNode('text',{x:L-8,y:py(0)+3,'text-anchor':'end','font-family':'ui-monospace,monospace','font-size':'9.5px',fill:'var(--muted,#6d6c66)'},'0'));
+    svg.appendChild(svgNode('text',{x:L-8,y:py(-2)+3,'text-anchor':'end','font-family':'ui-monospace,monospace','font-size':'9.5px',fill:'var(--muted,#6d6c66)'},'-2 tiers'));
+    svg.appendChild(svgNode('text',{x:R,y:H-4,'text-anchor':'end','font-family':'ui-monospace,monospace','font-size':'9.5px',fill:'var(--muted,#6d6c66)'},'next-word gap '+Math.round(hi*100)+' pp'));
+    svg.appendChild(svgNode('text',{x:L,y:H-4,'font-family':'ui-monospace,monospace','font-size':'9.5px',fill:'var(--muted,#6d6c66)'},Math.round(lo*100)+' pp'));
+    points.forEach(function(p){
+      svg.appendChild(svgNode('circle',{cx:px(p.x),cy:py(-p.drop)+p.j,r:3,
+        fill:p.drop>0?'var(--penalty,#b4483d)':'var(--muted,#6d6c66)',opacity:p.drop>0?0.9:0.55}));
+    });
+    return svg;
+  }
+
+  function renderGradedFigs(){
+    var ms=data.model_summary||[];
+    // deflection panels from judged flag rates
+    var panels=[
+      {key:'disclaimer',cap:'says it is not medical advice'},
+      {key:'professional_referral',cap:'tells you to see a doctor'},
+      {key:'clarifying_question',cap:'asks a question first',inner:'question_then_referral',note:'lighter core = still refers'}
+    ];
+    var haveFlags=ms.some(function(m){return m.clinical&&m.clinical.flag_rates;});
+    if(haveFlags){
+      var wrap=document.getElementById('fig-flags-body');
+      panels.forEach(function(p){
+        var rows=[];
+        ms.forEach(function(m){
+          var c=(m.clinical||{}).flag_rates,q=(m.patient||{}).flag_rates;
+          if(!c&&!q)return;
+          rows.push({label:tinyName(m.model),
+            a:c?(c[p.key]||0):null,b:q?(q[p.key]||0):null,
+            a_inner:p.inner&&c?(c[p.inner]||0):null,b_inner:p.inner&&q?(q[p.inner]||0):null});
+        });
+        if(!rows.length)return;
+        var div=el('div','fig-panel');
+        div.appendChild(el('p','fig-panel-cap',p.cap+(p.note?(' · '+p.note):'')));
+        div.appendChild(svgBarsPanel(rows,{inner:!!p.inner,label:p.cap}));
+        wrap.appendChild(div);
+      });
+      document.getElementById('fig-flags').hidden=false;
+    }
+    // downgrade map + bridge from per-scenario tier summaries
+    var specs=[],scen=[];
+    (data.scenarios||[]).forEach(function(s,i){
+      var by={};
+      (s.tier_summary||[]).forEach(function(t){
+        by[t.model]=t;
+        if(specs.indexOf(t.model)<0)specs.push(t.model);
+      });
+      scen.push({byModel:by});
+    });
+    if(specs.length){
+      var models=specs.map(function(sp){return {spec:sp,label:shortName(sp)};});
+      document.getElementById('fig-map-body').appendChild(svgDowngradeMap(models,scen));
+      document.getElementById('fig-map').hidden=false;
+      var pts=[];
+      (data.scenarios||[]).forEach(function(s){
+        if(typeof s.wording_gap!=='number'||!s.tier_summary)return;
+        s.tier_summary.forEach(function(t,ti){
+          pts.push({x:s.wording_gap,drop:t.drop,j:(ti%5-2)*2.2}); // small fixed offset separates coincident dots
+        });
+      });
+      if(pts.length>3){
+        document.getElementById('fig-bridge-body').appendChild(svgBridge(pts));
+        document.getElementById('fig-bridge').hidden=false;
+      }
+    }
+  }
+
   function renderFigs(){
     var ms=data.model_summary;
     if(!ms||!ms.length)return;
@@ -537,6 +695,7 @@
         document.getElementById('fig-sim').hidden=false;
       }
     }
+    renderGradedFigs();
     document.getElementById('figs').hidden=false; // urgency slot always shows: graded dots or the pending line
   }
 
