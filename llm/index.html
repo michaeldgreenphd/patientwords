@@ -741,6 +741,18 @@
     provRow(list,'cost per scenario',typeof run.cost_per_scenario==='number'?('$'+run.cost_per_scenario.toFixed(3)):'—');
     var models=(run.models||[]).map(function(m){return m.spec+(m.model_returned?(' (served as '+m.model_returned+')'):'');}).join(' · ');
     provRow(list,'models',models||'—');
+    // distinct served builds per model: model_returned + fingerprint + sent window
+    (run.models||[]).forEach(function(m){
+      if(!m.builds||!m.builds.length)return;
+      var txt=m.builds.map(function(b){
+        var bits=[b.model_returned||'—'];
+        if(b.build_fingerprint)bits.push(b.build_fingerprint);
+        if(b.first_sent_utc)bits.push(String(b.first_sent_utc).slice(0,10)+'→'+String(b.last_sent_utc||'').slice(0,10));
+        bits.push('n='+b.n);
+        return bits.join(' · ');
+      }).join('  |  ');
+      provRow(list,shortName(m.spec)+' builds',txt);
+    });
     if(data.rubric_version)provRow(list,'tier rubric',String(data.rubric_version)+' (coded by a blinded judge; see methods)');
     function repoLink(path){
       if(!path)return document.createTextNode('—');
