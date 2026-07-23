@@ -188,11 +188,7 @@
 
   <section id="llm-viewer" hidden aria-live="polite">
     <div id="figs" hidden>
-      <figure class="fig">
-        <figcaption class="fig-cap">Care-urgency of the advice <span class="fig-sub" id="fig-tiers-sub">coded tier, same scale per model</span></figcaption>
-        <div id="fig-tiers-body"></div>
-        <p class="fig-pending" id="fig-tiers-pending">Appears once each response is coded against the clinician-reviewed rubric.</p>
-      </figure>
+      <p class="fig-pending" id="fig-tiers-pending">Grades appear here once each response is coded against the clinician-reviewed rubric.</p>
       <figure class="fig" id="fig-flags" hidden>
         <figcaption class="fig-cap">What the answers do <span class="fig-sub">share of graded responses · <span style="color:var(--clinical)">clinical</span> vs <span style="color:var(--patient)">patient</span> wording</span></figcaption>
         <div class="fig-row" id="fig-flags-body"></div>
@@ -218,6 +214,10 @@
     <dl id="prov-list"></dl>
   </section>
 
+  <figure class="fig" id="fig-tiers" hidden>
+    <figcaption class="fig-cap">Care-urgency of the advice <span class="fig-sub" id="fig-tiers-sub">coded tier, same scale per model</span></figcaption>
+    <div id="fig-tiers-body"></div>
+  </figure>
   <figure class="fig" id="fig-sim" hidden>
         <figcaption class="fig-cap">Same question, re-asked vs re-worded <span class="fig-sub">word overlap between answers · higher = more alike</span></figcaption>
         <div id="fig-sim-body"></div>
@@ -542,13 +542,17 @@
 
   function svgDowngradeMap(models,scen){
     var cell=13,gap=3,L=150,top=6;
-    var W=L+scen.length*(cell+gap)+28,H=top+models.length*(cell+gap)+16;
+    var W=L+scen.length*(cell+gap)+96,H=top+models.length*(cell+gap)+16;
     var svg=svgNode('svg',{viewBox:'0 0 '+W+' '+H,role:'img','aria-label':'Downgrade map: one mark per scenario per model'});
     models.forEach(function(m,mi){
       var y=top+mi*(cell+gap);
       svg.appendChild(svgNode('text',{x:0,y:y+cell-3,'font-family':'ui-monospace,monospace','font-size':'10.5px',fill:'var(--ink,#1c1c19)'},m.label));
+      var graded=scen.filter(function(s){return (s.byModel||{})[m.spec];}).length;
       var nDown=scen.filter(function(s){var d=(s.byModel||{})[m.spec];return d&&d.downgrade;}).length;
-      svg.appendChild(svgNode('text',{x:L+scen.length*(cell+gap)+4,y:y+cell-3,'font-family':'ui-monospace,monospace','font-size':'9.5px',fill:'var(--penalty,#b4483d)'},String(nDown)));
+      var pct=graded?Math.round(100*nDown/graded):null;
+      if(pct!=null)svg.appendChild(svgNode('text',{x:L+scen.length*(cell+gap)+4,y:y+cell-3,
+        'font-family':'ui-monospace,monospace','font-size':'9.5px',fill:'var(--penalty,#b4483d)'},
+        pct+'%'+(mi===0?' downgraded':'')));
       scen.forEach(function(s,si){
         var d=(s.byModel||{})[m.spec];
         var xx=L+si*(cell+gap);
@@ -617,6 +621,7 @@
         wrap.appendChild(div);
       });
       document.getElementById('fig-flags').hidden=false;
+      document.getElementById('fig-tiers-pending').hidden=true;
     }
     // downgrade map + bridge from per-scenario tier summaries
     var specs=[],scen=[];
@@ -678,6 +683,7 @@
         label:'Mean coded care-urgency tier by model, clinical versus patient wording'});
       if(t){
         document.getElementById('fig-tiers-body').appendChild(t);
+        document.getElementById('fig-tiers').hidden=false;
         document.getElementById('fig-tiers-pending').hidden=true;
         var provisional=/draft/i.test(String(data.rubric_version||''));
         document.getElementById('fig-tiers-sub').textContent=
