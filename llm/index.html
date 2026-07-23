@@ -77,8 +77,13 @@
   .sc-pager [aria-current=true]{color:var(--ink);border-bottom:1px solid var(--ink)}
   .sc-pager .off{color:var(--structural);cursor:default}
   .sc-pager .state{color:var(--muted)}
-  .sc-meta{font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--muted);margin:2px 0 18px}
+  .sc-meta{font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--muted);margin:2px 0 4px}
   .sc-meta b{color:var(--ink);font-weight:600}
+  /* generation note: how this scenario's text was produced, with archive + trace links */
+  .sc-gen{font-family:var(--mono);font-size:11px;line-height:1.7;color:var(--muted);margin:0 0 18px;max-width:88ch}
+  .sc-gen a{color:var(--clinical);text-decoration:none}
+  .sc-gen a:hover{text-decoration:underline;text-underline-offset:3px}
+  .sc-gen .gen-note{font-style:italic}
   /* attempt switcher: site chip conventions */
   .chip-g{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:4px 0 14px}
   .chip-lbl{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-right:4px}
@@ -211,6 +216,7 @@
       <span class="chip-note">same prompt, re-asked — switching shows how much each model's answer moves</span>
     </div>
     <p class="sc-meta" id="sc-meta"></p>
+    <p class="sc-gen" id="sc-gen" hidden></p>
     <div id="sc-body"></div>
     <nav class="sc-pager" id="sc-pager2" aria-label="Scenario pages (bottom)"></nav>
   </section>
@@ -249,7 +255,18 @@
   var pending=document.getElementById('llm-pending');
   var viewer=document.getElementById('llm-viewer');
   var prov=document.getElementById('llm-prov');
-  var current=0, data=null;
+  var current=0, data=null, genByBatch={};
+
+  // generator model per source batch, from the sidecar copies in data/provenance.json
+  fetch('../data/provenance.json',{cache:'no-cache'})
+    .then(function(r){return r.ok?r.json():null;})
+    .then(function(p){
+      ((p&&p.batches)||[]).forEach(function(b){
+        if(b.batch)genByBatch[b.batch]=b.generated_by||b.model||null;
+      });
+      if(data)render(); // repaint the note if the payload beat this fetch
+    })
+    .catch(function(){});
 
   function el(tag,cls,text){var e=document.createElement(tag);if(cls)e.className=cls;if(text!=null)e.textContent=text;return e;}
   function dash(v){return (v==null||v==='')?'—':String(v);}
@@ -384,6 +401,42 @@
     return wrap;
   }
 
+  // where this scenario's text came from: generator model (provenance sidecar copy),
+  // the archived batch it belongs to, and its circuit trace on this site
+  function renderGen(s){
+    var node=document.getElementById('sc-gen');
+    node.textContent='';
+    var m=/^(.+)#(\d+)$/.exec(String(s.id||''));
+    if(!m){node.hidden=true;return;}
+    var batch=m[1], idx=parseInt(m[2],10);
+    var gen=genByBatch[batch];
+    node.appendChild(document.createTextNode(
+      (gen?('Both wordings were written by '+gen):'Both wordings were generated')+
+      ' as one stress pair, archived in '));
+    var ba=el('a',null,batch);
+    ba.href='https://github.com/michaeldgreenphd/patientwords-engine/blob/main/data/simulated/'+batch+'.json';
+    ba.target='_blank';ba.rel='noopener';
+    node.appendChild(ba);
+    node.appendChild(document.createTextNode('. '));
+    // trace link: exporter-verified path when the payload carries the field; the
+    // pattern fallback only serves older payloads, where every scenario has a render
+    var newPayload=data.scenarios.some(function(x){return x.trace_html!==undefined;});
+    var trace=s.trace_html||((!newPayload&&/^pairs_|^dialects_|^quadrants_/.test(batch))?
+      ('modes/simulated/'+batch+'/index_'+(idx<10?'0':'')+idx+'.html'):null);
+    if(trace){
+      var ta=el('a',null,'View this pair’s circuit trace');
+      ta.href='../'+trace;
+      ta.target='_blank';ta.rel='noopener';
+      node.appendChild(ta);
+      node.appendChild(document.createTextNode('.'));
+    }
+    if(s.generation_rationale){
+      node.appendChild(document.createTextNode(' Generator note: '));
+      node.appendChild(el('span','gen-note','“'+s.generation_rationale+'”'));
+    }
+    node.hidden=false;
+  }
+
   // "pairs_20260706T201750Z#1" -> "Scenario 1 — Run on July 6, 2026 at 8:17 PM";
   // anything unparseable falls back to the raw id
   function prettyId(id){
@@ -407,6 +460,7 @@
     if(pid)idNode.title=String(s.id); // raw archive id stays one hover away
     meta.appendChild(idNode);
     if(s.topic)meta.appendChild(document.createTextNode(' · topic: '+s.topic));
+    renderGen(s);
     var body=document.getElementById('sc-body');
     body.textContent='';
     var arms=armDefs(s);
