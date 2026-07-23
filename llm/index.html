@@ -60,7 +60,7 @@
   .fig svg{display:block;width:100%;height:auto;max-width:680px}
   .fig-pending{font-family:var(--mono);font-size:11.5px;color:var(--muted);margin:4px 0 0}
   .fig-row{display:flex;gap:26px;flex-wrap:wrap;align-items:flex-start}
-  .fig-panel{flex:1 1 200px;min-width:180px;max-width:230px}
+  .fig-panel{flex:1 1 240px;min-width:200px;max-width:300px}
   .fig-panel-cap{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:0 0 3px;min-height:28px}
   .fig-panel svg{max-width:none}
   #fig-map-body svg .mapcell{cursor:pointer}
@@ -368,7 +368,7 @@
         if(!seen[m]){seen[m]=1;order.push(m);}
       });
     });
-    return order;
+    return groupSpecs(order); // same family ordering as the figures
   }
 
   function cellBlock(d,mb){
@@ -523,18 +523,54 @@
     return i>=0?m.slice(i+1):m;
   }
 
+  // family grouping: same provider's models sit together, provider order by
+  // first appearance; used by every model-row figure so ordering matches
+  function groupSpecs(specs){
+    var order=[],by={};
+    specs.forEach(function(s){
+      var p=String(s).split(':')[0];
+      if(!by[p]){by[p]=[];order.push(p);}
+      by[p].push(s);
+    });
+    return order.reduce(function(acc,p){return acc.concat(by[p]);},[]);
+  }
+  // rows annotated for figures: provider set on each family's first row,
+  // gapBefore separates families with space instead of rules
+  function groupedRows(ms,specOf){
+    var order=[],by={};
+    ms.forEach(function(m){
+      var p=String(specOf(m)).split(':')[0];
+      if(!by[p]){by[p]=[];order.push(p);}
+      by[p].push(m);
+    });
+    var out=[];
+    order.forEach(function(p){
+      by[p].forEach(function(m,i){
+        out.push({m:m,provider:(i===0)?p:null,gapBefore:(i===0&&out.length>0)});
+      });
+    });
+    return out;
+  }
+
   // small multiples: the models are listed once on the left, each measure is a
   // dumbbell panel beside them, so one horizontal read gives a model's profile.
   // Per panel: a faint dashed line marks the pooled median; no gridlines, no boxes.
   function svgProfiles(labelRows,panels){
-    var rowH=27, top=34, LW=150, PW=170, GAP=52;
-    var H=top+labelRows.length*rowH+6;
+    var rowH=27, top=34, LW=150, PW=170, GAP=52, GROUPGAP=7;
+    // family gaps: precompute each row's center so panels stay aligned
+    var ys=[],yy=top;
+    labelRows.forEach(function(r){
+      if(r.gapBefore)yy+=GROUPGAP;
+      ys.push(yy+rowH/2);
+      yy+=rowH;
+    });
+    var H=yy+6;
     var W=LW+panels.length*(PW+GAP)-GAP+42;
     var svg=svgNode('svg',{viewBox:'0 0 '+W+' '+H,role:'img',
       'aria-label':'Per-model profiles: '+panels.map(function(p){return p.title;}).join(', ')+
-      ', two dots per model per measure'});
+      ', two dots per model per measure, grouped by provider'});
     labelRows.forEach(function(r,i){
-      var y=top+i*rowH+rowH/2;
+      var y=ys[i];
       var lbl=svgNode('text',{x:0,y:y+4,'font-family':'ui-monospace,monospace','font-size':'12px',fill:'var(--ink,#1c1c19)'},r.label);
       if(r.note){
         var ts=document.createElementNS('http://www.w3.org/2000/svg','tspan');
@@ -566,11 +602,11 @@
       function fmt(v){return p.decimals?v.toFixed(p.decimals):String(Math.round(v));}
       var sorted=vals.slice().sort(function(a,b){return a-b;});
       var med=sorted.length%2?sorted[(sorted.length-1)/2]:(sorted[sorted.length/2-1]+sorted[sorted.length/2])/2;
-      svg.appendChild(svgNode('line',{x1:x(med),y1:top+4,x2:x(med),y2:top+labelRows.length*rowH-2,
+      svg.appendChild(svgNode('line',{x1:x(med),y1:top+4,x2:x(med),y2:H-8,
         stroke:'var(--structural,#c3c9d2)','stroke-width':1,'stroke-dasharray':'2 4',opacity:.8}));
       p.rows.forEach(function(r,i){
         if(r.a==null&&r.b==null)return;
-        var y=top+i*rowH+rowH/2;
+        var y=ys[i];
         var xa=r.a!=null?x(r.a):null, xb=r.b!=null?x(r.b):null;
         if(xa!=null&&xb!=null)svg.appendChild(svgNode('line',{x1:xa,y1:y,x2:xb,y2:y,stroke:'var(--structural,#c3c9d2)','stroke-width':1}));
         if(xa!=null)svg.appendChild(svgNode('circle',{cx:xa,cy:y,r:3.5,fill:p.aColor}));
@@ -608,11 +644,17 @@
 
   function svgBarsPanel(rows,opts){
     opts=opts||{};
-    var W=230,L=64,R=190,rowH=26,top=4,H=top+rows.length*rowH+2;
+    var hasProv=rows.some(function(r){return r.provider;});
+    var W=hasProv?300:230,L=64,R=190,rowH=26,top=4,GAP=6;
+    var H=top+rows.length*rowH+rows.filter(function(r){return r.gapBefore;}).length*GAP+2;
     var svg=svgNode('svg',{viewBox:'0 0 '+W+' '+H,role:'img','aria-label':opts.label||''});
     function x(v){return L+v*(R-L);}
+    var y=top-rowH;
     rows.forEach(function(r,i){
-      var y=top+i*rowH;
+      y+=rowH+(r.gapBefore?GAP:0);
+      // provider attribution, once per family, in the right margin
+      if(r.provider)svg.appendChild(svgNode('text',{x:W-2,y:y+13,'text-anchor':'end',
+        'font-family':'ui-monospace,monospace','font-size':'9px',fill:'var(--muted,#6d6c66)'},r.provider));
       svg.appendChild(svgNode('text',{x:0,y:y+14,'font-family':'ui-monospace,monospace','font-size':'10.5px',fill:'var(--ink,#1c1c19)'},r.label));
       [['a','var(--clinical,#15803d)',4],['b','var(--patient,#111827)',14]].forEach(function(sp){
         var v=r[sp[0]];
@@ -701,14 +743,15 @@
     var haveFlags=ms.some(function(m){return m.clinical&&m.clinical.flag_rates;});
     if(haveFlags){
       var wrap=document.getElementById('fig-flags-body');
+      var gms=groupedRows(ms.filter(function(m){
+        return (m.clinical||{}).flag_rates||(m.patient||{}).flag_rates;
+      }),function(m){return m.model;});
       panels.forEach(function(p){
-        var rows=[];
-        ms.forEach(function(m){
-          var c=(m.clinical||{}).flag_rates,q=(m.patient||{}).flag_rates;
-          if(!c&&!q)return;
-          rows.push({label:tinyName(m.model),
+        var rows=gms.map(function(g){
+          var m=g.m,c=(m.clinical||{}).flag_rates,q=(m.patient||{}).flag_rates;
+          return {label:tinyName(m.model),provider:g.provider,gapBefore:g.gapBefore,
             a:c?(c[p.key]||0):null,b:q?(q[p.key]||0):null,
-            a_inner:p.inner&&c?(c[p.inner]||0):null,b_inner:p.inner&&q?(q[p.inner]||0):null});
+            a_inner:p.inner&&c?(c[p.inner]||0):null,b_inner:p.inner&&q?(q[p.inner]||0):null};
         });
         if(!rows.length)return;
         var div=el('div','fig-panel');
@@ -730,7 +773,7 @@
       scen.push({byModel:by});
     });
     if(specs.length){
-      var models=specs.map(function(sp){return {spec:sp,label:shortName(sp)};});
+      var models=groupSpecs(specs).map(function(sp){return {spec:sp,label:shortName(sp)};});
       document.getElementById('fig-map-body').appendChild(svgDowngradeMap(models,scen));
       document.getElementById('fig-map').hidden=false;
       var pts=[];
@@ -750,10 +793,11 @@
   function renderFigs(){
     var ms=data.model_summary;
     if(!ms||!ms.length)return;
-    var rows=ms.filter(function(m){
+    var grows=groupedRows(ms.filter(function(m){
       var c=m.clinical||{},p=m.patient||{};
       return c.mean_words!=null||p.mean_words!=null||c.tier_mean_rank!=null||p.tier_mean_rank!=null||!!m.similarity;
-    });
+    }),function(m){return m.model;});
+    var rows=grows.map(function(g){return g.m;});
     if(rows.length){
       // n moves to the subtitle when uniform; a per-model note appears only when it differs
       var wn={},sn={};
@@ -763,11 +807,11 @@
         if(m.similarity&&m.similarity.n_stimuli!=null)sn[m.similarity.n_stimuli]=1;
       });
       var wUniform=Object.keys(wn).length<=1, sUniform=Object.keys(sn).length<=1;
-      var labels=rows.map(function(m){
+      var labels=rows.map(function(m,i){
         var c=m.clinical||{},p=m.patient||{},notes=[];
         if(!wUniform&&(c.n!=null||p.n!=null))notes.push('n='+((c.n===p.n)?c.n:(dash(c.n)+'·'+dash(p.n))));
         if(!sUniform&&m.similarity&&m.similarity.n_stimuli!=null)notes.push('overlap n='+m.similarity.n_stimuli);
-        return {label:shortName(m.model),note:notes.join(' ')||null};
+        return {label:shortName(m.model),note:notes.join(' ')||null,gapBefore:grows[i].gapBefore};
       });
       var panels=[],subBits=[];
       var to=data.tier_order;
