@@ -426,9 +426,24 @@
     node.appendChild(document.createTextNode(onlyFlips?
       'The pair comes from the simulated scenario set: circuit tracing on gemma-2-2b found its top next-word prediction changes between these two wordings, and only pairs with that change were used here. ':
       'The pair comes from the simulated scenario set traced on gemma-2-2b. '));
-    var ask=(data.ask_suffix!==undefined)?data.ask_suffix:'... anyway what should I do?';
-    if(ask)node.appendChild(document.createTextNode(
-      'Each question above is the pair’s sentence with the same fixed ending added: “'+ask+'”. '));
+    // advice-request construction, scoped to the set it describes: while every
+    // scenario shares one suffix the claim covers 1..N; a future payload mixing
+    // builds switches this to a per-scenario statement automatically
+    var ask=(s.ask_suffix!==undefined&&s.ask_suffix!==null)?s.ask_suffix:
+            ((data.ask_suffix!==undefined)?data.ask_suffix:'... anyway what should I do?');
+    var seen={};
+    data.scenarios.forEach(function(x){
+      var a=(x.ask_suffix!==undefined&&x.ask_suffix!==null)?x.ask_suffix:data.ask_suffix;
+      if(a!=null)seen[a]=1;
+    });
+    var uniform=Object.keys(seen).length<=1;
+    if(ask&&uniform){
+      node.appendChild(document.createTextNode(
+        'Scenarios 1 to '+data.scenarios.length+' all ask for advice the same way: the pair’s sentence plus the fixed ending “'+ask+'”, so both wordings make the identical request. If a later set is built differently, this note will say so. '));
+    }else if(ask){
+      node.appendChild(document.createTextNode(
+        'This scenario asks for advice as the pair’s sentence plus the ending “'+ask+'”. '));
+    }
     // trace link: exporter-verified path when the payload carries the field; the
     // pattern fallback only serves older payloads, where every scenario has a render
     var newPayload=data.scenarios.some(function(x){return x.trace_html!==undefined;});
