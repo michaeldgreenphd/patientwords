@@ -418,6 +418,17 @@
     ba.target='_blank';ba.rel='noopener';
     node.appendChild(ba);
     node.appendChild(document.createTextNode('. '));
+    // how the pair was selected and how the traced sentence became a full question.
+    // Field-less payloads predate the exporter fields; the fallbacks state the
+    // registered 2026-07-21 build (flip-only selection, fixed ask suffix).
+    var sel=data.selection||null;
+    var onlyFlips=sel?!!sel.only_flips:true;
+    node.appendChild(document.createTextNode(onlyFlips?
+      'The pair comes from the simulated scenario set: circuit tracing on gemma-2-2b found its top next-word prediction changes between these two wordings, and only pairs with that change were used here. ':
+      'The pair comes from the simulated scenario set traced on gemma-2-2b. '));
+    var ask=(data.ask_suffix!==undefined)?data.ask_suffix:'... anyway what should I do?';
+    if(ask)node.appendChild(document.createTextNode(
+      'Each question above is the pair’s sentence with the same fixed ending added: “'+ask+'”. '));
     // trace link: exporter-verified path when the payload carries the field; the
     // pattern fallback only serves older payloads, where every scenario has a render
     var newPayload=data.scenarios.some(function(x){return x.trace_html!==undefined;});
