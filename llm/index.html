@@ -600,7 +600,8 @@
   // opts.inner names a second rate drawn as a darker segment inside each bar
   function tinyName(spec){
     var m=shortName(spec);
-    var fam=['haiku','gemini','grok','deepseek','kimi','gpt'];
+    // 'mini' before 'gpt': the two OpenAI arms stay distinguishable in 64px
+    var fam=['haiku','sonnet','gemini','grok','deepseek','kimi','mini','gpt'];
     for(var i=0;i<fam.length;i++)if(m.indexOf(fam[i])>=0)return fam[i]==='gpt'?m:fam[i];
     return m;
   }
