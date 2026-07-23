@@ -61,7 +61,7 @@
   .fig-pending{font-family:var(--mono);font-size:11.5px;color:var(--muted);margin:4px 0 0}
   .fig-row{display:flex;gap:26px;flex-wrap:wrap;align-items:flex-start}
   .fig-panel{flex:1 1 200px;min-width:180px;max-width:230px}
-  .fig-panel-cap{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:0 0 3px}
+  .fig-panel-cap{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:0 0 3px;min-height:28px}
   .fig-panel svg{max-width:none}
   #fig-map-body svg .mapcell{cursor:pointer}
   .fig-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
@@ -194,7 +194,7 @@
         <p class="fig-pending" id="fig-tiers-pending">Appears once each response is coded against the clinician-reviewed rubric.</p>
       </figure>
       <figure class="fig" id="fig-flags" hidden>
-        <figcaption class="fig-cap">What the answers do <span class="fig-sub">share of graded responses · clinical vs patient wording</span></figcaption>
+        <figcaption class="fig-cap">What the answers do <span class="fig-sub">share of graded responses · <span style="color:var(--clinical)">clinical</span> vs <span style="color:var(--patient)">patient</span> wording</span></figcaption>
         <div class="fig-row" id="fig-flags-body"></div>
       </figure>
       <figure class="fig" id="fig-map" hidden>
@@ -516,20 +516,25 @@
 
   function svgBarsPanel(rows,opts){
     opts=opts||{};
-    var W=230,L=64,R=192,rowH=24,top=4,H=top+rows.length*rowH+2;
+    var W=230,L=64,R=190,rowH=26,top=4,H=top+rows.length*rowH+2;
     var svg=svgNode('svg',{viewBox:'0 0 '+W+' '+H,role:'img','aria-label':opts.label||''});
     function x(v){return L+v*(R-L);}
     rows.forEach(function(r,i){
       var y=top+i*rowH;
-      svg.appendChild(svgNode('text',{x:0,y:y+13,'font-family':'ui-monospace,monospace','font-size':'10.5px',fill:'var(--ink,#1c1c19)'},r.label));
-      [['a','var(--clinical,#15803d)',3],['b','var(--patient,#111827)',12]].forEach(function(sp){
+      svg.appendChild(svgNode('text',{x:0,y:y+14,'font-family':'ui-monospace,monospace','font-size':'10.5px',fill:'var(--ink,#1c1c19)'},r.label));
+      [['a','var(--clinical,#15803d)',4],['b','var(--patient,#111827)',14]].forEach(function(sp){
         var v=r[sp[0]];
         if(v==null)return;
         var yy=y+sp[2];
-        svg.appendChild(svgNode('rect',{x:L,y:yy,width:Math.max(x(v)-L,0.5),height:6,fill:sp[1]}));
+        svg.appendChild(svgNode('rect',{x:L,y:yy,width:Math.max(x(v)-L,0.5),height:5,fill:sp[1]}));
         var iv=r[sp[0]+'_inner'];
-        if(opts.inner&&iv!=null)svg.appendChild(svgNode('rect',{x:L,y:yy+1.5,width:Math.max(x(iv)-L,0),height:3,fill:'var(--paper,#faf9f5)',opacity:.45}));
-        svg.appendChild(svgNode('text',{x:x(v)+4,y:yy+6,'font-family':'ui-monospace,monospace','font-size':'9.5px',fill:'var(--muted,#6d6c66)'},Math.round(v*100)+'%'));
+        if(opts.inner&&iv!=null)svg.appendChild(svgNode('rect',{x:L,y:yy+1.25,width:Math.max(x(iv)-L,0),height:2.5,fill:'var(--paper,#faf9f5)',opacity:.5}));
+        var lbl=Math.round(v*100)+'%';
+        if(x(v)+26>W){ // bar reaches the edge: label sits inside its end, in paper
+          svg.appendChild(svgNode('text',{x:x(v)-3,y:yy+4.6,'text-anchor':'end','font-family':'ui-monospace,monospace','font-size':'9px',fill:'var(--paper,#faf9f5)'},lbl));
+        }else{
+          svg.appendChild(svgNode('text',{x:x(v)+4,y:yy+4.6,'font-family':'ui-monospace,monospace','font-size':'9px',fill:'var(--muted,#6d6c66)'},lbl));
+        }
       });
     });
     return svg;
@@ -537,11 +542,13 @@
 
   function svgDowngradeMap(models,scen){
     var cell=13,gap=3,L=150,top=6;
-    var W=L+scen.length*(cell+gap)+6,H=top+models.length*(cell+gap)+16;
+    var W=L+scen.length*(cell+gap)+28,H=top+models.length*(cell+gap)+16;
     var svg=svgNode('svg',{viewBox:'0 0 '+W+' '+H,role:'img','aria-label':'Downgrade map: one mark per scenario per model'});
     models.forEach(function(m,mi){
       var y=top+mi*(cell+gap);
       svg.appendChild(svgNode('text',{x:0,y:y+cell-3,'font-family':'ui-monospace,monospace','font-size':'10.5px',fill:'var(--ink,#1c1c19)'},m.label));
+      var nDown=scen.filter(function(s){var d=(s.byModel||{})[m.spec];return d&&d.downgrade;}).length;
+      svg.appendChild(svgNode('text',{x:L+scen.length*(cell+gap)+4,y:y+cell-3,'font-family':'ui-monospace,monospace','font-size':'9.5px',fill:'var(--penalty,#b4483d)'},String(nDown)));
       scen.forEach(function(s,si){
         var d=(s.byModel||{})[m.spec];
         var xx=L+si*(cell+gap);
