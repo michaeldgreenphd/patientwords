@@ -206,7 +206,7 @@
         <div class="fig-row" id="fig-flags-body"></div>
       </figure>
       <figure class="fig" id="fig-map" hidden>
-        <figcaption class="fig-cap">Where the downgrades happen <span class="fig-sub">one mark per scenario · filled = patient wording graded less urgent · tap a mark to open it</span></figcaption>
+        <figcaption class="fig-cap">Where the downgrades happen <span class="fig-sub">one mark per scenario · filled = patient wording graded less urgent · tap a mark to open it · a red numeral counts the models downgrading that scenario · downgrades cluster by scenario, not by the size of the next-word gap</span></figcaption>
         <div id="fig-map-body" class="fig-scroll"></div>
       </figure>
     </div>
@@ -230,10 +230,6 @@
   <figure class="fig" id="fig-profiles" hidden>
     <figcaption class="fig-cap">Model profiles <span class="fig-sub" id="fig-profiles-sub"></span></figcaption>
     <div id="fig-profiles-body" class="fig-scroll"></div>
-  </figure>
-  <figure class="fig" id="fig-bridge" hidden>
-        <figcaption class="fig-cap">Next-word gap vs advice drop <span class="fig-sub">one ring per scenario per model · red = downgrade · overlaps darken</span></figcaption>
-        <div id="fig-bridge-body"></div>
   </figure>
 
   <a class="back" href="../">← Back home</a>
@@ -526,7 +522,7 @@
   // family grouping: same provider's models sit together; provider order fixed
   // by the owner (2026-07-23), any unlisted provider follows in first-appearance
   // order; used by every model-row figure so ordering matches
-  var PROVIDER_ORDER=['anthropic','openai','xai','deepseek','moonshot'];
+  var PROVIDER_ORDER=['anthropic','openai','google','xai','deepseek','moonshot'];
   function provRank(p){var i=PROVIDER_ORDER.indexOf(p);return i<0?PROVIDER_ORDER.length:i;}
   function sortProviders(order){
     return order.map(function(p,i){return [provRank(p),i,p];})
@@ -711,32 +707,18 @@
         svg.appendChild(rc);
       });
     });
+    // column consensus: how many models downgrade this scenario, a bare numeral
+    // under columns where two or more agree — the caption explains the count
+    scen.forEach(function(s,si){
+      var n=models.filter(function(m){var d=(s.byModel||{})[m.spec];return d&&d.downgrade;}).length;
+      if(n<2)return;
+      svg.appendChild(svgNode('text',{x:L+si*(cell+gap)+cell/2,y:H-3,'text-anchor':'middle',
+        'font-family':'ui-monospace,monospace','font-size':'9px','font-weight':n>=models.length?'700':'400',
+        fill:'var(--penalty,#b4483d)'},String(n)));
+    });
     // scenario index ticks: first and last only
     svg.appendChild(svgNode('text',{x:L,y:H-3,'font-family':'ui-monospace,monospace','font-size':'9px',fill:'var(--muted,#6d6c66)'},'1'));
     svg.appendChild(svgNode('text',{x:L+(scen.length-1)*(cell+gap),y:H-3,'font-family':'ui-monospace,monospace','font-size':'9px',fill:'var(--muted,#6d6c66)'},String(scen.length)));
-    return svg;
-  }
-
-  function svgBridge(points){
-    var W=680,H=200,L=60,R=650,T=14,B=170;
-    var xs=points.map(function(p){return p.x;});
-    var lo=Math.min.apply(null,xs),hi=Math.max.apply(null,xs);
-    if(lo===hi){lo-=1;hi+=1;}
-    var ymin=-3,ymax=3;
-    function px(v){return L+(v-lo)/(hi-lo)*(R-L);}
-    function py(v){return B-(v-ymin)/(ymax-ymin)*(B-T);}
-    var svg=svgNode('svg',{viewBox:'0 0 '+W+' '+H,role:'img','aria-label':'Wording gap versus advice tier drop, one dot per scenario per model'});
-    svg.appendChild(svgNode('line',{x1:L,y1:py(0),x2:R,y2:py(0),stroke:'var(--hairline,#dcdad2)','stroke-width':1}));
-    svg.appendChild(svgNode('text',{x:L-8,y:py(0)+3,'text-anchor':'end','font-family':'ui-monospace,monospace','font-size':'9.5px',fill:'var(--muted,#6d6c66)'},'0'));
-    svg.appendChild(svgNode('text',{x:L-8,y:py(-2)+3,'text-anchor':'end','font-family':'ui-monospace,monospace','font-size':'9.5px',fill:'var(--muted,#6d6c66)'},'-2 tiers'));
-    svg.appendChild(svgNode('text',{x:R,y:H-4,'text-anchor':'end','font-family':'ui-monospace,monospace','font-size':'9.5px',fill:'var(--muted,#6d6c66)'},'next-word gap '+Math.round(hi*100)+' pp'));
-    svg.appendChild(svgNode('text',{x:L,y:H-4,'font-family':'ui-monospace,monospace','font-size':'9.5px',fill:'var(--muted,#6d6c66)'},Math.round(lo*100)+' pp'));
-    points.forEach(function(p){
-      // open rings + jitter: coincident points build visible density instead of hiding
-      svg.appendChild(svgNode('circle',{cx:px(p.x),cy:py(-p.drop)+p.j,r:3.2,fill:'none',
-        stroke:p.drop>0?'var(--penalty,#b4483d)':'var(--muted,#6d6c66)','stroke-width':1.2,
-        opacity:p.drop>0?0.9:0.5}));
-    });
     return svg;
   }
 
@@ -784,17 +766,6 @@
       var models=groupSpecs(specs).map(function(sp){return {spec:sp,label:shortName(sp)};});
       document.getElementById('fig-map-body').appendChild(svgDowngradeMap(models,scen));
       document.getElementById('fig-map').hidden=false;
-      var pts=[];
-      (data.scenarios||[]).forEach(function(s){
-        if(typeof s.wording_gap!=='number'||!s.tier_summary)return;
-        s.tier_summary.forEach(function(t,ti){
-          pts.push({x:s.wording_gap,drop:t.drop,j:(ti%5-2)*2.2}); // small fixed offset separates coincident dots
-        });
-      });
-      if(pts.length>3){
-        document.getElementById('fig-bridge-body').appendChild(svgBridge(pts));
-        document.getElementById('fig-bridge').hidden=false;
-      }
     }
   }
 
