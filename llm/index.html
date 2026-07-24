@@ -68,6 +68,24 @@
   .fig-scroll svg{min-width:620px}
   /* small-multiples profile: wider than the single-panel figures, scrolls on small screens */
   #fig-profiles-body svg{max-width:840px;min-width:720px}
+  /* eight-readings collapsible: the consensus-worst scenario's opening lines */
+  .er{border-top:1px solid var(--hairline);margin:8px 0 4px;padding-top:8px;max-width:1000px}
+  .er summary{font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--clinical);cursor:pointer}
+  .er summary:hover{color:var(--ink)}
+  .er-cap{font-family:var(--mono);font-size:10.5px;color:var(--muted);margin:8px 0 0}
+  .er-cap a{color:var(--clinical);text-decoration:none}
+  .er-cap a:hover{text-decoration:underline;text-underline-offset:3px}
+  .er-heads,.er-row{display:grid;grid-template-columns:92px 1fr 1fr 132px;gap:4px 18px;align-items:baseline}
+  .er-heads{margin:10px 0 2px}
+  .er-h{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;font-weight:600}
+  .er-row{border-top:1px solid var(--hairline);padding:7px 0 6px}
+  .er-m{font-family:var(--mono);font-size:11px;font-weight:600;margin:0}
+  .er-q{font-size:12.5px;font-style:italic;line-height:1.45;margin:0;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+  .er-c{border-left:2px solid var(--clinical);padding-left:8px}
+  .er-p{border-left:2px solid var(--patient);padding-left:8px}
+  .er-t{font-family:var(--mono);font-size:10px;color:var(--muted);white-space:nowrap;margin:0}
+  .er-t.down{color:var(--penalty)}
+  @media (max-width:900px){.er-heads{display:none}.er-row{grid-template-columns:1fr;gap:4px}}
   /* scenario pager: text-only (Tufte) */
   .sc-pager{font-family:var(--mono);font-size:12px;margin:22px 0 6px;display:flex;gap:12px;
     flex-wrap:wrap;align-items:baseline}
@@ -209,6 +227,11 @@
         <figcaption class="fig-cap">Where the downgrades happen <span class="fig-sub">one mark per scenario · filled = patient wording graded less urgent · tap a mark to open it · a red numeral counts the models downgrading that scenario · downgrades cluster by scenario, not by the size of the next-word gap</span></figcaption>
         <div id="fig-map-body" class="fig-scroll"></div>
       </figure>
+      <details class="er" id="eight-readings" hidden>
+        <summary id="er-sum"></summary>
+        <p class="er-cap" id="er-cap"></p>
+        <div id="er-grid"></div>
+      </details>
     </div>
     <nav class="sc-pager" id="sc-pager" aria-label="Scenario pages"></nav>
     <div class="chip-g" id="attempt-row" role="group" aria-label="Attempt" hidden>
@@ -678,9 +701,69 @@
     return svg;
   }
 
-  function svgDowngradeMap(models,scen){
+  // first sentence of a response, tightened for the strip: markdown marks
+  // removed, word-boundary truncation; empty text stays an em dash
+  function opening(txt){
+    var t=String(txt||'').replace(/\*\*|__|`/g,'').replace(/\s+/g,' ').trim();
+    if(!t)return '—';
+    var m=/^(.{20,110}?[.!?])(\s|$)/.exec(t);
+    if(m)return m[1];
+    if(t.length<=110)return t;
+    return t.slice(0,110).replace(/\s+\S*$/,'')+' …';
+  }
+
+  function sampleText(armBlock,spec){
+    var rs=(armBlock||{}).responses||[];
+    for(var i=0;i<rs.length;i++){
+      if(rs[i].model!==spec)continue;
+      var sm=rs[i].samples||[];
+      for(var k=0;k<sm.length;k++)if(sm[k].k===1&&sm[k].text)return sm[k].text;
+      for(var j=0;j<sm.length;j++)if(sm[j].text)return sm[j].text;
+    }
+    return null;
+  }
+
+  // collapsible strip: the consensus-worst scenario, one opening line per model
+  // per wording — the qualitative face of the map's boldest numeral
+  function renderEightReadings(models,scen,bestSi,bestN){
+    var s=data.scenarios[bestSi];
+    if(!s)return false;
+    var det=document.getElementById('eight-readings');
+    document.getElementById('er-sum').textContent=
+      'Scenario '+(bestSi+1)+': '+bestN+' of '+models.length+' models downgrade it — read the opening lines';
+    var cap=document.getElementById('er-cap');
+    cap.textContent='first sentence of each model’s first answer · formatting marks removed · machine-coded tiers, provisional until clinician review · ';
+    var a=el('a',null,'open the full scenario');
+    a.href='#s'+(bestSi+1);
+    cap.appendChild(a);
+    var grid=document.getElementById('er-grid');
+    grid.textContent='';
+    var heads=el('div','er-heads');
+    heads.appendChild(el('span'));
+    var hc=el('span','er-h','clinical wording'); hc.style.color='var(--clinical)'; heads.appendChild(hc);
+    var hp=el('span','er-h','everyday patient wording'); hp.style.color='var(--patient)'; heads.appendChild(hp);
+    heads.appendChild(el('span','er-h','coded tier'));
+    grid.appendChild(heads);
+    var by={};
+    (s.tier_summary||[]).forEach(function(t){by[t.model]=t;});
+    models.forEach(function(m){
+      var row=el('div','er-row');
+      row.appendChild(el('p','er-m',tinyName(m.spec)));
+      row.appendChild(el('p','er-q er-c','“'+opening(sampleText(s.clinical,m.spec))+'”'));
+      row.appendChild(el('p','er-q er-p','“'+opening(sampleText(s.patient,m.spec))+'”'));
+      var t=by[m.spec];
+      row.appendChild(el('p','er-t'+(t&&t.downgrade?' down':''),t?(t.clinical+' → '+t.patient):'—'));
+      grid.appendChild(row);
+    });
+    det.hidden=false;
+    return true;
+  }
+
+  function svgDowngradeMap(models,scen,opts){
+    opts=opts||{};
     var cell=13,gap=3,L=150,top=6;
-    var W=L+scen.length*(cell+gap)+96,H=top+models.length*(cell+gap)+16;
+    var annot=(opts.annotSi!=null)?14:0;
+    var W=L+scen.length*(cell+gap)+96,H=top+models.length*(cell+gap)+16+annot;
     var svg=svgNode('svg',{viewBox:'0 0 '+W+' '+H,role:'img','aria-label':'Downgrade map: one mark per scenario per model'});
     models.forEach(function(m,mi){
       var y=top+mi*(cell+gap);
@@ -709,16 +792,32 @@
     });
     // column consensus: how many models downgrade this scenario, a bare numeral
     // under columns where two or more agree — the caption explains the count
+    var footY=H-3-annot;
     scen.forEach(function(s,si){
       var n=models.filter(function(m){var d=(s.byModel||{})[m.spec];return d&&d.downgrade;}).length;
       if(n<2)return;
-      svg.appendChild(svgNode('text',{x:L+si*(cell+gap)+cell/2,y:H-3,'text-anchor':'middle',
+      svg.appendChild(svgNode('text',{x:L+si*(cell+gap)+cell/2,y:footY,'text-anchor':'middle',
         'font-family':'ui-monospace,monospace','font-size':'9px','font-weight':n>=models.length?'700':'400',
         fill:'var(--penalty,#b4483d)'},String(n)));
     });
+    // the boldest column points at the collapsible strip below the figure
+    if(opts.annotSi!=null){
+      var ax=L+opts.annotSi*(cell+gap)+cell/2;
+      var t=svgNode('text',{x:ax,y:H-3,'text-anchor':'middle','font-family':'ui-monospace,monospace',
+        'font-size':'9px',fill:'var(--penalty,#b4483d)','text-decoration':'underline',cursor:'pointer'},
+        'read the answers ↓');
+      t.addEventListener('click',function(){
+        var d=document.getElementById('eight-readings');
+        d.open=true;
+        d.scrollIntoView({behavior:'smooth',block:'nearest'});
+      });
+      var tt=svgNode('title',{},'open the opening lines of every model for this scenario');
+      t.appendChild(tt);
+      svg.appendChild(t);
+    }
     // scenario index ticks: first and last only
-    svg.appendChild(svgNode('text',{x:L,y:H-3,'font-family':'ui-monospace,monospace','font-size':'9px',fill:'var(--muted,#6d6c66)'},'1'));
-    svg.appendChild(svgNode('text',{x:L+(scen.length-1)*(cell+gap),y:H-3,'font-family':'ui-monospace,monospace','font-size':'9px',fill:'var(--muted,#6d6c66)'},String(scen.length)));
+    svg.appendChild(svgNode('text',{x:L,y:footY,'font-family':'ui-monospace,monospace','font-size':'9px',fill:'var(--muted,#6d6c66)'},'1'));
+    svg.appendChild(svgNode('text',{x:L+(scen.length-1)*(cell+gap),y:footY,'font-family':'ui-monospace,monospace','font-size':'9px',fill:'var(--muted,#6d6c66)'},String(scen.length)));
     return svg;
   }
 
@@ -764,7 +863,15 @@
     });
     if(specs.length){
       var models=groupSpecs(specs).map(function(sp){return {spec:sp,label:shortName(sp)};});
-      document.getElementById('fig-map-body').appendChild(svgDowngradeMap(models,scen));
+      // consensus-worst scenario feeds the collapsible strip and its map pointer
+      var bestSi=null,bestN=0;
+      scen.forEach(function(s,si){
+        var n=models.filter(function(m){var d=(s.byModel||{})[m.spec];return d&&d.downgrade;}).length;
+        if(n>bestN){bestN=n;bestSi=si;}
+      });
+      var haveStrip=(bestN>=2)&&renderEightReadings(models,scen,bestSi,bestN);
+      document.getElementById('fig-map-body').appendChild(
+        svgDowngradeMap(models,scen,haveStrip?{annotSi:bestSi}:{}));
       document.getElementById('fig-map').hidden=false;
     }
   }
