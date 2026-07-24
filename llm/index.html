@@ -523,8 +523,16 @@
     return i>=0?m.slice(i+1):m;
   }
 
-  // family grouping: same provider's models sit together, provider order by
-  // first appearance; used by every model-row figure so ordering matches
+  // family grouping: same provider's models sit together; provider order fixed
+  // by the owner (2026-07-23), any unlisted provider follows in first-appearance
+  // order; used by every model-row figure so ordering matches
+  var PROVIDER_ORDER=['anthropic','openai','xai','deepseek','moonshot'];
+  function provRank(p){var i=PROVIDER_ORDER.indexOf(p);return i<0?PROVIDER_ORDER.length:i;}
+  function sortProviders(order){
+    return order.map(function(p,i){return [provRank(p),i,p];})
+      .sort(function(a,b){return a[0]-b[0]||a[1]-b[1];})
+      .map(function(t){return t[2];});
+  }
   function groupSpecs(specs){
     var order=[],by={};
     specs.forEach(function(s){
@@ -532,7 +540,7 @@
       if(!by[p]){by[p]=[];order.push(p);}
       by[p].push(s);
     });
-    return order.reduce(function(acc,p){return acc.concat(by[p]);},[]);
+    return sortProviders(order).reduce(function(acc,p){return acc.concat(by[p]);},[]);
   }
   // rows annotated for figures: provider set on each family's first row,
   // gapBefore separates families with space instead of rules
@@ -544,7 +552,7 @@
       by[p].push(m);
     });
     var out=[];
-    order.forEach(function(p){
+    sortProviders(order).forEach(function(p){
       by[p].forEach(function(m,i){
         out.push({m:m,provider:(i===0)?p:null,gapBefore:(i===0&&out.length>0)});
       });
