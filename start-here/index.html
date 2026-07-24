@@ -463,36 +463,32 @@
   </section>
 
   <section>
-    <p class="step-no">9 · The engine</p>
-    <h2>Closing the loop: Tracing the patient voice</h2>
-    <p>To permanently mend the gap, the model&rsquo;s internal wiring must be evaluated against real-world dialects. By mapping linguistic variations directly to token probabilities, we can capture and correct systemic drops in urgency.</p>
-    <div class="fig" role="img" aria-label="Two rows on a shared probability axis from zero to forty percent. The medical lexicon wording, I have acid reflux, puts the safe target antacid on top at 31 percent, drawn in teal. Directly underneath, the patient-derived wording, my stomach's on fire, steers the top prediction away from the safe target: ice cream at 29 percent, drawn in amber, with the safe target displaced from the top entirely.">
-    <svg viewBox="0 0 800 160">
-      <line x1="300" y1="30" x2="300" y2="130" stroke="var(--hairline)" stroke-width="1"/>
-      <text x="300" y="146" class="sv-m" text-anchor="middle">0%</text>
-      <text x="760" y="146" class="sv-m" text-anchor="end">40%</text>
-      <text x="0" y="55" class="sv-q">“I have <tspan style="fill:var(--teal);font-weight:700">acid reflux</tspan>.”</text>
-      <line x1="300" y1="50" x2="646" y2="50" stroke="#9aa1ad" stroke-width="1"/>
-      <circle cx="656" cy="50" r="4.5" fill="#0f766e"/>
-      <text x="666" y="55" class="sv-a" style="font-size:12px" fill="#0f766e">antacid 31%</text>
-      <text x="0" y="105" class="sv-q">“My stomach’s on fire.”</text>
-      <line x1="300" y1="100" x2="623" y2="100" stroke="#9aa1ad" stroke-width="1"/>
-      <circle cx="633" cy="100" r="4.5" fill="#b45309"/>
-      <text x="643" y="105" class="sv-a" style="font-size:12px" fill="#b45309">ice cream 29%</text>
-      <path d="M656,57 C656,78 640,80 634,93" fill="none" stroke="#b45309" stroke-width="1" stroke-dasharray="3 3"/>
-      <text x="640" y="80" class="sv-m" text-anchor="end" fill="#b45309">prediction steered off the safe target</text>
-      <text x="300" y="122" class="sv-m">safe target displaced from the top entirely</text>
+    <p class="step-no">9 · The mended system</p>
+    <h2>Closing the loop: Native orchestration and human handoff</h2>
+    <p>When the loop is closed, the model no longer relies on a fragile translation patch. It natively maps community dialects to safe clinical pathways, orchestrating both immediate guidance and structured handoffs to human clinicians.</p>
+    <div class="fig" role="img" aria-label="The everyday wording, my stomach's on fire, feeds a dashed box labeled fine-tuned orchestration model, which branches into two parallel teal actions: care navigation recommending an over-the-counter antacid, and clinician routing generating a structured SBAR handoff beginning, patient reports acute dyspepsia.">
+    <svg viewBox="0 0 800 190">
+      <text x="0" y="100" class="sv-q">“My stomach’s on fire.”</text>
+      <path class="sv-line" d="M198,95 L240,95" stroke-width="1.2"/>
+      <rect x="240" y="60" width="164" height="70" fill="none" stroke="#6d6c66" stroke-width="1.2" stroke-dasharray="5 5"/>
+      <text x="322" y="90" class="sv-m" text-anchor="middle" style="letter-spacing:.12em">FINE-TUNED</text>
+      <text x="322" y="106" class="sv-m" text-anchor="middle" style="letter-spacing:.12em">ORCHESTRATION MODEL</text>
+      <path class="sv-line" d="M404,85 C440,83 444,48 470,44" stroke-width="1.2"/>
+      <path class="sv-line" d="M404,105 C440,107 444,142 470,146" stroke-width="1.2"/>
+      <text x="478" y="38" class="sv-m" style="letter-spacing:.12em;text-transform:uppercase">care navigation · immediate care</text>
+      <text x="478" y="58" class="sv-a" style="font-size:11.5px" fill="#0f766e">Recommend OTC antacid (high confidence)</text>
+      <text x="478" y="140" class="sv-m" style="letter-spacing:.12em;text-transform:uppercase">clinician routing · human handoff · SBAR</text>
+      <text x="478" y="160" class="sv-a" style="font-size:11.5px" fill="#0f766e">S: “Patient reports acute dyspepsia…”</text>
     </svg>
     </div>
-    <p class="cap">live pair, scenario 48 · paired traces like this are the loop&rsquo;s raw material: measured at scale across the corpus, re-checked nightly for drift</p>
+    <p class="cap">the mended state this loop is built to reach, sketched, not yet a measurement · the tuned model natively interprets the dialect, triggering guideline-concordant navigation and an asynchronous clinician handoff</p>
   </section>
 
   <div class="src">
     Sources: all model answers and probabilities are live gemma-2-2b measurements —
     scenario 48 (panel 2, first two rows; panel 5&rsquo;s feature counts are its circuit_diff) and scenario 85 (panel 3) in <a href="https://github.com/michaeldgreenphd/patientwords/blob/main/data/simulated_scenarios.json">the scenario measurements file on GitHub</a>;
     the register ladder (panel 2, third row), panel 8&rsquo;s context result, and panel 6&rsquo;s translation outcomes in <a href="https://github.com/michaeldgreenphd/patientwords/blob/main/data/provenance.json">the provenance file on GitHub</a>.
-    Panel 9 re-plots scenario 48&rsquo;s two measurements (antacid 31%, ice cream 29%).
-    The clinician and orchestration panels are illustrative, not measurements.
+    The clinician, orchestration, and mended-system panels (1, 7, 9) are illustrative, not measurements.
   </div>
   <div class="endnote" style="border-top:1px solid var(--ink);margin-top:42px;padding-top:14px">
     <p style="font-family:var(--mono);font-size:12px;line-height:1.8;color:var(--muted);margin:0 0 10px">SIMULATED DATA: the sentence pairs measured across this site are written by an LLM and checked automatically.</p>
