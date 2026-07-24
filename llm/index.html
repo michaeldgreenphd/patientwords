@@ -142,17 +142,19 @@
   .resp-text{font-size:15px;line-height:1.55;margin:0;white-space:pre-wrap;overflow-wrap:break-word}
   .resp-text.missing{color:var(--muted)}
   .resp-foot{font-family:var(--mono);font-size:10.5px;letter-spacing:.04em;color:var(--muted);margin:6px 0 0}
-  /* provenance panel: strict two-column key/value grid; a faint rule separates
-     the run metrics from the technical hashes */
+  /* provenance panel: strict two-column key/value grid — keys right-aligned to a
+     central gutter, values in tabular lining figures; three clusters (run parameters,
+     models, artifacts & hashes) separated by vertical margin alone, no rules */
   .prov{border-top:1px solid var(--ink);margin-top:38px;padding-top:12px}
   .prov h2{font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.2em;
     text-transform:uppercase;margin:0 0 12px}
   .prov dl{display:grid;grid-template-columns:max-content 1fr;gap:6px 22px;margin:0 0 14px}
-  .prov dt{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
-  .prov dd{font-family:var(--mono);font-size:12px;margin:0;overflow-wrap:anywhere}
-  .prov dt.sep,.prov dd.sep{border-top:1px solid var(--hairline);padding-top:10px;margin-top:4px}
-  .prov dd ul.prov-models{margin:0;padding:0 0 0 18px;list-style:disc}
-  .prov dd ul.prov-models li{margin:1px 0}
+  .prov dt{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--muted);text-align:right}
+  .prov dd{font-family:var(--mono);font-size:12px;margin:0;overflow-wrap:anywhere;
+    font-variant-numeric:tabular-nums lining-nums}
+  .prov dt.grp,.prov dd.grp{margin-top:16px}
+  .prov dd .prov-mline div{margin:1px 0}
   .prov dd a{color:var(--clinical);text-decoration:none}
   .prov dd a:hover{text-decoration:underline;text-underline-offset:3px}
   .prov .note{font-size:15px;line-height:1.62;font-family:var(--serif);color:var(--ink);margin:0 0 12px}
@@ -177,7 +179,8 @@
     .masthead nav{gap:8px 22px}
     .masthead nav a{padding:7px 0}
     .prov dl{grid-template-columns:1fr}
-    .prov dd.sep{border-top:0;padding-top:0;margin-top:0} /* stacked: the dt rule alone marks the break */
+    .prov dt{text-align:left}
+    .prov dd.grp{margin-top:0} /* stacked: the dt margin alone marks the cluster break */
     body{font-size:16px}}
 </style>
 </head>
@@ -231,6 +234,11 @@
         <summary id="er-sum"></summary>
         <p class="er-cap" id="er-cap"></p>
         <div id="er-grid"></div>
+      </details>
+      <details class="er" id="tier-spread" hidden>
+        <summary id="tsp-sum"></summary>
+        <p class="er-cap" id="tsp-cap"></p>
+        <div id="tsp-body" class="fig-scroll"></div>
       </details>
     </div>
     <nav class="sc-pager" id="sc-pager" aria-label="Scenario pages"></nav>
@@ -482,16 +490,18 @@
     node.hidden=false;
   }
 
-  // "pairs_20260706T201750Z#1" -> "Scenario 1 — Run on July 6, 2026 at 8:17 PM";
-  // anything unparseable falls back to the raw id
-  function prettyId(id){
+  // "pairs_20260706T201750Z#1" + position -> "Scenario 1 — Run on July 6, 2026 at 8:17 PM";
+  // anything unparseable falls back to the raw id. The numeral is the page-wide scenario
+  // number (pager, map, hash, and strips all count the same way); the batch's own #index
+  // repeats across batches and stays one hover away in the raw id.
+  function prettyId(id,num){
     var m=/(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})Z#(\d+)$/.exec(String(id||''));
     if(!m)return null;
     var months=['January','February','March','April','May','June','July','August','September','October','November','December'];
     var mo=months[parseInt(m[2],10)-1];
     if(!mo)return null;
     var h=parseInt(m[4],10),ap=h>=12?'PM':'AM',h12=h%12||12;
-    return 'Scenario '+m[7]+' — Run on '+mo+' '+parseInt(m[3],10)+', '+m[1]+' at '+h12+':'+m[5]+' '+ap;
+    return 'Scenario '+num+' — Run on '+mo+' '+parseInt(m[3],10)+', '+m[1]+' at '+h12+':'+m[5]+' '+ap;
   }
 
   function render(){
@@ -500,7 +510,7 @@
     renderPager(document.getElementById('sc-pager2'));
     var meta=document.getElementById('sc-meta');
     meta.textContent='';
-    var pid=prettyId(s.id);
+    var pid=prettyId(s.id,current+1);
     var idNode=el('b',null,pid||dash(s.id));
     if(pid)idNode.title=String(s.id); // raw archive id stays one hover away
     meta.appendChild(idNode);
@@ -534,6 +544,19 @@
     current=i;
     if(('#s'+(i+1))!==location.hash){history.replaceState(null,'','#s'+(i+1));}
     render();
+  }
+
+  // figure links land the reader on the rendered scenario, not just set the hash
+  function goAndShow(i){
+    go(i);
+    var t=document.getElementById('sc-meta');
+    if(t)t.scrollIntoView({behavior:'smooth',block:'start'});
+  }
+  function scenarioLink(label,si){
+    var a=el('a',null,label);
+    a.href='#s'+(si+1);
+    a.addEventListener('click',function(ev){ev.preventDefault();goAndShow(si);});
+    return a;
   }
 
   function shortName(spec){
@@ -733,9 +756,7 @@
       'Scenario '+(bestSi+1)+': '+bestN+' of '+models.length+' models downgrade it — read the opening lines';
     var cap=document.getElementById('er-cap');
     cap.textContent='first sentence of each model’s first answer · formatting marks removed · machine-coded tiers, provisional until clinician review · ';
-    var a=el('a',null,'open the full scenario');
-    a.href='#s'+(bestSi+1);
-    cap.appendChild(a);
+    cap.appendChild(scenarioLink('show this scenario below ↓',bestSi));
     var grid=document.getElementById('er-grid');
     grid.textContent='';
     var heads=el('div','er-heads');
@@ -756,6 +777,74 @@
       grid.appendChild(row);
     });
     det.hidden=false;
+    return true;
+  }
+
+  // compact tier-spread strip: one hairline per model, one dot per attempt —
+  // clinical just above the line, patient just below; horizontal spread inside
+  // a row is the same model landing on different tiers across re-asks
+  function renderTierSpread(models,scen,skipSi){
+    var to=data.tier_order;
+    if(!to||to.length<2)return false;
+    function spread(s){
+      var tc=s.tier_counts_by_model||{},sc=0;
+      Object.keys(tc).forEach(function(m){
+        ['clinical','patient'].forEach(function(a){
+          var c=tc[m][a];
+          if(c)sc+=Math.max(0,Object.keys(c).length-1);
+        });
+      });
+      return sc;
+    }
+    var bestSi=null,bestSc=0;
+    (data.scenarios||[]).forEach(function(s,si){
+      if(si===skipSi)return;
+      var sc=spread(s);
+      if(sc>bestSc){bestSc=sc;bestSi=si;}
+    });
+    if(bestSc<3)return false;
+    var s=data.scenarios[bestSi];
+    var tc=s.tier_counts_by_model||{};
+    var by={};(s.tier_summary||[]).forEach(function(t){by[t.model]=t;});
+    var specs=models.map(function(m){return m.spec;}).filter(function(sp){return tc[sp];});
+    var nDown=specs.filter(function(sp){return by[sp]&&by[sp].downgrade;}).length;
+    document.getElementById('tsp-sum').textContent=
+      'Scenario '+(bestSi+1)+': '+nDown+' of '+specs.length+' models downgrade it, and some disagree with themselves across attempts';
+    var cap=document.getElementById('tsp-cap');
+    cap.textContent='one dot per attempt · clinical above the line, patient below · horizontal spread = the same model, re-asked, coded at different tiers · modal ties break toward the more urgent tier · machine-coded, provisional · ';
+    cap.appendChild(scenarioLink('show this scenario below ↓',bestSi));
+    var W=760,AX0=120,AX1=700,rowH=17,top=18;
+    var H=top+specs.length*rowH+2;
+    function x(ti){return AX0+ti/(to.length-1)*(AX1-AX0);}
+    var svg=svgNode('svg',{viewBox:'0 0 '+W+' '+H,role:'img',
+      'aria-label':'Coded care-urgency of every attempt for this scenario, per model and wording'});
+    to.forEach(function(t,i){
+      svg.appendChild(svgNode('text',{x:x(i),y:10,'text-anchor':'middle','font-family':'ui-monospace,monospace','font-size':'9px',fill:'var(--muted,#6d6c66)'},t));
+    });
+    specs.forEach(function(sp,ri){
+      var cy=top+ri*rowH+rowH/2;
+      var t=by[sp];
+      svg.appendChild(svgNode('text',{x:0,y:cy+3.5,'font-family':'ui-monospace,monospace','font-size':'10.5px',
+        fill:(t&&t.downgrade)?'var(--penalty,#b4483d)':'var(--ink,#1c1c19)'},tinyName(sp)+((t&&t.downgrade)?' ↓':'')));
+      svg.appendChild(svgNode('line',{x1:AX0-14,y1:cy,x2:AX1+14,y2:cy,stroke:'var(--hairline,#dcdad2)','stroke-width':0.7}));
+      to.forEach(function(_,i){
+        svg.appendChild(svgNode('line',{x1:x(i),y1:cy-1.5,x2:x(i),y2:cy+1.5,stroke:'var(--structural,#c3c9d2)','stroke-width':0.8}));
+      });
+      [['clinical','var(--clinical,#15803d)',-3.4],['patient','var(--patient,#111827)',3.4]].forEach(function(lane){
+        var counts=(tc[sp]||{})[lane[0]]||{};
+        Object.keys(counts).forEach(function(tier){
+          var ti=to.indexOf(tier);
+          if(ti<0)return;
+          for(var k=0;k<counts[tier];k++){
+            svg.appendChild(svgNode('circle',{cx:x(ti)+(k-(counts[tier]-1)/2)*6.5,cy:cy+lane[2],r:2.6,fill:lane[1]}));
+          }
+        });
+      });
+    });
+    var body=document.getElementById('tsp-body');
+    body.textContent='';
+    body.appendChild(svg);
+    document.getElementById('tier-spread').hidden=false;
     return true;
   }
 
@@ -873,6 +962,7 @@
       document.getElementById('fig-map-body').appendChild(
         svgDowngradeMap(models,scen,haveStrip?{annotSi:bestSi}:{}));
       document.getElementById('fig-map').hidden=false;
+      renderTierSpread(models,scen,haveStrip?bestSi:null);
     }
   }
 
@@ -949,6 +1039,16 @@
     list.appendChild(dd);
   }
 
+  // "2026-07-22T00:13:46Z" -> "July 22, 2026 at 12:13 AM" (UTC, matching the archive);
+  // anything unparseable passes through unchanged
+  function fmtStamp(iso){
+    var m=/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/.exec(String(iso||''));
+    if(!m)return iso?String(iso):'—';
+    var months=['January','February','March','April','May','June','July','August','September','October','November','December'];
+    var h=parseInt(m[4],10),ap=h>=12?'PM':'AM',h12=h%12||12;
+    return months[parseInt(m[2],10)-1]+' '+parseInt(m[3],10)+', '+m[1]+' at '+h12+':'+m[5]+' '+ap;
+  }
+
   function renderProv(){
     var run=data.run||{};
     var srcInfo=data.source||{};
@@ -958,8 +1058,12 @@
       'timestamp are logged per call, and the chain head is committed beside the data.';
     var list=document.getElementById('prov-list');
     list.textContent='';
-    var win=(run.first_sent_utc||run.last_sent_utc)?
-      (dash(run.first_sent_utc)+' → '+dash(run.last_sent_utc)):'—';
+    // cluster 1 — run parameters
+    var win='—';
+    if(run.first_sent_utc||run.last_sent_utc){
+      win=el('span',null,fmtStamp(run.first_sent_utc)+' → '+fmtStamp(run.last_sent_utc));
+      win.title=dash(run.first_sent_utc)+' → '+dash(run.last_sent_utc); // raw ISO stays one hover away
+    }
     provRow(list,'queries ran',win);
     provRow(list,'scenarios shown',String(data.scenarios.length));
     provRow(list,'samples per model per wording',dash(run.samples_per_cell));
@@ -967,26 +1071,29 @@
     provRow(list,'total calls',dash(run.n_calls));
     provRow(list,'total cost',typeof run.cost_usd==='number'?('$'+run.cost_usd.toFixed(2)):'—');
     provRow(list,'cost per scenario',typeof run.cost_per_scenario==='number'?('$'+run.cost_per_scenario.toFixed(3)):'—');
-    // run metrics end here; the faint rule marks the break before the technical block.
-    // models render as a scannable list, one endpoint (and served build) per line
-    var mlist=el('ul','prov-models');
-    (run.models||[]).forEach(function(m){
-      mlist.appendChild(el('li',null,m.spec+(m.model_returned?(' (served as '+m.model_returned+')'):'')));
+    // cluster 2 — the models: one line per served build, figure order (provider families together)
+    var ms=(run.models||[]).slice().sort(function(a,b){
+      var d=provRank(a.provider)-provRank(b.provider);
+      return d||String(a.spec).localeCompare(String(b.spec));
     });
-    provRow(list,'models',mlist.children.length?mlist:'—','sep');
-    // distinct served builds per model: model_returned + fingerprint + sent window
-    (run.models||[]).forEach(function(m){
-      if(!m.builds||!m.builds.length)return;
-      var txt=m.builds.map(function(b){
-        var bits=[b.model_returned||'—'];
+    var mbox=el('div','prov-mline');
+    ms.forEach(function(m){
+      var builds=(m.builds&&m.builds.length)?m.builds:
+        [{model_returned:m.model_returned,n:m.n_responses}];
+      builds.forEach(function(b){
+        var bits=[m.spec,'served as '+(b.model_returned||'—')];
         if(b.build_fingerprint)bits.push(b.build_fingerprint);
-        if(b.first_sent_utc)bits.push(String(b.first_sent_utc).slice(0,10)+'→'+String(b.last_sent_utc||'').slice(0,10));
-        bits.push('n='+b.n);
-        return bits.join(' · ');
-      }).join('  |  ');
-      provRow(list,shortName(m.spec)+' builds',txt);
+        if(b.first_sent_utc)bits.push(String(b.first_sent_utc).slice(0,10)+'→'+
+          String(b.last_sent_utc||b.first_sent_utc).slice(0,10));
+        bits.push('n='+(b.n!=null?b.n:'—'));
+        mbox.appendChild(el('div',null,bits.join(' · ')));
+      });
     });
-    if(data.rubric_version)provRow(list,'tier rubric',String(data.rubric_version)+' (coded by a blinded judge; see methods)');
+    provRow(list,'models',mbox.children.length?mbox:'—','grp');
+    // cluster 3 — artifacts & hashes ('grp' on whichever row lands first)
+    var first3=true;
+    function artRow(label,valueNode){provRow(list,label,valueNode,first3?'grp':null);first3=false;}
+    if(data.rubric_version)artRow('tier rubric',String(data.rubric_version)+' (coded by a blinded judge; see methods)');
     function repoLink(path){
       if(!path)return document.createTextNode('—');
       var a=el('a',null,path);
@@ -994,16 +1101,27 @@
       a.target='_blank';a.rel='noopener';
       return a;
     }
-    provRow(list,'response archive',repoLink(srcInfo.responses_file));
-    provRow(list,'stimuli file',repoLink(srcInfo.stimuli_file));
-    if(srcInfo.judgments_file)provRow(list,'tier codings',repoLink(srcInfo.judgments_file));
+    artRow('response archive',repoLink(srcInfo.responses_file));
+    artRow('stimuli file',repoLink(srcInfo.stimuli_file));
+    if(srcInfo.judgments_file)artRow('tier codings',repoLink(srcInfo.judgments_file));
     if(data.chain_head){
       var ch=el('span',null,String(data.chain_head).slice(0,16)+'…');
       ch.title=data.chain_head;
-      provRow(list,'archive chain head',ch);
+      artRow('archive chain head',ch);
     }
-    provRow(list,'payload generated',dash(data.generated_utc));
-    if(data.engine_sha)provRow(list,'engine commit',String(data.engine_sha).slice(0,9));
+    var gen='—';
+    if(data.generated_utc){
+      gen=el('span',null,fmtStamp(data.generated_utc));
+      gen.title=String(data.generated_utc);
+    }
+    artRow('payload generated',gen);
+    if(data.engine_sha){
+      var sha=String(data.engine_sha);
+      var ea=el('a',null,sha.slice(0,9));
+      ea.href='https://github.com/michaeldgreenphd/patientwords-engine/commit/'+sha;
+      ea.target='_blank';ea.rel='noopener';ea.title=sha;
+      artRow('engine commit',ea);
+    }
     prov.hidden=false;
   }
 
