@@ -583,12 +583,12 @@
    "2.5": {
     "recovered": 4,
     "n": 5,
-    "_": "boost top-5 at strength 2.5: pair-5 remeasure landed (not recovered \u2014 the same pair misses at every strength); final 4/5 \u2014 trace_out/boostgrid_s2p5"
+    "_": "boost top-5 at strength 2.5: pair-5 remeasure landed (not recovered — the same pair misses at every strength); final 4/5 — trace_out/boostgrid_s2p5"
    },
    "5": {
     "recovered": 5,
     "n": 5,
-    "_": "boost top-5 clinical features at strength 5 on the recovered subset; all 5 pairs landed and recovered \u2014 trace_out/boostgrid_s5, run 2026-07-08"
+    "_": "boost top-5 clinical features at strength 5 on the recovered subset; all 5 pairs landed and recovered — trace_out/boostgrid_s5, run 2026-07-08"
    },
    "10": {
     "recovered": 4,
@@ -598,17 +598,17 @@
    "20": {
     "recovered": 1,
     "n": 4,
-    "_": "boost top-5 at strength 20: remeasure resolved the three server 500s (flake, not strength); 1/4 recovered, with occasional degeneration \u2014 recovery declines sharply at the top of the dose range; pair 5 unmeasured \u2014 trace_out/boostgrid_s20"
+    "_": "boost top-5 at strength 20: remeasure resolved the three server 500s (flake, not strength); 1/4 recovered, with occasional degeneration — recovery declines sharply at the top of the dose range; pair 5 unmeasured — trace_out/boostgrid_s20"
    }
   },
   "low_rank_6_10": {
    "recovered": 3,
    "n": 4,
-   "_": "boost clinical ranks 6-10 at strength 10 (rank offset 5): 3/4 measured pairs recovered (one call 500'd server-side). Near-parity with the top-5 arm (4/5): the causal handle is distributed across the clinical circuit, not concentrated in the top-5 features. Placebo (random features) remains 0/5 \u2014 trace_out/boostgrid_lowrank, 2026-07-08",
+   "_": "boost clinical ranks 6-10 at strength 10 (rank offset 5): 3/4 measured pairs recovered (one call 500'd server-side). Near-parity with the top-5 arm (4/5): the causal handle is distributed across the clinical circuit, not concentrated in the top-5 features. Placebo (random features) remains 0/5 — trace_out/boostgrid_lowrank, 2026-07-08",
    "replication": {
     "recovered": 3,
     "n": 4,
-    "_": "independent second run, identical pattern: same three pairs recover, same pair misses, same pair 500s server-side \u2014 trace_out/boostgrid_lowrank (branch), 2026-07-09"
+    "_": "independent second run, identical pattern: same three pairs recover, same pair misses, same pair 500s server-side — trace_out/boostgrid_lowrank (branch), 2026-07-09"
    }
   },
   "placebo": {
@@ -645,7 +645,21 @@
   "mean_abs_delta_vs_baseline": 0.0642,
   "per_baseline_sd_mean": 0.0764,
   "per_baseline_sd_median": 0.0415,
-  "verdict": "single-sentence next-token probabilities move under innocuous rewording by about the same magnitude as the term-swap penalty (0.070); single pairs are illustrations, inference lives in the paired aggregate where bidirectional paraphrase noise averages out (SE contribution ~0.009 at n=132)"
+  "verdict": "single-sentence next-token probabilities move under innocuous rewording by about the same magnitude as the term-swap penalty (0.070); single pairs are illustrations, inference lives in the paired aggregate where bidirectional paraphrase noise averages out (SE contribution ~0.009 at n=132)",
+  "superseded_by": "paraphrase_robustness_floor_v2"
+ },
+ "paraphrase_robustness_floor_v2": {
+  "_": "Expanded innocuous-paraphrase floor: 50 baselines x 5 meaning-preserving rewordings, term held fixed (trace_out/dialects_20260723T001434Z, gemma-2-2b, traced 2026-07-23..28). Supersedes the n=9 paraphrase_robustness entry as the site floor stat; v1 retained above for provenance.",
+  "n_baselines_measured": 50,
+  "n_variant_rows": 250,
+  "n_variants_measured": 200,
+  "n_variants_unmeasured": 50,
+  "mean_abs_delta_vs_baseline": 0.0657,
+  "median_delta_vs_baseline": -0.011,
+  "per_baseline_sd_mean": 0.0718,
+  "per_baseline_sd_median": 0.0497,
+  "halved_share": 0.1,
+  "verdict": "the n=9 floor replicates at 5x the baselines: innocuous same-register rewording moves single-sentence next-token probabilities by +-0.066 on average (v1: +-0.064) and halves the target in 10% of measured variants; 50 of 250 variant rows are unmeasured (target left the readable top-k under rewording) and are disclosed, not dropped silently"
  },
  "context_inoculation": {
   "_": "copied from the engine context-prefix run (trace_out/urgency_downgrades_20260707T1__context, 2026-07-08; summarized in the released findings synthesis section 5)",

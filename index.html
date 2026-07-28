@@ -711,9 +711,12 @@
         var NSs='http://www.w3.org/2000/svg';
         function sel(n,a,txt){var e=document.createElementNS(NSs,n);for(var k in a)e.setAttribute(k,a[k]);if(txt!=null)e.textContent=txt;return e;}
         // only models with observed movement: probe models measured on a
-        // handful of pairs would render as 0/0 and read as "never downgrades"
+        // handful of pairs would render as 0/0 and read as "never downgrades";
+        // the payload-level render_min_n additionally gates under-powered cells
+        var aMinN=u.render_min_n;
         var ams=models.filter(function(m){var d=pmd[m];
-          return d&&typeof d.downgrades==='number'&&typeof d.upgrades==='number'&&(d.downgrades+d.upgrades)>0;});
+          return d&&typeof d.downgrades==='number'&&typeof d.upgrades==='number'&&(d.downgrades+d.upgrades)>0
+            &&(typeof aMinN!=='number'||(d.n_phrases||0)>=aMinN);});
         if(ams.length){
           var slot=92,W2=ams.length*slot,maxLen=84;
           var maxC=1,maxUp=1;
@@ -888,7 +891,8 @@
     // probabilities; number fetched so it can never go stale
     fetch('data/provenance.json',{cache:'no-cache'}).then(function(r){return r.json();})
       .then(function(p){
-        var m=p&&p.paraphrase_robustness&&p.paraphrase_robustness.mean_abs_delta_vs_baseline;
+        var pr=p&&(p.paraphrase_robustness_floor_v2||p.paraphrase_robustness);
+        var m=pr&&pr.mean_abs_delta_vs_baseline;
         if(typeof m!=='number')return;
         note.insertBefore(document.createTextNode('for scale: meaning-preserving paraphrases '+
           'alone move these single-sentence probabilities by \u00b1'+(m*100).toFixed(1)+
@@ -924,7 +928,8 @@
       ?('One of the largest cases. Across the '+sp.n_phrases+' distinct scored phrases the average wording gap is ')
       :('One of the largest cases. Across all '+scored.length+' scored pairs the average wording gap is ')));
     var b1=document.createElement('b');b1.textContent=(mean>0?'+':'−')+Math.abs(mean*100).toFixed(0)+' pp';el.appendChild(b1);
-    var floor=prov&&prov.paraphrase_robustness&&prov.paraphrase_robustness.mean_abs_delta_vs_baseline;
+    var provFloor=prov&&(prov.paraphrase_robustness_floor_v2||prov.paraphrase_robustness);
+    var floor=provFloor&&provFloor.mean_abs_delta_vs_baseline;
     if(typeof floor==='number'){
       el.appendChild(document.createTextNode('; a single measurement is itself noisy — meaning-preserving rewording alone shifts it by ±'));
       var b2=document.createElement('b');b2.textContent=(floor*100).toFixed(1)+' pp';el.appendChild(b2);

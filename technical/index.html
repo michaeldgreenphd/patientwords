@@ -764,6 +764,14 @@
     function draw(payload){
       var models = payload.models || {};
       var ids = Object.keys(models);
+      // payload-level render gate (engine render_min_n): bands whose final
+      // point is under-powered stay out of the fold, matching the Part 4
+      // forest's exclusion. Older payloads lack the field and render as before.
+      var minN = payload.render_min_n;
+      if (typeof minN === 'number') ids = ids.filter(function(id){
+        var pts = (models[id] && models[id].points) || [];
+        return pts.length && (pts[pts.length - 1].n_phrases || 0) >= minN;
+      });
       if (!ids.length) return pending();
       // the base model headlines regardless of payload key order
       if (ids.indexOf('gemma-2-2b') > 0) {

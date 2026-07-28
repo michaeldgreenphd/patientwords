@@ -798,7 +798,12 @@
         // payloads lack the field — fall back to the pooled flip_classes tally.
         var updm=urg.summary.per_model_deduped;
         var uids=(updm&&Object.keys(updm).length)?Object.keys(updm):null;
-        if(uids){
+        // payload-level render gate (engine render_min_n): under-powered
+        // model rows fall back to the page's pending behavior (absent row).
+        var uMinN=urg.render_min_n;
+        if(uids&&typeof uMinN==='number')uids=uids.filter(function(m){
+          var d=updm[m]||{};return (d.n_phrases||0)>=uMinN;});
+        if(uids&&uids.length){
           var uIntro=el('div');
           uIntro.appendChild(el('b',null,'Urgency view'));
           uIntro.appendChild(el('span',null,' — downgrades vs upgrades by model (phrase-deduped: each phrase counted once per model, re-traces collapsed).'));

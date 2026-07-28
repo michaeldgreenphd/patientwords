@@ -466,7 +466,8 @@
       // scale reference for single cells, fetched so it can never go stale
       fetch('../data/provenance.json',{cache:'no-cache'}).then(function(r){return r.json();})
         .then(function(p){
-          var m=p&&p.paraphrase_robustness&&p.paraphrase_robustness.mean_abs_delta_vs_baseline;
+          var pr=p&&(p.paraphrase_robustness_floor_v2||p.paraphrase_robustness);
+          var m=pr&&pr.mean_abs_delta_vs_baseline;
           var nn=document.getElementById('dl-noise');
           if(typeof m==='number'&&nn)nn.textContent='For scale: meaning-preserving paraphrases alone move these '+
             'single-sentence probabilities by ±'+(m*100).toFixed(1)+' pp on average, so a small cell is within paraphrase noise. ';
