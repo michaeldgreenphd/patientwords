@@ -36,7 +36,7 @@
   .sample-banner{font-family:var(--mono);font-size:12px;letter-spacing:.08em;border:2px solid var(--penalty);color:var(--penalty);padding:8px 12px;margin:14px 0}
   .pending{border:1px solid var(--hairline);border-left:3px solid var(--structural);padding:14px 16px;font-family:var(--mono);font-size:12.5px;color:var(--muted);margin:24px 0}
   .coder-row{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;margin:18px 0 4px;font-family:var(--mono);font-size:12px}
-  .coder-row input{font:inherit;padding:5px 8px;border:1px solid var(--hairline);background:#fff;min-width:180px}
+  .coder-row select{font:inherit;padding:5px 8px;border:1px solid var(--hairline);background:#fff;min-width:220px}
   .progress{font-family:var(--mono);font-size:12px;color:var(--muted);margin:14px 0 8px}
   .progress b{color:var(--ink)}
   .resp-box{border:1px solid var(--ink);padding:16px 18px;margin:8px 0 16px;background:#fff}
@@ -94,7 +94,8 @@
   <section id="cd-app" hidden>
     <div class="coder-row">
       <label for="coder">coder</label>
-      <input id="coder" placeholder="name / role (recorded in the export)" autocomplete="off">
+      <select id="coder"></select>
+      <span class="note">recorded with every judgment · roster is set when the sample is generated; new coders are added by regenerating it</span>
     </div>
     <p class="progress" id="cd-progress" aria-live="polite"></p>
     <div class="resp-box"><p id="cd-text"></p></div>
@@ -196,22 +197,24 @@
 
   function doExport(){
     var noteEl=document.getElementById('cd-export-note');
-    var coder=(document.getElementById('coder').value||'').trim();
-    if(!coder){noteEl.textContent='enter a coder name first — every judgment is attributed';return;}
+    var sel=document.getElementById('coder');
+    var coderId=sel.value;
+    if(!coderId){noteEl.textContent='select your name first — every judgment is attributed';return;}
+    var coderLabel=sel.options[sel.selectedIndex].textContent;
     var n=codedCount();
     var codings=[];
     data.items.forEach(function(it){
       var c=store[it.coding_id];
       if(c&&c.tier)codings.push({coding_id:it.coding_id,tier:c.tier,flags:c.flags||{},notes:c.notes||'',coded_utc:c.coded_utc});
     });
-    var doc={coder:coder,exported_utc:new Date().toISOString(),
+    var doc={coder:coderLabel,coder_id:coderId,exported_utc:new Date().toISOString(),
              payload_generated_utc:data.generated_utc,rubric_version:data.rubric.version,
              rubric_sha256:data.rubric.sha256,n_items:data.items.length,n_coded:n,codings:codings,
              _sample:!!(sample||data._sample)||undefined};
     var blob=new Blob([JSON.stringify(doc,null,1)],{type:'application/json'});
     var a=document.createElement('a');
     a.href=URL.createObjectURL(blob);
-    a.download='codings_'+coder.replace(/[^a-z0-9]+/gi,'-').toLowerCase()+'_'+doc.exported_utc.slice(0,10)+'.json';
+    a.download='codings_'+coderId.replace(/[^a-z0-9]+/gi,'-').toLowerCase()+'_'+doc.exported_utc.slice(0,10)+'.json';
     a.click();
     noteEl.textContent=(n<data.items.length?('exported '+n+' of '+data.items.length+' — partial export; finish and re-export for the registered gate. ')
                                             :('exported all '+n+' codings. '))
@@ -228,6 +231,17 @@
       if(sample||d._sample)document.getElementById('sample-banner').hidden=false;
       document.getElementById('cd-pending').hidden=true;
       document.getElementById('cd-app').hidden=false;
+      var sel=document.getElementById('coder');
+      var ph=document.createElement('option');
+      ph.value='';ph.textContent='select coder…';ph.disabled=true;ph.selected=true;
+      sel.appendChild(ph);
+      (d.coders||[]).forEach(function(c){
+        var o=document.createElement('option');
+        o.value=c.id;o.textContent=c.label;
+        sel.appendChild(o);
+      });
+      try{var savedCoder=localStorage.getItem(storeKey+'-coder');if(savedCoder)sel.value=savedCoder;}catch(e){}
+      sel.addEventListener('change',function(){try{localStorage.setItem(storeKey+'-coder',sel.value);}catch(e){}});
       document.getElementById('cd-prev').addEventListener('click',function(){go(cur-1);});
       document.getElementById('cd-next').addEventListener('click',function(){go(cur+1);});
       document.getElementById('cd-jump').addEventListener('click',function(){
