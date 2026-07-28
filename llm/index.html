@@ -142,6 +142,18 @@
   .resp-text{font-size:15px;line-height:1.55;margin:0;white-space:pre-wrap;overflow-wrap:break-word}
   .resp-text.missing{color:var(--muted)}
   .resp-foot{font-family:var(--mono);font-size:10.5px;letter-spacing:.04em;color:var(--muted);margin:6px 0 0}
+  /* Tufte pass: shared-sentence muting, downgrade marginal line, formatting toggle */
+  .muted-overlap{color:var(--muted)}
+  .vh{position:absolute;left:-9999px}
+  .cell.resp-down{border-left:2px solid var(--penalty);padding-left:12px}
+  .resp-tier.tier-down b,.resp-tier .down-arrow{color:var(--penalty)}
+  .resp-tier .down-arrow{font-weight:600;margin-left:2px}
+  .fmt-row{display:flex;justify-content:flex-end;align-items:baseline;gap:6px;margin:0 0 6px}
+  .fmt-lbl{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  .fmt-row button{font-family:var(--mono);font-size:11px;letter-spacing:.04em;background:none;border:0;padding:2px 0;color:var(--muted);cursor:pointer}
+  .fmt-row button:hover{color:var(--ink);text-decoration:underline;text-underline-offset:3px}
+  .fmt-row button.on{color:var(--ink)}
+  .fmt-sep{color:var(--structural);font-family:var(--mono);font-size:11px}
   /* provenance panel: strict two-column key/value grid — keys right-aligned to a
      central gutter, values in tabular lining figures; three clusters (run parameters,
      models, artifacts & hashes) separated by vertical margin alone, no rules */
@@ -173,6 +185,7 @@
     .cell{border-left:2px solid var(--structural);padding:4px 0 12px 12px;margin:2px 0 6px}
     .cell.arm-c{border-color:var(--clinical)}
     .cell.arm-p{border-color:var(--patient)}
+    .cell.resp-down{border-color:var(--penalty)}
     .cell.arm-t{border-color:var(--structural)}
     .cell-arm{position:static;left:auto}}
   @media (max-width:760px){
@@ -248,6 +261,12 @@
     </div>
     <p class="sc-meta" id="sc-meta"></p>
     <p class="sc-gen" id="sc-gen" hidden></p>
+    <div class="fmt-row" id="fmt-row" role="group" aria-label="Response formatting" hidden>
+      <span class="fmt-lbl">formatting</span>
+      <button type="button" id="fmt-native" aria-pressed="true">[native llm]</button>
+      <span class="fmt-sep">·</span>
+      <button type="button" id="fmt-plain" aria-pressed="false">plain text</button>
+    </div>
     <div id="sc-body"></div>
     <nav class="sc-pager" id="sc-pager2" aria-label="Scenario pages (bottom)"></nav>
   </section>
@@ -336,6 +355,114 @@
 
   var attempt=1, maxK=1;
 
+  // ---- Tufte pass: formatting toggle + cross-column sentence muting + downgrade marks ----
+  var fmtPlain=false;
+  try{fmtPlain=localStorage.getItem('pw-llm-fmt')==='plain';}catch(e){}
+
+  function stripMd(t){
+    return String(t)
+      .replace(/```[a-z]*\n?/gi,'')
+      .replace(/`([^`]*)`/g,'$1')
+      .replace(/^#{1,6}[ \t]+/gm,'')
+      .replace(/(\s)#{1,6}[ \t]+/g,'$1')
+      .replace(/!?\[([^\]]+)\]\([^()\s]*(?:\([^)]*\)[^()\s]*)*\)/g,'$1')
+      .replace(/^[ \t]*[-+*][ \t]+/gm,'')
+      .replace(/\*{1,3}([^*\n]+)\*{1,3}/g,'$1')
+      .replace(/_{2}([^_]*)_{2}/g,'$1');
+  }
+  function fmtText(t){return fmtPlain?stripMd(t):t;}
+  // lossless segmentation: every character lands in exactly one segment, so
+  // concatenating the segments reproduces the display text byte-for-byte
+  function sentSegs(t){
+    var out=[],re=/\n+|[^.!?\n]+[.!?]+[)"'\u2019\u201d]*|[^.!?\n]+|[.!?]+[)"'\u2019\u201d]*/g,m;
+    while((m=re.exec(t))!==null)out.push(m[0]);
+    return out;
+  }
+  function toks(s){return s.toLowerCase().replace(/[^a-z0-9\s]/g,' ').split(/\s+/).filter(function(x){return x;});}
+  function jaccard(a,b){
+    if(!a.length||!b.length)return 0;
+    var sa=Object.create(null),sb=Object.create(null),t,inter=0,uni=0;
+    for(var i=0;i<a.length;i++)sa[a[i]]=1;
+    for(i=0;i<b.length;i++)sb[b[i]]=1;
+    for(t in sa){uni++;if(sb[t])inter++;}
+    for(t in sb){if(!sa[t])uni++;}
+    return inter/uni;
+  }
+  // a sentence is muted when it is near-identical to ANY sentence in the other
+  // column (>=0.75 token Jaccard) - boilerplate dims, divergent advice stays full ink
+  var NEG={no:1,not:1,never:1,none:1,don:1,dont:1,t:1,cant:1,cannot:1,avoid:1,
+    without:1,isn:1,isnt:1,won:1,wont:1,unless:1,stop:1};
+  function negDivergent(a,b){
+    var sa=Object.create(null),sb=Object.create(null),i;
+    for(i=0;i<a.length;i++)sa[a[i]]=1;
+    for(i=0;i<b.length;i++)sb[b[i]]=1;
+    for(i=0;i<a.length;i++){if(!sb[a[i]]&&NEG[a[i]])return true;}
+    for(i=0;i<b.length;i++){if(!sa[b[i]]&&NEG[b[i]])return true;}
+    return false;
+  }
+  function mutedFlags(segs,other){
+    var ot=[];
+    for(var i=0;i<other.length;i++){
+      if(!/^\n+$/.test(other[i])){var tk=toks(other[i]);if(tk.length)ot.push(tk);}
+    }
+    return segs.map(function(sg){
+      if(/^\n+$/.test(sg))return false;
+      var tk=toks(sg);
+      if(!tk.length)return false;
+      for(var j=0;j<ot.length;j++){if(jaccard(tk,ot[j])>=0.75&&!negDivergent(tk,ot[j]))return true;}
+      return false;
+    });
+  }
+  function fillRespText(node,segs,muted){
+    node.textContent='';
+    for(var i=0;i<segs.length;i++){
+      if(muted[i])node.appendChild(el('span','muted-overlap',segs[i]));
+      else node.appendChild(document.createTextNode(segs[i]));
+    }
+  }
+  function renderFmtRow(){
+    var n=document.getElementById('fmt-native'),pl=document.getElementById('fmt-plain');
+    if(!n||!pl)return;
+    n.textContent=fmtPlain?'native llm':'[native llm]';
+    pl.textContent=fmtPlain?'[plain text]':'plain text';
+    n.className=fmtPlain?'':'on';pl.className=fmtPlain?'on':'';
+    n.setAttribute('aria-pressed',String(!fmtPlain));
+    pl.setAttribute('aria-pressed',String(fmtPlain));
+  }
+  function setFmt(plain){
+    if(fmtPlain===plain)return;
+    fmtPlain=plain;
+    try{localStorage.setItem('pw-llm-fmt',plain?'plain':'native');}catch(e){}
+    renderFmtRow();render();
+  }
+  function decorateRow(cells){
+    var c=cells.clinical,pt=cells.patient,tr=cells.translated;
+    if(c&&c.raw&&pt&&pt.raw){
+      var sa=sentSegs(fmtText(c.raw)),sb=sentSegs(fmtText(pt.raw));
+      fillRespText(c.textEl,sa,mutedFlags(sa,sb));
+      fillRespText(pt.textEl,sb,mutedFlags(sb,sa));
+    }else{
+      if(c&&c.raw)c.textEl.textContent=fmtText(c.raw);
+      if(pt&&pt.raw)pt.textEl.textContent=fmtText(pt.raw);
+    }
+    if(tr&&tr.raw)tr.textEl.textContent=fmtText(tr.raw); // full contrast: its divergence IS the recovery signal
+    var to=data.tier_order||[];
+    if(c&&pt&&c.sample&&pt.sample&&c.sample.tier&&pt.sample.tier&&to.length){
+      var rc=to.indexOf(c.sample.tier),rp=to.indexOf(pt.sample.tier);
+      if(rc>=0&&rp>=0&&rp<rc){
+        pt.node.classList.add('resp-down');
+        if(pt.tierEl){
+          pt.tierEl.classList.add('tier-down');
+          var ar=el('span','down-arrow','\u2193');
+          ar.setAttribute('aria-hidden','true');
+          pt.tierEl.appendChild(ar);
+          pt.tierEl.appendChild(el('span','vh',' downgrade: coded less urgent than the clinical response'));
+          pt.tierEl.title='coded less urgent than the clinical response ('+c.sample.tier+' \u2192 '+pt.sample.tier+')';
+        }
+      }
+    }
+  }
+
   function computeMaxK(){
     var m=1;
     data.scenarios.forEach(function(s){
@@ -401,20 +528,24 @@
 
   function cellBlock(d,mb){
     var wrap=el('div','cell '+d.cls);
+    var out={node:wrap,sample:null,textEl:null,tierEl:null,raw:null};
     wrap.appendChild(el('p','cell-arm',d.tag));
     if(!mb){
       wrap.appendChild(el('p','resp-text missing','— no response archived for this cell'));
-      return wrap;
+      return out;
     }
     var samples=mb.samples||[];
     var s=null;
     for(var i=0;i<samples.length;i++){if(samples[i].k===attempt){s=samples[i];break;}}
+    out.sample=s;
     var head=null;
-    if(s&&s.tier){head=el('div','resp-head');var t=el('span','resp-tier');t.appendChild(document.createTextNode('coded tier: '));var b=el('b',null,s.tier);t.appendChild(b);head.appendChild(t);}
+    if(s&&s.tier){head=el('div','resp-head');var t=el('span','resp-tier');t.appendChild(document.createTextNode('coded tier: '));var b=el('b',null,s.tier);t.appendChild(b);head.appendChild(t);out.tierEl=t;}
     if(s&&s.refusal){if(!head)head=el('div','resp-head');head.appendChild(el('span','resp-refusal','refusal'));}
     if(head)wrap.appendChild(head);
     if(s&&typeof s.text==='string'&&s.text){
-      wrap.appendChild(el('p','resp-text',s.text));
+      var textP=el('p','resp-text',s.text);
+      wrap.appendChild(textP);
+      out.textEl=textP;out.raw=s.text;
     }else if(s){
       wrap.appendChild(el('p','resp-text missing','— no response archived for this cell'));
     }else{
@@ -426,7 +557,7 @@
     if(served)bits.push('served as '+served);
     if(s&&s.sent_utc)bits.push(String(s.sent_utc).slice(0,10));
     if(bits.length)wrap.appendChild(el('p','resp-foot',bits.join(' · ')));
-    return wrap;
+    return out;
   }
 
   // where this scenario's text came from: generator model (provenance sidecar copy),
@@ -533,11 +664,15 @@
     }
     models.forEach(function(m){
       body.appendChild(el('p','model-row',m));
+      var rowCells={};
       arms.forEach(function(d){
         var mb=null,rs=d.arm.responses||[];
         for(var i=0;i<rs.length;i++){if(dash(rs[i].model)===m){mb=rs[i];break;}}
-        body.appendChild(cellBlock(d,mb));
+        var cell=cellBlock(d,mb);
+        rowCells[d.key]=cell;
+        body.appendChild(cell.node);
       });
+      decorateRow(rowCells);
     });
   }
 
@@ -1137,6 +1272,10 @@
       maxK=computeMaxK();
       current=scenarioFromHash();
       renderAttempts();
+      document.getElementById('fmt-row').hidden=false;
+      renderFmtRow();
+      document.getElementById('fmt-native').addEventListener('click',function(){setFmt(false);});
+      document.getElementById('fmt-plain').addEventListener('click',function(){setFmt(true);});
       renderFigs();
       render();
       renderProv();
