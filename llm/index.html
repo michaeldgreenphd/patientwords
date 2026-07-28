@@ -143,7 +143,8 @@
   .resp-text.missing{color:var(--muted)}
   .resp-foot{font-family:var(--mono);font-size:10.5px;letter-spacing:.04em;color:var(--muted);margin:6px 0 0}
   /* Tufte pass: shared-sentence muting, downgrade marginal line, formatting toggle */
-  .muted-overlap{opacity:.42}
+  .muted-overlap{color:var(--muted)}
+  .vh{position:absolute;left:-9999px}
   .cell.resp-down{border-left:2px solid var(--penalty);padding-left:12px}
   .resp-tier.tier-down b,.resp-tier .down-arrow{color:var(--penalty)}
   .resp-tier .down-arrow{font-weight:600;margin-left:2px}
@@ -184,6 +185,7 @@
     .cell{border-left:2px solid var(--structural);padding:4px 0 12px 12px;margin:2px 0 6px}
     .cell.arm-c{border-color:var(--clinical)}
     .cell.arm-p{border-color:var(--patient)}
+    .cell.resp-down{border-color:var(--penalty)}
     .cell.arm-t{border-color:var(--structural)}
     .cell-arm{position:static;left:auto}}
   @media (max-width:760px){
@@ -259,7 +261,7 @@
     </div>
     <p class="sc-meta" id="sc-meta"></p>
     <p class="sc-gen" id="sc-gen" hidden></p>
-    <div class="fmt-row" id="fmt-row" hidden>
+    <div class="fmt-row" id="fmt-row" role="group" aria-label="Response formatting" hidden>
       <span class="fmt-lbl">formatting</span>
       <button type="button" id="fmt-native" aria-pressed="true">[native llm]</button>
       <span class="fmt-sep">·</span>
@@ -362,23 +364,23 @@
       .replace(/`([^`]*)`/g,'$1')
       .replace(/^#{1,6}[ \t]+/gm,'')
       .replace(/(\s)#{1,6}[ \t]+/g,'$1')
-      .replace(/\[([^\]]+)\]\([^)]*\)/g,'$1')
-      .replace(/\*{1,3}/g,'')
-      .replace(/_{2}([^_]*)_{2}/g,'$1')
-      .replace(/^[ \t]*[-+][ \t]+/gm,'');
+      .replace(/!?\[([^\]]+)\]\([^()\s]*(?:\([^)]*\)[^()\s]*)*\)/g,'$1')
+      .replace(/^[ \t]*[-+*][ \t]+/gm,'')
+      .replace(/\*{1,3}([^*\n]+)\*{1,3}/g,'$1')
+      .replace(/_{2}([^_]*)_{2}/g,'$1');
   }
   function fmtText(t){return fmtPlain?stripMd(t):t;}
   // lossless segmentation: every character lands in exactly one segment, so
   // concatenating the segments reproduces the display text byte-for-byte
   function sentSegs(t){
-    var out=[],re=/\n+|[^.!?\n]+[.!?]+[)"'\u2019\u201d]*|[^.!?\n]+/g,m;
+    var out=[],re=/\n+|[^.!?\n]+[.!?]+[)"'\u2019\u201d]*|[^.!?\n]+|[.!?]+[)"'\u2019\u201d]*/g,m;
     while((m=re.exec(t))!==null)out.push(m[0]);
     return out;
   }
   function toks(s){return s.toLowerCase().replace(/[^a-z0-9\s]/g,' ').split(/\s+/).filter(function(x){return x;});}
   function jaccard(a,b){
     if(!a.length||!b.length)return 0;
-    var sa={},sb={},t,inter=0,uni=0;
+    var sa=Object.create(null),sb=Object.create(null),t,inter=0,uni=0;
     for(var i=0;i<a.length;i++)sa[a[i]]=1;
     for(i=0;i<b.length;i++)sb[b[i]]=1;
     for(t in sa){uni++;if(sb[t])inter++;}
@@ -387,6 +389,16 @@
   }
   // a sentence is muted when it is near-identical to ANY sentence in the other
   // column (>=0.75 token Jaccard) - boilerplate dims, divergent advice stays full ink
+  var NEG={no:1,not:1,never:1,none:1,don:1,dont:1,t:1,cant:1,cannot:1,avoid:1,
+    without:1,isn:1,isnt:1,won:1,wont:1,unless:1,stop:1};
+  function negDivergent(a,b){
+    var sa=Object.create(null),sb=Object.create(null),i;
+    for(i=0;i<a.length;i++)sa[a[i]]=1;
+    for(i=0;i<b.length;i++)sb[b[i]]=1;
+    for(i=0;i<a.length;i++){if(!sb[a[i]]&&NEG[a[i]])return true;}
+    for(i=0;i<b.length;i++){if(!sa[b[i]]&&NEG[b[i]])return true;}
+    return false;
+  }
   function mutedFlags(segs,other){
     var ot=[];
     for(var i=0;i<other.length;i++){
@@ -396,7 +408,7 @@
       if(/^\n+$/.test(sg))return false;
       var tk=toks(sg);
       if(!tk.length)return false;
-      for(var j=0;j<ot.length;j++){if(jaccard(tk,ot[j])>=0.75)return true;}
+      for(var j=0;j<ot.length;j++){if(jaccard(tk,ot[j])>=0.75&&!negDivergent(tk,ot[j]))return true;}
       return false;
     });
   }
@@ -443,6 +455,7 @@
           var ar=el('span','down-arrow','\u2193');
           ar.setAttribute('aria-hidden','true');
           pt.tierEl.appendChild(ar);
+          pt.tierEl.appendChild(el('span','vh',' downgrade: coded less urgent than the clinical response'));
           pt.tierEl.title='coded less urgent than the clinical response ('+c.sample.tier+' \u2192 '+pt.sample.tier+')';
         }
       }
