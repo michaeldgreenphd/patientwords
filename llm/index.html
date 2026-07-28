@@ -266,11 +266,11 @@
     <p class="sc-gen" id="sc-gen" hidden></p>
     <div class="fmt-row" id="fmt-row" role="group" aria-label="Response formatting" hidden>
       <span class="fmt-lbl">formatting</span>
-      <button type="button" id="fmt-fmt" aria-pressed="true">[formatted]</button>
+      <button type="button" id="fmt-plain" aria-pressed="true">[plain text]</button>
+      <span class="fmt-sep">·</span>
+      <button type="button" id="fmt-fmt" aria-pressed="false">formatted</button>
       <span class="fmt-sep">·</span>
       <button type="button" id="fmt-native" aria-pressed="false">raw llm</button>
-      <span class="fmt-sep">·</span>
-      <button type="button" id="fmt-plain" aria-pressed="false">plain text</button>
     </div>
     <div id="sc-body"></div>
     <nav class="sc-pager" id="sc-pager2" aria-label="Scenario pages (bottom)"></nav>
@@ -361,9 +361,10 @@
   var attempt=1, maxK=1;
 
   // ---- Tufte pass: formatting toggle + cross-column sentence muting + downgrade marks ----
-  // three states: 'formatted' (default - the model's own markdown rendered),
-  // 'native' (raw source, byte-identical to the archive), 'plain' (stripped)
-  var fmtMode='formatted';
+  // three states: 'plain' (default - stripped, owner preference 2026-07-28),
+  // 'formatted' (the model's own markdown rendered), 'native' (raw source,
+  // byte-identical to the archive)
+  var fmtMode='plain';
   try{
     var _fm=localStorage.getItem('pw-llm-fmt');
     if(_fm==='plain'||_fm==='native'||_fm==='formatted')fmtMode=_fm;
