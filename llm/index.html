@@ -144,6 +144,9 @@
   .resp-foot{font-family:var(--mono);font-size:10.5px;letter-spacing:.04em;color:var(--muted);margin:6px 0 0}
   /* Tufte pass: shared-sentence muting, downgrade marginal line, formatting toggle */
   .muted-overlap{color:var(--muted)}
+  /* emphasis ink belongs to divergence only: rendered bold inside a shared
+     (muted) sentence is flattened so weight always signals difference */
+  .muted-overlap b{font-weight:400}
   .vh{position:absolute;left:-9999px}
   .cell.resp-down{border-left:2px solid var(--penalty);padding-left:12px}
   .resp-tier.tier-down b,.resp-tier .down-arrow{color:var(--penalty)}
@@ -263,7 +266,9 @@
     <p class="sc-gen" id="sc-gen" hidden></p>
     <div class="fmt-row" id="fmt-row" role="group" aria-label="Response formatting" hidden>
       <span class="fmt-lbl">formatting</span>
-      <button type="button" id="fmt-native" aria-pressed="true">[native llm]</button>
+      <button type="button" id="fmt-fmt" aria-pressed="true">[formatted]</button>
+      <span class="fmt-sep">·</span>
+      <button type="button" id="fmt-native" aria-pressed="false">raw llm</button>
       <span class="fmt-sep">·</span>
       <button type="button" id="fmt-plain" aria-pressed="false">plain text</button>
     </div>
@@ -356,8 +361,14 @@
   var attempt=1, maxK=1;
 
   // ---- Tufte pass: formatting toggle + cross-column sentence muting + downgrade marks ----
-  var fmtPlain=false;
-  try{fmtPlain=localStorage.getItem('pw-llm-fmt')==='plain';}catch(e){}
+  // three states: 'formatted' (default - the model's own markdown rendered),
+  // 'native' (raw source, byte-identical to the archive), 'plain' (stripped)
+  var fmtMode='formatted';
+  try{
+    var _fm=localStorage.getItem('pw-llm-fmt');
+    if(_fm==='plain'||_fm==='native'||_fm==='formatted')fmtMode=_fm;
+  }catch(e){}
+  var fmtPlain=(fmtMode==='plain');
 
   function stripMd(t){
     return String(t)
@@ -371,6 +382,59 @@
       .replace(/_{2}([^_]*)_{2}/g,'$1');
   }
   function fmtText(t){return fmtPlain?stripMd(t):t;}
+  // 'formatted' mode: render the model's own markdown, DOM-built (no HTML
+  // injection path). Conservative rules matching the plain stripper: paired
+  // ** only ('5*3 mg' survives - single asterisks never touched), #-headings
+  // at line start; anything unpaired stays literal. Pairs are matched over
+  // the WHOLE response so bold spanning a sentence boundary still renders.
+  function boldRanges(text){
+    var idx=[],i=0;
+    while((i=text.indexOf('**',i))!==-1){idx.push(i);i+=2;}
+    var ranges=[];
+    for(var j=0;j+1<idx.length;j+=2)ranges.push([idx[j],idx[j+1]]);
+    return ranges;
+  }
+  function mdInto(parent,seg,absStart,ranges,lineStart){
+    var hOffset=0,heading=false,body=seg;
+    if(lineStart){
+      var hm=/^#{1,3}[ \t]+/.exec(seg);
+      if(hm){heading=true;hOffset=hm[0].length;body=seg.slice(hOffset);}
+    }
+    var target=heading?el('b','md-h'):parent;
+    var out='',bold=false,started=false;
+    function flush(){
+      if(!out)return;
+      if(bold)target.appendChild(el('b',null,out));
+      else target.appendChild(document.createTextNode(out));
+      out='';
+    }
+    for(var i=0;i<body.length;i++){
+      var a=absStart+hOffset+i,isBold=false,isMarker=false;
+      for(var r=0;r<ranges.length;r++){
+        var o=ranges[r][0],c=ranges[r][1];
+        if(o>a)break;
+        if((a>=o&&a<o+2)||(a>=c&&a<c+2)){isMarker=true;break;}
+        if(a>=o+2&&a<c){isBold=true;break;}
+      }
+      if(isMarker)continue;
+      if(!started){bold=isBold;started=true;}
+      if(isBold!==bold){flush();bold=isBold;}
+      out+=body[i];
+    }
+    flush();
+    if(heading)parent.appendChild(target);
+  }
+  // one cell-text setter for every mode; keeps the muting path identical
+  function setCellText(node,text){
+    if(fmtMode!=='formatted'){node.textContent=fmtText(text);return;}
+    node.textContent='';
+    var segs=sentSegs(text),ranges=boldRanges(text),off=0;
+    for(var i=0;i<segs.length;i++){
+      var lineStart=(i===0)||/\n$/.test(segs[i-1]);
+      mdInto(node,segs[i],off,ranges,lineStart);
+      off+=segs[i].length;
+    }
+  }
   // lossless segmentation: every character lands in exactly one segment, so
   // concatenating the segments reproduces the display text byte-for-byte
   function sentSegs(t){
@@ -415,24 +479,39 @@
   }
   function fillRespText(node,segs,muted){
     node.textContent='';
+    var ranges=(fmtMode==='formatted')?boldRanges(segs.join('')):null,off=0;
     for(var i=0;i<segs.length;i++){
-      if(muted[i])node.appendChild(el('span','muted-overlap',segs[i]));
-      else node.appendChild(document.createTextNode(segs[i]));
+      var lineStart=(i===0)||/\n$/.test(segs[i-1]);
+      if(muted[i]){
+        var sp=el('span','muted-overlap');
+        if(ranges)mdInto(sp,segs[i],off,ranges,lineStart);
+        else sp.appendChild(document.createTextNode(segs[i]));
+        node.appendChild(sp);
+      }else if(ranges){
+        mdInto(node,segs[i],off,ranges,lineStart);
+      }else{
+        node.appendChild(document.createTextNode(segs[i]));
+      }
+      off+=segs[i].length;
     }
   }
   function renderFmtRow(){
-    var n=document.getElementById('fmt-native'),pl=document.getElementById('fmt-plain');
-    if(!n||!pl)return;
-    n.textContent=fmtPlain?'native llm':'[native llm]';
-    pl.textContent=fmtPlain?'[plain text]':'plain text';
-    n.className=fmtPlain?'':'on';pl.className=fmtPlain?'on':'';
-    n.setAttribute('aria-pressed',String(!fmtPlain));
-    pl.setAttribute('aria-pressed',String(fmtPlain));
+    var defs=[['fmt-fmt','formatted','formatted'],['fmt-native','raw llm','native'],
+              ['fmt-plain','plain text','plain']];
+    for(var i=0;i<defs.length;i++){
+      var b=document.getElementById(defs[i][0]);
+      if(!b)continue;
+      var on=(fmtMode===defs[i][2]);
+      b.textContent=on?'['+defs[i][1]+']':defs[i][1];
+      b.className=on?'on':'';
+      b.setAttribute('aria-pressed',String(on));
+    }
   }
-  function setFmt(plain){
-    if(fmtPlain===plain)return;
-    fmtPlain=plain;
-    try{localStorage.setItem('pw-llm-fmt',plain?'plain':'native');}catch(e){}
+  function setFmt(mode){
+    if(fmtMode===mode)return;
+    fmtMode=mode;
+    fmtPlain=(mode==='plain');
+    try{localStorage.setItem('pw-llm-fmt',mode);}catch(e){}
     renderFmtRow();render();
   }
   function decorateRow(cells){
@@ -442,10 +521,10 @@
       fillRespText(c.textEl,sa,mutedFlags(sa,sb));
       fillRespText(pt.textEl,sb,mutedFlags(sb,sa));
     }else{
-      if(c&&c.raw)c.textEl.textContent=fmtText(c.raw);
-      if(pt&&pt.raw)pt.textEl.textContent=fmtText(pt.raw);
+      if(c&&c.raw)setCellText(c.textEl,c.raw);
+      if(pt&&pt.raw)setCellText(pt.textEl,pt.raw);
     }
-    if(tr&&tr.raw)tr.textEl.textContent=fmtText(tr.raw); // full contrast: its divergence IS the recovery signal
+    if(tr&&tr.raw)setCellText(tr.textEl,tr.raw); // full contrast: its divergence IS the recovery signal
     var to=data.tier_order||[];
     if(c&&pt&&c.sample&&pt.sample&&c.sample.tier&&pt.sample.tier&&to.length){
       var rc=to.indexOf(c.sample.tier),rp=to.indexOf(pt.sample.tier);
@@ -1274,8 +1353,9 @@
       renderAttempts();
       document.getElementById('fmt-row').hidden=false;
       renderFmtRow();
-      document.getElementById('fmt-native').addEventListener('click',function(){setFmt(false);});
-      document.getElementById('fmt-plain').addEventListener('click',function(){setFmt(true);});
+      document.getElementById('fmt-fmt').addEventListener('click',function(){setFmt('formatted');});
+      document.getElementById('fmt-native').addEventListener('click',function(){setFmt('native');});
+      document.getElementById('fmt-plain').addEventListener('click',function(){setFmt('plain');});
       renderFigs();
       render();
       renderProv();

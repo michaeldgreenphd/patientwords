@@ -121,6 +121,7 @@
   .fig h3{font-size:24px;font-weight:600;line-height:1.22;margin:0 0 10px;letter-spacing:-.004em}
   .fig p{font-size:15.5px;line-height:1.62;margin:0 0 14px}
   .stat{font-family:var(--mono);font-size:13px;font-weight:600;letter-spacing:.01em}
+  .stat-note{font-family:var(--mono);font-size:12px;line-height:1.7;color:var(--muted);margin:4px 0 0}
   .stat.penalty{color:var(--penalty)}
   .stat.recovery{color:var(--clinical)}
   .traced{margin:12px 0 0;font-family:var(--mono);font-size:11px;letter-spacing:.03em;
@@ -467,6 +468,7 @@
       <h3>Simulated Scenarios</h3>
       <p>Claude writes new patient-vs-clinical pairs in the hand-built dataset’s format, and LLM validators accept or reject each. Accepted pairs are traced on gemma-2-2b and published with the generator’s rationale and cost.</p>
       <span class="stat" id="sim-stat" hidden></span>
+      <p class="stat-note">This is a stress-test. Topics were chosen to probe suspected failure modes from circuit tracing of sentences. The pooled share is not a population rate.</p>
       <details class="trace-fold">
         <summary>Trace details</summary>
         <p class="traced" data-mode="simulated" data-traced="gemma-2-2b">
