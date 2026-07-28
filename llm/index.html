@@ -52,6 +52,40 @@
   /* pending state */
   .pending{border:1px solid var(--hairline);border-left:3px solid var(--structural);
     padding:14px 16px;font-family:var(--mono);font-size:12.5px;line-height:1.8;color:var(--muted);margin:26px 0}
+  /* summary figures: dumbbell rows, hairline structure, direct labels */
+  .fig{margin:18px 0 4px}
+  .fig-cap{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--ink);margin:0 0 2px}
+  .fig-cap .fig-sub{font-weight:400;letter-spacing:.06em;text-transform:none;color:var(--muted)}
+  .fig svg{display:block;width:100%;height:auto;max-width:680px}
+  .fig-pending{font-family:var(--mono);font-size:11.5px;color:var(--muted);margin:4px 0 0}
+  .fig-row{display:flex;gap:26px;flex-wrap:wrap;align-items:flex-start}
+  .fig-panel{flex:1 1 240px;min-width:200px;max-width:300px}
+  .fig-panel-cap{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:0 0 3px;min-height:28px}
+  .fig-panel svg{max-width:none}
+  #fig-map-body svg .mapcell{cursor:pointer}
+  .fig-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .fig-scroll svg{min-width:620px}
+  /* small-multiples profile: wider than the single-panel figures, scrolls on small screens */
+  #fig-profiles-body svg{max-width:840px;min-width:720px}
+  /* eight-readings collapsible: the consensus-worst scenario's opening lines */
+  .er{border-top:1px solid var(--hairline);margin:8px 0 4px;padding-top:8px;max-width:1000px}
+  .er summary{font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--clinical);cursor:pointer}
+  .er summary:hover{color:var(--ink)}
+  .er-cap{font-family:var(--mono);font-size:10.5px;color:var(--muted);margin:8px 0 0}
+  .er-cap a{color:var(--clinical);text-decoration:none}
+  .er-cap a:hover{text-decoration:underline;text-underline-offset:3px}
+  .er-heads,.er-row{display:grid;grid-template-columns:92px 1fr 1fr 132px;gap:4px 18px;align-items:baseline}
+  .er-heads{margin:10px 0 2px}
+  .er-h{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;font-weight:600}
+  .er-row{border-top:1px solid var(--hairline);padding:7px 0 6px}
+  .er-m{font-family:var(--mono);font-size:11px;font-weight:600;margin:0}
+  .er-q{font-size:12.5px;font-style:italic;line-height:1.45;margin:0;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+  .er-c{border-left:2px solid var(--clinical);padding-left:8px}
+  .er-p{border-left:2px solid var(--patient);padding-left:8px}
+  .er-t{font-family:var(--mono);font-size:10px;color:var(--muted);white-space:nowrap;margin:0}
+  .er-t.down{color:var(--penalty)}
+  @media (max-width:900px){.er-heads{display:none}.er-row{grid-template-columns:1fr;gap:4px}}
   /* scenario pager: text-only (Tufte) */
   .sc-pager{font-family:var(--mono);font-size:12px;margin:22px 0 6px;display:flex;gap:12px;
     flex-wrap:wrap;align-items:baseline}
@@ -61,8 +95,13 @@
   .sc-pager [aria-current=true]{color:var(--ink);border-bottom:1px solid var(--ink)}
   .sc-pager .off{color:var(--structural);cursor:default}
   .sc-pager .state{color:var(--muted)}
-  .sc-meta{font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--muted);margin:2px 0 18px}
+  .sc-meta{font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--muted);margin:2px 0 4px}
   .sc-meta b{color:var(--ink);font-weight:600}
+  /* generation note: how this scenario's text was produced, with archive + trace links */
+  .sc-gen{font-family:var(--mono);font-size:11px;line-height:1.7;color:var(--muted);margin:0 0 18px;max-width:88ch}
+  .sc-gen a{color:var(--clinical);text-decoration:none}
+  .sc-gen a:hover{text-decoration:underline;text-underline-offset:3px}
+  .sc-gen .gen-note{font-style:italic}
   /* attempt switcher: site chip conventions */
   .chip-g{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:4px 0 14px}
   .chip-lbl{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-right:4px}
@@ -71,34 +110,62 @@
   .chip:hover{color:var(--ink);border-color:var(--muted)}
   .chip.on{color:var(--clinical);border-color:var(--clinical);font-weight:600}
   .chip-note{font-family:var(--mono);font-size:10.5px;color:var(--muted);margin-left:6px}
-  /* arm sections */
-  .arm{margin:0 0 30px}
+  /* side-by-side wordings: one column per arm, one row per model —
+     column alignment does the comparing, hairlines carry the structure */
+  #sc-body{display:grid;column-gap:30px;border-bottom:1px solid var(--ink);padding-bottom:8px}
+  #sc-body.cols-1{grid-template-columns:minmax(0,1fr)}
+  #sc-body.cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #sc-body.cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .arm-head{min-width:0;padding:0 0 14px}
   .arm-label{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.2em;
     text-transform:uppercase;margin:0 0 8px}
   .arm-c .arm-label{color:var(--clinical)}
   .arm-p .arm-label{color:var(--patient)}
   .arm-t .arm-label{color:var(--muted)}
-  .ask{font-size:19px;line-height:1.55;margin:0 0 14px;padding:10px 16px;border-left:3px solid}
+  .ask{font-size:16.5px;line-height:1.5;margin:0;padding:8px 12px;border-left:3px solid}
   .arm-c .ask{border-color:var(--clinical)}
   .arm-p .ask{border-color:var(--patient)}
   .arm-t .ask{border-color:var(--structural);color:var(--muted)}
-  .resp{border-top:1px solid var(--hairline);padding:12px 0 14px}
-  .resp:last-child{border-bottom:1px solid var(--ink)}
-  .resp-head{display:flex;flex-wrap:wrap;gap:6px 16px;align-items:baseline;margin:0 0 6px}
-  .resp-model{font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.04em}
+  .model-row{grid-column:1/-1;border-top:1px solid var(--hairline);margin:0;
+    padding:8px 0 2px;font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.04em}
+  .cell{min-width:0;padding:2px 0 14px}
+  .cell-arm{position:absolute;left:-9999px;font-family:var(--mono);font-size:10px;
+    letter-spacing:.14em;text-transform:uppercase;margin:0 0 4px}
+  .arm-c .cell-arm{color:var(--clinical)}
+  .arm-p .cell-arm{color:var(--patient)}
+  .arm-t .cell-arm{color:var(--muted)}
+  .span-all{grid-column:1/-1}
+  .resp-head{display:flex;flex-wrap:wrap;gap:4px 14px;align-items:baseline;margin:0 0 4px}
   .resp-tier{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
   .resp-tier b{color:var(--ink);font-weight:600}
   .resp-refusal{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--penalty)}
-  .resp-text{font-size:15.5px;line-height:1.6;margin:0;white-space:pre-wrap}
+  .resp-text{font-size:15px;line-height:1.55;margin:0;white-space:pre-wrap;overflow-wrap:break-word}
   .resp-text.missing{color:var(--muted)}
   .resp-foot{font-family:var(--mono);font-size:10.5px;letter-spacing:.04em;color:var(--muted);margin:6px 0 0}
-  /* provenance panel */
+  /* Tufte pass: shared-sentence muting, downgrade marginal line, formatting toggle */
+  .muted-overlap{opacity:.42}
+  .cell.resp-down{border-left:2px solid var(--penalty);padding-left:12px}
+  .resp-tier.tier-down b,.resp-tier .down-arrow{color:var(--penalty)}
+  .resp-tier .down-arrow{font-weight:600;margin-left:2px}
+  .fmt-row{display:flex;justify-content:flex-end;align-items:baseline;gap:6px;margin:0 0 6px}
+  .fmt-lbl{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  .fmt-row button{font-family:var(--mono);font-size:11px;letter-spacing:.04em;background:none;border:0;padding:2px 0;color:var(--muted);cursor:pointer}
+  .fmt-row button:hover{color:var(--ink);text-decoration:underline;text-underline-offset:3px}
+  .fmt-row button.on{color:var(--ink)}
+  .fmt-sep{color:var(--structural);font-family:var(--mono);font-size:11px}
+  /* provenance panel: strict two-column key/value grid — keys right-aligned to a
+     central gutter, values in tabular lining figures; three clusters (run parameters,
+     models, artifacts & hashes) separated by vertical margin alone, no rules */
   .prov{border-top:1px solid var(--ink);margin-top:38px;padding-top:12px}
   .prov h2{font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.2em;
     text-transform:uppercase;margin:0 0 12px}
-  .prov dl{display:grid;grid-template-columns:auto 1fr;gap:5px 22px;margin:0 0 14px}
-  .prov dt{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
-  .prov dd{font-family:var(--mono);font-size:12px;margin:0;overflow-wrap:anywhere}
+  .prov dl{display:grid;grid-template-columns:max-content 1fr;gap:6px 22px;margin:0 0 14px}
+  .prov dt{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--muted);text-align:right}
+  .prov dd{font-family:var(--mono);font-size:12px;margin:0;overflow-wrap:anywhere;
+    font-variant-numeric:tabular-nums lining-nums}
+  .prov dt.grp,.prov dd.grp{margin-top:16px}
+  .prov dd .prov-mline div{margin:1px 0}
   .prov dd a{color:var(--clinical);text-decoration:none}
   .prov dd a:hover{text-decoration:underline;text-underline-offset:3px}
   .prov .note{font-size:15px;line-height:1.62;font-family:var(--serif);color:var(--ink);margin:0 0 12px}
@@ -109,10 +176,22 @@
   .endnote{border-top:1px solid var(--ink);margin-top:42px;padding-top:14px}
   footer{font-family:var(--mono);font-size:12px;line-height:1.9;color:var(--muted)}
   footer a{color:var(--muted);text-underline-offset:3px}
+  @media (max-width:900px){
+    /* stacked fallback: wordings first, then each model's answers together */
+    #sc-body{display:block}
+    .arm-head{padding:0 0 12px}
+    .model-row{margin-top:4px}
+    .cell{border-left:2px solid var(--structural);padding:4px 0 12px 12px;margin:2px 0 6px}
+    .cell.arm-c{border-color:var(--clinical)}
+    .cell.arm-p{border-color:var(--patient)}
+    .cell.arm-t{border-color:var(--structural)}
+    .cell-arm{position:static;left:auto}}
   @media (max-width:760px){
     .masthead nav{gap:8px 22px}
     .masthead nav a{padding:7px 0}
     .prov dl{grid-template-columns:1fr}
+    .prov dt{text-align:left}
+    .prov dd.grp{margin-top:0} /* stacked: the dt margin alone marks the cluster break */
     body{font-size:16px}}
 </style>
 </head>
@@ -140,8 +219,8 @@
 <main id="main">
   <p class="dateline">Advice arm <span class="mode">· full model responses, verbatim</span></p>
   <h1>LLM responses</h1>
-  <p class="subtitle">The same situation, asked two ways, across assistants.</p>
-  <p class="explainer">Each scenario below is one clinical situation phrased two ways. The clinical wording comes first, with every model's response beneath it; the everyday patient wording follows, with the same models' responses. Responses are shown verbatim. Each model was asked the same prompt several times — the attempt switcher moves between those repeat draws. Where a translation step ran, the machine-translated wording and its responses appear third.</p>
+  <p class="subtitle">The same medical scenario, framed with patient language v. doctor language. Responses across frontier AI labs, queried using API calls.</p>
+  <p class="explainer">Each scenario below is one clinical situation phrased two ways. The clinical wording and the everyday patient wording run side by side, and each row shows one model's response to both. Responses are shown verbatim. Each model was asked the same prompt 3 times. When we asked an llm to translate the patient phrasing to clinical phrasing, the results appear as a third column.</p>
 
   <div class="sample-banner" id="sample-banner" hidden>SAMPLE DATA — synthetic placeholder payload for layout verification only. Nothing on this page is a measurement.</div>
 
@@ -152,12 +231,40 @@
   </div>
 
   <section id="llm-viewer" hidden aria-live="polite">
+    <div id="figs" hidden>
+      <p class="fig-pending" id="fig-tiers-pending">Grades appear here once each response is coded against the clinician-reviewed rubric.</p>
+      <figure class="fig" id="fig-flags" hidden>
+        <figcaption class="fig-cap">What the answers do <span class="fig-sub">share of graded responses · <span style="color:var(--clinical)">clinical</span> vs <span style="color:var(--patient)">patient</span> wording</span></figcaption>
+        <div class="fig-row" id="fig-flags-body"></div>
+      </figure>
+      <figure class="fig" id="fig-map" hidden>
+        <figcaption class="fig-cap">Where the downgrades happen <span class="fig-sub">one mark per scenario · filled = patient wording graded less urgent · tap a mark to open it · a red numeral counts the models downgrading that scenario · downgrades cluster by scenario, not by the size of the next-word gap</span></figcaption>
+        <div id="fig-map-body" class="fig-scroll"></div>
+      </figure>
+      <details class="er" id="eight-readings" hidden>
+        <summary id="er-sum"></summary>
+        <p class="er-cap" id="er-cap"></p>
+        <div id="er-grid"></div>
+      </details>
+      <details class="er" id="tier-spread" hidden>
+        <summary id="tsp-sum"></summary>
+        <p class="er-cap" id="tsp-cap"></p>
+        <div id="tsp-body" class="fig-scroll"></div>
+      </details>
+    </div>
     <nav class="sc-pager" id="sc-pager" aria-label="Scenario pages"></nav>
     <div class="chip-g" id="attempt-row" role="group" aria-label="Attempt" hidden>
       <span class="chip-lbl">attempt</span>
       <span class="chip-note">same prompt, re-asked — switching shows how much each model's answer moves</span>
     </div>
     <p class="sc-meta" id="sc-meta"></p>
+    <p class="sc-gen" id="sc-gen" hidden></p>
+    <div class="fmt-row" id="fmt-row" hidden>
+      <span class="fmt-lbl">formatting</span>
+      <button type="button" id="fmt-native" aria-pressed="true">[native llm]</button>
+      <span class="fmt-sep">·</span>
+      <button type="button" id="fmt-plain" aria-pressed="false">plain text</button>
+    </div>
     <div id="sc-body"></div>
     <nav class="sc-pager" id="sc-pager2" aria-label="Scenario pages (bottom)"></nav>
   </section>
@@ -167,6 +274,11 @@
     <p class="note" id="prov-note"></p>
     <dl id="prov-list"></dl>
   </section>
+
+  <figure class="fig" id="fig-profiles" hidden>
+    <figcaption class="fig-cap">Model profiles <span class="fig-sub" id="fig-profiles-sub"></span></figcaption>
+    <div id="fig-profiles-body" class="fig-scroll"></div>
+  </figure>
 
   <a class="back" href="../">← Back home</a>
   <div class="endnote">
@@ -187,13 +299,25 @@
   var pending=document.getElementById('llm-pending');
   var viewer=document.getElementById('llm-viewer');
   var prov=document.getElementById('llm-prov');
-  var current=0, data=null;
+  var current=0, data=null, genByBatch={};
+
+  // generator model per source batch, from the sidecar copies in data/provenance.json
+  fetch('../data/provenance.json',{cache:'no-cache'})
+    .then(function(r){return r.ok?r.json():null;})
+    .then(function(p){
+      ((p&&p.batches)||[]).forEach(function(b){
+        if(b.batch)genByBatch[b.batch]=b.generated_by||b.model||null;
+      });
+      if(data)render(); // repaint the note if the payload beat this fetch
+    })
+    .catch(function(){});
 
   function el(tag,cls,text){var e=document.createElement(tag);if(cls)e.className=cls;if(text!=null)e.textContent=text;return e;}
   function dash(v){return (v==null||v==='')?'—':String(v);}
 
   function scenarioFromHash(){
     var m=/^#s(\d+)$/.exec(location.hash);
+    if(!m)m=/[?&]s=(\d+)/.exec(location.search); // email-safe deep link: ?s=N survives fragment-stripping
     if(!m)return 0;
     var i=parseInt(m[1],10)-1;
     return (data&&i>=0&&i<data.scenarios.length)?i:0;
@@ -228,6 +352,103 @@
 
   var attempt=1, maxK=1;
 
+  // ---- Tufte pass: formatting toggle + cross-column sentence muting + downgrade marks ----
+  var fmtPlain=false;
+  try{fmtPlain=localStorage.getItem('pw-llm-fmt')==='plain';}catch(e){}
+
+  function stripMd(t){
+    return String(t)
+      .replace(/```[a-z]*\n?/gi,'')
+      .replace(/`([^`]*)`/g,'$1')
+      .replace(/^#{1,6}[ \t]+/gm,'')
+      .replace(/(\s)#{1,6}[ \t]+/g,'$1')
+      .replace(/\[([^\]]+)\]\([^)]*\)/g,'$1')
+      .replace(/\*{1,3}/g,'')
+      .replace(/_{2}([^_]*)_{2}/g,'$1')
+      .replace(/^[ \t]*[-+][ \t]+/gm,'');
+  }
+  function fmtText(t){return fmtPlain?stripMd(t):t;}
+  // lossless segmentation: every character lands in exactly one segment, so
+  // concatenating the segments reproduces the display text byte-for-byte
+  function sentSegs(t){
+    var out=[],re=/\n+|[^.!?\n]+[.!?]+[)"'\u2019\u201d]*|[^.!?\n]+/g,m;
+    while((m=re.exec(t))!==null)out.push(m[0]);
+    return out;
+  }
+  function toks(s){return s.toLowerCase().replace(/[^a-z0-9\s]/g,' ').split(/\s+/).filter(function(x){return x;});}
+  function jaccard(a,b){
+    if(!a.length||!b.length)return 0;
+    var sa={},sb={},t,inter=0,uni=0;
+    for(var i=0;i<a.length;i++)sa[a[i]]=1;
+    for(i=0;i<b.length;i++)sb[b[i]]=1;
+    for(t in sa){uni++;if(sb[t])inter++;}
+    for(t in sb){if(!sa[t])uni++;}
+    return inter/uni;
+  }
+  // a sentence is muted when it is near-identical to ANY sentence in the other
+  // column (>=0.75 token Jaccard) - boilerplate dims, divergent advice stays full ink
+  function mutedFlags(segs,other){
+    var ot=[];
+    for(var i=0;i<other.length;i++){
+      if(!/^\n+$/.test(other[i])){var tk=toks(other[i]);if(tk.length)ot.push(tk);}
+    }
+    return segs.map(function(sg){
+      if(/^\n+$/.test(sg))return false;
+      var tk=toks(sg);
+      if(!tk.length)return false;
+      for(var j=0;j<ot.length;j++){if(jaccard(tk,ot[j])>=0.75)return true;}
+      return false;
+    });
+  }
+  function fillRespText(node,segs,muted){
+    node.textContent='';
+    for(var i=0;i<segs.length;i++){
+      if(muted[i])node.appendChild(el('span','muted-overlap',segs[i]));
+      else node.appendChild(document.createTextNode(segs[i]));
+    }
+  }
+  function renderFmtRow(){
+    var n=document.getElementById('fmt-native'),pl=document.getElementById('fmt-plain');
+    if(!n||!pl)return;
+    n.textContent=fmtPlain?'native llm':'[native llm]';
+    pl.textContent=fmtPlain?'[plain text]':'plain text';
+    n.className=fmtPlain?'':'on';pl.className=fmtPlain?'on':'';
+    n.setAttribute('aria-pressed',String(!fmtPlain));
+    pl.setAttribute('aria-pressed',String(fmtPlain));
+  }
+  function setFmt(plain){
+    if(fmtPlain===plain)return;
+    fmtPlain=plain;
+    try{localStorage.setItem('pw-llm-fmt',plain?'plain':'native');}catch(e){}
+    renderFmtRow();render();
+  }
+  function decorateRow(cells){
+    var c=cells.clinical,pt=cells.patient,tr=cells.translated;
+    if(c&&c.raw&&pt&&pt.raw){
+      var sa=sentSegs(fmtText(c.raw)),sb=sentSegs(fmtText(pt.raw));
+      fillRespText(c.textEl,sa,mutedFlags(sa,sb));
+      fillRespText(pt.textEl,sb,mutedFlags(sb,sa));
+    }else{
+      if(c&&c.raw)c.textEl.textContent=fmtText(c.raw);
+      if(pt&&pt.raw)pt.textEl.textContent=fmtText(pt.raw);
+    }
+    if(tr&&tr.raw)tr.textEl.textContent=fmtText(tr.raw); // full contrast: its divergence IS the recovery signal
+    var to=data.tier_order||[];
+    if(c&&pt&&c.sample&&pt.sample&&c.sample.tier&&pt.sample.tier&&to.length){
+      var rc=to.indexOf(c.sample.tier),rp=to.indexOf(pt.sample.tier);
+      if(rc>=0&&rp>=0&&rp<rc){
+        pt.node.classList.add('resp-down');
+        if(pt.tierEl){
+          pt.tierEl.classList.add('tier-down');
+          var ar=el('span','down-arrow','\u2193');
+          ar.setAttribute('aria-hidden','true');
+          pt.tierEl.appendChild(ar);
+          pt.tierEl.title='coded less urgent than the clinical response ('+c.sample.tier+' \u2192 '+pt.sample.tier+')';
+        }
+      }
+    }
+  }
+
   function computeMaxK(){
     var m=1;
     data.scenarios.forEach(function(s){
@@ -255,6 +476,12 @@
         b.addEventListener('click',function(){
           if(attempt===k)return;
           attempt=k; renderAttempts(); render();
+          // the responses are what changed - bring them into view if they aren't
+          var mr=document.querySelector('#sc-body .model-row');
+          if(mr){
+            var r=mr.getBoundingClientRect();
+            if(r.top>window.innerHeight*0.9||r.top<0)mr.scrollIntoView({behavior:'smooth',block:'start'});
+          }
         });
         row.insertBefore(b,note);
       })(k);
@@ -262,40 +489,137 @@
     row.hidden=false;
   }
 
-  function respBlock(mb){
-    var wrap=el('div','resp');
+  function armDefs(s){
+    return [
+      {key:'clinical',cls:'arm-c',label:'Clinical wording',tag:'clinical'},
+      {key:'patient',cls:'arm-p',label:'Everyday patient wording',tag:'patient'},
+      {key:'translated',cls:'arm-t',label:'After LLM translation of the patient wording',tag:'translated'}
+    ].filter(function(d){
+      var a=s[d.key];
+      if(!a||(!a.message&&!(a.responses&&a.responses.length)))return false;
+      d.arm=a; return true;
+    });
+  }
+
+  function modelOrder(arms){
+    var seen={},order=[];
+    arms.forEach(function(d){
+      (d.arm.responses||[]).forEach(function(mb){
+        var m=dash(mb.model);
+        if(!seen[m]){seen[m]=1;order.push(m);}
+      });
+    });
+    return groupSpecs(order); // same family ordering as the figures
+  }
+
+  function cellBlock(d,mb){
+    var wrap=el('div','cell '+d.cls);
+    var out={node:wrap,sample:null,textEl:null,tierEl:null,raw:null};
+    wrap.appendChild(el('p','cell-arm',d.tag));
+    if(!mb){
+      wrap.appendChild(el('p','resp-text missing','— no response archived for this cell'));
+      return out;
+    }
     var samples=mb.samples||[];
     var s=null;
     for(var i=0;i<samples.length;i++){if(samples[i].k===attempt){s=samples[i];break;}}
-    var head=el('div','resp-head');
-    head.appendChild(el('span','resp-model',dash(mb.model)));
-    if(s&&s.tier){var t=el('span','resp-tier');t.appendChild(document.createTextNode('coded tier: '));var b=el('b',null,s.tier);t.appendChild(b);head.appendChild(t);}
-    if(s&&s.refusal)head.appendChild(el('span','resp-refusal','refusal'));
-    wrap.appendChild(head);
+    out.sample=s;
+    var head=null;
+    if(s&&s.tier){head=el('div','resp-head');var t=el('span','resp-tier');t.appendChild(document.createTextNode('coded tier: '));var b=el('b',null,s.tier);t.appendChild(b);head.appendChild(t);out.tierEl=t;}
+    if(s&&s.refusal){if(!head)head=el('div','resp-head');head.appendChild(el('span','resp-refusal','refusal'));}
+    if(head)wrap.appendChild(head);
     if(s&&typeof s.text==='string'&&s.text){
-      wrap.appendChild(el('p','resp-text',s.text));
+      var textP=el('p','resp-text',s.text);
+      wrap.appendChild(textP);
+      out.textEl=textP;out.raw=s.text;
     }else if(s){
       wrap.appendChild(el('p','resp-text missing','— no response archived for this cell'));
     }else{
       wrap.appendChild(el('p','resp-text missing','— attempt '+attempt+' not archived for this cell'));
     }
-    var bits=['attempt '+attempt+' of '+maxK];
+    var bits=[];
+    if(maxK>1)bits.push('attempt '+attempt); // visible confirmation the switcher changed this cell
     var served=(s&&s.model_returned)||mb.model_returned;
     if(served)bits.push('served as '+served);
     if(s&&s.sent_utc)bits.push(String(s.sent_utc).slice(0,10));
-    wrap.appendChild(el('p','resp-foot',bits.join(' · ')));
-    return wrap;
+    if(bits.length)wrap.appendChild(el('p','resp-foot',bits.join(' · ')));
+    return out;
   }
 
-  function armSection(cls,label,arm){
-    if(!arm||(!arm.message&&!(arm.responses&&arm.responses.length)))return null;
-    var sec=el('section','arm '+cls);
-    sec.appendChild(el('p','arm-label',label));
-    if(arm.message)sec.appendChild(el('p','ask',arm.message));
-    var rs=arm.responses||[];
-    if(!rs.length){sec.appendChild(el('p','resp-text missing','— no responses archived yet'));}
-    for(var i=0;i<rs.length;i++)sec.appendChild(respBlock(rs[i]));
-    return sec;
+  // where this scenario's text came from: generator model (provenance sidecar copy),
+  // the archived batch it belongs to, and its circuit trace on this site
+  function renderGen(s){
+    var node=document.getElementById('sc-gen');
+    node.textContent='';
+    var m=/^(.+)#(\d+)$/.exec(String(s.id||''));
+    if(!m){node.hidden=true;return;}
+    var batch=m[1], idx=parseInt(m[2],10);
+    var gen=genByBatch[batch];
+    node.appendChild(document.createTextNode(
+      (gen?('Both wordings were written by '+gen):'Both wordings were generated')+
+      ' as one stress pair, archived in '));
+    var ba=el('a',null,batch);
+    ba.href='https://github.com/michaeldgreenphd/patientwords-engine/blob/main/data/simulated/'+batch+'.json';
+    ba.target='_blank';ba.rel='noopener';
+    node.appendChild(ba);
+    node.appendChild(document.createTextNode('. '));
+    // how the pair was selected and how the traced sentence became a full question.
+    // Field-less payloads predate the exporter fields; the fallbacks state the
+    // registered 2026-07-21 build (flip-only selection, fixed ask suffix).
+    var sel=data.selection||null;
+    var onlyFlips=sel?!!sel.only_flips:true;
+    node.appendChild(document.createTextNode(onlyFlips?
+      'The pair comes from the simulated scenario set: circuit tracing on gemma-2-2b found its top next-word prediction changes between these two wordings, and only pairs with that change were used here. ':
+      'The pair comes from the simulated scenario set traced on gemma-2-2b. '));
+    // advice-request construction, scoped to the set it describes: while every
+    // scenario shares one suffix the claim covers 1..N; a future payload mixing
+    // builds switches this to a per-scenario statement automatically
+    var ask=(s.ask_suffix!==undefined&&s.ask_suffix!==null)?s.ask_suffix:
+            ((data.ask_suffix!==undefined)?data.ask_suffix:'... anyway what should I do?');
+    var seen={};
+    data.scenarios.forEach(function(x){
+      var a=(x.ask_suffix!==undefined&&x.ask_suffix!==null)?x.ask_suffix:data.ask_suffix;
+      if(a!=null)seen[a]=1;
+    });
+    var uniform=Object.keys(seen).length<=1;
+    if(ask&&uniform){
+      node.appendChild(document.createTextNode(
+        'Scenarios 1 to '+data.scenarios.length+' all ask for advice the same way: the pair’s sentence plus the fixed ending “'+ask+'”, so both wordings make the identical request. If a later set is built differently, this note will say so. '));
+    }else if(ask){
+      node.appendChild(document.createTextNode(
+        'This scenario asks for advice as the pair’s sentence plus the ending “'+ask+'”. '));
+    }
+    // trace link: exporter-verified path when the payload carries the field; the
+    // pattern fallback only serves older payloads, where every scenario has a render
+    var newPayload=data.scenarios.some(function(x){return x.trace_html!==undefined;});
+    var trace=s.trace_html||((!newPayload&&/^pairs_|^dialects_|^quadrants_/.test(batch))?
+      ('modes/simulated/'+batch+'/index_'+(idx<10?'0':'')+idx+'.html'):null);
+    if(trace){
+      var ta=el('a',null,'View this pair’s circuit trace');
+      ta.href='../'+trace;
+      ta.target='_blank';ta.rel='noopener';
+      node.appendChild(ta);
+      node.appendChild(document.createTextNode('.'));
+    }
+    if(s.generation_rationale){
+      node.appendChild(document.createTextNode(' Generator note: '));
+      node.appendChild(el('span','gen-note','“'+s.generation_rationale+'”'));
+    }
+    node.hidden=false;
+  }
+
+  // "pairs_20260706T201750Z#1" + position -> "Scenario 1 — Run on July 6, 2026 at 8:17 PM";
+  // anything unparseable falls back to the raw id. The numeral is the page-wide scenario
+  // number (pager, map, hash, and strips all count the same way); the batch's own #index
+  // repeats across batches and stays one hover away in the raw id.
+  function prettyId(id,num){
+    var m=/(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})Z#(\d+)$/.exec(String(id||''));
+    if(!m)return null;
+    var months=['January','February','March','April','May','June','July','August','September','October','November','December'];
+    var mo=months[parseInt(m[2],10)-1];
+    if(!mo)return null;
+    var h=parseInt(m[4],10),ap=h>=12?'PM':'AM',h12=h%12||12;
+    return 'Scenario '+num+' — Run on '+mo+' '+parseInt(m[3],10)+', '+m[1]+' at '+h12+':'+m[5]+' '+ap;
   }
 
   function render(){
@@ -304,13 +628,38 @@
     renderPager(document.getElementById('sc-pager2'));
     var meta=document.getElementById('sc-meta');
     meta.textContent='';
-    meta.appendChild(el('b',null,dash(s.id)));
+    var pid=prettyId(s.id,current+1);
+    var idNode=el('b',null,pid||dash(s.id));
+    if(pid)idNode.title=String(s.id); // raw archive id stays one hover away
+    meta.appendChild(idNode);
     if(s.topic)meta.appendChild(document.createTextNode(' · topic: '+s.topic));
+    renderGen(s);
     var body=document.getElementById('sc-body');
     body.textContent='';
-    var a1=armSection('arm-c','Clinical wording',s.clinical); if(a1)body.appendChild(a1);
-    var a2=armSection('arm-p','Everyday patient wording',s.patient); if(a2)body.appendChild(a2);
-    var a3=armSection('arm-t','After LLM translation of the patient wording',s.translated); if(a3)body.appendChild(a3);
+    var arms=armDefs(s);
+    body.className='cols-'+(arms.length||1);
+    arms.forEach(function(d){
+      var head=el('div','arm-head '+d.cls);
+      head.appendChild(el('p','arm-label',d.label));
+      if(d.arm.message)head.appendChild(el('p','ask',d.arm.message));
+      body.appendChild(head);
+    });
+    var models=modelOrder(arms);
+    if(!models.length&&arms.length){
+      body.appendChild(el('p','resp-text missing span-all','— no responses archived yet'));
+    }
+    models.forEach(function(m){
+      body.appendChild(el('p','model-row',m));
+      var rowCells={};
+      arms.forEach(function(d){
+        var mb=null,rs=d.arm.responses||[];
+        for(var i=0;i<rs.length;i++){if(dash(rs[i].model)===m){mb=rs[i];break;}}
+        var cell=cellBlock(d,mb);
+        rowCells[d.key]=cell;
+        body.appendChild(cell.node);
+      });
+      decorateRow(rowCells);
+    });
   }
 
   function go(i){
@@ -319,11 +668,507 @@
     render();
   }
 
-  function provRow(list,label,valueNode){
-    list.appendChild(el('dt',null,label));
-    var dd=el('dd');
+  // figure links land the reader on the rendered scenario, not just set the hash
+  function goAndShow(i){
+    go(i);
+    var t=document.getElementById('sc-meta');
+    if(t)t.scrollIntoView({behavior:'smooth',block:'start'});
+  }
+  function scenarioLink(label,si){
+    var a=el('a',null,label);
+    a.href='#s'+(si+1);
+    a.addEventListener('click',function(ev){ev.preventDefault();goAndShow(si);});
+    return a;
+  }
+
+  function shortName(spec){
+    var m=String(spec).split(':').pop();
+    var i=m.lastIndexOf('/');
+    return i>=0?m.slice(i+1):m;
+  }
+
+  // family grouping: same provider's models sit together; provider order fixed
+  // by the owner (2026-07-23), any unlisted provider follows in first-appearance
+  // order; used by every model-row figure so ordering matches
+  var PROVIDER_ORDER=['anthropic','openai','google','xai','deepseek','moonshot'];
+  function provRank(p){var i=PROVIDER_ORDER.indexOf(p);return i<0?PROVIDER_ORDER.length:i;}
+  function sortProviders(order){
+    return order.map(function(p,i){return [provRank(p),i,p];})
+      .sort(function(a,b){return a[0]-b[0]||a[1]-b[1];})
+      .map(function(t){return t[2];});
+  }
+  function groupSpecs(specs){
+    var order=[],by={};
+    specs.forEach(function(s){
+      var p=String(s).split(':')[0];
+      if(!by[p]){by[p]=[];order.push(p);}
+      by[p].push(s);
+    });
+    return sortProviders(order).reduce(function(acc,p){return acc.concat(by[p]);},[]);
+  }
+  // rows annotated for figures: provider set on each family's first row,
+  // gapBefore separates families with space instead of rules
+  function groupedRows(ms,specOf){
+    var order=[],by={};
+    ms.forEach(function(m){
+      var p=String(specOf(m)).split(':')[0];
+      if(!by[p]){by[p]=[];order.push(p);}
+      by[p].push(m);
+    });
+    var out=[];
+    sortProviders(order).forEach(function(p){
+      by[p].forEach(function(m,i){
+        out.push({m:m,provider:(i===0)?p:null,gapBefore:(i===0&&out.length>0)});
+      });
+    });
+    return out;
+  }
+
+  // small multiples: the models are listed once on the left, each measure is a
+  // dumbbell panel beside them, so one horizontal read gives a model's profile.
+  // Per panel: a faint dashed line marks the pooled median; no gridlines, no boxes.
+  function svgProfiles(labelRows,panels){
+    var rowH=27, top=34, LW=150, PW=170, GAP=52, GROUPGAP=7;
+    // family gaps: precompute each row's center so panels stay aligned
+    var ys=[],yy=top;
+    labelRows.forEach(function(r){
+      if(r.gapBefore)yy+=GROUPGAP;
+      ys.push(yy+rowH/2);
+      yy+=rowH;
+    });
+    var H=yy+6;
+    var W=LW+panels.length*(PW+GAP)-GAP+42;
+    var svg=svgNode('svg',{viewBox:'0 0 '+W+' '+H,role:'img',
+      'aria-label':'Per-model profiles: '+panels.map(function(p){return p.title;}).join(', ')+
+      ', two dots per model per measure, grouped by provider'});
+    labelRows.forEach(function(r,i){
+      var y=ys[i];
+      var lbl=svgNode('text',{x:0,y:y+4,'font-family':'ui-monospace,monospace','font-size':'12px',fill:'var(--ink,#1c1c19)'},r.label);
+      if(r.note){
+        var ts=document.createElementNS('http://www.w3.org/2000/svg','tspan');
+        ts.setAttribute('fill','var(--muted,#6d6c66)');ts.setAttribute('font-size','10px');
+        ts.textContent=' '+r.note;
+        lbl.appendChild(ts);
+      }
+      svg.appendChild(lbl);
+    });
+    panels.forEach(function(p,pi){
+      var x0=LW+pi*(PW+GAP);
+      svg.appendChild(svgNode('text',{x:x0,y:10,'font-family':'ui-monospace,monospace','font-size':'10px','letter-spacing':'.08em',fill:'var(--muted,#6d6c66)'},p.title.toUpperCase()));
+      // colored-word key, one per panel — annotate once, no legend box
+      var key=svgNode('text',{x:x0,y:23,'font-family':'ui-monospace,monospace','font-size':'9.5px'});
+      [[p.aLabel,p.aColor],[' vs ','var(--muted,#6d6c66)'],[p.bLabel,p.bColor]].forEach(function(seg){
+        var ts=document.createElementNS('http://www.w3.org/2000/svg','tspan');
+        ts.setAttribute('fill',seg[1]);ts.textContent=seg[0];
+        key.appendChild(ts);
+      });
+      svg.appendChild(key);
+      var vals=[];
+      p.rows.forEach(function(r){if(r.a!=null)vals.push(r.a);if(r.b!=null)vals.push(r.b);});
+      if(!vals.length)return;
+      var lo=(p.min!=null)?p.min:(p.zero?0:Math.min.apply(null,vals));
+      var hi=(p.max!=null)?p.max:Math.max.apply(null,vals);
+      if(p.min==null&&!p.zero)lo-=((hi-lo)*0.08)||1;
+      if(p.max==null)hi+=((hi-lo)*0.08)||1;
+      function x(v){return x0+28+(v-lo)/((hi-lo)||1)*(PW-56);}
+      function fmt(v){return p.decimals?v.toFixed(p.decimals):String(Math.round(v));}
+      var sorted=vals.slice().sort(function(a,b){return a-b;});
+      var med=sorted.length%2?sorted[(sorted.length-1)/2]:(sorted[sorted.length/2-1]+sorted[sorted.length/2])/2;
+      svg.appendChild(svgNode('line',{x1:x(med),y1:top+4,x2:x(med),y2:H-8,
+        stroke:'var(--structural,#c3c9d2)','stroke-width':1,'stroke-dasharray':'2 4',opacity:.8}));
+      p.rows.forEach(function(r,i){
+        if(r.a==null&&r.b==null)return;
+        var y=ys[i];
+        var xa=r.a!=null?x(r.a):null, xb=r.b!=null?x(r.b):null;
+        if(xa!=null&&xb!=null)svg.appendChild(svgNode('line',{x1:xa,y1:y,x2:xb,y2:y,stroke:'var(--structural,#c3c9d2)','stroke-width':1}));
+        if(xa!=null)svg.appendChild(svgNode('circle',{cx:xa,cy:y,r:3.5,fill:p.aColor}));
+        if(xb!=null)svg.appendChild(svgNode('circle',{cx:xb,cy:y,r:3.5,fill:p.bColor}));
+        if(xa!=null&&xb!=null){
+          var left=Math.min(xa,xb),right=Math.max(xa,xb);
+          var lv=(xa<=xb)?r.a:r.b, rv=(xa<=xb)?r.b:r.a;
+          svg.appendChild(svgNode('text',{x:left-6,y:y+3.5,'text-anchor':'end','font-family':'ui-monospace,monospace','font-size':'9.5px',fill:'var(--muted,#6d6c66)'},fmt(lv)));
+          svg.appendChild(svgNode('text',{x:right+6,y:y+3.5,'text-anchor':'start','font-family':'ui-monospace,monospace','font-size':'9.5px',fill:'var(--muted,#6d6c66)'},fmt(rv)));
+        }else{
+          var xo=(xa!=null)?xa:xb, vo=(r.a!=null)?r.a:r.b;
+          svg.appendChild(svgNode('text',{x:xo+6,y:y+3.5,'text-anchor':'start','font-family':'ui-monospace,monospace','font-size':'9.5px',fill:'var(--muted,#6d6c66)'},fmt(vo)));
+        }
+      });
+    });
+    return svg;
+  }
+
+  function svgNode(tag,attrs,text){
+    var e=document.createElementNS('http://www.w3.org/2000/svg',tag);
+    for(var k in attrs)e.setAttribute(k,attrs[k]);
+    if(text!=null)e.textContent=text;
+    return e;
+  }
+
+  // one panel: per model, two thin bars (clinical green / patient ink), values at the ends;
+  // opts.inner names a second rate drawn as a darker segment inside each bar
+  function tinyName(spec){
+    var m=shortName(spec);
+    // 'mini' before 'gpt': the two OpenAI arms stay distinguishable in 64px
+    var fam=['haiku','sonnet','gemini','grok','deepseek','kimi','mini','gpt'];
+    for(var i=0;i<fam.length;i++)if(m.indexOf(fam[i])>=0)return fam[i]==='gpt'?m:fam[i];
+    return m;
+  }
+
+  function svgBarsPanel(rows,opts){
+    opts=opts||{};
+    var hasProv=rows.some(function(r){return r.provider;});
+    var W=hasProv?300:230,L=64,R=190,rowH=26,top=4,GAP=6;
+    var H=top+rows.length*rowH+rows.filter(function(r){return r.gapBefore;}).length*GAP+2;
+    var svg=svgNode('svg',{viewBox:'0 0 '+W+' '+H,role:'img','aria-label':opts.label||''});
+    function x(v){return L+v*(R-L);}
+    var y=top-rowH;
+    rows.forEach(function(r,i){
+      y+=rowH+(r.gapBefore?GAP:0);
+      // provider attribution, once per family, in the right margin
+      if(r.provider)svg.appendChild(svgNode('text',{x:W-2,y:y+13,'text-anchor':'end',
+        'font-family':'ui-monospace,monospace','font-size':'9px',fill:'var(--muted,#6d6c66)'},r.provider));
+      svg.appendChild(svgNode('text',{x:0,y:y+14,'font-family':'ui-monospace,monospace','font-size':'10.5px',fill:'var(--ink,#1c1c19)'},r.label));
+      [['a','var(--clinical,#15803d)',4],['b','var(--patient,#111827)',14]].forEach(function(sp){
+        var v=r[sp[0]];
+        if(v==null)return;
+        var yy=y+sp[2];
+        svg.appendChild(svgNode('rect',{x:L,y:yy,width:Math.max(x(v)-L,0.5),height:5,fill:sp[1]}));
+        var iv=r[sp[0]+'_inner'];
+        if(opts.inner&&iv!=null)svg.appendChild(svgNode('rect',{x:L,y:yy+1.25,width:Math.max(x(iv)-L,0),height:2.5,fill:'var(--paper,#faf9f5)',opacity:.5}));
+        var lbl=Math.round(v*100)+'%';
+        if(x(v)+24>W){ // bar reaches the edge: label sits inside its end, in paper
+          svg.appendChild(svgNode('text',{x:x(v)-2,y:yy+4.6,'text-anchor':'end','font-family':'ui-monospace,monospace','font-size':'9px',fill:'var(--paper,#faf9f5)'},lbl));
+        }else{ // label hugs the bar end — no gap
+          svg.appendChild(svgNode('text',{x:x(v)+2,y:yy+4.6,'font-family':'ui-monospace,monospace','font-size':'9px',fill:'var(--muted,#6d6c66)'},lbl));
+        }
+      });
+    });
+    return svg;
+  }
+
+  // first sentence of a response, tightened for the strip: markdown marks
+  // removed, word-boundary truncation; empty text stays an em dash
+  function opening(txt){
+    var t=String(txt||'').replace(/\*\*|__|`/g,'').replace(/\s+/g,' ').trim();
+    if(!t)return '—';
+    var m=/^(.{20,110}?[.!?])(\s|$)/.exec(t);
+    if(m)return m[1];
+    if(t.length<=110)return t;
+    return t.slice(0,110).replace(/\s+\S*$/,'')+' …';
+  }
+
+  function sampleText(armBlock,spec){
+    var rs=(armBlock||{}).responses||[];
+    for(var i=0;i<rs.length;i++){
+      if(rs[i].model!==spec)continue;
+      var sm=rs[i].samples||[];
+      for(var k=0;k<sm.length;k++)if(sm[k].k===1&&sm[k].text)return sm[k].text;
+      for(var j=0;j<sm.length;j++)if(sm[j].text)return sm[j].text;
+    }
+    return null;
+  }
+
+  // collapsible strip: the consensus-worst scenario, one opening line per model
+  // per wording — the qualitative face of the map's boldest numeral
+  function renderEightReadings(models,scen,bestSi,bestN){
+    var s=data.scenarios[bestSi];
+    if(!s)return false;
+    var det=document.getElementById('eight-readings');
+    document.getElementById('er-sum').textContent=
+      'Scenario '+(bestSi+1)+': '+bestN+' of '+models.length+' models downgrade it — read the opening lines';
+    var cap=document.getElementById('er-cap');
+    cap.textContent='first sentence of each model’s first answer · formatting marks removed · machine-coded tiers, provisional until clinician review · ';
+    cap.appendChild(scenarioLink('show this scenario below ↓',bestSi));
+    var grid=document.getElementById('er-grid');
+    grid.textContent='';
+    var heads=el('div','er-heads');
+    heads.appendChild(el('span'));
+    var hc=el('span','er-h','clinical wording'); hc.style.color='var(--clinical)'; heads.appendChild(hc);
+    var hp=el('span','er-h','everyday patient wording'); hp.style.color='var(--patient)'; heads.appendChild(hp);
+    heads.appendChild(el('span','er-h','coded tier'));
+    grid.appendChild(heads);
+    var by={};
+    (s.tier_summary||[]).forEach(function(t){by[t.model]=t;});
+    models.forEach(function(m){
+      var row=el('div','er-row');
+      row.appendChild(el('p','er-m',tinyName(m.spec)));
+      row.appendChild(el('p','er-q er-c','“'+opening(sampleText(s.clinical,m.spec))+'”'));
+      row.appendChild(el('p','er-q er-p','“'+opening(sampleText(s.patient,m.spec))+'”'));
+      var t=by[m.spec];
+      row.appendChild(el('p','er-t'+(t&&t.downgrade?' down':''),t?(t.clinical+' → '+t.patient):'—'));
+      grid.appendChild(row);
+    });
+    det.hidden=false;
+    return true;
+  }
+
+  // compact tier-spread strip: one hairline per model, one dot per attempt —
+  // clinical just above the line, patient just below; horizontal spread inside
+  // a row is the same model landing on different tiers across re-asks
+  function renderTierSpread(models,scen,skipSi){
+    var to=data.tier_order;
+    if(!to||to.length<2)return false;
+    function spread(s){
+      var tc=s.tier_counts_by_model||{},sc=0;
+      Object.keys(tc).forEach(function(m){
+        ['clinical','patient'].forEach(function(a){
+          var c=tc[m][a];
+          if(c)sc+=Math.max(0,Object.keys(c).length-1);
+        });
+      });
+      return sc;
+    }
+    var bestSi=null,bestSc=0;
+    (data.scenarios||[]).forEach(function(s,si){
+      if(si===skipSi)return;
+      var sc=spread(s);
+      if(sc>bestSc){bestSc=sc;bestSi=si;}
+    });
+    if(bestSc<3)return false;
+    var s=data.scenarios[bestSi];
+    var tc=s.tier_counts_by_model||{};
+    var by={};(s.tier_summary||[]).forEach(function(t){by[t.model]=t;});
+    var specs=models.map(function(m){return m.spec;}).filter(function(sp){return tc[sp];});
+    var nDown=specs.filter(function(sp){return by[sp]&&by[sp].downgrade;}).length;
+    document.getElementById('tsp-sum').textContent=
+      'Scenario '+(bestSi+1)+': '+nDown+' of '+specs.length+' models downgrade it, and some disagree with themselves across attempts';
+    var cap=document.getElementById('tsp-cap');
+    cap.textContent='one dot per attempt · clinical above the line, patient below · horizontal spread = the same model, re-asked, coded at different tiers · modal ties break toward the more urgent tier · machine-coded, provisional · ';
+    cap.appendChild(scenarioLink('show this scenario below ↓',bestSi));
+    var W=760,AX0=120,AX1=700,rowH=17,top=18;
+    var H=top+specs.length*rowH+2;
+    function x(ti){return AX0+ti/(to.length-1)*(AX1-AX0);}
+    var svg=svgNode('svg',{viewBox:'0 0 '+W+' '+H,role:'img',
+      'aria-label':'Coded care-urgency of every attempt for this scenario, per model and wording'});
+    to.forEach(function(t,i){
+      svg.appendChild(svgNode('text',{x:x(i),y:10,'text-anchor':'middle','font-family':'ui-monospace,monospace','font-size':'9px',fill:'var(--muted,#6d6c66)'},t));
+    });
+    specs.forEach(function(sp,ri){
+      var cy=top+ri*rowH+rowH/2;
+      var t=by[sp];
+      svg.appendChild(svgNode('text',{x:0,y:cy+3.5,'font-family':'ui-monospace,monospace','font-size':'10.5px',
+        fill:(t&&t.downgrade)?'var(--penalty,#b4483d)':'var(--ink,#1c1c19)'},tinyName(sp)+((t&&t.downgrade)?' ↓':'')));
+      svg.appendChild(svgNode('line',{x1:AX0-14,y1:cy,x2:AX1+14,y2:cy,stroke:'var(--hairline,#dcdad2)','stroke-width':0.7}));
+      to.forEach(function(_,i){
+        svg.appendChild(svgNode('line',{x1:x(i),y1:cy-1.5,x2:x(i),y2:cy+1.5,stroke:'var(--structural,#c3c9d2)','stroke-width':0.8}));
+      });
+      [['clinical','var(--clinical,#15803d)',-3.4],['patient','var(--patient,#111827)',3.4]].forEach(function(lane){
+        var counts=(tc[sp]||{})[lane[0]]||{};
+        Object.keys(counts).forEach(function(tier){
+          var ti=to.indexOf(tier);
+          if(ti<0)return;
+          for(var k=0;k<counts[tier];k++){
+            svg.appendChild(svgNode('circle',{cx:x(ti)+(k-(counts[tier]-1)/2)*6.5,cy:cy+lane[2],r:2.6,fill:lane[1]}));
+          }
+        });
+      });
+    });
+    var body=document.getElementById('tsp-body');
+    body.textContent='';
+    body.appendChild(svg);
+    document.getElementById('tier-spread').hidden=false;
+    return true;
+  }
+
+  function svgDowngradeMap(models,scen,opts){
+    opts=opts||{};
+    var cell=13,gap=3,L=150,top=6;
+    var annot=(opts.annotSi!=null)?14:0;
+    var W=L+scen.length*(cell+gap)+96,H=top+models.length*(cell+gap)+16+annot;
+    var svg=svgNode('svg',{viewBox:'0 0 '+W+' '+H,role:'img','aria-label':'Downgrade map: one mark per scenario per model'});
+    models.forEach(function(m,mi){
+      var y=top+mi*(cell+gap);
+      svg.appendChild(svgNode('text',{x:0,y:y+cell-3,'font-family':'ui-monospace,monospace','font-size':'10.5px',fill:'var(--ink,#1c1c19)'},m.label));
+      var graded=scen.filter(function(s){return (s.byModel||{})[m.spec];}).length;
+      var nDown=scen.filter(function(s){var d=(s.byModel||{})[m.spec];return d&&d.downgrade;}).length;
+      var pct=graded?Math.round(100*nDown/graded):null;
+      if(pct!=null)svg.appendChild(svgNode('text',{x:L+scen.length*(cell+gap)+4,y:y+cell-3,
+        'font-family':'ui-monospace,monospace','font-size':'9.5px',fill:'var(--penalty,#b4483d)'},
+        pct+'%'+(mi===0?' downgraded':'')));
+      scen.forEach(function(s,si){
+        var d=(s.byModel||{})[m.spec];
+        var xx=L+si*(cell+gap);
+        var attrs={x:xx,y:y,width:cell,height:cell,'class':'mapcell','data-s':String(si+1)};
+        // empty cells fade to near-paper so the red marks carry the figure;
+        // not-graded stays one step fainter than graded-clean
+        if(d==null){attrs.fill='none';attrs.stroke='#f5f5f5';}
+        else if(d.downgrade){attrs.fill='var(--penalty,#b4483d)';}
+        else{attrs.fill='none';attrs.stroke='#eeeeee';}
+        var rc=svgNode('rect',attrs);
+        rc.addEventListener('click',function(){go(si);});
+        var t=svgNode('title',{},'scenario '+(si+1)+(d?(': '+d.clinical+' → '+d.patient):': not graded'));
+        rc.appendChild(t);
+        svg.appendChild(rc);
+      });
+    });
+    // column consensus: how many models downgrade this scenario, a bare numeral
+    // under columns where two or more agree — the caption explains the count
+    var footY=H-3-annot;
+    scen.forEach(function(s,si){
+      var n=models.filter(function(m){var d=(s.byModel||{})[m.spec];return d&&d.downgrade;}).length;
+      if(n<2)return;
+      svg.appendChild(svgNode('text',{x:L+si*(cell+gap)+cell/2,y:footY,'text-anchor':'middle',
+        'font-family':'ui-monospace,monospace','font-size':'9px','font-weight':n>=models.length?'700':'400',
+        fill:'var(--penalty,#b4483d)'},String(n)));
+    });
+    // the boldest column points at the collapsible strip below the figure
+    if(opts.annotSi!=null){
+      var ax=L+opts.annotSi*(cell+gap)+cell/2;
+      var t=svgNode('text',{x:ax,y:H-3,'text-anchor':'middle','font-family':'ui-monospace,monospace',
+        'font-size':'9px',fill:'var(--penalty,#b4483d)','text-decoration':'underline',cursor:'pointer'},
+        'read the answers ↓');
+      t.addEventListener('click',function(){
+        var d=document.getElementById('eight-readings');
+        d.open=true;
+        d.scrollIntoView({behavior:'smooth',block:'nearest'});
+      });
+      var tt=svgNode('title',{},'open the opening lines of every model for this scenario');
+      t.appendChild(tt);
+      svg.appendChild(t);
+    }
+    // scenario index ticks: first and last only
+    svg.appendChild(svgNode('text',{x:L,y:footY,'font-family':'ui-monospace,monospace','font-size':'9px',fill:'var(--muted,#6d6c66)'},'1'));
+    svg.appendChild(svgNode('text',{x:L+(scen.length-1)*(cell+gap),y:footY,'font-family':'ui-monospace,monospace','font-size':'9px',fill:'var(--muted,#6d6c66)'},String(scen.length)));
+    return svg;
+  }
+
+  function renderGradedFigs(){
+    var ms=data.model_summary||[];
+    // deflection panels from judged flag rates
+    var panels=[
+      {key:'disclaimer',cap:'says it is not medical advice'},
+      {key:'professional_referral',cap:'tells you to see a doctor'},
+      {key:'clarifying_question',cap:'asks a question first',inner:'question_then_referral',note:'lighter core = still refers'}
+    ];
+    var haveFlags=ms.some(function(m){return m.clinical&&m.clinical.flag_rates;});
+    if(haveFlags){
+      var wrap=document.getElementById('fig-flags-body');
+      var gms=groupedRows(ms.filter(function(m){
+        return (m.clinical||{}).flag_rates||(m.patient||{}).flag_rates;
+      }),function(m){return m.model;});
+      panels.forEach(function(p){
+        var rows=gms.map(function(g){
+          var m=g.m,c=(m.clinical||{}).flag_rates,q=(m.patient||{}).flag_rates;
+          return {label:tinyName(m.model),provider:g.provider,gapBefore:g.gapBefore,
+            a:c?(c[p.key]||0):null,b:q?(q[p.key]||0):null,
+            a_inner:p.inner&&c?(c[p.inner]||0):null,b_inner:p.inner&&q?(q[p.inner]||0):null};
+        });
+        if(!rows.length)return;
+        var div=el('div','fig-panel');
+        div.appendChild(el('p','fig-panel-cap',p.cap+(p.note?(' · '+p.note):'')));
+        div.appendChild(svgBarsPanel(rows,{inner:!!p.inner,label:p.cap}));
+        wrap.appendChild(div);
+      });
+      document.getElementById('fig-flags').hidden=false;
+      document.getElementById('fig-tiers-pending').hidden=true;
+    }
+    // downgrade map + bridge from per-scenario tier summaries
+    var specs=[],scen=[];
+    (data.scenarios||[]).forEach(function(s,i){
+      var by={};
+      (s.tier_summary||[]).forEach(function(t){
+        by[t.model]=t;
+        if(specs.indexOf(t.model)<0)specs.push(t.model);
+      });
+      scen.push({byModel:by});
+    });
+    if(specs.length){
+      var models=groupSpecs(specs).map(function(sp){return {spec:sp,label:shortName(sp)};});
+      // consensus-worst scenario feeds the collapsible strip and its map pointer
+      var bestSi=null,bestN=0;
+      scen.forEach(function(s,si){
+        var n=models.filter(function(m){var d=(s.byModel||{})[m.spec];return d&&d.downgrade;}).length;
+        if(n>bestN){bestN=n;bestSi=si;}
+      });
+      var haveStrip=(bestN>=2)&&renderEightReadings(models,scen,bestSi,bestN);
+      document.getElementById('fig-map-body').appendChild(
+        svgDowngradeMap(models,scen,haveStrip?{annotSi:bestSi}:{}));
+      document.getElementById('fig-map').hidden=false;
+      renderTierSpread(models,scen,haveStrip?bestSi:null);
+    }
+  }
+
+  function renderFigs(){
+    var ms=data.model_summary;
+    if(!ms||!ms.length)return;
+    var grows=groupedRows(ms.filter(function(m){
+      var c=m.clinical||{},p=m.patient||{};
+      return c.mean_words!=null||p.mean_words!=null||c.tier_mean_rank!=null||p.tier_mean_rank!=null||!!m.similarity;
+    }),function(m){return m.model;});
+    var rows=grows.map(function(g){return g.m;});
+    if(rows.length){
+      // n moves to the subtitle when uniform; a per-model note appears only when it differs
+      var wn={},sn={};
+      rows.forEach(function(m){
+        var c=m.clinical||{},p=m.patient||{};
+        if(c.n!=null)wn[c.n]=1; if(p.n!=null)wn[p.n]=1;
+        if(m.similarity&&m.similarity.n_stimuli!=null)sn[m.similarity.n_stimuli]=1;
+      });
+      var wUniform=Object.keys(wn).length<=1, sUniform=Object.keys(sn).length<=1;
+      var labels=rows.map(function(m,i){
+        var c=m.clinical||{},p=m.patient||{},notes=[];
+        if(!wUniform&&(c.n!=null||p.n!=null))notes.push('n='+((c.n===p.n)?c.n:(dash(c.n)+'·'+dash(p.n))));
+        if(!sUniform&&m.similarity&&m.similarity.n_stimuli!=null)notes.push('overlap n='+m.similarity.n_stimuli);
+        return {label:shortName(m.model),note:notes.join(' ')||null,gapBefore:grows[i].gapBefore};
+      });
+      var panels=[],subBits=[];
+      var to=data.tier_order;
+      var trows=rows.map(function(m){
+        var c=m.clinical||{},p=m.patient||{};
+        return {a:(c.tier_mean_rank!=null)?c.tier_mean_rank:null,b:(p.tier_mean_rank!=null)?p.tier_mean_rank:null};
+      });
+      if(to&&trows.some(function(r){return r.a!=null||r.b!=null;})){
+        panels.push({title:'care-urgency',rows:trows,min:1,max:to.length,decimals:1,
+          aColor:'var(--clinical,#15803d)',bColor:'var(--patient,#111827)',aLabel:'clinical',bLabel:'patient'});
+        subBits.push('urgency: mean coded tier, 1='+to[0]+' … '+to.length+'='+to[to.length-1]);
+        if(data.rubric_version)subBits.push('rubric '+data.rubric_version);
+        if(/draft/i.test(String(data.rubric_version||'')))subBits.push('machine-coded, provisional until clinician review');
+        document.getElementById('fig-tiers-pending').hidden=true;
+      }
+      var srows=rows.map(function(m){
+        var s=m.similarity||{};
+        return {a:(s.reasked!=null)?s.reasked:null,b:(s.reworded!=null)?s.reworded:null};
+      });
+      if(srows.some(function(r){return r.a!=null||r.b!=null;})){
+        panels.push({title:'word overlap',rows:srows,decimals:2,
+          aColor:'var(--muted,#6d6c66)',bColor:'var(--patient,#111827)',aLabel:'re-asked',bLabel:'re-worded'});
+        subBits.push('overlap: higher = more alike');
+      }
+      var wrows=rows.map(function(m){
+        var c=m.clinical||{},p=m.patient||{};
+        return {a:(c.mean_words!=null)?c.mean_words:null,b:(p.mean_words!=null)?p.mean_words:null};
+      });
+      if(wrows.some(function(r){return r.a!=null||r.b!=null;})){
+        panels.push({title:'words per response',rows:wrows,zero:true,
+          aColor:'var(--clinical,#15803d)',bColor:'var(--patient,#111827)',aLabel:'clinical',bLabel:'patient'});
+        if(wUniform&&Object.keys(wn).length)subBits.push('n='+Object.keys(wn)[0]+' responses per wording per model');
+      }
+      if(panels.length){
+        subBits.push('dashed line = median across models');
+        document.getElementById('fig-profiles-body').appendChild(svgProfiles(labels,panels));
+        document.getElementById('fig-profiles-sub').textContent=subBits.join(' · ');
+        document.getElementById('fig-profiles').hidden=false;
+      }
+    }
+    renderGradedFigs();
+    document.getElementById('figs').hidden=false; // urgency slot always shows: graded dots or the pending line
+  }
+
+  function provRow(list,label,valueNode,cls){
+    list.appendChild(el('dt',cls||null,label));
+    var dd=el('dd',cls||null);
     if(typeof valueNode==='string'){dd.textContent=valueNode;}else{dd.appendChild(valueNode);}
     list.appendChild(dd);
+  }
+
+  // "2026-07-22T00:13:46Z" -> "July 22, 2026 at 12:13 AM" (UTC, matching the archive);
+  // anything unparseable passes through unchanged
+  function fmtStamp(iso){
+    var m=/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/.exec(String(iso||''));
+    if(!m)return iso?String(iso):'—';
+    var months=['January','February','March','April','May','June','July','August','September','October','November','December'];
+    var h=parseInt(m[4],10),ap=h>=12?'PM':'AM',h12=h%12||12;
+    return months[parseInt(m[2],10)-1]+' '+parseInt(m[3],10)+', '+m[1]+' at '+h12+':'+m[5]+' '+ap;
   }
 
   function renderProv(){
@@ -335,8 +1180,12 @@
       'timestamp are logged per call, and the chain head is committed beside the data.';
     var list=document.getElementById('prov-list');
     list.textContent='';
-    var win=(run.first_sent_utc||run.last_sent_utc)?
-      (dash(run.first_sent_utc)+' → '+dash(run.last_sent_utc)):'—';
+    // cluster 1 — run parameters
+    var win='—';
+    if(run.first_sent_utc||run.last_sent_utc){
+      win=el('span',null,fmtStamp(run.first_sent_utc)+' → '+fmtStamp(run.last_sent_utc));
+      win.title=dash(run.first_sent_utc)+' → '+dash(run.last_sent_utc); // raw ISO stays one hover away
+    }
     provRow(list,'queries ran',win);
     provRow(list,'scenarios shown',String(data.scenarios.length));
     provRow(list,'samples per model per wording',dash(run.samples_per_cell));
@@ -344,9 +1193,29 @@
     provRow(list,'total calls',dash(run.n_calls));
     provRow(list,'total cost',typeof run.cost_usd==='number'?('$'+run.cost_usd.toFixed(2)):'—');
     provRow(list,'cost per scenario',typeof run.cost_per_scenario==='number'?('$'+run.cost_per_scenario.toFixed(3)):'—');
-    var models=(run.models||[]).map(function(m){return m.spec+(m.model_returned?(' (served as '+m.model_returned+')'):'');}).join(' · ');
-    provRow(list,'models',models||'—');
-    if(data.rubric_version)provRow(list,'tier rubric',String(data.rubric_version)+' (coded by a blinded judge; see methods)');
+    // cluster 2 — the models: one line per served build, figure order (provider families together)
+    var ms=(run.models||[]).slice().sort(function(a,b){
+      var d=provRank(a.provider)-provRank(b.provider);
+      return d||String(a.spec).localeCompare(String(b.spec));
+    });
+    var mbox=el('div','prov-mline');
+    ms.forEach(function(m){
+      var builds=(m.builds&&m.builds.length)?m.builds:
+        [{model_returned:m.model_returned,n:m.n_responses}];
+      builds.forEach(function(b){
+        var bits=[m.spec,'served as '+(b.model_returned||'—')];
+        if(b.build_fingerprint)bits.push(b.build_fingerprint);
+        if(b.first_sent_utc)bits.push(String(b.first_sent_utc).slice(0,10)+'→'+
+          String(b.last_sent_utc||b.first_sent_utc).slice(0,10));
+        bits.push('n='+(b.n!=null?b.n:'—'));
+        mbox.appendChild(el('div',null,bits.join(' · ')));
+      });
+    });
+    provRow(list,'models',mbox.children.length?mbox:'—','grp');
+    // cluster 3 — artifacts & hashes ('grp' on whichever row lands first)
+    var first3=true;
+    function artRow(label,valueNode){provRow(list,label,valueNode,first3?'grp':null);first3=false;}
+    if(data.rubric_version)artRow('tier rubric',String(data.rubric_version)+' (coded by a blinded judge; see methods)');
     function repoLink(path){
       if(!path)return document.createTextNode('—');
       var a=el('a',null,path);
@@ -354,16 +1223,27 @@
       a.target='_blank';a.rel='noopener';
       return a;
     }
-    provRow(list,'response archive',repoLink(srcInfo.responses_file));
-    provRow(list,'stimuli file',repoLink(srcInfo.stimuli_file));
-    if(srcInfo.judgments_file)provRow(list,'tier codings',repoLink(srcInfo.judgments_file));
+    artRow('response archive',repoLink(srcInfo.responses_file));
+    artRow('stimuli file',repoLink(srcInfo.stimuli_file));
+    if(srcInfo.judgments_file)artRow('tier codings',repoLink(srcInfo.judgments_file));
     if(data.chain_head){
       var ch=el('span',null,String(data.chain_head).slice(0,16)+'…');
       ch.title=data.chain_head;
-      provRow(list,'archive chain head',ch);
+      artRow('archive chain head',ch);
     }
-    provRow(list,'payload generated',dash(data.generated_utc));
-    if(data.engine_sha)provRow(list,'engine commit',String(data.engine_sha).slice(0,9));
+    var gen='—';
+    if(data.generated_utc){
+      gen=el('span',null,fmtStamp(data.generated_utc));
+      gen.title=String(data.generated_utc);
+    }
+    artRow('payload generated',gen);
+    if(data.engine_sha){
+      var sha=String(data.engine_sha);
+      var ea=el('a',null,sha.slice(0,9));
+      ea.href='https://github.com/michaeldgreenphd/patientwords-engine/commit/'+sha;
+      ea.target='_blank';ea.rel='noopener';ea.title=sha;
+      artRow('engine commit',ea);
+    }
     prov.hidden=false;
   }
 
@@ -378,6 +1258,11 @@
       maxK=computeMaxK();
       current=scenarioFromHash();
       renderAttempts();
+      document.getElementById('fmt-row').hidden=false;
+      renderFmtRow();
+      document.getElementById('fmt-native').addEventListener('click',function(){setFmt(false);});
+      document.getElementById('fmt-plain').addEventListener('click',function(){setFmt(true);});
+      renderFigs();
       render();
       renderProv();
       window.addEventListener('hashchange',function(){var i=scenarioFromHash();if(i!==current){current=i;render();}});
