@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Coding instrument — PatientWords</title>
+<meta name="description" content="Blinded human-coding instrument for the advice arm's registered validation gate. Codings are recorded locally in the coder's browser and enter the study only when the exported file is committed.">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#faf9f5">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23faf9f5'/%3E%3Crect x='9' y='9' width='30' height='30' fill='%23111827'/%3E%3Crect x='25' y='25' width='30' height='30' fill='%2315803d'/%3E%3C/svg%3E">
+<style>
+  :root{
+    --paper:#faf9f5; --ink:#1c1c19; --patient:#111827; --clinical:#15803d;
+    --penalty:#b4483d; --muted:#6d6c66; --structural:#c3c9d2; --hairline:#dcdad2;
+    --serif:'Iowan Old Style','Palatino Linotype',Palatino,'Book Antiqua',Georgia,serif;
+    --mono:ui-monospace,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace;
+  }
+  html{background:var(--paper)}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--serif);
+    font-size:17px;line-height:1.62;-webkit-font-smoothing:antialiased}
+  main{max-width:860px;margin:0 auto;padding:0 22px 56px}
+  a{color:inherit}
+  a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--clinical);outline-offset:3px;border-radius:1px}
+  .skip{position:absolute;left:-9999px;top:0;background:var(--paper);color:var(--ink);padding:8px 14px;border:1px solid var(--ink);z-index:10}
+  .skip:focus{left:8px}
+  .masthead{max-width:860px;margin:0 auto;padding:20px 22px 0}
+  .rule-heavy{border:0;border-top:2px solid var(--ink);margin:0}
+  .rule-fine{border:0;border-top:1px solid var(--hairline);margin:3px 0 0}
+  .wordmark{font-family:var(--serif);font-size:19px;font-weight:600;text-decoration:none;display:inline-block;padding:10px 0 12px}
+  .wordmark .pw-p{color:var(--patient)}
+  .wordmark .pw-w{color:var(--clinical);font-style:italic}
+  .wordmark .pw-w::before{content:'·';color:var(--muted);font-style:normal;font-weight:400;margin:0 3px 0 2px}
+  .dateline{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--clinical);font-weight:600;margin:30px 0 12px}
+  h1{font-size:clamp(26px,4vw,34px);line-height:1.15;font-weight:600;margin:0 0 10px}
+  .explainer{font-size:15.5px;line-height:1.6;color:var(--muted);margin:0 0 10px}
+  .sample-banner{font-family:var(--mono);font-size:12px;letter-spacing:.08em;border:2px solid var(--penalty);color:var(--penalty);padding:8px 12px;margin:14px 0}
+  .pending{border:1px solid var(--hairline);border-left:3px solid var(--structural);padding:14px 16px;font-family:var(--mono);font-size:12.5px;color:var(--muted);margin:24px 0}
+  .coder-row{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;margin:18px 0 4px;font-family:var(--mono);font-size:12px}
+  .coder-row select{font:inherit;padding:5px 8px;border:1px solid var(--hairline);background:#fff;min-width:220px}
+  .progress{font-family:var(--mono);font-size:12px;color:var(--muted);margin:14px 0 8px}
+  .progress b{color:var(--ink)}
+  .resp-box{border:1px solid var(--ink);padding:16px 18px;margin:8px 0 16px;background:#fff}
+  .resp-box p{margin:0;font-size:16px;line-height:1.6;white-space:pre-wrap}
+  fieldset{border:0;padding:0;margin:0 0 14px}
+  legend{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin:0 0 8px}
+  .tiers{display:flex;flex-direction:column;gap:6px}
+  .tier{display:flex;gap:10px;align-items:baseline;border:1px solid var(--hairline);padding:8px 12px;cursor:pointer;background:#fff}
+  .tier:hover{border-color:var(--muted)}
+  .tier.on{border-color:var(--clinical);box-shadow:inset 3px 0 0 var(--clinical)}
+  .tier input{accent-color:var(--clinical)}
+  .tier .tl{font-family:var(--mono);font-size:12.5px;font-weight:600;white-space:nowrap}
+  .tier .td{font-size:14px;color:var(--muted);line-height:1.45}
+  .flags{display:flex;flex-wrap:wrap;gap:8px 18px}
+  .flag{font-family:var(--mono);font-size:12px;display:flex;gap:6px;align-items:center;cursor:pointer}
+  .flag input{accent-color:var(--clinical)}
+  textarea{width:100%;box-sizing:border-box;font-family:var(--serif);font-size:14.5px;padding:8px 10px;border:1px solid var(--hairline);background:#fff;min-height:52px}
+  .navrow{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:16px 0}
+  .btn{font-family:var(--mono);font-size:12px;letter-spacing:.06em;padding:7px 14px;background:#fff;border:1px solid var(--ink);cursor:pointer}
+  .btn:hover{background:var(--ink);color:var(--paper)}
+  .btn.primary{border-color:var(--clinical);color:var(--clinical)}
+  .btn.primary:hover{background:var(--clinical);color:#fff}
+  .btn:disabled{border-color:var(--hairline);color:var(--structural);cursor:default;background:#fff}
+  .note{font-family:var(--mono);font-size:11px;color:var(--muted);line-height:1.7}
+  .endnote{border-top:1px solid var(--ink);margin-top:40px;padding-top:12px}
+  footer{font-family:var(--mono);font-size:12px;line-height:1.9;color:var(--muted)}
+  footer a{color:var(--muted)}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="masthead">
+  <hr class="rule-heavy"><hr class="rule-fine">
+  <a class="wordmark" href="../"><span class="pw-p">Patient</span><span class="pw-w">Words</span></a>
+  <hr class="rule-fine">
+</header>
+<main id="main">
+  <p class="dateline">Coding instrument <span style="color:var(--muted);font-weight:400;text-transform:none;letter-spacing:.06em">· blinded human validation of the advice-arm rubric</span></p>
+  <h1>Code the advice</h1>
+  <p class="explainer">You see one assistant response at a time — nothing about which wording or which
+  model produced it. Read it, pick the single tier that matches the response's <em>primary</em>
+  recommendation, set the flags, move on. Codings save in this browser as you click and leave it
+  only when you export the file at the end. The exported file becomes part of the study when it is
+  committed to the engine repository; the coder's name travels with every judgment. Current coding
+  is by the study owner, disclosed as such; clinician coders will use this same instrument.</p>
+
+  <div class="sample-banner" id="sample-banner" hidden>SAMPLE DATA — synthetic placeholder items for layout verification only.</div>
+
+  <div class="pending" id="cd-pending">
+    No coding sample is published yet. This page renders from
+    <code>data/advice_coding_sample.json</code> once the engine's
+    <code>advice_human_coding.py build-sample</code> publishes it.
+  </div>
+
+  <section id="cd-app" hidden>
+    <div class="coder-row">
+      <label for="coder">coder</label>
+      <select id="coder"></select>
+      <span class="note">recorded with every judgment · roster is set when the sample is generated; new coders are added by regenerating it</span>
+    </div>
+    <p class="progress" id="cd-progress" aria-live="polite"></p>
+    <div class="resp-box"><p id="cd-text"></p></div>
+    <fieldset>
+      <legend>Primary tier (one)</legend>
+      <div class="tiers" id="cd-tiers" role="radiogroup" aria-label="Tier"></div>
+    </fieldset>
+    <fieldset>
+      <legend>Flags</legend>
+      <div class="flags" id="cd-flags"></div>
+    </fieldset>
+    <fieldset>
+      <legend>Notes (optional)</legend>
+      <textarea id="cd-notes" aria-label="Notes for this item"></textarea>
+    </fieldset>
+    <div class="navrow">
+      <button class="btn" type="button" id="cd-prev">← prev</button>
+      <button class="btn" type="button" id="cd-next">next →</button>
+      <button class="btn" type="button" id="cd-jump">first uncoded</button>
+      <span style="flex:1"></span>
+      <button class="btn primary" type="button" id="cd-export">export codings</button>
+    </div>
+    <p class="note" id="cd-export-note"></p>
+  </section>
+
+  <div class="endnote">
+    <footer>
+      Blinded instrument: item order is shuffled and carries no wording/model information ·
+      recorded locally until exported · exports are committed to
+      <a href="https://github.com/michaeldgreenphd/patientwords-engine">patientwords-engine</a> under <code>data/advice/human/</code> ·
+      <a href="../methods.html">how the pipeline works</a>
+    </footer>
+  </div>
+</main>
+<script>
+(function(){
+  if(!window.fetch)return;
+  var sample=/[?&]sample=1/.test(location.search);
+  var src=sample?'../data/advice_coding_sample.sample.json':'../data/advice_coding_sample.json';
+  var data=null, cur=0, store={}, storeKey=null;
+
+  function el(t,c,x){var e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e;}
+  function save(){try{localStorage.setItem(storeKey,JSON.stringify(store));}catch(e){}}
+  function codedCount(){var n=0;data.items.forEach(function(it){if((store[it.coding_id]||{}).tier)n++;});return n;}
+
+  function renderProgress(){
+    var p=document.getElementById('cd-progress');
+    p.textContent='';
+    p.appendChild(el('b',null,'item '+(cur+1)+' of '+data.items.length));
+    p.appendChild(document.createTextNode(' · '+codedCount()+' coded · rubric '+(data.rubric.version||'—')));
+  }
+
+  function render(){
+    var it=data.items[cur], c=store[it.coding_id]||{};
+    document.getElementById('cd-text').textContent=it.response_text;
+    var tiers=document.getElementById('cd-tiers'); tiers.textContent='';
+    data.rubric.tiers.forEach(function(t){
+      var lab=el('label','tier'+(c.tier===t.id?' on':''));
+      var r=document.createElement('input');r.type='radio';r.name='tier';r.value=t.id;r.checked=c.tier===t.id;
+      r.addEventListener('change',function(){
+        var cc=store[it.coding_id]=store[it.coding_id]||{};
+        cc.tier=t.id; cc.coded_utc=new Date().toISOString();
+        save(); render();
+      });
+      lab.appendChild(r);
+      var box=el('span');
+      box.appendChild(el('span','tl',t.label||t.id));
+      box.appendChild(el('div','td',t.definition||''));
+      lab.appendChild(box);
+      tiers.appendChild(lab);
+    });
+    var flags=document.getElementById('cd-flags'); flags.textContent='';
+    (data.rubric.flags||[]).forEach(function(f){
+      var lab=el('label','flag');
+      var cb=document.createElement('input');cb.type='checkbox';
+      cb.checked=!!((c.flags||{})[f.id]);
+      cb.addEventListener('change',function(){
+        var cc=store[it.coding_id]=store[it.coding_id]||{};
+        cc.flags=cc.flags||{}; cc.flags[f.id]=cb.checked; cc.coded_utc=new Date().toISOString();
+        save(); renderProgress();
+      });
+      lab.appendChild(cb);
+      lab.appendChild(el('span',null,f.id));
+      lab.title=f.definition||'';
+      flags.appendChild(lab);
+    });
+    var notes=document.getElementById('cd-notes');
+    notes.value=c.notes||'';
+    notes.oninput=function(){
+      var cc=store[it.coding_id]=store[it.coding_id]||{};
+      cc.notes=notes.value; save();
+    };
+    document.getElementById('cd-prev').disabled=(cur===0);
+    document.getElementById('cd-next').disabled=(cur===data.items.length-1);
+    renderProgress();
+  }
+
+  function go(i){cur=Math.max(0,Math.min(data.items.length-1,i));render();window.scrollTo(0,0);}
+
+  function doExport(){
+    var noteEl=document.getElementById('cd-export-note');
+    var sel=document.getElementById('coder');
+    var coderId=sel.value;
+    if(!coderId){noteEl.textContent='select your name first — every judgment is attributed';return;}
+    var coderLabel=sel.options[sel.selectedIndex].textContent;
+    var n=codedCount();
+    var codings=[];
+    data.items.forEach(function(it){
+      var c=store[it.coding_id];
+      if(c&&c.tier)codings.push({coding_id:it.coding_id,tier:c.tier,flags:c.flags||{},notes:c.notes||'',coded_utc:c.coded_utc});
+    });
+    var doc={coder:coderLabel,coder_id:coderId,exported_utc:new Date().toISOString(),
+             payload_generated_utc:data.generated_utc,rubric_version:data.rubric.version,
+             rubric_sha256:data.rubric.sha256,n_items:data.items.length,n_coded:n,codings:codings,
+             _sample:!!(sample||data._sample)||undefined};
+    var blob=new Blob([JSON.stringify(doc,null,1)],{type:'application/json'});
+    var a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    a.download='codings_'+coderId.replace(/[^a-z0-9]+/gi,'-').toLowerCase()+'_'+doc.exported_utc.slice(0,10)+'.json';
+    a.click();
+    noteEl.textContent=(n<data.items.length?('exported '+n+' of '+data.items.length+' — partial export; finish and re-export for the registered gate. ')
+                                            :('exported all '+n+' codings. '))
+      +'Commit the file to patientwords-engine data/advice/human/ then run advice_human_coding.py score.';
+  }
+
+  fetch(src,{cache:'no-cache'})
+    .then(function(r){return r.ok?r.json():null;})
+    .then(function(d){
+      if(!d||!Array.isArray(d.items)||!d.items.length)return;
+      data=d;
+      storeKey='pw-coding-'+(d.rubric&&d.rubric.sha256?d.rubric.sha256.slice(0,12):'x')+'-'+(d.generated_utc||'');
+      try{store=JSON.parse(localStorage.getItem(storeKey))||{};}catch(e){store={};}
+      if(sample||d._sample)document.getElementById('sample-banner').hidden=false;
+      document.getElementById('cd-pending').hidden=true;
+      document.getElementById('cd-app').hidden=false;
+      var sel=document.getElementById('coder');
+      var ph=document.createElement('option');
+      ph.value='';ph.textContent='select coder…';ph.disabled=true;ph.selected=true;
+      sel.appendChild(ph);
+      (d.coders||[]).forEach(function(c){
+        var o=document.createElement('option');
+        o.value=c.id;o.textContent=c.label;
+        sel.appendChild(o);
+      });
+      try{var savedCoder=localStorage.getItem(storeKey+'-coder');if(savedCoder)sel.value=savedCoder;}catch(e){}
+      sel.addEventListener('change',function(){try{localStorage.setItem(storeKey+'-coder',sel.value);}catch(e){}});
+      document.getElementById('cd-prev').addEventListener('click',function(){go(cur-1);});
+      document.getElementById('cd-next').addEventListener('click',function(){go(cur+1);});
+      document.getElementById('cd-jump').addEventListener('click',function(){
+        for(var i=0;i<data.items.length;i++){if(!((store[data.items[i].coding_id]||{}).tier)){go(i);return;}}
+        go(data.items.length-1);
+      });
+      document.getElementById('cd-export').addEventListener('click',doExport);
+      render();
+    })
+    .catch(function(){});
+})();
+</script>
+</body>
+</html>
