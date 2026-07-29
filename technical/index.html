@@ -84,6 +84,9 @@
   /* transport figure: one-line legend (the per-layer readout is drawn on the graph) */
   #tr-readout{margin:4px 0 0}
   #tr-readout .ro-legend{font-size:13px;line-height:1.5;color:var(--muted);margin:0 0 8px}
+  #tr-readout .ro-legend a{font-family:var(--mono);font-size:11px;color:var(--clinical);
+    text-decoration:none;white-space:nowrap}
+  #tr-readout .ro-legend a:hover,#tr-readout .ro-legend a:focus-visible{text-decoration:underline;text-underline-offset:3px}
   /* charts float in negative space: no frame survives, whatever draws them */
   .fig,.fig svg,.figwrap,.figwrap svg,#forest,#forest svg,#dumbbells,#dumbbells svg,
   #ad-blocks,#ad-blocks svg,.conv-panel svg{
@@ -1003,6 +1006,10 @@
         ||hijEx[0]||exl[0];
       if(ex){
         var H1=186,svg=el('svg',{viewBox:'0 0 '+(W+30)+' '+H1});  // +30 so the far-right endpoint label isn't clipped
+        // paper halo behind annotation text: labels stay legible where a
+        // trajectory line or hairline passes behind them
+        function halo(t){t.setAttribute('stroke','#faf9f5');t.setAttribute('stroke-width','3');
+          t.setAttribute('stroke-linejoin','round');t.style.paintOrder='stroke';return t;}
         var OUT_GAP=18;                                  // visually detach the final-output layer (25)
         function tx(i){return lx(i)+(i>=L-1?OUT_GAP:0);} // local x with the output gap
         var AXIS=140;                                    // y of the layer-axis brackets
@@ -1049,7 +1056,7 @@
                 hit.appendChild(ht);svg.appendChild(hit);
               }
             });
-            if(last){labEl=txt(last.x+8,last.y+3.5,label,color,10.5);svg.appendChild(labEl);}
+            if(last){labEl=halo(txt(last.x+8,last.y+3.5,label,color,10.5));svg.appendChild(labEl);}
           }
           return {last:last,labEl:labEl};
         }
@@ -1079,11 +1086,22 @@
               if(Math.abs(p.x-x)<80&&Math.abs(p.y-y)<12)y+=(above?-12:12);
             });
             var anchor=x>tx(L-2)?'end':(x<PAD+40?'start':'middle');
-            var t=txt(x,y,text,color,9,anchor,true);
+            var t=halo(txt(x,y,text,color,9,anchor,true));
             svg.appendChild(t);placed.push({x:x,y:y});
             return t;
           }
-          var formLab=lab(ce.first,ex.clin_ranks,'enters top-8 · L'+ce.first,'#15803d',true);
+          // the forming label sits end-anchored LEFT of the entry point, at the
+          // point's own height — clear of the line rising away from it; falls
+          // back to the above-the-point slot when there is no room at the left
+          var formLab=null;
+          if(ce.first!=null&&tx(ce.first)-8>150){
+            formLab=halo(txt(tx(ce.first)-8,ry(Math.min(ex.clin_ranks[ce.first],8))+3.5,
+              'enters top-8 · L'+ce.first,'#15803d',9,'end',true));
+            svg.appendChild(formLab);
+            placed.push({x:tx(ce.first)-8,y:ry(Math.min(ex.clin_ranks[ce.first],8))+3.5});
+          }else{
+            formLab=lab(ce.first,ex.clin_ranks,'enters top-8 · L'+ce.first,'#15803d',true);
+          }
           if(ce.rank1!=null&&ce.rank1!==ce.first)
             lab(ce.rank1,ex.clin_ranks,'rank 1 · L'+ce.rank1,'#15803d',true);
           if(pe.last!=null&&pe.last<L-1){
@@ -1394,6 +1412,11 @@
     .then(function(d){
       var exs=(d.exemplars&&d.exemplars.length)?d.exemplars:(d.exemplar?[d.exemplar]:[]);
       exs=exs.filter(function(e){return e&&e.sides&&e.layers&&e.layers.length;});
+      // owner-directed display exclusion (2026-07-30): these targets stay in the
+      // committed data and every census count; they are just not offered as
+      // featured chips on this page
+      var EXCLUDE_TARGETS=['semen'];
+      exs=exs.filter(function(e){return EXCLUDE_TARGETS.indexOf(String(e.target||'').trim())<0;});
       if(!exs.length)throw 0;
       var W=800,LABEL=140,RPAD=160,gx0=LABEL,gx1=W-RPAD,gw=gx1-gx0,rowH=11;
       function rows(side){
@@ -1428,6 +1451,13 @@
           'prediction at the answer, and the small grey “was …” below the row names the top word '+
           'earlier in depth, before it settled. When the clinical answer never enters the top-8 '+
           'here, the row says so.';
+        if(ex.render){
+          leg.appendChild(document.createTextNode(' '));
+          var ta=document.createElement('a');
+          ta.href='../'+ex.render;ta.target='_blank';ta.rel='noopener';
+          ta.textContent='Open this pair’s circuit trace ↗';
+          leg.appendChild(ta);
+        }
         host.appendChild(leg);
       }
       function render(ex){
