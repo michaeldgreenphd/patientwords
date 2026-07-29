@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>LLM responses — PatientWords</title>
+<title>LLM responses — natural questions — PatientWords</title>
 <meta name="description" content="Full assistant responses to the same clinical situation asked two ways — clinical wording and everyday patient wording — across consumer LLMs, shown verbatim with provenance.">
 <link rel="canonical" href="https://michaeldgreenphd.github.io/patientwords/llm/">
 <meta name="theme-color" content="#faf9f5">
@@ -222,16 +222,16 @@
   <hr class="rule-fine">
 </header>
 <main id="main">
-  <p class="dateline">Advice arm <span class="mode">· full model responses, verbatim</span></p>
-  <h1>LLM responses</h1>
-  <p class="subtitle">The same medical scenario, framed with patient language v. doctor language. Responses across frontier AI labs, queried using API calls.</p>
-  <p class="explainer">Each scenario below is one clinical situation phrased two ways. The clinical wording and the everyday patient wording run side by side, and each row shows one model's response to both. Responses are shown verbatim. Each model was asked the same prompt 3 times. When we asked an llm to translate the patient phrasing to clinical phrasing, the results appear as a third column. A second stimulus family — complete, human-sounding questions instead of sentence completions — is collected separately: <a href="natural.html">natural questions</a>.</p>
+  <p class="dateline">Advice arm <span class="mode">· natural-question family · partial collection, elicitation in progress</span></p>
+  <h1>LLM responses — natural questions</h1>
+  <p class="subtitle">The same medical situation asked as a complete, human-sounding question — once in everyday patient words, once with the clinical term. Responses across frontier AI labs, queried using API calls.</p>
+  <p class="explainer">Unlike the <a href="./">first advice set</a>, which used an open-ended sentence-completion frame, every stimulus here is a complete question in one of eight registered syntax styles; the two phrasings differ only by a short term swap. Each row shows one model's response to both, verbatim. Each model was asked the same prompt 3 times; scenarios still being collected may show fewer. When an LLM translated the patient phrasing to clinical phrasing, the results appear as a third column. This payload is a partial export of an in-progress collection — the scenario count below reflects what is measured so far, not the registered total of 75.</p>
 
   <div class="sample-banner" id="sample-banner" hidden>SAMPLE DATA — synthetic placeholder payload for layout verification only. Nothing on this page is a measurement.</div>
 
   <div class="pending" id="llm-pending">
-    No advice-arm payload is published yet. This page renders from
-    <code>data/advice_scenarios.json</code> once the exporter publishes it; every
+    No natural-question payload is published yet. This page renders from
+    <code>data/advice_scenarios_nat.json</code> once the exporter publishes it; every
     response shown will be a logged, hash-chained archive record.
   </div>
 
@@ -302,8 +302,7 @@
 <script>
 (function(){
   if(!window.fetch)return;
-  var sample=/[?&]sample=1/.test(location.search);
-  var src=sample?'../data/advice_scenarios.sample.json':'../data/advice_scenarios.json';
+  var src='../data/advice_scenarios_nat.json';
   var pending=document.getElementById('llm-pending');
   var viewer=document.getElementById('llm-viewer');
   var prov=document.getElementById('llm-prov');
@@ -1346,7 +1345,7 @@
     .then(function(d){
       if(!d||!Array.isArray(d.scenarios)||!d.scenarios.length)return; // pending stays
       data=d;
-      if(sample||d._sample)document.getElementById('sample-banner').hidden=false;
+      if(d._sample)document.getElementById('sample-banner').hidden=false;
       pending.hidden=true;
       viewer.hidden=false;
       maxK=computeMaxK();
