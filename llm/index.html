@@ -104,8 +104,11 @@
   .er-q{font-size:12.5px;font-style:italic;line-height:1.45;margin:0;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
   .er-c{border-left:2px solid var(--clinical);padding-left:8px}
   .er-p{border-left:2px solid var(--patient);padding-left:8px}
+  /* coded-tier cells: baseline tier in ink; red is reserved for the arrow +
+     landing tier, and only when the move is an actual downgrade */
   .er-t{font-family:var(--mono);font-size:10px;color:var(--muted);white-space:nowrap;margin:0}
-  .er-t.down{color:var(--penalty)}
+  .er-t .er-tbase{color:var(--ink)}
+  .er-t .er-down{color:var(--penalty);font-weight:600}
   @media (max-width:900px){.er-heads{display:none}.er-row{grid-template-columns:1fr;gap:4px}}
   /* scenario pager: text-only (Tufte) */
   .sc-pager{font-family:var(--mono);font-size:12px;margin:22px 0 6px;display:flex;gap:12px;
@@ -143,10 +146,11 @@
   .arm-c .arm-label{color:var(--clinical)}
   .arm-p .arm-label{color:var(--patient)}
   .arm-t .arm-label{color:var(--muted)}
-  .ask{font-size:16.5px;line-height:1.5;margin:0;padding:8px 12px;border-left:3px solid}
-  .arm-c .ask{border-color:var(--clinical)}
-  .arm-p .ask{border-color:var(--patient)}
-  .arm-t .ask{border-color:var(--structural);color:var(--muted)}
+  /* prompt blocks: whitespace and the colored arm headers separate the columns
+     (the border bars are gone); the red left rule on .resp-down stays — it is
+     a downgrade marker, not a separator */
+  .ask{font-size:16.5px;line-height:1.5;margin:0;padding:8px 0}
+  .arm-t .ask{color:var(--muted)}
   .model-row{grid-column:1/-1;border-top:1px solid var(--hairline);margin:0;
     padding:8px 0 2px;font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.04em}
   .cell{min-width:0;padding:2px 0 14px}
@@ -983,17 +987,15 @@
 
   function svgBarsPanel(rows,opts){
     opts=opts||{};
-    var hasProv=rows.some(function(r){return r.provider;});
-    var W=hasProv?300:230,L=64,R=190,rowH=26,top=4,GAP=6;
+    var W=230,L=64,R=190,rowH=26,top=4,GAP=6;
     var H=top+rows.length*rowH+rows.filter(function(r){return r.gapBefore;}).length*GAP+2;
     var svg=svgNode('svg',{viewBox:'0 0 '+W+' '+H,role:'img','aria-label':opts.label||''});
     function x(v){return L+v*(R-L);}
     var y=top-rowH;
     rows.forEach(function(r,i){
       y+=rowH+(r.gapBefore?GAP:0);
-      // provider attribution, once per family, in the right margin
-      if(r.provider)svg.appendChild(svgNode('text',{x:W-2,y:y+13,'text-anchor':'end',
-        'font-family':'ui-monospace,monospace','font-size':'9px',fill:'var(--muted,#6d6c66)'},r.provider));
+      // provider grouping is carried by the family gap alone (gapBefore);
+      // the company names were non-data ink and are gone (owner 2026-07-30)
       svg.appendChild(svgNode('text',{x:0,y:y+14,'font-family':'ui-monospace,monospace','font-size':'10.5px',fill:'var(--ink,#1c1c19)'},r.label));
       [['a','var(--clinical,#15803d)',4],['b','var(--patient,#111827)',14]].forEach(function(sp){
         var v=r[sp[0]];
@@ -1062,7 +1064,13 @@
       row.appendChild(el('p','er-q er-c','“'+opening(sampleText(s.clinical,m.spec))+'”'));
       row.appendChild(el('p','er-q er-p','“'+opening(sampleText(s.patient,m.spec))+'”'));
       var t=by[m.spec];
-      row.appendChild(el('p','er-t'+(t&&t.downgrade?' down':''),t?(t.clinical+' → '+t.patient):'—'));
+      var tp=el('p','er-t');
+      if(t){
+        tp.appendChild(el('span','er-tbase',t.clinical));
+        tp.appendChild(el('span',t.downgrade?'er-down':null,' → '+t.patient));
+        if(t.downgrade)tp.title='downgrade: the patient wording is coded less urgent than the clinical wording';
+      }else{tp.textContent='—';}
+      row.appendChild(tp);
       grid.appendChild(row);
     });
     det.hidden=false;
@@ -1100,35 +1108,58 @@
     document.getElementById('tsp-sum').textContent=
       'Scenario '+(bestSi+1)+': '+nDown+' of '+specs.length+' models downgrade it, and some disagree with themselves across attempts';
     var cap=document.getElementById('tsp-cap');
-    cap.textContent='one dot per attempt · clinical above the line, patient below · horizontal spread = the same model, re-asked, coded at different tiers · modal ties break toward the more urgent tier · machine-coded, provisional · ';
+    cap.textContent='one dumbbell per attempt (the same prompt re-asked): filled green = the clinical wording’s coded tier, open ink = the patient wording’s, the hairline spans the shift · attempts stack within a model row; unequal dumbbells in one row are the model disagreeing with itself · machine-coded, provisional · ';
     cap.appendChild(scenarioLink('show this scenario below ↓',bestSi));
-    var W=760,AX0=120,AX1=700,rowH=17,top=18;
-    var H=top+specs.length*rowH+2;
+    // per-attempt tier pairs read straight from the scenario's samples (k joins
+    // the clinical and patient arms of the same re-ask)
+    function tiersByK(arm,spec){
+      var out={};
+      (((arm||{}).responses)||[]).forEach(function(mb){
+        if(mb.model!==spec)return;
+        (mb.samples||[]).forEach(function(sm){if(sm.k&&sm.tier)out[sm.k]=sm.tier;});
+      });
+      return out;
+    }
+    var W=760,AX0=120,AX1=700,top=18,sub=10,pad=7;
+    var bands=specs.map(function(sp){
+      var ck=tiersByK(s.clinical,sp),pk=tiersByK(s.patient,sp);
+      var ks={};
+      Object.keys(ck).forEach(function(k){ks[k]=1;});
+      Object.keys(pk).forEach(function(k){ks[k]=1;});
+      var kk=Object.keys(ks).map(Number).sort(function(a,b){return a-b;});
+      return {sp:sp,ck:ck,pk:pk,ks:kk,h:Math.max(1,kk.length)*sub+pad};
+    });
+    var H=top+bands.reduce(function(a,b){return a+b.h;},0)+6;
     function x(ti){return AX0+ti/(to.length-1)*(AX1-AX0);}
     var svg=svgNode('svg',{viewBox:'0 0 '+W+' '+H,role:'img',
-      'aria-label':'Coded care-urgency of every attempt for this scenario, per model and wording'});
+      'aria-label':'Coded care-urgency of every attempt for this scenario: per model and attempt, a dumbbell connects the clinical wording’s tier to the patient wording’s tier'});
+    // one set of tier gridlines + labels spanning the whole plot
     to.forEach(function(t,i){
+      svg.appendChild(svgNode('line',{x1:x(i),y1:top-4,x2:x(i),y2:H-4,
+        stroke:'var(--hairline,#dcdad2)','stroke-width':0.7}));
       svg.appendChild(svgNode('text',{x:x(i),y:10,'text-anchor':'middle','font-family':'ui-monospace,monospace','font-size':'9px',fill:'var(--muted,#6d6c66)'},t));
     });
-    specs.forEach(function(sp,ri){
-      var cy=top+ri*rowH+rowH/2;
-      var t=by[sp];
-      svg.appendChild(svgNode('text',{x:0,y:cy+3.5,'font-family':'ui-monospace,monospace','font-size':'10.5px',
-        fill:(t&&t.downgrade)?'var(--penalty,#b4483d)':'var(--ink,#1c1c19)'},tinyName(sp)+((t&&t.downgrade)?' ↓':'')));
-      svg.appendChild(svgNode('line',{x1:AX0-14,y1:cy,x2:AX1+14,y2:cy,stroke:'var(--hairline,#dcdad2)','stroke-width':0.7}));
-      to.forEach(function(_,i){
-        svg.appendChild(svgNode('line',{x1:x(i),y1:cy-1.5,x2:x(i),y2:cy+1.5,stroke:'var(--structural,#c3c9d2)','stroke-width':0.8}));
+    var yCur=top;
+    bands.forEach(function(b){
+      var t=by[b.sp];
+      var mid=yCur+b.h/2;
+      svg.appendChild(svgNode('text',{x:0,y:mid+3.5,'font-family':'ui-monospace,monospace','font-size':'10.5px',
+        fill:(t&&t.downgrade)?'var(--penalty,#b4483d)':'var(--ink,#1c1c19)'},tinyName(b.sp)+((t&&t.downgrade)?' ↓':'')));
+      b.ks.forEach(function(k,ki){
+        var cy=yCur+pad/2+(ki+0.5)*sub;
+        var ci=b.ck[k]!=null?to.indexOf(b.ck[k]):-1;
+        var pi=b.pk[k]!=null?to.indexOf(b.pk[k]):-1;
+        if(ci>=0&&pi>=0&&ci!==pi)
+          svg.appendChild(svgNode('line',{x1:x(ci),y1:cy,x2:x(pi),y2:cy,
+            stroke:'var(--muted,#6d6c66)','stroke-width':0.9}));
+        if(pi>=0)svg.appendChild(svgNode('circle',{cx:x(pi),cy:cy,r:3.1,fill:'none',
+          stroke:'var(--patient,#111827)','stroke-width':1.2}));
+        if(ci>=0)svg.appendChild(svgNode('circle',{cx:x(ci),cy:cy,r:2.4,fill:'var(--clinical,#15803d)'}));
+        var hit=svgNode('rect',{x:AX0-14,y:cy-sub/2,width:AX1-AX0+28,height:sub,fill:'transparent'});
+        hit.appendChild(svgNode('title',{},tinyName(b.sp)+' · attempt '+k+': clinical '+(b.ck[k]||'—')+' → patient '+(b.pk[k]||'—')));
+        svg.appendChild(hit);
       });
-      [['clinical','var(--clinical,#15803d)',-3.4],['patient','var(--patient,#111827)',3.4]].forEach(function(lane){
-        var counts=(tc[sp]||{})[lane[0]]||{};
-        Object.keys(counts).forEach(function(tier){
-          var ti=to.indexOf(tier);
-          if(ti<0)return;
-          for(var k=0;k<counts[tier];k++){
-            svg.appendChild(svgNode('circle',{cx:x(ti)+(k-(counts[tier]-1)/2)*6.5,cy:cy+lane[2],r:2.6,fill:lane[1]}));
-          }
-        });
-      });
+      yCur+=b.h;
     });
     var body=document.getElementById('tsp-body');
     body.textContent='';
