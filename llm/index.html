@@ -225,7 +225,15 @@
   <p class="dateline">Advice arm <span class="mode">· full model responses, verbatim</span></p>
   <h1>LLM responses</h1>
   <p class="subtitle">The same medical scenario, framed with patient language v. doctor language. Responses across frontier AI labs, queried using API calls.</p>
-  <p class="explainer">Each scenario below is one clinical situation phrased two ways. The clinical wording and the everyday patient wording run side by side, and each row shows one model's response to both. Responses are shown verbatim. Each model was asked the same prompt 3 times. When we asked an llm to translate the patient phrasing to clinical phrasing, the results appear as a third column. A second stimulus family — complete, human-sounding questions instead of sentence completions — is collected separately: <a href="natural.html">natural questions</a>.</p>
+  <p class="explainer">Each scenario below is one clinical situation phrased two ways. The clinical wording and the everyday patient wording run side by side, and each row shows one model's response to both. Responses are shown verbatim. Each model was asked the same prompt 3 times. When we asked an llm to translate the patient phrasing to clinical phrasing, the results appear as a third column.</p>
+
+  <div class="chip-g" role="group" aria-label="Stimulus family">
+    <span class="chip-lbl">Family</span>
+    <button class="chip" id="fam-cloze" aria-pressed="false">sentence completions</button>
+    <button class="chip" id="fam-nat" aria-pressed="false">natural questions</button>
+    <span class="chip-note" id="fam-chip-note"></span>
+  </div>
+  <p class="explainer" id="fam-note" hidden>This family asks each situation as a complete, human-sounding question in one of eight registered syntax styles; the two phrasings differ only by a short term swap. It is a <strong>partial collection, elicitation in progress</strong> — the scenario count reflects what is measured so far, not the registered total of 75.</p>
 
   <div class="sample-banner" id="sample-banner" hidden>SAMPLE DATA — synthetic placeholder payload for layout verification only. Nothing on this page is a measurement.</div>
 
@@ -303,7 +311,21 @@
 (function(){
   if(!window.fetch)return;
   var sample=/[?&]sample=1/.test(location.search);
-  var src=sample?'../data/advice_scenarios.sample.json':'../data/advice_scenarios.json';
+  var fam=/[?&]family=nat/.test(location.search)?'nat':'cloze';
+  var src=sample?'../data/advice_scenarios.sample.json'
+      :(fam==='nat'?'../data/advice_scenarios_nat.json':'../data/advice_scenarios.json');
+  // family chips: a page reload per switch keeps the one-shot loader intact
+  (function(){
+    var c=document.getElementById('fam-cloze'), n=document.getElementById('fam-nat');
+    (fam==='nat'?n:c).classList.add('on');
+    (fam==='nat'?n:c).setAttribute('aria-pressed','true');
+    c.addEventListener('click',function(){ if(fam!=='cloze')location.search='';});
+    n.addEventListener('click',function(){ if(fam!=='nat')location.search='?family=nat';});
+    if(fam==='nat'){
+      document.getElementById('fam-note').hidden=false;
+      document.getElementById('fam-chip-note').textContent='partial collection · in progress';
+    }
+  })();
   var pending=document.getElementById('llm-pending');
   var viewer=document.getElementById('llm-viewer');
   var prov=document.getElementById('llm-prov');
