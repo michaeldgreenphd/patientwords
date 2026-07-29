@@ -95,19 +95,17 @@
   .provenance{border:1px solid var(--hairline);background:#fff;margin:22px 0 8px;
     padding:12px 16px;font-family:var(--mono);font-size:11.5px;line-height:1.9;color:var(--muted)}
   .provenance b{color:var(--ink);font-weight:600}
-  .retrace-line{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.04em;margin:6px 0 0}
-  .retrace-line a{color:var(--muted)}
+  /* repeatability block: its own bordered strip so the re-trace claim can never
+     read as a caption of the generation timeline (which lives at page bottom) */
+  .retr{border:1px solid var(--hairline);background:#fff;margin:10px 0 8px;padding:12px 16px}
+  .retr .retr-head{font-family:var(--mono);font-size:11.5px;line-height:1.9;color:var(--muted);margin:0}
+  .retr .retr-head b{color:var(--ink)}
+  .retr a{color:var(--muted)}
+  .retr .retr-cap{font-family:var(--mono);font-size:10px;color:var(--muted);margin:2px 0 0;letter-spacing:.03em}
+  .retr svg{display:block;width:100%;height:auto;max-width:568px;margin-top:6px}
   .provenance .pv-cost{color:var(--clinical);font-weight:600}
-  /* urgency-by-model: dense borderless table (Model · Downgrades · Upgrades) */
-  .urg-tbl{border-collapse:collapse;margin:9px 0 12px;font-family:var(--mono);font-size:11.5px;
-    font-variant-numeric:tabular-nums}
-  .urg-tbl th{color:var(--muted);font-weight:600;letter-spacing:.06em;text-transform:uppercase;
-    font-size:9.5px;padding:0 0 5px;border-bottom:1px solid var(--hairline);white-space:nowrap;text-align:left}
-  .urg-tbl td{padding:3px 0;color:var(--ink);border:0;white-space:nowrap}
-  .urg-tbl th.num,.urg-tbl td.num{text-align:right;padding-left:30px}
-  .urg-tbl td.dn{color:var(--penalty);font-weight:600}
-  .urg-tbl td.up{color:var(--clinical);font-weight:600}
-  .urg-tbl tr:last-child td{padding-bottom:0}
+  /* urgency-by-model: diverging bars (downgrades left in red, upgrades right in
+     grey), label column shared with the tier-shift forest below */
   /* per-model tier-shift forest (#11): one dot per model, shared axis, zero line */
   .urg-forest{display:block;margin:8px 0 2px}
   .urg-fhead{margin:14px 0 2px}
@@ -448,7 +446,7 @@
     </div>
     <p class="sum-caption">click a Sim number to jump to its full trace ·
       glyph: ● clinical → ○ patient target probability on a shared 0–1 axis (dashed = patient below the traced spread) ·
-      * intended target fell below the traced spread; measurement anchored on the clinical top prediction · screened-out rows kept their clinical trace but failed the measurement screen (open a Sim page for details)</p>
+      * intended target fell below the traced spread; measurement anchored on the clinical top prediction · screened-out rows (failed the measurement screen; clinical trace kept) are hidden by default — the &ldquo;hide screened-out&rdquo; toggle above shows them</p>
     <nav class="sum-pages" id="sim-pages" aria-label="Scenario pages"></nav>
   </section>
 
@@ -460,11 +458,13 @@
   </section>
 
   <div class="provenance" id="sim-provenance" hidden></div>
-  <p class="retrace-line" id="retrace-line" hidden></p>
-  <div class="tl" id="sim-timeline" hidden></div>
+  <div class="retr" id="retrace-block" hidden>
+    <p class="retr-head"><b>Repeatability</b> — <span id="retrace-text"></span></p>
+    <div id="retrace-strip"></div>
+    <p class="retr-cap" id="retrace-cap" hidden></p>
+  </div>
   <script>
   (function(){
-    var box = document.getElementById('sim-timeline');
     var NS = 'http://www.w3.org/2000/svg';
     function el(name, attrs, style){
       var e = document.createElementNS(NS, name);
@@ -476,6 +476,8 @@
       .then(function(r){ if(!r.ok) throw new Error('missing'); return r.json(); })
       .then(draw).catch(function(){ /* strip stays hidden; page unaffected */ });
     function draw(t){
+      var box = document.getElementById('sim-timeline');
+      if (!box) return;
       var batches = (t.batches || []).filter(function(b){ return b.utc; });
       if (batches.length < 2) return;
       var t0 = Date.parse(batches[0].utc), t1 = Date.parse(batches[batches.length - 1].utc);
@@ -525,9 +527,11 @@
         lb.textContent = day(e[0]);
         svg.appendChild(lb);
       });
-      // legend as marginalia, tied to the axis by the start date (not floated in the summary)
+      // legend as marginalia, tied to the axis by the start date (not floated in
+      // the summary); the tiers are defined, not just named — Tier B is the
+      // pre-registered run whose milestone marks sit on this same axis
       var leg = el('text', {x: ml, y: axisY + 30, 'text-anchor': 'start', 'class': 'marginalia'});
-      leg.textContent = 'hollow = Tier A · filled = Tier B';
+      leg.textContent = 'hollow = Tier A (before the pre-registration) · filled = Tier B (the pre-registered run)';
       svg.appendChild(leg);
       box.appendChild(svg);
       var sum = document.createElement('p');
@@ -537,7 +541,8 @@
         '</b> Tier B so far) · generation <b>$' + t.totals.generation_usd.toFixed(2) +
         '</b> total · tracing and inference $0 on public CI';
       box.appendChild(sum);
-      box.hidden = false;
+      var sec = document.getElementById('sim-provtl');
+      if (sec) sec.hidden = false;
     }
   })();
   </script>
@@ -546,6 +551,11 @@
   <div class="pending-note" id="sim-pending" hidden>
     <span class="pending-mark"></span>loading · simulated series
   </div>
+
+  <section id="sim-provtl" hidden>
+    <h2>Data provenance &amp; timeline</h2>
+    <div class="tl" id="sim-timeline"></div>
+  </section>
 
   <a class="back" href="../">← Back home</a>
 
@@ -808,30 +818,66 @@
           uIntro.appendChild(el('b',null,'Urgency view'));
           uIntro.appendChild(el('span',null,' — downgrades vs upgrades by model (phrase-deduped: each phrase counted once per model, re-traces collapsed).'));
           prov.appendChild(uIntro);
-          // dense, borderless table; most downgrades first (safety-relevant first)
+          // most downgrades first (safety-relevant first)
           var uorder=uids.slice().sort(function(a,b){
             var da=updm[a]||{},db=updm[b]||{};
             return (db.downgrades||0)-(da.downgrades||0)
               ||(db.upgrades||0)-(da.upgrades||0)||(a<b?-1:a>b?1:0);
           });
-          var utbl=el('table','urg-tbl');
-          var uhead=el('tr');
-          var uthM=el('th',null,'Model'); uthM.setAttribute('scope','col');
-          var uthD=el('th','num','Downgrades'); uthD.setAttribute('scope','col');
-          var uthU=el('th','num','Upgrades'); uthU.setAttribute('scope','col');
-          uhead.appendChild(uthM);uhead.appendChild(uthD);uhead.appendChild(uthU);
-          var uthead=el('thead');uthead.appendChild(uhead);utbl.appendChild(uthead);
-          var utbody=el('tbody');
-          uorder.forEach(function(mid){
-            var d=updm[mid]||{};
-            var r=el('tr');
-            r.appendChild(el('td',null,mid));
-            r.appendChild(el('td','num dn',String(d.downgrades||0)));
-            r.appendChild(el('td','num up',String(d.upgrades||0)));
-            utbody.appendChild(r);
+          // diverging bars replace the count table (owner direction 2026-07-30):
+          // downgrades extend left in penalty red, upgrades right in structural
+          // grey (grey, not green — an upgrade is still a redirect, not a
+          // clinical win), direct counts at the bar ends, one shared per-count
+          // scale, the zero axis as the spine. The label column matches the
+          // tier-shift forest below so the two figures read as one dashboard.
+          var NSu='http://www.w3.org/2000/svg';
+          function usel(n,a,st){var e=document.createElementNS(NSu,n);
+            for(var k in a)e.setAttribute(k,a[k]);if(st)e.setAttribute('style',st);return e;}
+          var maxDn=1,maxUp=1;
+          uorder.forEach(function(mid){var d=updm[mid]||{};
+            maxDn=Math.max(maxDn,d.downgrades||0);maxUp=Math.max(maxUp,d.upgrades||0);});
+          var uW=568,uLab=150,uPadR=14,uRh=17,uTop=16,uBot=6;
+          var uPlot=uW-uLab-uPadR-70;              // 70: room for the end count labels
+          var uk=uPlot/(maxDn+maxUp);
+          var uZx=uLab+34+maxDn*uk;                // zero spine
+          var uH=uTop+uorder.length*uRh+uBot;
+          var dv=usel('svg',{'class':'urg-div',viewBox:'0 0 '+uW+' '+uH,role:'img',
+            'aria-label':'Downgrades versus upgrades per model, phrase-deduped: '+
+              uorder.map(function(mid){var d=updm[mid]||{};
+                return mid+' '+(d.downgrades||0)+' down, '+(d.upgrades||0)+' up';}).join('; ')+'.'},
+            'width:100%;height:auto;max-width:'+uW+'px;display:block;margin:9px 0 2px');
+          dv.appendChild(usel('line',{x1:uZx,x2:uZx,y1:uTop-4,y2:uH-uBot+2},
+            'stroke:var(--muted);stroke-width:1'));
+          var uh1=usel('text',{x:uZx-6,y:uTop-6,'text-anchor':'end'},
+            'font-family:var(--mono);font-size:9px;fill:var(--penalty)');
+          uh1.textContent='← downgrades';dv.appendChild(uh1);
+          var uh2=usel('text',{x:uZx+6,y:uTop-6},
+            'font-family:var(--mono);font-size:9px;fill:var(--muted)');
+          uh2.textContent='upgrades →';dv.appendChild(uh2);
+          uorder.forEach(function(mid,i){
+            var d=updm[mid]||{},cy=uTop+i*uRh+uRh/2;
+            var g=usel('g',{});
+            var lab=usel('text',{x:uLab-8,y:cy+3,'text-anchor':'end'},
+              'font-family:var(--mono);font-size:10.5px;fill:var(--ink)');
+            lab.textContent=mid;g.appendChild(lab);
+            var dn=d.downgrades||0,up=d.upgrades||0;
+            if(dn)g.appendChild(usel('rect',{x:uZx-dn*uk,y:cy-4.5,width:dn*uk,height:9},
+              'fill:var(--penalty)'));
+            if(up)g.appendChild(usel('rect',{x:uZx+1,y:cy-4.5,width:Math.max(up*uk,0.5),height:9},
+              'fill:var(--structural)'));
+            var cdn=usel('text',{x:uZx-dn*uk-5,y:cy+3,'text-anchor':'end'},
+              'font-family:var(--mono);font-size:10px;fill:var(--penalty)');
+            cdn.textContent=String(dn);g.appendChild(cdn);
+            var cup=usel('text',{x:uZx+Math.max(up*uk,0.5)+6,y:cy+3},
+              'font-family:var(--mono);font-size:10px;fill:var(--muted)');
+            cup.textContent=String(up);g.appendChild(cup);
+            var ti=document.createElementNS(NSu,'title');
+            ti.textContent=mid+' · '+dn+' downgrades / '+up+' upgrades'+
+              (typeof d.n_phrases==='number'?' · '+d.n_phrases+' phrases':'')+' · phrase-deduped';
+            g.appendChild(ti);
+            dv.appendChild(g);
           });
-          utbl.appendChild(utbody);
-          prov.appendChild(utbl);
+          prov.appendChild(dv);
           var uOut=el('div');
           uOut.appendChild(el('span',null,'Care-urgency tier vocabulary: '));
           uOut.appendChild(el('b',null,urg.vocabulary_status||'owner-reviewed v1 · domain review pending'));
@@ -1022,6 +1068,10 @@
       var currentPage=1,pageCount=1,totalRows=0;
       var sortKey=null,sortDir=-1,filterText='',filterTopic='',filterStatus='';
       var filterSpec='',filterSub='',subRowReset=function(){};
+      // screened-out rows (failed the measurement screen) hidden by default
+      // (owner direction 2026-07-30); the chip toggle shows them, and choosing
+      // outcome = "screened out" always overrides the hide
+      var hideScreened=true;
 
       // Cross-model view. gemma-2-2b is the base: its measurements live at the
       // scenario top level and are the fallback; other models add s.models[id].
@@ -1198,6 +1248,12 @@
           if(filterStatus==='pat')return typeof m.language_penalty==='number'&&m.language_penalty>0;
           return true;
         });
+        if(hideScreened&&filterStatus!=='screened'){
+          list=list.filter(function(s){
+            var m=hasModel(s)?cur(s):{};
+            return !(m.screening&&m.screening.status==='screened_out');
+          });
+        }
         if(filterText){
           var q=filterText.toLowerCase();
           list=list.filter(function(s){
@@ -1271,6 +1327,15 @@
         pages.appendChild(nav('Next →',currentPage+1,currentPage<pageCount));
       }
       function renderTable(){
+        // keep the chip's count honest for the selected model
+        var scChip=document.getElementById('sim-hide-screened');
+        if(scChip){
+          var scN=scenarios.filter(function(s){
+            var m=hasModel(s)?cur(s):{};
+            return m.screening&&m.screening.status==='screened_out';
+          }).length;
+          scChip.textContent='hide screened-out · '+scN;
+        }
         var list=visibleScenarios();
         sumBody.textContent='';
         pages.textContent='';
@@ -1388,11 +1453,31 @@
            {val:'clin',name:'clinical stronger'},{val:'pat',name:'patient stronger'},
            {val:'screened',name:'screened out'}],
           function(){return filterStatus;},function(v){filterStatus=v;});
+        // screened-out visibility chip (aria-pressed per the site convention);
+        // renderTable keeps its count label current for the selected model
+        var scN0=scenarios.filter(function(s){
+          var m=hasModel(s)?cur(s):{};
+          return m.screening&&m.screening.status==='screened_out';
+        }).length;
+        var scChip=el('button','chip on','hide screened-out · '+scN0);
+        scChip.type='button';scChip.id='sim-hide-screened';
+        scChip.setAttribute('aria-pressed','true');
+        scChip.title='screened-out pairs failed the measurement screen (their clinical trace is kept); hidden by default to keep the table dense — click to show them';
+        scChip.addEventListener('click',function(){
+          hideScreened=!hideScreened;
+          scChip.classList.toggle('on',hideScreened);
+          scChip.setAttribute('aria-pressed',String(hideScreened));
+          renderTable();
+        });
+        wrap.appendChild(scChip);
       })();
 
       document.getElementById('sim-reset').addEventListener('click',function(){
         sortKey=null;sortDir=-1;filterText='';filterTopic='';filterStatus='';
         filterSpec='';subRowReset();
+        hideScreened=true;
+        var scc=document.getElementById('sim-hide-screened');
+        if(scc){scc.classList.add('on');scc.setAttribute('aria-pressed','true');}
         var fb=document.getElementById('sim-filter');
         if(fb)fb.value='';
         // filter dropdowns reset to their first ("all") option; the model
@@ -1494,18 +1579,70 @@
 </script>
 <script>
 (function(){
-  // repeatability line under the provenance strip (data/retrace_consistency.json)
+  // repeatability block (data/retrace_consistency.json): its own strip with the
+  // claim plus a per-phrase spread plot. A run-1-vs-run-2 scatter is not
+  // drawable from the published payload — it records per-phrase SPREADS
+  // (max − min across up to 9 re-traces), not per-run probabilities — so the
+  // honest graphic is the spread distribution itself.
   fetch('../data/retrace_consistency.json',{cache:'no-cache'})
     .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
     .then(function(d){
       if(!d.pairs_retraced)return;
-      var el=document.getElementById('retrace-line');
-      el.textContent='repeatability: '+d.top_word_stable_pairs+' of '+d.pairs_retraced+
+      var txt=document.getElementById('retrace-text');
+      txt.textContent=d.top_word_stable_pairs+' of '+d.pairs_retraced+
         ' phrases traced more than once reproduce identical probabilities and top-five lists '+
         'at recorded precision (max spread '+d.prob_spread_max+') · ';
-      var a=document.createElement('a');a.href='https://github.com/michaeldgreenphd/patientwords/blob/main/data/retrace_consistency.json';
-      a.textContent='source';el.appendChild(a);
-      el.hidden=false;
+      var a=document.createElement('a');
+      a.href='https://github.com/michaeldgreenphd/patientwords/blob/main/data/retrace_consistency.json';
+      a.textContent='source';txt.appendChild(a);
+      // per-phrase spread strip: one dot per re-traced phrase at its largest
+      // observed probability spread; most pile on zero, the tail is the story
+      var rows=Array.isArray(d.rows)?d.rows:[];
+      if(rows.length){
+        var NS='http://www.w3.org/2000/svg';
+        function sv(n,at,st){var e=document.createElementNS(NS,n);
+          for(var k in at)e.setAttribute(k,at[k]);if(st)e.setAttribute('style',st);return e;}
+        var sp=rows.map(function(r){
+          return {v:Math.max(r.spread_p_clinical||0,r.spread_p_patient||0),r:r};});
+        var vmax=Math.max(d.prob_spread_max||0,0.001);
+        sp.forEach(function(x){vmax=Math.max(vmax,x.v);});
+        var W=568,L=8,R=64,axY=26,H=44;
+        function X(v){return L+(v/vmax)*(W-L-R);}
+        var svg=sv('svg',{viewBox:'0 0 '+W+' '+H,role:'img',
+          'aria-label':'One dot per re-traced phrase at the largest probability spread it showed across its re-traces; '+
+            'most sit at zero, the largest is '+vmax+'.'});
+        svg.appendChild(sv('line',{x1:L,x2:W-R,y1:axY,y2:axY},
+          'stroke:var(--hairline);stroke-width:1'));
+        var jig={};
+        sp.forEach(function(x){
+          var xx=Math.round(X(x.v)*2)/2;
+          var n=(jig[xx]=(jig[xx]||0)+1);
+          var c=sv('circle',{cx:xx,cy:axY-4-((n-1)%6)*4.4,r:2.2},
+            'fill:var(--ink);fill-opacity:.5');
+          var ti=document.createElementNS(NS,'title');
+          ti.textContent=(x.r.model||'')+' · '+(x.r.n_traces||'?')+' traces · spread clinical '+
+            (x.r.spread_p_clinical!=null?x.r.spread_p_clinical:'—')+' / patient '+
+            (x.r.spread_p_patient!=null?x.r.spread_p_patient:'—');
+          c.appendChild(ti);
+          svg.appendChild(c);
+        });
+        var t0=sv('text',{x:L,y:axY+13},
+          'font-family:var(--mono);font-size:9.5px;fill:var(--muted)');
+        t0.textContent='0';svg.appendChild(t0);
+        var tm=sv('text',{x:X(vmax),y:axY+13,'text-anchor':'middle'},
+          'font-family:var(--mono);font-size:9.5px;fill:var(--muted)');
+        tm.textContent=String(vmax);svg.appendChild(tm);
+        var lbl=sv('text',{x:W-R+8,y:axY+3},
+          'font-family:var(--mono);font-size:9px;fill:var(--muted)');
+        lbl.textContent='spread (p)';svg.appendChild(lbl);
+        document.getElementById('retrace-strip').appendChild(svg);
+        var cap=document.getElementById('retrace-cap');
+        cap.textContent='one dot per re-traced phrase · x = the largest probability spread (max − min) that '+
+          'phrase showed across its re-traces · stacked dots share a value · a run-by-run scatter is not '+
+          'drawable from the published data, which records per-phrase spreads, not per-run probabilities';
+        cap.hidden=false;
+      }
+      document.getElementById('retrace-block').hidden=false;
     }).catch(function(){});
 })();
 </script>
