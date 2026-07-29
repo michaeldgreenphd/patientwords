@@ -227,13 +227,7 @@
   <p class="subtitle">The same medical scenario, framed with patient language v. doctor language. Responses across frontier AI labs, queried using API calls.</p>
   <p class="explainer">Each scenario below is one clinical situation phrased two ways. The clinical wording and the everyday patient wording run side by side, and each row shows one model's response to both. Responses are shown verbatim. Each model was asked the same prompt 3 times. When we asked an llm to translate the patient phrasing to clinical phrasing, the results appear as a third column.</p>
 
-  <div class="chip-g" role="group" aria-label="Stimulus family">
-    <span class="chip-lbl">Family</span>
-    <button class="chip" id="fam-cloze" aria-pressed="false">sentence completions</button>
-    <button class="chip" id="fam-nat" aria-pressed="false">natural questions</button>
-    <span class="chip-note" id="fam-chip-note"></span>
-  </div>
-  <p class="explainer" id="fam-note" hidden>This family asks each situation as a complete, human-sounding question in one of eight registered syntax styles; the two phrasings differ only by a short term swap. It is a <strong>partial collection, elicitation in progress</strong> — the scenario count reflects what is measured so far, not the registered total of 75.</p>
+  <p class="explainer" id="fam-note" hidden></p>
 
   <div class="sample-banner" id="sample-banner" hidden>SAMPLE DATA — synthetic placeholder payload for layout verification only. Nothing on this page is a measurement.</div>
 
@@ -311,21 +305,30 @@
 (function(){
   if(!window.fetch)return;
   var sample=/[?&]sample=1/.test(location.search);
-  var fam=/[?&]family=nat/.test(location.search)?'nat':'cloze';
-  var src=sample?'../data/advice_scenarios.sample.json'
-      :(fam==='nat'?'../data/advice_scenarios_nat.json':'../data/advice_scenarios.json');
-  // family chips: a page reload per switch keeps the one-shot loader intact
-  (function(){
-    var c=document.getElementById('fam-cloze'), n=document.getElementById('fam-nat');
-    (fam==='nat'?n:c).classList.add('on');
-    (fam==='nat'?n:c).setAttribute('aria-pressed','true');
-    c.addEventListener('click',function(){ if(fam!=='cloze')location.search='';});
-    n.addEventListener('click',function(){ if(fam!=='nat')location.search='?family=nat';});
-    if(fam==='nat'){
-      document.getElementById('fam-note').hidden=false;
-      document.getElementById('fam-chip-note').textContent='partial collection · in progress';
-    }
-  })();
+  var src=sample?'../data/advice_scenarios.sample.json':'../data/advice_scenarios.json';
+
+  // Merged payloads pool several stimulus families into one scenario list and
+  // one set of figures (owner direction 2026-07-29). The note states the mix
+  // and any registered-total shortfall, with every number read from the payload.
+  function renderFamNote(d){
+    var fams=d.families||[];
+    if(fams.length<2)return;
+    function label(f){return f.family==='natural_questions'?'natural questions':'sentence completions';}
+    var text='This page pools two stimulus families in one scenario list and one set of figures: '+
+      fams.map(function(f){return f.n_scenarios_published+' '+label(f);}).join(' and ')+'. '+
+      'Natural questions ask each situation as a complete, human-sounding question in one of eight '+
+      'registered syntax styles; sentence completions use the original open-ended frame.';
+    fams.forEach(function(f){
+      if(f.n_items_registered&&f.n_scenarios_published<f.n_items_registered){
+        text+=' The '+label(f)+' family is published at '+f.n_scenarios_published+
+          ' of its registered '+f.n_items_registered+
+          ' stimuli (owner-directed stop, logged as a pre-registration deviation 2026-07-29).';
+      }
+    });
+    var n=document.getElementById('fam-note');
+    n.textContent=text;
+    n.hidden=false;
+  }
   var pending=document.getElementById('llm-pending');
   var viewer=document.getElementById('llm-viewer');
   var prov=document.getElementById('llm-prov');
@@ -683,10 +686,20 @@
     // Field-less payloads predate the exporter fields; the fallbacks state the
     // registered 2026-07-21 build (flip-only selection, fixed ask suffix).
     var sel=data.selection||null;
-    var onlyFlips=sel?!!sel.only_flips:true;
-    node.appendChild(document.createTextNode(onlyFlips?
-      'The pair comes from the simulated scenario set: circuit tracing on gemma-2-2b found its top next-word prediction changes between these two wordings, and only pairs with that change were used here. ':
-      'The pair comes from the simulated scenario set traced on gemma-2-2b. '));
+    var famSel=null;
+    (data.families||[]).forEach(function(f){if(s.family&&f.family===s.family)famSel=f.selection||null;});
+    if(s.family==='natural_questions'){
+      // this family was authored as complete questions and never circuit-traced;
+      // saying so per scenario keeps the provenance exact on a mixed page
+      node.appendChild(document.createTextNode(
+        'The pair was authored directly as a complete, natural-sounding question in one of eight registered syntax styles — the two wordings differ only by the short term swap. This family was not circuit-traced. '));
+    }else{
+      var eff=famSel||sel;
+      var onlyFlips=eff?!!eff.only_flips:true;
+      node.appendChild(document.createTextNode(onlyFlips?
+        'The pair comes from the simulated scenario set: circuit tracing on gemma-2-2b found its top next-word prediction changes between these two wordings, and only pairs with that change were used here. ':
+        'The pair comes from the simulated scenario set traced on gemma-2-2b. '));
+    }
     // advice-request construction, scoped to the set it describes: while every
     // scenario shares one suffix the claim covers 1..N; a future payload mixing
     // builds switches this to a per-scenario statement automatically
@@ -749,6 +762,8 @@
     if(pid)idNode.title=String(s.id); // raw archive id stays one hover away
     meta.appendChild(idNode);
     if(s.topic)meta.appendChild(document.createTextNode(' · topic: '+s.topic));
+    if(s.family)meta.appendChild(document.createTextNode(
+      ' · '+(s.family==='natural_questions'?'natural question':'sentence completion')));
     renderGen(s);
     var body=document.getElementById('sc-body');
     body.textContent='';
@@ -1369,6 +1384,7 @@
       if(!d||!Array.isArray(d.scenarios)||!d.scenarios.length)return; // pending stays
       data=d;
       if(sample||d._sample)document.getElementById('sample-banner').hidden=false;
+      renderFamNote(d);
       pending.hidden=true;
       viewer.hidden=false;
       maxK=computeMaxK();
