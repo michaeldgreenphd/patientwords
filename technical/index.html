@@ -114,11 +114,6 @@
     font-size:14.5px;line-height:1.5;vertical-align:top}
   .router td.num{font-family:var(--mono);font-size:12.5px;white-space:nowrap}
   .router .queued{color:var(--muted);font-style:italic}
-  .next{font-family:var(--mono);font-size:10px;letter-spacing:.1em;font-weight:700;
-    text-transform:uppercase;color:var(--muted);margin-right:10px}
-  ul.plan{list-style:none;margin:6px 0 14px;padding:0}
-  ul.plan li{border-bottom:1px solid var(--hairline);padding:10px 0;font-size:15.5px;line-height:1.6}
-  ul.plan li:last-child{border-bottom:0}
   .explainer{font-size:17px;line-height:1.66;margin:0 0 14px}
   .me-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:22px 0 12px}
   .scroll-hint{display:none;font-family:var(--mono);font-size:10px;letter-spacing:.08em;
@@ -541,13 +536,6 @@
       <p class="cap" id="cap-loglens">exploratory · gemma-2-2b · pairs whose answer never forms counted at right · coverage limited to pairs measured under both lenses</p>
     </details>
 
-    <h3>Queued next</h3>
-    <ul class="plan">
-      <li><span class="next">next</span>The three translation arms through the lens: does real translation restore early formation while the placebo paraphrase leaves depth unchanged?</li>
-      <li><span class="next">next</span>The context prefix through the lens: does one sentence of clinical context make the answer form earlier, or only boost it late?</li>
-      <li><span class="next">next</span>Misspelling stress set: does a real observed misspelling delay formation or prevent it?</li>
-      <li><span class="next">next</span>A lens reading in the daily drift sentinel, watching the internals for service change, not just the outputs (fires daily since July 14; every day-over-day lens comparison so far reads out identical).</li>
-    </ul>
   </section>
 
   <section id="models">
@@ -965,10 +953,20 @@
   }
   function mount(id,svg){var host=document.getElementById(id);host.textContent='';host.appendChild(svg);}
 
-  fetch('../data/jlens_insights.json',{cache:'no-cache'})
-    .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
-    .then(function(d){
+  Promise.all([
+    fetch('../data/jlens_insights.json',{cache:'no-cache'})
+      .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();}),
+    fetch('../data/jlens_depth.json',{cache:'no-cache'})
+      .then(function(r){return r.ok?r.json():null;}).catch(function(){return null;}),
+    fetch('../data/simulated_scenarios.json',{cache:'no-cache'})
+      .then(function(r){return r.ok?r.json():null;}).catch(function(){return null;})
+  ])
+    .then(function(res){
+      var d=res[0],dep=res[1],simPay=res[2];
       var L=(d.formation&&d.formation.n_layers)||26;
+      var SCN={};
+      (((simPay&&simPay.scenarios)||[])).forEach(function(x){SCN[x.batch+'#'+x.batch_index]=x;});
+      function stem3(t){return String(t||'').trim().toLowerCase().slice(0,3);}
       var W=700,PAD=124,PW=W-PAD-120;
       function lx(layer){return PAD+layer/(L-1)*PW;}
 
@@ -980,10 +978,27 @@
       // prefer the engine-picked exemplar (d.featured_exemplar); the class
       // filter stays as fallback for older payloads
       var exl=d.exemplars||[];
-      // engine pick first; the fallback prefers the highest-contrast hijack —
-      // one whose clinical side still holds rank 1 at the output layer
+      // owner-directed (2026-07-30): the film strip features a REAL flip — a
+      // suppressed (hijack) pair whose winning word differs from the clinical
+      // target beyond a shared stem, with the lens winner corroborated by the
+      // pair's circuit-trace measured tops. Chosen by rule from the committed
+      // worked examples (which carry full two-sided readouts), so a data
+      // refresh re-picks honestly; the engine exemplar remains the fallback.
+      var flipEx=null;
+      function toArr(rd){var a=[],i;for(i=0;i<L;i++){var v=rd?rd[String(i)]:null;a.push(v==null?null:v);}return a;}
+      (((dep&&dep.examples)||[])).forEach(function(e){
+        if(flipEx||e['class']!=='suppressed')return;
+        if(stem3(e.winner)===stem3(e.target))return;
+        var sc=SCN[(e.set||'')+'#'+e.index];
+        if(!sc||!sc.top_clinical||!sc.top_patient)return;
+        if(stem3(sc.top_patient[0])!==stem3(e.winner))return;
+        if(stem3(sc.top_clinical[0])!==stem3(e.target))return;
+        flipEx={'class':'hijack',clin_ranks:toArr(e.clin_ranks),pat_ranks:toArr(e.pat_ranks),
+          prompts:e.prompts,dataset:e.set,index:e.index,render:sc.html||null};
+      });
       var hijEx=exl.filter(function(e){return e['class']==='hijack';});
-      var ex=(typeof d.featured_exemplar==='number'&&exl[d.featured_exemplar])
+      var ex=flipEx
+        ||(typeof d.featured_exemplar==='number'&&exl[d.featured_exemplar])
         ||hijEx.filter(function(e){return (e.clin_ranks||[])[L-1]===1;})[0]
         ||hijEx[0]||exl[0];
       if(ex){
@@ -1012,9 +1027,16 @@
           svg.appendChild(txt(tx(t[0]),AXIS+28,t[1],'#8a8a84',8,t[2],true));
         });
         function path(ranks,color,label){
-          var seg=[],last=null,labEl=null;
+          var seg=[],last=null,labEl=null,prevReadable=false;
           ranks.forEach(function(r,i){
-            if(r!=null){seg.push((seg.length?'L':'M')+tx(i)+','+ry(Math.min(r,8)));last={x:tx(i),y:ry(Math.min(r,8))};}
+            if(r!=null){
+              // a gap in readability breaks the line: segments only connect
+              // consecutive readable layers, so the drawing never bridges
+              // layers where the answer was not in the window
+              seg.push(((seg.length&&prevReadable)?'L':'M')+tx(i)+','+ry(Math.min(r,8)));
+              last={x:tx(i),y:ry(Math.min(r,8))};
+              prevReadable=true;
+            }else{prevReadable=false;}
           });
           if(seg.length){
             svg.appendChild(el('path',{d:seg.join(' '),fill:'none',stroke:color,'stroke-width':1.8}));
@@ -1083,33 +1105,30 @@
         // payload (the same pair's circuit-trace measurement). Green when it
         // matches the pair's target; otherwise the side's own ink — different
         // tokens can still mean the same thing, so color never claims a flip.
-        fetch('../data/simulated_scenarios.json',{cache:'no-cache'})
-          .then(function(r){return r.ok?r.json():null;})
-          .then(function(sd){
-            var s=((sd&&sd.scenarios)||[]).filter(function(x){
-              return x.batch===ex.dataset&&x.batch_index===ex.index;})[0];
-            if(!s)return;
-            function m(w,t){w=(w||'').toLowerCase();t=(t||'').trim().toLowerCase();
-              return w.length>2&&t.length>2&&(w.indexOf(t)===0||t.indexOf(w)===0);}
-            function endWord(end,top,side){
-              if(!end||!end.labEl||!top||!top[0])return;
-              var ts=document.createElementNS(NS,'tspan');
-              ts.setAttribute('x',end.last.x+8);ts.setAttribute('dy',13);
-              ts.setAttribute('fill',m(top[0],s.target_token)?'#15803d':(side==='clinical'?'#6d6c66':'#111827'));
-              ts.textContent='→ “'+top[0]+'”';
-              var tt=document.createElementNS(NS,'title');
-              tt.textContent='measured top next word under '+side+' wording · p = '+
-                (typeof top[1]==='number'?top[1].toFixed(3):'—')+' · circuit-trace measurement of the same pair';
-              ts.appendChild(tt);
-              end.labEl.appendChild(ts);
-            }
-            endWord(clinEnd,s.top_clinical,'clinical');
-            endWord(patEnd,s.top_patient,'patient');
-          }).catch(function(){});
+        (function(){
+          var s=SCN[ex.dataset+'#'+ex.index];
+          if(!s)return;
+          function m(w,t){w=(w||'').toLowerCase();t=(t||'').trim().toLowerCase();
+            return w.length>2&&t.length>2&&(w.indexOf(t)===0||t.indexOf(w)===0);}
+          function endWord(end,top,side){
+            if(!end||!end.labEl||!top||!top[0])return;
+            var ts=document.createElementNS(NS,'tspan');
+            ts.setAttribute('x',end.last.x+8);ts.setAttribute('dy',13);
+            ts.setAttribute('fill',m(top[0],s.target_token)?'#15803d':(side==='clinical'?'#6d6c66':'#111827'));
+            ts.textContent='→ “'+top[0]+'”';
+            var tt=document.createElementNS(NS,'title');
+            tt.textContent='measured top next word under '+side+' wording · p = '+
+              (typeof top[1]==='number'?top[1].toFixed(3):'—')+' · circuit-trace measurement of the same pair';
+            ts.appendChild(tt);
+            end.labEl.appendChild(ts);
+          }
+          endWord(clinEnd,s.top_clinical,'clinical');
+          endWord(patEnd,s.top_patient,'patient');
+        })();
         mount('fig-traj',svg);
         var capT=document.getElementById('cap-traj');
         capT.textContent=
-          'one real measured pair (pair '+ex.index+' of the '+pwBatch(ex.dataset)+', class: '+ex['class']+') · rank of the clinical answer in the top-8 window, by layer · green: clinical wording · dark: patient wording · a line that stops means the answer left the window · the arrowed word at each line’s end is that wording’s measured top next word (hover for its probability) · observational: the lens reads the residual stream, it does not intervene · source: ';
+          'one real measured pair (pair '+ex.index+' of the '+pwBatch(ex.dataset)+', class: '+ex['class']+') · rank of the clinical answer in the top-8 window, by layer · green: clinical wording · dark: patient wording · a break or stop in a line means the answer left the window there · the arrowed word at each line’s end is that wording’s measured top next word (hover for its probability) · observational: the lens reads the residual stream, it does not intervene · source: ';
         var capA=document.createElement('a');
         capA.href='https://github.com/michaeldgreenphd/patientwords/blob/main/data/jlens_insights.json';
         capA.rel='noopener';capA.textContent='jlens_insights.json';
