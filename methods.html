@@ -144,6 +144,13 @@
     vertical-align:baseline;transform:translateY(1px)}
 
   .fold{margin:14px 0 6px}
+  /* display-set math (rule: no external math libraries — LaTeX-style typography in CSS):
+     italic serif variables via <var>, real − and · operators, equations wrap as units */
+  .fml{margin:8px 0 10px;padding-left:18px;font-size:16px}
+  .fml .eq{white-space:nowrap;margin-right:2.4em}
+  .fml var,.fold var{font-style:italic;font-family:var(--serif)}
+  .jspace-cap a{color:var(--muted);text-underline-offset:3px}
+  .jspace-cap a:hover{color:var(--ink)}
   .fold>summary{font-family:var(--mono);font-size:12px;color:var(--muted);cursor:pointer;
     letter-spacing:.02em;line-height:1.7}
   .fold>summary:hover{color:var(--ink)}
@@ -158,7 +165,7 @@
   .tier-cap{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.04em;margin:0 0 18px}
 
   /* Step 4 · the four comparison views as a 2×2 grid (non-link headers) */
-  .four-views{display:grid;grid-template-columns:1fr 1fr;gap:16px 28px;margin:10px 0 14px;padding:0;list-style:none}
+  .four-views{display:grid;grid-template-columns:1fr 1fr;gap:14px 28px;margin:10px 0 6px;padding:0;list-style:none}
   .four-views li{margin:0;padding:0}
   .four-views .eng-name{font-weight:600;display:block;margin:0 0 3px}
   .four-views p{margin:0;font-size:15.5px;line-height:1.55}
@@ -183,8 +190,8 @@
   .four-views .spark-tags{display:flex;flex-direction:column;justify-content:center;gap:6px;
     font-family:var(--mono);font-size:8px;letter-spacing:.03em;color:var(--muted);line-height:1}
   .four-views .spark-note{font-family:var(--mono);font-size:8px;letter-spacing:.03em;color:var(--muted)}
-  /* J-space illustrative schematic — hand-authored concept diagram, NOT a live trace */
-  .jspace{margin:20px 0 12px}
+  /* J-space schematic — hand-authored until data/jspace.json turns empirical */
+  .jspace{margin:8px 0 12px}
   .jspace-cap{font-family:var(--mono);font-size:11.5px;color:var(--muted);line-height:1.7;max-width:680px;margin:0 0 15px}
   .jspace-cap b{color:var(--ink);font-weight:600}
   .jspace-grid{display:grid;gap:18px 22px}
@@ -324,19 +331,21 @@
     <details class="fold">
       <summary>The formula behind these bars</summary>
       <p>Each traced pair contributes one split per phrasing, rebuilt from two committed
-        batch-summary scalars. <code>C</code> is the clinical share of transcoder-feature
-        attribution mass: a feature&rsquo;s mass is the summed |edge&nbsp;weight| incident to
-        it, and <code>C</code> is the clinical-tagged fraction of that mass over all feature
-        nodes. <code>E</code> is the share of attribution mass on MLP reconstruction-error
+        batch-summary scalars: <var>C</var>, the clinical-tagged fraction of transcoder-feature
+        attribution mass (a feature&rsquo;s mass is the summed |edge&nbsp;weight| incident to
+        it), and <var>E</var>, the share of attribution mass on MLP reconstruction-error
         nodes &mdash; the part of the computation the feature basis does not explain. The
-        three segments are <code>clin = (1 &minus; E) &middot; C</code> &nbsp;&middot;&nbsp;
-        <code>off = (1 &minus; E) &middot; (1 &minus; C)</code> &nbsp;&middot;&nbsp;
-        <code>struct = E</code>, summing to 1. The corpus figure is the mean of these splits,
-        per phrasing, across measured gemma-2-2b pairs &mdash; the one model whose public
-        transcoders make the clinical tag meaningful &mdash; with sealed holdout pairs
-        excluded; displayed values are rounded so the three sum to exactly 100. The caption
-        above discloses whether the bars currently show that measured mean or the
-        illustrative placeholder.</p>
+        three segments, summing to&nbsp;1:</p>
+      <p class="fml">
+        <span class="eq"><var>clin</var> = (1 &minus; <var>E</var>) &middot; <var>C</var></span>
+        <span class="eq"><var>off</var> = (1 &minus; <var>E</var>) &middot; (1 &minus; <var>C</var>)</span>
+        <span class="eq"><var>struct</var> = <var>E</var></span>
+      </p>
+      <p>The corpus figure is the mean of these splits, per phrasing, across measured
+        gemma-2-2b pairs &mdash; the one model whose public transcoders make the clinical tag
+        meaningful &mdash; with sealed holdout pairs excluded; displayed values are rounded so
+        the three sum to exactly 100. The caption above discloses whether the bars currently
+        show that measured mean or the illustrative placeholder.</p>
     </details>
     <script>
     (function(){
@@ -364,7 +373,18 @@
         var host=document.getElementById('cshare'); if(!host)return; host.textContent='';
         host.appendChild(row('clinical phrasing',data.clinical));
         host.appendChild(row('patient phrasing',data.patient));
-        var cap=document.getElementById('cshare-cap'); if(cap)cap.textContent=empirical?CAP_EMPIRICAL:CAP_PENDING;
+        var cap=document.getElementById('cshare-cap');
+        if(cap){
+          var t=empirical?CAP_EMPIRICAL:CAP_PENDING;
+          // trace counts read from the payload (exporter n_pairs), never written here;
+          // the counts differ per phrasing because screened-out pairs keep a clinical
+          // trace but skip the patient one
+          if(empirical&&data.n_pairs&&data.n_pairs.clinical&&data.n_pairs.patient){
+            t='Mean attribution mass across the measured corpus · n = '+data.n_pairs.clinical+
+              ' clinical-wording / '+data.n_pairs.patient+' patient-wording traces · gemma-2-2b.';
+          }
+          cap.textContent=t;
+        }
       }
       fetch('data/tag_mass.json',{cache:'no-cache'}).then(function(r){return r.ok?r.json():null;}).then(function(d){
         if(d&&d.empirical&&d.clinical&&d.patient)render(d,true);else render(PLACEHOLDER,false);
@@ -478,7 +498,25 @@
         var cap=fig.querySelector('.jspace-cap');
         if(cap){cap.textContent='';var b=document.createElement('b');
           b.textContent='Empirical J-lens residual stream readout at middle layers.';cap.appendChild(b);
-          if(d.note)cap.appendChild(document.createTextNode(' '+d.note));}
+          if(d.note)cap.appendChild(document.createTextNode(' '+d.note));
+          // source citation built from the payload's machine-readable source block
+          // (never hardcoded here, so it tracks the exporter's chosen exemplar)
+          cap.appendChild(document.createTextNode(' Source data: '));
+          var a1=document.createElement('a');
+          a1.href='https://github.com/michaeldgreenphd/patientwords/blob/main/data/jspace.json';
+          a1.rel='noopener';a1.textContent='jspace.json';
+          cap.appendChild(a1);
+          var src=d.source||{};
+          if(src.stem&&src.index!=null){
+            cap.appendChild(document.createTextNode(' · pair '+src.stem+'#'+src.index+' ('));
+            var a2=document.createElement('a');
+            a2.href='https://github.com/michaeldgreenphd/patientwords-engine/blob/main/data/simulated/'+src.stem+'.json';
+            a2.rel='noopener';a2.textContent='archived batch';
+            cap.appendChild(a2);
+            cap.appendChild(document.createTextNode(')'));
+          }
+          cap.appendChild(document.createTextNode('.'));
+        }
       }).catch(function(){});
     })();
     </script>
