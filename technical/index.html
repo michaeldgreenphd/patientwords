@@ -91,8 +91,8 @@
   .fig,.fig svg,.figwrap,.figwrap svg,#forest,#forest svg,#dumbbells,#dumbbells svg,
   #ad-blocks,#ad-blocks svg,.conv-panel svg{
     border:none !important;box-shadow:none !important;background:transparent !important;outline:none !important}
-  /* hairline divider between the first two Part-3 census figures (formation, taxonomy) */
-  #fig-form,#fig-tax{border-bottom:1px solid var(--hairline) !important;padding-bottom:3rem;margin-bottom:3rem}
+  /* hairline divider after the Part-3 formation figure */
+  #fig-form{border-bottom:1px solid var(--hairline) !important;padding-bottom:3rem;margin-bottom:3rem}
   /* the data sits directly beneath the sentence that introduces it */
   section p:has(+ .fig),section p:has(+ #forest),section p:has(+ #dumbbells),
   section p:has(+ .router){margin-bottom:6px}
@@ -462,9 +462,6 @@
 
     <h3>Capture versus hijack</h3>
     <p id="dd-tax-text"></p>
-    <div class="fig" role="img" aria-label="For each hijacked pair, a horizontal line from the layer where the clinical answer formed under patient wording to the output layer, where another word has won. Captures, where the answer never formed, have nothing to draw and are counted in the text above." id="fig-tax">
-      <span class="pend">figure pending: the lens readouts have not loaded</span>
-    </div>
 
     <h3>Where in the sentence</h3>
     <p id="dd-tr-text">The layer axis above asks <em>when</em> the clinical answer forms.
@@ -1217,71 +1214,11 @@
           f.patient_never+' of '+d.n_pairs+' patient readings against '+f.clinical_never+' of '+d.n_pairs+' clinical.';
       })();
 
-      /* Fig 3: taxonomy - hijack displacement spans */
+      /* Taxonomy counts (the displacement-spans figure was removed 2026-07-30,
+         owner direction; the narrative line below keeps every number, and the
+         per-pair classes stay in the census squares and table) */
       (function(){
-        var hij=(d.points||[]).filter(function(p){return p['class']==='hijack';});
         var tax=d.taxonomy||{};
-        var rowsN=hij.length, H3=54+rowsN*13+30;   // extra top headroom for the stacked outlier label
-        var svg=el('svg',{viewBox:'0 0 '+W+' '+H3});
-        hij.sort(function(a,b){return (a.pat_formed||0)-(b.pat_formed||0);});
-        var lineRefs=[];
-        hij.forEach(function(p,i){
-          var y=34+i*13;
-          var line=el('line',{x1:lx(p.pat_formed),x2:lx(L-1),y1:y,y2:y,stroke:'#b4483d','stroke-width':1.1,opacity:.75});
-          // every track carries a hover title (enriched below with the verbatim sentence)
-          var tt=el('title',{});
-          tt.textContent='forms at layer '+p.pat_formed+', pushed out by the output layer';
-          line.appendChild(tt);svg.appendChild(line);
-          svg.appendChild(el('circle',{cx:lx(p.pat_formed),cy:y,r:2.6,fill:'#111827'}));
-          svg.appendChild(el('rect',{x:lx(L-1)-2.4,y:y-2.4,width:4.8,height:4.8,fill:'#b4483d'}));
-          if(i===0){
-            svg.appendChild(txt(lx(p.pat_formed)-8,y+3.5,'forms','#4b5563',9.5,'end'));
-            svg.appendChild(txt(lx(L-1)+8,y+3.5,'lock-in','#b4483d',9.5));
-          }
-          lineRefs.push({p:p,y:y,tt:tt});
-        });
-        var base=34+rowsN*13+18;
-        svg.appendChild(el('line',{x1:PAD,x2:PAD+PW,y1:base,y2:base,stroke:'#dcdad2','stroke-width':.7}));
-        [0,Math.round((L-1)/2),L-1].forEach(function(l){
-          svg.appendChild(txt(lx(l),base+13,'layer '+l,'#4b5563',9.5,l===0?'start':(l===L-1?'end':'middle')));
-        });
-        // captures have no line to draw (the answer never forms); name them in the
-        // empty lower-left so the 28 plotted tracks aren't mistaken for the whole story
-        var nCap=(tax.capture&&tax.capture.n)||0;
-        if(nCap)svg.appendChild(txt(PAD,base-56,'Note: '+nCap+' captures (answer never forms) not plotted','#6d6c66',9.5,'start',true));
-        mount('fig-tax',svg);
-        // enrich track tooltips + label the two extreme tracks with the verbatim swap,
-        // where the pair carries a committed base sentence (graceful when it does not)
-        fetch('../data/jlens_swaps.json',{cache:'no-cache'}).then(function(r){return r.ok?r.json():null;}).then(function(s){
-          var SW=(s&&s.swaps)||{};
-          lineRefs.forEach(function(o){
-            var sw=SW[o.p.dataset+'#'+o.p.index];
-            if(sw&&sw.baseline)o.tt.textContent='“'+sw.baseline+' ___” · clinical “'+sw.target+
-              '” hijacked by the everyday wording'+(sw.swap?' (“'+sw.swap+'”)':'');
-          });
-          // truncate at a word boundary (never mid-word) so labels read cleanly
-          function wbTrunc(s,max){
-            if(!s||s.length<=max)return s||'';
-            var cut=s.slice(0,max),sp=cut.lastIndexOf(' ');
-            return (sp>max*0.5?cut.slice(0,sp):cut.replace(/\s+$/,''))+'…';
-          }
-          // label the two extreme tracks, each stacked on two lines in clear space
-          // (above the earliest-forming line, below the latest) — no ellipsis mid-word
-          function outlier(o,above){
-            if(!o)return;var sw=SW[o.p.dataset+'#'+o.p.index];if(!sw||!sw.target)return;
-            var swp=wbTrunc(sw.swap||'',22);
-            var anchor=above?'start':'end', xx=above?lx(o.p.pat_formed):lx(L-1);
-            var y1=above?o.y-17:o.y+9;
-            var tEl=el('text',{x:xx,y:y1,'text-anchor':anchor,'font-size':8.5,'font-family':'var(--mono)'});
-            var l1=el('tspan',{x:xx,fill:'#6d6c66'});l1.appendChild(document.createTextNode('forms: “'+sw.target+'”'));
-            tEl.appendChild(l1);
-            if(swp){var l2=el('tspan',{x:xx,dy:'10',fill:'#b4483d'});
-              l2.appendChild(document.createTextNode('↳ hijacked by: “'+swp+'”'));tEl.appendChild(l2);}
-            svg.appendChild(tEl);
-          }
-          outlier(lineRefs[0],true);
-          outlier(lineRefs[lineRefs.length-1],false);
-        }).catch(function(){});
         // window check (moved off the removed caption into the narrative): does the
         // capture-vs-hijack ordering survive narrower top-K windows?
         var winNote='';
