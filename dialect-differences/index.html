@@ -130,15 +130,30 @@
   .view-sub{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.03em;
     margin:4px 0 10px}
   .dlm th,.dlm td{white-space:nowrap}
+  .dlm{min-width:1100px}
+  .dlm td.spark svg{display:block;margin-left:auto}
+  /* sortable matrix headers: the button inherits the header look; the caret is
+     drawn only on hover and on the active column (aria-sort), never everywhere */
+  .dlm th button{background:none;border:0;padding:0;margin:0;cursor:pointer;font:inherit;
+    color:inherit;letter-spacing:inherit;text-transform:inherit;text-align:inherit}
+  .dlm th button:hover{color:var(--ink);text-decoration:underline;text-underline-offset:3px}
+  .dlm th button:focus-visible{outline:2px solid var(--clinical);outline-offset:2px}
+  .dlm th button::after{content:'';display:inline-block;width:8px;height:8px;margin-left:4px;
+    vertical-align:middle;background-repeat:no-repeat;background-position:center;background-size:8px 8px;
+    opacity:0;transition:opacity .15s ease;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3E%3Cpath d='M4 1L7 6H1z' fill='%236d6c66'/%3E%3C/svg%3E")}
+  .dlm th button:hover::after{opacity:.45}
+  .dlm th[aria-sort] button::after{opacity:1}
+  .dlm th[aria-sort=descending] button::after{
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3E%3Cpath d='M4 7L1 2H7z' fill='%236d6c66'/%3E%3C/svg%3E")}
+  @media (prefers-reduced-motion:reduce){.dlm th button::after{transition:none}}
   .dlm .term{font-weight:600}
   /* target inline beside the term (was a forced line break) to halve the term column's height */
   .dlm .tgt{color:var(--muted);font-weight:400;font-size:10.5px;margin-left:6px;white-space:nowrap}
   /* baseline sentence frame under the term (mono, muted) — shows what generated the row */
   .dlm .dl-base{display:block;font-family:var(--mono);font-size:10px;line-height:1.45;
     color:var(--muted);letter-spacing:.01em;white-space:normal;max-width:38ch;margin:3px 0 0}
-  /* a flip (top prediction changed) is marked by a hairline underline on the value itself, no extra glyph */
-  .dlm .dl-flip{text-decoration:underline;text-decoration-color:var(--penalty);
-    text-decoration-thickness:1px;text-underline-offset:2px}
+  /* flips are marked inside the cell sparkline: a red underline beneath the moved dot */
   .functag{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.04em;
     color:var(--muted);white-space:nowrap;margin-top:1px}
   .dlm a{font-size:10.5px;color:var(--muted)}
@@ -251,13 +266,17 @@
         <tbody id="dlm-body"></tbody>
       </table>
     </div>
-    <p class="dl-caption">Each cell is one traced sentence (n=1): the change in p(target) when
-       that framing replaces standard English &mdash; clinical green for a gain, red for a
-       loss. Column labels are the instructions given to the generating LLM.
-       An underlined value marks a framing that also flips the model&rsquo;s top prediction away
-       from the baseline target; hover any cell for its exact sentence and the new top prediction.
+    <p class="dl-caption">Each cell is one traced sentence (n=1), drawn as a dot pair on a
+       shared 0&ndash;100% probability track: the grey dot is the term&rsquo;s standard-English
+       baseline p(target), the moved dot is that framing&rsquo;s p(target) &mdash; clinical
+       green for a gain, red for a loss &mdash; and a red underline beneath the moved dot marks
+       a framing that also flips the model&rsquo;s top prediction away from the baseline target.
+       Hover any cell for the exact sentence, the new top prediction, and the precise numbers.
+       Column labels are the instructions given to the generating LLM.
        Rows whose target is a function word (&ldquo;my&rdquo;, &ldquo;the&rdquo;) are tagged and
-       their flips sit outside the headline count. <span id="dl-noise"></span>Click any row to open
+       their flips sit outside the headline count. Rows open ordered by the mean change across
+       framings, most fragile term first; click a column header to re-sort by that column, click
+       again to reverse. <span id="dl-noise"></span>Click any row to open
        that term&rsquo;s standalone render.</p>
   </section>
 
@@ -379,53 +398,97 @@
         freq[v.dialect]=(freq[v.dialect]||0)+1;});});
       var dialects=Object.keys(freq).sort(function(a,b){return freq[b]-freq[a];});
       var head=document.getElementById('dlm-head');
+      var body=document.getElementById('dlm-body');
       var tr=el('tr');
-      function hth(cls,txt){var t=el('th',cls,txt);t.setAttribute('scope','col');return t;}
-      tr.appendChild(hth(null,'Term (target)'));
-      var thb=hth('num','baseline p');tr.appendChild(thb);
-      dialects.forEach(function(d){var th=hth('num',shortName(d));
-        th.title='LLM instruction: '+d;tr.appendChild(th);});
-      var thc=hth('num','core');
-      thc.title='clinical features surviving every framing / clinical features in the baseline trace';
-      tr.appendChild(thc);
+      // sortable headers per the site convention: a real <button> in each
+      // th[data-key], aria-sort on the active th only; the caret is CSS-drawn
+      // and appears on hover or on the active column, never on every header
+      function hth(cls,txt,key,ttl){
+        var t=el('th',cls);t.setAttribute('scope','col');
+        if(ttl)t.title=ttl;
+        if(key){
+          t.setAttribute('data-key',key);
+          var b=document.createElement('button');
+          b.type='button';b.textContent=txt;
+          if(ttl)b.title=ttl;
+          b.addEventListener('click',function(){clickSort(key);});
+          t.appendChild(b);
+        }else if(txt)t.textContent=txt;
+        return t;
+      }
+      tr.appendChild(hth(null,'Term (target)','term'));
+      tr.appendChild(hth('num','baseline p','baseline'));
+      dialects.forEach(function(d){
+        tr.appendChild(hth('num',shortName(d),'d:'+d,'LLM instruction: '+d));});
+      tr.appendChild(hth('num','core','core',
+        'clinical features surviving every framing / clinical features in the baseline trace'));
       tr.appendChild(hth(null,''));
       head.appendChild(tr);
-      var body=document.getElementById('dlm-body');
       // rows whose target is a function word measure sentence frame, not the
       // clinical concept; their flips stay visible but leave the headline count.
       // prefer the exporter's classification (it.target_is_function, vocabulary
       // in data/display_vocab.json — audit M5); inline FUNC is the fallback
       var FUNC={'my':1,'the':1,'a':1,'an':1,'his':1,'her':1,'their':1,'this':1,'that':1,'it':1};
       var flips=0,funcFlips=0,cells=0;
-      items.forEach(function(it){
+      // one data pass: tallies (order-independent), per-dialect lookup, and the
+      // mean change across framings that drives the default most-fragile-first order
+      var rowsData=items.map(function(it){
         var isFunc=(typeof it.target_is_function==='boolean')?it.target_is_function
           :FUNC[String(it.target_token||'').trim().toLowerCase()]===1;
+        var byD={},sum=0,n=0;
+        it.variants.forEach(function(v){
+          byD[v.dialect]=v;cells++;
+          if(typeof v.delta==='number'){sum+=v.delta;n++;}
+          if(v.flip){if(isFunc)funcFlips++;else flips++;}
+        });
+        return {it:it,isFunc:isFunc,byD:byD,meanDelta:n?sum/n:null};
+      });
+      // inline dot plot per cell: grey dot = the term's baseline p(target),
+      // moved dot = this framing's p, on a shared 0–100% track; green gain,
+      // red loss; a red underline beneath the moved dot marks a flip. Exact
+      // numbers stay one hover away in the cell title.
+      var SVGNS='http://www.w3.org/2000/svg';
+      function sv(n,a){var e=document.createElementNS(SVGNS,n);for(var k in a)e.setAttribute(k,a[k]);return e;}
+      function spark(basP,v){
+        var x0=3,x1=61;
+        function X(p){return x0+Math.max(0,Math.min(1,p||0))*(x1-x0);}
+        var svg=sv('svg',{viewBox:'0 0 64 15',width:64,height:15,'aria-hidden':'true',focusable:'false'});
+        svg.appendChild(sv('line',{x1:x0,x2:x1,y1:7,y2:7,stroke:'#dcdad2','stroke-width':0.8}));
+        var col=v.delta>0?'#15803d':(v.delta<0?'#b4483d':'#6d6c66');
+        if(basP!=null&&v.p!=null)
+          svg.appendChild(sv('line',{x1:X(basP),x2:X(v.p),y1:7,y2:7,stroke:col,'stroke-width':1.4}));
+        if(basP!=null)svg.appendChild(sv('circle',{cx:X(basP),cy:7,r:2,fill:'#c3c9d2'}));
+        if(v.p!=null)svg.appendChild(sv('circle',{cx:X(v.p),cy:7,r:2.6,fill:col}));
+        if(v.flip&&v.p!=null)
+          svg.appendChild(sv('line',{x1:X(v.p)-4,x2:X(v.p)+4,y1:13,y2:13,stroke:'#b4483d','stroke-width':1.4}));
+        return svg;
+      }
+      function buildRow(r){
+        var it=r.it;
         var row=el('tr');
         var td=el('td');
-        var tspan=el('span','term',it.term);
-        td.appendChild(tspan);
+        td.appendChild(el('span','term',it.term));
         td.appendChild(el('span','tgt',String.fromCharCode(8594)+' '+(it.target_token||'?')));
-        if(isFunc)td.appendChild(el('span','functag','function-word target'));
+        if(r.isFunc)td.appendChild(el('span','functag','function-word target'));
         // baseline sentence frame, pulled verbatim from the data (the ___ is the next-token probe)
         if(it.baseline_prompt)td.appendChild(el('span','dl-base','base: '+String.fromCharCode(8220)+it.baseline_prompt+' ___'+String.fromCharCode(8221)));
         row.appendChild(td);
-        var bp=el('td','num',it.baseline_p==null?String.fromCharCode(8212):pct(it.baseline_p));
-        row.appendChild(bp);
+        row.appendChild(el('td','num',it.baseline_p==null?String.fromCharCode(8212):pct(it.baseline_p)));
         dialects.forEach(function(d){
-          var v=null;
-          for(var i=0;i<it.variants.length;i++){if(it.variants[i].dialect===d){v=it.variants[i];break;}}
-          var c=el('td','num');
+          var v=r.byD[d];
+          var c=el('td','num spark');
           if(!v){c.textContent=String.fromCharCode(8212);row.appendChild(c);return;}
-          cells++;
-          var s=el('span',v.delta>0?'dpos':(v.delta<0?'dneg':null),fmtD(v.delta));
-          c.appendChild(s);
-          // hover shows the exact framed sentence the LLM evaluated for this term × dialect cell
-          c.title=String.fromCharCode(8220)+v.prompt+String.fromCharCode(8221)+' '+String.fromCharCode(8594)+' top: '+(v.top_token||'?')+
-            (v.top_p!=null?' ('+pct(v.top_p)+')':'');
-          // flip carried by underlining the value itself (color + sign already carry the delta)
-          if(v.flip){if(isFunc)funcFlips++;else flips++;s.classList.add('dl-flip');}
+          c.appendChild(spark(it.baseline_p,v));
+          // the exact numbers live here: the framed sentence, its top prediction,
+          // and baseline → framing p(target) with the signed change
+          var tip=String.fromCharCode(8220)+v.prompt+String.fromCharCode(8221)+' '+String.fromCharCode(8594)+' top: '+(v.top_token||'?')+
+            (v.top_p!=null?' ('+pct(v.top_p)+')':'')+
+            ' '+String.fromCharCode(183)+' p(target) '+(it.baseline_p!=null?pct(it.baseline_p):String.fromCharCode(8212))+
+            ' '+String.fromCharCode(8594)+' '+(v.p!=null?pct(v.p):String.fromCharCode(8212))+
+            ' ('+fmtD(v.delta)+')';
+          c.title=tip;
           c.setAttribute('aria-label',fmtD(v.delta)+(v.flip?' (flips top prediction)':'')+
-            ' '+String.fromCharCode(183)+' '+c.title);
+            ' '+String.fromCharCode(183)+' '+tip);
           row.appendChild(c);
         });
         var cc=el('td','num');
@@ -447,8 +510,37 @@
           row.addEventListener('keydown',function(e){if(e.key==='Enter')go();});
         }
         row.appendChild(lk);
-        body.appendChild(row);
-      });
+        return row;
+      }
+      var sortKey=null,sortDir=1;  // null = default: mean change, most fragile first
+      function sortVal(r,key){
+        if(key==='term')return (r.it.term||'').toLowerCase();
+        if(key==='baseline')return r.it.baseline_p;
+        if(key==='core')return r.it.core?(r.it.core.invariant/(r.it.core.baseline_clinical||1)):null;
+        if(key&&key.slice(0,2)==='d:'){var v=r.byD[key.slice(2)];return v?v.delta:null;}
+        return r.meanDelta;
+      }
+      function renderMatrix(){
+        var arr=rowsData.slice();
+        var dir=sortKey?sortDir:1;
+        arr.sort(function(a,b){
+          var ka=sortVal(a,sortKey),kb=sortVal(b,sortKey);
+          if(ka==null&&kb==null)return 0;
+          if(ka==null)return 1;if(kb==null)return -1;
+          return ka<kb?-dir:(ka>kb?dir:0);
+        });
+        body.textContent='';
+        arr.forEach(function(r){body.appendChild(buildRow(r));});
+      }
+      function clickSort(key){
+        if(sortKey===key)sortDir=-sortDir;else{sortKey=key;sortDir=1;}
+        head.querySelectorAll('th[data-key]').forEach(function(t){
+          if(t.getAttribute('data-key')===key)t.setAttribute('aria-sort',sortDir>0?'ascending':'descending');
+          else t.removeAttribute('aria-sort');
+        });
+        renderMatrix();
+      }
+      renderMatrix();
       // headline tallies prefer the exporter's counts (data.headline, audit
       // M5); the loop's own tallies above stay as fallback
       var hl=data.headline||{};
