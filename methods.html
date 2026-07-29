@@ -321,6 +321,23 @@
       <span class="pend">figure pending</span>
     </div>
     <p class="cshare-cap" id="cshare-cap"></p>
+    <details class="fold">
+      <summary>The formula behind these bars</summary>
+      <p>Each traced pair contributes one split per phrasing, rebuilt from two committed
+        batch-summary scalars. <code>C</code> is the clinical share of transcoder-feature
+        attribution mass: a feature&rsquo;s mass is the summed |edge&nbsp;weight| incident to
+        it, and <code>C</code> is the clinical-tagged fraction of that mass over all feature
+        nodes. <code>E</code> is the share of attribution mass on MLP reconstruction-error
+        nodes &mdash; the part of the computation the feature basis does not explain. The
+        three segments are <code>clin = (1 &minus; E) &middot; C</code> &nbsp;&middot;&nbsp;
+        <code>off = (1 &minus; E) &middot; (1 &minus; C)</code> &nbsp;&middot;&nbsp;
+        <code>struct = E</code>, summing to 1. The corpus figure is the mean of these splits,
+        per phrasing, across measured gemma-2-2b pairs &mdash; the one model whose public
+        transcoders make the clinical tag meaningful &mdash; with sealed holdout pairs
+        excluded; displayed values are rounded so the three sum to exactly 100. The caption
+        above discloses whether the bars currently show that measured mean or the
+        illustrative placeholder.</p>
+    </details>
     <script>
     (function(){
       // Circuit-share bars, data-driven. The placeholder proportions encode the
@@ -414,6 +431,19 @@
         </div>
       </div>
     </figure>
+    <details class="fold">
+      <summary>What &ldquo;J-space&rdquo; is, operationally</summary>
+      <p>The pills stand in for what the Jacobian lens reads out of the residual stream. At a
+        chosen layer and token position the lens decodes the stream into a ranked list of
+        vocabulary tokens; this study reads the top&nbsp;8 at the final prompt position, layer
+        by layer, through Neuronpedia&rsquo;s hosted deployment of the reference implementation
+        (Gurnee et&nbsp;al., Transformer Circuits, 2026 &mdash; full credit in the
+        &ldquo;How the Jacobian lens reads layers&rdquo; fold below). The depth figure in
+        &ldquo;Reading the layers&rdquo; and the Technical page&rsquo;s Parts&nbsp;1&ndash;3
+        are drawn from that same readout. When a committed readout for this worked example
+        lands, the pills render the measured tokens and the figure relabels itself; until
+        then the caption above marks the schematic illustrative.</p>
+    </details>
     <script>
     (function(){
       // The J-space schematic is hand-authored ("Illustrative") by default. If the
