@@ -669,14 +669,17 @@
     <h2>What this evidence does and does not show</h2>
     <p>This project measures how the probability of a single next word changes when clinical wording is replaced by patient wording. That is not an observed clinical outcome.</p>
     <p>A gap is not necessarily bad. The model may be tracking how people actually write, or it may be giving less clinical information to people who write informally. This site measures the gap. Telling the two apart requires testing the advice itself. Either way, a person who uses everyday wording gets different predictions from the model.</p>
+    <details class="fold">
+      <summary>In brief: one small model carries the circuit evidence · attribution graphs are interpretive · feature labels are machine-generated · measurements are a point in time · translation can fail · the stimuli are constructed. Expand for the full statements.</summary>
     <ul class="limits">
-      <li><b>One small model carries the circuit evidence.</b> Every graph here comes from gemma-2-2b, chosen because its transcoders are public. The behavioral checks on the other seven models measure next-word probabilities only.</li>
+      <li><b>One small model carries the circuit evidence.</b> Every graph here comes from gemma-2-2b, chosen because its transcoders are public. The behavioral checks on the other models measure next-word probabilities only.</li>
       <li><b>Attribution graphs are an interpretive tool.</b> They reconstruct the model’s computation through features and prune heavily; error nodes absorb what’s missed.</li>
-      <li><b>Feature labels are machine-generated.</b> The clinical / off-target categories come from keyword-matching auto-interp descriptions. </li>
+      <li><b>Feature labels are machine-generated.</b> The clinical / off-target categories come from keyword-matching auto-interp descriptions.</li>
       <li><b>Measurements are a point in time.</b> The probabilities were observed on specific dates against a hosted service. The pairs re-traced so far reproduce exactly at the recorded three-decimal precision, but that is the set that happened to be repeated, not a guarantee. A re-trace can move a probability slightly, and a value near zero can fall below what the trace resolves.</li>
       <li><b>Translation can fail.</b> The fix in the Translation figure is itself an LLM step.</li>
       <li><b>The stimuli are constructed.</b> Most phrase pairs were written by a language model and checked automatically, not collected from patients.</li>
     </ul>
+    </details>
     <p>Nothing here is medical advice, and no part of this pipeline is a deployed clinical tool. The claim is narrower: on the models measured, the same situation phrased in patient words is measurably less likely to reach the clinical answer than in clinical terms.</p>
   </section>
 
