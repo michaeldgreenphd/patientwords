@@ -1012,7 +1012,7 @@
           svg.appendChild(txt(tx(t[0]),AXIS+28,t[1],'#8a8a84',8,t[2],true));
         });
         function path(ranks,color,label){
-          var seg=[],last=null;
+          var seg=[],last=null,labEl=null;
           ranks.forEach(function(r,i){
             if(r!=null){seg.push((seg.length?'L':'M')+tx(i)+','+ry(Math.min(r,8)));last={x:tx(i),y:ry(Math.min(r,8))};}
           });
@@ -1027,11 +1027,12 @@
                 hit.appendChild(ht);svg.appendChild(hit);
               }
             });
-            if(last)svg.appendChild(txt(last.x+8,last.y+3.5,label,color,10.5));
+            if(last){labEl=txt(last.x+8,last.y+3.5,label,color,10.5);svg.appendChild(labEl);}
           }
+          return {last:last,labEl:labEl};
         }
-        path(ex.clin_ranks,'#15803d','clinical wording');
-        path(ex.pat_ranks,'#111827','patient wording');
+        var clinEnd=path(ex.clin_ranks,'#15803d','clinical wording');
+        var patEnd=path(ex.pat_ranks,'#111827','patient wording');
         // direct labels at the trajectory's inflection points, computed from the
         // ranks (never hardcoded): where the clinical answer enters the window,
         // where it reaches rank 1, where the patient side is pushed out. Clinical
@@ -1063,9 +1064,13 @@
           var formLab=lab(ce.first,ex.clin_ranks,'enters top-8 · L'+ce.first,'#15803d',true);
           if(ce.rank1!=null&&ce.rank1!==ce.first)
             lab(ce.rank1,ex.clin_ranks,'rank 1 · L'+ce.rank1,'#15803d',true);
-          if(pe.last!=null&&pe.last<L-1)
-            lab(pe.last,ex.pat_ranks,'pushed out after L'+pe.last,'#b4483d',
+          if(pe.last!=null&&pe.last<L-1){
+            // end-anchored left of the final dot, so the measured-next-word line
+            // appended to the right-hand wording label never collides with it
+            var pl=lab(pe.last,ex.pat_ranks,'pushed out after L'+pe.last,'#b4483d',
                 ry(Math.min(ex.pat_ranks[pe.last],8))>112);
+            if(pl){pl.setAttribute('text-anchor','end');pl.setAttribute('x',tx(pe.last)-8);}
+          }
           // name the forming token from the committed swaps file when it carries this pair
           fetch('../data/jlens_swaps.json',{cache:'no-cache'})
             .then(function(r){return r.ok?r.json():null;})
@@ -1074,10 +1079,37 @@
               if(sw&&sw.target&&formLab)formLab.textContent='forms “'+sw.target+'” · L'+ce.first;
             }).catch(function(){});
         })();
+        // measured final top next word at each line's end, from the scenarios
+        // payload (the same pair's circuit-trace measurement). Green when it
+        // matches the pair's target; otherwise the side's own ink — different
+        // tokens can still mean the same thing, so color never claims a flip.
+        fetch('../data/simulated_scenarios.json',{cache:'no-cache'})
+          .then(function(r){return r.ok?r.json():null;})
+          .then(function(sd){
+            var s=((sd&&sd.scenarios)||[]).filter(function(x){
+              return x.batch===ex.dataset&&x.batch_index===ex.index;})[0];
+            if(!s)return;
+            function m(w,t){w=(w||'').toLowerCase();t=(t||'').trim().toLowerCase();
+              return w.length>2&&t.length>2&&(w.indexOf(t)===0||t.indexOf(w)===0);}
+            function endWord(end,top,side){
+              if(!end||!end.labEl||!top||!top[0])return;
+              var ts=document.createElementNS(NS,'tspan');
+              ts.setAttribute('x',end.last.x+8);ts.setAttribute('dy',13);
+              ts.setAttribute('fill',m(top[0],s.target_token)?'#15803d':(side==='clinical'?'#6d6c66':'#111827'));
+              ts.textContent='→ “'+top[0]+'”';
+              var tt=document.createElementNS(NS,'title');
+              tt.textContent='measured top next word under '+side+' wording · p = '+
+                (typeof top[1]==='number'?top[1].toFixed(3):'—')+' · circuit-trace measurement of the same pair';
+              ts.appendChild(tt);
+              end.labEl.appendChild(ts);
+            }
+            endWord(clinEnd,s.top_clinical,'clinical');
+            endWord(patEnd,s.top_patient,'patient');
+          }).catch(function(){});
         mount('fig-traj',svg);
         var capT=document.getElementById('cap-traj');
         capT.textContent=
-          'one real measured pair (pair '+ex.index+' of the '+pwBatch(ex.dataset)+', class: '+ex['class']+') · rank of the clinical answer in the top-8 window, by layer · green: clinical wording · dark: patient wording · a line that stops means the answer left the window · observational: the lens reads the residual stream, it does not intervene · source: ';
+          'one real measured pair (pair '+ex.index+' of the '+pwBatch(ex.dataset)+', class: '+ex['class']+') · rank of the clinical answer in the top-8 window, by layer · green: clinical wording · dark: patient wording · a line that stops means the answer left the window · the arrowed word at each line’s end is that wording’s measured top next word (hover for its probability) · observational: the lens reads the residual stream, it does not intervene · source: ';
         var capA=document.createElement('a');
         capA.href='https://github.com/michaeldgreenphd/patientwords/blob/main/data/jlens_insights.json';
         capA.rel='noopener';capA.textContent='jlens_insights.json';
