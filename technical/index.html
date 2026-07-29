@@ -95,6 +95,10 @@
   section p:has(+ .router){margin-bottom:6px}
   #forest,#dumbbells{margin-top:2px}
   .cap{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.04em;margin:6px 0 18px;line-height:1.7}
+  .cap a{color:var(--muted);text-underline-offset:3px}
+  .cap a:hover{color:var(--ink)}
+  #ad-pairs td a{font-family:var(--mono);font-size:11.5px;color:var(--muted);text-underline-offset:3px}
+  #ad-pairs td a:hover,#ad-pairs td a:focus-visible{color:var(--clinical)}
   .pend{font-family:var(--mono);font-size:12px;color:var(--muted)}
   .stat-line{font-family:var(--mono);font-size:13px;margin:0 0 14px}
   .stat-line b{color:var(--clinical)}
@@ -486,7 +490,8 @@
     <div id="ad-blocks"><span class="pend">figure pending: the depth census has not loaded</span></div>
     <p class="cap">hover a square for its clinical target · the generated sets live in the
       <a href="../simulated-scenarios/">scenario gallery</a>; the reviewed downgrade set is
-      separate</p>
+      separate · per-pair depth classes:
+      <a href="https://github.com/michaeldgreenphd/patientwords/blob/main/data/jlens_depth.json" rel="noopener">jlens_depth.json</a></p>
     <details class="fold">
       <summary>Every pair: depth class and care-urgency tiers regained by translation, where measured (owner-reviewed v1 tiers, domain review pending)</summary>
       <div class="scroll" id="ad-pairs"></div>
@@ -513,7 +518,7 @@
       </tr></thead>
       <tbody id="router-body"></tbody>
     </table>
-    <p class="cap" id="cap-router">care-urgency tiers regained per pair (owner-reviewed v1 tiers, domain review pending) · translation column from the joined translated panels · steering column queued: per-pair steering verdicts against the same lens classes</p>
+    <p class="cap" id="cap-router">care-urgency tiers regained per pair (owner-reviewed v1 tiers, domain review pending) · translation column from the joined translated panels · steering column queued: per-pair steering verdicts against the same lens classes · the depth classes are observational lens readouts; causal verification is interventional — steering (feature ablation) here, and the activation-patching lane on the methods page</p>
 
     <details class="fold">
       <summary>Does tuning move the depth?</summary>
@@ -805,21 +810,25 @@
         // zero hairline + y labels
         svg.appendChild(el('line', {x1: m.l, x2: W - m.r, y1: Y(0), y2: Y(0)},
           'stroke:var(--structural);stroke-width:.75;stroke-opacity:.5'));
-        [0, -0.10].forEach(function(v){
-          if (v < ymin) return;
-          var t = el('text', {x: m.l - 5, y: Y(v) + 3.5, 'text-anchor': 'end'},
-            'font-family:var(--mono);font-size:10px;fill:#4b5563');
-          t.textContent = v === 0 ? '0' : pp(v);
-          svg.appendChild(t);
-        });
-        // end ticks only (no baseline - the zero rule is the anchor)
-        [[0, '0'], [xmax, xmax + ' phrases']].forEach(function(tk){
-          var t = el('text', {x: X(tk[0]), y: H - m.b + 14,
-            'text-anchor': tk[0] === 0 ? 'start' : 'end'},
-            'font-family:var(--mono);font-size:10px;fill:#4b5563');
-          t.textContent = tk[1];
-          svg.appendChild(t);
-        });
+        // tick text on the primary panel only: the panels share one scale, so the
+        // gemma-2-2b panel carries the axes and the repeats stay bare hairlines
+        if (panelIndex === 0) {
+          [0, -0.10].forEach(function(v){
+            if (v < ymin) return;
+            var t = el('text', {x: m.l - 5, y: Y(v) + 3.5, 'text-anchor': 'end'},
+              'font-family:var(--mono);font-size:10px;fill:#4b5563');
+            t.textContent = v === 0 ? '0' : pp(v);
+            svg.appendChild(t);
+          });
+          // end ticks only (no baseline - the zero rule is the anchor)
+          [[0, '0'], [xmax, xmax + ' phrases']].forEach(function(tk){
+            var t = el('text', {x: X(tk[0]), y: H - m.b + 14,
+              'text-anchor': tk[0] === 0 ? 'start' : 'end'},
+              'font-family:var(--mono);font-size:10px;fill:#4b5563');
+            t.textContent = tk[1];
+            svg.appendChild(t);
+          });
+        }
         // CI band
         var d = 'M' + pts.map(function(p){ return X(p.n_phrases) + ',' + Y(p.ci95[1]); }).join('L') +
                 'L' + pts.slice().reverse().map(function(p){ return X(p.n_phrases) + ',' + Y(p.ci95[0]); }).join('L') + 'Z';
@@ -860,7 +869,9 @@
             '[' + pp(p.ci95[0]) + ', ' + pp(p.ci95[1]) + ']', p.downgrades, p.upgrades, (p === fin ? 1 : 0)]);
         });
         panel.appendChild(svg);
-        panel.appendChild(lab);
+        // final-estimate line on the primary only; the children keep just the
+        // model title — their exact values live in the data table below
+        if (panelIndex === 0) panel.appendChild(lab);
         // the first model's panel carries the story; the repeats confirm it and fold away
         if (panelIndex === 0) grid.appendChild(panel);
         else document.getElementById('conv-grid-more').appendChild(panel);
@@ -879,7 +890,7 @@
             return last && last.ci95 && last.ci95[1] != null && last.ci95[1] < 0;
           });
         document.getElementById('conv-more-sum').textContent =
-          'The other ' + others.length + ' models, drawn the same way' +
+          'The other ' + others.length + ' models, drawn to the same scale' +
           (allBelow ? ': every band ends below zero.' : '.');
         document.getElementById('conv-more').hidden = false;
       }
@@ -962,15 +973,19 @@
       function lx(layer){return PAD+layer/(L-1)*PW;}
 
       document.getElementById('dd-head').textContent=
-        d.n_pairs+' pairs with landed lens readouts · '+d.model+' · '+L+' layers · exploratory';
+        d.n_pairs+' pairs with landed lens readouts · '+d.model+' · '+L+' layers · exploratory · observational readout';
       document.getElementById('credit-line').textContent=d.method_credit;
 
       /* Fig 1: exemplar trajectory (hijack) — layers 0..24 = internal workspace, 25 = final output */
       // prefer the engine-picked exemplar (d.featured_exemplar); the class
       // filter stays as fallback for older payloads
       var exl=d.exemplars||[];
+      // engine pick first; the fallback prefers the highest-contrast hijack —
+      // one whose clinical side still holds rank 1 at the output layer
+      var hijEx=exl.filter(function(e){return e['class']==='hijack';});
       var ex=(typeof d.featured_exemplar==='number'&&exl[d.featured_exemplar])
-        ||exl.filter(function(e){return e['class']==='hijack';})[0]||exl[0];
+        ||hijEx.filter(function(e){return (e.clin_ranks||[])[L-1]===1;})[0]
+        ||hijEx[0]||exl[0];
       if(ex){
         var H1=186,svg=el('svg',{viewBox:'0 0 '+(W+30)+' '+H1});  // +30 so the far-right endpoint label isn't clipped
         var OUT_GAP=18;                                  // visually detach the final-output layer (25)
@@ -1004,16 +1019,69 @@
           if(seg.length){
             svg.appendChild(el('path',{d:seg.join(' '),fill:'none',stroke:color,'stroke-width':1.8}));
             ranks.forEach(function(r,i){
-              if(r!=null)svg.appendChild(el('circle',{cx:tx(i),cy:ry(Math.min(r,8)),r:2.2,fill:color}));
+              if(r!=null){
+                svg.appendChild(el('circle',{cx:tx(i),cy:ry(Math.min(r,8)),r:2.2,fill:color}));
+                // invisible hit target: hover names the layer and exact rank
+                var hit=el('circle',{cx:tx(i),cy:ry(Math.min(r,8)),r:7,fill:'transparent'});
+                var ht=el('title',{});ht.textContent='layer '+i+' · rank '+r;
+                hit.appendChild(ht);svg.appendChild(hit);
+              }
             });
             if(last)svg.appendChild(txt(last.x+8,last.y+3.5,label,color,10.5));
           }
         }
         path(ex.clin_ranks,'#15803d','clinical wording');
         path(ex.pat_ranks,'#111827','patient wording');
+        // direct labels at the trajectory's inflection points, computed from the
+        // ranks (never hardcoded): where the clinical answer enters the window,
+        // where it reaches rank 1, where the patient side is pushed out. Clinical
+        // annotates above its line, patient below; a crowded label steps one slot on.
+        (function(){
+          function evs(ranks){
+            var first=null,rank1=null,lastL=null;
+            (ranks||[]).forEach(function(r,i){
+              if(r==null)return;
+              if(first==null)first=i;
+              if(rank1==null&&r===1)rank1=i;
+              lastL=i;
+            });
+            return {first:first,rank1:rank1,last:lastL};
+          }
+          var ce=evs(ex.clin_ranks),pe=evs(ex.pat_ranks);
+          var placed=[];
+          function lab(layer,ranks,text,color,above){
+            if(layer==null)return null;
+            var x=tx(layer),y=ry(Math.min(ranks[layer],8))+(above?-12:16);
+            placed.forEach(function(p){
+              if(Math.abs(p.x-x)<80&&Math.abs(p.y-y)<12)y+=(above?-12:12);
+            });
+            var anchor=x>tx(L-2)?'end':(x<PAD+40?'start':'middle');
+            var t=txt(x,y,text,color,9,anchor,true);
+            svg.appendChild(t);placed.push({x:x,y:y});
+            return t;
+          }
+          var formLab=lab(ce.first,ex.clin_ranks,'enters top-8 · L'+ce.first,'#15803d',true);
+          if(ce.rank1!=null&&ce.rank1!==ce.first)
+            lab(ce.rank1,ex.clin_ranks,'rank 1 · L'+ce.rank1,'#15803d',true);
+          if(pe.last!=null&&pe.last<L-1)
+            lab(pe.last,ex.pat_ranks,'pushed out after L'+pe.last,'#b4483d',
+                ry(Math.min(ex.pat_ranks[pe.last],8))>112);
+          // name the forming token from the committed swaps file when it carries this pair
+          fetch('../data/jlens_swaps.json',{cache:'no-cache'})
+            .then(function(r){return r.ok?r.json():null;})
+            .then(function(s){
+              var sw=s&&s.swaps&&s.swaps[ex.dataset+'#'+ex.index];
+              if(sw&&sw.target&&formLab)formLab.textContent='forms “'+sw.target+'” · L'+ce.first;
+            }).catch(function(){});
+        })();
         mount('fig-traj',svg);
-        document.getElementById('cap-traj').textContent=
-          'one real measured pair (pair '+ex.index+' of the '+pwBatch(ex.dataset)+', class: '+ex['class']+') · rank of the clinical answer in the top-8 window, by layer · green: clinical wording · dark: patient wording · a line that stops means the answer left the window';
+        var capT=document.getElementById('cap-traj');
+        capT.textContent=
+          'one real measured pair (pair '+ex.index+' of the '+pwBatch(ex.dataset)+', class: '+ex['class']+') · rank of the clinical answer in the top-8 window, by layer · green: clinical wording · dark: patient wording · a line that stops means the answer left the window · observational: the lens reads the residual stream, it does not intervene · source: ';
+        var capA=document.createElement('a');
+        capA.href='https://github.com/michaeldgreenphd/patientwords/blob/main/data/jlens_insights.json';
+        capA.rel='noopener';capA.textContent='jlens_insights.json';
+        capT.appendChild(capA);
         // verbatim sentences above the chart, pivot words lit, with a trace link —
         // populated once the exemplar carries prompts (graceful no-op until then)
         (function(){
@@ -1563,7 +1631,10 @@
     else{simText='Every band sits below zero, under both.';}
     var fs=document.getElementById('forest-sim'); if(fs)fs.textContent=simText;
     var W=680,R=34,ML=170,MR=90,H=ids.length*R+42;
-    function X(v){return ML+(W-ML-MR)*((v-lo)/(hi-lo));}
+    // forest reclaims the old numeric-label margin; exact values stay one hover
+    // away (per-row title) and in the interim table below
+    var FMR=36;
+    function X(v){return ML+(W-ML-FMR)*((v-lo)/(hi-lo));}
     var svg=el('svg',{viewBox:'0 0 '+W+' '+H,role:'img',
       'aria-label':'Mean wording gap per model with 95 percent and simultaneous intervals. '+simText+' Values in the table below.'});
     svg.appendChild(el('line',{x1:X(0),x2:X(0),y1:10,y2:H-26},'stroke:var(--structural);stroke-width:1'));
@@ -1586,8 +1657,6 @@
         'stroke:var(--penalty);stroke-width:1;opacity:.45'));
       g.appendChild(el('line',{x1:X(p.ci95[0]),x2:X(p.ci95[1]),y1:y,y2:y},'stroke:var(--penalty);stroke-width:2'));
       g.appendChild(el('circle',{cx:X(p.mean),cy:y,r:4},'fill:var(--penalty)'));
-      var v=el('text',{x:W-MR+8,y:y+4},'font-family:var(--mono);font-size:11px;fill:#4b5563');
-      v.textContent=pp(p.mean)+' pp'; g.appendChild(v);
       var t=document.createElementNS(NS,'title');
       t.textContent=id+': '+pp(p.mean)+' pp ['+pp(p.ci95[0])+', '+pp(p.ci95[1])+']'+
         (sc?(', simultaneous ['+pp(sc[0])+', '+pp(sc[1])+']'):'')+', n='+p.n_phrases;
@@ -1750,6 +1819,15 @@
     fill:'#4b5563'},attrs||{}),parent);t.textContent=str;return t;}
   function h(tag,cls,text){var e=document.createElement(tag);if(cls)e.className=cls;
     if(text!=null)e.textContent=text;return e;}
+  function pwBatch(stem,short){
+    var m=/^(pairs|dialects|urgency_downgrades|drift_sentinel)_(\d{4})(\d{2})(\d{2})T(\d{2})?(\d{2})?/.exec(stem||'');
+    if(!m)return stem||'';
+    var mo=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][+m[3]-1];
+    if(short)return mo+' '+(+m[4])+((m[5]&&m[6])?(' '+m[5]+':'+m[6]):'');
+    var kind={pairs:'generated scenario batch',dialects:'dialect framings batch',
+      urgency_downgrades:'reviewed downgrade set',drift_sentinel:'drift sentinel'}[m[1]];
+    return kind+' of '+mo+' '+(+m[4])+', '+m[2]+((m[5]&&m[6])?(' '+m[5]+':'+m[6]+' UTC'):'');
+  }
   var CLASSES=[['retained','#15803d'],['suppressed','#b4483d'],['absent','#c3c9d2']];
   var SWAPS={};
 
@@ -1831,16 +1909,22 @@
       // collect every pair once; the SET label is abbreviated in-cell, full name on hover
       var rowsData=[];
       blocks.forEach(function(b){
-        var setName=(b.label||b.id).split('·')[0].trim();  // human name, not the file stem
         b.pairs.forEach(function(u){
           var rv=rec[b.id+'#'+u.index];
-          rowsData.push({set:setName,setAbbr:setName.replace(/^batch of\s+/i,''),setId:b.id,
+          rowsData.push({setId:b.id,setShort:pwBatch(b.id,1)||b.id,setFull:pwBatch(b.id)||b.id,
             pair:u.index,clinical:u.target,cls:u['class'],recovery:(rv==null?null:rv)});
         });
       });
       function buildRow(r){
         var row=h('tr');
-        var setTd=h('td'),sp=h('span',null,r.setAbbr);sp.title=r.set;setTd.appendChild(sp);row.appendChild(setTd);
+        // human-readable batch tag (date identity, the sitewide convention),
+        // linked to the archived batch data on GitHub; full name on hover
+        var setTd=h('td');
+        var sa=h('a',null,r.setShort);
+        sa.href='https://github.com/michaeldgreenphd/patientwords-engine/blob/main/data/simulated/'+r.setId+'.json';
+        sa.title=r.setFull+' — archived batch data on GitHub';
+        sa.target='_blank';sa.rel='noopener';
+        setTd.appendChild(sa);row.appendChild(setTd);
         // pair number expands to the pair's verbatim base sentence when one is committed
         var pairTd=h('td','num mono');
         var base=(SWAPS[r.setId+'#'+r.pair]||{}).baseline;
@@ -1878,10 +1962,18 @@
         if(key==='pair')return r.pair;
         if(key==='recovery')return r.recovery;
         if(key==='class')return clsRank[r.cls]!=null?clsRank[r.cls]:99;
-        if(key==='set')return (r.set||'').toLowerCase();
+        if(key==='set')return r.setId;  // stems sort by kind, then chronology
         return (r.clinical||'').toLowerCase();
       }
-      var sortKey=null,sortDir=1;
+      var sortKey=null,sortDir=1,page=0,PAGE=10;
+      // pager in the site's .tf-pager idiom; sorting resets to page 1
+      var pager=h('div','tf-pager');
+      var prevB=h('button','tf-nav','← Prev');prevB.type='button';
+      var pstat=h('span','tf-status');pstat.setAttribute('aria-live','polite');
+      var nextB=h('button','tf-nav','Next →');nextB.type='button';
+      prevB.addEventListener('click',function(){if(page>0){page--;renderRows();}});
+      nextB.addEventListener('click',function(){page++;renderRows();});
+      pager.appendChild(prevB);pager.appendChild(pstat);pager.appendChild(nextB);
       function renderRows(){
         var arr=rowsData.slice();
         if(sortKey){
@@ -1892,8 +1984,17 @@
             return va<vb?-sortDir:(va>vb?sortDir:0);
           });
         }
+        var pages=Math.max(1,Math.ceil(arr.length/PAGE));
+        if(page>pages-1)page=pages-1;
+        if(page<0)page=0;
         ptb.textContent='';
-        arr.forEach(function(r){ptb.appendChild(buildRow(r));});
+        arr.slice(page*PAGE,page*PAGE+PAGE).forEach(function(r){ptb.appendChild(buildRow(r));});
+        pstat.textContent=arr.length
+          ?('rows '+(page*PAGE+1)+'–'+Math.min((page+1)*PAGE,arr.length)+' of '+arr.length
+            +(pages>1?(' · page '+(page+1)+'/'+pages):''))
+          :'no rows';
+        prevB.disabled=page<=0;nextB.disabled=page>=pages-1;
+        pager.style.display=pages>1?'':'none';
       }
       phr.querySelectorAll('th').forEach(function(th){
         var key=th.getAttribute('data-key');
@@ -1901,12 +2002,14 @@
           if(sortKey===key)sortDir=-sortDir;else{sortKey=key;sortDir=1;}
           phr.querySelectorAll('th').forEach(function(t){t.removeAttribute('aria-sort');});
           th.setAttribute('aria-sort',sortDir>0?'ascending':'descending');
+          page=0;
           renderRows();
         });
       });
       renderRows();
       pt.appendChild(ptb);
       pmount.appendChild(pt);
+      pmount.parentNode.insertBefore(pager,pmount.nextSibling);
 
       // --- worked examples ----------------------------------------------
       var exs=data.examples||[];
