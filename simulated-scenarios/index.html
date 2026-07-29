@@ -635,6 +635,9 @@
       var seg=document.createElementNS(NS,'line');
       seg.setAttribute('x1',xa);seg.setAttribute('x2',xb);
       seg.setAttribute('y1','6');seg.setAttribute('y2','6');
+      // ±0.005 dead-band = half the two-decimal display precision: a shift too
+      // small to show in the printed numbers renders flat, not colored. An
+      // unmeasured patient side (below the traced spread) draws dashed to zero.
       var dir=(!known||pp<pc-0.005)?'down':(pp>pc+0.005?'up':'flat');
       seg.setAttribute('class','seg '+dir);
       if(!known)seg.setAttribute('stroke-dasharray','2 3');

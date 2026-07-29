@@ -803,6 +803,9 @@
         for(var l=0;l<L;l++){
           var rank=lane[2][String(l)];
           if(rank){
+            // rank→ink: linear ramp, rank 1 ≈ .94 opacity down to rank 8 ≈ .13
+            // — darker = nearer the top of the readout window; the floor keeps
+            // rank 8 visible on paper
             el('rect',{x:xAt(l),y:y,width:CELL,height:CELL,fill:lane[3],
               'fill-opacity':(1.05-rank*0.115).toFixed(2)},svg);
           }else{ // faint anchor so the lane tracks to the shared axis
@@ -851,6 +854,11 @@
       txt(svg,0,probTop-18,'patch: inject',{'font-size':11,fill:'#1c1c19',
         'font-family':'Iowan Old Style,Palatino,Georgia,serif'});
       txt(svg,0,probTop-6,'clinical translation',{'font-size':8.5,fill:'#6d6c66'});
+      // best recovery layer: argmax over the patch bars EXCLUDING the output
+      // layer (l < L−1) — injecting the clinical state at the read-out layer
+      // recovers the answer trivially and must not headline; a leading null
+      // counts as −1 so the first measured layer can win. The exporter's
+      // ann.best_patch_layer overrides this scan below when present.
       var best=0;
       ex.patched.forEach(function(p,l){
         if(p==null)return;

@@ -430,6 +430,10 @@
   }catch(e){}
   var fmtPlain=(fmtMode==='plain');
 
+  // plain mode strips: code fences / inline backticks, ATX headings (line-start
+  // or mid-text), images/links (keep the label; the URL may contain one nested
+  // paren pair), list bullets, and paired *…* / __…__ marks. Single asterisks
+  // and underscores are never touched — "5*3 mg" and snake_case survive.
   function stripMd(t){
     return String(t)
       .replace(/```[a-z]*\n?/gi,'')
@@ -454,6 +458,11 @@
     for(var j=0;j+1<idx.length;j+=2)ranges.push([idx[j],idx[j+1]]);
     return ranges;
   }
+  // ranges hold ABSOLUTE offsets into the full response; seg is a slice that
+  // starts at absStart, so each char maps back via a = absStart + hOffset + i.
+  // The 2-char '**' markers are dropped, chars strictly inside a pair render
+  // bold; hOffset skips the heading prefix consumed above. This is why bold
+  // spanning a sentence boundary still renders: pairing is whole-response.
   function mdInto(parent,seg,absStart,ranges,lineStart){
     var hOffset=0,heading=false,body=seg;
     if(lineStart){
@@ -516,6 +525,9 @@
   // column (>=0.75 token Jaccard) - boilerplate dims, divergent advice stays full ink
   var NEG={no:1,not:1,never:1,none:1,don:1,dont:1,t:1,cant:1,cannot:1,avoid:1,
     without:1,isn:1,isnt:1,won:1,wont:1,unless:1,stop:1};
+  // polarity guard for the muting rule: near-identical sentences that differ
+  // by a negation token ("take X" vs "don't take X") can pass the Jaccard
+  // threshold yet give opposite advice — never dim those.
   function negDivergent(a,b){
     var sa=Object.create(null),sb=Object.create(null),i;
     for(i=0;i<a.length;i++)sa[a[i]]=1;
@@ -1077,6 +1089,10 @@
   function renderTierSpread(models,scen,skipSi){
     var to=data.tier_order;
     if(!to||to.length<2)return false;
+    // self-disagreement score: each (model, wording) contributes
+    // (#distinct tiers across its re-ask attempts − 1); the scenario with the
+    // highest total shows the most within-model tier flapping. Under 3 the
+    // strip isn't worth rendering (the early return below).
     function spread(s){
       var tc=s.tier_counts_by_model||{},sc=0;
       Object.keys(tc).forEach(function(m){

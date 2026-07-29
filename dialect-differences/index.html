@@ -364,6 +364,9 @@
 </main>
 <script>
 (function(){
+  // batch stems follow the engine convention '<kind>_YYYYMMDD[THHMM…]' (UTC),
+  // kind ∈ {pairs, dialects, urgency_downgrades, drift_sentinel}; short=true →
+  // 'Jul 6 20:17', else the full labelled date. Unknown stems pass through verbatim.
   function pwBatch(stem,short){
     var m=/^(pairs|dialects|urgency_downgrades|drift_sentinel)_(\d{4})(\d{2})(\d{2})T(\d{2})?(\d{2})?/.exec(stem||'');
     if(!m)return stem||'';
