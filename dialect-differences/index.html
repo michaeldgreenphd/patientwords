@@ -121,6 +121,8 @@
   tr.acc td{padding:0;border-bottom:1px solid var(--hairline)}
   tr.acc iframe{width:100%;border:0;display:block;min-height:520px;background:#fff}
   tr.acc .acc-cap{font-family:var(--mono);font-size:10.5px;color:var(--muted);padding:6px 0 10px}
+  tr.acc .acc-cap a{color:var(--clinical);text-decoration:none}
+  tr.acc .acc-cap a:hover,tr.acc .acc-cap a:focus-visible{text-decoration:underline;text-underline-offset:3px}
   .meth{border:1px solid var(--hairline);background:#fbfaf6;margin:22px 0 16px;padding:0 16px}
   .meth summary{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;
     color:var(--muted);padding:10px 0;cursor:pointer}
@@ -276,8 +278,8 @@
        Rows whose target is a function word (&ldquo;my&rdquo;, &ldquo;the&rdquo;) are tagged and
        their flips sit outside the headline count. Rows open ordered by the mean change across
        framings, most fragile term first; click a column header to re-sort by that column, click
-       again to reverse. <span id="dl-noise"></span>Click any row to open
-       that term&rsquo;s standalone render.</p>
+       again to reverse. <span id="dl-noise"></span><span id="dl-rowhelp">Click any row to open
+       that term&rsquo;s standalone render.</span></p>
   </section>
 
   <section id="dl-featured" hidden>
@@ -499,7 +501,51 @@
         }else{cc.textContent=String.fromCharCode(8212);}
         row.appendChild(cc);
         var lk=el('td','chev-c');
-        if(it.render){
+        if(it.multi_render){
+          // engine small-multiples export (multi_NN.html): the row expands the
+          // baseline + most-consequential framings inline, structural features
+          // stripped by the renderer; the full sweep stays one link away in
+          // the caption. multi_render null/absent falls back to the plain
+          // render link below (older payloads unchanged).
+          var btn=document.createElement('button');
+          btn.type='button';btn.className='chev-i';btn.textContent='+';
+          btn.setAttribute('aria-expanded','false');
+          btn.setAttribute('aria-label','show the small-multiples view for '+it.term);
+          lk.appendChild(btn);
+          row.classList.add('rowlink');
+          var toggle=function(){
+            if(mOpen&&mOpen.row===row){
+              mOpen.tr.remove();row.classList.remove('acc-open');
+              btn.setAttribute('aria-expanded','false');mOpen=null;return;
+            }
+            if(mOpen){mOpen.tr.remove();mOpen.row.classList.remove('acc-open');
+              mOpen.btn.setAttribute('aria-expanded','false');}
+            var tr2=el('tr','acc');
+            var td2=el('td');td2.colSpan=dialects.length+4;
+            var f=document.createElement('iframe');
+            f.src='../modes/dialect/sweep/'+it.multi_render;
+            f.title='Small multiples for '+it.term+': baseline beside its most consequential framings, structural features stripped';
+            td2.appendChild(f);
+            var cap=el('div','acc-cap');
+            var mv=Array.isArray(it.multi_variants)&&it.multi_variants.length
+              ?it.multi_variants.map(shortName).join(' '+String.fromCharCode(183)+' '):null;
+            cap.appendChild(document.createTextNode('baseline + '+(mv||'most consequential framings')+
+              ' (engine-selected by consequence) '+String.fromCharCode(183)+' structural features stripped '+String.fromCharCode(183)+' '));
+            if(it.render){
+              var fa=el('a',null,'full sweep, all framings '+String.fromCharCode(8594));
+              fa.href='../modes/dialect/sweep/'+it.render;
+              cap.appendChild(fa);
+            }
+            td2.appendChild(cap);
+            tr2.appendChild(td2);
+            row.after(tr2);
+            row.classList.add('acc-open');
+            btn.setAttribute('aria-expanded','true');
+            mOpen={row:row,tr:tr2,btn:btn};
+          };
+          btn.addEventListener('click',function(e){e.stopPropagation();toggle();});
+          row.addEventListener('click',toggle);
+        }else if(it.render){
           lk.appendChild(el('span','chev-i',String.fromCharCode(8250)));
           row.className='rowlink';
           row.tabIndex=0;
@@ -513,6 +559,7 @@
         return row;
       }
       var sortKey=null,sortDir=1;  // null = default: mean change, most fragile first
+      var mOpen=null;              // the one open small-multiples accordion row
       function sortVal(r,key){
         if(key==='term')return (r.it.term||'').toLowerCase();
         if(key==='baseline')return r.it.baseline_p;
@@ -529,6 +576,7 @@
           if(ka==null)return 1;if(kb==null)return -1;
           return ka<kb?-dir:(ka>kb?dir:0);
         });
+        mOpen=null;  // rebuilt rows discard any open accordion
         body.textContent='';
         arr.forEach(function(r){body.appendChild(buildRow(r));});
       }
@@ -541,6 +589,15 @@
         renderMatrix();
       }
       renderMatrix();
+      // the row-help sentence tracks the payload: it only promises the inline
+      // small-multiples view once at least one term actually carries one
+      if(items.some(function(it){return it.multi_render;})){
+        var rh=document.getElementById('dl-rowhelp');
+        if(rh)rh.textContent='Click a row to open its small-multiples view inline '+
+          String.fromCharCode(8212)+' the baseline beside the framings that moved it most, structural features '+
+          'stripped; the full sweep (every framing) is linked inside. Rows without a small-multiples view '+
+          'open the full sweep render directly.';
+      }
       // headline tallies prefer the exporter's counts (data.headline, audit
       // M5); the loop's own tallies above stay as fallback
       var hl=data.headline||{};
