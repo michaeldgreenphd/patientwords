@@ -550,7 +550,7 @@
       clinical answer loses when the sentence is worded the way an everyday
       patient would say it, as opposed to standard medical terms. The thick band is
       each model's own 95% interval; the hairline is the stricter simultaneous
-      interval, sized for reading all eight at once.
+      interval, sized for reading all ten at once.
       <span id="forest-sim"></span></p>
     <div id="forest"></div>
     <p class="me-caption" id="forest-cap"></p>
@@ -560,9 +560,9 @@
       <p style="font-size:15px;line-height:1.6">
         Each panel follows one model as it reads more phrase pairs. The red line is the
         average wording gap; the band around it starts wide and narrows as
-        hundreds of phrases accumulate. The four
-        post-registration additions have read about 120 phrases so far, so their bands
-        stay wider. Early points in any panel are unstable by construction; read where
+        hundreds of phrases accumulate. The six
+        post-registration additions range from 30 to 813 phrases read so far, so the
+        thinnest bands stay widest. Early points in any panel are unstable by construction; read where
         each band ends, not the path it took.
       </p>
       <div class="conv-grid" id="conv-grid" aria-describedby="conv-caption"></div>
@@ -579,9 +579,16 @@
         <div id="conv-table-wrap"></div></details>
     </details>
 
+    <p class="explainer" id="rival-note">A rival reading we cannot fully exclude: the models may be
+      matching the register of the question &mdash; accommodating the speaker, not failing to understand.
+      Two observations cut against pure accommodation: the mechanistic traces show the clinical concept
+      often never forms under casual phrasing (absence, not suppression), and the tier shifts survive when
+      the question explicitly asks what to do. But behavioral data alone cannot separate the two, and we
+      say so.</p>
+
     <h3>When the answer changes, it goes down the care ladder</h3>
     <p>Among phrases where the top prediction changes under patient wording,
-      downgrades outnumber upgrades on every model. Asterisks mark asymmetry that
+      <span id="asym-line">downgrades outnumber upgrades in most models</span>. Asterisks mark asymmetry that
       survives multiple-comparison correction within the model's registration
       family; hover a row for the exact value.</p>
     <div id="dumbbells"></div>
@@ -611,8 +618,8 @@
         <li>One record per (model, clinical phrase); re-traces collapse by majority vote.</li>
         <li>Wording-gap intervals: phrase-level bootstrap after dedupe, percentile 95%, <code>seed 7</code>; the file also carries simultaneous (Bonferroni) intervals and batch- and topic-clustered sensitivity intervals.</li>
         <li>Downgrade rates: Clopper&ndash;Pearson exact 95%.</li>
-        <li>Asymmetry: exact two-sided sign tests, Benjamini&ndash;Hochberg corrected within registration family; the merged eight-model correction stays in the file for comparison.</li>
-        <li>Registration: four models pre-registered, four post-registration exploratory; departures are recorded in <a href="https://github.com/michaeldgreenphd/patientwords-engine/blob/claude/gemma-clinical-colloquial-interp-mavx04/docs/prereg_divergence_log.md">the divergence log in the engine repository</a>.</li>
+        <li>Asymmetry: exact two-sided sign tests, Benjamini&ndash;Hochberg corrected within registration family; the merged ten-model correction stays in the file for comparison.</li>
+        <li>Registration: four models pre-registered, six post-registration exploratory; departures are recorded in <a href="https://github.com/michaeldgreenphd/patientwords-engine/blob/claude/gemma-clinical-colloquial-interp-mavx04/docs/prereg_divergence_log.md">the divergence log in the engine repository</a>.</li>
         <li>Confirmatory holdout: one tenth of Tier B phrases, withheld from this site's data files until the registered endpoint runs.</li>
         <li>Circuit evidence: gemma-2-2b only; the rest behavioral, fixed open weights, a point in time.</li>
         <li>Care-urgency tiers: owner-reviewed v1, domain review pending.</li>
@@ -1704,10 +1711,19 @@
       'phrase-deduped bootstrap, seed '+d.seed+' × '+d.boot+' · hairline: simultaneous (Bonferroni) interval · source: the per-model statistics file';
 
     var maxC=0; ids.forEach(function(id){var s=per[id].sign_test;maxC=Math.max(maxC,s.downgrades,s.upgrades);});
+    // asymmetry comparative computed from the loaded stats (owner D2, 2026-07-30):
+    // the static 'every model' claim broke the day one model tied
+    var nGt=ids.filter(function(id){var s=per[id].sign_test;return s.downgrades>s.upgrades;}).length;
+    var ties=ids.filter(function(id){var s=per[id].sign_test;return s.downgrades===s.upgrades;});
+    var asymText=(nGt===ids.length)?'downgrades outnumber upgrades on every model'
+      :'downgrades outnumber upgrades on '+nGt+' of '+ids.length+' models'
+       +(ties.length?'; '+ties.join(' and ')+' ties on too few changed predictions to weigh':'');
+    var asymEl=document.getElementById('asym-line');
+    if(asymEl)asymEl.textContent=asymText;
     var W2=680,H2=ids.length*R+30;
     function X2(c){return ML+(W2-ML-MR-110)*(c/maxC);}
     var svg2=el('svg',{viewBox:'0 0 '+W2+' '+H2,role:'img',
-      'aria-label':'Downgrades versus upgrades per model among changed predictions; downgrades exceed upgrades on every model. Values in the table below.'});
+      'aria-label':'Downgrades versus upgrades per model among changed predictions; '+asymText+'. Values in the table below.'});
     ids.forEach(function(id,i){
       var s=per[id].sign_test,y=20+i*R,g2=el('g',{});
       var name=el('text',{x:ML-10,y:y+4,'text-anchor':'end'},'font-family:var(--mono);font-size:12px;fill:var(--ink)');

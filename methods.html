@@ -305,7 +305,11 @@
       word the model chose. The technical term for that weight is attribution mass.</p>
     <details id="retrace-fold" class="fold" hidden>
       <summary>View repeatability and validation metrics</summary>
-      <p id="retrace-note">The instrument repeats itself, within the record we have. Source: the repeatability measurements file on the patient words GitHub.</p>
+      <p id="retrace-note">The instrument repeats itself, within the record we have:
+        <span id="rt-n">&mdash;</span> pairs re-traced; the same top word in
+        <span id="rt-stable">&mdash;</span>; identical top-five spread lists in
+        <span id="rt-lists">&mdash;</span>; probabilities moved by at most
+        <span id="rt-spread">&mdash;</span>. Source: <a href="https://github.com/michaeldgreenphd/patientwords/blob/main/data/retrace_consistency.json">the repeatability measurements file</a>.</p>
     </details>
   </section>
 
@@ -622,7 +626,9 @@
       <code>claude-haiku-4-5</code>, <a href="https://www.anthropic.com/news/claude-haiku-4-5" rel="noopener">Anthropic, released October 2025</a>) and they <em>translate</em> patient wording into
       clinical wording for the Translation figure. A different set of models
       <em>takes</em> the test: the open-weights gemma, qwen, llama, etc. on every other
-      page.
+      page. The advice arm is the exception: Anthropic models appear there as generator,
+      translator, judge, and two measured subjects; that circularity is disclosed on
+      <a href="llm/">the LLM-responses page</a>.
     </p>
     <p>
       We audited the tests Claude wrote. The audit asks a
@@ -633,6 +639,13 @@
       <em>translating patient words into clinical words can lose information</em>. The
       losses appear at the translation step, not before it.
     </p>
+    <p id="advice-arm-note"><b>The advice arm, briefly.</b> The LLM-responses page queries eight deployed
+      assistants over the same scenarios (single-turn API calls, three attempts per phrasing). Care-urgency
+      tiers are coded by <code>claude-haiku-4-5</code> against a draft rubric (v1.1, clinician review
+      pending), blinded to model identity per response; the judge is itself a measured assistant. Elicitation
+      parameters, the human-coding gate, and per-arm judge&ndash;human agreement are documented on
+      <a href="llm/">the page itself</a>, <a href="llm/code.html">the coding instrument</a>, and the engine
+      repository&rsquo;s pre-registration.</p>
     <details class="fold">
       <summary>The audit numbers, model by model: extraction accuracy from the patient&rsquo;s own words versus after translation, with each run&rsquo;s cost.</summary>
     <p class="me-n" id="me-n"></p>
@@ -743,7 +756,7 @@
       <li><b>One small model carries the circuit evidence.</b> Every graph here comes from gemma-2-2b, chosen because its transcoders are public. The behavioral checks on the other models measure next-word probabilities only.</li>
       <li><b>Attribution graphs are an interpretive tool.</b> They reconstruct the model’s computation through features and prune heavily; error nodes absorb what’s missed.</li>
       <li><b>Feature labels are machine-generated.</b> The clinical / off-target categories come from keyword-matching auto-interp descriptions.</li>
-      <li><b>Measurements are a point in time.</b> The probabilities were observed on specific dates against a hosted service. The pairs re-traced so far reproduce exactly at the recorded three-decimal precision, but that is the set that happened to be repeated, not a guarantee. A re-trace can move a probability slightly, and a value near zero can fall below what the trace resolves.</li>
+      <li><b>Measurements are a point in time.</b> The probabilities were observed on specific dates against a hosted service. The <span id="lim-rt-n">&mdash;</span> pairs re-traced so far reproduce the same top word in every case; recorded probabilities moved by at most 0.027. That is a stability check against the hosted service on the set that happened to be repeated, not an accuracy guarantee. A re-trace can move a probability slightly, and a value near zero can fall below what the trace resolves.</li>
       <li><b>Translation can fail.</b> The fix in the Translation figure is itself an LLM step.</li>
       <li><b>The stimuli are constructed.</b> Most phrase pairs were written by a language model and checked automatically, not collected from patients.</li>
     </ul>

@@ -209,6 +209,16 @@
   </section>
 
   <section>
+    <p class="step-no">&middot; Why it matters</p>
+    <h2>Who is harmed, and how</h2>
+    <p>A person describing symptoms in everyday words to an assistant that under-triages. The
+       dangerous direction is downward &mdash; a missed urgent case costs more than an over-cautious
+       referral &mdash; and the people most likely to write in casual register are those with least
+       access to clinical vocabulary. That is why this study reads every shift against a care-urgency
+       ladder rather than counting word changes.</p>
+  </section>
+
+  <section>
     <p class="step-no">2 · The model diverges</p>
     <h2>Three phrasings, three different answers</h2>
     <p>We gave a language model the same sentences and identified its most likely next word. Under the clinical phrasing, the top next word is a medical answer. Under the patient phrasing, it is a food word, even in the one that uses the clinical term.</p>
@@ -230,7 +240,10 @@
       <text x="552" y="147" class="sv-a" fill="#b45309">apple</text>
     </svg>
     </div>
-    <p class="cap">the wording chooses the answer — measured on gemma-2-2b ·</p>
+    <p class="cap">the wording chooses the answer — measured on gemma-2-2b · note the twist: the
+      hyper-formal &ldquo;dyspepsia&rdquo; fails in this casual sentence frame too — register mismatch
+      cuts both ways, and formality is also a register. In step&nbsp;5&rsquo;s sketch the same word
+      succeeds because it sits in a clinical frame.</p>
   </section>
 
   <section>
@@ -488,7 +501,7 @@
     Sources: all model answers and probabilities are live gemma-2-2b measurements —
     scenario 48 (panel 2, first two rows; panel 5&rsquo;s feature counts are its circuit_diff) and scenario 85 (panel 3) in <a href="https://github.com/michaeldgreenphd/patientwords/blob/main/data/simulated_scenarios.json">the scenario measurements file on GitHub</a>;
     the register ladder (panel 2, third row), panel 8&rsquo;s context result, and panel 6&rsquo;s translation outcomes in <a href="https://github.com/michaeldgreenphd/patientwords/blob/main/data/provenance.json">the provenance file on GitHub</a>.
-    The clinician, orchestration, and mended-system panels (1, 7, 9) are illustrative, not measurements.
+    The clinician, orchestration, and mended-system panels (1, 7, 9) are illustrative, not measurements; panel 5&rsquo;s antacid outcome is the clinical-frame trace of the same pair (its casual-frame counterpart is panel&nbsp;2&rsquo;s third row).
   </div>
   <div class="endnote" style="border-top:1px solid var(--ink);margin-top:42px;padding-top:14px">
     <p style="font-family:var(--mono);font-size:12px;line-height:1.8;color:var(--muted);margin:0 0 10px">SIMULATED DATA: the sentence pairs measured across this site are written by an LLM and checked automatically.</p>

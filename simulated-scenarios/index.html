@@ -1396,8 +1396,8 @@
       if(!d.pairs_retraced)return;
       var txt=document.getElementById('retrace-text');
       txt.textContent=d.top_word_stable_pairs+' of '+d.pairs_retraced+
-        ' phrases traced more than once reproduce identical probabilities and top-five lists '+
-        'at recorded precision (max spread '+d.prob_spread_max+') · ';
+        ' phrases traced more than once reproduce the same top word and top-five list; '+
+        'probabilities move by at most '+d.prob_spread_max+' · ';
       var a=document.createElement('a');
       a.href='https://github.com/michaeldgreenphd/patientwords/blob/main/data/retrace_consistency.json';
       a.textContent='source';txt.appendChild(a);
