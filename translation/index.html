@@ -213,7 +213,7 @@
   <hr class="rule-fine">
 </header>
 <main id="main">
-  <p class="dateline"><span class="mode">translation recovery · live trace · traced July 7, 2026 · re-traced July 9, 2026</span></p>
+  <p class="dateline"><span class="mode">translation recovery · live trace · traced July 7, 2026 · re-traced July 9, 2026 · renders re-traced July 30, 2026</span></p>
   <h1>Translation</h1>
   <p class="subtitle">Translating the patient sentence back into clinical terms restores the prediction in 8 of the 20 hardest cases.</p>
   <p class="explainer">The mitigation: an LLM rewrites the patient sentence in standard terms, and that rewrite is traced directly. Of the 20 reviewed downgrades: 8 recovered, 7 unrecovered, 5 unclassifiable. In the cases translation fixes, the clinical features reappear and the target probability recovers; the worsened rewrites are labeled on their cards below.</p>
@@ -271,7 +271,7 @@
     <summary>View the live three-panel trace (clinical / patient / translated)</summary>
   <p class="traced" data-mode="translation" data-traced="gemma-2-2b">
     <span class="tm"><b>live trace:</b> gemma-2-2b</span>
-    <span class="tp" id="fold-meta">hosted circuit-tracer via Neuronpedia · re-traced July 9, 2026 · phrase 17 of the
+    <span class="tp" id="fold-meta">hosted circuit-tracer via Neuronpedia · re-traced July 30, 2026 · phrase 17 of the
       reviewed downgrade set (predictions that fell to a lower care tier), three panels (clinical / patient / LLM-translated)</span>
   </p>
 
@@ -286,7 +286,7 @@
             title="Live translation mitigation: nap under patient wording, laxative after translation"></iframe>
   </div>
   </div>
-  <p class="embed-caption" id="flip-cap">Live trace: under patient wording the top word is “ nap” (30%); after rewriting to clinical wording it’s “ lax(ative)” (41%) — above the original clinical phrasing (26%).</p>
+  <p class="embed-caption" id="flip-cap">Live trace: under patient wording the top word is “ nap” (30%); after rewriting to clinical wording it’s “ lax(ative)” (41%) — above the original clinical phrasing (26%). Captioned probabilities are the July 7 study measurement; the inline render is an independent July 30, 2026 re-trace of the same phrase (same top word in every panel).</p>
   </details>
 
 
@@ -487,11 +487,6 @@
     // editorial pins prefer tc.featured (engine data, audit M3 tail); the
     // hardcoded keys stay as fallback for older payloads
     var feat=tc.featured||{};
-    // phrase 17's embedded render is the July 9 re-trace; its caption must
-    // show the numbers the figure displays, not the classification study's
-    var capPath=(Array.isArray(feat.caption_case)&&feat.caption_case.length===2)
-      ?feat.caption_case:['grandma_laxative','retrace_20260709'];
-    retrace17=(tc[capPath[0]]&&tc[capPath[0]][capPath[1]])||null;
     // 1. process flow from the pinned case (real texts + tokens)
     var ic=tc[feat.flow_case||'icecream_antacid'];
     if(ic&&ic.prompts){
@@ -664,7 +659,7 @@
   // height (the site keeps a single scrollbar), so "showing a panel" means
   // scrolling the page to that panel's offset inside the inline render.
   var frame=document.getElementById('flip-frame');
-  var curPanel=0,pendingScroll=false,retrace17=null;
+  var curPanel=0,pendingScroll=false;
   function setTabs(i){
     curPanel=i;
     document.querySelectorAll('.tabs button[data-panel]').forEach(function(x){
@@ -690,15 +685,12 @@
     if(fold)fold.open=true;
     var nn=(c.index<10?'0':'')+c.index;
     var src='../modes/simulated/urgency_downgrades_20260707T1/index_'+nn+'.html';
-    // phrase 17 displays the July 9 re-trace; caption must match the render
+    // every inline render in this set is the July 30, 2026 re-trace; captions
+    // keep the July 7 study measurements (the committed data rows) and say so,
+    // rather than mixing the two provenances in one sentence
     var pt=c.patient_top,tt=c.translated_top,ct=c.clinical_top,
-        when='traced July 7, 2026',extra='';
-    if(c.index===17&&retrace17){
-      pt=retrace17.patient_top;tt=retrace17.translated;ct=retrace17.clinical;
-      when='re-traced July 9, 2026';
-      extra=' Independent re-trace of the study case (which measured '
-        +pct(c.translated_top[1])+').';
-    }
+        when='study trace July 7, 2026 · inline render re-traced July 30, 2026',
+        extra=' Captioned probabilities are the July 7 study measurement; the inline render is an independent July 30 re-trace of the same phrase.';
     var meta=document.getElementById('fold-meta');
     if(meta)meta.textContent='hosted circuit-tracer via Neuronpedia · '+when+' · phrase '
       +c.index+' of the downgrade set, three panels (clinical / patient / LLM-translated) · '
