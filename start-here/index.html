@@ -181,11 +181,11 @@
 
   <div class="core-q">
     <p class="core-q-lbl">Research question</p>
-    <p class="core-q-body"><b>Does the language patients use change how a language model reasons about their situation (and how safely it answers) compared with standard clinical wording?</b> To find out, we pair patient phrasings for healthcare issues with their medical equivalents, identify which internal features of the language model each phrasing activates, and measure whether the casual wording pulls the model&rsquo;s next word away from a medically appropriate answer.</p>
-    <p class="core-q-scope">Scope: The models studied here are open-weight, chosen so their internal reasoning can be traced directly. Whether the same effects hold in larger closed-source models (whose internals cannot be observed) is an open question we also are investigating.</p>
+    <p class="core-q-body"><b>Does the language patients use change how a language model reasons about their situation (and how safely it answers) compared with standard clinical wording?</b> To find out, we pair patient phrasings for healthcare issues with their medical equivalents, identify which internal features of the language model each phrasing activates, and measure whether the patient wording pulls the model&rsquo;s next word away from a medically appropriate answer.</p>
+    <p class="core-q-scope">Scope: The models studied here are open-weight, chosen so their internal reasoning can be traced directly. Whether the same effects hold in larger closed-source models (whose internals cannot be observed) is an open question we also are investigating (pilot on LLM page).</p>
   </div>
 
-  <p class="proxy"><b>Is the next predicted word a proxy for clinical reasoning?</b> Our claim is narrow. The next token is where the model commits (in a deployed system it <em>is</em> the advice, and every later word is conditioned on that advice) so if patient wording makes the clinical answer less probable that is a measurable, safety-relevant shift. The circuit view (step&nbsp;5) then shows the shift is mechanical because the medical features themselves fire less.</p>
+  <p class="proxy">The next token is where the model commits (in a deployed system it <em>is</em> the advice, and every later word is conditioned on that advice) so if patient wording makes the clinical answer less probable that is a measurable, safety-relevant shift. The circuit view (step&nbsp;5) then shows the shift is mechanical because the medical features themselves activate less inside the model.</p>
 
   <section>
     <p class="step-no">1 · A doctor converges</p>
@@ -211,17 +211,15 @@
   <section>
     <p class="step-no">&middot; Why it matters</p>
     <h2>Who is harmed, and how</h2>
-    <p>A person describing symptoms in everyday words to an assistant that under-triages. The
-       dangerous direction is downward &mdash; a missed urgent case costs more than an over-cautious
-       referral &mdash; and the people most likely to write in casual register are those with least
-       access to clinical vocabulary. That is why this study reads every shift against a care-urgency
-       ladder rather than counting word changes.</p>
+    <p>A person describing symptoms in everyday words to an assistant that under-triages. A
+       dangerous direction is misrepresenting urgency, and the people most likely to write in
+       casual language are often those with least access to clinical vocabulary.</p>
   </section>
 
   <section>
     <p class="step-no">2 · The model diverges</p>
     <h2>Three phrasings, three different answers</h2>
-    <p>We gave a language model the same sentences and identified its most likely next word. Under the clinical phrasing, the top next word is a medical answer. Under the patient phrasing, it is a food word, even in the one that uses the clinical term.</p>
+    <p>We gave a language model similar clinical scenarios (phrased differently) and identified its most likely next word. Under the clinical phrasing, the top next word is a medical answer. Under the patient phrasing, it is a food word, even in the one that uses the clinical term.</p>
     <div class="fig" role="img" aria-label="The same three phrasings pass through a language model and come out as three different answers: antacid, ice cream, and apple.">
     <svg viewBox="0 0 800 190">
       <text x="0" y="28" class="sv-q">“I have <tspan style="fill:var(--teal);font-weight:700">acid reflux</tspan>.”</text>
@@ -241,9 +239,9 @@
     </svg>
     </div>
     <p class="cap">the wording chooses the answer — measured on gemma-2-2b · note the twist: the
-      hyper-formal &ldquo;dyspepsia&rdquo; fails in this casual sentence frame too — register mismatch
-      cuts both ways, and formality is also a register. In step&nbsp;5&rsquo;s sketch the same word
-      succeeds because it sits in a clinical frame.</p>
+      hyper-formal &ldquo;dyspepsia&rdquo; fails in this casual sentence frame too, and formality is
+      also a register. In step&nbsp;5&rsquo;s sketch the same word succeeds when it sits in a
+      clinical frame.</p>
   </section>
 
   <section>
@@ -265,7 +263,7 @@
   <section>
     <p class="step-no">4 · What we measure</p>
     <h2>Two numbers per sentence pair</h2>
-    <p><b>How far the right answer's probability falls</b> when the wording turns casual, and <b>whether the top answer changes</b>. When it changes to a word lower on the care urgency tiers we created, (like "inhaler" becoming "shirt" in step 3) we count a downgrade.</p>
+    <p><b>How far the right answer's probability falls</b> when the wording turns casual, and <b>whether the top answer changes</b>. When it changes to a word lower on the care urgency tiers we created, (like "inhaler" becoming "shirt" in step 3) we count an urgency downgrade.</p>
     <div class="ladder-fig" id="care-ladder"><span class="ladder-pend">figure pending: the urgency measurements have not loaded</span></div>
     <p class="cap" id="ladder-cap" hidden></p>
   </section>
@@ -330,8 +328,9 @@
     <p class="step-no">6 · The patch</p>
     <h2>A translation layer, for now</h2>
     <p>A temporary solution is a <b>clinical translator</b>. It sits between the patient and the model and,
-      before the model ever answers, rewrites the casual sentence into medical wording &mdash;
-      &ldquo;my stomach&rsquo;s on fire&rdquo; becomes &ldquo;I have acid reflux.&rdquo;</p>
+      before the model ever answers, rewrites the casual sentence into medical wording. Depending on
+      the nature of the prompt, a long term solution also considers the orchestration of care and
+      gathering more information.</p>
     <div class="fig" role="img" aria-label="Without translation: the two everyday phrasings go straight into the language model and come out as ice cream at 29% and apple.">
     <svg viewBox="0 0 800 150">
       <text x="0" y="14" class="sv-m" style="letter-spacing:.14em;text-transform:uppercase">without translation</text>
@@ -371,7 +370,7 @@
   <section>
     <p class="step-no">7 · The smart patch</p>
     <h2>Beyond translation: Orchestrating care</h2>
-    <p>A rewrite is fragile. An intermediary can orchestrate based on confidence and context, routing the query to the safest path.</p>
+    <p>A rewrite is fragile. An intermediary can orchestrate based on confidence and context, routing the query to the safest path. It can also encourage communication of more nuance.</p>
     <div class="fig" role="img" aria-label="One patient query feeds an orchestration layer, which branches into three parallel paths: guideline concordance routes to a clinical model and starts guideline-concordant therapy such as an antacid; care navigation routes to real-world actions, suggesting an over-the-counter remedy and booking a primary-care follow-up; honest ambiguity routes to an uncertainty check, logging the amorphous input and referring to a human doctor.">
     <svg viewBox="0 0 800 220">
       <text x="0" y="115" class="sv-q">“My stomach’s on fire.”</text>

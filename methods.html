@@ -281,7 +281,7 @@
   <section>
     <p class="step-no">Step 1 · Model &amp; features</p>
     <h2>Splitting the model’s activity into readable features</h2>
-    <p>The study’s subject is <code>gemma-2-2b</code>, a small open language model
+    <p>The study’s primary subject is <code>gemma-2-2b</code>, a small open language model
       (<a href="https://huggingface.co/google/gemma-2-2b" rel="noopener">Google DeepMind, released July 2024</a>). Watched
       directly, its inner workings are millions of undifferentiated numbers.</p>
     <details class="fold">
@@ -309,7 +309,7 @@
         <span id="rt-n">&mdash;</span> pairs re-traced; the same top word in
         <span id="rt-stable">&mdash;</span>; identical top-five spread lists in
         <span id="rt-lists">&mdash;</span>; probabilities moved by at most
-        <span id="rt-spread">&mdash;</span>. Source: <a href="https://github.com/michaeldgreenphd/patientwords/blob/main/data/retrace_consistency.json">the repeatability measurements file</a>.</p>
+        <span id="rt-spread">&mdash;</span>. Source: <a href="https://github.com/michaeldgreenphd/patientwords/blob/main/data/retrace_consistency.json">the repeatability measurements file</a> on our GitHub repository.</p>
     </details>
   </section>
 
@@ -347,7 +347,7 @@
       </p>
       <p>The corpus figure is the mean of these splits, per phrasing, across measured
         gemma-2-2b pairs &mdash; the one model whose public transcoders make the clinical tag
-        meaningful &mdash; with sealed holdout pairs excluded; displayed values are rounded so
+        meaningful; displayed values are rounded so
         the three sum to exactly 100. The caption above discloses whether the bars currently
         show that measured mean or the illustrative placeholder.</p>
     </details>
@@ -435,7 +435,7 @@
       </li>
     </ul>
     <figure class="jspace">
-      <p class="jspace-cap"><b>What the wording changes, before the answer.</b> Illustrative schematic — the example words and concept tags are hand-authored, not a measurement. Clinical wording lights up medical concepts inside the model (the “J-space” the Jacobian lens reads); the same situation in patient words lights up everyday ones, and that redirects the next word.</p>
+      <p class="jspace-cap"><b>What the wording changes, before the answer.</b> Illustrative schematic — the example words and concept tags are not a measurement. Clinical wording lights up medical concepts inside the model (the “J-space” the Jacobian lens reads); the same situation in patient words lights up everyday ones, and that redirects the next word.</p>
       <div class="jspace-grid jspace-2" role="img" aria-label="Two panels. A, clinical wording ‘my dyspepsia flared up’ activates the concepts medical, gastrointestinal and treatment, and the model outputs antacid. B, patient wording ‘my stomach’s on fire’ activates food, spicy and casual, and the model outputs ice cream.">
         <div class="jspanel" data-jsrole="clinical">
           <div class="jspanel-head">A · Clinical wording</div>
@@ -457,9 +457,8 @@
     </figure>
     <details class="fold">
       <summary>What &ldquo;J-space&rdquo; is, operationally</summary>
-      <p>The pills stand in for what the Jacobian lens reads out of the residual stream. At a
-        chosen layer and token position the lens decodes the stream into a ranked list of
-        vocabulary tokens; this study reads the top&nbsp;8 at the final prompt position, layer
+      <p>At a chosen layer and token position the Jacobian lens decodes the stream into a
+        ranked list of vocabulary tokens; this study reads the top&nbsp;8 at the final prompt position, layer
         by layer, through Neuronpedia&rsquo;s hosted deployment of the reference implementation
         (Gurnee et&nbsp;al., Transformer Circuits, 2026 &mdash; full credit in the
         &ldquo;How the Jacobian lens reads layers&rdquo; fold below). The depth figure in
@@ -545,7 +544,7 @@
           <tbody id="tier-body"></tbody>
         </table>
       </div>
-      <p class="tier-cap" id="tier-cap" hidden>care-urgency tiers · domain review pending · predicted words with no urgency information are excluded</p>
+      <p class="tier-cap" id="tier-cap" hidden>care-urgency tiers · domain review from clinicians pending · predicted words with no urgency information are excluded</p>
     </details>
     <script>
     (function(){
@@ -578,17 +577,17 @@
   <section id="reading-layers">
     <p class="step-no">Depth</p>
     <h2>Reading the layers</h2>
-    <p>The circuit view names which features fire. The Jacobian lens reads what the model would say if forced to answer at each of its 26 layers.</p>
+    <p>The circuit trace names which features activate at each layer and the final next word prediction. The Jacobian lens reads what the model would say if forced to answer at each of its 26 layers.</p>
     <div class="rl-figwrap"><div id="rl-fig"><span class="rl-pend">figure pending: the depth census has not loaded</span></div></div>
     <p class="rl-cap">
-      One downgrade-set pair, one layer axis. Top lanes: the lens readout; darker cells
+      Top lanes: the lens readout; darker cells
       rank the clinical answer higher in that layer&rsquo;s top 8; a faint dot means
       not readable. Bottom lane: the answer&rsquo;s probability when the everyday run is
       patched with the clinical state at that single layer, best position per layer,
       against the two measured levels.
     </p>
     <p>
-      The bottom lane is the causal check. <b>To test whether the patient&rsquo;s wording caused
+      <b>To test whether the patient&rsquo;s wording caused
       the failure, we patch the model by injecting the translated clinical sentence
       at specific layers, to see if the correct medical answer recovers.</b> If the clinical
       state brings the answer back, the wording, not a gap in the model&rsquo;s knowledge, was
@@ -623,11 +622,11 @@
       For this project Anthropic&rsquo;s
        models do two jobs. They <em>write</em> the test questions (the
       phrase pairs; each batch&rsquo;s record names the exact model, currently
-      <code>claude-haiku-4-5</code>, <a href="https://www.anthropic.com/news/claude-haiku-4-5" rel="noopener">Anthropic, released October 2025</a>) and they <em>translate</em> patient wording into
+      <code>claude-haiku-4-5</code>, <a href="https://www.anthropic.com/news/claude-haiku-4-5" rel="noopener">released October 2025</a>) and they <em>translate</em> patient wording into
       clinical wording for the Translation figure. A different set of models
       <em>takes</em> the test: the open-weights gemma, qwen, llama, etc. on every other
       page. The advice arm is the exception: Anthropic models appear there as generator,
-      translator, judge, and two measured subjects; that circularity is disclosed on
+      translator, judge, and two measured subjects; that limitation is disclosed on
       <a href="llm/">the LLM-responses page</a>.
     </p>
     <p>
@@ -636,8 +635,7 @@
       patient&rsquo;s own words, once after translating those words into clinical
       language. On a 10-item probe the models scored the patient wording at ceiling
       (10/10); their own clinical rewrite dropped 0&ndash;2 items (haiku none), so
-      <em>translating patient words into clinical words can lose information</em>. The
-      losses appear at the translation step, not before it.
+      <em>translating patient words into clinical words can lose information</em>.
     </p>
     <p id="advice-arm-note"><b>The advice arm, briefly.</b> The LLM-responses page queries eight deployed
       assistants over the same scenarios (single-turn API calls, three attempts per phrasing). Care-urgency
@@ -749,23 +747,23 @@
     <p class="step-no">Limitations</p>
     <h2>What this evidence does and does not show</h2>
     <p>This project measures how the probability of a single next word changes when clinical wording is replaced by patient wording. That is not an observed clinical outcome.</p>
-    <p>A gap is not necessarily bad. The model may be tracking how people actually write, or it may be giving less clinical information to people who write informally. This site measures the gap. Telling the two apart requires testing the advice itself. Either way, a person who uses everyday wording gets different predictions from the model.</p>
+    <p>A gap is not necessarily bad. The model may be tracking how people actually write, or it may be giving less clinical information to people who write informally. Telling the two apart requires testing the advice itself.</p>
     <details class="fold">
       <summary>In brief: one small model carries the circuit evidence · attribution graphs are interpretive · feature labels are machine-generated · measurements are a point in time · translation can fail · the stimuli are constructed. Expand for the full statements.</summary>
     <ul class="limits">
       <li><b>One small model carries the circuit evidence.</b> Every graph here comes from gemma-2-2b, chosen because its transcoders are public. The behavioral checks on the other models measure next-word probabilities only.</li>
       <li><b>Attribution graphs are an interpretive tool.</b> They reconstruct the model’s computation through features and prune heavily; error nodes absorb what’s missed.</li>
-      <li><b>Feature labels are machine-generated.</b> The clinical / off-target categories come from keyword-matching auto-interp descriptions.</li>
-      <li><b>Measurements are a point in time.</b> The probabilities were observed on specific dates against a hosted service. The <span id="lim-rt-n">&mdash;</span> pairs re-traced so far reproduce the same top word in every case; recorded probabilities moved by at most 0.027. That is a stability check against the hosted service on the set that happened to be repeated, not an accuracy guarantee. A re-trace can move a probability slightly, and a value near zero can fall below what the trace resolves.</li>
+      <li><b>Feature labels are machine-generated.</b> The clinical / off-target categories come from keyword-matching (description in GitHub).</li>
+      <li><b>Measurements are a point in time.</b> The probabilities were observed on specific dates against a hosted service. The <span id="lim-rt-n">&mdash;</span> pairs re-traced so far reproduce the same top word in every case; recorded probabilities moved by at most 0.027. A re-trace can move a probability slightly, and a value near zero can fall below what the trace resolves.</li>
       <li><b>Translation can fail.</b> The fix in the Translation figure is itself an LLM step.</li>
-      <li><b>The stimuli are constructed.</b> Most phrase pairs were written by a language model and checked automatically, not collected from patients.</li>
+      <li><b>The stimuli are constructed.</b> Most phrase pairs were written by a language model and checked automatically, not collected from patients. We are currently interviewing patients about their LLM use.</li>
     </ul>
     </details>
     <p>Nothing here is medical advice, and no part of this pipeline is a deployed clinical tool. The claim is narrower: on the models measured, the same situation phrased in patient words is measurably less likely to reach the clinical answer than in clinical terms.</p>
   </section>
 
   <div class="endnote">
-    <p>Two kinds of provenance appear in the gallery. The comparison figures and the simulated scenarios use prompts written by an LLM and checked automatically. The phrase dataset is the other kind: hand-built from real patient language and measured by hand.</p>
+    <p>Two kinds of provenance appear in the gallery. The comparison figures and the simulated scenarios use prompts written by an LLM and checked automatically. The phrase dataset is the other kind: hand-built and measured by hand (currently phrases written by Michael D. Green, will be later replaced with patient language from interviews).</p>
     <footer>
       Built with the <a href="https://github.com/michaeldgreenphd/patientwords-engine">patientwords-engine</a> pipeline
       on <a href="https://neuronpedia.org">Neuronpedia</a> ·

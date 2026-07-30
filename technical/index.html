@@ -453,9 +453,8 @@
     <p class="stat-line" id="dd-head">loading the lens readouts</p>
 
     <h3>Where answers form</h3>
-    <p id="dd-form-text">When the clinical answer forms at all, it forms late,
-      and patient wording barely moves that depth. The difference between the
-      wordings is not timing. It is existence.</p>
+    <p id="dd-form-text">Based on our testing so far, when the clinical answer forms at all,
+      it forms late, and patient wording barely moves that depth.</p>
     <div class="fig" role="img" aria-label="Dot strip of formation layers for every measured pair, one row for clinical wording and one for patient wording, with counts of pairs whose answer never formed shown at the right edge." id="fig-form">
       <span class="pend">figure pending: the lens readouts have not loaded</span>
     </div>
@@ -513,7 +512,7 @@
       </tr></thead>
       <tbody id="router-body"></tbody>
     </table>
-    <p class="cap" id="cap-router">care-urgency tiers regained per pair (owner-reviewed v1 tiers, domain review pending) · translation column from the joined translated panels · steering column queued: per-pair steering verdicts against the same lens classes · the depth classes are observational lens readouts; causal verification is interventional — steering (feature ablation) here, and the activation-patching lane on the methods page</p>
+    <p class="cap" id="cap-router">care-urgency tiers regained per pair (Michael D. Green-reviewed, clinician review pending) · translation column from the joined translated panels · steering column queued: per-pair steering verdicts against the same lens classes · the depth classes are observational lens readouts; causal verification is interventional — steering (feature ablation) here, and the activation-patching lane on the methods page</p>
 
     <details class="fold">
       <summary>Does tuning move the depth?</summary>
@@ -543,7 +542,7 @@
     <h2><span id="me-count-h">Ten</span> models, one measurement.</h2>
     <p class="explainer">The  models here are
       the measured subjects; the stimuli they read are written by Claude models and
-      audited on the <a href="../methods.html#generation-eval">methods page</a>. Population, dedupe, correction, and holdout details are in the interim-table fold below, under Statistical methods.</p>
+      audited on the <a href="../methods.html#generation-eval">methods page</a>.</p>
 
     <h3>The wording gap, model by model</h3>
     <p>Mean wording gap: the percentage points of next-word probability the
@@ -556,14 +555,11 @@
     <p class="me-caption" id="forest-cap"></p>
 
     <details class="fold">
-      <summary>How confidence accumulated: each model's estimate, batch by batch (moved from methods)</summary>
+      <summary>How confidence accumulated: each model's estimate, batch by batch</summary>
       <p style="font-size:15px;line-height:1.6">
         Each panel follows one model as it reads more phrase pairs. The red line is the
         average wording gap; the band around it starts wide and narrows as
-        hundreds of phrases accumulate. The six
-        post-registration additions range from 30 to 813 phrases read so far, so the
-        thinnest bands stay widest. Early points in any panel are unstable by construction; read where
-        each band ends, not the path it took.
+        hundreds of phrases accumulate.
       </p>
       <div class="conv-grid" id="conv-grid" aria-describedby="conv-caption"></div>
       <details class="fold" id="conv-more" hidden>
@@ -573,18 +569,17 @@
       <div class="conv-xlab" aria-hidden="true">phrases tested →</div>
       <p class="conv-cap" id="conv-caption">Mean wording gap per model as
         measurement accumulates. Shaded band: bootstrap 95% confidence
-        interval (seed 7, phrase-deduped, Tier B exploration split only). Grey hairline:
+        interval (Tier B exploration split only). Grey hairline:
         zero wording gap. Drawn at load time from <a href="https://github.com/michaeldgreenphd/patientwords/blob/main/data/convergence.json">the convergence data file on GitHub</a>.</p>
       <details class="conv-table"><summary>Data table (every point)</summary>
         <div id="conv-table-wrap"></div></details>
     </details>
 
     <p class="explainer" id="rival-note">A rival reading we cannot fully exclude: the models may be
-      matching the register of the question &mdash; accommodating the speaker, not failing to understand.
+      matching the register of the question &mdash; accommodating the speaker.
       Two observations cut against pure accommodation: the mechanistic traces show the clinical concept
       often never forms under casual phrasing (absence, not suppression), and the tier shifts survive when
-      the question explicitly asks what to do. But behavioral data alone cannot separate the two, and we
-      say so.</p>
+      the question explicitly asks what to do.</p>
 
     <h3>When the answer changes, it goes down the care ladder</h3>
     <p>Among phrases where the top prediction changes under patient wording,
@@ -614,7 +609,7 @@
       <p class="me-caption" id="ev-cap"></p>
       <p class="sm-h">Statistical methods</p>
       <ul class="sm-l">
-        <li>Population: plain generated scenario batches only; steered, screened, imported, and re-traced rows are reported as a labeled sensitivity analysis in the statistics file.</li>
+        <li>Population: plain generated scenario batches only; steered, screened, imported, and re-traced rows are reported as a labeled sensitivity analysis in the statistics file on GitHub.</li>
         <li>One record per (model, clinical phrase); re-traces collapse by majority vote.</li>
         <li>Wording-gap intervals: phrase-level bootstrap after dedupe, percentile 95%, <code>seed 7</code>; the file also carries simultaneous (Bonferroni) intervals and batch- and topic-clustered sensitivity intervals.</li>
         <li>Downgrade rates: Clopper&ndash;Pearson exact 95%.</li>
@@ -622,7 +617,7 @@
         <li>Registration: four models pre-registered, six post-registration exploratory; departures are recorded in <a href="https://github.com/michaeldgreenphd/patientwords-engine/blob/claude/gemma-clinical-colloquial-interp-mavx04/docs/prereg_divergence_log.md">the divergence log in the engine repository</a>.</li>
         <li>Confirmatory holdout: one tenth of Tier B phrases, withheld from this site's data files until the registered endpoint runs.</li>
         <li>Circuit evidence: gemma-2-2b only; the rest behavioral, fixed open weights, a point in time.</li>
-        <li>Care-urgency tiers: owner-reviewed v1, domain review pending.</li>
+        <li>Care-urgency tiers: owner-reviewed v1, clinician review pending.</li>
         <li>Source: <a href="https://github.com/michaeldgreenphd/patientwords/blob/main/data/model_stats.json">the per-model statistics file on GitHub</a>.</li>
       </ul>
     </details>
@@ -1227,9 +1222,9 @@
         mount('fig-form',svg);
         var f=d.formation;
         document.getElementById('dd-form-text').textContent=
-          'When the clinical answer forms at all, it forms late (median layer '+f.clinical.median+' of '+(L-1)+
+          'Based on our testing so far, when the clinical answer forms at all, it forms late (median layer '+f.clinical.median+' of '+(L-1)+
           ') and patient wording barely moves that depth (median lag '+f.lag.median+' layers, n='+f.lag.n+
-          '). The difference between the wordings is not timing. It is existence: the answer never enters the window in '+
+          '). The answer never enters the window in '+
           f.patient_never+' of '+d.n_pairs+' patient readings against '+f.clinical_never+' of '+d.n_pairs+' clinical.';
       })();
 
