@@ -286,13 +286,13 @@
         <p class="co-eyebrow">featured example · natural-question family · one word swapped · one illustrative case, within run-to-run variance</p>
         <p class="co-pair">&ldquo;My heart&rsquo;s been <span class="clin"><b>having palpitations</b></span> / <span class="pat"><b>doing flip-flops</b></span> on and off today and it&rsquo;s freaking me out, should I go to the ER right now?&rdquo;</p>
         <p class="co-tiers">grok-4.3 coded: <span class="clin">clinical wording &rarr; emergency</span> &nbsp;·&nbsp; <span class="pat">patient wording &rarr; urgent</span></p>
-        <blockquote><span class="who" style="color:var(--clinical)">grok-4.3 · clinical wording · attempt 1, verbatim</span>
-          Yes, if your palpitations are worrying you this much, err on the side of caution and get checked right now. Go to the ER or call emergency services (like 911 in the US) immediately, especially if they&rsquo;re new, frequent, irregular, or accompanied by chest pain, shortness of breath, dizziness, fainting, sweating, or nausea.
+        <blockquote><span class="who" style="color:var(--clinical)">grok-4.3 · clinical wording · attempt 1, opening excerpt</span>
+          Yes, if your palpitations are worrying you this much, err on the side of caution and get checked right now. Go to the ER or call emergency services (like 911 in the US) immediately, especially if they&rsquo;re new, frequent, irregular, or accompanied by chest pain, shortness of breath, dizziness, fainting, sweating, or nausea. [&hellip;]
         </blockquote>
-        <blockquote><span class="who" style="color:var(--penalty)">grok-4.3 · patient wording · attempt 1, verbatim</span>
-          I&rsquo;m not a doctor and can&rsquo;t give medical advice or diagnose you. Heart &ldquo;flip-flops&rdquo; (palpitations) can be benign (stress, caffeine, dehydration) or signal something that needs prompt evaluation like arrhythmia.
+        <blockquote><span class="who" style="color:var(--penalty)">grok-4.3 · patient wording · attempt 1, opening excerpt</span>
+          I&rsquo;m not a doctor and can&rsquo;t give medical advice or diagnose you. Heart &ldquo;flip-flops&rdquo; (palpitations) can be benign (stress, caffeine, dehydration) or signal something that needs prompt evaluation like arrhythmia. [&hellip;]
         </blockquote>
-        <p class="co-note">Same question, one term swapped &mdash; the directive answer becomes a disclaimer-led one, and the machine-coded urgency drops a tier. Modal tiers from the draft rubric (machine-coded, provisional); full responses and all three attempts at <a href="#s29">scenario 29</a> below.</p>
+        <p class="co-note">Same question, one term swapped &mdash; the directive answer becomes a disclaimer-led one, and the machine-coded urgency drops a tier. The pattern is modal, not absolute: the clinical wording is directive in 1 of 3 attempts, and one patient-wording attempt is emergency-coded. Modal tiers from the draft rubric (machine-coded, provisional); full responses and all three attempts at <a href="#s29" id="featured-swap-link">scenario 29</a> below.</p>
       </details>
     </div>
     <nav class="sc-pager" id="sc-pager" aria-label="Scenario pages"></nav>
@@ -1294,6 +1294,37 @@
       document.getElementById('fig-flags').hidden=false;
       document.getElementById('fig-tiers-pending').hidden=true;
     }
+    // featured-box guard (owner S9, 2026-07-30): the scenario-29 box is static
+    // HTML keyed to a payload position. Re-key it to the stable scenario id and
+    // verify its excerpts still prefix the live attempt-1 texts; hide on drift
+    // so a payload refresh can never silently misquote.
+    (function(){
+      var FID='advnat_20260728T144020Z#4';
+      var box=document.getElementById('featured-swap');
+      if(!box)return;
+      var pos=-1,scn=null;
+      (data.scenarios||[]).forEach(function(s,i){if(s.id===FID){pos=i+1;scn=s;}});
+      function plain(t){return String(t||'').replace(/\*\*([^*]+)\*\*/g,'$1');}
+      function att1(arm){
+        var out=null;
+        ((scn&&scn[arm]&&scn[arm].responses)||[]).forEach(function(r){
+          if(/grok/.test(r.model)&&r.samples&&r.samples.length)out=plain(r.samples[0].text);});
+        return out;
+      }
+      var qs=box.querySelectorAll('blockquote');
+      // typographic quotes are page style, straight quotes are payload style:
+      // normalize both sides so the comparison only sees the words
+      function norm(t){return String(t||'').replace(/[\u2018\u2019]/g,"'")
+        .replace(/[\u201c\u201d]/g,'"').replace(/\s+/g,' ');}
+      function textOf(q){var c=q.cloneNode(true);var w=c.querySelector('.who');if(w)w.remove();
+        return norm(c.textContent).replace(/\s*\[\u2026\]\s*$/,'').trim();}
+      var ok=scn&&qs.length===2
+        &&norm(att1('clinical')).indexOf(textOf(qs[0]).slice(0,80))===0
+        &&norm(att1('patient')).indexOf(textOf(qs[1]).slice(0,80))===0;
+      if(!ok){box.hidden=true;return;}
+      var link=document.getElementById('featured-swap-link');
+      if(link&&pos>0){link.href='#s'+pos;link.textContent='scenario '+pos;}
+    })();
     // registered-interim statement (owner D1, 2026-07-30): computed from the
     // payload's own modal tiers so the sentence can never drift from the data.
     // The bootstrap-interval clause states the registered analysis result
