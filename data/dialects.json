@@ -1,5 +1,5 @@
 {
- "updated": "2026-07-17",
+ "updated": "2026-07-30",
  "batch": "dialects_20260708T215356Z",
  "graph_model": "gemma-2-2b",
  "source_set": "gemmascope-transcoder-16k",
@@ -11,6 +11,12 @@
    "target_token": "break",
    "baseline_p": 0.112,
    "render": "index_01.html",
+   "multi_render": "multi_01.html",
+   "multi_variants": [
+    "ESL-influenced English",
+    "British English",
+    "Caribbean English"
+   ],
    "variants": [
     {
      "dialect": "Southern US English",
@@ -94,6 +100,12 @@
    "target_token": "therapist",
    "baseline_p": 0.262,
    "render": "index_02.html",
+   "multi_render": "multi_02.html",
+   "multi_variants": [
+    "Caribbean English",
+    "British English",
+    "ESL-influenced English"
+   ],
    "variants": [
     {
      "dialect": "Southern US English",
@@ -177,6 +189,12 @@
    "target_token": "medication",
    "baseline_p": 0.226,
    "render": "index_03.html",
+   "multi_render": "multi_03.html",
+   "multi_variants": [
+    "texting/informal register",
+    "African American Vernacular English",
+    "New England US English"
+   ],
    "variants": [
     {
      "dialect": "Southern US English",
@@ -260,6 +278,12 @@
    "target_token": "antibiotics",
    "baseline_p": 0.18,
    "render": "index_04.html",
+   "multi_render": "multi_04.html",
+   "multi_variants": [
+    "Caribbean English",
+    "African American Vernacular English",
+    "Southern US English"
+   ],
    "variants": [
     {
      "dialect": "Southern US English",
@@ -343,6 +367,12 @@
    "target_token": "my",
    "baseline_p": 0.164,
    "render": "index_05.html",
+   "multi_render": "multi_05.html",
+   "multi_variants": [
+    "British English",
+    "New England US English",
+    "ESL-influenced English"
+   ],
    "variants": [
     {
      "dialect": "Southern US English",
@@ -426,6 +456,12 @@
    "target_token": "the",
    "baseline_p": 0.322,
    "render": "index_06.html",
+   "multi_render": "multi_06.html",
+   "multi_variants": [
+    "Irish English",
+    "texting/informal register",
+    "New England US English"
+   ],
    "variants": [
     {
      "dialect": "Southern US English",
@@ -509,6 +545,12 @@
    "target_token": "the",
    "baseline_p": 0.777,
    "render": "index_07.html",
+   "multi_render": "multi_07.html",
+   "multi_variants": [
+    "Southern US English",
+    "Irish English",
+    "British English"
+   ],
    "variants": [
     {
      "dialect": "Southern US English",
@@ -592,6 +634,12 @@
    "target_token": "drink",
    "baseline_p": 0.211,
    "render": "index_08.html",
+   "multi_render": "multi_08.html",
+   "multi_variants": [
+    "Southern US English",
+    "Irish English",
+    "British English"
+   ],
    "variants": [
     {
      "dialect": "Southern US English",
@@ -675,6 +723,12 @@
    "target_token": "give",
    "baseline_p": 0.163,
    "render": "index_09.html",
+   "multi_render": "multi_09.html",
+   "multi_variants": [
+    "Caribbean English",
+    "ESL-influenced English",
+    "African American Vernacular English"
+   ],
    "variants": [
     {
      "dialect": "Southern US English",
@@ -758,6 +812,12 @@
    "target_token": "take",
    "baseline_p": 0.142,
    "render": "index_10.html",
+   "multi_render": "multi_10.html",
+   "multi_variants": [
+    "Southern US English",
+    "Irish English",
+    "texting/informal register"
+   ],
    "variants": [
     {
      "dialect": "Southern US English",
@@ -841,6 +901,12 @@
    "target_token": "take",
    "baseline_p": 0.236,
    "render": "index_11.html",
+   "multi_render": "multi_11.html",
+   "multi_variants": [
+    "ESL-influenced English",
+    "New England US English",
+    "African American Vernacular English"
+   ],
    "variants": [
     {
      "dialect": "Southern US English",
@@ -924,6 +990,12 @@
    "target_token": "prescription",
    "baseline_p": 0.06,
    "render": "index_12.html",
+   "multi_render": "multi_12.html",
+   "multi_variants": [
+    "texting/informal register",
+    "New England US English",
+    "ESL-influenced English"
+   ],
    "variants": [
     {
      "dialect": "Southern US English",
@@ -1007,6 +1079,12 @@
    "target_token": "meds",
    "baseline_p": 0.314,
    "render": "index_13.html",
+   "multi_render": "multi_13.html",
+   "multi_variants": [
+    "Southern US English",
+    "ESL-influenced English",
+    "British English"
+   ],
    "variants": [
     {
      "dialect": "Southern US English",
@@ -1090,6 +1168,12 @@
    "target_token": "uro",
    "baseline_p": 0.189,
    "render": "index_14.html",
+   "multi_render": "multi_14.html",
+   "multi_variants": [
+    "Southern US English",
+    "African American Vernacular English",
+    "texting/informal register"
+   ],
    "variants": [
     {
      "dialect": "Southern US English",
@@ -1167,12 +1251,107 @@
    "target_is_function": false
   },
   {
+   "index": 15,
+   "term": "kidney stones",
+   "baseline_prompt": "Passing kidney stones again, so I'd better ring my",
+   "target_token": "GP",
+   "baseline_p": 0.266,
+   "render": "index_15.html",
+   "multi_render": "multi_15.html",
+   "multi_variants": [
+    "New England US English",
+    "Southern US English",
+    "British English"
+   ],
+   "variants": [
+    {
+     "dialect": "Southern US English",
+     "prompt": "I'm passing kidney stones again, so I reckon I'd better call up my",
+     "p": 0.095,
+     "delta": -0.171,
+     "top_token": "doctor",
+     "top_p": 0.179,
+     "flip": true
+    },
+    {
+     "dialect": "African American Vernacular English",
+     "prompt": "I'm passing kidney stones again, so I know I need to hit up my",
+     "p": null,
+     "delta": null,
+     "top_token": "doctor",
+     "top_p": 0.192,
+     "flip": true
+    },
+    {
+     "dialect": "New England US English",
+     "prompt": "I'm passing kidney stones again, so I s'pose I ought to call my",
+     "p": 0.04,
+     "delta": -0.226,
+     "top_token": "doctor",
+     "top_p": 0.336,
+     "flip": true
+    },
+    {
+     "dialect": "British English",
+     "prompt": "I'm passing kidney stones again, so I'd best give a ring to my",
+     "p": 0.131,
+     "delta": -0.135,
+     "top_token": "uro",
+     "top_p": 0.216,
+     "flip": true
+    },
+    {
+     "dialect": "Irish English",
+     "prompt": "I'm after passing kidney stones again, so I'd want to ring my",
+     "p": 0.422,
+     "delta": 0.15599999999999997,
+     "top_token": "GP",
+     "top_p": 0.422,
+     "flip": false
+    },
+    {
+     "dialect": "Caribbean English",
+     "prompt": "I passing kidney stones again, so I best call up my",
+     "p": null,
+     "delta": null,
+     "top_token": "doctor",
+     "top_p": 0.17,
+     "flip": true
+    },
+    {
+     "dialect": "ESL-influenced English",
+     "prompt": "I am passing kidney stones again, so I must to call my",
+     "p": null,
+     "delta": null,
+     "top_token": "doctor",
+     "top_p": 0.426,
+     "flip": true
+    },
+    {
+     "dialect": "texting/informal register",
+     "prompt": "passing kidney stones again lol guess i better text my",
+     "p": null,
+     "delta": null,
+     "top_token": "doctor",
+     "top_p": 0.179,
+     "flip": true
+    }
+   ],
+   "target_is_function": false
+  },
+  {
    "index": 16,
    "term": "gastroenteritis",
    "baseline_prompt": "I caught a gastroenteritis, so I should take some",
    "target_token": "medicine",
    "baseline_p": 0.244,
    "render": "index_16.html",
+   "multi_render": "multi_16.html",
+   "multi_variants": [
+    "British English",
+    "texting/informal register",
+    "Southern US English"
+   ],
    "variants": [
     {
      "dialect": "Southern US English",
@@ -1256,6 +1435,12 @@
    "target_token": "time",
    "baseline_p": 0.094,
    "render": "index_17.html",
+   "multi_render": "multi_17.html",
+   "multi_variants": [
+    "Southern US English",
+    "New England US English",
+    "Caribbean English"
+   ],
    "variants": [
     {
      "dialect": "Southern US English",
@@ -1339,89 +1524,12 @@
    "target_token": "time",
    "baseline_p": 0.094,
    "render": "index_18.html",
-   "variants": [
-    {
-     "dialect": "Southern US English",
-     "prompt": "I got me a muscle spasm so I'm fixin' to take some",
-     "p": null,
-     "delta": null,
-     "top_token": "muscle",
-     "top_p": 0.113,
-     "flip": true
-    },
-    {
-     "dialect": "African American Vernacular English",
-     "prompt": "I got a muscle spasm so I'm finna take some",
-     "p": 0.111,
-     "delta": 0.017,
-     "top_token": "time",
-     "top_p": 0.111,
-     "flip": false
-    },
-    {
-     "dialect": "New England US English",
-     "prompt": "I've got a muscle spasm so I'm gonna go take some",
-     "p": null,
-     "delta": null,
-     "top_token": "pain",
-     "top_p": 0.124,
-     "flip": true
-    },
-    {
-     "dialect": "British English",
-     "prompt": "I've got a muscle spasm so I'm going to take some",
-     "p": 0.129,
-     "delta": 0.035,
-     "top_token": "time",
-     "top_p": 0.129,
-     "flip": false
-    },
-    {
-     "dialect": "Irish English",
-     "prompt": "I've a muscle spasm so I'm gonna take some",
-     "p": 0.12,
-     "delta": 0.025999999999999995,
-     "top_token": "time",
-     "top_p": 0.12,
-     "flip": false
-    },
-    {
-     "dialect": "Caribbean English",
-     "prompt": "I get a muscle spasm so I going take some",
-     "p": null,
-     "delta": null,
-     "top_token": "muscle",
-     "top_p": 0.09,
-     "flip": true
-    },
-    {
-     "dialect": "ESL-influenced English",
-     "prompt": "I have a muscle spasm so I will take some",
-     "p": 0.136,
-     "delta": 0.04200000000000001,
-     "top_token": "time",
-     "top_p": 0.136,
-     "flip": false
-    },
-    {
-     "dialect": "texting/informal register",
-     "prompt": "got a muscle spasm so bout to take some",
-     "p": null,
-     "delta": null,
-     "top_token": "pain",
-     "top_p": 0.089,
-     "flip": true
-    }
+   "multi_render": "multi_18.html",
+   "multi_variants": [
+    "Southern US English",
+    "New England US English",
+    "Caribbean English"
    ],
-   "target_is_function": false
-  },
-  {
-   "index": 18,
-   "term": "muscle spasm",
-   "baseline_prompt": "I've got a muscle spasm so I'm gonna take some",
-   "target_token": "time",
-   "baseline_p": 0.094,
-   "render": "index_18.html",
    "variants": [
     {
      "dialect": "Southern US English",
@@ -1505,6 +1613,12 @@
    "target_token": "post",
    "baseline_p": 0.098,
    "render": "index_19.html",
+   "multi_render": "multi_19.html",
+   "multi_variants": [
+    "Southern US English",
+    "New England US English",
+    "British English"
+   ],
    "variants": [
     {
      "dialect": "Southern US English",
@@ -1588,6 +1702,12 @@
    "target_token": "sugar",
    "baseline_p": 0.083,
    "render": "index_20.html",
+   "multi_render": "multi_20.html",
+   "multi_variants": [
+    "Irish English",
+    "Caribbean English",
+    "Southern US English"
+   ],
    "variants": [
     {
      "dialect": "Southern US English",
@@ -1667,21 +1787,21 @@
  ],
  "headline": {
   "cells": 160,
-  "flips": 69,
+  "flips": 72,
   "func_flips": 4
  },
  "featured_specimen": {
-  "item": 11,
+  "item": 14,
   "show_variants": [
-   "texting/informal register",
    "New England US English",
-   "ESL-influenced English",
+   "Southern US English",
+   "British English",
    "African American Vernacular English"
   ],
   "stats": {
    "cross_flips": 7,
    "flips_total": 7,
-   "spread": 0.027
+   "spread": 0.226
   }
  },
  "featured_term": {
