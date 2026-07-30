@@ -246,7 +246,7 @@
   <hr class="rule-fine">
 </header>
 <main id="main">
-  <p class="dateline"><span class="mode">dialect & register sweep · live render · traced July 16 and 17, 2026</span></p>
+  <p class="dateline"><span class="mode">dialect & register sweep · live render · traced <span id="dl-traced">—</span></span></p>
   <h1>Dialect differences</h1>
   <p class="subtitle">The clinical term held fixed while the surrounding sentence shifts across eight LLM-approximated dialect and register framings per term.</p>
   <p class="explainer">The clinical term stays fixed while the sentence around it is re-traced across dialect and register variants, so any shift comes from framing. The framings are Claude-written approximations: each column label is the instruction given to the generating model, not a recording of how any community speaks, and no speaker of any variety reviewed them. The sweep below holds a set of clinical terms fixed, one per row, and re-traces each across several framings; the matrix reports the exact counts.</p>
@@ -398,6 +398,17 @@
     .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
     .then(function(data){
       var items=data.items||[];if(!items.length)return;
+      // dateline trace date is runtime-filled from the payload stamp so it can
+      // never drift from the data again (claim-check DRIFT fix, 2026-07-30 —
+      // the sweep was fully re-traced and the static date went stale)
+      (function(){
+        var tEl=document.getElementById('dl-traced');
+        var m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(data.updated||''));
+        if(tEl&&m){
+          var mo=['January','February','March','April','May','June','July','August','September','October','November','December'][+m[2]-1];
+          tEl.textContent=mo+' '+(+m[3])+', '+m[1];
+        }
+      })();
       var freq={};
       items.forEach(function(it){it.variants.forEach(function(v){
         freq[v.dialect]=(freq[v.dialect]||0)+1;});});
@@ -528,6 +539,20 @@
             var f=document.createElement('iframe');
             f.src='../modes/dialect/sweep/'+it.multi_render;
             f.title='Small multiples for '+it.term+': baseline beside its most consequential framings, structural features stripped';
+            // the multi renders are responsive SVGs; size the frame to the
+            // render's own aspect (viewBox) so the accordion carries no dead
+            // space and never crops — clamped so a surprise render stays sane
+            f.addEventListener('load',function(){
+              try{
+                var svg=f.contentDocument&&f.contentDocument.querySelector('svg');
+                var vb=svg&&svg.viewBox&&svg.viewBox.baseVal;
+                if(vb&&vb.width){
+                  var h=Math.max(240,Math.min(700,f.clientWidth*vb.height/vb.width+30));
+                  f.style.minHeight='0';
+                  f.style.height=h+'px';
+                }
+              }catch(e){}
+            });
             td2.appendChild(f);
             var cap=el('div','acc-cap');
             var mv=Array.isArray(it.multi_variants)&&it.multi_variants.length
