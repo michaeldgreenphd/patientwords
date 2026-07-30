@@ -1325,24 +1325,21 @@
     // (engine data/advice/analysis_stimuli_*, every interval covers zero).
     (function(){
       var ro=data.tier_order||[];var rk={};ro.forEach(function(t,i){rk[t]=i;});
-      var dn=0,up=0,tot=0,fam={};
+      var dn=0,up=0,tot=0;
       (data.scenarios||[]).forEach(function(s){
-        var f=s.family||'other';
         (s.tier_summary||[]).forEach(function(t){
           var c=rk[t.clinical],p=rk[t.patient];
           if(c==null||p==null)return;
-          tot++;fam[f]=fam[f]||[0,0];
-          if(p<c){dn++;fam[f][0]++;}else if(p>c){up++;fam[f][1]++;}
+          tot++;
+          if(p<c){dn++;}else if(p>c){up++;}
         });
       });
       if(!tot)return;
-      var fc=fam.sentence_completions||[0,0],fn=fam.natural_questions||[0,0];
       var elx=document.getElementById('interim-note');
       elx.textContent='Interim result: across '+tot+' (scenario \u00d7 model) cells, patient phrasing changes '
         +'the modal care-urgency tier in '+(dn+up)+' \u2014 '+dn+' down, '+up+' up. Near-symmetric, and every '
-        +'registered bootstrap interval covers zero. The two stimulus families lean in opposite directions '
-        +'(sentence completions '+fc[0]+'\u2193/'+fc[1]+'\u2191; natural questions '+fn[0]+'\u2193/'+fn[1]
-        +'\u2191). Individual examples below are single cases inside within-run variance.';
+        +'registered bootstrap interval covers zero. Individual examples below are single cases inside '
+        +'within-run variance.';
       elx.hidden=false;
     })();
     // downgrade map + bridge from per-scenario tier summaries

@@ -133,11 +133,6 @@
   .me-table td.num{text-align:right;font-family:var(--mono);font-size:12.5px;white-space:nowrap}
   .me-table td.mono{font-family:var(--mono);font-size:12.5px}
   .me-table tr:last-child td{border-bottom:1px solid var(--ink)}
-  /* specialty table: rows unruled; thin grey top/bottom anchor the block */
-  #sp-table{min-width:460px;border-top:1px solid var(--hairline);border-bottom:1px solid var(--hairline)}
-  #sp-table th{border-bottom:1px solid var(--hairline)}
-  #sp-table td{border-bottom:0;padding:8px 18px 8px 0}
-  #sp-table tr:last-child td{border-bottom:0}
   .me-caption{font-family:var(--mono);font-size:11px;color:var(--muted);
     letter-spacing:.04em;margin:6px 0 0}
   .sm-h{font-family:var(--mono);font-size:10.5px;font-weight:600;letter-spacing:.14em;
@@ -611,7 +606,7 @@
       <ul class="sm-l">
         <li>Population: plain generated scenario batches only; steered, screened, imported, and re-traced rows are reported as a labeled sensitivity analysis in the statistics file on GitHub.</li>
         <li>One record per (model, clinical phrase); re-traces collapse by majority vote.</li>
-        <li>Wording-gap intervals: phrase-level bootstrap after dedupe, percentile 95%, <code>seed 7</code>; the file also carries simultaneous (Bonferroni) intervals and batch- and topic-clustered sensitivity intervals.</li>
+        <li>Wording-gap intervals: phrase-level bootstrap after dedupe, percentile 95%, <code>seed 7</code>.</li>
         <li>Downgrade rates: Clopper&ndash;Pearson exact 95%.</li>
         <li>Asymmetry: exact two-sided sign tests, Benjamini&ndash;Hochberg corrected within registration family; the merged ten-model correction stays in the file for comparison.</li>
         <li>Registration: four models pre-registered, six post-registration exploratory; departures are recorded in <a href="https://github.com/michaeldgreenphd/patientwords-engine/blob/claude/gemma-clinical-colloquial-interp-mavx04/docs/prereg_divergence_log.md">the divergence log in the engine repository</a>.</li>
@@ -622,24 +617,6 @@
       </ul>
     </details>
 
-    <div id="sp-block" hidden>
-      <details class="fold">
-        <summary id="sp-sum">Where the wording gap concentrates: per-specialty, exploratory</summary>
-        <p class="scroll-hint" aria-hidden="true">table scrolls sideways →</p>
-        <div class="me-scroll">
-          <table class="me-table" id="sp-table" aria-describedby="sp-caption">
-            <thead><tr>
-              <th scope="col">Specialty</th>
-              <th scope="col" class="num">Phrases</th>
-              <th scope="col" class="num">Mean wording gap</th>
-              <th scope="col" class="num">Downgrades</th>
-            </tr></thead>
-            <tbody id="sp-body"></tbody>
-          </table>
-        </div>
-        <p class="me-caption" id="sp-caption">gemma-2-2b · exploratory: cells under 10 phrases suppressed · grouping follows the draft specialty taxonomy (owner review pending) · hypothesis-generating only, not a pre-registered endpoint</p>
-      </details>
-    </div>
   </section>
 
   <div class="conv-tip" id="conv-tip" aria-hidden="true"></div>
@@ -925,8 +902,7 @@
       are interim numbers from the exploration split; the pre-registered
       confirmatory holdout is withheld from this site's data files until the
       registered endpoint runs. Ranks are within the lens's top-8 readout;
-      "never formed" means never entered that readable window for two
-      consecutive layers (one-layer blips do not count, rule adopted July 14).</p>
+      "never formed" means the answer never entered that readable window.</p>
     <footer>
       Built with the <a href="https://github.com/michaeldgreenphd/patientwords-engine">patientwords-engine</a> pipeline
       on <a href="https://neuronpedia.org">Neuronpedia</a> ·
@@ -1824,35 +1800,6 @@
       ]
     });
   }
-})();
-</script>
-<script>
-(function(){
-  fetch('../data/specialty_breakdown.json',{cache:'no-cache'})
-    .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
-    .then(function(d){
-      var specs=d.specialties||{};
-      var rows=[];
-      Object.keys(specs).forEach(function(sp){
-        var c=specs[sp]['gemma-2-2b'];
-        if(c)rows.push({sp:sp,n:c.n_phrases,mean:c.mean_penalty,dg:c.downgrades});
-      });
-      if(!rows.length)return;
-      rows.sort(function(a,b){return a.mean-b.mean;});
-      var body=document.getElementById('sp-body');
-      rows.forEach(function(r){
-        var tr=document.createElement('tr');
-        var td=document.createElement('td');td.textContent=r.sp;tr.appendChild(td);
-        td=document.createElement('td');td.className='num';td.textContent=r.n;tr.appendChild(td);
-        td=document.createElement('td');td.className='num';
-        td.textContent=(r.mean>0?'+':'')+r.mean.toFixed(3);tr.appendChild(td);
-        td=document.createElement('td');td.className='num';td.textContent=r.dg;tr.appendChild(td);
-        body.appendChild(tr);
-      });
-      document.getElementById('sp-sum').textContent=
-        'Where the wording gap concentrates: per-specialty wording gap on the base model, '+rows.length+' specialties, exploratory';
-      document.getElementById('sp-block').hidden=false;
-    }).catch(function(){});
 })();
 </script>
 <script>
