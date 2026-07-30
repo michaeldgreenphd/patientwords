@@ -105,19 +105,10 @@
   .retr svg{display:block;width:100%;height:auto;max-width:568px;margin-top:6px}
   .provenance .pv-cost{color:var(--clinical);font-weight:600}
   /* urgency-by-model: diverging bars (downgrades left in red, upgrades right in
-     grey), label column shared with the tier-shift forest below */
-  /* per-model tier-shift forest (#11): one dot per model, shared axis, zero line */
-  .urg-forest{display:block;margin:8px 0 2px}
+     grey). Per-model tier-shift stats live on the technical page, Part 4,
+     since the 2026-07-30 owner cut; .urg-fhead is the pointer line */
   .urg-fhead{margin:14px 0 2px}
-  .urg-foot{font-size:10px;color:var(--muted);line-height:1.6;margin:0 0 2px}
 
-  /* study timeline strip (drawn at load from ../data/timeline.json) */
-  .tl{margin:8px 0 0;padding:10px 16px 8px;border:1px solid var(--hairline);background:#fff}
-  .tl svg{width:100%;height:auto;display:block}
-  .tl-sum{font-family:var(--mono);font-size:11.5px;line-height:1.9;color:var(--muted);margin:4px 0 0}
-  .tl-sum b{color:var(--ink);font-weight:600}
-  /* legend marginalia tied to the axis (SVG text) */
-  .tl .marginalia{font-family:var(--mono);font-size:9px;letter-spacing:.04em;fill:var(--muted)}
 
   /* concise summary table (one row per scenario, rows jump to the full card) */
   .sum-scroll{overflow-x:auto;margin:26px 0 0}
@@ -463,104 +454,19 @@
     <div id="retrace-strip"></div>
     <p class="retr-cap" id="retrace-cap" hidden></p>
   </div>
-  <script>
-  (function(){
-    var NS = 'http://www.w3.org/2000/svg';
-    function el(name, attrs, style){
-      var e = document.createElementNS(NS, name);
-      for (var k in attrs) e.setAttribute(k, attrs[k]);
-      if (style) e.setAttribute('style', style);
-      return e;
-    }
-    fetch('../data/timeline.json', {cache:'no-cache'})
-      .then(function(r){ if(!r.ok) throw new Error('missing'); return r.json(); })
-      .then(draw).catch(function(){ /* strip stays hidden; page unaffected */ });
-    function draw(t){
-      var box = document.getElementById('sim-timeline');
-      if (!box) return;
-      var batches = (t.batches || []).filter(function(b){ return b.utc; });
-      if (batches.length < 2) return;
-      var t0 = Date.parse(batches[0].utc), t1 = Date.parse(batches[batches.length - 1].utc);
-      var span = Math.max(t1 - t0, 1);
-      var W = 720, H = 86, ml = 8, mr = 8, axisY = 46;   // extra height for the axis legend marginalia
-      function X(iso){ return ml + (W - ml - mr) * ((Date.parse(iso) - t0) / span); }
-      function day(iso){ return iso.slice(5, 10).replace('-', ' / '); }
-      var svg = el('svg', {viewBox: '0 0 ' + W + ' ' + H, role: 'img',
-        'aria-label': 'Study timeline: ' + t.totals.generation_batches + ' generation batches from ' +
-          batches[0].utc.slice(0,10) + ' to ' + batches[batches.length-1].utc.slice(0,10) +
-          '; hollow dots are Tier A batches, filled dots Tier B; the pre-registration mark precedes every Tier B batch.'});
-      svg.appendChild(el('line', {x1: ml, x2: W - mr, y1: axisY, y2: axisY},
-        'stroke:var(--hairline);stroke-width:1'));
-      // milestones: small vertical rules with staggered labels above the axis
-      (t.milestones || []).forEach(function(ms, i){
-        var x = Math.min(Math.max(X(ms.utc), ml), W - mr);
-        var short = /pre-registration/i.test(ms.label) ? 'pre-registered'
-                  : /started/i.test(ms.label) ? 'tier B started'
-                  : ms.label.toLowerCase();
-        var atRight = x > W * 0.7;
-        svg.appendChild(el('line', {x1: x, x2: x, y1: axisY - 26 + i * 12, y2: axisY},
-          'stroke:var(--ink);stroke-width:1'));
-        var lb = el('text', {x: atRight ? x - 4 : x + 4, y: axisY - 28 + i * 12,
-          'text-anchor': atRight ? 'end' : 'start'},
-          'font-family:var(--mono);font-size:9.5px;fill:var(--ink)');
-        lb.textContent = short;
-        svg.appendChild(lb);
-      });
-      batches.forEach(function(b){
-        var isPairs = b.kind === 'pairs';
-        var dot = el('circle', {cx: X(b.utc), cy: axisY, r: isPairs ? 3.5 : 2},
-          b.tierb ? 'fill:var(--ink);stroke:none'
-                  : 'fill:#fff;stroke:var(--muted);stroke-width:1');
-        var ti = document.createElementNS(NS, 'title');
-        ti.textContent = b.batch + ' · ' + (b.generator || '') + ' · ' +
-          (b.accepted != null ? b.accepted + ' accepted · ' : '') +
-          '$' + (b.cost_usd != null ? b.cost_usd.toFixed(4) : '—') +
-          (b.tierb ? ' · Tier B' : '');
-        dot.appendChild(ti);
-        svg.appendChild(dot);
-      });
-      // end date labels
-      [[batches[0].utc, 'start'], [batches[batches.length-1].utc, 'end']].forEach(function(e, i){
-        var lb = el('text', {x: i === 0 ? ml : W - mr, y: axisY + 16,
-          'text-anchor': i === 0 ? 'start' : 'end'},
-          'font-family:var(--mono);font-size:10px;fill:var(--muted)');
-        lb.textContent = day(e[0]);
-        svg.appendChild(lb);
-      });
-      // legend as marginalia, tied to the axis by the start date (not floated in
-      // the summary); the tiers are defined, not just named — Tier B is the
-      // pre-registered run whose milestone marks sit on this same axis
-      var leg = el('text', {x: ml, y: axisY + 30, 'text-anchor': 'start', 'class': 'marginalia'});
-      leg.textContent = 'hollow = Tier A (before the pre-registration) · filled = Tier B (the pre-registered run)';
-      svg.appendChild(leg);
-      box.appendChild(svg);
-      var sum = document.createElement('p');
-      sum.className = 'tl-sum';
-      sum.innerHTML = '<b>' + t.totals.generation_batches + '</b> generation batches · <b>' +
-        t.totals.accepted_pairs + '</b> accepted pairs (<b>' + t.totals.tierb_accepted +
-        '</b> Tier B so far) · generation <b>$' + t.totals.generation_usd.toFixed(2) +
-        '</b> total · tracing and inference $0 on public CI';
-      box.appendChild(sum);
-      var sec = document.getElementById('sim-provtl');
-      if (sec) sec.hidden = false;
-    }
-  })();
-  </script>
+  <!-- study-timeline strip removed 2026-07-30 (owner cut 3): process history,
+       not evidence. Data survives in data/timeline.json (regenerated nightly);
+       generation provenance stays in data/provenance.json. -->
 
 
   <div class="pending-note" id="sim-pending" hidden>
     <span class="pending-mark"></span>loading · simulated series
   </div>
 
-  <section id="sim-provtl" hidden>
-    <h2>Data provenance &amp; timeline</h2>
-    <div class="tl" id="sim-timeline"></div>
-  </section>
-
   <a class="back" href="../">← Back home</a>
 
   <div class="endnote">
-    <p id="sim-endnote">SIMULATED DATA · these phrasings were written by an LLM (see the strip above) and passed the generator's automatic validators; they are not statements from patients and contain no real personal or clinical data.</p>
+    <p id="sim-endnote">SIMULATED DATA · these phrasings were written by an LLM (generation provenance: the batch records in <a href="https://github.com/michaeldgreenphd/patientwords/blob/main/data/provenance.json">data/provenance.json</a>) and passed the generator's automatic validators; they are not statements from patients and contain no real personal or clinical data.</p>
     <footer>
       Built with the <a href="https://github.com/michaeldgreenphd/patientwords-engine">patientwords-engine</a> pipeline
       on <a href="https://neuronpedia.org">Neuronpedia</a> ·
@@ -659,96 +565,8 @@
     return td;
   }
 
-  // Per-model care-urgency tier-shift forest (#11, owner 2026-07-20). One dot
-  // per model at summary.per_model[m].mean_tier_shift on a shared axis; the
-  // vertical rule is the no-shift reference (a forest zero line). The axis is
-  // scaled to the models with n>=100 so the two n=3 medical models don't
-  // squash it; those fall left of the scale and are drawn hollow with a caret.
-  // The representative-redirect annotation is gated to the strongest reliable
-  // downgrader so a tiny-n model can never headline. Returns null (chart
-  // skipped) whenever the data is absent or too thin.
-  function tierForest(summary){
-    var pm=summary&&summary.per_model;
-    if(!pm)return null;
-    // gate from the collector when present (recorded analysis parameter,
-    // audit M4); 100 stays as fallback for older payloads
-    var GATE=(typeof summary.reliability_gate_n==='number')?summary.reliability_gate_n:100;
-    var NS='http://www.w3.org/2000/svg';
-    var rows=Object.keys(pm).map(function(id){
-      var v=pm[id]||{};
-      return {id:id,mts:v.mean_tier_shift,n:v.n||0,dn:v.downgrades||0,
-              up:v.upgrades||0,rep:v.representative,ok:(v.n||0)>=GATE};
-    }).filter(function(r){return typeof r.mts==='number';});
-    if(rows.length<2)return null;
-    // reliable group first, most-negative (biggest downgrade) first within each
-    rows.sort(function(a,b){return (a.ok!==b.ok)?(a.ok?-1:1):(a.mts-b.mts);});
-    var rel=rows.filter(function(r){return r.ok;});
-    // prefer the collector's headline pick (summary.headline_downgrader,
-    // audit M4); the in-page reduce stays as fallback
-    var extreme=(summary.headline_downgrader
-      ?rel.filter(function(r){return r.id===summary.headline_downgrader;})[0]:null)
-      ||(rel.length?rel.reduce(function(a,b){return b.mts<a.mts?b:a;}):null);
-    var scale=rel.length?rel:rows;
-    var lo=Math.min.apply(null,scale.map(function(r){return r.mts;}));
-    var dmin=Math.min(lo*1.15,-0.02), dmax=0.015;  // include 0 for the zero line
-    var W=568,labW=150,padR=14,rh=17,top=8,botAxis=20;
-    var plotL=labW, plotR=W-padR, plotW=plotR-plotL;
-    var H=top+rows.length*rh+botAxis;
-    function X(v){return plotL+(Math.max(dmin,Math.min(dmax,v))-dmin)/(dmax-dmin)*plotW;}
-    function svgel(name,attrs,style){var e=document.createElementNS(NS,name);
-      for(var k in attrs)e.setAttribute(k,attrs[k]);if(style)e.setAttribute('style',style);return e;}
-    var svg=svgel('svg',{'class':'urg-forest',viewBox:'0 0 '+W+' '+H,role:'img',
-      'aria-label':'Mean care-urgency tier shift by model. Negative means patient phrasing '
-        +'predicts less-urgent care. '+rows.map(function(r){
-          return r.id+' '+(r.mts<0?'minus ':'')+Math.abs(r.mts).toFixed(3)
-            +(r.ok?'':' (n='+r.n+', below the n='+GATE+' gate)');}).join('; ')+'.'},
-      'width:100%;height:auto;max-width:'+W+'px');
-    var plotBot=top+rows.length*rh;
-    // faint dashed gridlines at each 0.05 tick (never between rows)
-    for(var tv=Math.ceil(dmin*20)/20; tv<dmax-1e-9; tv+=0.05){
-      var t=Math.round(tv*100)/100; if(Math.abs(t)<1e-9)continue;
-      var gx=X(t);
-      svg.appendChild(svgel('line',{x1:gx,x2:gx,y1:top,y2:plotBot},
-        'stroke:var(--hairline);stroke-width:1;stroke-dasharray:1 4'));
-      var gl=svgel('text',{x:gx,y:H-6,'text-anchor':'middle'},
-        'font-family:var(--mono);font-size:9px;fill:var(--muted)');
-      gl.textContent='−'+Math.abs(t).toFixed(2);
-      svg.appendChild(gl);
-    }
-    // the zero reference line (decision a): solid, a touch stronger than ticks
-    var zx=X(0);
-    svg.appendChild(svgel('line',{x1:zx,x2:zx,y1:top-2,y2:plotBot+2},
-      'stroke:var(--muted);stroke-width:1'));
-    var z0=svgel('text',{x:zx,y:H-6,'text-anchor':'middle'},
-      'font-family:var(--mono);font-size:9px;fill:var(--muted)');
-    z0.textContent='0';svg.appendChild(z0);
-    rows.forEach(function(r,i){
-      var cy=top+i*rh+rh/2;
-      var lab=svgel('text',{x:plotL-8,y:cy+3,'text-anchor':'end'},
-        'font-family:var(--mono);font-size:10.5px;fill:'+(r.ok?'var(--ink)':'var(--muted)'));
-      lab.textContent=r.id;svg.appendChild(lab);
-      var cx=X(r.mts), off=r.mts<dmin;
-      var dot=svgel('circle',{cx:cx,cy:cy,r:r.ok?4:3},
-        r.ok?'fill:var(--penalty);stroke:none'
-            :'fill:#fff;stroke:var(--muted);stroke-width:1.2');
-      var ti=document.createElementNS(NS,'title');
-      ti.textContent=r.id+' · tier shift '+(r.mts<0?'−':'+')+Math.abs(r.mts).toFixed(3)
-        +' · n='+r.n+' · '+r.dn+' downgrades / '+r.up+' upgrades'+(r.ok?'':' · below the n≥100 gate');
-      dot.appendChild(ti);svg.appendChild(dot);
-      if(off){  // pinned at the edge: tag the true magnitude so the clamp can't mislead
-        var car=svgel('text',{x:cx+8,y:cy+3},
-          'font-family:var(--mono);font-size:9.5px;fill:var(--muted)');
-        car.textContent='‹ −'+Math.abs(r.mts).toFixed(2);svg.appendChild(car);
-      }
-      if(extreme&&r.id===extreme.id&&r.rep&&r.rep.from&&r.rep.to){
-        var an=svgel('text',{x:cx+9,y:cy+3},
-          'font-family:var(--mono);font-size:10px;fill:var(--penalty)');
-        an.textContent='“'+r.rep.from+'” → “'+r.rep.to+'”';
-        svg.appendChild(an);
-      }
-    });
-    return {svg:svg,extreme:extreme,off:rows.filter(function(r){return r.mts<dmin;})};
-  }
+  // Per-model tier-shift statistics moved to the technical page, Part 4
+  // (owner cut 2026-07-30); the provenance block links there instead.
 
   Promise.all([
     fetch('../data/simulated_scenarios.json',{cache:'no-cache'})
@@ -896,30 +714,15 @@
           uline.appendChild(el('span',null,'; the Urgency column reads from the measured urgency data.'));
           prov.appendChild(uline);
         }
-        // per-model tier-shift forest, below the table (#11, owner 2026-07-20)
-        var forest=tierForest(urg.summary);
-        if(forest){
-          var fh=el('div','urg-fhead');
-          fh.appendChild(el('b',null,'Tier shift by model'));
-          fh.appendChild(el('span',null,' — mean care-urgency change from clinical to '
-            +'patient wording (negative = patient phrasing predicts less-urgent care); '
-            +'the vertical rule is no shift.'));
-          prov.appendChild(fh);
-          prov.appendChild(forest.svg);
-          var fnbits=[];
-          if(forest.extreme)fnbits.push('“'+(forest.extreme.rep&&forest.extreme.rep.from||'—')
-            +'” → “'+(forest.extreme.rep&&forest.extreme.rep.to||'—')+'” annotates '
-            +forest.extreme.id+', the strongest downgrader at n ≥ 100 ('
-            +forest.extreme.n.toLocaleString()+' pairs)');
-          if(forest.off.length)fnbits.push(forest.off.map(function(r){
-            return r.id+' (−'+Math.abs(r.mts).toFixed(2)+', n='+r.n+')';}).join(' and ')
-            +' fall left of the scale — too few pairs to weight');
-          if(fnbits.length){
-            var fn=el('div','urg-foot');
-            fn.appendChild(el('span',null,fnbits.join('; ')+'.'));
-            prov.appendChild(fn);
-          }
-        }
+        // pointer to the consolidated per-model statistics (owner cut 2026-07-30)
+        var fh=el('div','urg-fhead');
+        fh.appendChild(el('span',null,'Per-model tier-shift and downgrade statistics: '));
+        var fl=document.createElement('a');
+        fl.href='../technical/#models';
+        fl.textContent='the technical page, Part 4';
+        fh.appendChild(fl);
+        fh.appendChild(el('span',null,'.'));
+        prov.appendChild(fh);
       }
       prov.hidden=false;
 
