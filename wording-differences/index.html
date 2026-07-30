@@ -10,7 +10,7 @@
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="PatientWords">
 <meta property="og:title" content="Wording differences — PatientWords">
-<meta property="og:description" content="Swap one word — “asthma flares” vs. “chest gets all tight” — and gemma-2-2b’s top next word falls from inhaler at 69% to 4%. Or hold the words and change only the grammar; the prediction still moves.">
+<meta property="og:description" content="Swap one word — “asthma flares” vs. “chest gets all tight” — and gemma-2-2b’s top next word changes from inhaler to shirt, with inhaler dropping out of the top five. Or hold the words and change only the grammar; the prediction still moves.">
 <meta property="og:url" content="https://michaeldgreenphd.github.io/patientwords/wording-differences/">
 <meta property="og:image" content="https://michaeldgreenphd.github.io/patientwords/assets/share_card.png">
 <meta property="og:image:width" content="2400">
@@ -18,7 +18,7 @@
 <meta property="og:image:alt" content="Scenario 85: clinical wording predicts inhaler at 69%; the everyday wording “chest gets all tight” predicts shirt, and inhaler falls to 4%.">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Wording differences — PatientWords">
-<meta name="twitter:description" content="Swap one word and gemma-2-2b’s top next word falls from inhaler at 69% to 4%; hold the words and change only the grammar, and the prediction still moves.">
+<meta name="twitter:description" content="Swap one word and gemma-2-2b’s top next word changes from inhaler to shirt, with inhaler dropping out of the top five; hold the words and change only the grammar, and the prediction still moves.">
 <meta name="twitter:image" content="https://michaeldgreenphd.github.io/patientwords/assets/share_card.png">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23faf9f5'/%3E%3Crect x='9' y='9' width='30' height='30' fill='%23111827'/%3E%3Crect x='25' y='25' width='30' height='30' fill='%2315803d'/%3E%3C/svg%3E">
 <style>
@@ -207,23 +207,23 @@
   <p class="subtitle">Swap one word, or only the grammar around it; either moves the prediction.</p>
   <section id="word">
   <h2 class="view-head">Swap the word</h2>
-  <p class="explainer">A single phrase swapped — “asthma flares” vs. “chest gets all tight” — as two stacked traces. Clinical wording gives inhaler at 69%; the patient wording drops it to 4%, and the top guess becomes “shirt”.</p>
-  <span class="stat penalty">Wording gap: −65% probability (0.69 → 0.04)</span>
+  <p class="explainer">A single phrase swapped — “asthma flares” vs. “chest gets all tight” — as two stacked traces. Clinical wording gives inhaler at 68%; under patient wording it drops out of the model’s top five entirely — the top guess becomes “shirt” (20%).</p>
+  <span class="stat penalty">Wording gap: inhaler 0.68 under clinical wording → below the top-five readout floor under patient wording</span>
   <p class="lead-caveat" id="word-caveat" hidden></p>
   <details class="trace-fold">
     <summary>Trace details</summary>
     <p class="traced" data-mode="2panel" data-traced="gemma-2-2b">
       <span class="tm"><b>live trace:</b> gemma-2-2b</span>
-      <span class="tp">hosted circuit-tracer via Neuronpedia · traced July 7, 2026 · scenario 85 of the
-        simulated series · next-token probabilities read directly from the trace ·
-        “asthma flares” vs. “chest gets all tight”, target “ inhaler”</span>
+      <span class="tp">hosted circuit-tracer via Neuronpedia · re-traced July 30, 2026 (first traced
+        July 7, 2026) · scenario 85 of the simulated series · next-token probabilities read directly
+        from the trace · “asthma flares” vs. “chest gets all tight”, target “ inhaler”</span>
     </p>
   </details>
   <div class="embed">
     <iframe class="live" src="../modes/simulated/featured_sim85/index_01.html" loading="lazy"
             title="Live attribution-graph comparison: asthma flares vs. chest gets all tight"></iframe>
   </div>
-  <p class="embed-caption">Live trace: clinical wording reaches “ inhaler” at 69%; the patient phrasing top word is “ shirt”, with inhaler at 4% (scenario 85). Two panels on one scale — clinical above, patient below: green clinical features stack over the swapped word and feed the continuation.</p>
+  <p class="embed-caption">Live trace: clinical wording reaches “ inhaler” at 68%; the patient phrasing top word is “ shirt” (20%), with “ inhaler” below the trace’s top-five readout floor (scenario 85). Two panels on one scale — clinical above, patient below: green clinical features stack over the swapped word and feed the continuation.</p>
   </section>
 
   <section id="grammar">
@@ -446,7 +446,7 @@
 </script>
 <script>
 (function(){
-  // Live aggregate caveat beside the −65% single-case lead: the corpus mean
+  // Live aggregate caveat beside the single-case lead: the corpus mean
   // language penalty and the paraphrase-noise floor, both computed at runtime
   // so the extreme case isn't read as typical. Sources: simulated_scenarios.json
   // (language_penalty) and provenance.json (paraphrase_robustness.mean_abs_delta_vs_baseline).
