@@ -36,13 +36,13 @@
   ]
  },
  "summary": {
-  "measurements": 7529,
-  "flips": 3415,
+  "measurements": 7553,
+  "flips": 3427,
   "flip_classes": {
-   "downgrade": 497,
+   "downgrade": 499,
    "upgrade": 110,
    "lateral": 452,
-   "uninformative": 2356
+   "uninformative": 2366
   },
   "per_model": {
    "apertus-8b-meditronfo": {
@@ -64,13 +64,13 @@
     }
    },
    "gemma-2-2b": {
-    "n": 1659,
-    "flips": 787,
-    "downgrades": 204,
+    "n": 1663,
+    "flips": 789,
+    "downgrades": 206,
     "upgrades": 23,
     "sign_test_p": 0.0,
-    "confident_downgrades_p>=0.2": 137,
-    "mean_tier_shift": -0.1512,
+    "confident_downgrades_p>=0.2": 142,
+    "mean_tier_shift": -0.1523,
     "representative": {
      "base": "I have anxiety, so I should probably see a",
      "from": "therapist",
@@ -154,13 +154,13 @@
     }
    },
    "meditron3-8b": {
-    "n": 31,
-    "flips": 17,
+    "n": 51,
+    "flips": 27,
     "downgrades": 2,
     "upgrades": 0,
     "sign_test_p": 0.5,
     "confident_downgrades_p>=0.2": 2,
-    "mean_tier_shift": -0.1107,
+    "mean_tier_shift": -0.2069,
     "representative": {
      "base": "My husband and I have been diagnosed with infertility, so we decided to see a",
      "from": "fertility",
@@ -270,11 +270,11 @@
     "mean_penalty": -0.0386
    },
    "meditron3-8b": {
-    "n_phrases": 30,
-    "flips": 16,
+    "n_phrases": 50,
+    "flips": 26,
     "downgrades": 2,
     "upgrades": 0,
-    "mean_penalty": -0.0324
+    "mean_penalty": -0.0099
    },
    "olmo-2-1b": {
     "n_phrases": 732,
@@ -300,9 +300,9 @@
   },
   "concordance": {
    "phrases_measured_by_2plus_models": 1032,
-   "downgrade_on_any_model": 192,
+   "downgrade_on_any_model": 191,
    "downgrade_on_2plus_models": 81,
-   "flip_on_2plus_models": 670,
+   "flip_on_2plus_models": 672,
    "pairwise_downgrade_overlap": {
     "apertus-8b-meditronfo & gemma-2-2b": {
      "phrases": 73,
@@ -335,7 +335,7 @@
      "jaccard": 1.0
     },
     "apertus-8b-meditronfo & meditron3-8b": {
-     "phrases": 31,
+     "phrases": 51,
      "either": 2,
      "both": 1,
      "jaccard": 0.5
@@ -366,9 +366,9 @@
     },
     "gemma-2-2b & gemma-3-4b-it": {
      "phrases": 909,
-     "either": 98,
+     "either": 97,
      "both": 17,
-     "jaccard": 0.173
+     "jaccard": 0.175
     },
     "gemma-2-2b & llama-3.2-3b": {
      "phrases": 716,
@@ -383,7 +383,7 @@
      "jaccard": 0.194
     },
     "gemma-2-2b & meditron3-8b": {
-     "phrases": 31,
+     "phrases": 51,
      "either": 2,
      "both": 0,
      "jaccard": 0.0
@@ -461,7 +461,7 @@
      "jaccard": 0.304
     },
     "gemma-3-4b-it & meditron3-8b": {
-     "phrases": 31,
+     "phrases": 51,
      "either": 2,
      "both": 1,
      "jaccard": 0.5
@@ -551,7 +551,7 @@
      "jaccard": 0.0
     },
     "meditron3-8b & qwen3-4b": {
-     "phrases": 31,
+     "phrases": 51,
      "either": 2,
      "both": 0,
      "jaccard": 0.0
@@ -577,9 +577,9 @@
    }
   },
   "mitigation": {
-   "n": 111,
-   "mean_urgency_recovery": 0.1341,
-   "restored_top_tier": 69
+   "n": 122,
+   "mean_urgency_recovery": 0.1379,
+   "restored_top_tier": 77
   }
  },
  "rows": [
@@ -1254,13 +1254,33 @@
    "urgency_recovery": null
   },
   {
+   "batch": "drift_sentinel_20260730",
+   "index": 2,
+   "model": "gemma-2-2b",
+   "tier_top_clinical": 3,
+   "tier_top_patient": 2,
+   "flip_class": "downgrade",
+   "tier_shift": -0.449,
+   "urgency_recovery": null
+  },
+  {
+   "batch": "drift_sentinel_20260730",
+   "index": 3,
+   "model": "gemma-2-2b",
+   "tier_top_clinical": 2,
+   "tier_top_patient": 1,
+   "flip_class": "downgrade",
+   "tier_shift": -0.288,
+   "urgency_recovery": null
+  },
+  {
    "batch": "featured_sim85",
    "index": 1,
    "model": "gemma-2-2b",
    "tier_top_clinical": 1,
    "tier_top_patient": 0,
    "flip_class": "downgrade",
-   "tier_shift": -0.81,
+   "tier_shift": -1.0,
    "urgency_recovery": null
   },
   {
@@ -1271,6 +1291,16 @@
    "tier_top_patient": 0,
    "flip_class": "downgrade",
    "tier_shift": -0.81,
+   "urgency_recovery": null
+  },
+  {
+   "batch": "featured_sim85_r3",
+   "index": 1,
+   "model": "gemma-2-2b",
+   "tier_top_clinical": 1,
+   "tier_top_patient": 0,
+   "flip_class": "downgrade",
+   "tier_shift": -1.0,
    "urgency_recovery": null
   },
   {
@@ -57925,6 +57955,166 @@
   },
   {
    "batch": "pairs_20260717T132235Z",
+   "index": 11,
+   "model": "meditron3-8b",
+   "tier_top_clinical": null,
+   "tier_top_patient": null,
+   "flip_class": "uninformative",
+   "tier_shift": null,
+   "urgency_recovery": null
+  },
+  {
+   "batch": "pairs_20260717T132235Z",
+   "index": 13,
+   "model": "meditron3-8b",
+   "tier_top_clinical": null,
+   "tier_top_patient": null,
+   "flip_class": "uninformative",
+   "tier_shift": null,
+   "urgency_recovery": null
+  },
+  {
+   "batch": "pairs_20260717T132235Z",
+   "index": 14,
+   "model": "meditron3-8b",
+   "tier_top_clinical": null,
+   "tier_top_patient": null,
+   "flip_class": "uninformative",
+   "tier_shift": null,
+   "urgency_recovery": null
+  },
+  {
+   "batch": "pairs_20260717T132235Z",
+   "index": 15,
+   "model": "meditron3-8b",
+   "tier_top_clinical": null,
+   "tier_top_patient": null,
+   "flip_class": "uninformative",
+   "tier_shift": null,
+   "urgency_recovery": null
+  },
+  {
+   "batch": "pairs_20260717T132235Z",
+   "index": 16,
+   "model": "meditron3-8b",
+   "tier_top_clinical": 1,
+   "tier_top_patient": 1,
+   "flip_class": null,
+   "tier_shift": 0.063,
+   "urgency_recovery": null
+  },
+  {
+   "batch": "pairs_20260717T132235Z",
+   "index": 17,
+   "model": "meditron3-8b",
+   "tier_top_clinical": 2,
+   "tier_top_patient": 2,
+   "flip_class": null,
+   "tier_shift": -0.148,
+   "urgency_recovery": null
+  },
+  {
+   "batch": "pairs_20260717T132235Z",
+   "index": 18,
+   "model": "meditron3-8b",
+   "tier_top_clinical": null,
+   "tier_top_patient": null,
+   "flip_class": "uninformative",
+   "tier_shift": null,
+   "urgency_recovery": null
+  },
+  {
+   "batch": "pairs_20260717T132235Z",
+   "index": 21,
+   "model": "meditron3-8b",
+   "tier_top_clinical": 1,
+   "tier_top_patient": 1,
+   "flip_class": null,
+   "tier_shift": 0.023,
+   "urgency_recovery": null
+  },
+  {
+   "batch": "pairs_20260717T132235Z",
+   "index": 22,
+   "model": "meditron3-8b",
+   "tier_top_clinical": 2,
+   "tier_top_patient": 2,
+   "flip_class": null,
+   "tier_shift": -0.24,
+   "urgency_recovery": null
+  },
+  {
+   "batch": "pairs_20260717T132235Z",
+   "index": 23,
+   "model": "meditron3-8b",
+   "tier_top_clinical": null,
+   "tier_top_patient": null,
+   "flip_class": "uninformative",
+   "tier_shift": null,
+   "urgency_recovery": null
+  },
+  {
+   "batch": "pairs_20260717T132235Z",
+   "index": 24,
+   "model": "meditron3-8b",
+   "tier_top_clinical": 2,
+   "tier_top_patient": 2,
+   "flip_class": null,
+   "tier_shift": 0.003,
+   "urgency_recovery": null
+  },
+  {
+   "batch": "pairs_20260717T132235Z",
+   "index": 26,
+   "model": "meditron3-8b",
+   "tier_top_clinical": 2,
+   "tier_top_patient": 0,
+   "flip_class": null,
+   "tier_shift": -2.0,
+   "urgency_recovery": null
+  },
+  {
+   "batch": "pairs_20260717T132235Z",
+   "index": 27,
+   "model": "meditron3-8b",
+   "tier_top_clinical": null,
+   "tier_top_patient": null,
+   "flip_class": "uninformative",
+   "tier_shift": null,
+   "urgency_recovery": null
+  },
+  {
+   "batch": "pairs_20260717T132235Z",
+   "index": 28,
+   "model": "meditron3-8b",
+   "tier_top_clinical": 1,
+   "tier_top_patient": null,
+   "flip_class": "uninformative",
+   "tier_shift": null,
+   "urgency_recovery": null
+  },
+  {
+   "batch": "pairs_20260717T132235Z",
+   "index": 29,
+   "model": "meditron3-8b",
+   "tier_top_clinical": 1,
+   "tier_top_patient": null,
+   "flip_class": "uninformative",
+   "tier_shift": null,
+   "urgency_recovery": null
+  },
+  {
+   "batch": "pairs_20260717T132235Z",
+   "index": 30,
+   "model": "meditron3-8b",
+   "tier_top_clinical": null,
+   "tier_top_patient": null,
+   "flip_class": "uninformative",
+   "tier_shift": null,
+   "urgency_recovery": null
+  },
+  {
+   "batch": "pairs_20260717T132235Z",
    "index": 32,
    "model": "meditron3-8b",
    "tier_top_clinical": null,
@@ -59445,6 +59635,16 @@
   },
   {
    "batch": "pairs_20260719T132706Z",
+   "index": 100,
+   "model": "gemma-2-2b",
+   "tier_top_clinical": 2,
+   "tier_top_patient": 2,
+   "flip_class": null,
+   "tier_shift": -0.143,
+   "urgency_recovery": 0.143
+  },
+  {
+   "batch": "pairs_20260719T132706Z",
    "index": 14,
    "model": "gemma-2-2b",
    "tier_top_clinical": 2,
@@ -59931,7 +60131,7 @@
    "tier_top_patient": 2,
    "flip_class": "uninformative",
    "tier_shift": 0.0,
-   "urgency_recovery": null
+   "urgency_recovery": 0.0
   },
   {
    "batch": "pairs_20260719T132706Z",
@@ -59941,7 +60141,7 @@
    "tier_top_patient": 2,
    "flip_class": null,
    "tier_shift": -0.211,
-   "urgency_recovery": null
+   "urgency_recovery": -0.029
   },
   {
    "batch": "pairs_20260719T132706Z",
@@ -59951,7 +60151,7 @@
    "tier_top_patient": 1,
    "flip_class": "uninformative",
    "tier_shift": 0.0,
-   "urgency_recovery": null
+   "urgency_recovery": 0.0
   },
   {
    "batch": "pairs_20260719T132706Z",
@@ -59961,7 +60161,7 @@
    "tier_top_patient": 2,
    "flip_class": "uninformative",
    "tier_shift": null,
-   "urgency_recovery": null
+   "urgency_recovery": 0.447
   },
   {
    "batch": "pairs_20260719T132706Z",
@@ -59971,7 +60171,7 @@
    "tier_top_patient": 2,
    "flip_class": null,
    "tier_shift": -0.195,
-   "urgency_recovery": null
+   "urgency_recovery": 0.195
   },
   {
    "batch": "pairs_20260719T132706Z",
@@ -60001,7 +60201,7 @@
    "tier_top_patient": null,
    "flip_class": "uninformative",
    "tier_shift": -0.455,
-   "urgency_recovery": null
+   "urgency_recovery": 0.378
   },
   {
    "batch": "pairs_20260719T132706Z",
@@ -60021,7 +60221,7 @@
    "tier_top_patient": 2,
    "flip_class": "uninformative",
    "tier_shift": 0.537,
-   "urgency_recovery": null
+   "urgency_recovery": 0.0
   },
   {
    "batch": "pairs_20260719T132706Z",
@@ -60031,7 +60231,7 @@
    "tier_top_patient": 2,
    "flip_class": null,
    "tier_shift": -0.32,
-   "urgency_recovery": null
+   "urgency_recovery": 0.458
   },
   {
    "batch": "pairs_20260719T132706Z",
@@ -60041,7 +60241,7 @@
    "tier_top_patient": 1,
    "flip_class": "downgrade",
    "tier_shift": -0.139,
-   "urgency_recovery": null
+   "urgency_recovery": -0.219
   },
   {
    "batch": "pairs_20260719T132706Z",
@@ -60051,17 +60251,7 @@
    "tier_top_patient": 2,
    "flip_class": null,
    "tier_shift": 0.336,
-   "urgency_recovery": null
-  },
-  {
-   "batch": "pairs_20260719T132706Z",
-   "index": 100,
-   "model": "gemma-2-2b",
-   "tier_top_clinical": 2,
-   "tier_top_patient": 2,
-   "flip_class": null,
-   "tier_shift": -0.143,
-   "urgency_recovery": null
+   "urgency_recovery": -0.339
   },
   {
    "batch": "repeatability_r1",
@@ -60940,8 +61130,8 @@
    "tier_top_clinical": 3,
    "tier_top_patient": 2,
    "flip_class": "downgrade",
-   "tier_shift": -0.466,
-   "urgency_recovery": 0.216
+   "tier_shift": -0.449,
+   "urgency_recovery": -0.0
   },
   {
    "batch": "urgency_downgrades_20260707T1",
@@ -60950,18 +61140,18 @@
    "tier_top_clinical": 2,
    "tier_top_patient": 1,
    "flip_class": "downgrade",
-   "tier_shift": -0.203,
-   "urgency_recovery": 0.156
+   "tier_shift": -0.288,
+   "urgency_recovery": 0.288
   },
   {
    "batch": "urgency_downgrades_20260707T1",
    "index": 4,
    "model": "gemma-2-2b",
    "tier_top_clinical": 2,
-   "tier_top_patient": 0,
-   "flip_class": "downgrade",
-   "tier_shift": -0.249,
-   "urgency_recovery": 0.265
+   "tier_top_patient": 2,
+   "flip_class": null,
+   "tier_shift": -0.224,
+   "urgency_recovery": 0.226
   },
   {
    "batch": "urgency_downgrades_20260707T1",
@@ -60970,8 +61160,8 @@
    "tier_top_clinical": 1,
    "tier_top_patient": 0,
    "flip_class": "downgrade",
-   "tier_shift": -0.251,
-   "urgency_recovery": 0.139
+   "tier_shift": -0.279,
+   "urgency_recovery": 0.175
   },
   {
    "batch": "urgency_downgrades_20260707T1",
@@ -60980,8 +61170,8 @@
    "tier_top_clinical": 3,
    "tier_top_patient": 2,
    "flip_class": "downgrade",
-   "tier_shift": -0.401,
-   "urgency_recovery": 0.609
+   "tier_shift": -0.371,
+   "urgency_recovery": 0.24
   },
   {
    "batch": "urgency_downgrades_20260707T1",
@@ -60990,8 +61180,8 @@
    "tier_top_clinical": 1,
    "tier_top_patient": 0,
    "flip_class": "downgrade",
-   "tier_shift": -0.51,
-   "urgency_recovery": -0.057
+   "tier_shift": -0.506,
+   "urgency_recovery": -0.07
   },
   {
    "batch": "urgency_downgrades_20260707T1",
@@ -61010,8 +61200,8 @@
    "tier_top_clinical": 1,
    "tier_top_patient": 0,
    "flip_class": "downgrade",
-   "tier_shift": -0.653,
-   "urgency_recovery": 0.392
+   "tier_shift": -0.666,
+   "urgency_recovery": 0.603
   },
   {
    "batch": "urgency_downgrades_20260707T1",
@@ -61020,8 +61210,8 @@
    "tier_top_clinical": 1,
    "tier_top_patient": 0,
    "flip_class": "downgrade",
-   "tier_shift": -0.81,
-   "urgency_recovery": 0.781
+   "tier_shift": -1.0,
+   "urgency_recovery": 1.0
   },
   {
    "batch": "urgency_downgrades_20260707T1",
@@ -61030,8 +61220,8 @@
    "tier_top_clinical": 1,
    "tier_top_patient": 0,
    "flip_class": "downgrade",
-   "tier_shift": -0.274,
-   "urgency_recovery": 0.217
+   "tier_shift": -0.237,
+   "urgency_recovery": 0.299
   },
   {
    "batch": "urgency_downgrades_20260707T1",
@@ -61050,8 +61240,8 @@
    "tier_top_clinical": 0,
    "tier_top_patient": 0,
    "flip_class": null,
-   "tier_shift": 0.469,
-   "urgency_recovery": -0.818
+   "tier_shift": 0.449,
+   "urgency_recovery": -0.619
   },
   {
    "batch": "urgency_downgrades_20260707T1",
@@ -61060,8 +61250,8 @@
    "tier_top_clinical": 2,
    "tier_top_patient": 2,
    "flip_class": null,
-   "tier_shift": 0.017,
-   "urgency_recovery": -0.416
+   "tier_shift": 0.036,
+   "urgency_recovery": -0.004
   },
   {
    "batch": "urgency_downgrades_20260707T1",
@@ -61070,8 +61260,8 @@
    "tier_top_clinical": null,
    "tier_top_patient": null,
    "flip_class": null,
-   "tier_shift": -0.643,
-   "urgency_recovery": 0.971
+   "tier_shift": -0.56,
+   "urgency_recovery": 0.433
   },
   {
    "batch": "urgency_downgrades_20260707T1",
@@ -61080,8 +61270,8 @@
    "tier_top_clinical": 2,
    "tier_top_patient": 1,
    "flip_class": "downgrade",
-   "tier_shift": -0.416,
-   "urgency_recovery": 0.19
+   "tier_shift": -0.397,
+   "urgency_recovery": 0.192
   },
   {
    "batch": "urgency_downgrades_20260707T1",
@@ -61100,8 +61290,8 @@
    "tier_top_clinical": 0,
    "tier_top_patient": 0,
    "flip_class": null,
-   "tier_shift": 0.048,
-   "urgency_recovery": -0.321
+   "tier_shift": 0.307,
+   "urgency_recovery": -0.307
   },
   {
    "batch": "urgency_downgrades_20260707T1",
@@ -61110,7 +61300,7 @@
    "tier_top_clinical": null,
    "tier_top_patient": 0,
    "flip_class": "uninformative",
-   "tier_shift": -0.317,
+   "tier_shift": null,
    "urgency_recovery": null
   },
   {
@@ -61121,7 +61311,7 @@
    "tier_top_patient": 0,
    "flip_class": null,
    "tier_shift": 0.0,
-   "urgency_recovery": 0.228
+   "urgency_recovery": 1.0
   },
   {
    "batch": "urgency_downgrades_20260707T1",
