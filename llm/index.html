@@ -149,6 +149,16 @@
   .arm-t .ask{color:var(--muted)}
   .model-row{grid-column:1/-1;border-top:1px solid var(--hairline);margin:0;
     padding:8px 0 2px;font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.04em}
+  /* arriving from a mark in the downgrade map: say which row the mark meant,
+     then get out of the way (the class is dropped after ~2s) */
+  .model-row.row-flash{box-shadow:inset 3px 0 0 var(--penalty)}
+  @media (prefers-reduced-motion: no-preference){
+    .model-row.row-flash{animation:rowflash 2s ease-out}
+    @keyframes rowflash{
+      0%{background:#f7e7e4}
+      100%{background:transparent}
+    }
+  }
   .cell{min-width:0;padding:2px 0 14px}
   .cell-arm{position:absolute;left:-9999px;font-family:var(--mono);font-size:10px;
     letter-spacing:.14em;text-transform:uppercase;margin:0 0 4px}
@@ -836,7 +846,9 @@
       body.appendChild(el('p','resp-text missing span-all','— no responses archived yet'));
     }
     models.forEach(function(m){
-      body.appendChild(el('p','model-row',m));
+      var mrow=el('p','model-row',m);
+      mrow.dataset.model=m;            // join key for the downgrade map's marks
+      body.appendChild(mrow);
       var rowCells={};
       arms.forEach(function(d){
         var mb=null,rs=d.arm.responses||[];
@@ -860,6 +872,28 @@
     go(i);
     var t=document.getElementById('sc-meta');
     if(t)t.scrollIntoView({behavior:'smooth',block:'start'});
+  }
+
+  // A mark in the downgrade map is a (model x scenario) cell, so a click knows
+  // which single answer changed - land on that model's row, not just the top of
+  // the scenario. Falls back to the scenario header when the row cannot be
+  // found (older payload shapes, or a model graded but not archived).
+  function goAndShowModel(i,spec){
+    go(i);
+    var row=null;
+    if(spec){
+      var rows=document.querySelectorAll('#sc-body .model-row');
+      for(var k=0;k<rows.length;k++){
+        if(rows[k].dataset.model===spec){row=rows[k];break;}
+      }
+    }
+    if(!row){goAndShow(i);return;}
+    row.scrollIntoView({behavior:'smooth',block:'center'});
+    row.classList.remove('row-flash');
+    void row.offsetWidth;            // restart the cue on a repeat click
+    row.classList.add('row-flash');
+    if(row._flashTimer)clearTimeout(row._flashTimer);
+    row._flashTimer=setTimeout(function(){row.classList.remove('row-flash');},2000);
   }
   function scenarioLink(label,si){
     var a=el('a',null,label);
@@ -1220,9 +1254,11 @@
         if(d==null){attrs.fill='none';attrs.stroke='#f5f5f5';}
         else if(d.downgrade){attrs.fill='var(--penalty,#b4483d)';}
         else{attrs.fill='none';attrs.stroke='#eeeeee';}
+        attrs.cursor='pointer';
         var rc=svgNode('rect',attrs);
-        rc.addEventListener('click',function(){go(si);});
-        var t=svgNode('title',{},'scenario '+(si+1)+(d?(': '+d.clinical+' → '+d.patient):': not graded'));
+        rc.addEventListener('click',function(){goAndShowModel(si,m.spec);});
+        var t=svgNode('title',{},'scenario '+(si+1)+(d?(': '+d.clinical+' → '+d.patient):': not graded')
+          +' — open '+m.label+'’s answers');
         rc.appendChild(t);
         svg.appendChild(rc);
       });
