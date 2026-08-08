@@ -1583,6 +1583,12 @@
       renderFigs();
       render();
       renderProv();
+      // An explicit deep link (#sN or ?s=N) means the reader came for one scenario:
+      // land them on it, not on the page top.
+      if(/^#s\d+$/.test(location.hash)||/[?&]s=\d+/.test(location.search)){
+        var tgt=document.getElementById('sc-meta');
+        if(tgt)tgt.scrollIntoView({block:'start'});
+      }
       window.addEventListener('hashchange',function(){var i=scenarioFromHash();if(i!==current){current=i;render();}});
     })
     .catch(function(){/* pending stays */});
