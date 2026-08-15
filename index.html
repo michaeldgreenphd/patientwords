@@ -468,7 +468,7 @@
       <h3>Simulated Scenarios</h3>
       <p>Claude writes new patient-vs-clinical pairs, and LLM validators accept or reject each (based on formatting). Accepted pairs are traced on gemma-2-2b and published with the generator’s rationale and cost.</p>
       <span class="stat" id="sim-stat" hidden></span>
-      <p class="stat-note">This is a stress-test. Topics were chosen to probe suspected failure modes from circuit tracing of sentences. The pooled share is not a population rate.</p>
+      <p class="stat-note">Batches here were generated to stress specific topics, so flip-prone scenarios are over-represented by design; the pooled share is a property of this stress-test set, not an estimate of how often models flip in general.</p>
       <details class="trace-fold">
         <summary>Trace details</summary>
         <p class="traced" data-mode="simulated" data-traced="gemma-2-2b">
@@ -783,7 +783,7 @@
         },0);
       var scenarios=data.scenarios||[];
       var scored=scenarios.filter(function(s){
-        return typeof s.language_penalty==='number';
+        return typeof s.language_penalty==='number'&&!s.steered;
       });
       var screened=(typeof tot.screened_out==='number')?tot.screened_out
         :scenarios.filter(function(s){
@@ -791,12 +791,17 @@
         }).length;
       var nMeasured=(typeof tot.measured==='number')?tot.measured
         :scenarios.length-screened;
+      // Steered batches are published and labelled, but every figure on this
+      // page is computed without them: a share over a set chosen to flip
+      // measures the selection, not the model.
+      var nSteered=(typeof tot.steered_measured==='number')?tot.steered_measured:0;
       if(count)count.textContent=(accepted||scenarios.length)
         +' generated pairs · '+nMeasured+' measured'
-        +(screened?' · '+screened+' screened out':'');
+        +(screened?' · '+screened+' screened out':'')
+        +(nSteered?' · '+nSteered+' steered, shown but not pooled':'');
       if(!scenarios.length)return;
       var measured=scenarios.filter(function(s){
-        return !(s.screening&&s.screening.status==='screened_out');
+        return !(s.screening&&s.screening.status==='screened_out')&&!s.steered;
       });
       var flips=(typeof tot.flipped_base==='number')?tot.flipped_base
         :measured.filter(function(s){return s.flipped;}).length;
@@ -921,7 +926,8 @@
     // the row-level mean stays as fallback for older payloads
     var sp=sim.summary&&sim.summary.penalty;
     var useSum=!!(sp&&typeof sp.mean_phrase_deduped==='number');
-    var scored=sim.scenarios.filter(function(s){return typeof s.language_penalty==='number';});
+    var scored=sim.scenarios.filter(function(s){
+      return typeof s.language_penalty==='number'&&!s.steered;});
     if(!useSum&&!scored.length)return;
     var mean=useSum?sp.mean_phrase_deduped
       :scored.reduce(function(a,s){return a+s.language_penalty;},0)/scored.length;
