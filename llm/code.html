@@ -46,6 +46,8 @@
   .resp-box .md-list:last-child{margin-bottom:0}
   .resp-box .md-list li{margin:0 0 .3em}
   .resp-box code{font-family:var(--mono);font-size:14px}
+  .resp-box .md-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:1.1em 0 .5em}
+  .resp-box .md-h:first-child{margin-top:0}
   fieldset{border:0;padding:0;margin:0 0 14px}
   legend{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin:0 0 8px}
   .tiers{display:flex;flex-direction:column;gap:6px}
@@ -177,6 +179,8 @@
       }
       block.split('\n').forEach(function(line){
         if(!line.trim())return;
+        var h=/^\s*(#{1,6})\s+(.*)$/.exec(line);
+        if(h){flush();runIsBullet=null;var hd=el('div','md-h');inline(hd,h[2]);host.appendChild(hd);return;}
         var isB=/^\s*[-*+]\s+/.test(line);
         if(runIsBullet!==null&&isB!==runIsBullet)flush();
         runIsBullet=isB; run.push(line);
