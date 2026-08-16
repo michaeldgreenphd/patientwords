@@ -39,7 +39,13 @@
   .progress{font-family:var(--mono);font-size:12px;color:var(--muted);margin:14px 0 8px}
   .progress b{color:var(--ink)}
   .resp-box{border:1px solid var(--ink);padding:16px 18px;margin:8px 0 16px;background:#fff}
-  .resp-box p{margin:0;font-size:16px;line-height:1.6;white-space:pre-wrap}
+  .resp-box p{margin:0;font-size:16px;line-height:1.6}
+  .resp-box .md-p{margin:0 0 .75em}
+  .resp-box .md-p:last-child{margin-bottom:0}
+  .resp-box .md-list{margin:0 0 .75em;padding-left:1.2em;font-size:16px;line-height:1.6}
+  .resp-box .md-list:last-child{margin-bottom:0}
+  .resp-box .md-list li{margin:0 0 .3em}
+  .resp-box code{font-family:var(--mono);font-size:14px}
   fieldset{border:0;padding:0;margin:0 0 14px}
   legend{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin:0 0 8px}
   .tiers{display:flex;flex-direction:column;gap:6px}
@@ -97,7 +103,7 @@
       <span class="note">recorded with every judgment · roster is set when the sample is generated; new coders are added by regenerating it</span>
     </div>
     <p class="progress" id="cd-progress" aria-live="polite"></p>
-    <div class="resp-box"><p id="cd-text"></p></div>
+    <div class="resp-box"><div id="cd-text"></div></div>
     <fieldset>
       <legend>Primary tier (one)</legend>
       <div class="tiers" id="cd-tiers" role="radiogroup" aria-label="Tier"></div>
@@ -137,6 +143,47 @@
   var data=null, cur=0, store={}, storeKey=null;
 
   function el(t,c,x){var e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e;}
+
+  // Responses arrive as assistant markdown. Render a minimal subset — bold, italic,
+  // bullets, paragraphs — by building nodes, never innerHTML: the text is model-authored
+  // and this repo is public, so no string ever reaches the parser as markup.
+  function inline(node,s){
+    var re=/(\*\*|__)(.+?)\1|(\*|_)([^*_]+?)\3|`([^`]+?)`/g, last=0, m;
+    while((m=re.exec(s))!==null){
+      if(m.index>last)node.appendChild(document.createTextNode(s.slice(last,m.index)));
+      if(m[2]!=null)node.appendChild(el('strong',null,m[2]));
+      else if(m[4]!=null)node.appendChild(el('em',null,m[4]));
+      else node.appendChild(el('code',null,m[5]));
+      last=re.lastIndex;
+    }
+    if(last<s.length)node.appendChild(document.createTextNode(s.slice(last)));
+  }
+  function renderMarkdown(host,text){
+    host.textContent='';
+    String(text==null?'':text).split(/\n{2,}/).forEach(function(block){
+      // A block often mixes a lead-in line with bullets under it, so group consecutive
+      // lines of the same kind rather than judging the block as a whole.
+      var run=[], runIsBullet=null;
+      function flush(){
+        if(!run.length)return;
+        if(runIsBullet){
+          var ul=el('ul','md-list');
+          run.forEach(function(l){var li=document.createElement('li');inline(li,l.replace(/^\s*[-*+]\s+/,''));ul.appendChild(li);});
+          host.appendChild(ul);
+        }else{
+          var p=el('p','md-p');inline(p,run.join(' '));host.appendChild(p);
+        }
+        run=[];
+      }
+      block.split('\n').forEach(function(line){
+        if(!line.trim())return;
+        var isB=/^\s*[-*+]\s+/.test(line);
+        if(runIsBullet!==null&&isB!==runIsBullet)flush();
+        runIsBullet=isB; run.push(line);
+      });
+      flush(); runIsBullet=null;
+    });
+  }
   function save(){try{localStorage.setItem(storeKey,JSON.stringify(store));}catch(e){}}
   function codedCount(){var n=0;data.items.forEach(function(it){if((store[it.coding_id]||{}).tier)n++;});return n;}
 
@@ -149,7 +196,7 @@
 
   function render(){
     var it=data.items[cur], c=store[it.coding_id]||{};
-    document.getElementById('cd-text').textContent=it.response_text;
+    renderMarkdown(document.getElementById('cd-text'),it.response_text);
     var tiers=document.getElementById('cd-tiers'); tiers.textContent='';
     data.rubric.tiers.forEach(function(t){
       var lab=el('label','tier'+(c.tier===t.id?' on':''));
