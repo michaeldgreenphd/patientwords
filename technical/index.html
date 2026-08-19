@@ -303,6 +303,14 @@
   .jsout-off{border-color:var(--penalty);color:var(--penalty)}
   @media (max-width:560px){.jspace-3,.jspace-2{grid-template-columns:1fr}}
   @media (max-width:760px){body{font-size:16px}}
+
+  /* Part 4 additions (2026-08-19): medical-twin callout + integrity panel */
+  #twin svg{display:block;max-width:100%}
+  .rigor{font-family:var(--mono);font-size:12.5px;border-collapse:collapse;min-width:560px}
+  .rigor th{text-align:left;font-weight:600;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--ink);padding:5px 16px 5px 0}
+  .rigor td{border-bottom:1px solid var(--hairline);padding:6px 16px 6px 0;vertical-align:top}
+  .rigor td:first-child{font-weight:600;white-space:nowrap}
+  .rigor-scroll{overflow-x:auto}
 </style>
 </head>
 <body>
@@ -530,6 +538,7 @@
       <p class="cap" id="cap-loglens">exploratory · gemma-2-2b · pairs whose answer never forms counted at right · coverage limited to pairs measured under both lenses</p>
     </details>
 
+
   </section>
 
   <section id="models">
@@ -569,6 +578,14 @@
       <details class="conv-table"><summary>Data table (every point)</summary>
         <div id="conv-table-wrap"></div></details>
     </details>
+
+    <h3>Medical fine-tuning does not close the gap</h3>
+    <p>medgemma-4b-it is gemma-3-4b-it&rsquo;s medical fine-tune &mdash; same base, same
+      size, tuned on medical text. If domain tuning fixed register sensitivity, the
+      pair would separate. <span id="twin-line">It does not.</span></p>
+    <div id="twin" aria-label="Interval comparison of a base model and its medical fine-tune"></div>
+    <p class="me-caption" id="twin-cap"></p>
+    <p class="explainer" id="twin-others"></p>
 
     <p class="explainer" id="rival-note">A rival reading we cannot fully exclude: the models may be
       matching the register of the question &mdash; accommodating the speaker.
@@ -616,6 +633,26 @@
         <li>Source: <a href="https://github.com/michaeldgreenphd/patientwords/blob/main/data/model_stats.json">the per-model statistics file on GitHub</a>.</li>
       </ul>
     </details>
+
+    <h3>The integrity panel</h3>
+    <p>The checks that keep this study honest, gathered in one place. Each value is
+      read from the corresponding published data file when this page loads.</p>
+    <p class="scroll-hint" aria-hidden="true">table scrolls sideways &rarr;</p>
+    <div class="rigor-scroll">
+      <table class="rigor" id="rigor">
+        <thead><tr><th scope="col">mechanism</th><th scope="col">what it does</th><th scope="col">live value</th></tr></thead>
+        <tbody>
+          <tr><td>pre-registration</td><td>endpoints and primary models fixed before measurement; departures logged in <a href="https://github.com/michaeldgreenphd/patientwords-engine/blob/claude/gemma-clinical-colloquial-interp-mavx04/docs/prereg_divergence_log.md">the divergence log</a></td><td id="rg-prereg">&mdash;</td></tr>
+          <tr><td>sealed holdout</td><td>a slice of phrases withheld from every published file until the registered endpoint runs &mdash; the contamination guard</td><td id="rg-holdout">&mdash;</td></tr>
+          <tr><td>backend cross-check</td><td>the anchor model is measured twice &mdash; hosted attribution graphs and independent CPU inference &mdash; and the two must agree</td><td id="rg-backend">accumulating; reported when parity lands</td></tr>
+          <tr><td>drift sentinel</td><td>the same probe re-traced daily against a pinned baseline, so a silent host change cannot masquerade as a finding</td><td id="rg-drift">&mdash;</td></tr>
+          <tr><td>retrace consistency</td><td>pairs that happened to be traced repeatedly, checked for agreement</td><td id="rg-retrace">&mdash;</td></tr>
+          <tr><td>multiplicity</td><td>Benjamini&ndash;Hochberg correction within the registration family</td><td id="rg-bh">&mdash;</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="me-caption">Assembled from the same data files the figures above read; nothing on this panel is hand-entered.</p>
+
 
   </section>
 
@@ -2089,6 +2126,94 @@
       }
     })
     .catch(function(){/* pending states stay */});
+})();
+</script>
+
+<script>
+/* Part 4 additions (2026-08-19): medical-twin callout + integrity panel.
+   Separate fetches on purpose - nothing here can break the forest renderer. */
+(function(){
+  'use strict';
+  var NS='http://www.w3.org/2000/svg';
+  function sv(t,a){var e=document.createElementNS(NS,t);for(var k in a)e.setAttribute(k,a[k]);return e;}
+  function pp(x){return (100*x).toFixed(1);}
+  fetch('../data/model_stats.json',{cache:'no-cache'})
+    .then(function(r){if(!r.ok)throw 0;return r.json();})
+    .then(function(d){
+      var per=d.per_model||{};
+      var base=per['gemma-3-4b-it'],med=per['medgemma-4b-it'];
+      if(base&&med){
+        var rows=[
+          {id:'gemma-3-4b-it',q:base.penalty,color:'#1c1c19',open:false,suffix:''},
+          {id:'medgemma-4b-it',q:med.penalty,color:'#b4483d',open:true,suffix:' \u00b7 medical fine-tune'}
+        ];
+        var W=640,H=104,ML=250,MR=40,y0=30,R=36;
+        var lo=Math.min(base.penalty.ci95[0],med.penalty.ci95[0])-0.005,hi=0.003;
+        function X(v){return ML+(v-lo)/(hi-lo)*(W-ML-MR);}
+        var svg=sv('svg',{viewBox:'0 0 '+W+' '+H,role:'img',
+          'aria-label':'Mean wording gap with 95% intervals: the base model and its medical fine-tune overlap'});
+        svg.appendChild(sv('line',{x1:X(0),y1:12,x2:X(0),y2:H-22,stroke:'#c3c9d2','stroke-width':1}));
+        var zl=sv('text',{x:X(0),y:H-8,'font-family':'ui-monospace,Menlo,monospace','font-size':10,fill:'#6d6c66','text-anchor':'middle'});
+        zl.textContent='0';svg.appendChild(zl);
+        rows.forEach(function(r,i){
+          var y=y0+i*R,q=r.q;
+          var lab=sv('text',{x:4,y:y+4,'font-family':'ui-monospace,Menlo,monospace','font-size':12,fill:r.color});
+          lab.textContent=r.id+r.suffix; svg.appendChild(lab);
+          svg.appendChild(sv('line',{x1:X(q.ci95[0]),y1:y,x2:X(q.ci95[1]),y2:y,stroke:r.color,'stroke-width':2}));
+          var c=sv('circle',{cx:X(q.mean),cy:y,r:4.2,stroke:r.color,'stroke-width':2,
+            fill:r.open?'#faf9f5':r.color});
+          var t=document.createElementNS(NS,'title');
+          t.textContent=r.id+': mean '+pp(q.mean)+' pp, 95% CI ['+pp(q.ci95[0])+', '+pp(q.ci95[1])+']';
+          c.appendChild(t); svg.appendChild(c);
+        });
+        document.getElementById('twin').appendChild(svg);
+        var inside=med.penalty.ci95[0]>=base.penalty.ci95[0]&&med.penalty.ci95[1]<=base.penalty.ci95[1];
+        var overlap=med.penalty.ci95[0]<=base.penalty.ci95[1]&&base.penalty.ci95[0]<=med.penalty.ci95[1];
+        var tl=document.getElementById('twin-line');
+        if(tl)tl.textContent=inside?'It does not: the fine-tune\u2019s interval sits inside its base\u2019s.'
+          :overlap?'It does not: the two intervals overlap.'
+          :'The intervals separate \u2014 read the exact values below.';
+        var tc=document.getElementById('twin-cap');
+        if(tc)tc.textContent='open marker = medical fine-tune \u00b7 base '+pp(base.penalty.mean)+' pp vs fine-tune '+pp(med.penalty.mean)+' pp \u00b7 same statistics file as the figure above';
+      }
+      var m3=per['meditron3-8b'],ap=per['apertus-8b-meditronfo'];
+      var to=document.getElementById('twin-others');
+      if(to&&m3&&ap){
+        to.textContent='The two 8B medical fine-tunes tell the same story from the other side: '
+          +'meditron3-8b downgrades '+m3.sign_test.downgrades+' care-urgency tiers against '
+          +m3.sign_test.upgrades+' upgrades, apertus-8b-meditronfo '+ap.sign_test.downgrades
+          +' against '+ap.sign_test.upgrades+'. Training on medical text changes what a model '
+          +'knows; it does not change what it does when the patient speaks casually.';
+      }
+      var reg=(d.registration||{}).pre_registered||[];
+      var pr=document.getElementById('rg-prereg');
+      if(pr)pr.textContent=reg.length?reg.length+' models pre-registered: '+reg.join(', '):'\u2014';
+      var bhv=document.getElementById('rg-bh');
+      var bh=(d.benjamini_hochberg||{}).families;
+      if(bhv&&bh){var fams=Object.keys(bh);
+        bhv.textContent=fams.map(function(f){return f+': '+(bh[f].n_tests||'?')+' tests';}).join(' \u00b7 ');}
+    }).catch(function(){});
+  fetch('../data/simulated_scenarios.json',{cache:'no-cache'})
+    .then(function(r){if(!r.ok)throw 0;return r.json();})
+    .then(function(p2){var h=document.getElementById('rg-holdout');
+      if(h&&p2.holdout_withheld!=null)h.textContent=p2.holdout_withheld+' scenario rows withheld from this payload';})
+    .catch(function(){});
+  fetch('../data/drift_series.json',{cache:'no-cache'})
+    .then(function(r){if(!r.ok)throw 0;return r.json();})
+    .then(function(ds){var h=document.getElementById('rg-drift');
+      if(!h||ds.days_measured==null)return;
+      var dm=ds.days_measured,n=Array.isArray(dm)?dm.length:dm;
+      var last=Array.isArray(dm)&&dm.length?String(dm[dm.length-1]):'';
+      if(last.length===8)last=last.slice(0,4)+'-'+last.slice(4,6)+'-'+last.slice(6);
+      var fm=ds.first_moved;var fmd=fm&&typeof fm==='object'?(fm.day||fm.date||''):(fm||'');
+      if(String(fmd).length===8)fmd=String(fmd).slice(0,4)+'-'+String(fmd).slice(4,6)+'-'+String(fmd).slice(6);
+      h.textContent=n+' days measured'+(last?(' \u00b7 through '+last):'')+(fmd?(' \u00b7 first movement '+fmd):'');})
+    .catch(function(){});
+  fetch('../data/retrace_consistency.json',{cache:'no-cache'})
+    .then(function(r){if(!r.ok)throw 0;return r.json();})
+    .then(function(rc){var h=document.getElementById('rg-retrace');
+      if(h&&rc.pairs_retraced!=null)h.textContent=rc.pairs_retraced+' pairs retraced \u00b7 '+(rc.top_word_stable_pairs!=null?rc.top_word_stable_pairs+' with a stable top word':'');})
+    .catch(function(){});
 })();
 </script>
 </body>

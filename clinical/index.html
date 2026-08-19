@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Clinical Brief — PatientWords</title>
+<meta name="description" content="For clinicians: language models triage the same symptom differently depending on whether it is phrased in clinical terms or the way patients actually talk. Three numbers, one verbatim pair, and where the downgrades land.">
+<link rel="canonical" href="https://michaeldgreenphd.github.io/patientwords/clinical/">
+<meta name="theme-color" content="#faf9f5">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="PatientWords">
+<meta property="og:title" content="Clinical Brief — PatientWords">
+<meta property="og:description" content="Same symptom, two phrasings, different dispositions: how language models move care advice down the urgency ladder when the patient speaks colloquially.">
+<meta property="og:url" content="https://michaeldgreenphd.github.io/patientwords/clinical/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Clinical Brief — PatientWords">
+<meta name="twitter:description" content="Same symptom, two phrasings, different dispositions.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23faf9f5'/%3E%3Crect x='9' y='9' width='30' height='30' fill='%23111827'/%3E%3Crect x='25' y='25' width='30' height='30' fill='%2315803d'/%3E%3C/svg%3E">
+<style>
+  :root{
+    --paper:#faf9f5; --ink:#1c1c19; --patient:#111827; --clinical:#15803d;
+    --penalty:#b4483d; --muted:#6d6c66; --structural:#c3c9d2; --hairline:#dcdad2;
+    --serif:'Iowan Old Style','Palatino Linotype',Palatino,'Book Antiqua',Georgia,serif;
+    --mono:ui-monospace,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace;
+  }
+  html{background:var(--paper)}
+  body{margin:0;padding:0;background:var(--paper);color:var(--ink);
+    font-family:var(--serif);font-size:17px;line-height:1.62;
+    -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+  main{max-width:860px;margin:0 auto;padding:0 22px 56px}
+  a{color:inherit}
+  a:focus-visible{outline:2px solid var(--clinical);outline-offset:3px;border-radius:1px}
+  .skip{position:absolute;left:-9999px;top:0;background:var(--paper);color:var(--ink);padding:8px 14px;border:1px solid var(--ink);z-index:10}
+  .skip:focus{left:8px}
+  ::selection{background:#dbe9df}
+  .masthead{max-width:860px;margin:0 auto;padding:20px 22px 0}
+  .masthead-row{display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:8px 24px;padding:10px 0 12px}
+  .wordmark{font-family:var(--serif);font-size:19px;font-weight:600;letter-spacing:.02em;text-decoration:none}
+  .wordmark .pw-p{color:var(--patient)}
+  .wordmark .pw-w{color:var(--clinical);font-style:italic}
+  .wordmark .pw-w::before{content:'·';color:var(--muted);font-style:normal;font-weight:400;margin:0 3px 0 2px}
+  .masthead nav{display:flex;flex-wrap:wrap;gap:6px 20px}
+  .masthead nav a{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);text-decoration:none;padding:2px 0}
+  .masthead nav a:hover{color:var(--ink);text-decoration:underline;text-underline-offset:4px}
+  .masthead nav a:nth-child(3),.masthead nav a:nth-child(9){margin-right:2vw}
+  .rule-heavy{border:0;border-top:2px solid var(--ink);margin:0}
+  .rule-fine{border:0;border-top:1px solid var(--hairline);margin:3px 0 0}
+  .dateline{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin:26px 0 6px}
+  h1{font-size:33px;line-height:1.15;margin:0 0 8px;font-weight:600;letter-spacing:-.01em;max-width:24ch}
+  h2{font-size:21px;margin:38px 0 6px;font-weight:600}
+  p{margin:.5em 0;max-width:66ch}
+  .explainer{color:var(--muted);font-size:16px}
+  .draft{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--penalty)}
+  .stat{display:flex;gap:38px;flex-wrap:wrap;margin:20px 0 6px}
+  .stat>div{min-width:150px;max-width:220px}
+  .stat .n{font-family:var(--mono);font-size:34px;font-weight:600;font-variant-numeric:tabular-nums;line-height:1.05}
+  .stat .d{font-size:13.5px;color:var(--muted);line-height:1.4;margin-top:3px}
+  .fig{border:1px solid var(--hairline);background:#fff;padding:18px 20px 14px;margin:18px 0}
+  .fig .figlab{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  .fig .cap{font-size:13.5px;color:var(--muted);margin-top:10px;line-height:1.5;max-width:none}
+  .fig .cap b{color:var(--ink)}
+  .vig{display:grid;grid-template-columns:1fr 1fr;gap:0;border-top:1px solid var(--hairline);margin-top:10px}
+  @media (max-width:560px){.vig{grid-template-columns:1fr}.vig>div:first-child{border-right:0;border-bottom:1px solid var(--hairline)}}
+  .vig>div{padding:12px 14px 10px}
+  .vig>div:first-child{border-right:1px solid var(--hairline)}
+  .vig .reg{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase}
+  .vig .say{font-size:16px;line-height:1.5;min-height:64px;margin-top:4px}
+  .vig .say i{font-style:italic;background:#eaf3ec}
+  .vig>div:last-child .say i{background:#f7ebe9}
+  .sb{margin-top:8px}
+  .sb .r{display:flex;align-items:center;gap:8px;margin:3px 0;font-family:var(--mono);font-size:12px}
+  .sb .w{flex:none;width:78px;text-align:right;color:var(--muted);overflow:hidden;text-overflow:ellipsis}
+  .sb .b{height:10px;background:var(--structural);min-width:1px}
+  .sb .r:first-child .b{background:var(--clinical)}
+  .sb .p{color:var(--muted);font-variant-numeric:tabular-nums}
+  .tierline{font-family:var(--mono);font-size:12px;margin-top:10px;color:var(--muted)}
+  .tierline b{color:var(--penalty);font-weight:600}
+  .mxwrap{overflow-x:auto;margin-top:8px}
+  table.mx{font-family:var(--mono);font-size:12px;border-collapse:collapse;font-variant-numeric:tabular-nums}
+  .mx th{font-weight:600;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:4px 10px;text-align:center;border:0}
+  .mx th[scope=row]{text-align:right;padding-right:12px;white-space:nowrap}
+  .mx td{width:78px;height:48px;text-align:center;vertical-align:middle;border:1px solid var(--hairline);position:relative}
+  .mx td .dot{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);border-radius:50%;background:var(--penalty);opacity:.8}
+  .mx td .v{position:relative;font-weight:600}
+  .mx td.diag{background:var(--paper)}
+  .pend{color:var(--muted)}
+  .box{border-left:3px solid var(--clinical);padding:2px 0 2px 16px;margin:22px 0}
+  .box.warn{border-left-color:var(--penalty)}
+  footer{margin-top:56px;padding-top:14px;border-top:1px solid var(--hairline);font-size:13px;color:var(--muted);line-height:1.7}
+</style>
+</head>
+<body>
+<a class="skip" href="#content">Skip to content</a>
+<header class="masthead">
+  <hr class="rule-heavy">
+  <div class="masthead-row">
+    <a class="wordmark" href="../"><span class="pw-p">Patient</span><span class="pw-w">Words</span></a>
+    <nav aria-label="Site">
+      <a href="../start-here/">Start Here</a>
+      <a href="../methods.html">Methods</a>
+      <a href="../technical/">Technical</a>
+      <a href="../wording-differences/">Wording Differences</a>
+      <a href="../dialect-differences/">Dialect Differences</a>
+      <a href="../translation/">Translation</a>
+      <a href="../simulated-scenarios/">Simulated Scenarios</a>
+      <a href="../llm/">LLM</a>
+      <a href="../phrase-dataset/">Phrase Dataset</a>
+      <a href="https://github.com/michaeldgreenphd/patientwords">GitHub</a>
+    </nav>
+  </div>
+  <hr class="rule-fine">
+</header>
+<main id="content">
+  <p class="dateline">Clinical brief · for clinicians and triage teams</p>
+  <h1>The model hears the words, not the symptom.</h1>
+  <p class="explainer">We measured how open-weight language models complete the same
+    care-seeking sentence when the symptom is stated in clinical terms and when it is
+    stated the way patients actually talk. The models are measured subjects, not tools
+    under endorsement; nothing on this page is medical advice. Every number is computed
+    in this page from the study's published data files.</p>
+
+  <div class="stat" id="stats" aria-live="polite">
+    <div><div class="n" id="s-pct">—</div><div class="d" id="s-pct-d">of matched scenario pairs lose at least one care-urgency tier in at least one measured model</div></div>
+    <div><div class="n" id="s-dn">—</div><div class="d" id="s-dn-d">tier downgrades across all classified measurements — downgrades outnumber upgrades in every model</div></div>
+    <div><div class="n" id="s-em">—</div><div class="d" id="s-em-d">downgrades out of the emergency tier</div></div>
+  </div>
+  <p class="draft" id="vocab-status">urgency tiers: loading…</p>
+
+  <h2>One pair, verbatim</h2>
+  <p>Both sentences describe the same complaint. The model reads them and predicts the
+    next word — the kind of professional the speaker should see.</p>
+  <div class="fig">
+    <div class="figlab" id="vig-lab">live trace · loading…</div>
+    <div class="vig" id="vig">
+      <div>
+        <div class="reg" style="color:var(--clinical)">clinical register</div>
+        <div class="say" id="vig-cl-say"><span class="pend">—</span></div>
+        <div class="sb" id="vig-cl-sb"></div>
+      </div>
+      <div>
+        <div class="reg" style="color:var(--penalty)">patient register</div>
+        <div class="say" id="vig-pt-say"><span class="pend">—</span></div>
+        <div class="sb" id="vig-pt-sb"></div>
+      </div>
+    </div>
+    <div class="tierline" id="vig-tier"></div>
+    <p class="cap" id="vig-cap">A live published trace; the bars are the model's top
+      next-word probabilities for each phrasing. When the payload has not loaded, this
+      panel stays pending.</p>
+  </div>
+
+  <h2>Where the downgrades land</h2>
+  <p>Each downgrade moves a scenario from the tier its clinical phrasing reached to the
+    tier its patient phrasing reached. Most slips are one step. The top row is the one
+    that matters clinically.</p>
+  <div class="fig">
+    <div class="figlab" id="mx-lab">tier downgrades, all measured models pooled · loading…</div>
+    <div class="mxwrap">
+      <table class="mx" id="mx" aria-describedby="mx-cap">
+        <caption class="figlab" style="text-align:left;padding:0 0 6px;caption-side:top;display:none">downgrade matrix</caption>
+        <thead><tr id="mx-head"><th></th></tr></thead>
+        <tbody id="mx-body"></tbody>
+      </table>
+    </div>
+    <p class="cap" id="mx-cap">Dot area is proportional to count; the exact count is
+      printed in every cell. Cells on and above the diagonal are empty by construction —
+      this figure shows downgrades only. Computed at load time from the urgency data
+      file; hover a cell for the tier definitions.</p>
+    <p class="draft" id="vocab-status-2"></p>
+  </div>
+
+  <h2>Why this belongs in clinical conversations</h2>
+  <p>The register these models penalize is not random. It is the register of lower
+    health literacy — hedged, narrative, metaphor-heavy, sometimes misspelled. That is
+    the same population clinical communication research already treats as at risk, the
+    reason teach-back and literacy-sensitive practice exist. As language models move
+    into triage-adjacent products, phrasing sensitivity becomes a safety property of
+    the deployment, and the people most likely to phrase colloquially are the people
+    with the least slack when advice arrives a tier low.</p>
+  <p>Two cautions in the other direction. These are next-word measurements on open
+    models, not evaluations of any deployed product; and part of the effect may be the
+    model accommodating the speaker's register rather than losing the concept — the
+    <a href="../technical/">technical page</a> reports the evidence on both sides.</p>
+
+  <div class="box warn">
+    <p><b>Review status.</b> The care-urgency tier vocabulary behind every number on
+      this page is <span id="vocab-inline">owner-reviewed, physician review pending</span>.
+      Until a clinician signs off the tier assignments, treat tier-level counts as
+      provisional. The <a href="https://github.com/michaeldgreenphd/patientwords-engine/blob/claude/gemma-clinical-colloquial-interp-mavx04/docs/tier_review_checklist.md">review
+      checklist</a> is a ~30-minute task; the blinded response-coding worksheet
+      (<a href="../llm/code.html">here</a>) takes about 20 more.</p>
+  </div>
+
+  <footer>
+    Built with the <a href="https://github.com/michaeldgreenphd/patientwords-engine">patientwords-engine</a> pipeline
+    on <a href="https://neuronpedia.org">Neuronpedia</a> ·
+    attribution graphs by <a href="https://github.com/safety-research/circuit-tracer">circuit-tracer</a> ·
+    features from <a href="https://huggingface.co/google/gemma-scope-2b-pt-transcoders">Gemma Scope</a> transcoders<br>
+    set in Iowan Old Style &amp; ui-monospace · every number on this page traces to a data file <a href="https://github.com/michaeldgreenphd/patientwords/tree/main/data">in this repository</a>
+  </footer>
+</main>
+<script>
+(function(){
+  'use strict';
+  function el(t,c,x){var e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e;}
+  var PREF_BATCH='pairs_20260710T050657Z', PREF_INDEX=5, VIG_MODEL='gemma-2-2b';
+
+  fetch('../data/urgency_shift.json',{cache:'no-cache'})
+    .then(function(r){return r.ok?r.json():null;})
+    .then(function(u){ if(!u||!u.rows) return;
+      var vs=u.vocabulary_status||'status unavailable';
+      document.getElementById('vocab-status').textContent='urgency tiers: '+vs;
+      document.getElementById('vocab-status-2').textContent='urgency tiers: '+vs;
+      document.getElementById('vocab-inline').textContent=vs;
+
+      var rows=u.rows, tiers=u.tiers||{};
+      var classified=0, down=0, downByCell={}, maxTier=0;
+      var pairs={}, downPairs={};
+      rows.forEach(function(r){
+        var c=r.tier_top_clinical,p=r.tier_top_patient;
+        pairs[r.batch+'#'+r.index]=1;
+        if(c==null||p==null)return;
+        classified++;
+        if(r.flip_class==='downgrade'){
+          down++; downPairs[r.batch+'#'+r.index]=1;
+          var k=c+'>'+p; downByCell[k]=(downByCell[k]||0)+1;
+          if(c>maxTier)maxTier=c;
+        }
+      });
+      var nPairs=Object.keys(pairs).length, nDownPairs=Object.keys(downPairs).length;
+      var em=0,emLow=0;
+      Object.keys(downByCell).forEach(function(k){
+        var c=+k.split('>')[0],p=+k.split('>')[1];
+        if(c===maxTier){em+=downByCell[k]; if(p<=1)emLow+=downByCell[k];}
+      });
+      document.getElementById('s-pct').textContent=nPairs?Math.round(100*nDownPairs/nPairs)+'%':'—';
+      document.getElementById('s-pct-d').textContent='of '+nPairs.toLocaleString()+' matched scenario pairs ('+nDownPairs.toLocaleString()+') lose at least one care-urgency tier in at least one measured model';
+      document.getElementById('s-dn').textContent=down.toLocaleString();
+      document.getElementById('s-dn-d').textContent='tier downgrades across '+classified.toLocaleString()+' classified measurements — downgrades outnumber upgrades in every measured model';
+      document.getElementById('s-em').textContent=em.toLocaleString();
+      document.getElementById('s-em-d').textContent='downgrades out of the emergency tier'+(emLow?', '+emLow+' of them straight to self-care or no action':'');
+
+      // ----- matrix: rows = from-tier (desc), cols = to-tier (asc), downgrades only
+      var names={}; Object.keys(tiers).forEach(function(k){if(k!=='null')names[+k]=String(tiers[k]).split('/')[0].split(' - ')[0].trim();});
+      var order=Object.keys(names).map(Number).sort(function(a,b){return a-b;});
+      var head=document.getElementById('mx-head');
+      var hcorner=el('th',null,''); hcorner.setAttribute('scope','col'); head.textContent=''; head.appendChild(hcorner);
+      order.slice(0,-1).forEach(function(t){var th=el('th',null,names[t]);th.setAttribute('scope','col');head.appendChild(th);});
+      var body=document.getElementById('mx-body'); body.textContent='';
+      var maxCell=0; Object.keys(downByCell).forEach(function(k){maxCell=Math.max(maxCell,downByCell[k]);});
+      order.slice(1).reverse().forEach(function(from){
+        var tr=document.createElement('tr');
+        var th=el('th',null,names[from]); th.setAttribute('scope','row'); tr.appendChild(th);
+        order.slice(0,-1).forEach(function(to){
+          var td=document.createElement('td');
+          if(to>=from){td.className='diag';}
+          else{
+            var n=downByCell[from+'>'+to]||0;
+            if(n){
+              var d=el('span','dot'); var px=Math.max(5,Math.round(38*Math.sqrt(n/maxCell)));
+              d.style.width=px+'px'; d.style.height=px+'px'; td.appendChild(d);
+              td.appendChild(el('span','v',String(n)));
+            } else {td.appendChild(el('span','pend','·'));}
+            td.title=(tiers[String(from)]||from)+' → '+(tiers[String(to)]||to)+': '+n+' downgrade'+(n===1?'':'s');
+          }
+          tr.appendChild(td);
+        });
+        body.appendChild(tr);
+      });
+      document.getElementById('mx-lab').textContent='tier downgrades, all measured models pooled · '+down.toLocaleString()+' downgrades';
+
+      // ----- vignette tier line needs the urgency row; stash for the payload step
+      window.__pwTierRow=null;
+      rows.some(function(r){
+        if(r.batch===PREF_BATCH&&r.index===PREF_INDEX&&r.model===VIG_MODEL){window.__pwTierRow=r;return true;}
+        return false;});
+      window.__pwTierNames=names;
+    })
+    .catch(function(){ document.getElementById('vocab-status').textContent='urgency tiers: data pending'; });
+
+  fetch('../data/simulated_scenarios.json',{cache:'no-cache'})
+    .then(function(r){return r.ok?r.json():null;})
+    .then(function(d){ if(!d||!d.scenarios) return;
+      var s=null;
+      d.scenarios.some(function(x){
+        if(x.batch===PREF_BATCH&&(x.batch_index===PREF_INDEX||x.index===PREF_INDEX)){s=x;return true;}
+        return false;});
+      if(!s){ // dynamic fallback: first flipped scenario with both spreads
+        d.scenarios.some(function(x){
+          if(x.flipped&&x.spread_clinical&&x.spread_patient&&
+             (x.patient_prompt||'').length<110){s=x;return true;}
+          return false;});
+      }
+      if(!s)return;
+      function say(id,txt,term){
+        var host=document.getElementById(id); host.textContent='';
+        var t=String(txt||'');
+        var i=term?t.indexOf(term):-1;
+        host.appendChild(document.createTextNode('“'));
+        if(i>=0){
+          host.appendChild(document.createTextNode(t.slice(0,i)));
+          host.appendChild(el('i',null,term));
+          host.appendChild(document.createTextNode(t.slice(i+term.length)));
+        } else host.appendChild(document.createTextNode(t));
+        host.appendChild(document.createTextNode('”'));
+      }
+      say('vig-cl-say',s.clinical_prompt,s.clinical_term);
+      say('vig-pt-say',s.patient_prompt,s.patient_term);
+      function bars(id,spread){
+        var host=document.getElementById(id); host.textContent='';
+        (spread||[]).slice(0,4).forEach(function(pair){
+          var r=el('div','r');
+          r.appendChild(el('span','w',String(pair[0])));
+          var b=el('span','b'); b.style.width=Math.max(1,Math.round(200*pair[1]))+'px'; r.appendChild(b);
+          r.appendChild(el('span','p',(pair[1]).toFixed(2).replace(/^0/,'')));
+          host.appendChild(r);
+        });
+      }
+      bars('vig-cl-sb',s.spread_clinical);
+      bars('vig-pt-sb',s.spread_patient);
+      document.getElementById('vig-lab').textContent='live trace · '+VIG_MODEL+' · batch '+s.batch+' #'+(s.batch_index||s.index);
+      var tr=window.__pwTierRow, tn=window.__pwTierNames||{};
+      if(tr&&tr.flip_class==='downgrade'){
+        var line=document.getElementById('vig-tier'); line.textContent='';
+        line.appendChild(document.createTextNode('care-urgency tier: '+(tn[tr.tier_top_clinical]||tr.tier_top_clinical)+' → '));
+        line.appendChild(el('b',null,String(tn[tr.tier_top_patient]||tr.tier_top_patient)));
+        line.appendChild(document.createTextNode(' — a downgrade on phrasing alone'));
+      }
+    })
+    .catch(function(){ /* pending states already rendered */ });
+})();
+</script>
+</body>
+</html>

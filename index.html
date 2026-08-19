@@ -308,6 +308,10 @@
   .tg .bar-val{font-family:var(--mono);font-size:11.5px;color:var(--muted);min-width:4ch}
   .tg-cap{font-family:var(--mono);font-size:11.5px;color:var(--muted);margin:2px 0 0;max-width:640px}
   @media (prefers-reduced-motion:reduce){.tg .bar-fill{transition:none}}
+
+  .onramp{font-family:var(--mono);font-size:12px;letter-spacing:.04em;margin:10px 0 0;color:var(--muted)}
+  .onramp span{letter-spacing:.14em;text-transform:uppercase;font-size:10.5px;margin-right:6px}
+  .onramp a{color:var(--ink);text-decoration:underline;text-underline-offset:3px}
 </style>
 </head>
 <body>
@@ -335,6 +339,10 @@
   <p class="dateline">mechanistic interpretability of medical v. patient language</p>
   <h1><span class="patient">Patients</span> don’t speak like doctors.<br><span class="clinical">Small open models</span> change their next-word predictions when the way a question is framed changes. This might scale to LLMs</h1>
   <p class="lede">We evaluate how gemma-2-2b (an open weight model from Google) reads clinical terms versus the everyday words patients use. Wording can change the model's top next word in addition to its confidence. Try the case below.</p>
+
+  <p class="onramp"><span>Two ways in:</span>
+    <a href="clinical/">for clinicians &mdash; the brief</a> ·
+    <a href="technical/">for AI researchers &mdash; the technical page</a></p>
 
   <div class="tg" id="home-tg">
     <p class="tg-sentence">“When the dust kicks up my
