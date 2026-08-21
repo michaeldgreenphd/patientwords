@@ -311,6 +311,24 @@
         <span id="rt-lists">&mdash;</span>; probabilities moved by at most
         <span id="rt-spread">&mdash;</span>. Source: <a href="https://github.com/michaeldgreenphd/patientwords/blob/main/data/retrace_consistency.json">the repeatability measurements file</a> on our GitHub repository.</p>
     </details>
+    <details id="instrument-record" class="fold">
+      <summary>Instrument change record</summary>
+      <p>The hosted tracer changed under the study twice. On July&nbsp;31 its two
+        served lens host ids stopped returning identical depth readouts, and on
+        August&nbsp;14 both daily checks &mdash; next-word drift and lens depth &mdash;
+        stepped on the same day, on the same three frozen sentences, with
+        unchanged request parameters: a host-side instrument change, not model
+        noise. Lens readouts collected across those dates span up to three
+        instrument eras; the core comparison batch was re-measured under the
+        current host on August&nbsp;21, and the depth data carries a
+        <code>host_state_provenance</code> block recording the era boundaries.</p>
+      <p>The daily drift record has three permanently missing days &mdash;
+        August&nbsp;8, 12, and 19 &mdash; when no check ran. A missed day cannot be
+        re-measured later without mislabeling a newer model under an older date,
+        so the gaps stay in the record. Source:
+        <a href="https://github.com/michaeldgreenphd/patientwords/blob/main/data/drift_series.json">the daily drift series</a> and
+        <a href="https://github.com/michaeldgreenphd/patientwords/blob/main/data/jlens_depth.json">the depth data&rsquo;s provenance block</a>.</p>
+    </details>
   </section>
 
   <section>

@@ -520,7 +520,7 @@
     <details class="fold">
       <summary>Does tuning move the depth?</summary>
     <p id="dd-it-text"></p>
-    <div class="fig" role="img" aria-label="Paired dots: for each phrase measured under both model ids, the layer where the answer formed under the base id and under the instruction-tuned id, connected by a hairline. The readouts are identical on every pair." id="fig-it">
+    <div class="fig" role="img" aria-label="Paired dots: for each phrase measured under both model ids, the layer where the answer formed under the base id and under the instruction-tuned id, connected by a hairline. The two ids serve separate hosts since 2026-07-31, so the rows can differ." id="fig-it">
       <span class="pend">figure pending: the lens readouts have not loaded</span>
     </div>
     <p class="cap" id="cap-it"></p>
@@ -1350,10 +1350,15 @@
           });
         });
         mount('fig-it',svg);
+        var nDiff=it.pairs.filter(function(p){return p.base!==p.it;}).length;
         document.getElementById('cap-it').textContent=
-          'patient-side formation layer for the '+it.n_paired+' phrases read under both model ids · every pair identical, so the two rows mirror each other exactly · not yet a tuning comparison';
+          'patient-side formation layer for the '+it.n_paired+' phrases read under both model ids · '
+          +nDiff+' of '+it.n_paired+' pairs differ · both ids re-measured under a single host state on 2026-08-21';
+        var bm=it.base_median&&it.base_median.median,im=it.it_median&&it.it_median.median;
         document.getElementById('dd-it-text').textContent=
-          'The '+it.n_paired+' phrases read under both the gemma-2-2b and gemma-2-2b-it ids return identical lens readouts on every pair, so this is reported as one model — not a tuning comparison — until Neuronpedia confirms the two ids serve separate hosts.';
+          'The '+it.n_paired+' phrases read under both the gemma-2-2b and gemma-2-2b-it ids returned identical readouts until 2026-07-31, when Neuronpedia’s two hosts separated. Re-measured under a single host state on 2026-08-21, the ids differ on '+nDiff+' of '+it.n_paired+' pairs'
+          +((bm!=null&&im!=null)?': the instruction-tuned id forms the answer at median layer '+im+' versus '+bm+' for the base id.':'.')
+          +' The panel now reads as a base-versus-tuned comparison under one host state.';
       })();
     })
     .catch(function(){
