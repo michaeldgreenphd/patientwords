@@ -149,6 +149,12 @@
   .arm-t .ask{color:var(--muted)}
   .model-row{grid-column:1/-1;border-top:1px solid var(--hairline);margin:0;
     padding:8px 0 2px;font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.04em}
+  /* anonymous preview model (ox-alpha): dashed rule + dagger, note under
+     Limitations — the marker travels with every row so no reading of the page
+     mistakes it for an identified production model */
+  .model-row.preview{border-top-style:dashed}
+  .model-row .prev-tag{font-weight:400;color:var(--muted);letter-spacing:.06em}
+  .mono-inline{font-family:var(--mono);font-size:.85em}
   /* arriving from a mark in the downgrade map: say which row the mark meant,
      then get out of the way (the class is dropped after ~2s) */
   .model-row.row-flash{box-shadow:inset 3px 0 0 var(--penalty)}
@@ -328,7 +334,7 @@
     <h2>Provenance</h2>
     <p class="note" id="prov-note"></p>
     <dl id="prov-list"></dl>
-    <p class="note">These are API measurements, not consumer product sessions. Five of eight arms route via
+    <p class="note">These are API measurements, not consumer product sessions. Six of nine arms route via
       OpenRouter.</p>
   </section>
 
@@ -340,6 +346,13 @@
       the register-difference story, so register-difference claims on this page are bounded by that gap.
       Independent clinical coders are planned. The coding instrument and the blinded gate record are in
       <a href="code.html">the human-coding page</a>.</p>
+    <p class="note" id="ox-note" hidden>&dagger; <b>ox-alpha</b> is an anonymous preview model, served through
+      OpenRouter as <span class="mono-inline">stealth/ox-alpha</span> and evaluated
+      <span id="ox-window">—</span> during its free preview window; the window closed before the full grid
+      finished, so its coverage is thinner than the other arms. Who built it is unconfirmed, and its rows carry
+      this dagger until a lab claims it. It also re-graded the archive as a second-opinion judge; that agreement
+      is quantified on the <a href="../methods.html#judge-agreement">methods page</a>. Second-opinion judgments
+      never drive the tiers shown here.</p>
   </section>
 
   <figure class="fig" id="fig-profiles" hidden>
@@ -846,7 +859,11 @@
       body.appendChild(el('p','resp-text missing span-all','— no responses archived yet'));
     }
     models.forEach(function(m){
-      var mrow=el('p','model-row',m);
+      var mrow=el('p','model-row'+(isPreview(m)?' preview':''),m);
+      if(isPreview(m)){
+        mrow.appendChild(document.createTextNode(' '));
+        mrow.appendChild(el('span','prev-tag','† anonymous preview'));
+      }
       mrow.dataset.model=m;            // join key for the downgrade map's marks
       body.appendChild(mrow);
       var rowCells={};
@@ -905,8 +922,14 @@
   function shortName(spec){
     var m=String(spec).split(':').pop();
     var i=m.lastIndexOf('/');
-    return i>=0?m.slice(i+1):m;
+    m=i>=0?m.slice(i+1):m;
+    return isPreview(spec)?m+'†':m;  // display label only, never a join key
   }
+
+  // anonymous preview arm: every rendering of this spec carries a dagger that
+  // resolves to the provenance note under Limitations (identity unconfirmed)
+  var PREVIEW_SPECS={'openrouter:stealth/ox-alpha':true};
+  function isPreview(spec){return !!PREVIEW_SPECS[String(spec)];}
 
   // family grouping: same provider's models sit together; provider order fixed
   // by the owner (2026-07-23), any unlisted provider follows in first-appearance
@@ -1028,6 +1051,7 @@
   // one panel: per model, two thin bars (clinical green / patient ink), values at the ends;
   // opts.inner names a second rate drawn as a darker segment inside each bar
   function tinyName(spec){
+    if(isPreview(spec))return 'ox†';   // dagger travels into figure labels too
     var m=shortName(spec);
     // 'mini' before 'gpt': the two OpenAI arms stay distinguishable in 64px
     var fam=['haiku','sonnet','gemini','grok','deepseek','kimi','mini','gpt'];
@@ -1528,6 +1552,35 @@
       });
     });
     provRow(list,'models',mbox.children.length?mbox:'—','grp');
+    // preview-arm provenance note: unhidden only when the payload carries the
+    // arm; its evaluation window is read from the archive's own build records
+    var prev=ms.filter(function(m){return isPreview(m.spec);})[0];
+    if(prev){
+      var bs=prev.builds||[];
+      var stamps=[];
+      bs.forEach(function(b){
+        if(b.first_sent_utc)stamps.push(b.first_sent_utc);
+        if(b.last_sent_utc)stamps.push(b.last_sent_utc);
+      });
+      var w=document.getElementById('ox-window');
+      function paint(){
+        if(w&&stamps.length){
+          stamps.sort();
+          w.textContent=stamps[0].slice(0,10)+' → '+stamps[stamps.length-1].slice(0,10);
+        }
+        document.getElementById('ox-note').hidden=false;
+      }
+      // the arm answered AND re-graded; the full window spans both, so fold in
+      // the judging stamps from the judge-agreement export before painting
+      fetch('../data/judge_agreement.json',{cache:'no-cache'})
+        .then(function(r){return r.ok?r.json():null;})
+        .then(function(j){
+          var jw=j&&j.secondary_window_utc;
+          if(jw&&jw.first){stamps.push(jw.first);stamps.push(jw.last);}
+          paint();
+        })
+        .catch(paint);
+    }
     // cluster 3 — artifacts & hashes ('grp' on whichever row lands first)
     var first3=true;
     function artRow(label,valueNode){provRow(list,label,valueNode,first3?'grp':null);first3=false;}

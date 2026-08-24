@@ -137,6 +137,24 @@
   .me-table th:first-child{width:26%}
   .me-table th:nth-child(2){width:52%;min-width:120px}
   .me-table th:last-child{width:22%}
+  /* judge-agreement confusion matrix: counts are the data-ink; the faint green
+     diagonal is the only fill, hairlines the only structure */
+  .ja-head{font-family:var(--mono);font-size:12px;color:var(--ink);margin:18px 0 4px}
+  .ja-head b{color:var(--clinical)}
+  .ja-scroll{overflow-x:auto;margin:8px 0 4px}
+  .ja-table{border-collapse:collapse;font-family:var(--mono);font-variant-numeric:tabular-nums}
+  .ja-table th{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--muted);padding:6px 14px;text-align:right;border-bottom:1px solid var(--ink)}
+  .ja-table th[scope=row]{text-align:left;border-bottom:1px solid var(--hairline);
+    padding-left:0;white-space:nowrap}
+  .ja-table tr:last-child th[scope=row]{border-bottom:1px solid var(--ink)}
+  .ja-table td{font-size:13px;padding:8px 14px;text-align:right;
+    border-bottom:1px solid var(--hairline);color:var(--muted)}
+  .ja-table tr:last-child td{border-bottom:1px solid var(--ink)}
+  .ja-table td.diag{background:#e9f2ec;color:var(--ink);font-weight:600}
+  .ja-table td.far{color:var(--penalty)}
+  .ja-axes{font-family:var(--mono);font-size:10.5px;color:var(--muted);margin:6px 0 0}
+  .ja-axes b{color:var(--ink);font-weight:600}
   .slope-cell svg{width:100%;max-width:210px;height:auto}
   .me-legend{font-family:var(--mono);font-size:11px;color:var(--muted);
     letter-spacing:.04em;margin:8px 0 0}
@@ -655,8 +673,9 @@
       (10/10); their own clinical rewrite dropped 0&ndash;2 items (haiku none), so
       <em>translating patient words into clinical words can lose information</em>.
     </p>
-    <p id="advice-arm-note"><b>The advice arm, briefly.</b> The LLM-responses page queries eight deployed
-      assistants over the same scenarios (single-turn API calls, three attempts per phrasing). Care-urgency
+    <p id="advice-arm-note"><b>The advice arm, briefly.</b> The LLM-responses page queries nine deployed
+      assistants over the same scenarios (single-turn API calls, three attempts per phrasing; one arm is an
+      anonymous preview model, dagger-marked there with its provenance). Care-urgency
       tiers are coded by <code>claude-haiku-4-5</code> against a draft rubric (v1.1, clinician review
       pending), blinded to model identity per response; the judge is itself a measured assistant. Elicitation
       parameters, the human-coding gate, and per-arm judge&ndash;human agreement are documented on
@@ -742,6 +761,78 @@
       .catch(function(){
         document.getElementById('me-updated').textContent='data pending: the table fills in when evaluation results land';
       });
+  })();
+  </script>
+
+  <section id="judge-agreement">
+    <p class="step-no">Step 5 · Judge agreement</p>
+    <h2>A second judge re-graded the archive</h2>
+    <p>
+      Every care-urgency tier published on <a href="llm/">the LLM-responses page</a> is coded by one
+      judge, <code>claude-haiku-4-5</code>. To measure how much hangs on that choice, a second model
+      re-graded the archived responses against the same rubric: <code>ox-alpha</code>, an anonymous
+      preview model evaluated during its free window (identity unconfirmed; it is the
+      dagger-marked arm on the LLM page). Its gradings are disclosure only &mdash; they never drive a
+      published tier.
+    </p>
+    <p id="ja-summary" class="ja-head">agreement pending: the matrix fills in when the export lands</p>
+    <div class="ja-scroll">
+      <table class="ja-table" id="ja-table" hidden
+             aria-label="Tier confusion matrix: rows are the published judge's tiers, columns the second judge's tiers, cells the number of responses">
+        <thead><tr id="ja-cols"><th></th></tr></thead>
+        <tbody id="ja-body"></tbody>
+      </table>
+    </div>
+    <p class="ja-axes" id="ja-axes" hidden><b>Rows:</b> the published judge (claude-haiku-4-5) ·
+      <b>columns:</b> the second judge (ox-alpha) · diagonal = same tier.</p>
+    <p id="ja-lean" hidden></p>
+  </section>
+  <script>
+  (function(){
+    var TIER_LABEL={self_care:'self-care',routine:'routine',urgent:'urgent',emergency:'emergency'};
+    function pct(x){return (x*100).toFixed(1)+'%';}
+    fetch('data/judge_agreement.json',{cache:'no-cache'})
+      .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
+      .then(function(d){
+        var order=d.tier_order.slice().reverse(); // most urgent first, reading top-left down
+        var sum=document.getElementById('ja-summary');
+        sum.textContent='';
+        sum.appendChild(document.createTextNode('n = '+d.n_paired.toLocaleString()+' responses graded by both · '));
+        var b1=document.createElement('b');b1.textContent=pct(d.exact.rate)+' same tier';
+        sum.appendChild(b1);
+        sum.appendChild(document.createTextNode(' · '+pct(d.within_one.rate)+' within one tier'));
+        var cols=document.getElementById('ja-cols');
+        order.forEach(function(t){
+          var th=document.createElement('th');th.scope='col';th.textContent=TIER_LABEL[t]||t;
+          cols.appendChild(th);
+        });
+        var body=document.getElementById('ja-body');
+        order.forEach(function(rt){
+          var tr=document.createElement('tr');
+          var th=document.createElement('th');th.scope='row';th.textContent=TIER_LABEL[rt]||rt;
+          tr.appendChild(th);
+          order.forEach(function(ct){
+            var i=d.tier_order.indexOf(rt),j=d.tier_order.indexOf(ct);
+            var td=document.createElement('td');
+            td.textContent=d.matrix[i][j].toLocaleString();
+            if(i===j)td.className='diag';
+            else if(Math.abs(i-j)>1)td.className='far';
+            tr.appendChild(td);
+          });
+          body.appendChild(tr);
+        });
+        document.getElementById('ja-table').hidden=false;
+        document.getElementById('ja-axes').hidden=false;
+        var lean=document.getElementById('ja-lean');
+        var up=d.lean.secondary_more_urgent,down=d.lean.primary_more_urgent;
+        lean.textContent='Disagreements lean one way: in '+up.toLocaleString()+' of the '
+          +(up+down).toLocaleString()+' split decisions the second judge coded the response more urgent '
+          +'than the published judge, '+(up/down).toFixed(1)+'× the reverse direction — where '
+          +'the two differ, the published tier is usually the less urgent reading. The red cells are '
+          +'the '+pct(1-d.within_one.rate)+' of gradings more than one tier apart.';
+        lean.hidden=false;
+      })
+      .catch(function(){/* pending line stays */});
   })();
   </script>
 

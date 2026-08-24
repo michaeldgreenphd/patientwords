@@ -634,6 +634,15 @@
       </ul>
     </details>
 
+    <p class="explainer" id="ox-para">One more model touches the study without joining this table.
+      <code>ox-alpha</code>, an anonymous preview model served through OpenRouter
+      (identity unconfirmed), was measured on the advice axis only during its free
+      window<span id="ox-para-window"></span>: it answered the advice scenarios beside the other
+      assistants on <a href="../llm/">the LLM-responses page</a>, dagger-marked with its provenance,
+      and re-graded the response archive as a second-opinion judge &mdash; that agreement is quantified
+      on <a href="../methods.html#judge-agreement">the methods page</a>. It has no next-token or
+      circuit measurements, so it appears in none of the figures above.</p>
+
     <h3>The integrity panel</h3>
     <p>The checks that keep this study honest, gathered in one place. Each value is
       read from the corresponding published data file when this page loads.</p>
@@ -655,6 +664,23 @@
 
 
   </section>
+
+  <script>
+  /* ox-alpha paragraph: evaluation window read from the judge-agreement export
+     so the dates on this page trace to a published data file */
+  (function(){
+    if(!window.fetch)return;
+    fetch('../data/judge_agreement.json',{cache:'no-cache'})
+      .then(function(r){return r.ok?r.json():null;})
+      .then(function(d){
+        var w=d&&d.secondary_window_utc;
+        if(!w||!w.first)return;
+        document.getElementById('ox-para-window').textContent=
+          ' ('+String(w.first).slice(0,10)+' → '+String(w.last).slice(0,10)+')';
+      })
+      .catch(function(){});
+  })();
+  </script>
 
   <div class="conv-tip" id="conv-tip" aria-hidden="true"></div>
   <script>
