@@ -162,10 +162,13 @@
     text-align:left;border-bottom:0;padding:0 14px 3px;font-weight:400}
   .ja-table th.axis b{color:var(--ink);font-weight:600}
   .ja-table th.axis-spacer{border-bottom:0}
-  .ja-table th.corner{font-size:10.5px;letter-spacing:.04em;text-transform:none;font-weight:400;
-    text-align:left;padding-left:0;padding-right:20px;white-space:normal;max-width:150px;line-height:1.7;
-    vertical-align:bottom}
-  .ja-table th.corner b{color:var(--ink);font-weight:600}
+  /* row-axis label runs vertically beside the rows it names, mirroring the
+     column-axis label above the columns — position does the explaining */
+  .ja-table th.rowaxis{border-bottom:0;padding:0 12px 0 0;text-align:center;vertical-align:middle}
+  .ja-table th.rowaxis span{writing-mode:vertical-rl;transform:rotate(180deg);display:inline-block;
+    white-space:nowrap;font-size:10.5px;letter-spacing:.04em;text-transform:none;font-weight:400;
+    color:var(--muted)}
+  .ja-table th.rowaxis span b{color:var(--ink);font-weight:600}
   .ja-axes{font-family:var(--mono);font-size:10.5px;color:var(--muted);margin:6px 0 0}
   .ja-axes b{color:var(--ink);font-weight:600}
   .slope-cell svg{width:100%;max-width:210px;height:auto}
@@ -819,10 +822,10 @@
         function rowSum(rt){return order.reduce(function(s,ct){return s+cell(rt,ct);},0);}
         function colSum(ct){return order.reduce(function(s,rt){return s+cell(rt,ct);},0);}
         var cols=document.getElementById('ja-cols');
-        // column-axis label spans the tier columns; row-axis label fills the
-        // corner — full judge names on the table itself, nothing to decode
+        // one axis per judge, each label placed ON its axis: ox-alpha runs
+        // across the top (columns), claude-haiku-4-5 down the left side (rows)
         var axisTr=document.createElement('tr');
-        var sp=document.createElement('th');sp.className='axis-spacer';axisTr.appendChild(sp);
+        var sp=document.createElement('th');sp.className='axis-spacer';sp.colSpan=2;axisTr.appendChild(sp);
         var ax=document.createElement('th');ax.className='axis';
         ax.colSpan=order.length+1;ax.setAttribute('scope','colgroup');
         var axb=document.createElement('b');axb.textContent='ox-alpha';
@@ -830,11 +833,8 @@
         ax.appendChild(document.createTextNode(' (second judge) coded it as →'));
         axisTr.appendChild(ax);
         cols.parentNode.insertBefore(axisTr,cols);
-        var corner=cols.firstElementChild;
-        corner.className='corner';
-        var cb=document.createElement('b');cb.textContent='claude-haiku-4-5';
-        corner.appendChild(cb);
-        corner.appendChild(document.createTextNode(' (published judge) coded it as ↓'));
+        var lead=document.createElement('th');lead.className='axis-spacer';
+        cols.insertBefore(lead,cols.firstElementChild);
         order.forEach(function(t){
           var th=document.createElement('th');th.scope='col';th.textContent=TIER_LABEL[t]||t;
           cols.appendChild(th);
@@ -842,8 +842,18 @@
         var thAll=document.createElement('th');thAll.scope='col';thAll.className='tot';thAll.textContent='all';
         cols.appendChild(thAll);
         var body=document.getElementById('ja-body');
-        order.forEach(function(rt){
+        order.forEach(function(rt,ri){
           var tr=document.createElement('tr');
+          if(ri===0){
+            var ra=document.createElement('th');ra.className='rowaxis';
+            ra.rowSpan=order.length+1;ra.setAttribute('scope','rowgroup');
+            var span=document.createElement('span');
+            var rb=document.createElement('b');rb.textContent='claude-haiku-4-5';
+            span.appendChild(rb);
+            span.appendChild(document.createTextNode(' (published judge) coded it as ↓'));
+            ra.appendChild(span);
+            tr.appendChild(ra);
+          }
           var th=document.createElement('th');th.scope='row';th.textContent=TIER_LABEL[rt]||rt;
           tr.appendChild(th);
           order.forEach(function(ct){
