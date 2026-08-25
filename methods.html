@@ -153,6 +153,10 @@
   .ja-table tr:last-child td{border-bottom:1px solid var(--ink)}
   .ja-table td.diag{background:#e9f2ec;color:var(--ink);font-weight:600}
   .ja-table td.far{color:var(--penalty)}
+  /* muted marginals: each judge's own tier distribution, set off by a hairline */
+  .ja-table th.tot,.ja-table td.tot{border-left:1px solid var(--hairline);color:var(--muted);font-weight:400}
+  .ja-table tr.tot th,.ja-table tr.tot td{border-top:1px solid var(--hairline);color:var(--muted);font-weight:400;font-size:11.5px;padding-top:6px;padding-bottom:6px}
+  .ja-table th.corner{font-size:9px;letter-spacing:.06em;text-align:left;padding-left:0}
   .ja-axes{font-family:var(--mono);font-size:10.5px;color:var(--muted);margin:6px 0 0}
   .ja-axes b{color:var(--ink);font-weight:600}
   .slope-cell svg{width:100%;max-width:210px;height:auto}
@@ -784,7 +788,8 @@
       </table>
     </div>
     <p class="ja-axes" id="ja-axes" hidden><b>Rows:</b> the published judge (claude-haiku-4-5) ·
-      <b>columns:</b> the second judge (ox-alpha) · diagonal = same tier.</p>
+      <b>columns:</b> the second judge (ox-alpha) · diagonal = same tier · the muted margins are
+      each judge's own tier distribution over the same responses.</p>
     <p id="ja-lean" hidden></p>
   </section>
   <script>
@@ -801,11 +806,18 @@
         var b1=document.createElement('b');b1.textContent=pct(d.exact.rate)+' same tier';
         sum.appendChild(b1);
         sum.appendChild(document.createTextNode(' · '+pct(d.within_one.rate)+' within one tier'));
+        function cell(rt,ct){return d.matrix[d.tier_order.indexOf(rt)][d.tier_order.indexOf(ct)];}
+        function rowSum(rt){return order.reduce(function(s,ct){return s+cell(rt,ct);},0);}
+        function colSum(ct){return order.reduce(function(s,rt){return s+cell(rt,ct);},0);}
         var cols=document.getElementById('ja-cols');
+        cols.firstElementChild.className='corner';
+        cols.firstElementChild.textContent='haiku ↓ · ox →';
         order.forEach(function(t){
           var th=document.createElement('th');th.scope='col';th.textContent=TIER_LABEL[t]||t;
           cols.appendChild(th);
         });
+        var thAll=document.createElement('th');thAll.scope='col';thAll.className='tot';thAll.textContent='all';
+        cols.appendChild(thAll);
         var body=document.getElementById('ja-body');
         order.forEach(function(rt){
           var tr=document.createElement('tr');
@@ -814,13 +826,26 @@
           order.forEach(function(ct){
             var i=d.tier_order.indexOf(rt),j=d.tier_order.indexOf(ct);
             var td=document.createElement('td');
-            td.textContent=d.matrix[i][j].toLocaleString();
+            td.textContent=cell(rt,ct).toLocaleString();
             if(i===j)td.className='diag';
             else if(Math.abs(i-j)>1)td.className='far';
             tr.appendChild(td);
           });
+          var tot=document.createElement('td');tot.className='tot';tot.textContent=rowSum(rt).toLocaleString();
+          tr.appendChild(tot);
           body.appendChild(tr);
         });
+        // marginals row: the second judge's own tier distribution over the same responses
+        var mrow=document.createElement('tr');mrow.className='tot';
+        var mth=document.createElement('th');mth.scope='row';mth.textContent='all';
+        mrow.appendChild(mth);
+        order.forEach(function(ct){
+          var td=document.createElement('td');td.textContent=colSum(ct).toLocaleString();
+          mrow.appendChild(td);
+        });
+        var grand=document.createElement('td');grand.className='tot';grand.textContent=d.n_paired.toLocaleString();
+        mrow.appendChild(grand);
+        body.appendChild(mrow);
         document.getElementById('ja-table').hidden=false;
         document.getElementById('ja-axes').hidden=false;
         var lean=document.getElementById('ja-lean');

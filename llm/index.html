@@ -972,7 +972,9 @@
   // dumbbell panel beside them, so one horizontal read gives a model's profile.
   // Per panel: a faint dashed line marks the pooled median; no gridlines, no boxes.
   function svgProfiles(labelRows,panels){
-    var rowH=27, top=34, LW=150, PW=170, GAP=52, GROUPGAP=7;
+    // LW fits the longest name + per-model note; too narrow and the note runs
+    // under the first panel's left value labels (seen once notes appeared)
+    var rowH=27, top=34, LW=248, PW=170, GAP=52, GROUPGAP=7;
     // family gaps: precompute each row's center so panels stay aligned
     var ys=[],yy=top;
     labelRows.forEach(function(r){
@@ -1584,7 +1586,7 @@
     // cluster 3 — artifacts & hashes ('grp' on whichever row lands first)
     var first3=true;
     function artRow(label,valueNode){provRow(list,label,valueNode,first3?'grp':null);first3=false;}
-    if(data.rubric_version)artRow('tier rubric',String(data.rubric_version)+' \u00b7 coded by claude-haiku-4-5, blinded to model identity per response. The judge is itself a measured assistant and shares a vendor with claude-sonnet-5 \u2014 it grades its own responses; the judge\u2013human agreement note under Limitations bounds this.');
+    if(data.rubric_version)artRow('tier rubric',String(data.rubric_version)+' \u00b7 coded by claude-haiku-4-5, blinded to model identity per response. The judge is itself a measured assistant and shares a vendor with claude-sonnet-5 \u2014 it grades its own responses; the judge\u2013human agreement note under Limitations bounds this, and a second model\u2019s re-grade of the archive is quantified on the methods page.');
     function repoLink(path){
       if(!path)return document.createTextNode('—');
       var a=el('a',null,path);
