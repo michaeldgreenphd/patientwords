@@ -156,7 +156,16 @@
   /* muted marginals: each judge's own tier distribution, set off by a hairline */
   .ja-table th.tot,.ja-table td.tot{border-left:1px solid var(--hairline);color:var(--muted);font-weight:400}
   .ja-table tr.tot th,.ja-table tr.tot td{border-top:1px solid var(--hairline);color:var(--muted);font-weight:400;font-size:11.5px;padding-top:6px;padding-bottom:6px}
-  .ja-table th.corner{font-size:9px;letter-spacing:.06em;text-align:left;padding-left:0}
+  /* axis labels sit directly on the table, full judge names, muted so the
+     counts stay the ink that matters (no legend, no key) */
+  .ja-table th.axis{font-size:10.5px;letter-spacing:.04em;text-transform:none;color:var(--muted);
+    text-align:left;border-bottom:0;padding:0 14px 3px;font-weight:400}
+  .ja-table th.axis b{color:var(--ink);font-weight:600}
+  .ja-table th.axis-spacer{border-bottom:0}
+  .ja-table th.corner{font-size:10.5px;letter-spacing:.04em;text-transform:none;font-weight:400;
+    text-align:left;padding-left:0;padding-right:20px;white-space:normal;max-width:150px;line-height:1.7;
+    vertical-align:bottom}
+  .ja-table th.corner b{color:var(--ink);font-weight:600}
   .ja-axes{font-family:var(--mono);font-size:10.5px;color:var(--muted);margin:6px 0 0}
   .ja-axes b{color:var(--ink);font-weight:600}
   .slope-cell svg{width:100%;max-width:210px;height:auto}
@@ -787,9 +796,9 @@
         <tbody id="ja-body"></tbody>
       </table>
     </div>
-    <p class="ja-axes" id="ja-axes" hidden><b>Rows:</b> the published judge (claude-haiku-4-5) ·
-      <b>columns:</b> the second judge (ox-alpha) · diagonal = same tier · the muted margins are
-      each judge's own tier distribution over the same responses.</p>
+    <p class="ja-axes" id="ja-axes" hidden>Each cell counts responses: the green diagonal is both judges
+      choosing the same tier; red cells are more than one tier apart. The muted "all" margins are each
+      judge's own tier distribution over the same responses.</p>
     <p id="ja-lean" hidden></p>
   </section>
   <script>
@@ -810,8 +819,22 @@
         function rowSum(rt){return order.reduce(function(s,ct){return s+cell(rt,ct);},0);}
         function colSum(ct){return order.reduce(function(s,rt){return s+cell(rt,ct);},0);}
         var cols=document.getElementById('ja-cols');
-        cols.firstElementChild.className='corner';
-        cols.firstElementChild.textContent='haiku ↓ · ox →';
+        // column-axis label spans the tier columns; row-axis label fills the
+        // corner — full judge names on the table itself, nothing to decode
+        var axisTr=document.createElement('tr');
+        var sp=document.createElement('th');sp.className='axis-spacer';axisTr.appendChild(sp);
+        var ax=document.createElement('th');ax.className='axis';
+        ax.colSpan=order.length+1;ax.setAttribute('scope','colgroup');
+        var axb=document.createElement('b');axb.textContent='ox-alpha';
+        ax.appendChild(axb);
+        ax.appendChild(document.createTextNode(' (second judge) coded it as →'));
+        axisTr.appendChild(ax);
+        cols.parentNode.insertBefore(axisTr,cols);
+        var corner=cols.firstElementChild;
+        corner.className='corner';
+        var cb=document.createElement('b');cb.textContent='claude-haiku-4-5';
+        corner.appendChild(cb);
+        corner.appendChild(document.createTextNode(' (published judge) coded it as ↓'));
         order.forEach(function(t){
           var th=document.createElement('th');th.scope='col';th.textContent=TIER_LABEL[t]||t;
           cols.appendChild(th);
