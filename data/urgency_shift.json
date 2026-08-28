@@ -36,10 +36,10 @@
   ]
  },
  "summary": {
-  "measurements": 16584,
-  "flips": 7327,
+  "measurements": 16587,
+  "flips": 7329,
   "flip_classes": {
-   "downgrade": 1007,
+   "downgrade": 1009,
    "upgrade": 290,
    "lateral": 1053,
    "uninformative": 4977
@@ -64,13 +64,13 @@
     }
    },
    "gemma-2-2b": {
-    "n": 2343,
-    "flips": 1116,
-    "downgrades": 279,
+    "n": 2346,
+    "flips": 1118,
+    "downgrades": 281,
     "upgrades": 46,
     "sign_test_p": 0.0,
-    "confident_downgrades_p>=0.2": 211,
-    "mean_tier_shift": -0.1316,
+    "confident_downgrades_p>=0.2": 213,
+    "mean_tier_shift": -0.1319,
     "representative": {
      "base": "I have anxiety, so I should probably see a",
      "from": "therapist",
@@ -1645,6 +1645,26 @@
   },
   {
    "batch": "drift_sentinel_20260827",
+   "index": 3,
+   "model": "gemma-2-2b",
+   "tier_top_clinical": 2,
+   "tier_top_patient": 1,
+   "flip_class": "downgrade",
+   "tier_shift": -0.258,
+   "urgency_recovery": null
+  },
+  {
+   "batch": "drift_sentinel_20260828",
+   "index": 2,
+   "model": "gemma-2-2b",
+   "tier_top_clinical": 3,
+   "tier_top_patient": 2,
+   "flip_class": "downgrade",
+   "tier_shift": -0.476,
+   "urgency_recovery": null
+  },
+  {
+   "batch": "drift_sentinel_20260828",
    "index": 3,
    "model": "gemma-2-2b",
    "tier_top_clinical": 2,
