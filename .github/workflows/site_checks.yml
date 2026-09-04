@@ -48,15 +48,22 @@ jobs:
 
       # The engine ref is resolved rather than assumed. Both checkers live over
       # there, so a cross-repo change lands on a shared working branch before it
-      # reaches main -- and the first run of this workflow failed exactly that
-      # way (check_pages.py existed on the branch, not on main, 2026-09-04).
-      # Prefer the branch of the same name when the engine has one; fall back to
-      # the engine's default branch. Which was used is printed, because a silent
-      # fallback to main would run yesterday's checkers against today's site.
+      # reaches the engine's integration branch -- and this workflow has failed
+      # that way twice on 2026-09-04: once on a feature branch (checker on the
+      # branch, not on main) and once on main itself, the moment the sibling PR
+      # merged (the checker had landed on the engine's OPS branch, not on engine
+      # main, which is an archive branch 3,000+ commits behind the study).
+      #
+      # So the fallback is the engine's ops branch, not its main. ENGINE_FALLBACK_REF
+      # is the one place to change if the engine's integration branch moves. The
+      # presence guard below fails loudly if either checker is missing at whatever
+      # ref was chosen; a fallback that quietly ran yesterday's checkers would
+      # read exactly like a pass.
       - name: Resolve the engine ref
         id: engine
         env:
           BRANCH: ${{ github.head_ref || github.ref_name }}
+          ENGINE_FALLBACK_REF: claude/gemma-clinical-colloquial-interp-mavx04
         run: |
           set -euo pipefail
           REPO=https://github.com/michaeldgreenphd/patientwords-engine
@@ -64,8 +71,8 @@ jobs:
             echo "ref=$BRANCH" >> "$GITHUB_OUTPUT"
             echo "engine ref: $BRANCH (matching branch)"
           else
-            echo "ref=main" >> "$GITHUB_OUTPUT"
-            echo "engine ref: main (no matching branch)"
+            echo "ref=$ENGINE_FALLBACK_REF" >> "$GITHUB_OUTPUT"
+            echo "engine ref: $ENGINE_FALLBACK_REF (no matching branch; engine integration branch)"
           fi
 
       # blob:none + sparse: the engine carries a large trace_out/ history and
