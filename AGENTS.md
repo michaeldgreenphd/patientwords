@@ -70,10 +70,14 @@ structural grey `#c3c9d2`, penalty red `#b4483d`, paper `#faf9f5`, muted `#6d6c6
 
 ### The rest of the published set, by consuming page
 
-Every file below is written by an engine script and fetched by page JS. The
-engine's `scripts/validate_frontend_contract.py --site` is the machine-readable
-version of this table — it shape-checks each payload and is the gate to run
-after any export.
+Every file below is fetched by page JS. All of them are written by an engine
+script and overwritten by the next export **except the two whose Engine writer
+column reads "no engine writer"** — those are hand-maintained here, and editing
+them is the documented workflow. That column is load-bearing, not annotation:
+the data-alteration rule below keys off it. The engine's
+`scripts/validate_frontend_contract.py --site` is the machine-readable version
+of this table — it shape-checks each payload and is the gate to run after any
+export.
 
 | File | Read by | Engine writer |
 |---|---|---|
@@ -85,6 +89,7 @@ after any export.
 | `tag_mass.json` | `methods.html` (attribution mass by phrasing) | `export_tag_mass.py` |
 | `retrace_consistency.json` | `methods.html`, `simulated-scenarios/` | `retrace_consistency.py` |
 | `jspace.json` | `methods.html`, `technical/` | `export_jspace.py` |
+| `judge_agreement.json` | `methods.html`, `llm/index.html`, `technical/` | `export_judge_agreement.py` |
 | `jlens_depth.json` | `methods.html`, `simulated-scenarios/`, `technical/` | `export_jlens_depth.py` |
 | `jlens_loglens.json`, `jlens_transport.json` | `technical/` (j-lens chain) | `export_jlens_loglens.py`, `export_jlens_transport.py` |
 | `jlens_insights.json`, `jlens_swaps.json` | `technical/` (j-lens chain) | `jlens_insights.py`, `export_pair_swaps.py` |
