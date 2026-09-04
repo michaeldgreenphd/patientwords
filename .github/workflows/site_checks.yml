@@ -1,0 +1,122 @@
+name: Site checks
+
+# This repo publishes straight to GitHub Pages and had no CI at all until
+# 2026-09-04. Its pages are JS-heavy: each fetches published JSON written by the
+# engine and builds tables from it in the browser, so a payload whose shape moved
+# renders a blank cell or an empty panel rather than throwing. Nobody sees an
+# error; a column is just quietly empty on the public site.
+#
+# Two gates, in order, because they catch different things (established by
+# breaking the site on purpose, not assumed):
+#
+#   1. contract  — the engine's validate_frontend_contract.py shape-checks every
+#      payload against what page JS reads. This is what catches a renamed or
+#      missing field. Run WITHOUT --strict: the current data carries a known
+#      warning (dead rows in urgency_shift.json) and --strict would make this
+#      workflow red on its first run, which is how a check gets switched off.
+#   2. pages     — the engine's check_pages.py loads all 20 pages in Chromium and
+#      fails on JS errors, failed data requests, HTTP errors, and any table that
+#      is empty WHILE VISIBLE. It does not catch a renamed field, because a page
+#      that hides its section is degrading gracefully, which the site's rules
+#      require. Gate 1 is the one for that.
+#
+# Both tools live in patientwords-engine: this repo deliberately contains no
+# Python, and the contract validator was already there. The engine is public, so
+# the checkout needs no credentials.
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: site-checks-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out the site
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          path: patientwords
+
+      # The engine ref is resolved rather than assumed. Both checkers live over
+      # there, so a cross-repo change lands on a shared working branch before it
+      # reaches main -- and the first run of this workflow failed exactly that
+      # way (check_pages.py existed on the branch, not on main, 2026-09-04).
+      # Prefer the branch of the same name when the engine has one; fall back to
+      # the engine's default branch. Which was used is printed, because a silent
+      # fallback to main would run yesterday's checkers against today's site.
+      - name: Resolve the engine ref
+        id: engine
+        env:
+          BRANCH: ${{ github.head_ref || github.ref_name }}
+        run: |
+          set -euo pipefail
+          REPO=https://github.com/michaeldgreenphd/patientwords-engine
+          if [ -n "$BRANCH" ] && git ls-remote --exit-code --heads "$REPO" "$BRANCH" >/dev/null 2>&1; then
+            echo "ref=$BRANCH" >> "$GITHUB_OUTPUT"
+            echo "engine ref: $BRANCH (matching branch)"
+          else
+            echo "ref=main" >> "$GITHUB_OUTPUT"
+            echo "engine ref: main (no matching branch)"
+          fi
+
+      # blob:none + sparse: the engine carries a large trace_out/ history and
+      # only these paths are needed to run the two checks.
+      - name: Check out the engine (for the two checkers)
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          repository: michaeldgreenphd/patientwords-engine
+          ref: ${{ steps.engine.outputs.ref }}
+          path: patientwords-engine
+          filter: blob:none
+          sparse-checkout: |
+            scripts
+            data
+
+      # A missing checker is a check that did not run, which reads exactly like
+      # a check that passed. Fail loudly instead.
+      - name: Verify both checkers are present
+        run: |
+          set -euo pipefail
+          for f in validate_frontend_contract.py check_pages.py; do
+            test -f "patientwords-engine/scripts/$f" \
+              || { echo "::error::patientwords-engine/scripts/$f missing at ref ${{ steps.engine.outputs.ref }}"; exit 1; }
+          done
+          echo "both checkers present at ref ${{ steps.engine.outputs.ref }}"
+
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.11"
+
+      - name: Contract check (catches a renamed or missing payload field)
+        working-directory: patientwords-engine
+        run: |
+          python scripts/validate_frontend_contract.py \
+            --site ../patientwords --engine .
+
+      - name: Install Playwright Chromium
+        run: |
+          pip install --quiet playwright
+          python -m playwright install --with-deps chromium
+
+      - name: Page check (catches JS errors and visibly-empty tables)
+        working-directory: patientwords-engine
+        run: |
+          python scripts/check_pages.py --site ../patientwords \
+            --json "$GITHUB_WORKSPACE/page_report.json"
+
+      - name: Upload the page report
+        if: ${{ always() }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: page-report
+          path: page_report.json
+          if-no-files-found: ignore

@@ -89,8 +89,9 @@ its nightly cycle.
   replaced wholesale by exports, never patched here. The public set is capped
   to the most consequential scenarios; full render sets live in the engine
   repo's GitHub Releases.
-- Root and per-section HTML — the gallery pages. `CLAUDE.md` records the
-  working rules (data contracts, palette, accessibility floor, figure style).
+- Root and per-section HTML — the gallery pages. `AGENTS.md` records the
+  working rules (data contracts, palette, accessibility floor, figure style);
+  `CLAUDE.md` is a one-line pointer to it.
 
 ## Rewriting the narrative
 
