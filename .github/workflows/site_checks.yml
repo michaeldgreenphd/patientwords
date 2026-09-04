@@ -50,30 +50,30 @@ jobs:
       # there, so a cross-repo change lands on a shared working branch before it
       # reaches the engine's integration branch -- and this workflow has failed
       # that way twice on 2026-09-04: once on a feature branch (checker on the
-      # branch, not on main) and once on main itself, the moment the sibling PR
-      # merged (the checker had landed on the engine's OPS branch, not on engine
-      # main, which is an archive branch 3,000+ commits behind the study).
+      # branch, not on the integration branch) and once on site main, the moment
+      # the sibling PR merged (the checker was on the engine's then-integration
+      # branch, not on engine main, which was an archive branch at the time).
       #
-      # So the fallback is the engine's ops branch, not its main. ENGINE_FALLBACK_REF
-      # is the one place to change if the engine's integration branch moves. The
-      # presence guard below fails loudly if either checker is missing at whatever
-      # ref was chosen; a fallback that quietly ran yesterday's checkers would
-      # read exactly like a pass.
+      # Since engine #6 (2026-09-04) the engine's integration branch IS main, so
+      # the fallback is engine main. ENGINE_FALLBACK_REF is the one place to
+      # change if that ever moves again. The presence guard below fails loudly if
+      # either checker is missing at whatever ref was chosen; a fallback that
+      # quietly ran yesterday's checkers would read exactly like a pass.
       - name: Resolve the engine ref
         id: engine
         env:
           BRANCH: ${{ github.head_ref || github.ref_name }}
-          ENGINE_FALLBACK_REF: claude/gemma-clinical-colloquial-interp-mavx04
+          ENGINE_FALLBACK_REF: main
         run: |
           set -euo pipefail
           REPO=https://github.com/michaeldgreenphd/patientwords-engine
-          # Site main is the site's integration branch; it pairs with the engine's
-          # integration branch, never with engine main. The name-match rule below
-          # would otherwise pick engine main (both repos have one) and the
-          # presence guard would fail -- which is exactly what happened on the
-          # first push to site main, and again in the first version of this fix,
-          # which only changed the fallback that main never reached (Codex P1,
-          # 2026-09-04). So main is routed explicitly, before any name matching.
+          # Site main pairs with the engine's integration branch and is routed
+          # explicitly, before any name matching, so the pairing never depends on
+          # the two repos happening to share a branch name. (When the engine's
+          # integration branch was not its main, the name-match rule picked engine
+          # main and the presence guard failed; the first version of the fix
+          # changed only the fallback, which main never reached -- Codex P1,
+          # 2026-09-04. Today the two routes agree; the explicit one stays.)
           if [ "$BRANCH" = "main" ]; then
             echo "ref=$ENGINE_FALLBACK_REF" >> "$GITHUB_OUTPUT"
             echo "engine ref: $ENGINE_FALLBACK_REF (site main -> engine integration branch)"
