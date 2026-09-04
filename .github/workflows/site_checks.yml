@@ -77,7 +77,11 @@ jobs:
           if [ "$BRANCH" = "main" ]; then
             echo "ref=$ENGINE_FALLBACK_REF" >> "$GITHUB_OUTPUT"
             echo "engine ref: $ENGINE_FALLBACK_REF (site main -> engine integration branch)"
-          elif [ -n "$BRANCH" ] && git ls-remote --exit-code --heads "$REPO" "$BRANCH" >/dev/null 2>&1; then
+          # refs/heads/ makes the existence test exact. A bare name is a PATTERN that
+          # git ls-remote matches against ref tails, so site "foo" would match engine
+          # "archive/foo", emit ref=foo, and actions/checkout would fail on a ref that
+          # does not exist -- before the presence guard, with no fallback (Codex P2).
+          elif [ -n "$BRANCH" ] && git ls-remote --exit-code --heads "$REPO" "refs/heads/$BRANCH" >/dev/null 2>&1; then
             echo "ref=$BRANCH" >> "$GITHUB_OUTPUT"
             echo "engine ref: $BRANCH (matching branch)"
           else
