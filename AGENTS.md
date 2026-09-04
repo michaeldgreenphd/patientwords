@@ -83,7 +83,7 @@ export.
 |---|---|---|
 | `advice_scenarios.json` | `llm/index.html` | `export_advice_scenarios.py` |
 | `advice_coding_sample.json` | `llm/code.html` (human-coding worksheet) | `advice_human_coding.py` |
-| `display_vocab.json` | `dialect-differences/index.html` | `export_dialect_matrix.py` |
+| `display_vocab.json` | **no page** (`dialect-differences/` names it only in a code comment; it fetches `dialects.json` and `provenance.json`) | `export_dialect_matrix.py` |
 | `translation_scale.json` | `translation/index.html` | `translation_scale.py` |
 | `drift_series.json` | `methods.html` (daily sentinel series), `technical/` | `drift_sentinel.py` |
 | `tag_mass.json` | `methods.html` (attribution mass by phrasing) | `export_tag_mass.py` |
@@ -101,9 +101,9 @@ export.
 `*.sample.json` files are development fixtures, but two ARE fetched by live pages
 when the URL carries `?sample=1` (`llm/index.html` → `advice_scenarios.sample.json`,
 `llm/code.html` → `advice_coding_sample.sample.json`), so their shape is part of the
-contract too. Four published files currently have **no page consumer** —
+contract too. Five published files currently have **no page consumer** —
 `advice_scenarios_nat.json`, `patch_profile.json`, `specialty_breakdown.json`,
-`simulated_archive.json`. They are staged data waiting on a page; do not assume a
+`simulated_archive.json`, `display_vocab.json`. They are staged data waiting on a page; do not assume a
 page breaks if they change, and do not delete them assuming they are dead. The
 consumer column above is hand-maintained and nothing checks it: the 2026-09-04
 fact-check found two rows missing `technical/`. `validate_frontend_contract.py`
@@ -215,9 +215,13 @@ silently breaks a published page:
 `404.html` hard-codes the `/patientwords/` prefix in **10 absolute links**. That
 is correct today and deliberate: GitHub Pages serves `404.html` for a missing
 path at any depth, so relative links there would resolve against the missing
-path and break. Every other page uses relative links — but five pages carry an
-absolute `<link rel="canonical" href="https://michaeldgreenphd.github.io/patientwords/…">`
-that hard-codes the same host and prefix and goes stale the same way.
+path and break. Every other page uses relative links — but **15 pages** (11
+composed pages and 4 meta-refresh stubs) carry an absolute
+`<link rel="canonical" href="https://michaeldgreenphd.github.io/patientwords/…">`
+that hard-codes the same host and prefix and goes stale the same way. A custom
+domain therefore touches `404.html` plus those 15 canonicals; count them with
+`grep -rl 'rel="canonical" href="https://michaeldgreenphd.github.io/patientwords' --include=*.html .`
+rather than trusting this number.
 
 But those 10 are absolute *and* carry the project-path prefix. **Adding a custom
 domain moves the site root from `/patientwords/` to `/`, and all 10 become
