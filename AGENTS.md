@@ -177,3 +177,72 @@ silently breaks a published page:
   this repo, provenance labels must stay accurate, and draft labels on
   urgency-tier content stay until the vocabulary is approved. Weakening any of
   those is a correctness finding here, not a wording preference.
+
+## Stack and deployment
+
+* **This repo contains no Python.** Zero `.py` files as of 2026-09-04. Every page
+  is self-contained HTML with inline CSS and inline vanilla JS; the only Python
+  in the workflow is `python3 -m http.server` for local preview. All data
+  extraction, statistics, and rendering happen in `patientwords-engine` and
+  arrive here as committed files. A pull request that adds a build step, a
+  bundler, a framework, or a Python dependency to this repo is a change of
+  architecture, not an improvement, and needs to be argued as one.
+* **Served by GitHub Pages from the repository root at the project path
+  `/patientwords/`.** There is no `CNAME` file and no Pages workflow: the site is
+  project pages, not a custom domain, and its root is `/patientwords/`, not `/`.
+* **Deployment safety.** Anything that changes how the site is served — adding a
+  `CNAME`, adding a Pages workflow, moving the publishing source or directory,
+  or changing DNS in front of it — gets scrutinized and must state why. These
+  changes fail in production, not in review, and this repo has no CI that would
+  catch them.
+
+### The custom-domain trap, if a custom domain is ever added
+
+`404.html` hard-codes the `/patientwords/` prefix in **10 absolute links**. That
+is correct today and deliberate: GitHub Pages serves `404.html` for a missing
+path at any depth, so relative links there would resolve against the missing
+path and break. Every other page correctly uses relative links.
+
+But those 10 are absolute *and* carry the project-path prefix. **Adding a custom
+domain moves the site root from `/patientwords/` to `/`, and all 10 become
+404s** — on the very page a lost visitor lands on. So if a `CNAME` ever appears
+in a pull request, `404.html` must change in the same pull request, and a
+reviewer should treat a `CNAME` without it as an incomplete change.
+
+## Responding to code review
+
+Every pull request here is reviewed by Codex and Copilot. Their findings are
+**hypotheses, not defects**, and the disposition is yours to establish:
+
+1. **Verify against the actual file before changing anything.** Read the lines
+   the finding names. On the first reviewed pull request here (#4, 2026-09-04)
+   three findings arrived: two were real — a rule in this file contradicting its
+   own data-contracts table, and a stale `CLAUDE.md` reference in `README.md` —
+   and one was a misreading of how a trailing newline renders in a diff.
+2. **Give every finding a disposition on its own thread**: fixed, naming the
+   commit; declined, naming the reason and the evidence; or not applicable, and
+   why. Silence is not a disposition.
+3. **Resolve only threads you actually fixed.** Resolving one you dismissed makes
+   the pull request look handled when it is not.
+4. **Never apply a finding you have not checked.** Applying a wrong one puts a
+   defect into the file the reviewers grade against; dismissing a right one ships
+   what the review existed to catch. Both were live on that first pull request.
+
+Findings about page behaviour are checked by driving the pages, not by reading
+the diff — see **Verifying changes** above.
+
+## Numbers published here have known limitations
+
+The engine measures; this repo displays. Two facts about those measurements, as
+of 2026-09-04, matter to anyone writing page text about them. Both are recorded
+in full in the engine's `AGENTS.md` (**Known measurement limitations**) and
+`docs/backend_agreement_20260903.md`:
+
+* Per-pair probabilities from the engine's logits path carry a **bfloat16 error
+  term of up to 0.031** — roughly half the study's mean language penalty. Page
+  copy should not lean on a single pair's probability to three decimals.
+* One hosted measurement (index 20 of `pairs_20260710T011743Z`) recorded a
+  neighbouring token's probability. Not yet fixed.
+
+Neither changes a published number, and neither is a reason to edit `data/` here
+— that is the engine's to correct and re-export.
