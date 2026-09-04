@@ -85,23 +85,29 @@ export.
 | `advice_coding_sample.json` | `llm/code.html` (human-coding worksheet) | `advice_human_coding.py` |
 | `display_vocab.json` | `dialect-differences/index.html` | `export_dialect_matrix.py` |
 | `translation_scale.json` | `translation/index.html` | `translation_scale.py` |
-| `drift_series.json` | `methods.html` (daily sentinel series) | `drift_sentinel.py` |
+| `drift_series.json` | `methods.html` (daily sentinel series), `technical/` | `drift_sentinel.py` |
 | `tag_mass.json` | `methods.html` (attribution mass by phrasing) | `export_tag_mass.py` |
-| `retrace_consistency.json` | `methods.html`, `simulated-scenarios/` | `retrace_consistency.py` |
+| `retrace_consistency.json` | `methods.html`, `simulated-scenarios/`, `technical/` | `retrace_consistency.py` |
 | `jspace.json` | `methods.html`, `technical/` | `export_jspace.py` |
 | `judge_agreement.json` | `methods.html`, `llm/index.html`, `technical/` | `export_judge_agreement.py` |
 | `jlens_depth.json` | `methods.html`, `simulated-scenarios/`, `technical/` | `export_jlens_depth.py` |
 | `jlens_loglens.json`, `jlens_transport.json` | `technical/` (j-lens chain) | `export_jlens_loglens.py`, `export_jlens_transport.py` |
 | `jlens_insights.json`, `jlens_swaps.json` | `technical/` (j-lens chain) | `jlens_insights.py`, `export_pair_swaps.py` |
-| `simulated_archive.{csv,json}` | `simulated-scenarios/scenario.html` (collaborator download) | `export_archive.py` |
+| `simulated_archive.csv` | `simulated-scenarios/scenario.html` (collaborator download) | `export_archive.py` |
+| `simulated_archive.json` | **no page** (written alongside the CSV; staged) | `export_archive.py` |
 | `model_provenance.json` | `technical/` (per-model build info) | **no engine writer** — hand-maintained here |
 | `specialties.json` | `simulated-scenarios/` (specialty filter) | **no engine writer** — hand-synced from the engine's `data/specialty_map.draft.json`; `validate_frontend_contract.py` checks the two agree |
 
-`*.sample.json` files are fixtures for local development, not fetched by any
-page. Three published files currently have **no consumer** — `advice_scenarios_nat.json`,
-`patch_profile.json`, `specialty_breakdown.json`. They are staged data waiting on a
-page; do not assume a page breaks if they change, and do not delete them assuming
-they are dead.
+`*.sample.json` files are development fixtures, but two ARE fetched by live pages
+when the URL carries `?sample=1` (`llm/index.html` → `advice_scenarios.sample.json`,
+`llm/code.html` → `advice_coding_sample.sample.json`), so their shape is part of the
+contract too. Four published files currently have **no page consumer** —
+`advice_scenarios_nat.json`, `patch_profile.json`, `specialty_breakdown.json`,
+`simulated_archive.json`. They are staged data waiting on a page; do not assume a
+page breaks if they change, and do not delete them assuming they are dead. The
+consumer column above is hand-maintained and nothing checks it: the 2026-09-04
+fact-check found two rows missing `technical/`. `validate_frontend_contract.py`
+checks file shapes, not who reads them.
 
 ## Established UI conventions
 
@@ -109,7 +115,8 @@ they are dead.
   `aria-pressed` toggled with the `.on` class.
 - Sortable table headers: real `<button>`s inside `th[data-key]`, `aria-sort` on the
   active `th`; first click on the Urgency column sorts most-safety-relevant first.
-- Accessibility floor: skip link on every page, `:focus-visible` outlines (never bare
+- Accessibility floor: skip link on every composed page (the five meta-refresh stubs and
+  `share/card.html` lack one), `:focus-visible` outlines (never bare
   `outline:none`), `scope="col"` on generated headers, iframe `title`s, decorative
   preview iframes `aria-hidden`.
 - Vocabulary used across flip displays: the model *hedges* (top prediction holds, loses
@@ -185,11 +192,12 @@ silently breaks a published page:
 
 ## Stack and deployment
 
-* **This repo contains no Python.** Zero `.py` files as of 2026-09-04. Every page
-  is self-contained HTML with inline CSS and inline vanilla JS; the only Python
-  in the workflow is `python3 -m http.server` for local preview. All data
-  extraction, statistics, and rendering happen in `patientwords-engine` and
-  arrive here as committed files. A pull request that adds a build step, a
+* **This repo contains no Python source.** Zero `.py` files as of 2026-09-04.
+  Every page is self-contained HTML with inline CSS and inline vanilla JS. Python
+  appears in two places only: `python3 -m http.server` for local preview, and
+  `.github/workflows/site_checks.yml`, which checks out `patientwords-engine` and
+  runs its two checkers — the code stays over there. All data extraction,
+  statistics, and rendering happen in the engine and arrive here as committed files. A pull request that adds a build step, a
   bundler, a framework, or a Python dependency to this repo is a change of
   architecture, not an improvement, and needs to be argued as one.
 * **Served by GitHub Pages from the repository root at the project path
@@ -198,15 +206,18 @@ silently breaks a published page:
 * **Deployment safety.** Anything that changes how the site is served — adding a
   `CNAME`, adding a Pages workflow, moving the publishing source or directory,
   or changing DNS in front of it — gets scrutinized and must state why. These
-  changes fail in production, not in review, and this repo has no CI that would
-  catch them.
+  changes fail in production, not in review: the CI this repo has (`site_checks.yml`)
+  validates payload shapes and drives the pages, and inspects nothing about how the
+  site is served.
 
 ### The custom-domain trap, if a custom domain is ever added
 
 `404.html` hard-codes the `/patientwords/` prefix in **10 absolute links**. That
 is correct today and deliberate: GitHub Pages serves `404.html` for a missing
 path at any depth, so relative links there would resolve against the missing
-path and break. Every other page correctly uses relative links.
+path and break. Every other page uses relative links — but five pages carry an
+absolute `<link rel="canonical" href="https://michaeldgreenphd.github.io/patientwords/…">`
+that hard-codes the same host and prefix and goes stale the same way.
 
 But those 10 are absolute *and* carry the project-path prefix. **Adding a custom
 domain moves the site root from `/patientwords/` to `/`, and all 10 become
@@ -221,9 +232,11 @@ Every pull request here is reviewed by Codex and Copilot. Their findings are
 
 1. **Verify against the actual file before changing anything.** Read the lines
    the finding names. On the first reviewed pull request here (#4, 2026-09-04)
-   three findings arrived: two were real — a rule in this file contradicting its
-   own data-contracts table, and a stale `CLAUDE.md` reference in `README.md` —
-   and one was a misreading of how a trailing newline renders in a diff.
+   five findings arrived across two rounds: four were real — a rule in this file
+   contradicting its own data-contracts table (twice), a stale `CLAUDE.md`
+   reference in `README.md`, and a payload missing from that table — and one was
+   a misreading of how a trailing newline renders in a diff. A later fact-check of
+   this file found eight more false or misleading assertions. Plan for both.
 2. **Give every finding a disposition on its own thread**: fixed, naming the
    commit; declined, naming the reason and the evidence; or not applicable, and
    why. Silence is not a disposition.
@@ -244,8 +257,13 @@ in full in the engine's `AGENTS.md` (**Known measurement limitations**) and
 `docs/backend_agreement_20260903.md`:
 
 * Per-pair probabilities from the engine's logits path carry a **bfloat16 error
-  term of up to 0.031** — roughly half the study's mean language penalty. Page
-  copy should not lean on a single pair's probability to three decimals.
+  term of up to 0.032** — roughly half the study's mean language penalty. On top
+  of that, the 2026-09-04 negative control showed a neutral four-word clinical
+  insertion moves a pair's penalty by more than the studied effect in a third of
+  cases and flips its top-1 prediction — a "redirect" here — in 14 of 50. **Page copy
+  must not lean on any single pair's probability, penalty, or flip label**; the
+  aggregate estimate is the study's only claim-grade number, and its defensible
+  form is the direction (36/14, p = 0.003), not the −0.06 magnitude.
 * One hosted measurement (index 20 of `pairs_20260710T011743Z`) recorded a
   neighbouring token's probability. Not yet fixed.
 
