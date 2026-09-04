@@ -67,7 +67,17 @@ jobs:
         run: |
           set -euo pipefail
           REPO=https://github.com/michaeldgreenphd/patientwords-engine
-          if [ -n "$BRANCH" ] && git ls-remote --exit-code --heads "$REPO" "$BRANCH" >/dev/null 2>&1; then
+          # Site main is the site's integration branch; it pairs with the engine's
+          # integration branch, never with engine main. The name-match rule below
+          # would otherwise pick engine main (both repos have one) and the
+          # presence guard would fail -- which is exactly what happened on the
+          # first push to site main, and again in the first version of this fix,
+          # which only changed the fallback that main never reached (Codex P1,
+          # 2026-09-04). So main is routed explicitly, before any name matching.
+          if [ "$BRANCH" = "main" ]; then
+            echo "ref=$ENGINE_FALLBACK_REF" >> "$GITHUB_OUTPUT"
+            echo "engine ref: $ENGINE_FALLBACK_REF (site main -> engine integration branch)"
+          elif [ -n "$BRANCH" ] && git ls-remote --exit-code --heads "$REPO" "$BRANCH" >/dev/null 2>&1; then
             echo "ref=$BRANCH" >> "$GITHUB_OUTPUT"
             echo "engine ref: $BRANCH (matching branch)"
           else
