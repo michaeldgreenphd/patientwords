@@ -157,9 +157,14 @@ This repo is presentation only, so "stored data" and "schema" mean something
 specific here, and a reviewer who does not know it will pass a change that
 silently breaks a published page:
 
-* **Data this repo must not alter:** everything under `modes/` and `data/` is
-  written by the engine. Hand-editing either is data loss at the next export,
-  which overwrites it — the fix belongs in the engine repo instead.
+* **Data this repo must not alter:** `modes/` and every `data/` file with an
+  engine writer in the table above are overwritten wholesale by the next export,
+  so a hand edit is data loss and the fix belongs in the engine repo instead.
+  **The two exceptions are hand-maintained here and editing them is the
+  documented workflow:** `data/model_provenance.json`, which has no engine
+  writer at all, and `data/specialties.json`, hand-synced from the engine's
+  `data/specialty_map.draft.json` with `validate_frontend_contract.py` checking
+  the two agree. Rejecting an edit to those two blocks the only route they have.
 * **The schema that breaks silently:** page JS fetches `data/*.json` and reads
   named fields. A payload shape change without the matching page change produces
   a blank or `undefined` cell, not an error, so a reviewer must check the
