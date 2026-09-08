@@ -626,7 +626,7 @@
         <li>Wording-gap intervals: phrase-level bootstrap after dedupe, percentile 95%, <code>seed 7</code>.</li>
         <li>Downgrade rates: Clopper&ndash;Pearson exact 95%.</li>
         <li>Asymmetry: exact two-sided sign tests, Benjamini&ndash;Hochberg corrected within registration family; the merged ten-model correction stays in the file for comparison.</li>
-        <li>Registration: four models pre-registered, six post-registration exploratory; departures are recorded in <a href="https://github.com/michaeldgreenphd/patientwords-engine/blob/claude/gemma-clinical-colloquial-interp-mavx04/docs/prereg_divergence_log.md">the divergence log in the engine repository</a>.</li>
+        <li>Registration: four models pre-registered, six post-registration exploratory; departures are recorded in <a href="https://github.com/michaeldgreenphd/patientwords-engine/blob/main/docs/prereg_divergence_log.md">the divergence log in the engine repository</a>.</li>
         <li>Confirmatory holdout: one tenth of Tier B phrases, withheld from this site's data files until the registered endpoint runs.</li>
         <li>Circuit evidence: gemma-2-2b only; the rest behavioral, fixed open weights, a point in time.</li>
         <li>Care-urgency tiers: owner-reviewed v1, clinician review pending.</li>
@@ -651,7 +651,7 @@
       <table class="rigor" id="rigor">
         <thead><tr><th scope="col">mechanism</th><th scope="col">what it does</th><th scope="col">live value</th></tr></thead>
         <tbody>
-          <tr><td>pre-registration</td><td>endpoints and primary models fixed before measurement; departures logged in <a href="https://github.com/michaeldgreenphd/patientwords-engine/blob/claude/gemma-clinical-colloquial-interp-mavx04/docs/prereg_divergence_log.md">the divergence log</a></td><td id="rg-prereg">&mdash;</td></tr>
+          <tr><td>pre-registration</td><td>endpoints and primary models fixed before measurement; departures logged in <a href="https://github.com/michaeldgreenphd/patientwords-engine/blob/main/docs/prereg_divergence_log.md">the divergence log</a></td><td id="rg-prereg">&mdash;</td></tr>
           <tr><td>sealed holdout</td><td>a slice of phrases withheld from every published file until the registered endpoint runs &mdash; the contamination guard</td><td id="rg-holdout">&mdash;</td></tr>
           <tr><td>backend cross-check</td><td>the anchor model is measured twice &mdash; hosted attribution graphs and independent CPU inference &mdash; and the two must agree</td><td id="rg-backend">accumulating; reported when parity lands</td></tr>
           <tr><td>drift sentinel</td><td>the same probe re-traced daily against a pinned baseline, so a silent host change cannot masquerade as a finding</td><td id="rg-drift">&mdash;</td></tr>
