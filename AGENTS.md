@@ -112,7 +112,8 @@ page before the real files exist. While the page's `REAL_DATA_PUBLISHED` constan
 `false` it fetches only these, and it shows a "sample data" notice whenever it
 renders from them. The real files have the same keys without `sample`; the change
 that commits them also sets that constant to `true`, after which the page loads the
-real names and falls back to the samples if one is missing. The constant exists
+real names. The two files are one unit: if either real file is missing, the page
+renders both samples (never a real summary beside sample transcripts). The constant exists
 because `check_pages.py` fails on any 404 under `data/`, so a real-first fetch
 before the real files exist would turn site CI red. The page is gated: it merges
 only after the final pre-registered analysis, the engine exporter on `main`, the
