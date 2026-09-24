@@ -116,6 +116,11 @@
   table.strip td.na,table.strip td.miss{color:var(--muted);background:transparent}
   table.strip td.ng{color:var(--muted);background:repeating-linear-gradient(135deg,transparent 0 4px,var(--hairline) 4px 5px)}
   table.strip tr.roles th{font-size:9.5px;letter-spacing:.04em}
+  /* a grade judged under an earlier judge prompt: shown, never shaded like a current grade */
+  table.strip td.sup{color:var(--muted);background:transparent;border:1px dotted var(--muted);font-style:italic}
+  .grades .sup{font-style:italic}
+  .no-row{font-size:16.5px;line-height:1.55;margin:0 0 14px;max-width:42em}
+  .no-row code{font-size:.8em;color:var(--muted)}
   .strip-key{font-family:var(--mono);font-size:10.5px;color:var(--muted);margin:2px 0 14px;line-height:1.7}
   /* chat: three wordings side by side, exchanges aligned by row */
   .arm-tabs{display:none}
@@ -218,6 +223,15 @@
     <h2>The answer so far</h2>
     <p class="status-line" id="status-line"></p>
     <p class="headline" id="headline"></p>
+    <!-- Shown when summary.headline.text is null: the engine found no pre-specified wording (row_id says why). -->
+    <div id="no-row" hidden>
+      <!-- OWNER-SIGNOFF --><p class="no-row">No pre-specified wording applies to this result, so this page states no headline.</p>
+      <!-- OWNER-SIGNOFF --><p class="no-row" data-why="not_computable" hidden>No triple had a nonzero difference, so the primary sign test did not run.</p>
+      <!-- OWNER-SIGNOFF --><p class="no-row" data-why="no_prespecified_row" hidden>The scenario-level test was significant in the direction opposite to the primary test, and the pre-registered table has no row for that outcome.</p>
+      <!-- OWNER-SIGNOFF --><p class="no-row" data-why="not_selectable_as_registered" hidden>The results match a row of the pre-registered table, but that row cannot be used as registered: the table was fixed for all the planned scenarios, and the scenario-level test ran on fewer.</p>
+      <!-- OWNER-SIGNOFF --><p class="no-row" data-why="other" hidden>The analysis recorded a reason this page does not recognise.</p>
+      <p class="no-row"><code id="no-row-id"></code></p>
+    </div>
     <div id="style-wrap" hidden>
       <span class="lbl">Writing style against medical terms</span>
       <p class="style-sentence" id="style-sentence"></p>
@@ -359,12 +373,23 @@
     // The banner stays unless the summary explicitly records a review other than "pending".
     if(st.clinician_review!=null&&st.clinician_review!=='pending')$('review-banner').hidden=true;
 
-    var h=s.headline&&s.headline.text;
-    if(h){
+    var hd=s.headline;
+    if(hd&&typeof hd==='object'){
       $('sec-headline').hidden=false;
-      $('headline').textContent=h; // verbatim: never composed on this page
       // OWNER-SIGNOFF: the status sentence below
       $('status-line').textContent=st.final===true?'Final analysis.':'The final pre-registered analysis has not run yet.';
+      if(hd.text){
+        $('headline').textContent=hd.text; // verbatim: never composed on this page
+      }else{
+        // No registered wording applies. Say so, and why, from row_id; never compose a headline.
+        $('headline').hidden=true;
+        $('no-row').hidden=false;
+        var rid=hd.row_id==null?'':String(hd.row_id);
+        var why=rid==='not_computable'||rid==='no_prespecified_row'?rid:
+          rid.indexOf('not_selectable_as_registered:')===0?'not_selectable_as_registered':'other';
+        Array.prototype.forEach.call($('no-row').querySelectorAll('[data-why]'),function(p){p.hidden=p.getAttribute('data-why')!==why;});
+        $('no-row-id').textContent='row_id: '+(rid||DASH);
+      }
       var ss=s.style_sentence&&s.style_sentence.text;
       if(ss){$('style-wrap').hidden=false;$('style-sentence').textContent=ss;}
     }
@@ -606,6 +631,13 @@
         else{
           var g=(e.vals||{})[state.measure];
           if(!g){td.className='miss';tip='no value recorded';}
+          else if(g.superseded!=null){
+            // judged under an earlier judge prompt: shown as superseded, never shaded or compared
+            td.className='sup';
+            txt=g.na!=null?'n/a':g.v==null?DASH:abbr(g.v);
+            tip='superseded: judged under an earlier judge prompt ('+g.superseded+'), not compared \u00b7 '+
+              (g.na!=null?'not applicable: '+g.na:g.v==null?'no value':human(g.v));
+          }
           else if(g.na!=null){td.className='na';txt='n/a';tip='not applicable: '+g.na;}
           else if(g.v==null){td.className='miss';tip='no value';}
           else{
@@ -629,7 +661,7 @@
     t.appendChild(tb);
     var key=$('strip-key'); key.textContent='';
     key.appendChild(document.createTextNode((m.label||state.measure)+': '+vals.map(function(v){return abbr(v)+' '+human(v);}).join(' · ')+
-      ' · n/a not applicable · hatched = not graded · '+DASH+' no value'+(m.kind!=='nominal'?' · darker = higher on the scale':'')));
+      ' · n/a not applicable · hatched = not graded · dotted italic = superseded (earlier judge prompt, not compared) · '+DASH+' no value'+(m.kind!=='nominal'?' · darker = higher on the scale':'')));
   }
   function abbrRole(r){return {evidence:'evid',pressure:'press',neutral_control:'ctrl'}[r]||String(r).slice(0,5);}
 
@@ -654,7 +686,7 @@
         var u=el('div','bub user');u.appendChild(el('span','who',ARM_LABEL[a]+' · scripted user turn'));u.appendChild(document.createTextNode(e.user||DASH));cell.appendChild(u);
         arr(e.interim).forEach(function(it){
           var txt=typeof it==='string'?it:(it&&(it.text||it.content||it.reply))||'';
-          var isTool=it&&typeof it==='object'&&(it.role==='tool'||it.kind==='tool_result'||it.type==='tool_result');
+          var isTool=it&&typeof it==='object'&&(it.fixture===true||it.role==='tool'||it.kind==='tool_result'||it.type==='tool_result');
           var b=el('div','bub '+(isTool?'tool':'interim'));
           b.appendChild(el('span','who',isTool?'Scripted lookup result · text written by the study, not by the model':'Intermediate reply, same exchange'));
           b.appendChild(document.createTextNode(txt||DASH)); cell.appendChild(b);
@@ -669,7 +701,11 @@
           mids.forEach(function(id){var x=vals[id];if(!x)return;any=true;
             if(g.childNodes.length)g.appendChild(document.createTextNode(' · '));
             g.appendChild(document.createTextNode((MEAS[id].label||id)+' '));
-            g.appendChild(el('b',null,x.na!=null?'n/a':human(x.v)));});
+            var shown=x.na!=null?'n/a':x.v==null?DASH:human(x.v);
+            if(x.superseded!=null){
+              var sp=el('span','sup','superseded: '+shown+' (earlier judge prompt '+x.superseded+', not compared)');
+              g.appendChild(sp);
+            }else g.appendChild(el('b',null,shown));});
           if(!any)g.textContent='no grades recorded';
           cell.appendChild(g);
         }
