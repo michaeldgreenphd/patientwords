@@ -97,11 +97,28 @@ export.
 | `simulated_archive.json` | **no page** (written alongside the CSV; staged) | `export_archive.py` |
 | `model_provenance.json` | `technical/` (per-model build info) | **no engine writer** — hand-maintained here |
 | `specialties.json` | `simulated-scenarios/` (specialty filter) | **no engine writer** — hand-synced from the engine's `data/specialty_map.draft.json`; `validate_frontend_contract.py` checks the two agree |
+| `petri_multiturn_summary.json` | `multi-turn/index.html` (headline, D figure, repeats table, provenance) | `export_petri_multiturn.py` (not yet on engine `main`, 2026-09-24) — **owner-run, not the daily Routine** |
+| `petri_multiturn_conversations.json` | `multi-turn/index.html` (explore viewer) | `export_petri_multiturn.py` (not yet on engine `main`, 2026-09-24) — **owner-run, not the daily Routine** |
 
 `*.sample.json` files are development fixtures, but two ARE fetched by live pages
 when the URL carries `?sample=1` (`llm/index.html` → `advice_scenarios.sample.json`,
 `llm/code.html` → `advice_coding_sample.sample.json`), so their shape is part of the
-contract too. Five published files currently have **no page consumer** —
+contract too.
+
+The Multi-turn page has two more: `petri_multiturn_summary.sample.json` and
+`petri_multiturn_conversations.sample.json`. They are SYNTHETIC (placeholder text,
+random grades, `"sample": true` and a `_note` saying so) and exist only to build the
+page before the real files exist. While the page's `REAL_DATA_PUBLISHED` constant is
+`false` it fetches only these, and it shows a "sample data" notice whenever it
+renders from them. The real files have the same keys without `sample`; the change
+that commits them also sets that constant to `true`, after which the page loads the
+real names and falls back to the samples if one is missing. The constant exists
+because `check_pages.py` fails on any 404 under `data/`, so a real-first fetch
+before the real files exist would turn site CI red. The page is gated: it merges
+only after the final pre-registered analysis, the engine exporter on `main`, the
+vendor reproduction pack (engine wave-2 decision 16) and the owner's sign-off.
+
+Five published files currently have **no page consumer** —
 `advice_scenarios_nat.json`, `patch_profile.json`, `specialty_breakdown.json`,
 `simulated_archive.json`, `display_vocab.json`. They are staged data waiting on a page; do not assume a
 page breaks if they change, and do not delete them assuming they are dead. The
@@ -212,19 +229,19 @@ silently breaks a published page:
 
 ### The custom-domain trap, if a custom domain is ever added
 
-`404.html` hard-codes the `/patientwords/` prefix in **10 absolute links**. That
+`404.html` hard-codes the `/patientwords/` prefix in **12 absolute links**. That
 is correct today and deliberate: GitHub Pages serves `404.html` for a missing
 path at any depth, so relative links there would resolve against the missing
-path and break. Every other page uses relative links — but **15 pages** (11
+path and break. Every other page uses relative links — but **16 pages** (12
 composed pages and 4 meta-refresh stubs) carry an absolute
 `<link rel="canonical" href="https://michaeldgreenphd.github.io/patientwords/…">`
 that hard-codes the same host and prefix and goes stale the same way. A custom
-domain therefore touches `404.html` plus those 15 canonicals; count them with
+domain therefore touches `404.html` plus those 16 canonicals; count them with
 `grep -rl 'rel="canonical" href="https://michaeldgreenphd.github.io/patientwords' --include=*.html .`
 rather than trusting this number.
 
-But those 10 are absolute *and* carry the project-path prefix. **Adding a custom
-domain moves the site root from `/patientwords/` to `/`, and all 10 become
+But those 12 are absolute *and* carry the project-path prefix. **Adding a custom
+domain moves the site root from `/patientwords/` to `/`, and all 12 become
 404s** — on the very page a lost visitor lands on. So if a `CNAME` ever appears
 in a pull request, `404.html` must change in the same pull request, and a
 reviewer should treat a `CNAME` without it as an incomplete change.
