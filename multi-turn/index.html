@@ -204,10 +204,11 @@
   <h1>Does the way a person words their messages change the advice a model gives over a whole conversation?</h1>
   <!-- OWNER-SIGNOFF --><p class="subtitle">The same scripted patient situation, written three ways (colloquial, careful lay and clinical), sent to Claude Haiku 4.5 as a multi-turn conversation. Each reply is graded on several measures.</p>
 
-  <!-- Banner: shown while summary.status.clinician_review is "pending" (and by default, until the summary says otherwise) -->
+  <!-- Banner: the not-medical-advice line always shows. The review-pending line shows while
+       summary.status.clinician_review is "pending" (and by default, until the summary says otherwise). -->
   <div class="banner" id="review-banner">
     <!-- OWNER-SIGNOFF --><b>Not medical advice</b>Nothing here is medical advice. The study measures model behavior.
-    <br><!-- OWNER-SIGNOFF --><b>Clinician review pending</b>No clinician has reviewed these scenarios, the grading rubric or the grades.
+    <span id="review-pending"><br><!-- OWNER-SIGNOFF --><b>Clinician review pending</b>No clinician has reviewed these scenarios, the grading rubric or the grades.</span>
   </div>
 
   <div class="sample-banner" id="sample-banner" hidden>SAMPLE DATA — synthetic placeholder payload for building this page. Nothing on this page is a result.</div>
@@ -302,7 +303,7 @@
     <h2>Limitations</h2>
     <ul class="lim">
       <!-- OWNER-SIGNOFF --><li>The scenarios were written by an LLM, not taken from real patients.</li>
-      <!-- OWNER-SIGNOFF --><li>No clinician has reviewed the scenarios, the rubric or the grades.</li>
+      <!-- OWNER-SIGNOFF --><li id="lim-review">No clinician has reviewed the scenarios, the rubric or the grades.</li>
       <!-- OWNER-SIGNOFF --><li>The user turns are scripted, so they cannot answer a question the model asks.</li>
       <!-- OWNER-SIGNOFF --><li>One model was tested: Claude Haiku 4.5.</li>
       <!-- OWNER-SIGNOFF --><li>The grader is the same model as the one being tested.</li>
@@ -370,14 +371,17 @@
   // ---------- summary ----------
   function renderSummary(s){
     var st=s.status||{};
-    // The banner stays unless the summary explicitly records a review other than "pending".
-    if(st.clinician_review!=null&&st.clinician_review!=='pending')$('review-banner').hidden=true;
+    // The review-pending line and its limitation stay unless the summary explicitly records a review other than
+    // "pending". The not-medical-advice line always stays.
+    if(st.clinician_review!=null&&st.clinician_review!=='pending'){$('review-pending').hidden=true;$('lim-review').hidden=true;}
 
     var hd=s.headline;
     if(hd&&typeof hd==='object'){
       $('sec-headline').hidden=false;
-      // OWNER-SIGNOFF: the status sentence below
-      $('status-line').textContent=st.final===true?'Final analysis.':'The final pre-registered analysis has not run yet.';
+      // OWNER-SIGNOFF: the status sentence below. An absent status.final states nothing (Provenance shows a dash).
+      if(st.final===true||st.final===false)
+        $('status-line').textContent=st.final?'Final analysis.':'The final pre-registered analysis has not run yet.';
+      else $('status-line').hidden=true;
       if(hd.text){
         $('headline').textContent=hd.text; // verbatim: never composed on this page
       }else{
@@ -396,7 +400,7 @@
     var triples=arr(s.triples);
     if(triples.length){$('sec-fig').hidden=false;drawD(triples,s.scenario_means||{});window.addEventListener('resize',debounce(function(){drawD(triples,s.scenario_means||{});},150));}
     renderCounts(s.primary);
-    renderRepeats(arr(s.repeats));
+    renderRepeats(arr(s.repeats),arr(s.triples));
     renderProv(s);
   }
 
@@ -479,13 +483,20 @@
       ' eligible triples below zero, '+el_.filter(function(t){return t.D>0;}).length+' above, '+el_.filter(function(t){return t.D===0;}).length+' at zero.');
   }
 
-  function renderRepeats(rows){
+  function renderRepeats(rows,triples){
     if(!rows.length)return;
     $('sec-repeats').hidden=false;
+    // rows are per seed; the column names the seed's scenario (as the figure does), read from the triples.
+    // A seed with no triple shows its seed id; a scenario with several seeds shows each seed id beside it.
+    var scen={},seen={};
+    arr(triples).forEach(function(t){if(t&&t.seed_id&&t.scenario_id)scen[t.seed_id]=t.scenario_id;});
+    rows.forEach(function(r){var k=scen[r.seed_id];if(k)seen[k]=(seen[k]||0)+1;});
     var tb=$('rep-body'); tb.textContent='';
     rows.forEach(function(r){
-      var tr=el('tr');
-      tr.appendChild(el('td',null,r.seed_id||DASH));
+      var tr=el('tr'), k=scen[r.seed_id];
+      var td=el('td',null,k?(seen[k]>1?k+' · '+r.seed_id:k):(r.seed_id||DASH));
+      if(r.seed_id)td.title='seed '+r.seed_id;
+      tr.appendChild(td);
       tr.appendChild(el('td','num',num(r.epochs)));
       tr.appendChild(el('td','num',(typeof r.same_direction==='number'&&typeof r.epochs==='number')?r.same_direction+' of '+r.epochs:num(r.same_direction)));
       tb.appendChild(tr);
@@ -596,9 +607,12 @@
     if(!mids.length)mids=Object.keys(MEAS);
     if(mids.indexOf(state.measure)<0)state.measure=mids[0];
     var mc=$('measure-chips'); mc.textContent=''; mc.appendChild(el('span','chip-lbl','Grade strip'));
-    mids.forEach(function(id){var b=el('button','chip',MEAS[id].label||id);b.type='button';
+    mids.forEach(function(id){var b=el('button','chip',MEAS[id].label||id);b.type='button';b.dataset.measure=id;
       var on=id===state.measure;if(on)b.classList.add('on');b.setAttribute('aria-pressed',on?'true':'false');
-      b.addEventListener('click',function(){state.measure=id;draw();});mc.appendChild(b);});
+      b.addEventListener('click',function(){state.measure=id;draw();
+        // draw() rebuilt the chips, so focus moves to the new chip for this measure
+        Array.prototype.forEach.call($('measure-chips').querySelectorAll('.chip'),function(x){if(x.dataset.measure===id)x.focus();});});
+      mc.appendChild(b);});
     drawStrip(seed,triple);
     drawChat(seed,triple,mids);
   }
@@ -616,8 +630,8 @@
     th.appendChild(hr);
     var roles=arr(seed.roles);
     if(roles.some(function(r){return r;})){
-      var rr=el('tr','roles');rr.appendChild(el('th','row','role'));
-      for(var j=0;j<n;j++){var rh=el('th',null,roles[j]?abbrRole(roles[j]):'');if(roles[j])rh.title=human(roles[j]);rr.appendChild(rh);}
+      var rr=el('tr','roles'), rl=el('th','row','role'); rl.scope='row'; rr.appendChild(rl);
+      for(var j=0;j<n;j++){var rh=el('th',null,roles[j]?abbrRole(roles[j]):'');rh.scope='col';if(roles[j])rh.title=human(roles[j]);rr.appendChild(rh);}
       th.appendChild(rr);
     }
     t.appendChild(th);
