@@ -61,6 +61,7 @@
   .pending{border:1px solid var(--hairline);border-left:3px solid var(--structural);
     padding:14px 16px;font-family:var(--mono);font-size:12.5px;line-height:1.8;color:var(--muted);margin:26px 0}
   .status-line{font-family:var(--mono);font-size:11.5px;color:var(--muted);margin:0 0 10px}
+  .draft{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--penalty);margin:0 0 12px}
   /* headline: rendered verbatim from the summary file */
   .headline{font-size:clamp(19px,2.4vw,23px);line-height:1.45;margin:0 0 14px;max-width:38em}
   .style-sentence{font-size:16.5px;line-height:1.55;margin:0 0 6px;max-width:42em}
@@ -272,6 +273,7 @@
     <p class="seed-info" id="seed-info"></p>
 
     <div class="chip-g" id="measure-chips" role="group" aria-label="Measure shown in the grade strip"></div>
+    <!-- OWNER-SIGNOFF --><p class="draft draft-rubric">Draft rubric · clinician review pending</p>
     <div class="strip-wrap"><table class="strip" id="strip"></table></div>
     <p class="strip-key" id="strip-key"></p>
 
@@ -291,6 +293,7 @@
     <!-- The model names and the temperature below are filled from summary.provenance.models (a dash when absent). -->
     <!-- OWNER-SIGNOFF --><p class="note">Each wording is a separate conversation with <span id="m-target">&mdash;</span>, sampled at temperature <span id="m-temp">&mdash;</span>. A grader, <span id="m-also" hidden>also </span><span id="m-judge">&mdash;</span>, codes each reply.</p>
     <!-- OWNER-SIGNOFF --><p class="note">A conversation triple is one scenario, one epoch and one speaker, with its three conversations. D compares the urgency tier of each reply alone, ranked self care, routine, urgent, emergency.</p>
+    <!-- OWNER-SIGNOFF --><p class="draft draft-rubric">Draft rubric · clinician review pending</p>
     <!-- OWNER-SIGNOFF --><p class="note">The primary test is an exact two-sided sign test on the sign of D across triples. A second test treats each scenario as one unit, so a claim beyond these scenarios does not rest on one of them.</p>
     <!-- OWNER-SIGNOFF --><p class="note">The analysis plan was fixed before the prospective triples were generated. It is section 10 of the engine&rsquo;s <a href="https://github.com/michaeldgreenphd/patientwords-engine/blob/main/docs/petri_wave2_design.md#10-pre-specified-analysis-of-the-register-contrast-fixed-2026-09-23-before-epoch-3">wave-2 design note</a>.</p>
     <div id="example-wrap" hidden>
@@ -372,9 +375,10 @@
   // ---------- summary ----------
   function renderSummary(s){
     var st=s.status||{};
-    // The review-pending line and its limitation stay unless the summary explicitly records a review other than
-    // "pending". The not-medical-advice line always stays.
-    if(st.clinician_review!=null&&st.clinician_review!=='pending'){$('review-pending').hidden=true;$('lim-review').hidden=true;}
+    // The review-pending line, its limitation and the draft-rubric notices beside the tiers stay unless the summary
+    // explicitly records a review other than "pending". The not-medical-advice line always stays.
+    if(st.clinician_review!=null&&st.clinician_review!=='pending'){$('review-pending').hidden=true;$('lim-review').hidden=true;
+      Array.prototype.forEach.call(document.querySelectorAll('.draft-rubric'),function(n){n.hidden=true;});}
     // Method sentence: the models and temperature the runs recorded (the exporter refuses any other), never hard-coded
     var md=(s.provenance||{}).models||{};
     function label(v){return typeof v==='string'&&v?v:DASH;}
