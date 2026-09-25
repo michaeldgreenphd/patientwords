@@ -577,7 +577,9 @@
   function draw(){
     var seed=seedById(state.seed)||{};
     var triple={};
-    convsFor().forEach(function(v){if(epochOf(v)===state.epoch&&idKey(v)===state.identity)triple[v.arm]=v;});
+    // columns are registers: an identity seed's arm ids carry the speaker (patient_colloquial, clinician_clinical),
+    // so the column comes from the conversation's register, and from its arm only in a file that lacks register
+    convsFor().forEach(function(v){if(epochOf(v)===state.epoch&&idKey(v)===state.identity)triple[v.register||v.arm]=v;});
     // seed header
     var mech=(C.mechanisms||{})[seed.mechanism]||{};
     $('seed-q').textContent=mech.question||'';
