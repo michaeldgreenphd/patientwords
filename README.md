@@ -39,6 +39,7 @@ Nothing here is medical advice; the study measures model behavior.
 | [Translation](https://michaeldgreenphd.github.io/patientwords/translation/) | Rewriting patient wording into clinical terms restores circuit and prediction |
 | [Simulated Scenarios](https://michaeldgreenphd.github.io/patientwords/simulated-scenarios/) | The generated stress-pair corpus: every measurement, searchable, per model |
 | [LLM](https://michaeldgreenphd.github.io/patientwords/llm/) | The advice arm: verbatim assistant responses to both wordings |
+| [Multi-turn](https://michaeldgreenphd.github.io/patientwords/multi-turn/) | Scripted multi-turn conversations in three wordings, each reply graded (gated; not yet public) |
 | [Phrase Dataset](https://michaeldgreenphd.github.io/patientwords/phrase-dataset/) | The hand-built set from real patient language, measured by hand |
 
 Two provenances appear throughout and are always labeled: LLM-written

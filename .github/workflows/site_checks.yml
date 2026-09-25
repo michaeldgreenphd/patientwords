@@ -14,7 +14,7 @@ name: Site checks
 #      missing field. Run WITHOUT --strict: the current data carries a known
 #      warning (dead rows in urgency_shift.json) and --strict would make this
 #      workflow red on its first run, which is how a check gets switched off.
-#   2. pages     — the engine's check_pages.py loads all 20 pages in Chromium and
+#   2. pages     — the engine's check_pages.py loads all 21 pages in Chromium and
 #      fails on JS errors, failed data requests, HTTP errors, and any table that
 #      is empty WHILE VISIBLE. It does not catch a renamed field, because a page
 #      that hides its section is degrading gracefully, which the site's rules

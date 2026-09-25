@@ -1,0 +1,801 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Multi-turn — PatientWords</title>
+<meta name="description" content="Scripted multi-turn conversations with Claude Haiku 4.5: the same patient situation in three wordings, each reply graded, and whether the advice differs by wording.">
+<link rel="canonical" href="https://michaeldgreenphd.github.io/patientwords/multi-turn/">
+<meta name="theme-color" content="#faf9f5">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23faf9f5'/%3E%3Crect x='9' y='9' width='30' height='30' fill='%23111827'/%3E%3Crect x='25' y='25' width='30' height='30' fill='%2315803d'/%3E%3C/svg%3E">
+<style>
+  :root{
+    --paper:#faf9f5; --ink:#1c1c19; --patient:#111827; --clinical:#15803d;
+    --penalty:#b4483d; --muted:#6d6c66; --structural:#c3c9d2; --hairline:#dcdad2;
+    --serif:'Iowan Old Style','Palatino Linotype',Palatino,'Book Antiqua',Georgia,serif;
+    --mono:ui-monospace,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace;
+    /* chat bubbles only (owner decision): system sans, rounded, coloured */
+    --sans:system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+    --lay:#4b5563; --reply:#efede6;
+  }
+  html{background:var(--paper)}
+  body{margin:0;padding:0;background:var(--paper);color:var(--ink);
+    font-family:var(--serif);font-size:17px;line-height:1.62;
+    -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+  main{max-width:1100px;margin:0 auto;padding:0 22px 56px}
+  a{color:inherit}
+  a:focus-visible,button:focus-visible,select:focus-visible,summary:focus-visible{outline:2px solid var(--clinical);outline-offset:3px;border-radius:1px}
+  .skip{position:absolute;left:-9999px;top:0;background:var(--paper);color:var(--ink);padding:8px 14px;border:1px solid var(--ink);z-index:10}
+  .skip:focus{left:8px}
+  ::selection{background:#dbe9df}
+  .rule-heavy{border:0;border-top:2px solid var(--ink);margin:0}
+  .rule-fine{border:0;border-top:1px solid var(--hairline);margin:3px 0 0}
+  .masthead{max-width:1100px;margin:0 auto;padding:20px 22px 0}
+  .masthead-row{display:flex;align-items:baseline;justify-content:space-between;
+    flex-wrap:wrap;gap:8px 24px;padding:10px 0 12px}
+  .wordmark{font-family:var(--serif);font-size:19px;font-weight:600;letter-spacing:.02em;text-decoration:none}
+  .wordmark .pw-p{color:var(--patient)}
+  .wordmark .pw-w{color:var(--clinical);font-style:italic}
+  .wordmark .pw-w::before{content:'·';color:var(--muted);font-style:normal;font-weight:400;margin:0 3px 0 2px}
+  .masthead nav{display:flex;flex-wrap:wrap;gap:6px 20px}
+  .masthead nav a{font-family:var(--mono);font-size:11px;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--muted);text-decoration:none;padding:2px 0}
+  .masthead nav a:hover{color:var(--ink);text-decoration:underline;text-underline-offset:4px}
+  .masthead nav a[aria-current=page]{color:var(--ink);border-bottom:1px solid var(--ink)}
+  .masthead nav a:nth-child(3),.masthead nav a:nth-child(10){margin-right:2vw}
+  .dateline{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--clinical);font-weight:600;margin:34px 0 14px}
+  .dateline .mode{color:var(--muted);font-weight:400;letter-spacing:.06em;text-transform:none}
+  h1{font-size:clamp(28px,4.4vw,40px);line-height:1.16;font-weight:600;letter-spacing:-.006em;margin:0 0 10px;max-width:24em}
+  .subtitle{font-style:italic;font-size:19px;line-height:1.5;color:var(--muted);margin:0 0 20px;max-width:40em}
+  h2{font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;margin:0 0 12px}
+  section.blk{border-top:1px solid var(--ink);margin-top:38px;padding-top:12px}
+  .note{font-size:15.5px;line-height:1.62;margin:0 0 12px;max-width:44em}
+  .mono-inline,code{font-family:var(--mono);font-size:.85em}
+  /* banners: not-medical-advice + clinician review, and the sample-data notice */
+  .banner{border:1px solid var(--hairline);border-left:3px solid var(--ink);padding:10px 14px;margin:0 0 18px;
+    font-size:15px;line-height:1.55}
+  .banner b{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;font-weight:600;margin-right:6px}
+  .sample-banner{font-family:var(--mono);font-size:12px;letter-spacing:.08em;
+    border:2px solid var(--penalty);color:var(--penalty);padding:8px 12px;margin:0 0 18px}
+  .pending{border:1px solid var(--hairline);border-left:3px solid var(--structural);
+    padding:14px 16px;font-family:var(--mono);font-size:12.5px;line-height:1.8;color:var(--muted);margin:26px 0}
+  .status-line{font-family:var(--mono);font-size:11.5px;color:var(--muted);margin:0 0 10px}
+  .draft{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--penalty);margin:0 0 12px}
+  /* headline: rendered verbatim from the summary file */
+  .headline{font-size:clamp(19px,2.4vw,23px);line-height:1.45;margin:0 0 14px;max-width:38em}
+  .style-sentence{font-size:16.5px;line-height:1.55;margin:0 0 6px;max-width:42em}
+  .lbl{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:0 0 3px}
+  /* figure */
+  .fig{margin:10px 0 4px}
+  .fig-cap{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--ink);margin:0 0 6px}
+  .fig-cap .fig-sub{font-weight:400;letter-spacing:.06em;text-transform:none;color:var(--muted)}
+  #fig-d svg{display:block;width:100%;height:auto}
+  #fig-d text{font-family:var(--mono)}
+  .counts{font-family:var(--mono);font-size:11.5px;color:var(--muted);margin:8px 0 0;font-variant-numeric:tabular-nums}
+  .counts b{color:var(--ink);font-weight:600}
+  /* tables */
+  table.dt{border-collapse:collapse;font-family:var(--mono);font-size:12px;font-variant-numeric:tabular-nums;margin:4px 0 10px}
+  table.dt th{font-weight:600;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);
+    text-align:left;padding:4px 18px 4px 0;border-bottom:1px solid var(--ink)}
+  table.dt td{padding:5px 18px 5px 0;border-bottom:1px solid var(--hairline)}
+  table.dt td.num,table.dt th.num{text-align:right}
+  /* definition lists (provenance) */
+  .prov dl{display:grid;grid-template-columns:max-content 1fr;gap:6px 22px;margin:0 0 14px}
+  .prov dt{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-align:right}
+  .prov dd{font-family:var(--mono);font-size:12px;margin:0;overflow-wrap:anywhere;font-variant-numeric:tabular-nums lining-nums}
+  .prov pre{font-family:var(--mono);font-size:12px;background:#fff;border:1px solid var(--hairline);padding:8px 10px;margin:0;
+    white-space:pre-wrap;overflow-wrap:anywhere}
+  ul.lim{margin:0 0 12px;padding-left:20px;max-width:44em}
+  ul.lim li{font-size:15.5px;line-height:1.6;margin:0 0 4px}
+  /* example: one turn in three wordings */
+  .ex3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px 22px;margin:6px 0 14px}
+  .ex3 p{margin:0;font-size:15px;line-height:1.5}
+  /* chips (site convention) and selects */
+  .chip-g{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:4px 0 12px}
+  .chip-lbl{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-right:4px}
+  .chip{font-family:var(--mono);font-size:11px;color:var(--muted);background:#fff;
+    border:1px solid var(--hairline);padding:4px 10px;cursor:pointer;border-radius:2px}
+  .chip:hover{color:var(--ink);border-color:var(--muted)}
+  .chip.on{color:var(--clinical);border-color:var(--clinical);font-weight:600}
+  .pick{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:flex-end;margin:6px 0 10px}
+  .pick label{display:flex;flex-direction:column;font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  .pick select{font-family:var(--mono);font-size:12px;color:var(--ink);background:#fff;border:1px solid var(--hairline);
+    padding:4px 6px;margin-top:3px;max-width:88vw}
+  .seed-info{font-family:var(--mono);font-size:11.5px;color:var(--muted);margin:0 0 12px;line-height:1.7}
+  .seed-info b{color:var(--ink);font-weight:600}
+  .seed-q{font-size:16px;margin:0 0 4px}
+  /* grade strip */
+  .strip-wrap{overflow-x:auto;margin:0 0 4px}
+  table.strip{border-collapse:separate;border-spacing:2px;font-family:var(--mono);font-size:10.5px;font-variant-numeric:tabular-nums}
+  table.strip th{font-weight:400;color:var(--muted);padding:2px 4px;text-align:center;white-space:nowrap}
+  table.strip th.row{text-align:right;padding-right:8px}
+  table.strip td{min-width:30px;height:24px;text-align:center;padding:0;border:1px solid var(--hairline);background:#fff}
+  table.strip td button{all:unset;display:block;width:100%;height:100%;line-height:24px;cursor:pointer}
+  table.strip td button:focus-visible{outline:2px solid var(--clinical);outline-offset:1px}
+  table.strip td.na,table.strip td.miss{color:var(--muted);background:transparent}
+  table.strip td.ng{color:var(--muted);background:repeating-linear-gradient(135deg,transparent 0 4px,var(--hairline) 4px 5px)}
+  table.strip tr.roles th{font-size:9.5px;letter-spacing:.04em}
+  /* a grade judged under an earlier judge prompt: shown, never shaded like a current grade */
+  table.strip td.sup{color:var(--muted);background:transparent;border:1px dotted var(--muted);font-style:italic}
+  .grades .sup{font-style:italic}
+  .no-row{font-size:16.5px;line-height:1.55;margin:0 0 14px;max-width:42em}
+  .no-row code{font-size:.8em;color:var(--muted)}
+  .strip-key{font-family:var(--mono);font-size:10.5px;color:var(--muted);margin:2px 0 14px;line-height:1.7}
+  /* chat: three wordings side by side, exchanges aligned by row */
+  .arm-tabs{display:none}
+  .chat{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0 18px;font-family:var(--sans);font-size:14.5px;line-height:1.45}
+  .chat .colhead{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:600;
+    padding:0 0 6px;border-bottom:1px solid var(--ink);margin-bottom:4px}
+  .chat .colhead.a-colloquial{color:var(--patient)} .chat .colhead.a-lay_careful{color:var(--lay)} .chat .colhead.a-clinical{color:var(--clinical)}
+  .chat .exh{grid-column:1 / -1;font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;color:var(--muted);
+    border-top:1px solid var(--hairline);padding:10px 0 4px;margin-top:8px;scroll-margin-top:12px}
+  .chat .exh.hl{color:var(--ink);border-top-color:var(--ink)}
+  .cell{display:flex;flex-direction:column;gap:6px;padding:4px 0 6px}
+  .bub{border-radius:16px;padding:8px 12px;max-width:92%;overflow-wrap:anywhere;white-space:pre-wrap}
+  .bub.user{align-self:flex-end;color:#fff;border-bottom-right-radius:5px}
+  .a-colloquial .bub.user{background:var(--patient)}
+  .a-lay_careful .bub.user{background:var(--lay)}
+  .a-clinical .bub.user{background:var(--clinical)}
+  .bub.reply{align-self:flex-start;background:var(--reply);color:var(--ink);border-bottom-left-radius:5px}
+  .bub.reply.ungraded{background:transparent;border:1px dashed var(--structural)}
+  .bub.interim{align-self:flex-start;background:transparent;border:1px solid var(--hairline);color:var(--ink);font-size:13.5px;border-bottom-left-radius:5px}
+  .bub.tool{align-self:stretch;max-width:none;border-radius:6px;background:#fff;border:1px solid var(--structural);font-size:13px}
+  .who{display:block;font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;opacity:.8;margin-bottom:2px;white-space:normal}
+  .grades{font-family:var(--mono);font-size:10.5px;color:var(--muted);line-height:1.6}
+  .grades b{color:var(--ink);font-weight:600}
+  .tag{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--penalty)}
+  .rule{font-family:var(--mono);font-size:10.5px;color:var(--muted);line-height:1.6;border-top:1px solid var(--hairline);padding-top:6px;margin-top:10px}
+  .rule b{color:var(--ink);font-weight:600}
+  details.defs{margin:18px 0 0}
+  details.defs summary{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;cursor:pointer}
+  details.defs dl{margin:10px 0 0}
+  details.defs dt{font-family:var(--mono);font-size:11.5px;font-weight:600;margin-top:8px}
+  details.defs dd{margin:2px 0 0;font-size:14.5px;line-height:1.55;max-width:46em}
+  .back{display:inline-block;margin-top:28px;font-family:var(--mono);font-size:12px;
+    letter-spacing:.1em;text-transform:uppercase;color:var(--ink);text-decoration:none;
+    border-bottom:1px solid var(--ink);padding-bottom:2px}
+  .back:hover{color:var(--clinical);border-bottom-color:var(--clinical)}
+  .endnote{border-top:1px solid var(--ink);margin-top:42px;padding-top:14px}
+  footer{font-family:var(--mono);font-size:12px;line-height:1.9;color:var(--muted)}
+  footer a{color:var(--muted);text-underline-offset:3px}
+  @media (max-width:760px){
+    .masthead nav{gap:8px 22px}
+    .masthead nav a{padding:7px 0}
+    body{font-size:16px}
+    .prov dl{grid-template-columns:1fr}
+    .prov dt{text-align:left}
+    .ex3{grid-template-columns:1fr}
+    /* phone: one wording at a time, chosen by chips */
+    .arm-tabs{display:flex}
+    .chat{grid-template-columns:minmax(0,1fr)}
+    .chat .colhead{display:none}
+    .chat[data-arm="colloquial"] .cell:not(.a-colloquial),
+    .chat[data-arm="lay_careful"] .cell:not(.a-lay_careful),
+    .chat[data-arm="clinical"] .cell:not(.a-clinical){display:none}
+  }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="masthead">
+  <hr class="rule-heavy"><hr class="rule-fine">
+  <div class="masthead-row">
+    <a class="wordmark" href="../" aria-label="PatientWords home, the overview page"><span class="pw-p">Patient</span><span class="pw-w">Words</span></a>
+    <nav aria-label="Site">
+      <a href="../start-here/">Start Here</a>
+      <a href="../methods.html">Methods</a>
+      <a href="../technical/">Technical</a>
+      <a href="../wording-differences/">Wording Differences</a>
+      <a href="../dialect-differences/">Dialect Differences</a>
+      <a href="../translation/">Translation</a>
+      <a href="../simulated-scenarios/">Simulated Scenarios</a>
+      <a href="../llm/">LLM</a>
+      <a href="./" aria-current="page">Multi-turn</a>
+      <a href="../phrase-dataset/">Phrase Dataset</a>
+      <a href="https://github.com/michaeldgreenphd/patientwords">GitHub</a>
+    </nav>
+  </div>
+  <hr class="rule-fine">
+</header>
+<main id="main">
+  <!-- 1. The question (hero) -->
+  <p class="dateline">Multi-turn <span class="mode">· scripted conversations, three wordings</span></p>
+  <h1>Does the way a person words their messages change the advice a model gives over a whole conversation?</h1>
+  <!-- The model name below is summary.provenance.models.target_label (a dash when absent). -->
+  <!-- OWNER-SIGNOFF --><p class="subtitle">The same scripted patient situation, written three ways (colloquial, careful lay and clinical), sent to <span class="v-target">&mdash;</span> as a multi-turn conversation. Each reply is graded on several measures.</p>
+
+  <!-- Banner: the not-medical-advice line always shows. The review-pending line shows while
+       summary.status.clinician_review is "pending" (and by default, until the summary says otherwise). -->
+  <div class="banner" id="review-banner">
+    <!-- OWNER-SIGNOFF --><b>Not medical advice</b>Nothing here is medical advice. The study measures model behavior.
+    <span id="review-pending"><br><!-- OWNER-SIGNOFF --><b>Clinician review pending</b>No clinician has reviewed these scenarios, the grading rubric or the grades.</span>
+  </div>
+
+  <div class="sample-banner" id="sample-banner" hidden>SAMPLE DATA — synthetic placeholder payload for building this page. Nothing on this page is a result.</div>
+
+  <div class="pending" id="mt-pending">
+    No multi-turn payload is published yet. This page renders from
+    <code>data/petri_multiturn_summary.json</code> and
+    <code>data/petri_multiturn_conversations.json</code> once the engine exports them.
+  </div>
+
+  <!-- 2. The headline, verbatim from summary.headline.text -->
+  <section class="blk" id="sec-headline" hidden>
+    <h2>The answer so far</h2>
+    <p class="status-line" id="status-line"></p>
+    <p class="headline" id="headline"></p>
+    <!-- Shown when summary.headline.text is null: the engine found no pre-specified wording (row_id says why). -->
+    <div id="no-row" hidden>
+      <!-- OWNER-SIGNOFF --><p class="no-row">No pre-specified wording applies to this result, so this page states no headline.</p>
+      <!-- OWNER-SIGNOFF --><p class="no-row" data-why="not_computable" hidden>No triple had a nonzero difference, so the primary sign test did not run.</p>
+      <!-- OWNER-SIGNOFF --><p class="no-row" data-why="no_prespecified_row" hidden>The scenario-level test was significant in the direction opposite to the primary test, and the pre-registered table has no row for that outcome.</p>
+      <!-- OWNER-SIGNOFF --><p class="no-row" data-why="not_selectable_as_registered" hidden>The results match a row of the pre-registered table, but that row cannot be used as registered: the table was fixed for all the planned scenarios, and the scenario-level test ran on fewer.</p>
+      <!-- OWNER-SIGNOFF --><p class="no-row" data-why="other" hidden>The analysis recorded a reason this page does not recognise.</p>
+      <p class="no-row"><code id="no-row-id"></code></p>
+    </div>
+    <div id="style-wrap" hidden>
+      <span class="lbl">Writing style against medical terms</span>
+      <p class="style-sentence" id="style-sentence"></p>
+    </div>
+  </section>
+
+  <!-- 3. D per triple and per scenario -->
+  <section class="blk" id="sec-fig" hidden>
+    <h2>Difference by wording</h2>
+    <figure class="fig">
+      <figcaption class="fig-cap">D per conversation triple <span class="fig-sub"><!-- OWNER-SIGNOFF -->D = mean, over comparable exchanges, of urgency rank under colloquial wording minus rank under clinical wording · below zero = colloquial wording got less urgent advice · one mark per triple, one row per scenario · × = not eligible, left out of the tests</span></figcaption>
+      <div id="fig-d" role="img" aria-label="D per triple"></div>
+    </figure>
+    <p class="counts" id="counts"></p>
+  </section>
+
+  <!-- 4. Does it repeat -->
+  <section class="blk" id="sec-repeats" hidden>
+    <h2>Does it repeat?</h2>
+    <!-- OWNER-SIGNOFF --><p class="note">Each scenario was run in several epochs. The last column counts the epochs whose difference had the same direction as the primary test.</p>
+    <table class="dt">
+      <thead><tr><th scope="col">Scenario</th><th scope="col" class="num">Epochs</th><th scope="col" class="num">Same direction</th></tr></thead>
+      <tbody id="rep-body"></tbody>
+    </table>
+  </section>
+
+  <!-- F2: explore viewer -->
+  <section class="blk" id="sec-explore" hidden>
+    <h2>Explore the conversations</h2>
+    <!-- OWNER-SIGNOFF --><p class="note">Illustration only. No claim on this page rests on one conversation, one exchange or one grade.</p>
+    <div class="pick">
+      <label>Scenario <select id="pick-seed"></select></label>
+      <label>Epoch <select id="pick-epoch"></select></label>
+      <label id="pick-id-wrap" hidden>Speaker <select id="pick-id"></select></label>
+    </div>
+    <p class="seed-q" id="seed-q"></p>
+    <p class="seed-info" id="seed-info"></p>
+
+    <div class="chip-g" id="measure-chips" role="group" aria-label="Measure shown in the grade strip"></div>
+    <!-- OWNER-SIGNOFF --><p class="draft draft-rubric">Draft rubric · clinician review pending</p>
+    <div class="strip-wrap"><table class="strip" id="strip"></table></div>
+    <p class="strip-key" id="strip-key"></p>
+
+    <div class="chip-g arm-tabs" id="arm-chips" role="group" aria-label="Wording shown"></div>
+    <div class="chat" id="chat" data-arm="colloquial"></div>
+
+    <details class="defs" id="defs">
+      <summary>What the measures mean</summary>
+      <dl id="defs-list"></dl>
+    </details>
+  </section>
+
+  <!-- 5. Method -->
+  <section class="blk" id="sec-method">
+    <h2>Method</h2>
+    <!-- OWNER-SIGNOFF --><p class="note">Each scenario is a fixed script of user turns, written once and sent in three wordings: colloquial, careful lay and clinical.<span id="n-turns"></span></p>
+    <!-- The model names and the temperature below are filled from summary.provenance.models (a dash when absent). -->
+    <!-- OWNER-SIGNOFF --><p class="note">Each wording is a separate conversation with <span class="v-target">&mdash;</span>, sampled at temperature <span id="m-temp">&mdash;</span>. A grader, <span id="m-also" hidden>also </span><span id="m-judge">&mdash;</span>, codes each reply.</p>
+    <!-- OWNER-SIGNOFF --><p class="note">A conversation triple is one scenario, one epoch and one speaker, with its three conversations. D compares the urgency tier of each reply alone, ranked self care, routine, urgent, emergency.</p>
+    <!-- OWNER-SIGNOFF --><p class="draft draft-rubric">Draft rubric · clinician review pending</p>
+    <!-- OWNER-SIGNOFF --><p class="note">The primary test is an exact two-sided sign test on the sign of D across triples. A second test treats each scenario as one unit, so a claim beyond these scenarios does not rest on one of them.</p>
+    <!-- OWNER-SIGNOFF --><p class="note">The analysis plan was fixed before the prospective triples were generated. It is section 10 of the engine&rsquo;s <a href="https://github.com/michaeldgreenphd/patientwords-engine/blob/main/docs/petri_wave2_design.md#10-pre-specified-analysis-of-the-register-contrast-fixed-2026-09-23-before-epoch-3">wave-2 design note</a>.</p>
+    <div id="example-wrap" hidden>
+      <span class="lbl" id="example-lbl">One scripted turn in its three wordings</span>
+      <div class="ex3" id="example"></div>
+    </div>
+  </section>
+
+  <!-- 6. Limitations -->
+  <section class="blk" id="sec-limits">
+    <h2>Limitations</h2>
+    <ul class="lim">
+      <!-- OWNER-SIGNOFF --><li>The scenarios were written by an LLM, not taken from real patients.</li>
+      <!-- OWNER-SIGNOFF --><li id="lim-review">No clinician has reviewed the scenarios, the rubric or the grades.</li>
+      <!-- OWNER-SIGNOFF --><li>The user turns are scripted, so they cannot answer a question the model asks.</li>
+      <!-- The model name below is summary.provenance.models.target_label (a dash when absent); the next item shows only
+           when target_label and judge_label are both recorded and equal. -->
+      <!-- OWNER-SIGNOFF --><li>One model was tested: <span class="v-target">&mdash;</span>.</li>
+      <!-- OWNER-SIGNOFF --><li id="lim-same-grader" hidden>The grader is the same model as the one being tested.</li>
+      <!-- OWNER-SIGNOFF --><li>The test has little power at this size. A result that is not significant is inconclusive, not evidence that wording makes no difference.</li>
+    </ul>
+  </section>
+
+  <!-- 7. Provenance -->
+  <section class="blk prov" id="sec-prov" hidden>
+    <h2>Provenance</h2>
+    <dl id="prov-list"></dl>
+  </section>
+
+  <a class="back" href="../">← Back home</a>
+  <div class="endnote">
+    <footer>
+      Built with the patientwords-engine pipeline on <a href="https://neuronpedia.org">Neuronpedia</a> ·
+      attribution graphs by <a href="https://github.com/safety-research/circuit-tracer">circuit-tracer</a>
+    </footer>
+  </div>
+</main>
+<script>
+(function(){
+  'use strict';
+  // REAL_DATA_PUBLISHED: false until the engine exporter's real files are committed to data/.
+  // While false, the page requests only the .sample.json files, so the site's page check
+  // (engine scripts/check_pages.py, which fails on any HTTP 404 under data/) stays green.
+  // Set it to true in the same change that adds data/petri_multiturn_{summary,conversations}.json;
+  // the page then loads the real files and still falls back to the samples if one is missing.
+  var REAL_DATA_PUBLISHED=false;
+  var FORCE_SAMPLE=!REAL_DATA_PUBLISHED||/[?&]sample=1/.test(location.search);
+  var ARMS=['colloquial','lay_careful','clinical'];
+  var ARM_LABEL={colloquial:'Colloquial',lay_careful:'Careful lay',clinical:'Clinical'};
+  var DASH='—';
+  var TARGET_LABEL=null; // summary.provenance.models.target_label, for the chat's reply label
+  var usedSample=false;
+
+  function $(id){return document.getElementById(id);}
+  function el(tag,cls,text){var e=document.createElement(tag);if(cls)e.className=cls;if(text!=null)e.textContent=text;return e;}
+  function human(v){return v==null?DASH:String(v).replace(/_/g,' ');}
+  function num(v,dp){return (typeof v==='number'&&isFinite(v))?(dp==null?String(v):v.toFixed(dp)).replace('-','−'):DASH;}
+  function arr(v){return Array.isArray(v)?v:[];}
+
+  // The two files are one publication unit: the page shows both real files or both
+  // samples, never a real summary beside sample transcripts (or the reverse). If either
+  // real file is missing, both come from the samples and the sample notice shows.
+  var NAMES=['petri_multiturn_summary','petri_multiturn_conversations'];
+  function get(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u+' '+r.status);return r.json();});}
+  function getAll(suffix){return Promise.all(NAMES.map(function(n){return get('../data/'+n+suffix);}));}
+  function samples(){
+    usedSample=true;
+    // each sample may be absent on its own; the page renders whatever loads
+    return Promise.all(NAMES.map(function(n){return get('../data/'+n+'.sample.json').catch(function(){return null;});}));
+  }
+  var loadAll=FORCE_SAMPLE?samples():getAll('.json').catch(function(){return samples();});
+
+  loadAll.then(function(res){
+    var summary=res[0], conv=res[1];
+    if(!summary&&!conv)return; // pending block stays
+    $('mt-pending').hidden=true;
+    if(usedSample||(summary&&summary.sample)||(conv&&conv.sample))$('sample-banner').hidden=false;
+    if(summary)renderSummary(summary);
+    if(conv){renderExplore(conv);renderExample(conv);}
+  });
+
+  // ---------- summary ----------
+  function renderSummary(s){
+    var st=s.status||{};
+    // The review-pending line, its limitation and the draft-rubric notices beside the tiers stay unless the summary
+    // explicitly records a review other than "pending". The not-medical-advice line always stays.
+    if(st.clinician_review!=null&&st.clinician_review!=='pending'){$('review-pending').hidden=true;$('lim-review').hidden=true;
+      Array.prototype.forEach.call(document.querySelectorAll('.draft-rubric'),function(n){n.hidden=true;});}
+    // Method sentence: the models and temperature the runs recorded (the exporter refuses any other), never hard-coded
+    var md=(s.provenance||{}).models||{};
+    function label(v){return typeof v==='string'&&v?v:DASH;}
+    TARGET_LABEL=typeof md.target_label==='string'&&md.target_label?md.target_label:null;
+    // the tested model's name wherever the page states it: subtitle, Method, Limitations (the chat reads TARGET_LABEL)
+    Array.prototype.forEach.call(document.querySelectorAll('.v-target'),function(n){n.textContent=label(md.target_label);});
+    $('m-judge').textContent=label(md.judge_label);
+    $('m-temp').textContent=num(md.target_temperature);
+    // "also" and the same-grader limitation only when both labels are recorded and the grader is the tested model
+    var same=!!(TARGET_LABEL&&TARGET_LABEL===md.judge_label);
+    $('m-also').hidden=!same;
+    $('lim-same-grader').hidden=!same;
+
+    var hd=s.headline;
+    if(hd&&typeof hd==='object'){
+      $('sec-headline').hidden=false;
+      // OWNER-SIGNOFF: the status sentence below. An absent status.final states nothing (Provenance shows a dash).
+      if(st.final===true||st.final===false)
+        $('status-line').textContent=st.final?'Final analysis.':'The final pre-registered analysis has not run yet.';
+      else $('status-line').hidden=true;
+      if(hd.text){
+        $('headline').textContent=hd.text; // verbatim: never composed on this page
+      }else{
+        // No registered wording applies. Say so, and why, from row_id; never compose a headline.
+        $('headline').hidden=true;
+        $('no-row').hidden=false;
+        var rid=hd.row_id==null?'':String(hd.row_id);
+        var why=rid==='not_computable'||rid==='no_prespecified_row'?rid:
+          rid.indexOf('not_selectable_as_registered:')===0?'not_selectable_as_registered':'other';
+        Array.prototype.forEach.call($('no-row').querySelectorAll('[data-why]'),function(p){p.hidden=p.getAttribute('data-why')!==why;});
+        $('no-row-id').textContent='row_id: '+(rid||DASH);
+      }
+      var ss=s.style_sentence&&s.style_sentence.text;
+      if(ss){$('style-wrap').hidden=false;$('style-sentence').textContent=ss;}
+    }
+    var triples=arr(s.triples);
+    if(triples.length){$('sec-fig').hidden=false;drawD(triples,s.scenario_means||{});window.addEventListener('resize',debounce(function(){drawD(triples,s.scenario_means||{});},150));}
+    renderCounts(s.primary);
+    renderRepeats(arr(s.repeats),arr(s.triples));
+    renderProv(s);
+  }
+
+  function debounce(f,ms){var t;return function(){clearTimeout(t);t=setTimeout(f,ms);};}
+
+  function renderCounts(p){
+    if(!p)return;
+    var box=$('counts'); box.textContent='';
+    function add(lbl,val){if(box.childNodes.length)box.appendChild(document.createTextNode(' · '));
+      box.appendChild(document.createTextNode(lbl+' '));box.appendChild(el('b',null,val));}
+    add('eligible triples',num(p.triples));
+    add('D < 0',num(p.negative)); add('D > 0',num(p.positive)); add('D = 0',num(p.tied));
+    // a p below 0.001 prints as "< 0.001", never as 0.000
+    function pval(v){return typeof v==='number'&&isFinite(v)&&v>0&&v<0.001?'< 0.001':num(v,3);}
+    add('sign test p',pval(p.p_two_sided));
+    add('scenario test p',pval(p.gate_p));
+    add('scenario gate',p.gate_passed===true?'passed':p.gate_passed===false?'not passed':DASH);
+  }
+
+  var NS='http://www.w3.org/2000/svg';
+  function sv(tag,attrs,text){var e=document.createElementNS(NS,tag);for(var k in attrs)e.setAttribute(k,attrs[k]);if(text!=null)e.textContent=text;return e;}
+
+  function drawD(triples,means){
+    var host=$('fig-d'); host.textContent='';
+    var W=Math.max(300,Math.min(760,host.clientWidth||680));
+    var PARTS=[{key:'seen_before_plan',title:'Seen before the plan'},{key:'prospective',title:'Prospective'}];
+    // scenarios: union of triples and means; ordered by scenario mean (most negative first), then id
+    var ids=[];triples.forEach(function(t){if(ids.indexOf(t.scenario_id)<0)ids.push(t.scenario_id);});
+    Object.keys(means).forEach(function(k){if(ids.indexOf(k)<0)ids.push(k);});
+    ids.sort(function(a,b){var ma=means[a],mb=means[b];
+      if(typeof ma==='number'&&typeof mb==='number'&&ma!==mb)return ma-mb;return a<b?-1:a>b?1:0;});
+    var maxAbs=0;triples.forEach(function(t){if(typeof t.D==='number')maxAbs=Math.max(maxAbs,Math.abs(t.D));});
+    var dom=Math.max(0.5,Math.ceil(maxAbs*2)/2);
+    var gap=22, top=30, rowH=38, P=PARTS.length;
+    var pw=(W-gap*(P-1))/P;
+    var H=top+ids.length*rowH+34;
+    var svg=sv('svg',{viewBox:'0 0 '+W+' '+H,width:W,height:H});
+    var ink='#1c1c19',muted='#6d6c66',hair='#dcdad2',struct='#c3c9d2',pen='#b4483d',pat='#111827';
+    PARTS.forEach(function(part,pi){
+      var x0=pi*(pw+gap), pad=8;
+      function X(d){return x0+pad+(d+dom)/(2*dom)*(pw-2*pad);}
+      // n counts the eligible marks drawn; a triple with no numeric D (the exporter writes null when a conversation
+      // is missing or no exchange is comparable) has no mark, so it is counted here rather than dropped silently
+      var inPart=triples.filter(function(t){return t.partition===part.key;});
+      var n=inPart.filter(function(t){return t.eligible!==false&&typeof t.D==='number'&&isFinite(t.D);}).length;
+      var noD=inPart.filter(function(t){return !(typeof t.D==='number'&&isFinite(t.D));}).length;
+      var narrow=pw<260;
+      var ttl=sv('text',{x:x0,y:12,'font-size':narrow?10:11,'font-weight':600,fill:ink},part.title);
+      ttl.appendChild(sv('tspan',{'font-weight':400,fill:muted},' \u00b7 n '+n));
+      svg.appendChild(ttl);
+      if(noD)svg.appendChild(sv('text',{x:x0,y:24,'font-size':10,fill:muted},noD+' without D'));
+      var yb=top+ids.length*rowH;
+      [-dom,0,dom].forEach(function(v){
+        svg.appendChild(sv('text',{x:X(v),y:yb+13,'font-size':10,fill:muted,'text-anchor':v<0?'start':v>0?'end':'middle'},num(v)));});
+      svg.appendChild(sv('text',{x:x0+pad,y:yb+27,'font-size':10,fill:pen},'← colloquial less urgent'));
+      ids.forEach(function(id,ri){
+        var y=top+ri*rowH;
+        svg.appendChild(sv('line',{x1:x0,x2:x0+pw,y1:y+rowH-4,y2:y+rowH-4,stroke:hair,'stroke-width':1}));
+        // zero line per row, below the row's label line so it never crosses text
+        svg.appendChild(sv('line',{x1:X(0),x2:X(0),y1:y+10,y2:y+rowH-4,stroke:struct,'stroke-width':1}));
+        if(pi===0){
+          svg.appendChild(sv('text',{x:x0,y:y+6,'font-size':10,fill:muted},id));
+        }
+        if(pi===P-1){
+          var m=means[id];
+          svg.appendChild(sv('text',{x:x0+pw,y:y+6,'font-size':10,fill:ink,'text-anchor':'end'},(narrow?'mean ':'scenario mean ')+num(m,2)));
+        }
+        var seen={};
+        triples.filter(function(t){return t.scenario_id===id&&t.partition===part.key;}).forEach(function(t){
+          if(typeof t.D!=='number'||!isFinite(t.D))return;
+          var k=t.D.toFixed(3); seen[k]=(seen[k]||0)+1; var j=seen[k]-1;
+          var cy=y+20+(j%2?1:-1)*Math.ceil(j/2)*4, cx=X(t.D);
+          var tip=(t.seed_id||id)+' · epoch '+num(t.epoch)+' · D = '+num(t.D,2)+(t.eligible===false?' · not eligible':'');
+          var g;
+          if(t.eligible===false){
+            g=sv('path',{d:'M'+(cx-3.5)+' '+(cy-3.5)+'L'+(cx+3.5)+' '+(cy+3.5)+'M'+(cx+3.5)+' '+(cy-3.5)+'L'+(cx-3.5)+' '+(cy+3.5),stroke:muted,'stroke-width':1.3,fill:'none'});
+          }else if(t.D<0){g=sv('circle',{cx:cx,cy:cy,r:4.2,fill:pen});}
+          else if(t.D>0){g=sv('circle',{cx:cx,cy:cy,r:4.2,fill:pat});}
+          else{g=sv('circle',{cx:cx,cy:cy,r:3.8,fill:'#faf9f5',stroke:muted,'stroke-width':1.2});}
+          g.appendChild(sv('title',{},tip)); svg.appendChild(g);
+        });
+      });
+    });
+    host.appendChild(svg);
+    var el_=triples.filter(function(t){return t.eligible!==false;});
+    host.setAttribute('aria-label','D per triple for '+ids.length+' scenarios: '+el_.filter(function(t){return t.D<0;}).length+
+      ' eligible triples below zero, '+el_.filter(function(t){return t.D>0;}).length+' above, '+el_.filter(function(t){return t.D===0;}).length+' at zero.');
+  }
+
+  function renderRepeats(rows,triples){
+    if(!rows.length)return;
+    $('sec-repeats').hidden=false;
+    // rows are per seed; the column names the seed's scenario (as the figure does), read from the triples.
+    // A seed with no triple shows its seed id; a scenario with several seeds shows each seed id beside it.
+    var scen={},seen={};
+    arr(triples).forEach(function(t){if(t&&t.seed_id&&t.scenario_id)scen[t.seed_id]=t.scenario_id;});
+    rows.forEach(function(r){var k=scen[r.seed_id];if(k)seen[k]=(seen[k]||0)+1;});
+    var tb=$('rep-body'); tb.textContent='';
+    rows.forEach(function(r){
+      var tr=el('tr'), k=scen[r.seed_id];
+      var td=el('td',null,k?(seen[k]>1?k+' · '+r.seed_id:k):(r.seed_id||DASH));
+      if(r.seed_id)td.title='seed '+r.seed_id;
+      tr.appendChild(td);
+      tr.appendChild(el('td','num',num(r.epochs)));
+      tr.appendChild(el('td','num',(typeof r.same_direction==='number'&&typeof r.epochs==='number')?r.same_direction+' of '+r.epochs:num(r.same_direction)));
+      tb.appendChild(tr);
+    });
+  }
+
+  function renderProv(s){
+    var pv=s.provenance||{}, st=s.status||{}, vp=st.vendor_pack||{};
+    $('sec-prov').hidden=false;
+    var dl=$('prov-list'); dl.textContent='';
+    function row(k,v){var dt=el('dt',null,k),dd=el('dd');if(v instanceof Node)dd.appendChild(v);else dd.textContent=v;dl.appendChild(dt);dl.appendChild(dd);}
+    row('runs',arr(pv.runs).length?arr(pv.runs).join(', '):DASH);
+    row('analysis commit',pv.analysis_commit||DASH);
+    var md=pv.models||{};
+    function list(v){return arr(v).length?arr(v).join(', '):DASH;}
+    row('target model',list(md.target));
+    row('target model as served',list(md.target_served));
+    row('target temperature',num(md.target_temperature));
+    row('grader model',list(md.judge));
+    if(pv.verify){var pre=el('pre',null,pv.verify);row('verify the chain',pre);}else row('verify the chain',DASH);
+    row('vendor pack',vp.version?(vp.version+(vp.sent?' · sent '+vp.sent:'')):'not yet sent');
+    row('clinician review',st.clinician_review||DASH);
+    row('final analysis',st.final===true?'yes':st.final===false?'not yet':DASH);
+    if(s.headline&&s.headline.row_id)row('headline row',s.headline.row_id);
+    if(s.style_sentence&&s.style_sentence.row_id)row('style row',s.style_sentence.row_id);
+    if(s.seed!=null)row('file seed',String(s.seed));
+  }
+
+  // ---------- explore viewer ----------
+  var C=null, MEAS={}, state={seed:null,epoch:null,identity:null,measure:'tier_ro',arm:'colloquial'};
+
+  function renderExample(c){
+    var ex=c.example; if(!ex)return;
+    var box=$('example'); box.textContent='';
+    var any=false;
+    ARMS.forEach(function(a){if(ex[a]==null)return;any=true;var d=el('div');d.appendChild(el('span','lbl',ARM_LABEL[a]));d.appendChild(el('p',null,ex[a]));box.appendChild(d);});
+    if(!any)return;
+    $('example-wrap').hidden=false;
+    $('example-lbl').textContent='One scripted turn in its three wordings'+(ex.seed_id?' · '+ex.seed_id:'')+(ex.turn!=null?' · turn '+ex.turn:'');
+  }
+
+  function renderExplore(c){
+    C=c;
+    arr(c.measures).forEach(function(m){if(m&&m.id)MEAS[m.id]=m;});
+    var convs=arr(c.conversations); if(!convs.length)return;
+    $('sec-explore').hidden=false;
+    var seeds=arr(c.seeds), seedIds=[];
+    seeds.forEach(function(s){if(s.seed_id&&seedIds.indexOf(s.seed_id)<0&&convs.some(function(v){return v.seed_id===s.seed_id;}))seedIds.push(s.seed_id);});
+    convs.forEach(function(v){if(seedIds.indexOf(v.seed_id)<0)seedIds.push(v.seed_id);});
+    var sel=$('pick-seed'); sel.textContent='';
+    seedIds.forEach(function(id){var s=seedById(id);var o=el('option',null,(s&&s.topic?s.topic+' · ':'')+id);o.value=id;sel.appendChild(o);});
+    sel.addEventListener('change',function(){state.seed=sel.value;fillEpochs();draw();});
+    $('pick-epoch').addEventListener('change',function(){state.epoch=+$('pick-epoch').value;fillIdentities();draw();});
+    $('pick-id').addEventListener('change',function(){state.identity=$('pick-id').value;draw();});
+    // wording chips (phone)
+    var ac=$('arm-chips'); ac.appendChild(el('span','chip-lbl','Wording'));
+    ARMS.forEach(function(a){var b=el('button','chip',ARM_LABEL[a]);b.type='button';b.dataset.arm=a;
+      b.addEventListener('click',function(){state.arm=a;syncArm();});ac.appendChild(b);});
+    // definitions
+    var dl=$('defs-list'); dl.textContent='';
+    arr(c.measures).forEach(function(m){dl.appendChild(el('dt',null,m.label||m.id));
+      dl.appendChild(el('dd',null,(m.definition||'No definition given.')+' Values: '+arr(m.values).map(human).join(', ')+'.'));});
+    // turn count from the data, never hard-coded
+    var nt=0;convs.forEach(function(v){nt=Math.max(nt,arr(v.exchanges).length);});
+    // OWNER-SIGNOFF: the sentence below
+    if(nt)$('n-turns').textContent=' Each conversation in this file has up to '+nt+' exchanges.';
+    state.seed=seedIds[0]; fillEpochs(); syncArm(); draw();
+  }
+
+  function seedById(id){var s=arr(C.seeds);for(var i=0;i<s.length;i++)if(s[i].seed_id===id)return s[i];return null;}
+  function epochOf(v){return v.epoch!=null?v.epoch:v.run_epoch;}
+  function idKey(v){return v.identity==null?'':String(v.identity);}
+  function convsFor(){return arr(C.conversations).filter(function(v){return v.seed_id===state.seed;});}
+
+  function fillEpochs(){
+    var eps=[];convsFor().forEach(function(v){var e=epochOf(v);if(eps.indexOf(e)<0)eps.push(e);});
+    eps.sort(function(a,b){return a-b;});
+    var sel=$('pick-epoch'); sel.textContent='';
+    eps.forEach(function(e){var o=el('option',null,String(e));o.value=e;sel.appendChild(o);});
+    state.epoch=eps[0]; fillIdentities();
+  }
+  function fillIdentities(){
+    var ids=[];convsFor().forEach(function(v){if(epochOf(v)===state.epoch){var k=idKey(v);if(ids.indexOf(k)<0)ids.push(k);}});
+    var sel=$('pick-id'); sel.textContent='';
+    ids.forEach(function(k){var o=el('option',null,k||'none');o.value=k;sel.appendChild(o);});
+    $('pick-id-wrap').hidden=ids.length<2;
+    state.identity=ids[0]||'';
+  }
+  function syncArm(){
+    $('chat').setAttribute('data-arm',state.arm);
+    Array.prototype.forEach.call($('arm-chips').querySelectorAll('.chip'),function(b){
+      var on=b.dataset.arm===state.arm;b.classList.toggle('on',on);b.setAttribute('aria-pressed',on?'true':'false');});
+  }
+
+  function draw(){
+    var seed=seedById(state.seed)||{};
+    var triple={};
+    // columns are registers: an identity seed's arm ids carry the speaker (patient_colloquial, clinician_clinical),
+    // so the column comes from the conversation's register, and from its arm only in a file that lacks register
+    convsFor().forEach(function(v){if(epochOf(v)===state.epoch&&idKey(v)===state.identity)triple[v.register||v.arm]=v;});
+    // seed header
+    var mech=(C.mechanisms||{})[seed.mechanism]||{};
+    $('seed-q').textContent=mech.question||'';
+    var info=$('seed-info'); info.textContent='';
+    function bit(k,v){if(v==null||v==='')return;if(info.childNodes.length)info.appendChild(document.createTextNode(' · '));
+      info.appendChild(document.createTextNode(k+' '));info.appendChild(el('b',null,v));}
+    bit('mechanism',mech.title||seed.mechanism);
+    bit('set',seed.set); bit('scenario',seed.scenario_id);
+    bit('hypotheses',arr(seed.hypotheses).join(', '));
+    bit('system prompt',seed.system_prompt);
+    if(seed.proposition)bit('asserted proposition',seed.proposition);
+    // measures for this seed
+    var mids=arr(seed.measures).filter(function(id){return MEAS[id];});
+    if(!mids.length)mids=Object.keys(MEAS);
+    if(mids.indexOf(state.measure)<0)state.measure=mids[0];
+    var mc=$('measure-chips'); mc.textContent=''; mc.appendChild(el('span','chip-lbl','Grade strip'));
+    mids.forEach(function(id){var b=el('button','chip',MEAS[id].label||id);b.type='button';b.dataset.measure=id;
+      var on=id===state.measure;if(on)b.classList.add('on');b.setAttribute('aria-pressed',on?'true':'false');
+      b.addEventListener('click',function(){state.measure=id;draw();
+        // draw() rebuilt the chips, so focus moves to the new chip for this measure
+        Array.prototype.forEach.call($('measure-chips').querySelectorAll('.chip'),function(x){if(x.dataset.measure===id)x.focus();});});
+      mc.appendChild(b);});
+    drawStrip(seed,triple);
+    drawChat(seed,triple,mids);
+  }
+
+  function abbr(v){var w=String(v).split('_');return w.length>1?w.map(function(x){return x[0];}).join('').toUpperCase():String(v).slice(0,3);}
+
+  function drawStrip(seed,triple){
+    var m=MEAS[state.measure]||{values:[]}, vals=arr(m.values);
+    var n=0;ARMS.forEach(function(a){if(triple[a])n=Math.max(n,arr(triple[a].exchanges).length);});
+    var t=$('strip'); t.textContent='';
+    var cap=el('caption','vh');cap.textContent='Grades for '+(m.label||state.measure)+' by exchange and wording';
+    cap.style.cssText='position:absolute;left:-9999px';t.appendChild(cap);
+    var th=el('thead'), hr=el('tr'); hr.appendChild(el('th','row','exchange'));
+    for(var i=0;i<n;i++){var h=el('th',null,String(i+1));h.scope='col';hr.appendChild(h);}
+    th.appendChild(hr);
+    var roles=arr(seed.roles);
+    if(roles.some(function(r){return r;})){
+      var rr=el('tr','roles'), rl=el('th','row','role'); rl.scope='row'; rr.appendChild(rl);
+      for(var j=0;j<n;j++){var rh=el('th',null,roles[j]?abbrRole(roles[j]):'');rh.scope='col';if(roles[j])rh.title=human(roles[j]);rr.appendChild(rh);}
+      th.appendChild(rr);
+    }
+    t.appendChild(th);
+    var tb=el('tbody');
+    ARMS.forEach(function(a){
+      var tr=el('tr'), rh=el('th','row',ARM_LABEL[a]); rh.scope='row'; tr.appendChild(rh);
+      var ex=triple[a]?arr(triple[a].exchanges):[];
+      for(var i=0;i<n;i++){
+        var e=ex[i], td=el('td'), b=el('button'); b.type='button';
+        var txt=DASH, tip='no value';
+        if(!e){td.className='miss';}
+        else if(e.reply_is_graded===false){td.className='ng';txt='';tip='not graded';}
+        else{
+          var g=(e.vals||{})[state.measure];
+          if(!g){td.className='miss';tip='no value recorded';}
+          else if(g.superseded!=null){
+            // judged under an earlier judge prompt: shown as superseded, never shaded or compared
+            td.className='sup';
+            txt=g.na!=null?'n/a':g.v==null?DASH:abbr(g.v);
+            tip='superseded: judged under an earlier judge prompt ('+g.superseded+'), not compared \u00b7 '+
+              (g.na!=null?'not applicable: '+g.na:g.v==null?'no value':human(g.v));
+          }
+          else if(g.na!=null){td.className='na';txt='n/a';tip='not applicable: '+g.na;}
+          else if(g.v==null){td.className='miss';tip='no value';}
+          else{
+            txt=abbr(g.v); tip=human(g.v);
+            var r=vals.indexOf(g.v);
+            if(m.kind!=='nominal'&&r>=0&&vals.length>1){
+              var alpha=0.08+0.62*r/(vals.length-1);
+              td.style.background='rgba(17,24,39,'+alpha.toFixed(2)+')';
+              if(alpha>0.4)td.style.color='#fff';
+            }
+          }
+        }
+        b.textContent=txt;
+        b.setAttribute('aria-label',ARM_LABEL[a]+', exchange '+(i+1)+': '+tip);
+        b.title=ARM_LABEL[a]+' · exchange '+(i+1)+' · '+tip;
+        (function(k,arm){b.addEventListener('click',function(){state.arm=arm;syncArm();goEx(k);});})(i,a);
+        td.appendChild(b); tr.appendChild(td);
+      }
+      tb.appendChild(tr);
+    });
+    t.appendChild(tb);
+    var key=$('strip-key'); key.textContent='';
+    key.appendChild(document.createTextNode((m.label||state.measure)+': '+vals.map(function(v){return abbr(v)+' '+human(v);}).join(' · ')+
+      ' · n/a not applicable · hatched = not graded · dotted italic = superseded (earlier judge prompt, not compared) · '+DASH+' no value'+(m.kind!=='nominal'?' · darker = higher on the scale':'')));
+  }
+  function abbrRole(r){return {evidence:'evid',pressure:'press',neutral_control:'ctrl'}[r]||String(r).slice(0,5);}
+
+  function goEx(k){
+    Array.prototype.forEach.call(document.querySelectorAll('.chat .exh'),function(h){h.classList.remove('hl');});
+    var h=$('ex-'+k); if(!h)return; h.classList.add('hl');
+    h.scrollIntoView({behavior:'smooth',block:'start'});
+  }
+
+  function drawChat(seed,triple,mids){
+    var chat=$('chat'); chat.textContent='';
+    ARMS.forEach(function(a){chat.appendChild(el('div','colhead a-'+a,ARM_LABEL[a]));});
+    var n=0;ARMS.forEach(function(a){if(triple[a])n=Math.max(n,arr(triple[a].exchanges).length);});
+    var roles=arr(seed.roles);
+    for(var i=0;i<n;i++){
+      var first=null;ARMS.forEach(function(a){if(!first&&triple[a]&&arr(triple[a].exchanges)[i])first=arr(triple[a].exchanges)[i];});
+      var hd=el('div','exh','Exchange '+(i+1)+(first&&first.reply_turn!=null?' · reply turn '+first.reply_turn:'')+(roles[i]?' · '+human(roles[i])+' turn':''));
+      hd.id='ex-'+i; chat.appendChild(hd);
+      ARMS.forEach(function(a){
+        var ex=triple[a]?arr(triple[a].exchanges):[], e=ex[i]||null;
+        // the conversation's rule facts go under its own last exchange (under the last row if it has none)
+        var ruleHere=i===(ex.length?ex.length-1:n-1)&&triple[a]&&triple[a].rule;
+        var cell=el('div','cell a-'+a);
+        if(!e){cell.appendChild(el('div','grades',ARM_LABEL[a]+': no exchange recorded'));
+          if(ruleHere)cell.appendChild(ruleBox(triple[a].rule));chat.appendChild(cell);return;}
+        var u=el('div','bub user');u.appendChild(el('span','who',ARM_LABEL[a]+' · scripted user turn'));u.appendChild(document.createTextNode(e.user||DASH));cell.appendChild(u);
+        arr(e.interim).forEach(function(it){
+          var txt=typeof it==='string'?it:(it&&(it.text||it.content||it.reply))||'';
+          var isTool=it&&typeof it==='object'&&(it.fixture===true||it.role==='tool'||it.kind==='tool_result'||it.type==='tool_result');
+          var b=el('div','bub '+(isTool?'tool':'interim'));
+          b.appendChild(el('span','who',isTool?'Scripted lookup result · text written by the study, not by the model':'Intermediate reply, same exchange'));
+          b.appendChild(document.createTextNode(txt||DASH)); cell.appendChild(b);
+        });
+        var graded=e.reply_is_graded!==false;
+        var r=el('div','bub reply'+(graded?'':' ungraded'));
+        r.appendChild(el('span','who',(TARGET_LABEL||DASH)+' · reply'));
+        r.appendChild(document.createTextNode(e.reply||DASH)); cell.appendChild(r);
+        if(!graded){cell.appendChild(el('span','tag','Not graded'));}
+        else{
+          var g=el('div','grades'), vals=e.vals||{}, any=false;
+          mids.forEach(function(id){var x=vals[id];if(!x)return;any=true;
+            if(g.childNodes.length)g.appendChild(document.createTextNode(' · '));
+            g.appendChild(document.createTextNode((MEAS[id].label||id)+' '));
+            var shown=x.na!=null?'n/a':x.v==null?DASH:human(x.v);
+            if(x.superseded!=null){
+              var sp=el('span','sup','superseded: '+shown+' (earlier judge prompt '+x.superseded+', not compared)');
+              g.appendChild(sp);
+            }else g.appendChild(el('b',null,shown));});
+          if(!any)g.textContent='no grades recorded';
+          cell.appendChild(g);
+        }
+        if(ruleHere)cell.appendChild(ruleBox(triple[a].rule));
+        chat.appendChild(cell);
+      });
+    }
+  }
+
+  function ruleBox(rule){
+    var d=el('div','rule');
+    d.appendChild(el('span','lbl','Tool use in this conversation'));
+    var keys=[['tool_invoked','tool invoked'],['first_tool','first tool'],['first_call_turn','first call at turn'],
+      ['advice_before_lookup','advice before lookup'],['query_text','query'],['marker_echo','marker echoed'],
+      ['tool_calls_total','tool calls'],['tool_results_received','results received'],
+      ['unknown_tool_calls','unknown tool calls'],['parse_error_call','unparsable calls']];
+    var reasons=rule.reasons||{};
+    // query_text is a list, one entry per tool call (engine exporter, 2026-09-24); older files carry a string
+    function show(v){
+      if(Array.isArray(v)){
+        if(!v.length)return 'none';
+        var s=v.map(function(x){return x==null?DASH:String(x);}).join(' · ');
+        return v.length>1?s+' ('+v.length+' calls)':s;
+      }
+      return v===true?'yes':v===false?'no':v==null?DASH:String(v);
+    }
+    keys.forEach(function(k){
+      var v=rule[k[0]];
+      var line=el('div'); line.appendChild(document.createTextNode(k[1]+' '));
+      line.appendChild(el('b',null,show(v)));
+      if(reasons[k[0]])line.appendChild(document.createTextNode(' ('+reasons[k[0]]+')'));
+      d.appendChild(line);
+    });
+    return d;
+  }
+})();
+</script>
+</body>
+</html>
