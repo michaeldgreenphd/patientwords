@@ -288,7 +288,8 @@
   <section class="blk" id="sec-method">
     <h2>Method</h2>
     <!-- OWNER-SIGNOFF --><p class="note">Each scenario is a fixed script of user turns, written once and sent in three wordings: colloquial, careful lay and clinical.<span id="n-turns"></span></p>
-    <!-- OWNER-SIGNOFF --><p class="note">Each wording is a separate conversation with Claude Haiku 4.5, sampled at temperature 1. A grader, also Claude Haiku 4.5, codes each reply.</p>
+    <!-- The model names and the temperature below are filled from summary.provenance.models (a dash when absent). -->
+    <!-- OWNER-SIGNOFF --><p class="note">Each wording is a separate conversation with <span id="m-target">&mdash;</span>, sampled at temperature <span id="m-temp">&mdash;</span>. A grader, <span id="m-also" hidden>also </span><span id="m-judge">&mdash;</span>, codes each reply.</p>
     <!-- OWNER-SIGNOFF --><p class="note">A conversation triple is one scenario, one epoch and one speaker, with its three conversations. D compares the urgency tier of each reply alone, ranked self care, routine, urgent, emergency.</p>
     <!-- OWNER-SIGNOFF --><p class="note">The primary test is an exact two-sided sign test on the sign of D across triples. A second test treats each scenario as one unit, so a claim beyond these scenarios does not rest on one of them.</p>
     <!-- OWNER-SIGNOFF --><p class="note">The analysis plan was fixed before the prospective triples were generated. It is section 10 of the engine&rsquo;s <a href="https://github.com/michaeldgreenphd/patientwords-engine/blob/main/docs/petri_wave2_design.md#10-pre-specified-analysis-of-the-register-contrast-fixed-2026-09-23-before-epoch-3">wave-2 design note</a>.</p>
@@ -374,6 +375,14 @@
     // The review-pending line and its limitation stay unless the summary explicitly records a review other than
     // "pending". The not-medical-advice line always stays.
     if(st.clinician_review!=null&&st.clinician_review!=='pending'){$('review-pending').hidden=true;$('lim-review').hidden=true;}
+    // Method sentence: the models and temperature the runs recorded (the exporter refuses any other), never hard-coded
+    var md=(s.provenance||{}).models||{};
+    function label(v){return typeof v==='string'&&v?v:DASH;}
+    $('m-target').textContent=label(md.target_label);
+    $('m-judge').textContent=label(md.judge_label);
+    $('m-temp').textContent=num(md.target_temperature);
+    // "also" only when both labels are recorded and the grader is the tested model
+    $('m-also').hidden=!(typeof md.target_label==='string'&&md.target_label&&md.target_label===md.judge_label);
 
     var hd=s.headline;
     if(hd&&typeof hd==='object'){
@@ -510,6 +519,12 @@
     function row(k,v){var dt=el('dt',null,k),dd=el('dd');if(v instanceof Node)dd.appendChild(v);else dd.textContent=v;dl.appendChild(dt);dl.appendChild(dd);}
     row('runs',arr(pv.runs).length?arr(pv.runs).join(', '):DASH);
     row('analysis commit',pv.analysis_commit||DASH);
+    var md=pv.models||{};
+    function list(v){return arr(v).length?arr(v).join(', '):DASH;}
+    row('target model',list(md.target));
+    row('target model as served',list(md.target_served));
+    row('target temperature',num(md.target_temperature));
+    row('grader model',list(md.judge));
     if(pv.verify){var pre=el('pre',null,pv.verify);row('verify the chain',pre);}else row('verify the chain',DASH);
     row('vendor pack',vp.version?(vp.version+(vp.sent?' · sent '+vp.sent:'')):'not yet sent');
     row('clinician review',st.clinician_review||DASH);

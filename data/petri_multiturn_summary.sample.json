@@ -119,6 +119,20 @@
   "analysis_commit": "SAMPLE",
   "analysis_sha256": "SAMPLE",
   "exporter_commit": "SAMPLE",
-  "verify": "python -m scripts.petri_audit.cli verify-chain --data-dir data/petri/runs"
+  "verify": "python -m scripts.petri_audit.cli verify-chain --data-dir data/petri/runs",
+  "models": {
+   "target": [
+    "anthropic/claude-haiku-4-5"
+   ],
+   "target_served": [
+    "claude-haiku-4-5-20251001"
+   ],
+   "judge": [
+    "claude-haiku-4-5"
+   ],
+   "target_temperature": 1.0,
+   "target_label": "Claude Haiku 4.5",
+   "judge_label": "Claude Haiku 4.5"
+  }
  }
 }
