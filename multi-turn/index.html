@@ -725,10 +725,19 @@
       ['tool_calls_total','tool calls'],['tool_results_received','results received'],
       ['unknown_tool_calls','unknown tool calls'],['parse_error_call','unparsable calls']];
     var reasons=rule.reasons||{};
+    // query_text is a list, one entry per tool call (engine exporter, 2026-09-24); older files carry a string
+    function show(v){
+      if(Array.isArray(v)){
+        if(!v.length)return 'none';
+        var s=v.map(function(x){return x==null?DASH:String(x);}).join(' · ');
+        return v.length>1?s+' ('+v.length+' calls)':s;
+      }
+      return v===true?'yes':v===false?'no':v==null?DASH:String(v);
+    }
     keys.forEach(function(k){
       var v=rule[k[0]];
       var line=el('div'); line.appendChild(document.createTextNode(k[1]+' '));
-      line.appendChild(el('b',null,v===true?'yes':v===false?'no':v==null?DASH:String(v)));
+      line.appendChild(el('b',null,show(v)));
       if(reasons[k[0]])line.appendChild(document.createTextNode(' ('+reasons[k[0]]+')'));
       d.appendChild(line);
     });
