@@ -426,8 +426,10 @@
       box.appendChild(document.createTextNode(lbl+' '));box.appendChild(el('b',null,val));}
     add('eligible triples',num(p.triples));
     add('D < 0',num(p.negative)); add('D > 0',num(p.positive)); add('D = 0',num(p.tied));
-    add('sign test p',num(p.p_two_sided,3));
-    add('scenario test p',num(p.gate_p,3));
+    // a p below 0.001 prints as "< 0.001", never as 0.000
+    function pval(v){return typeof v==='number'&&isFinite(v)&&v>0&&v<0.001?'< 0.001':num(v,3);}
+    add('sign test p',pval(p.p_two_sided));
+    add('scenario test p',pval(p.gate_p));
     add('scenario gate',p.gate_passed===true?'passed':p.gate_passed===false?'not passed':DASH);
   }
 
@@ -453,11 +455,16 @@
     PARTS.forEach(function(part,pi){
       var x0=pi*(pw+gap), pad=8;
       function X(d){return x0+pad+(d+dom)/(2*dom)*(pw-2*pad);}
-      var n=triples.filter(function(t){return t.partition===part.key&&t.eligible!==false;}).length;
+      // n counts the eligible marks drawn; a triple with no numeric D (the exporter writes null when a conversation
+      // is missing or no exchange is comparable) has no mark, so it is counted here rather than dropped silently
+      var inPart=triples.filter(function(t){return t.partition===part.key;});
+      var n=inPart.filter(function(t){return t.eligible!==false&&typeof t.D==='number'&&isFinite(t.D);}).length;
+      var noD=inPart.filter(function(t){return !(typeof t.D==='number'&&isFinite(t.D));}).length;
       var narrow=pw<260;
       var ttl=sv('text',{x:x0,y:12,'font-size':narrow?10:11,'font-weight':600,fill:ink},part.title);
       ttl.appendChild(sv('tspan',{'font-weight':400,fill:muted},' \u00b7 n '+n));
       svg.appendChild(ttl);
+      if(noD)svg.appendChild(sv('text',{x:x0,y:24,'font-size':10,fill:muted},noD+' without D'));
       var yb=top+ids.length*rowH;
       [-dom,0,dom].forEach(function(v){
         svg.appendChild(sv('text',{x:X(v),y:yb+13,'font-size':10,fill:muted,'text-anchor':v<0?'start':v>0?'end':'middle'},num(v)));});
@@ -476,7 +483,7 @@
         }
         var seen={};
         triples.filter(function(t){return t.scenario_id===id&&t.partition===part.key;}).forEach(function(t){
-          if(typeof t.D!=='number')return;
+          if(typeof t.D!=='number'||!isFinite(t.D))return;
           var k=t.D.toFixed(3); seen[k]=(seen[k]||0)+1; var j=seen[k]-1;
           var cy=y+20+(j%2?1:-1)*Math.ceil(j/2)*4, cx=X(t.D);
           var tip=(t.seed_id||id)+' · epoch '+num(t.epoch)+' · D = '+num(t.D,2)+(t.eligible===false?' · not eligible':'');
@@ -716,8 +723,12 @@
       var hd=el('div','exh','Exchange '+(i+1)+(first&&first.reply_turn!=null?' · reply turn '+first.reply_turn:'')+(roles[i]?' · '+human(roles[i])+' turn':''));
       hd.id='ex-'+i; chat.appendChild(hd);
       ARMS.forEach(function(a){
-        var cell=el('div','cell a-'+a), e=triple[a]?arr(triple[a].exchanges)[i]:null;
-        if(!e){cell.appendChild(el('div','grades',ARM_LABEL[a]+': no exchange recorded'));chat.appendChild(cell);return;}
+        var ex=triple[a]?arr(triple[a].exchanges):[], e=ex[i]||null;
+        // the conversation's rule facts go under its own last exchange (under the last row if it has none)
+        var ruleHere=i===(ex.length?ex.length-1:n-1)&&triple[a]&&triple[a].rule;
+        var cell=el('div','cell a-'+a);
+        if(!e){cell.appendChild(el('div','grades',ARM_LABEL[a]+': no exchange recorded'));
+          if(ruleHere)cell.appendChild(ruleBox(triple[a].rule));chat.appendChild(cell);return;}
         var u=el('div','bub user');u.appendChild(el('span','who',ARM_LABEL[a]+' · scripted user turn'));u.appendChild(document.createTextNode(e.user||DASH));cell.appendChild(u);
         arr(e.interim).forEach(function(it){
           var txt=typeof it==='string'?it:(it&&(it.text||it.content||it.reply))||'';
@@ -744,7 +755,7 @@
           if(!any)g.textContent='no grades recorded';
           cell.appendChild(g);
         }
-        if(i===n-1&&triple[a].rule)cell.appendChild(ruleBox(triple[a].rule));
+        if(ruleHere)cell.appendChild(ruleBox(triple[a].rule));
         chat.appendChild(cell);
       });
     }
