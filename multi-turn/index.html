@@ -203,7 +203,8 @@
   <!-- 1. The question (hero) -->
   <p class="dateline">Multi-turn <span class="mode">· scripted conversations, three wordings</span></p>
   <h1>Does the way a person words their messages change the advice a model gives over a whole conversation?</h1>
-  <!-- OWNER-SIGNOFF --><p class="subtitle">The same scripted patient situation, written three ways (colloquial, careful lay and clinical), sent to Claude Haiku 4.5 as a multi-turn conversation. Each reply is graded on several measures.</p>
+  <!-- The model name below is summary.provenance.models.target_label (a dash when absent). -->
+  <!-- OWNER-SIGNOFF --><p class="subtitle">The same scripted patient situation, written three ways (colloquial, careful lay and clinical), sent to <span class="v-target">&mdash;</span> as a multi-turn conversation. Each reply is graded on several measures.</p>
 
   <!-- Banner: the not-medical-advice line always shows. The review-pending line shows while
        summary.status.clinician_review is "pending" (and by default, until the summary says otherwise). -->
@@ -291,7 +292,7 @@
     <h2>Method</h2>
     <!-- OWNER-SIGNOFF --><p class="note">Each scenario is a fixed script of user turns, written once and sent in three wordings: colloquial, careful lay and clinical.<span id="n-turns"></span></p>
     <!-- The model names and the temperature below are filled from summary.provenance.models (a dash when absent). -->
-    <!-- OWNER-SIGNOFF --><p class="note">Each wording is a separate conversation with <span id="m-target">&mdash;</span>, sampled at temperature <span id="m-temp">&mdash;</span>. A grader, <span id="m-also" hidden>also </span><span id="m-judge">&mdash;</span>, codes each reply.</p>
+    <!-- OWNER-SIGNOFF --><p class="note">Each wording is a separate conversation with <span class="v-target">&mdash;</span>, sampled at temperature <span id="m-temp">&mdash;</span>. A grader, <span id="m-also" hidden>also </span><span id="m-judge">&mdash;</span>, codes each reply.</p>
     <!-- OWNER-SIGNOFF --><p class="note">A conversation triple is one scenario, one epoch and one speaker, with its three conversations. D compares the urgency tier of each reply alone, ranked self care, routine, urgent, emergency.</p>
     <!-- OWNER-SIGNOFF --><p class="draft draft-rubric">Draft rubric · clinician review pending</p>
     <!-- OWNER-SIGNOFF --><p class="note">The primary test is an exact two-sided sign test on the sign of D across triples. A second test treats each scenario as one unit, so a claim beyond these scenarios does not rest on one of them.</p>
@@ -309,8 +310,10 @@
       <!-- OWNER-SIGNOFF --><li>The scenarios were written by an LLM, not taken from real patients.</li>
       <!-- OWNER-SIGNOFF --><li id="lim-review">No clinician has reviewed the scenarios, the rubric or the grades.</li>
       <!-- OWNER-SIGNOFF --><li>The user turns are scripted, so they cannot answer a question the model asks.</li>
-      <!-- OWNER-SIGNOFF --><li>One model was tested: Claude Haiku 4.5.</li>
-      <!-- OWNER-SIGNOFF --><li>The grader is the same model as the one being tested.</li>
+      <!-- The model name below is summary.provenance.models.target_label (a dash when absent); the next item shows only
+           when target_label and judge_label are both recorded and equal. -->
+      <!-- OWNER-SIGNOFF --><li>One model was tested: <span class="v-target">&mdash;</span>.</li>
+      <!-- OWNER-SIGNOFF --><li id="lim-same-grader" hidden>The grader is the same model as the one being tested.</li>
       <!-- OWNER-SIGNOFF --><li>The test has little power at this size. A result that is not significant is inconclusive, not evidence that wording makes no difference.</li>
     </ul>
   </section>
@@ -342,6 +345,7 @@
   var ARMS=['colloquial','lay_careful','clinical'];
   var ARM_LABEL={colloquial:'Colloquial',lay_careful:'Careful lay',clinical:'Clinical'};
   var DASH='—';
+  var TARGET_LABEL=null; // summary.provenance.models.target_label, for the chat's reply label
   var usedSample=false;
 
   function $(id){return document.getElementById(id);}
@@ -382,11 +386,15 @@
     // Method sentence: the models and temperature the runs recorded (the exporter refuses any other), never hard-coded
     var md=(s.provenance||{}).models||{};
     function label(v){return typeof v==='string'&&v?v:DASH;}
-    $('m-target').textContent=label(md.target_label);
+    TARGET_LABEL=typeof md.target_label==='string'&&md.target_label?md.target_label:null;
+    // the tested model's name wherever the page states it: subtitle, Method, Limitations (the chat reads TARGET_LABEL)
+    Array.prototype.forEach.call(document.querySelectorAll('.v-target'),function(n){n.textContent=label(md.target_label);});
     $('m-judge').textContent=label(md.judge_label);
     $('m-temp').textContent=num(md.target_temperature);
-    // "also" only when both labels are recorded and the grader is the tested model
-    $('m-also').hidden=!(typeof md.target_label==='string'&&md.target_label&&md.target_label===md.judge_label);
+    // "also" and the same-grader limitation only when both labels are recorded and the grader is the tested model
+    var same=!!(TARGET_LABEL&&TARGET_LABEL===md.judge_label);
+    $('m-also').hidden=!same;
+    $('lim-same-grader').hidden=!same;
 
     var hd=s.headline;
     if(hd&&typeof hd==='object'){
@@ -739,7 +747,7 @@
         });
         var graded=e.reply_is_graded!==false;
         var r=el('div','bub reply'+(graded?'':' ungraded'));
-        r.appendChild(el('span','who','Claude Haiku 4.5 · reply'));
+        r.appendChild(el('span','who',(TARGET_LABEL||DASH)+' · reply'));
         r.appendChild(document.createTextNode(e.reply||DASH)); cell.appendChild(r);
         if(!graded){cell.appendChild(el('span','tag','Not graded'));}
         else{
