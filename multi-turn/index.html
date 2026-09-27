@@ -212,17 +212,17 @@
     <span id="review-pending"><br><!-- OWNER-SIGNOFF --><b>Clinician review pending</b>No clinician has reviewed these scenarios, the grading rubric or the grades.</span>
   </div>
 
-  <div class="sample-banner" id="sample-banner" hidden>SAMPLE DATA — synthetic placeholder payload for building this page. Nothing on this page is a result.</div>
+  <div class="sample-banner" id="sample-banner" hidden>Sample data: made-up placeholder files used to build this page. Nothing on this page is a result.</div>
 
   <div class="pending" id="mt-pending">
-    No multi-turn payload is published yet. This page renders from
+    No results are published yet. This page shows them once the engine writes
     <code>data/petri_multiturn_summary.json</code> and
-    <code>data/petri_multiturn_conversations.json</code> once the engine exports them.
+    <code>data/petri_multiturn_conversations.json</code>.
   </div>
 
   <!-- 2. The headline, verbatim from summary.headline.text -->
   <section class="blk" id="sec-headline" hidden>
-    <h2>The answer so far</h2>
+    <h2>The result</h2>
     <p class="status-line" id="status-line"></p>
     <p class="headline" id="headline"></p>
     <!-- Shown when summary.headline.text is null: the engine found no pre-specified wording (row_id says why). -->
@@ -230,7 +230,7 @@
       <p class="no-row"><code id="no-row-id"></code></p>
     </div>
     <div id="style-wrap" hidden>
-      <span class="lbl">Writing style against medical terms</span>
+      <span class="lbl">Writing style or medical terms?</span>
       <p class="style-sentence" id="style-sentence"></p>
     </div>
   </section>
@@ -312,8 +312,9 @@
   <a class="back" href="../">← Back home</a>
   <div class="endnote">
     <footer>
-      Built with the patientwords-engine pipeline on <a href="https://neuronpedia.org">Neuronpedia</a> ·
-      attribution graphs by <a href="https://github.com/safety-research/circuit-tracer">circuit-tracer</a>
+      Built with the <a href="https://github.com/michaeldgreenphd/patientwords-engine">patientwords-engine</a> pipeline ·
+      conversations run with <a href="https://github.com/michaeldgreenphd/patientwords-inspect_petri">Petri</a> on
+      <a href="https://github.com/UKGovernmentBEIS/inspect_ai">Inspect</a>
     </footer>
   </div>
 </main>
@@ -410,15 +411,16 @@
   function renderCounts(p){
     if(!p)return;
     var box=$('counts'); box.textContent='';
-    function add(lbl,val){if(box.childNodes.length)box.appendChild(document.createTextNode(' · '));
-      box.appendChild(document.createTextNode(lbl+' '));box.appendChild(el('b',null,val));}
-    add('eligible triples',num(p.triples));
-    add('D < 0',num(p.negative)); add('D > 0',num(p.positive)); add('D = 0',num(p.tied));
+    // each number sits next to what it counts: "Triples counted: 7 · 1 below zero, 5 above, 1 tied · ..."
+    function t(x){box.appendChild(document.createTextNode(x));}
+    function b(x){box.appendChild(el('b',null,x));}
     // a p below 0.001 prints as "< 0.001", never as 0.000
     function pval(v){return typeof v==='number'&&isFinite(v)&&v>0&&v<0.001?'< 0.001':num(v,3);}
-    add('sign test p',pval(p.p_two_sided));
-    add('scenario test p',pval(p.gate_p));
-    add('scenario gate',p.gate_passed===true?'passed':p.gate_passed===false?'not passed':DASH);
+    t('Triples counted: ');b(num(p.triples));
+    t(' · ');b(num(p.negative));t(' below zero, ');b(num(p.positive));t(' above, ');b(num(p.tied));t(' tied');
+    t(' · sign test p = ');b(pval(p.p_two_sided));
+    t(' · scenario test p = ');b(pval(p.gate_p));
+    t(', ');b(p.gate_passed===true?'passed':p.gate_passed===false?'not passed':DASH);
   }
 
   var NS='http://www.w3.org/2000/svg';
@@ -427,7 +429,9 @@
   function drawD(triples,means){
     var host=$('fig-d'); host.textContent='';
     var W=Math.max(300,Math.min(760,host.clientWidth||680));
-    var PARTS=[{key:'seen_before_plan',title:'Seen before the plan'},{key:'prospective',title:'Prospective'}];
+    // the panel titles use the headline's own words ("the conversations run after the analysis was fixed")
+    var PARTS=[{key:'seen_before_plan',title:'Run before the analysis was fixed',short:'Before it was fixed'},
+               {key:'prospective',title:'Run after the analysis was fixed',short:'After it was fixed'}];
     // scenarios: union of triples and means; ordered by scenario mean (most negative first), then id
     var ids=[];triples.forEach(function(t){if(ids.indexOf(t.scenario_id)<0)ids.push(t.scenario_id);});
     Object.keys(means).forEach(function(k){if(ids.indexOf(k)<0)ids.push(k);});
@@ -449,8 +453,8 @@
       var n=inPart.filter(function(t){return t.eligible!==false&&typeof t.D==='number'&&isFinite(t.D);}).length;
       var noD=inPart.filter(function(t){return !(typeof t.D==='number'&&isFinite(t.D));}).length;
       var narrow=pw<260;
-      var ttl=sv('text',{x:x0,y:12,'font-size':narrow?10:11,'font-weight':600,fill:ink},part.title);
-      ttl.appendChild(sv('tspan',{'font-weight':400,fill:muted},' \u00b7 n '+n));
+      var ttl=sv('text',{x:x0,y:12,'font-size':narrow?10:11,'font-weight':600,fill:ink},narrow?part.short:part.title);
+      ttl.appendChild(sv('tspan',{'font-weight':400,fill:muted},' \u00b7 n = '+n));
       svg.appendChild(ttl);
       if(noD)svg.appendChild(sv('text',{x:x0,y:24,'font-size':10,fill:muted},noD+' without D'));
       var yb=top+ids.length*rowH;
@@ -487,8 +491,8 @@
     });
     host.appendChild(svg);
     var el_=triples.filter(function(t){return t.eligible!==false;});
-    host.setAttribute('aria-label','D per triple for '+ids.length+' scenarios: '+el_.filter(function(t){return t.D<0;}).length+
-      ' eligible triples below zero, '+el_.filter(function(t){return t.D>0;}).length+' above, '+el_.filter(function(t){return t.D===0;}).length+' at zero.');
+    host.setAttribute('aria-label','D for each counted triple, '+ids.length+' scenarios: '+el_.filter(function(t){return t.D<0;}).length+
+      ' below zero, '+el_.filter(function(t){return t.D>0;}).length+' above, '+el_.filter(function(t){return t.D===0;}).length+' at zero.');
   }
 
   function renderRepeats(rows,triples){
@@ -516,21 +520,29 @@
     $('sec-prov').hidden=false;
     var dl=$('prov-list'); dl.textContent='';
     function row(k,v){var dt=el('dt',null,k),dd=el('dd');if(v instanceof Node)dd.appendChild(v);else dd.textContent=v;dl.appendChild(dt);dl.appendChild(dd);}
-    row('runs',arr(pv.runs).length?arr(pv.runs).join(', '):DASH);
-    row('analysis commit',pv.analysis_commit||DASH);
+    var ENGINE='https://github.com/michaeldgreenphd/patientwords-engine';
+    row('runs analyzed',arr(pv.runs).length?arr(pv.runs).join(', '):DASH);
+    // a full commit hash links to that commit, so a reader can open the exact analysis code
+    var ac=pv.analysis_commit;
+    if(typeof ac==='string'&&/^[0-9a-f]{40}$/.test(ac)){var a=el('a',null,ac);a.href=ENGINE+'/commit/'+ac;row('analysis code (engine commit)',a);}
+    else row('analysis code (engine commit)',ac||DASH);
     var md=pv.models||{};
     function list(v){return arr(v).length?arr(v).join(', '):DASH;}
-    row('target model',list(md.target));
-    row('target model as served',list(md.target_served));
-    row('target temperature',num(md.target_temperature));
-    row('grader model',list(md.judge));
-    if(pv.verify){var pre=el('pre',null,pv.verify);row('verify the chain',pre);}else row('verify the chain',DASH);
-    row('vendor pack',vp.version?(vp.version+(vp.sent?' · sent '+vp.sent:'')):'not yet sent');
+    row('model tested',list(md.target));
+    row('model version served',list(md.target_served));
+    row('temperature',num(md.target_temperature));
+    row('grader',list(md.judge));
+    if(pv.verify){
+      var box=el('div'), pre=el('pre',null,pv.verify), where=el('span',null,'Run it in a copy of '), repo=el('a',null,'patientwords-engine');
+      repo.href=ENGINE; where.appendChild(repo); where.appendChild(document.createTextNode('.'));
+      box.appendChild(pre); box.appendChild(where); row('check the run records',box);
+    }else row('check the run records',DASH);
+    row('reproduction pack',vp.version?(vp.version+(vp.sent?' · sent '+vp.sent:' · not yet sent')):'not yet sent');
     row('clinician review',st.clinician_review||DASH);
     row('final analysis',st.final===true?'yes':st.final===false?'not yet':DASH);
-    if(s.headline&&s.headline.row_id)row('headline row',s.headline.row_id);
-    if(s.style_sentence&&s.style_sentence.row_id)row('style row',s.style_sentence.row_id);
-    if(s.seed!=null)row('file seed',String(s.seed));
+    if(s.headline&&s.headline.row_id)row('headline: row of the analysis plan',s.headline.row_id);
+    if(s.style_sentence&&s.style_sentence.row_id)row('style sentence: row of the analysis plan',s.style_sentence.row_id);
+    if(s.seed!=null)row('analysis random seed',String(s.seed));
   }
 
   // ---------- explore viewer ----------
@@ -606,12 +618,12 @@
     $('seed-q').textContent=mech.question||'';
     var info=$('seed-info'); info.textContent='';
     function bit(k,v){if(v==null||v==='')return;if(info.childNodes.length)info.appendChild(document.createTextNode(' · '));
-      info.appendChild(document.createTextNode(k+' '));info.appendChild(el('b',null,v));}
-    bit('mechanism',mech.title||seed.mechanism);
-    bit('set',seed.set); bit('scenario',seed.scenario_id);
-    bit('hypotheses',arr(seed.hypotheses).join(', '));
-    bit('system prompt',seed.system_prompt);
-    if(seed.proposition)bit('asserted proposition',seed.proposition);
+      info.appendChild(document.createTextNode(k+': '));info.appendChild(el('b',null,v));}
+    bit('Mechanism',mech.title||seed.mechanism);
+    bit('Scenario set',seed.set); bit('Scenario',seed.scenario_id);
+    bit('Hypotheses',arr(seed.hypotheses).join(', '));
+    bit('System prompt',seed.system_prompt);
+    if(seed.proposition)bit('Claim the user asserts',seed.proposition);
     // measures for this seed
     var mids=arr(seed.measures).filter(function(id){return MEAS[id];});
     if(!mids.length)mids=Object.keys(MEAS);
@@ -640,7 +652,7 @@
     th.appendChild(hr);
     var roles=arr(seed.roles);
     if(roles.some(function(r){return r;})){
-      var rr=el('tr','roles'), rl=el('th','row','role'); rl.scope='row'; rr.appendChild(rl);
+      var rr=el('tr','roles'), rl=el('th','row','turn type'); rl.scope='row'; rr.appendChild(rl);
       for(var j=0;j<n;j++){var rh=el('th',null,roles[j]?abbrRole(roles[j]):'');rh.scope='col';if(roles[j])rh.title=human(roles[j]);rr.appendChild(rh);}
       th.appendChild(rr);
     }
@@ -661,7 +673,7 @@
             // judged under an earlier judge prompt: shown as superseded, never shaded or compared
             td.className='sup';
             txt=g.na!=null?'n/a':g.v==null?DASH:abbr(g.v);
-            tip='superseded: judged under an earlier judge prompt ('+g.superseded+'), not compared \u00b7 '+
+            tip='graded under an earlier grading prompt ('+g.superseded+'), left out of the comparison \u00b7 '+
               (g.na!=null?'not applicable: '+g.na:g.v==null?'no value':human(g.v));
           }
           else if(g.na!=null){td.className='na';txt='n/a';tip='not applicable: '+g.na;}
@@ -686,8 +698,11 @@
     });
     t.appendChild(tb);
     var key=$('strip-key'); key.textContent='';
+    var used=[];arr(seed.roles).forEach(function(r){if(r&&used.indexOf(r)<0)used.push(r);});
     key.appendChild(document.createTextNode((m.label||state.measure)+': '+vals.map(function(v){return abbr(v)+' '+human(v);}).join(' · ')+
-      ' · n/a not applicable · hatched = not graded · dotted italic = superseded (earlier judge prompt, not compared) · '+DASH+' no value'+(m.kind!=='nominal'?' · darker = higher on the scale':'')));
+      ' · n/a not applicable · hatched: not graded · dotted italic: graded under an earlier grading prompt, left out of the comparison · '+
+      DASH+' no value'+(m.kind!=='nominal'?' · darker: higher on the scale':'')+
+      (used.length?'. Turn types: '+used.map(function(r){return abbrRole(r)+' '+human(r);}).join(' · '):'')));
   }
   function abbrRole(r){return {evidence:'evid',pressure:'press',neutral_control:'ctrl'}[r]||String(r).slice(0,5);}
 
@@ -713,12 +728,12 @@
         var cell=el('div','cell a-'+a);
         if(!e){cell.appendChild(el('div','grades',ARM_LABEL[a]+': no exchange recorded'));
           if(ruleHere)cell.appendChild(ruleBox(triple[a].rule));chat.appendChild(cell);return;}
-        var u=el('div','bub user');u.appendChild(el('span','who',ARM_LABEL[a]+' · scripted user turn'));u.appendChild(document.createTextNode(e.user||DASH));cell.appendChild(u);
+        var u=el('div','bub user');u.appendChild(el('span','who',ARM_LABEL[a]+' · scripted message'));u.appendChild(document.createTextNode(e.user||DASH));cell.appendChild(u);
         arr(e.interim).forEach(function(it){
           var txt=typeof it==='string'?it:(it&&(it.text||it.content||it.reply))||'';
           var isTool=it&&typeof it==='object'&&(it.fixture===true||it.role==='tool'||it.kind==='tool_result'||it.type==='tool_result');
           var b=el('div','bub '+(isTool?'tool':'interim'));
-          b.appendChild(el('span','who',isTool?'Scripted lookup result · text written by the study, not by the model':'Intermediate reply, same exchange'));
+          b.appendChild(el('span','who',isTool?'Lookup result · written by the study, not by the model':'Earlier reply in this exchange'));
           b.appendChild(document.createTextNode(txt||DASH)); cell.appendChild(b);
         });
         var graded=e.reply_is_graded!==false;
@@ -733,7 +748,7 @@
             g.appendChild(document.createTextNode((MEAS[id].label||id)+' '));
             var shown=x.na!=null?'n/a':x.v==null?DASH:human(x.v);
             if(x.superseded!=null){
-              var sp=el('span','sup','superseded: '+shown+' (earlier judge prompt '+x.superseded+', not compared)');
+              var sp=el('span','sup',shown+' (graded under an earlier grading prompt, '+x.superseded+'; left out of the comparison)');
               g.appendChild(sp);
             }else g.appendChild(el('b',null,shown));});
           if(!any)g.textContent='no grades recorded';
@@ -748,10 +763,13 @@
   function ruleBox(rule){
     var d=el('div','rule');
     d.appendChild(el('span','lbl','Tool use in this conversation'));
-    var keys=[['tool_invoked','tool invoked'],['first_tool','first tool'],['first_call_turn','first call at turn'],
-      ['advice_before_lookup','advice before lookup'],['query_text','query'],['marker_echo','marker echoed'],
-      ['tool_calls_total','tool calls'],['tool_results_received','results received'],
-      ['unknown_tool_calls','unknown tool calls'],['parse_error_call','unparsable calls']];
+    // labels say what each field counts (the engine's docs/framework/outcome_dimensions.draft.json); first_call_turn
+    // counts the model's replies, not the conversation's turns, so it is labelled as a reply number
+    var keys=[['tool_invoked','used a tool'],['first_tool','first tool used'],['first_call_turn','first tool call, in reply number'],
+      ['advice_before_lookup','gave advice before the first tool call'],['query_text','text sent to the tool'],
+      ['marker_echo','final reply repeats the marker planted in the result'],
+      ['tool_calls_total','tool calls'],['tool_results_received','results returned'],
+      ['unknown_tool_calls','calls to a tool that does not exist'],['parse_error_call','malformed tool calls']];
     var reasons=rule.reasons||{};
     // query_text is a list, one entry per tool call (engine exporter, 2026-09-24); older files carry a string
     function show(v){
