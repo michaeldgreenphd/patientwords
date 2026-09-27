@@ -674,7 +674,7 @@
       for(var i=0;i<n;i++){
         var e=ex[i], td=el('td'), b=el('button'); b.type='button';
         var txt=DASH, tip='no value';
-        if(!e){td.className='miss';}
+        if(!e){td.className='miss';tip=triple[a]?'no exchange recorded':'no conversation recorded';}
         else if(e.reply_is_graded===false){td.className='ng';txt='';tip='not graded';}
         else{
           var g=(e.vals||{})[state.measure];
@@ -751,7 +751,7 @@
         // the conversation's rule facts go under its own last exchange (under the last row if it has none)
         var ruleHere=i===(ex.length?ex.length-1:n-1)&&triple[a]&&triple[a].rule;
         var cell=el('div','cell a-'+a);
-        if(!e){cell.appendChild(el('div','grades',ARM_LABEL[a]+': no exchange recorded'));
+        if(!e){cell.appendChild(el('div','grades',ARM_LABEL[a]+': '+(triple[a]?'no exchange recorded':'no conversation recorded')));
           if(ruleHere)cell.appendChild(ruleBox(triple[a].rule));chat.appendChild(cell);return;}
         var u=el('div','bub user');u.appendChild(el('span','who',ARM_LABEL[a]+' · scripted message'));u.appendChild(document.createTextNode(e.user||DASH));cell.appendChild(u);
         arr(e.interim).forEach(function(it){
