@@ -216,9 +216,10 @@
   <div class="sample-banner" id="sample-banner" hidden>Sample data: made-up placeholder files used to build this page. Nothing on this page is a result.</div>
 
   <div class="pending" id="mt-pending">
-    No results are published yet. This page shows them once the engine writes
+    <span id="mt-loading">Loading the results…</span>
+    <span id="mt-none" hidden>No results are published yet. This page shows them once the engine writes
     <code>data/petri_multiturn_summary.json</code> and
-    <code>data/petri_multiturn_conversations.json</code>.
+    <code>data/petri_multiturn_conversations.json</code>.</span>
   </div>
 
   <!-- 2. The headline, verbatim from summary.headline.text -->
@@ -358,7 +359,8 @@
 
   loadAll.then(function(res){
     var summary=res[0], conv=res[1];
-    if(!summary&&!conv)return; // pending block stays
+    // nothing loaded: only now say so (while the files load, the block says it is loading)
+    if(!summary&&!conv){$('mt-loading').hidden=true;$('mt-none').hidden=false;return;}
     $('mt-pending').hidden=true;
     if(usedSample||(summary&&summary.sample)||(conv&&conv.sample))$('sample-banner').hidden=false;
     if(summary)renderSummary(summary);
@@ -413,7 +415,7 @@
   function debounce(f,ms){var t;return function(){clearTimeout(t);t=setTimeout(f,ms);};}
 
   function renderCounts(p){
-    if(!p)return;
+    if(!p){$('counts').textContent='Test results: not recorded in this file.';return;}
     var box=$('counts'); box.textContent='';
     // each number sits next to what it counts: "Triples counted: 7 · 1 below zero, 5 above, 1 tied · ..."
     function t(x){box.appendChild(document.createTextNode(x));}
@@ -484,7 +486,7 @@
           if(typeof t.D!=='number'||!isFinite(t.D))return;
           var k=t.D.toFixed(3); seen[k]=(seen[k]||0)+1; var j=seen[k]-1;
           var cy=y+20+(j%2?1:-1)*Math.ceil(j/2)*4, cx=X(t.D);
-          var tip=(t.seed_id||id)+' · run '+num(t.epoch)+' · D = '+num(t.D,2)+(t.eligible===false?' · not eligible':'');
+          var tip=(t.seed_id||id)+(typeof t.speaker==='string'&&t.speaker?' · '+t.speaker:'')+' · run '+num(t.epoch)+' · D = '+num(t.D,2)+(t.eligible===false?' · not eligible':'');
           var g;
           if(t.eligible===false){
             g=sv('path',{d:'M'+(cx-3.5)+' '+(cy-3.5)+'L'+(cx+3.5)+' '+(cy+3.5)+'M'+(cx+3.5)+' '+(cy-3.5)+'L'+(cx-3.5)+' '+(cy+3.5),stroke:muted,'stroke-width':1.3,fill:'none'});
@@ -743,9 +745,11 @@
     for(var i=0;i<n;i++){
       // the wordings can reach an exchange at different turns (a different number of tool messages), so the shared
       // heading names the reply turn only when every wording's reply sits at it; otherwise each reply names its own
-      var turns=[];ARMS.forEach(function(a){var x=triple[a]&&arr(triple[a].exchanges)[i];
-        if(x&&x.reply_turn!=null&&turns.indexOf(x.reply_turn)<0)turns.push(x.reply_turn);});
-      var oneTurn=turns.length===1;
+      // a reply with no recorded turn counts as disagreement, so the heading never asserts a turn for it; each reply then
+      // names its own, or says it has none (a file that records no turns at all shows none)
+      var turns=[],noTurn=false;ARMS.forEach(function(a){var x=triple[a]&&arr(triple[a].exchanges)[i];if(!x)return;
+        if(x.reply_turn==null)noTurn=true;else if(turns.indexOf(x.reply_turn)<0)turns.push(x.reply_turn);});
+      var oneTurn=!noTurn&&turns.length===1, ownTurns=!oneTurn&&turns.length>0;
       var hd=el('div','exh','Exchange '+(i+1)+(oneTurn?' · reply turn '+turns[0]:'')+(roles[i]?' · '+human(roles[i])+' turn':''));
       hd.id='ex-'+i; chat.appendChild(hd);
       ARMS.forEach(function(a){
@@ -765,7 +769,7 @@
         });
         var graded=e.reply_is_graded!==false;
         var r=el('div','bub reply'+(graded?'':' ungraded'));
-        r.appendChild(el('span','who',(TARGET_LABEL||DASH)+' · reply'+(!oneTurn&&e.reply_turn!=null?', turn '+e.reply_turn:'')));
+        r.appendChild(el('span','who',(TARGET_LABEL||DASH)+' · reply'+(ownTurns?(e.reply_turn!=null?', turn '+e.reply_turn:', turn not recorded'):'')));
         r.appendChild(document.createTextNode(e.reply||DASH)); cell.appendChild(r);
         if(!graded){cell.appendChild(el('span','tag','Not graded'));}
         else{
