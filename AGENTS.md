@@ -97,8 +97,8 @@ export.
 | `simulated_archive.json` | **no page** (written alongside the CSV; staged) | `export_archive.py` |
 | `model_provenance.json` | `technical/` (per-model build info) | **no engine writer** — hand-maintained here |
 | `specialties.json` | `simulated-scenarios/` (specialty filter) | **no engine writer** — hand-synced from the engine's `data/specialty_map.draft.json`; `validate_frontend_contract.py` checks the two agree |
-| `petri_multiturn_summary.json` | `multi-turn/index.html` (headline, D figure, repeats table, provenance) | `export_petri_multiturn.py` (not yet on engine `main`, 2026-09-24) — **owner-run, not the daily Routine** |
-| `petri_multiturn_conversations.json` | `multi-turn/index.html` (explore viewer) | `export_petri_multiturn.py` (not yet on engine `main`, 2026-09-24) — **owner-run, not the daily Routine** |
+| `petri_multiturn_summary.json` | `multi-turn/index.html` (headline, D figure, repeats table, provenance) | `export_petri_multiturn.py` (on engine `main` since 2026-09-25, 8575ef9b) — **owner-run, not the daily Routine** |
+| `petri_multiturn_conversations.json` | `multi-turn/index.html` (explore viewer) | `export_petri_multiturn.py` (on engine `main` since 2026-09-25, 8575ef9b) — **owner-run, not the daily Routine** |
 
 `*.sample.json` files are development fixtures, but two ARE fetched by live pages
 when the URL carries `?sample=1` (`llm/index.html` → `advice_scenarios.sample.json`,

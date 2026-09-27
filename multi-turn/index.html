@@ -499,14 +499,15 @@
     if(!rows.length)return;
     $('sec-repeats').hidden=false;
     // rows are per seed; the column names the seed's scenario (as the figure does), read from the triples.
-    // A seed with no triple shows its seed id; a scenario with several seeds shows each seed id beside it.
+    // A seed with no triple shows its seed id, labelled as a seed (it is not a scenario id); a scenario with several
+    // seeds shows each seed id beside it.
     var scen={},seen={};
     arr(triples).forEach(function(t){if(t&&t.seed_id&&t.scenario_id)scen[t.seed_id]=t.scenario_id;});
     rows.forEach(function(r){var k=scen[r.seed_id];if(k)seen[k]=(seen[k]||0)+1;});
     var tb=$('rep-body'); tb.textContent='';
     rows.forEach(function(r){
       var tr=el('tr'), k=scen[r.seed_id];
-      var td=el('td',null,k?(seen[k]>1?k+' · '+r.seed_id:k):(r.seed_id||DASH));
+      var td=el('td',null,k?(seen[k]>1?k+' · '+r.seed_id:k):(r.seed_id?'seed '+r.seed_id:DASH));
       if(r.seed_id)td.title='seed '+r.seed_id;
       tr.appendChild(td);
       tr.appendChild(el('td','num',num(r.epochs)));
@@ -537,7 +538,10 @@
       repo.href=ENGINE; where.appendChild(repo); where.appendChild(document.createTextNode('.'));
       box.appendChild(pre); box.appendChild(where); row('check the run records',box);
     }else row('check the run records',DASH);
-    row('reproduction pack',vp.version?(vp.version+(vp.sent?' · sent '+vp.sent:' · not yet sent')):'not yet sent');
+    // the exporter records the pack as the disclosure log's latest entry, or nulls when the log has none; a summary
+    // with no vendor_pack at all records nothing, so it shows a dash rather than a claim
+    var vpKnown=!!(st.vendor_pack&&typeof st.vendor_pack==='object');
+    row('reproduction pack',!vpKnown?DASH:vp.version?(vp.version+(vp.sent?' · sent '+vp.sent:' · not yet sent')):'not yet sent');
     row('clinician review',st.clinician_review||DASH);
     row('final analysis',st.final===true?'yes':st.final===false?'not yet':DASH);
     if(s.headline&&s.headline.row_id)row('headline: row of the analysis plan',s.headline.row_id);
@@ -718,8 +722,12 @@
     var n=0;ARMS.forEach(function(a){if(triple[a])n=Math.max(n,arr(triple[a].exchanges).length);});
     var roles=arr(seed.roles);
     for(var i=0;i<n;i++){
-      var first=null;ARMS.forEach(function(a){if(!first&&triple[a]&&arr(triple[a].exchanges)[i])first=arr(triple[a].exchanges)[i];});
-      var hd=el('div','exh','Exchange '+(i+1)+(first&&first.reply_turn!=null?' · reply turn '+first.reply_turn:'')+(roles[i]?' · '+human(roles[i])+' turn':''));
+      // the wordings can reach an exchange at different turns (a different number of tool messages), so the shared
+      // heading names the reply turn only when every wording's reply sits at it; otherwise each reply names its own
+      var turns=[];ARMS.forEach(function(a){var x=triple[a]&&arr(triple[a].exchanges)[i];
+        if(x&&x.reply_turn!=null&&turns.indexOf(x.reply_turn)<0)turns.push(x.reply_turn);});
+      var oneTurn=turns.length===1;
+      var hd=el('div','exh','Exchange '+(i+1)+(oneTurn?' · reply turn '+turns[0]:'')+(roles[i]?' · '+human(roles[i])+' turn':''));
       hd.id='ex-'+i; chat.appendChild(hd);
       ARMS.forEach(function(a){
         var ex=triple[a]?arr(triple[a].exchanges):[], e=ex[i]||null;
@@ -738,7 +746,7 @@
         });
         var graded=e.reply_is_graded!==false;
         var r=el('div','bub reply'+(graded?'':' ungraded'));
-        r.appendChild(el('span','who',(TARGET_LABEL||DASH)+' · reply'));
+        r.appendChild(el('span','who',(TARGET_LABEL||DASH)+' · reply'+(!oneTurn&&e.reply_turn!=null?', turn '+e.reply_turn:'')));
         r.appendChild(document.createTextNode(e.reply||DASH)); cell.appendChild(r);
         if(!graded){cell.appendChild(el('span','tag','Not graded'));}
         else{
