@@ -329,7 +329,7 @@
   // (engine scripts/check_pages.py, which fails on any HTTP 404 under data/) stays green.
   // Set it to true in the same change that adds data/petri_multiturn_{summary,conversations}.json;
   // the page then loads the real files and still falls back to the samples if one is missing.
-  var REAL_DATA_PUBLISHED=false;
+  var REAL_DATA_PUBLISHED=true;
   var FORCE_SAMPLE=!REAL_DATA_PUBLISHED||/[?&]sample=1/.test(location.search);
   var ARMS=['colloquial','lay_careful','clinical'];
   var ARM_LABEL={colloquial:'Colloquial',lay_careful:'Careful lay',clinical:'Clinical'};
@@ -422,8 +422,10 @@
     function pval(v){return typeof v==='number'&&isFinite(v)&&v>0&&v<0.001?'< 0.001':num(v,3);}
     t('Triples counted: ');b(num(p.triples));
     t(' · ');b(num(p.negative));t(' below zero, ');b(num(p.positive));t(' above, ');b(num(p.tied));t(' tied');
-    t(' · sign test p = ');b(pval(p.p_two_sided));
-    t(' · scenario test p = ');b(pval(p.gate_p));
+    // "p = 0.016", but "p < 0.001" rather than "p = < 0.001"
+    function pt(label,v){var x=pval(v);t(label+(x.charAt(0)==='<'?' p ':' p = '));b(x);}
+    pt(' · sign test',p.p_two_sided);
+    pt(' · scenario test',p.gate_p);
     t(', ');b(p.gate_passed===true?'passed':p.gate_passed===false?'not passed':DASH);
   }
 

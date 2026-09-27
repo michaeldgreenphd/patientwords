@@ -115,9 +115,13 @@ that commits them also sets that constant to `true`, after which the page loads 
 real names. The two files are one unit: if either real file is missing, the page
 renders both samples (never a real summary beside sample transcripts). The constant exists
 because `check_pages.py` fails on any 404 under `data/`, so a real-first fetch
-before the real files exist would turn site CI red. The page is gated: it merges
-only after the final pre-registered analysis, the engine exporter on `main`, the
-vendor reproduction pack (engine wave-2 decision 16) and the owner's sign-off.
+before the real files exist would turn site CI red. The page was gated on the final
+pre-registered analysis, the engine exporter on `main`, the vendor reproduction pack
+(engine wave-2 decision 16) and the owner's sign-off. The owner set the pack's send
+aside before publication (engine deviation D3, 2026-09-27, in
+`docs/preregistration_advice.md`): the page cites the pack and shows it as not yet
+sent, and the contract gate accepts that for the one pack version the deviation
+names (`data/petri/publication_deviations.json` in the engine).
 
 Five published files currently have **no page consumer** —
 `advice_scenarios_nat.json`, `patch_profile.json`, `specialty_breakdown.json`,
