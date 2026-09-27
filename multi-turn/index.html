@@ -61,7 +61,6 @@
   .pending{border:1px solid var(--hairline);border-left:3px solid var(--structural);
     padding:14px 16px;font-family:var(--mono);font-size:12.5px;line-height:1.8;color:var(--muted);margin:26px 0}
   .status-line{font-family:var(--mono);font-size:11.5px;color:var(--muted);margin:0 0 10px}
-  .draft{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--penalty);margin:0 0 12px}
   /* headline: rendered verbatim from the summary file */
   .headline{font-size:clamp(19px,2.4vw,23px);line-height:1.45;margin:0 0 14px;max-width:38em}
   .style-sentence{font-size:16.5px;line-height:1.55;margin:0 0 6px;max-width:42em}
@@ -228,11 +227,6 @@
     <p class="headline" id="headline"></p>
     <!-- Shown when summary.headline.text is null: the engine found no pre-specified wording (row_id says why). -->
     <div id="no-row" hidden>
-      <!-- OWNER-SIGNOFF --><p class="no-row">No pre-specified wording applies to this result, so this page states no headline.</p>
-      <!-- OWNER-SIGNOFF --><p class="no-row" data-why="not_computable" hidden>No triple had a nonzero difference, so the primary sign test did not run.</p>
-      <!-- OWNER-SIGNOFF --><p class="no-row" data-why="no_prespecified_row" hidden>The scenario-level test was significant in the direction opposite to the primary test, and the pre-registered table has no row for that outcome.</p>
-      <!-- OWNER-SIGNOFF --><p class="no-row" data-why="not_selectable_as_registered" hidden>The results match a row of the pre-registered table, but that row cannot be used as registered: the table was fixed for all the planned scenarios, and the scenario-level test ran on fewer.</p>
-      <!-- OWNER-SIGNOFF --><p class="no-row" data-why="other" hidden>The analysis recorded a reason this page does not recognise.</p>
       <p class="no-row"><code id="no-row-id"></code></p>
     </div>
     <div id="style-wrap" hidden>
@@ -245,7 +239,7 @@
   <section class="blk" id="sec-fig" hidden>
     <h2>Difference by wording</h2>
     <figure class="fig">
-      <figcaption class="fig-cap">D per conversation triple <span class="fig-sub"><!-- OWNER-SIGNOFF -->D = mean, over comparable exchanges, of urgency rank under colloquial wording minus rank under clinical wording · below zero = colloquial wording got less urgent advice · one mark per triple, one row per scenario · × = not eligible, left out of the tests</span></figcaption>
+      <figcaption class="fig-cap">D per conversation triple <span class="fig-sub"><!-- OWNER-SIGNOFF -->&times; = left out of the tests</span></figcaption>
       <div id="fig-d" role="img" aria-label="D per triple"></div>
     </figure>
     <p class="counts" id="counts"></p>
@@ -254,9 +248,9 @@
   <!-- 4. Does it repeat -->
   <section class="blk" id="sec-repeats" hidden>
     <h2>Does it repeat?</h2>
-    <!-- OWNER-SIGNOFF --><p class="note">Each scenario was run in several epochs. The last column counts the epochs whose difference had the same direction as the primary test.</p>
+    <!-- OWNER-SIGNOFF --><p class="note">Each scenario was run several times. The last column counts the runs whose difference had the same direction as the primary test.</p>
     <table class="dt">
-      <thead><tr><th scope="col">Scenario</th><th scope="col" class="num">Epochs</th><th scope="col" class="num">Same direction</th></tr></thead>
+      <thead><tr><th scope="col">Scenario</th><th scope="col" class="num">Runs</th><th scope="col" class="num">Same direction</th></tr></thead>
       <tbody id="rep-body"></tbody>
     </table>
   </section>
@@ -264,17 +258,16 @@
   <!-- F2: explore viewer -->
   <section class="blk" id="sec-explore" hidden>
     <h2>Explore the conversations</h2>
-    <!-- OWNER-SIGNOFF --><p class="note">Illustration only. No claim on this page rests on one conversation, one exchange or one grade.</p>
+    <!-- OWNER-SIGNOFF --><p class="note">Examples only. No claim here rests on a single conversation.</p>
     <div class="pick">
       <label>Scenario <select id="pick-seed"></select></label>
-      <label>Epoch <select id="pick-epoch"></select></label>
+      <label>Run <select id="pick-epoch"></select></label>
       <label id="pick-id-wrap" hidden>Speaker <select id="pick-id"></select></label>
     </div>
     <p class="seed-q" id="seed-q"></p>
     <p class="seed-info" id="seed-info"></p>
 
     <div class="chip-g" id="measure-chips" role="group" aria-label="Measure shown in the grade strip"></div>
-    <!-- OWNER-SIGNOFF --><p class="draft draft-rubric">Draft rubric · clinician review pending</p>
     <div class="strip-wrap"><table class="strip" id="strip"></table></div>
     <p class="strip-key" id="strip-key"></p>
 
@@ -290,13 +283,10 @@
   <!-- 5. Method -->
   <section class="blk" id="sec-method">
     <h2>Method</h2>
-    <!-- OWNER-SIGNOFF --><p class="note">Each scenario is a fixed script of user turns, written once and sent in three wordings: colloquial, careful lay and clinical.<span id="n-turns"></span></p>
     <!-- The model names and the temperature below are filled from summary.provenance.models (a dash when absent). -->
     <!-- OWNER-SIGNOFF --><p class="note">Each wording is a separate conversation with <span class="v-target">&mdash;</span>, sampled at temperature <span id="m-temp">&mdash;</span>. A grader, <span id="m-also" hidden>also </span><span id="m-judge">&mdash;</span>, codes each reply.</p>
-    <!-- OWNER-SIGNOFF --><p class="note">A conversation triple is one scenario, one epoch and one speaker, with its three conversations. D compares the urgency tier of each reply alone, ranked self care, routine, urgent, emergency.</p>
-    <!-- OWNER-SIGNOFF --><p class="draft draft-rubric">Draft rubric · clinician review pending</p>
-    <!-- OWNER-SIGNOFF --><p class="note">The primary test is an exact two-sided sign test on the sign of D across triples. A second test treats each scenario as one unit, so a claim beyond these scenarios does not rest on one of them.</p>
-    <!-- OWNER-SIGNOFF --><p class="note">The analysis plan was fixed before the prospective triples were generated. It is section 10 of the engine&rsquo;s <a href="https://github.com/michaeldgreenphd/patientwords-engine/blob/main/docs/petri_wave2_design.md#10-pre-specified-analysis-of-the-register-contrast-fixed-2026-09-23-before-epoch-3">wave-2 design note</a>.</p>
+    <!-- OWNER-SIGNOFF --><p class="note">A conversation triple is one scenario, one run and one speaker, with its three conversations. D compares the urgency tier of each reply alone, ranked self care, routine, urgent, emergency.</p>
+    <!-- OWNER-SIGNOFF --><p class="note">The main test is an exact sign test on D across triples. A second test gives each scenario equal weight.</p>
     <div id="example-wrap" hidden>
       <span class="lbl" id="example-lbl">One scripted turn in its three wordings</span>
       <div class="ex3" id="example"></div>
@@ -310,11 +300,6 @@
       <!-- OWNER-SIGNOFF --><li>The scenarios were written by an LLM, not taken from real patients.</li>
       <!-- OWNER-SIGNOFF --><li id="lim-review">No clinician has reviewed the scenarios, the rubric or the grades.</li>
       <!-- OWNER-SIGNOFF --><li>The user turns are scripted, so they cannot answer a question the model asks.</li>
-      <!-- The model name below is summary.provenance.models.target_label (a dash when absent); the next item shows only
-           when target_label and judge_label are both recorded and equal. -->
-      <!-- OWNER-SIGNOFF --><li>One model was tested: <span class="v-target">&mdash;</span>.</li>
-      <!-- OWNER-SIGNOFF --><li id="lim-same-grader" hidden>The grader is the same model as the one being tested.</li>
-      <!-- OWNER-SIGNOFF --><li>The test has little power at this size. A result that is not significant is inconclusive, not evidence that wording makes no difference.</li>
     </ul>
   </section>
 
@@ -379,10 +364,9 @@
   // ---------- summary ----------
   function renderSummary(s){
     var st=s.status||{};
-    // The review-pending line, its limitation and the draft-rubric notices beside the tiers stay unless the summary
-    // explicitly records a review other than "pending". The not-medical-advice line always stays.
-    if(st.clinician_review!=null&&st.clinician_review!=='pending'){$('review-pending').hidden=true;$('lim-review').hidden=true;
-      Array.prototype.forEach.call(document.querySelectorAll('.draft-rubric'),function(n){n.hidden=true;});}
+    // The review-pending line and its limitation stay unless the summary explicitly records a review other than
+    // "pending". The not-medical-advice line always stays.
+    if(st.clinician_review!=null&&st.clinician_review!=='pending'){$('review-pending').hidden=true;$('lim-review').hidden=true;}
     // Method sentence: the models and temperature the runs recorded (the exporter refuses any other), never hard-coded
     var md=(s.provenance||{}).models||{};
     function label(v){return typeof v==='string'&&v?v:DASH;}
@@ -391,10 +375,9 @@
     Array.prototype.forEach.call(document.querySelectorAll('.v-target'),function(n){n.textContent=label(md.target_label);});
     $('m-judge').textContent=label(md.judge_label);
     $('m-temp').textContent=num(md.target_temperature);
-    // "also" and the same-grader limitation only when both labels are recorded and the grader is the tested model
+    // "also" only when both labels are recorded and the grader is the tested model
     var same=!!(TARGET_LABEL&&TARGET_LABEL===md.judge_label);
     $('m-also').hidden=!same;
-    $('lim-same-grader').hidden=!same;
 
     var hd=s.headline;
     if(hd&&typeof hd==='object'){
@@ -410,9 +393,6 @@
         $('headline').hidden=true;
         $('no-row').hidden=false;
         var rid=hd.row_id==null?'':String(hd.row_id);
-        var why=rid==='not_computable'||rid==='no_prespecified_row'?rid:
-          rid.indexOf('not_selectable_as_registered:')===0?'not_selectable_as_registered':'other';
-        Array.prototype.forEach.call($('no-row').querySelectorAll('[data-why]'),function(p){p.hidden=p.getAttribute('data-why')!==why;});
         $('no-row-id').textContent='row_id: '+(rid||DASH);
       }
       var ss=s.style_sentence&&s.style_sentence.text;
@@ -494,7 +474,7 @@
           if(typeof t.D!=='number'||!isFinite(t.D))return;
           var k=t.D.toFixed(3); seen[k]=(seen[k]||0)+1; var j=seen[k]-1;
           var cy=y+20+(j%2?1:-1)*Math.ceil(j/2)*4, cx=X(t.D);
-          var tip=(t.seed_id||id)+' · epoch '+num(t.epoch)+' · D = '+num(t.D,2)+(t.eligible===false?' · not eligible':'');
+          var tip=(t.seed_id||id)+' · run '+num(t.epoch)+' · D = '+num(t.D,2)+(t.eligible===false?' · not eligible':'');
           var g;
           if(t.eligible===false){
             g=sv('path',{d:'M'+(cx-3.5)+' '+(cy-3.5)+'L'+(cx+3.5)+' '+(cy+3.5)+'M'+(cx+3.5)+' '+(cy-3.5)+'L'+(cx-3.5)+' '+(cy+3.5),stroke:muted,'stroke-width':1.3,fill:'none'});
@@ -587,10 +567,6 @@
     var dl=$('defs-list'); dl.textContent='';
     arr(c.measures).forEach(function(m){dl.appendChild(el('dt',null,m.label||m.id));
       dl.appendChild(el('dd',null,(m.definition||'No definition given.')+' Values: '+arr(m.values).map(human).join(', ')+'.'));});
-    // turn count from the data, never hard-coded
-    var nt=0;convs.forEach(function(v){nt=Math.max(nt,arr(v.exchanges).length);});
-    // OWNER-SIGNOFF: the sentence below
-    if(nt)$('n-turns').textContent=' Each conversation in this file has up to '+nt+' exchanges.';
     state.seed=seedIds[0]; fillEpochs(); syncArm(); draw();
   }
 
