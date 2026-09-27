@@ -653,6 +653,8 @@
     var m=MEAS[state.measure]||{values:[]}, vals=arr(m.values);
     var n=0;ARMS.forEach(function(a){if(triple[a])n=Math.max(n,arr(triple[a].exchanges).length);});
     var t=$('strip'); t.textContent='';
+    // no wording has an exchange: no strip, and the key says why rather than "exchanges 1 to 0"
+    if(!n){$('strip-key').textContent='No exchange recorded in this run.';return;}
     var cap=el('caption','vh');cap.textContent='Grades for '+(m.label||state.measure)+' by exchange and wording';
     cap.style.cssText='position:absolute;left:-9999px';t.appendChild(cap);
     var th=el('thead'), hr=el('tr'), corner=el('th','row','wording'); corner.scope='col'; hr.appendChild(corner);
@@ -724,6 +726,17 @@
     var chat=$('chat'); chat.textContent='';
     ARMS.forEach(function(a){chat.appendChild(el('div','colhead a-'+a,ARM_LABEL[a]));});
     var n=0;ARMS.forEach(function(a){if(triple[a])n=Math.max(n,arr(triple[a].exchanges).length);});
+    if(!n){
+      // records with no exchange in any wording: say so for each wording, and still show its conversation-level facts
+      chat.appendChild(el('div','exh','No exchange recorded'));
+      ARMS.forEach(function(a){
+        var cell=el('div','cell a-'+a);
+        cell.appendChild(el('div','grades',ARM_LABEL[a]+': '+(triple[a]?'no exchange recorded':'no conversation recorded')));
+        if(triple[a]&&triple[a].rule)cell.appendChild(ruleBox(triple[a].rule));
+        chat.appendChild(cell);
+      });
+      return;
+    }
     var roles=arr(seed.roles);
     for(var i=0;i<n;i++){
       // the wordings can reach an exchange at different turns (a different number of tool messages), so the shared
