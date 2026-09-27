@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Multi-turn — PatientWords</title>
-<meta name="description" content="Scripted multi-turn conversations with Claude Haiku 4.5: the same patient situation in three wordings, each reply graded, and whether the advice differs by wording.">
+<meta name="description" content="The same scripted patient situation in three wordings, sent to a language model as a multi-turn conversation, with each reply graded to see whether the advice differs by wording.">
 <link rel="canonical" href="https://michaeldgreenphd.github.io/patientwords/multi-turn/">
 <meta name="theme-color" content="#faf9f5">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23faf9f5'/%3E%3Crect x='9' y='9' width='30' height='30' fill='%23111827'/%3E%3Crect x='25' y='25' width='30' height='30' fill='%2315803d'/%3E%3C/svg%3E">
@@ -647,8 +647,8 @@
     var t=$('strip'); t.textContent='';
     var cap=el('caption','vh');cap.textContent='Grades for '+(m.label||state.measure)+' by exchange and wording';
     cap.style.cssText='position:absolute;left:-9999px';t.appendChild(cap);
-    var th=el('thead'), hr=el('tr'); hr.appendChild(el('th','row','exchange'));
-    for(var i=0;i<n;i++){var h=el('th',null,String(i+1));h.scope='col';hr.appendChild(h);}
+    var th=el('thead'), hr=el('tr'), corner=el('th','row','wording'); corner.scope='col'; hr.appendChild(corner);
+    for(var i=0;i<n;i++){var h=el('th',null,String(i+1));h.scope='col';h.title='exchange '+(i+1);hr.appendChild(h);}
     th.appendChild(hr);
     var roles=arr(seed.roles);
     if(roles.some(function(r){return r;})){
@@ -699,7 +699,7 @@
     t.appendChild(tb);
     var key=$('strip-key'); key.textContent='';
     var used=[];arr(seed.roles).forEach(function(r){if(r&&used.indexOf(r)<0)used.push(r);});
-    key.appendChild(document.createTextNode((m.label||state.measure)+': '+vals.map(function(v){return abbr(v)+' '+human(v);}).join(' · ')+
+    key.appendChild(document.createTextNode('Columns are exchanges 1 to '+n+'. '+(m.label||state.measure)+': '+vals.map(function(v){return abbr(v)+' '+human(v);}).join(' · ')+
       ' · n/a not applicable · hatched: not graded · dotted italic: graded under an earlier grading prompt, left out of the comparison · '+
       DASH+' no value'+(m.kind!=='nominal'?' · darker: higher on the scale':'')+
       (used.length?'. Turn types: '+used.map(function(r){return abbrRole(r)+' '+human(r);}).join(' · '):'')));
