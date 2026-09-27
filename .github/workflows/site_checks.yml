@@ -90,7 +90,11 @@ jobs:
           fi
 
       # blob:none + sparse: the engine carries a large trace_out/ history and
-      # only these paths are needed to run the two checks.
+      # only these paths are needed to run the two checks. ops/ holds the
+      # disclosure log the vendor-pack checks read, and docs/ the prompt, seed
+      # and lock files a Petri pack's state is recomputed from: without them the
+      # contract check read every pack as never built once the Multi-turn
+      # page's data was public (found 2026-09-27; engine PR #51 names the gap).
       - name: Check out the engine (for the two checkers)
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
@@ -101,6 +105,8 @@ jobs:
           sparse-checkout: |
             scripts
             data
+            ops
+            docs
 
       # A missing checker is a check that did not run, which reads exactly like
       # a check that passed. Fail loudly instead.
