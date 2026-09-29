@@ -14,18 +14,18 @@
     --penalty:#b4483d; --muted:#6d6c66; --structural:#c3c9d2; --hairline:#dcdad2;
     --serif:'Iowan Old Style','Palatino Linotype',Palatino,'Book Antiqua',Georgia,serif;
     --mono:ui-monospace,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace;
-    /* chat bubbles only (owner decision): system sans, rounded, coloured; the scripted message is a tint of its
-       wording's colour with ink text, so the three columns read as one set rather than three dark blocks */
+    /* chat bubbles only (owner decision): system sans, rounded; the scripted message is a solid bubble in its
+       wording's colour with white text, the reply a grey bubble with ink text */
     --sans:system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
-    --lay:#4b5563; --reply:#efede6;
     /* one colour per wording, everywhere: the bubbles, the lines, and the marks for which wording got the less
        urgent advice. Clinical is the site's fixed clinical green; colloquial blue and careful-lay amber are the owner's
        choice for this page's texting bubbles (AGENTS.md, semantic palette). The three pass the colour-blind check on
        every pair (worst delta E 6.8, legal with the direct labels every chart carries) and carry white text at 5:1 or
-       better. Red is kept for warnings. */
-    --w-colloquial:#2563eb; --w-lay:#b45309; --w-clinical:var(--clinical); --received:#e9e9eb;
-    /* the urgency scale, light to dark, as the grade strip shades it */
-    --u0:#ebe8df; --u1:#c9c5b9; --u2:#7d7a71; --u3:#2b2a26;
+       better. Red is kept for warnings. The reply grey keeps the muted labels on it at 4.55:1. */
+    --w-colloquial:#2563eb; --w-lay:#b45309; --w-clinical:var(--clinical); --received:#eeeef0;
+    /* the urgency scale, light to dark, as the grade strip shades it; the two light steps carry ink text (9.9:1 or
+       better), the two dark ones white (4.95:1 and 14.4:1) */
+    --u0:#ebe8df; --u1:#c9c5b9; --u2:#737067; --u3:#2b2a26;
     /* one type scale (five sizes) and one spacing scale for everything below the masthead */
     --t1:11px; --t2:14px; --t3:17px; --t4:21px; --t5:clamp(28px,4.2vw,38px);
     --s1:4px; --s2:8px; --s3:16px; --s4:24px; --s5:40px; --s6:64px;
@@ -145,6 +145,7 @@
   .pager #ex-label{color:var(--ink);letter-spacing:.06em}
   /* how the replies differ: two small charts side by side */
   .twofig{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:var(--s5)}
+  .differ-miss{font-family:var(--mono);font-size:var(--t1);color:var(--muted);margin:var(--s3) 0 0;max-width:60em}
   #fig-dist svg,#fig-turns svg{display:block;width:100%;height:auto;overflow:visible}
   #fig-dist text,#fig-turns text{font-family:var(--mono);font-size:var(--t1)}
   /* examples chosen by a rule */
@@ -168,7 +169,7 @@
   .cell{display:flex;flex-direction:column;gap:var(--s2);padding:0 0 var(--s2)}
   .bub{position:relative;z-index:0;border-radius:18px;padding:var(--s2) 14px;max-width:88%;overflow-wrap:anywhere;white-space:pre-wrap}
   .bub.user{align-self:flex-end;color:#fff;margin-right:8px}
-  .bub.user .who{color:rgba(255,255,255,.82)}
+  .bub.user .who{color:#fff}
   .a-colloquial .bub.user{background:var(--w-colloquial)}
   .a-lay_careful .bub.user{background:var(--w-lay)}
   .a-clinical .bub.user{background:var(--w-clinical)}
@@ -299,7 +300,7 @@
     <!-- OWNER-SIGNOFF --><p class="draft draft-rubric">Draft rubric · clinician review pending</p>
     <div class="twofig">
       <figure class="fig">
-        <figcaption class="fig-cap">Urgency of every graded reply <span class="fig-sub" id="dist-sub"></span></figcaption>
+        <figcaption class="fig-cap">Urgency of the replies <span class="fig-sub" id="dist-sub"></span></figcaption>
         <div id="fig-dist" role="img"></div>
       </figure>
       <figure class="fig">
@@ -307,6 +308,7 @@
         <div id="fig-turns" role="img"></div>
       </figure>
     </div>
+    <p class="differ-miss" id="differ-miss" hidden></p>
   </section>
 
   <!-- 4. The same triples by scenario, with each scenario's mean and how often its runs agreed (summary.repeats) -->
@@ -717,27 +719,36 @@
   }
   var WCOL={colloquial:'#2563eb',lay_careful:'#b45309',clinical:'#15803d'};
 
-  // every graded reply's urgency by wording (a 100% bar each), and the mean urgency at each exchange (a line each)
+  // the replies' urgency by wording (a 100% bar each), and the mean urgency at each exchange (a line each). A reply
+  // with no current grade (not graded, not applicable, superseded, or no value) is left out of both, and the page
+  // says how many per wording (Codex on site PR #10: they had been dropped without a word)
   function renderDiffer(c){
     var vals=arr((MEAS.tier_ro||{}).values); if(vals.length<2)return;
-    var dist={},byEx={},n={};
-    ARMS.forEach(function(a){dist[a]=vals.map(function(){return 0;});byEx[a]=[];n[a]=0;});
+    var dist={},byEx={},n={},miss={},nEx=0;
+    ARMS.forEach(function(a){dist[a]=vals.map(function(){return 0;});byEx[a]=[];n[a]=0;miss[a]=0;});
     arr(c.conversations).forEach(function(v){
       var a=v.register||v.arm; if(!dist[a])return;
-      arr(v.exchanges).forEach(function(e,i){var r=tierRank(e); if(r==null)return;
+      var xs=arr(v.exchanges); nEx=Math.max(nEx,xs.length);
+      xs.forEach(function(e,i){var r=tierRank(e); if(r==null){miss[a]++;return;}
         dist[a][r]++; n[a]++; (byEx[a][i]=byEx[a][i]||[]).push(r);});
     });
     if(!ARMS.some(function(a){return n[a];}))return;
     $('sec-differ').hidden=false;
+    // the denominators are always on the page: one n when the wordings match, each wording's n when they do not
     var ns=ARMS.map(function(a){return n[a];});
-    $('dist-sub').textContent=ns.every(function(x){return x===ns[0];})?'n = '+ns[0]+' per wording':'';
-    var draw2=function(){drawDist(vals,dist,n);drawTurns(vals,byEx);};
+    $('dist-sub').textContent=ns.every(function(x){return x===ns[0];})?'n = '+ns[0]+' per wording':
+      'n = '+ARMS.map(function(a){return n[a]+' '+ARM_LABEL[a].toLowerCase();}).join(', ');
+    var left=ARMS.filter(function(a){return miss[a];}), note=$('differ-miss');
+    note.textContent=left.length?'Left out of both charts, as replies with no current urgency grade: '+
+      left.map(function(a){return miss[a]+' '+ARM_LABEL[a].toLowerCase();}).join(', ')+'.':'';
+    note.hidden=!left.length;
+    var draw2=function(){drawDist(vals,dist,n,note.textContent);drawTurns(vals,byEx,nEx);};
     draw2(); window.addEventListener('resize',debounce(draw2,150));
   }
-  function drawDist(vals,dist,n){
+  function drawDist(vals,dist,n,missNote){
     var host=$('fig-dist'); host.textContent='';
     var W=Math.max(280,host.clientWidth||480), lab=84, bw=W-lab-6, rowH=34;
-    var fills=['#ebe8df','#c9c5b9','#7d7a71','#2b2a26'], inks=['#1c1c19','#1c1c19','#fff','#fff'];
+    var fills=['#ebe8df','#c9c5b9','#737067','#2b2a26'], inks=['#1c1c19','#1c1c19','#fff','#fff'];
     // the scale's names once, as a legend that wraps onto another row rather than run past the chart (Codex on
     // site PR #10: on a phone the last name ran past the viewport)
     var items=[],lx=lab,ly=4;vals.forEach(function(v,k){
@@ -766,11 +777,12 @@
       });
       summary.push(ARM_LABEL[a]+': '+vals.map(function(v,k){return human(v)+' '+Math.round(100*dist[a][k]/tot)+'%';}).join(', '));
     });
-    host.appendChild(svg); host.setAttribute('aria-label','Urgency of every graded reply. '+summary.join('. ')+'.');
+    host.appendChild(svg); host.setAttribute('aria-label','Urgency of the replies. '+summary.join('. ')+'.'+(missNote?' '+missNote:''));
   }
-  function drawTurns(vals,byEx){
+  function drawTurns(vals,byEx,nEx){
     var host=$('fig-turns'); host.textContent='';
-    var m=0;ARMS.forEach(function(a){m=Math.max(m,byEx[a].length);}); if(!m)return;
+    // the axis spans every exchange a conversation recorded, graded or not, so a last exchange with no grade stays on it
+    var m=nEx||0;ARMS.forEach(function(a){m=Math.max(m,byEx[a].length);}); if(!m)return;
     var W=Math.max(280,host.clientWidth||480), lab=78, right=92, top=10, h=150, H=top+h+30;
     var svg=sv('svg',{viewBox:'0 0 '+W+' '+H,width:W,height:H});
     var k=vals.length-1, pw=W-lab-right;
