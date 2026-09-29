@@ -18,7 +18,12 @@
        wording's colour with ink text, so the three columns read as one set rather than three dark blocks */
     --sans:system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
     --lay:#4b5563; --reply:#efede6;
-    --tint-colloquial:#e8e9ec; --tint-lay:#ebedef; --tint-clinical:#e1eee5;
+    /* one colour per wording, everywhere: the bubbles, the lines, and the marks for which wording got the less
+       urgent advice. Blue, amber and green pass the colour-blind check on every pair (worst delta E 7.9, legal with
+       the direct labels every chart carries) and carry white text at 5:1 or better. Red is kept for warnings. */
+    --w-colloquial:#2563eb; --w-lay:#b45309; --w-clinical:#047857; --received:#e9e9eb;
+    /* the urgency scale, light to dark, as the grade strip shades it */
+    --u0:#ebe8df; --u1:#c9c5b9; --u2:#7d7a71; --u3:#2b2a26;
     /* one type scale (five sizes) and one spacing scale for everything below the masthead */
     --t1:11px; --t2:14px; --t3:17px; --t4:21px; --t5:clamp(28px,4.2vw,38px);
     --s1:4px; --s2:8px; --s3:16px; --s4:24px; --s5:40px; --s6:64px;
@@ -60,7 +65,8 @@
   .example{margin:0 0 var(--s4)}
   .ex3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--s3) var(--s4)}
   .ex3 > div{border-left:2px solid var(--structural);padding-left:var(--s3)}
-  .ex3 > div.a-colloquial{border-left-color:var(--patient)} .ex3 > div.a-clinical{border-left-color:var(--clinical)}
+  .ex3 > div.a-colloquial{border-left-color:var(--w-colloquial)} .ex3 > div.a-lay_careful{border-left-color:var(--w-lay)}
+  .ex3 > div.a-clinical{border-left-color:var(--w-clinical)}
   .ex3 p{margin:0;font-size:var(--t2);line-height:1.5}
   /* banners: not-medical-advice + clinician review, and the sample-data notice */
   .banner{border-left:2px solid var(--ink);padding:var(--s1) var(--s3);margin:0 0 var(--s4);font-size:var(--t2);line-height:1.6}
@@ -82,7 +88,7 @@
   .tgroup{display:flex;flex-direction:column;gap:var(--s2)}
   .tmarks{display:flex;flex-wrap:wrap;gap:2px;max-width:340px}
   .tm{width:10px;height:10px;display:block}
-  .tm.neg{background:var(--penalty)} .tm.pos{background:var(--patient)} .tm.tie{box-shadow:inset 0 0 0 1.5px var(--muted)}
+  .tm.neg{background:var(--w-colloquial)} .tm.pos{background:var(--w-clinical)} .tm.tie{box-shadow:inset 0 0 0 1.5px var(--muted)}
   .tlab{font-size:var(--t2);line-height:1.3} .tlab b{font-family:var(--mono);font-size:var(--t3);font-weight:600;margin-right:var(--s1)}
   .counts{color:var(--muted);margin:0 0 var(--s4);font-variant-numeric:tabular-nums}
   .counts b{color:var(--ink);font-weight:600}
@@ -135,18 +141,45 @@
   .pager button{font-family:var(--mono);font-size:var(--t2);color:var(--ink);background:transparent;border:1px solid var(--hairline);width:32px;height:28px;cursor:pointer}
   .pager button:disabled{color:var(--structural);cursor:default}
   .pager #ex-label{color:var(--ink);letter-spacing:.06em}
+  /* how the replies differ: two small charts side by side */
+  .twofig{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:var(--s5)}
+  #fig-dist svg,#fig-turns svg{display:block;width:100%;height:auto;overflow:visible}
+  #fig-dist text,#fig-turns text{font-family:var(--mono);font-size:var(--t1)}
+  /* examples chosen by a rule */
+  .featured{display:grid;gap:var(--s4);margin:0 0 var(--s5)}
+  .fcard{border-top:1px solid var(--hairline);padding-top:var(--s3)}
+  .fhead{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:var(--s2) var(--s3);margin:0 0 var(--s3)}
+  .fhead .gap{font-size:var(--t3);font-weight:600}
+  .fhead .where{font-family:var(--mono);font-size:var(--t1);color:var(--muted)}
+  .fpair{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:var(--s4);font-family:var(--sans);font-size:var(--t2);line-height:1.5}
+  .fcol{display:flex;flex-direction:column;gap:var(--s2)}
+  .badge{align-self:flex-start;font-family:var(--mono);font-size:var(--t1);letter-spacing:.08em;text-transform:uppercase;padding:2px var(--s2);border-radius:3px}
+  .badge.u0{background:var(--u0);color:var(--ink)} .badge.u1{background:var(--u1);color:var(--ink)}
+  .badge.u2{background:var(--u2);color:#fff} .badge.u3{background:var(--u3);color:#fff}
+  .more-reply{font-family:var(--mono);font-size:var(--t1);color:var(--muted);background:none;border:0;padding:0;cursor:pointer;text-align:left;text-decoration:underline;text-underline-offset:3px}
+  .open-conv{justify-self:start;font-family:var(--mono);font-size:var(--t1);letter-spacing:.08em;text-transform:uppercase;color:var(--ink);background:none;border:1px solid var(--hairline);padding:var(--s1) var(--s2);cursor:pointer}
+  .open-conv:hover{border-color:var(--ink)}
   /* chat: the three wordings of the chosen exchange side by side */
   .arm-tabs{display:none}
   .chat{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0 var(--s3);font-family:var(--sans);font-size:var(--t2);line-height:1.5}
   .chat .colhead{font-family:var(--mono);font-size:var(--t1);letter-spacing:.14em;text-transform:uppercase;font-weight:600;padding:0 0 var(--s1);border-bottom:1px solid var(--ink);margin-bottom:var(--s2)}
   .cell{display:flex;flex-direction:column;gap:var(--s2);padding:0 0 var(--s2)}
-  .bub{border-radius:16px;padding:var(--s2) 12px;max-width:94%;overflow-wrap:anywhere;white-space:pre-wrap}
-  .bub.user{align-self:flex-end;color:var(--ink);border-bottom-right-radius:5px}
-  .a-colloquial .bub.user{background:var(--tint-colloquial);box-shadow:inset 3px 0 0 var(--patient)}
-  .a-lay_careful .bub.user{background:var(--tint-lay);box-shadow:inset 3px 0 0 var(--lay)}
-  .a-clinical .bub.user{background:var(--tint-clinical);box-shadow:inset 3px 0 0 var(--clinical)}
-  .bub.reply{align-self:flex-start;background:var(--reply);color:var(--ink);border-bottom-left-radius:5px}
+  .bub{position:relative;z-index:0;border-radius:18px;padding:var(--s2) 14px;max-width:88%;overflow-wrap:anywhere;white-space:pre-wrap}
+  .bub.user{align-self:flex-end;color:#fff;margin-right:8px}
+  .bub.user .who{color:rgba(255,255,255,.82)}
+  .a-colloquial .bub.user{background:var(--w-colloquial)}
+  .a-lay_careful .bub.user{background:var(--w-lay)}
+  .a-clinical .bub.user{background:var(--w-clinical)}
+  .bub.reply{align-self:flex-start;background:var(--received);color:var(--ink);margin-left:8px}
+  /* the tails: a curve in the bubble's colour, trimmed by a curve in the page's colour */
+  .bub.user::before,.bub.reply::before{content:"";position:absolute;z-index:-1;bottom:0;height:20px;width:20px;background:inherit}
+  .bub.user::before{right:-7px;border-bottom-left-radius:16px 14px}
+  .bub.reply::before{left:-7px;border-bottom-right-radius:16px 14px}
+  .bub.user::after,.bub.reply::after{content:"";position:absolute;z-index:-1;bottom:0;width:10px;height:20px;background:var(--paper)}
+  .bub.user::after{right:-10px;border-bottom-left-radius:10px}
+  .bub.reply::after{left:-10px;border-bottom-right-radius:10px}
   .bub.reply.ungraded{background:transparent;border:1px dashed var(--structural)}
+  .bub.reply.ungraded::before,.bub.reply.ungraded::after{display:none}
   .bub.interim{align-self:flex-start;background:transparent;border:1px solid var(--hairline);color:var(--ink);border-bottom-left-radius:5px}
   .bub.tool{align-self:stretch;max-width:none;border-radius:6px;background:#fff;border:1px solid var(--structural)}
   .who{display:block;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:2px;white-space:normal}
@@ -176,7 +209,7 @@
     .masthead nav{gap:8px 22px}
     .masthead nav a{padding:7px 0}
     body{font-size:16px}
-    .ex3,.about,.tools{grid-template-columns:minmax(0,1fr)}
+    .ex3,.about,.tools,.twofig,.fpair{grid-template-columns:minmax(0,1fr)}
     .prov dl{grid-template-columns:1fr}
     .prov dt{text-align:left}
     /* phone: one wording at a time, chosen by chips */
@@ -257,7 +290,23 @@
     </div>
   </section>
 
-  <!-- 3. The same triples by scenario, with each scenario's mean and how often its runs agreed (summary.repeats) -->
+  <!-- 3. How the replies differ: every graded reply's urgency by wording, and its mean at each exchange. Computed on
+       this page from the conversations file; a description of the replies, not a test (the tests count triples) -->
+  <section class="blk" id="sec-differ" hidden>
+    <h2>How the replies differ</h2>
+    <div class="twofig">
+      <figure class="fig">
+        <figcaption class="fig-cap">Urgency of every graded reply <span class="fig-sub" id="dist-sub"></span></figcaption>
+        <div id="fig-dist" role="img"></div>
+      </figure>
+      <figure class="fig">
+        <figcaption class="fig-cap">Urgency over the conversation <span class="fig-sub">mean at each exchange</span></figcaption>
+        <div id="fig-turns" role="img"></div>
+      </figure>
+    </div>
+  </section>
+
+  <!-- 4. The same triples by scenario, with each scenario's mean and how often its runs agreed (summary.repeats) -->
   <section class="blk" id="sec-fig" hidden>
     <h2>By scenario</h2>
     <figure class="fig">
@@ -280,13 +329,20 @@
   <section class="blk" id="sec-explore" hidden>
     <h2>Explore the conversations</h2>
     <!-- OWNER-SIGNOFF --><p class="note">Examples only. No claim here rests on a single conversation.</p>
+    <!-- two exchanges picked by a rule stated on the page, not by hand: the largest gap in urgency between the
+         colloquial and clinical replies, in each direction; ties go to the first by scenario, run and exchange -->
+    <div id="featured-wrap" hidden>
+      <span class="lbl">Two exchanges, picked by a rule: the largest gap between the colloquial and clinical replies, each way</span>
+      <div class="featured" id="featured"></div>
+      <span class="lbl">Every conversation</span>
+    </div>
     <div class="pick">
       <label>Scenario <select id="pick-seed"></select></label>
       <label>Run <select id="pick-epoch"></select></label>
       <label id="pick-id-wrap" hidden>Speaker <select id="pick-id"></select></label>
     </div>
     <p class="seed-q" id="seed-q"></p>
-    <p class="seed-info" id="seed-info"></p>
+    <details class="more" id="seed-more"><summary>About this scenario</summary><p class="seed-info" id="seed-info"></p></details>
 
     <div class="chip-g" id="measure-chips" role="group" aria-label="Measure shown in the grade strip"></div>
     <!-- OWNER-SIGNOFF --><p class="draft draft-rubric">Draft rubric · clinician review pending</p>
@@ -390,7 +446,7 @@
     $('mt-pending').hidden=true;
     if(usedSample||(summary&&summary.sample)||(conv&&conv.sample))$('sample-banner').hidden=false;
     if(summary)renderSummary(summary);
-    if(conv){renderExplore(conv);renderExample(conv);}
+    if(conv){renderExplore(conv);renderExample(conv);renderDiffer(conv);renderFeatured(conv);}
   });
 
   // ---------- summary ----------
@@ -462,14 +518,15 @@
   function renderTally(p){
     var box=$('tally'); box.textContent='';
     if(!p||typeof p.negative!=='number'||typeof p.positive!=='number'||typeof p.tied!=='number')return;
-    [['neg',p.negative,'colloquial less urgent'],['tie',p.tied,'tied'],['pos',p.positive,'colloquial more urgent']].forEach(function(g){
+    // a mark takes the colour of the wording whose reply was less urgent (D < 0: colloquial; D > 0: clinical)
+    [['neg',p.negative,'colloquial less urgent'],['tie',p.tied,'tied'],['pos',p.positive,'clinical less urgent']].forEach(function(g){
       var d=el('div','tgroup'), marks=el('div','tmarks'), lab=el('div','tlab');
       for(var i=0;i<g[1];i++)marks.appendChild(el('span','tm '+g[0]));
       lab.appendChild(el('b',null,String(g[1]))); lab.appendChild(document.createTextNode(g[2]));
       d.appendChild(marks); d.appendChild(lab); box.appendChild(d);
     });
     box.setAttribute('aria-label',p.negative+' triples colloquial less urgent, '+p.tied+' tied, '+p.positive+
-      ' colloquial more urgent');
+      ' clinical less urgent');
     box.hidden=false;
   }
 
@@ -496,7 +553,8 @@
       return (typeof r.same_direction==='number'&&typeof r.epochs==='number')?r.same_direction+' of '+r.epochs:DASH;}
     var maxAbs=0;triples.forEach(function(t){if(typeof t.D==='number')maxAbs=Math.max(maxAbs,Math.abs(t.D));});
     var dom=Math.max(0.5,Math.ceil(maxAbs*2)/2);
-    var ink='#1c1c19',muted='#6d6c66',hair='#dcdad2',struct='#c3c9d2',pen='#b4483d',pat='#111827';
+    // a mark takes the colour of the wording whose reply was less urgent: colloquial left of zero, clinical right
+    var ink='#1c1c19',muted='#6d6c66',hair='#dcdad2',struct='#c3c9d2',pen='#2563eb',pat='#047857';
     var labelW=narrow?0:184, colsW=narrow?0:280, gap=narrow?16:28;
     var pw=(W-labelW-colsW-gap)/2, top=narrow?48:30, rowH=narrow?44:26;
     var yb=top+ids.length*rowH, H=yb+40;
@@ -566,7 +624,7 @@
     });
     // the direction, stated once across both panels
     svg.appendChild(sv('text',{x:x0(0),y:yb+30,fill:muted},'← colloquial less urgent'));
-    svg.appendChild(sv('text',{x:x0(1)+pw,y:yb+30,'text-anchor':'end',fill:muted},'colloquial more urgent →'));
+    svg.appendChild(sv('text',{x:x0(1)+pw,y:yb+30,'text-anchor':'end',fill:muted},'clinical less urgent →'));
     host.appendChild(svg);
     var el_=triples.filter(function(t){return t.eligible!==false;});
     host.setAttribute('aria-label','D for each counted triple, '+ids.length+' scenarios: '+el_.filter(function(t){return t.D<0;}).length+
@@ -625,6 +683,152 @@
     if(s.headline&&s.headline.row_id)row('headline: row of the analysis plan',s.headline.row_id);
     if(s.style_sentence&&s.style_sentence.row_id)row('style sentence: row of the analysis plan',s.style_sentence.row_id);
     if(s.seed!=null)row('analysis random seed',String(s.seed));
+  }
+
+  // a reply's **bold** as bold, every other character as sent (the text itself is never changed)
+  function rich(node,text){
+    String(text).split(/(\*\*[^*\n]+\*\*)/).forEach(function(part){
+      if(/^\*\*[^*\n]+\*\*$/.test(part))node.appendChild(el('strong',null,part.slice(2,-2)));
+      else if(part)node.appendChild(document.createTextNode(part));
+    });
+  }
+  // the reply-alone urgency of one exchange as a rank on the rubric's scale, or null (ungraded, superseded, n/a, none)
+  function tierRank(e){
+    if(!e||e.reply_is_graded===false)return null;
+    var g=(e.vals||{}).tier_ro, vals=arr((MEAS.tier_ro||{}).values);
+    if(!g||g.superseded!=null||g.na!=null||g.v==null)return null;
+    var r=vals.indexOf(g.v);return r<0?null:r;
+  }
+  var WCOL={colloquial:'#2563eb',lay_careful:'#b45309',clinical:'#047857'};
+
+  // every graded reply's urgency by wording (a 100% bar each), and the mean urgency at each exchange (a line each)
+  function renderDiffer(c){
+    var vals=arr((MEAS.tier_ro||{}).values); if(vals.length<2)return;
+    var dist={},byEx={},n={};
+    ARMS.forEach(function(a){dist[a]=vals.map(function(){return 0;});byEx[a]=[];n[a]=0;});
+    arr(c.conversations).forEach(function(v){
+      var a=v.register||v.arm; if(!dist[a])return;
+      arr(v.exchanges).forEach(function(e,i){var r=tierRank(e); if(r==null)return;
+        dist[a][r]++; n[a]++; (byEx[a][i]=byEx[a][i]||[]).push(r);});
+    });
+    if(!ARMS.some(function(a){return n[a];}))return;
+    $('sec-differ').hidden=false;
+    var ns=ARMS.map(function(a){return n[a];});
+    $('dist-sub').textContent=ns.every(function(x){return x===ns[0];})?'n = '+ns[0]+' per wording':'';
+    var draw2=function(){drawDist(vals,dist,n);drawTurns(vals,byEx);};
+    draw2(); window.addEventListener('resize',debounce(draw2,150));
+  }
+  function drawDist(vals,dist,n){
+    var host=$('fig-dist'); host.textContent='';
+    var W=Math.max(280,host.clientWidth||480), lab=84, bw=W-lab-6, top=34, rowH=34, H=top+ARMS.length*rowH+4;
+    var svg=sv('svg',{viewBox:'0 0 '+W+' '+H,width:W,height:H});
+    var fills=['#ebe8df','#c9c5b9','#7d7a71','#2b2a26'], inks=['#1c1c19','#1c1c19','#fff','#fff'];
+    // the scale's names once, over the columns of the first bar's segments
+    var lx=lab;vals.forEach(function(v,k){
+      var sw=sv('rect',{x:lx,y:4,width:10,height:10,fill:fills[k]});svg.appendChild(sw);
+      var t=sv('text',{x:lx+14,y:13,fill:'#6d6c66'},human(v));svg.appendChild(t);
+      lx+=14+human(v).length*6.7+16;});
+    var summary=[];
+    ARMS.forEach(function(a,ri){
+      var y=top+ri*rowH, tot=n[a]||0, x=lab;
+      var mark=sv('rect',{x:0,y:y+8,width:8,height:8,fill:WCOL[a]});svg.appendChild(mark);
+      svg.appendChild(sv('text',{x:12,y:y+16,fill:'#1c1c19'},ARM_LABEL[a]));
+      if(!tot)return;
+      vals.forEach(function(v,k){
+        var c=dist[a][k], w=c/tot*bw; if(!c)return;
+        var g=sv('g',{});
+        g.appendChild(sv('rect',{x:x,y:y+2,width:Math.max(0,w-2),height:20,fill:fills[k]}));
+        var pct=Math.round(100*c/tot);
+        if(w>=30)g.appendChild(sv('text',{x:x+w/2-1,y:y+16,'text-anchor':'middle',fill:inks[k]},pct+'%'));
+        g.appendChild(sv('title',{},ARM_LABEL[a]+' · '+human(v)+' · '+pct+'% ('+c+' of '+tot+')'));
+        svg.appendChild(g); x+=w;
+      });
+      summary.push(ARM_LABEL[a]+': '+vals.map(function(v,k){return human(v)+' '+Math.round(100*dist[a][k]/tot)+'%';}).join(', '));
+    });
+    host.appendChild(svg); host.setAttribute('aria-label','Urgency of every graded reply. '+summary.join('. ')+'.');
+  }
+  function drawTurns(vals,byEx){
+    var host=$('fig-turns'); host.textContent='';
+    var m=0;ARMS.forEach(function(a){m=Math.max(m,byEx[a].length);}); if(!m)return;
+    var W=Math.max(280,host.clientWidth||480), lab=78, right=92, top=10, h=150, H=top+h+30;
+    var svg=sv('svg',{viewBox:'0 0 '+W+' '+H,width:W,height:H});
+    var k=vals.length-1, pw=W-lab-right;
+    function X(i){return lab+(m<2?pw/2:i/(m-1)*pw);}
+    function Y(r){return top+h-r/k*h;}
+    // the scale's levels as faint rules, named once on the left
+    vals.forEach(function(v,r){
+      svg.appendChild(sv('line',{x1:lab,x2:lab+pw,y1:Y(r),y2:Y(r),stroke:'#dcdad2','stroke-width':1}));
+      svg.appendChild(sv('text',{x:lab-8,y:Y(r)+4,'text-anchor':'end',fill:'#6d6c66'},human(v)));});
+    [0,m-1].forEach(function(i){svg.appendChild(sv('text',{x:X(i),y:top+h+18,'text-anchor':i?'end':'start',fill:'#6d6c66'},'exchange '+(i+1)));});
+    var ends=[];
+    ARMS.forEach(function(a){
+      var pts=[];byEx[a].forEach(function(rs,i){if(rs&&rs.length){var mu=rs.reduce(function(s,x){return s+x;},0)/rs.length;pts.push([i,mu,rs.length]);}});
+      if(!pts.length)return;
+      svg.appendChild(sv('path',{d:pts.map(function(p,j){return (j?'L':'M')+X(p[0])+' '+Y(p[1]);}).join(' '),fill:'none',stroke:WCOL[a],'stroke-width':2}));
+      pts.forEach(function(p){var g=sv('g',{});
+        g.appendChild(sv('circle',{cx:X(p[0]),cy:Y(p[1]),r:3,fill:WCOL[a]}));
+        g.appendChild(sv('circle',{cx:X(p[0]),cy:Y(p[1]),r:8,fill:'#000','fill-opacity':0}));
+        g.appendChild(sv('title',{},ARM_LABEL[a]+' · exchange '+(p[0]+1)+' · mean '+p[1].toFixed(2)+' (n = '+p[2]+')'));
+        svg.appendChild(g);});
+      var last=pts[pts.length-1]; ends.push([a,Y(last[1])]);
+    });
+    // direct labels at the right ends, nudged apart so they never overlap
+    ends.sort(function(p,q){return p[1]-q[1];});
+    for(var j=1;j<ends.length;j++)if(ends[j][1]-ends[j-1][1]<13)ends[j][1]=ends[j-1][1]+13;
+    ends.forEach(function(e){svg.appendChild(sv('text',{x:lab+pw+10,y:e[1]+4,fill:'#1c1c19'},ARM_LABEL[e[0]]));});
+    host.appendChild(svg);
+    host.setAttribute('aria-label','Mean urgency at each exchange, by wording, on the scale '+vals.map(human).join(', ')+'.');
+  }
+
+  // the two exchanges the rule picks: the most negative and the most positive gap between the colloquial and the
+  // clinical reply's urgency, over every comparable exchange; ties go to the first by scenario, run, speaker, exchange
+  function renderFeatured(c){
+    var groups={};
+    arr(c.conversations).forEach(function(v){var k=[v.seed_id,epochOf(v),idKey(v)].join('\u0001');
+      (groups[k]=groups[k]||{seed:v.seed_id,epoch:epochOf(v),identity:idKey(v)})[v.register||v.arm]=v;});
+    var cands=[];
+    Object.keys(groups).forEach(function(k){var g=groups[k];if(!g.colloquial||!g.clinical)return;
+      var a=arr(g.colloquial.exchanges), b=arr(g.clinical.exchanges);
+      for(var i=0;i<Math.min(a.length,b.length);i++){var ra=tierRank(a[i]),rb=tierRank(b[i]);
+        if(ra!=null&&rb!=null&&ra!==rb)cands.push({g:g,i:i,gap:ra-rb});}});
+    if(!cands.length)return;
+    function first(xs){xs.sort(function(p,q){return p.g.seed<q.g.seed?-1:p.g.seed>q.g.seed?1:
+      p.g.epoch-q.g.epoch||(p.g.identity<q.g.identity?-1:p.g.identity>q.g.identity?1:0)||p.i-q.i;});return xs[0];}
+    var lo=Math.min.apply(null,cands.map(function(x){return x.gap;})), hi=Math.max.apply(null,cands.map(function(x){return x.gap;}));
+    var picks=[];
+    if(lo<0)picks.push(first(cands.filter(function(x){return x.gap===lo;})));
+    if(hi>0)picks.push(first(cands.filter(function(x){return x.gap===hi;})));
+    var box=$('featured'); box.textContent='';
+    var vals=arr((MEAS.tier_ro||{}).values);
+    picks.forEach(function(pk){
+      var seed=seedById(pk.g.seed)||{}, card=el('div','fcard'), head=el('div','fhead');
+      var steps=Math.abs(pk.gap), lvl=steps===1?' level':' levels';
+      head.appendChild(el('span','gap',(pk.gap<0?'Colloquial ':'Clinical ')+steps+lvl+' less urgent'));
+      head.appendChild(el('span','where',(seed.topic||pk.g.seed)+' · run '+num(pk.g.epoch)+(pk.g.identity?' · '+pk.g.identity:'')+' · exchange '+(pk.i+1)));
+      card.appendChild(head);
+      var pair=el('div','fpair');
+      ['colloquial','clinical'].forEach(function(a){
+        var e=arr(pk.g[a].exchanges)[pk.i], col=el('div','fcol a-'+a);
+        var u=el('div','bub user');u.appendChild(el('span','who',ARM_LABEL[a]));u.appendChild(document.createTextNode(e.user||DASH));col.appendChild(u);
+        var r=el('div','bub reply'), full=String(e.reply||DASH), cut=full.length>320;
+        r.appendChild(el('span','who',(TARGET_LABEL||DASH)+' · reply'));
+        var body=el('span');rich(body,cut?full.slice(0,300).replace(/\s+\S*$/,'')+' …':full);r.appendChild(body);col.appendChild(r);
+        if(cut){var more=el('button','more-reply','Show the whole reply');more.type='button';
+          more.addEventListener('click',function(){body.textContent='';rich(body,full);more.remove();});col.appendChild(more);}
+        var rk=tierRank(e);col.appendChild(el('span','badge u'+rk,human(vals[rk])));
+        pair.appendChild(col);
+      });
+      card.appendChild(pair);
+      var open=el('button','open-conv','Open this conversation below');open.type='button';
+      open.addEventListener('click',function(){
+        state.seed=pk.g.seed;$('pick-seed').value=pk.g.seed;fillEpochs();
+        state.epoch=pk.g.epoch;$('pick-epoch').value=pk.g.epoch;fillIdentities();
+        state.identity=pk.g.identity;$('pick-id').value=pk.g.identity;state.ex=pk.i;draw();
+        $('ex-pager').scrollIntoView({behavior:'smooth',block:'start'});});
+      card.appendChild(open);
+      box.appendChild(card);
+    });
+    $('featured-wrap').hidden=false;
   }
 
   // ---------- explore viewer ----------
@@ -849,7 +1053,7 @@
       var graded=e.reply_is_graded!==false;
       var r=el('div','bub reply'+(graded?'':' ungraded'));
       r.appendChild(el('span','who',(TARGET_LABEL||DASH)+' · reply'+(ownTurns?(e.reply_turn!=null?', turn '+e.reply_turn:', turn not recorded'):'')));
-      r.appendChild(document.createTextNode(e.reply||DASH)); cell.appendChild(r);
+      var rb=el('span');rich(rb,e.reply||DASH);r.appendChild(rb); cell.appendChild(r);
       if(!graded){cell.appendChild(el('span','tag','Not graded'));}
       else{
         var g=el('div','grades'), vals=e.vals||{}, any=false;
