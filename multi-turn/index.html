@@ -14,15 +14,20 @@
     --penalty:#b4483d; --muted:#6d6c66; --structural:#c3c9d2; --hairline:#dcdad2;
     --serif:'Iowan Old Style','Palatino Linotype',Palatino,'Book Antiqua',Georgia,serif;
     --mono:ui-monospace,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace;
-    /* chat bubbles only (owner decision): system sans, rounded, coloured */
+    /* chat bubbles only (owner decision): system sans, rounded, coloured; the scripted message is a tint of its
+       wording's colour with ink text, so the three columns read as one set rather than three dark blocks */
     --sans:system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
     --lay:#4b5563; --reply:#efede6;
+    --tint-colloquial:#e8e9ec; --tint-lay:#ebedef; --tint-clinical:#e1eee5;
+    /* one type scale (five sizes) and one spacing scale for everything below the masthead */
+    --t1:11px; --t2:14px; --t3:17px; --t4:21px; --t5:clamp(28px,4.2vw,38px);
+    --s1:4px; --s2:8px; --s3:16px; --s4:24px; --s5:40px; --s6:64px;
   }
   html{background:var(--paper)}
   body{margin:0;padding:0;background:var(--paper);color:var(--ink);
-    font-family:var(--serif);font-size:17px;line-height:1.62;
+    font-family:var(--serif);font-size:var(--t3);line-height:1.6;
     -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
-  main{max-width:1100px;margin:0 auto;padding:0 22px 56px}
+  main{max-width:1100px;margin:0 auto;padding:0 22px var(--s6)}
   a{color:inherit}
   a:focus-visible,button:focus-visible,select:focus-visible,summary:focus-visible{outline:2px solid var(--clinical);outline-offset:3px;border-radius:1px}
   .skip{position:absolute;left:-9999px;top:0;background:var(--paper);color:var(--ink);padding:8px 14px;border:1px solid var(--ink);z-index:10}
@@ -43,130 +48,137 @@
   .masthead nav a:hover{color:var(--ink);text-decoration:underline;text-underline-offset:4px}
   .masthead nav a[aria-current=page]{color:var(--ink);border-bottom:1px solid var(--ink)}
   .masthead nav a:nth-child(3),.masthead nav a:nth-child(10){margin-right:2vw}
-  .dateline{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;
-    color:var(--clinical);font-weight:600;margin:34px 0 14px}
+  /* labels: one small mono style, used for every label and number on the page */
+  .dateline,.lbl,h2,.fig-cap,.status-line,.counts,.draft,.chip,.chip-lbl,.pick label,.seed-info,.strip-key,
+  .who,.grades,.rule,.tag,details.more summary,.back,footer,table.dt,.prov dt,.prov dd,.pager{font-family:var(--mono);font-size:var(--t1)}
+  .dateline{letter-spacing:.16em;text-transform:uppercase;color:var(--clinical);font-weight:600;margin:var(--s5) 0 var(--s3)}
   .dateline .mode{color:var(--muted);font-weight:400;letter-spacing:.06em;text-transform:none}
-  h1{font-size:clamp(28px,4.4vw,40px);line-height:1.16;font-weight:600;letter-spacing:-.006em;margin:0 0 10px;max-width:24em}
-  .subtitle{font-style:italic;font-size:19px;line-height:1.5;color:var(--muted);margin:0 0 20px;max-width:40em}
-  h2{font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;margin:0 0 12px}
-  section.blk{border-top:1px solid var(--ink);margin-top:38px;padding-top:12px}
-  .note{font-size:15.5px;line-height:1.62;margin:0 0 12px;max-width:44em}
-  .mono-inline,code{font-family:var(--mono);font-size:.85em}
+  h1{font-size:var(--t5);line-height:1.15;font-weight:600;letter-spacing:-.006em;margin:0 0 var(--s2);max-width:24em}
+  .subtitle{font-style:italic;color:var(--muted);margin:0 0 var(--s4);max-width:40em}
+  .lbl{display:block;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:0 0 var(--s1)}
+  /* the three wordings of one scripted turn, first, so the reader sees what varies before any result */
+  .example{margin:0 0 var(--s4)}
+  .ex3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--s3) var(--s4)}
+  .ex3 > div{border-left:2px solid var(--structural);padding-left:var(--s3)}
+  .ex3 > div.a-colloquial{border-left-color:var(--patient)} .ex3 > div.a-clinical{border-left-color:var(--clinical)}
+  .ex3 p{margin:0;font-size:var(--t2);line-height:1.5}
   /* banners: not-medical-advice + clinician review, and the sample-data notice */
-  .banner{border:1px solid var(--hairline);border-left:3px solid var(--ink);padding:10px 14px;margin:0 0 18px;
-    font-size:15px;line-height:1.55}
-  .banner b{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;font-weight:600;margin-right:6px}
-  .sample-banner{font-family:var(--mono);font-size:12px;letter-spacing:.08em;
-    border:2px solid var(--penalty);color:var(--penalty);padding:8px 12px;margin:0 0 18px}
-  .pending{border:1px solid var(--hairline);border-left:3px solid var(--structural);
-    padding:14px 16px;font-family:var(--mono);font-size:12.5px;line-height:1.8;color:var(--muted);margin:26px 0}
-  .status-line{font-family:var(--mono);font-size:11.5px;color:var(--muted);margin:0 0 10px}
-  .draft{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--penalty);margin:0 0 12px}
-  /* headline: rendered verbatim from the summary file */
-  .headline{font-size:clamp(19px,2.4vw,23px);line-height:1.45;margin:0 0 14px;max-width:38em}
-  .style-sentence{font-size:16.5px;line-height:1.55;margin:0 0 6px;max-width:42em}
-  .lbl{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:0 0 3px}
-  /* figure */
-  .fig{margin:10px 0 4px}
-  .fig-cap{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.14em;
-    text-transform:uppercase;color:var(--ink);margin:0 0 6px}
-  .fig-cap .fig-sub{font-weight:400;letter-spacing:.06em;text-transform:none;color:var(--muted)}
-  #fig-d svg{display:block;width:100%;height:auto}
-  #fig-d text{font-family:var(--mono)}
-  .counts{font-family:var(--mono);font-size:11.5px;color:var(--muted);margin:8px 0 0;font-variant-numeric:tabular-nums}
+  .banner{border-left:2px solid var(--ink);padding:var(--s1) var(--s3);margin:0 0 var(--s4);font-size:var(--t2);line-height:1.6}
+  .banner b{font-family:var(--mono);font-size:var(--t1);letter-spacing:.12em;text-transform:uppercase;font-weight:600;margin-right:var(--s2)}
+  .sample-banner{font-family:var(--mono);font-size:var(--t1);letter-spacing:.08em;border:2px solid var(--penalty);color:var(--penalty);padding:var(--s2) var(--s3);margin:0 0 var(--s4)}
+  .pending{border-left:2px solid var(--structural);padding:var(--s2) var(--s3);font-family:var(--mono);font-size:var(--t1);line-height:1.8;color:var(--muted);margin:var(--s4) 0}
+  /* sections: four, each under one rule; the first carries the answer and gets the largest text */
+  section.blk{border-top:1px solid var(--ink);margin-top:var(--s5);padding-top:var(--s2)}
+  h2{font-weight:600;letter-spacing:.2em;text-transform:uppercase;margin:0 0 var(--s3)}
+  h3{font-size:var(--t3);font-weight:600;margin:0 0 var(--s2)}
+  .note{font-size:var(--t2);line-height:1.6;margin:0 0 var(--s3);max-width:46em}
+  code{font-family:var(--mono);font-size:.85em}
+  .status-line{color:var(--muted);margin:0 0 var(--s2)}
+  .draft{letter-spacing:.1em;text-transform:uppercase;color:var(--penalty);margin:0 0 var(--s3)}
+  .headline{font-size:var(--t4);line-height:1.45;margin:0 0 var(--s4);max-width:36em}
+  .no-row{margin:0 0 var(--s3)} .no-row code{color:var(--muted)}
+  /* the answer's count: one mark per triple in the main test, grouped by the sign of D, each group labelled */
+  .tally{display:flex;flex-wrap:wrap;gap:var(--s2) var(--s5);margin:0 0 var(--s3)}
+  .tgroup{display:flex;flex-direction:column;gap:var(--s2)}
+  .tmarks{display:flex;flex-wrap:wrap;gap:2px;max-width:340px}
+  .tm{width:10px;height:10px;display:block}
+  .tm.neg{background:var(--penalty)} .tm.pos{background:var(--patient)} .tm.tie{box-shadow:inset 0 0 0 1.5px var(--muted)}
+  .tlab{font-size:var(--t2);line-height:1.3} .tlab b{font-family:var(--mono);font-size:var(--t3);font-weight:600;margin-right:var(--s1)}
+  .counts{color:var(--muted);margin:0 0 var(--s4);font-variant-numeric:tabular-nums}
   .counts b{color:var(--ink);font-weight:600}
-  /* tables */
-  table.dt{border-collapse:collapse;font-family:var(--mono);font-size:12px;font-variant-numeric:tabular-nums;margin:4px 0 10px}
-  table.dt th{font-weight:600;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);
-    text-align:left;padding:4px 18px 4px 0;border-bottom:1px solid var(--ink)}
-  table.dt td{padding:5px 18px 5px 0;border-bottom:1px solid var(--hairline)}
+  .style{margin:0} .style-sentence{margin:0;max-width:42em}
+  /* figure */
+  .fig{margin:0 0 var(--s3)}
+  .fig-cap{font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--ink);margin:0 0 var(--s3)}
+  .fig-cap .fig-sub{font-weight:400;letter-spacing:.06em;text-transform:none;color:var(--muted);margin-left:var(--s2)}
+  #fig-d svg{display:block;width:100%;height:auto;overflow:visible}
+  #fig-d text{font-family:var(--mono);font-size:var(--t1)}
+  /* disclosures: secondary material, one click away */
+  details.more{margin:var(--s3) 0 0}
+  details.more summary{letter-spacing:.12em;text-transform:uppercase;color:var(--muted);cursor:pointer;padding:var(--s1) 0}
+  details.more summary:hover{color:var(--ink)}
+  details.more[open] summary{color:var(--ink);margin-bottom:var(--s2)}
+  table.dt{border-collapse:collapse;font-variant-numeric:tabular-nums;margin:0 0 var(--s2)}
+  table.dt th{font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-align:left;padding:var(--s1) var(--s3) var(--s1) 0;border-bottom:1px solid var(--ink)}
+  table.dt td{padding:var(--s1) var(--s3) var(--s1) 0;border-bottom:1px solid var(--hairline)}
   table.dt td.num,table.dt th.num{text-align:right}
-  /* definition lists (provenance) */
-  .prov dl{display:grid;grid-template-columns:max-content 1fr;gap:6px 22px;margin:0 0 14px}
-  .prov dt{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-align:right}
-  .prov dd{font-family:var(--mono);font-size:12px;margin:0;overflow-wrap:anywhere;font-variant-numeric:tabular-nums lining-nums}
-  .prov pre{font-family:var(--mono);font-size:12px;background:#fff;border:1px solid var(--hairline);padding:8px 10px;margin:0;
-    white-space:pre-wrap;overflow-wrap:anywhere}
-  ul.lim{margin:0 0 12px;padding-left:20px;max-width:44em}
-  ul.lim li{font-size:15.5px;line-height:1.6;margin:0 0 4px}
-  /* example: one turn in three wordings */
-  .ex3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px 22px;margin:6px 0 14px}
-  .ex3 p{margin:0;font-size:15px;line-height:1.5}
-  /* chips (site convention) and selects */
-  .chip-g{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:4px 0 12px}
-  .chip-lbl{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-right:4px}
-  .chip{font-family:var(--mono);font-size:11px;color:var(--muted);background:#fff;
-    border:1px solid var(--hairline);padding:4px 10px;cursor:pointer;border-radius:2px}
-  .chip:hover{color:var(--ink);border-color:var(--muted)}
-  .chip.on{color:var(--clinical);border-color:var(--clinical);font-weight:600}
-  .pick{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:flex-end;margin:6px 0 10px}
-  .pick label{display:flex;flex-direction:column;font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
-  .pick select{font-family:var(--mono);font-size:12px;color:var(--ink);background:#fff;border:1px solid var(--hairline);
-    padding:4px 6px;margin-top:3px;max-width:88vw}
-  .seed-info{font-family:var(--mono);font-size:11.5px;color:var(--muted);margin:0 0 12px;line-height:1.7}
+  /* explorer */
+  .pick{display:flex;flex-wrap:wrap;gap:var(--s2) var(--s3);align-items:flex-end;margin:0 0 var(--s3)}
+  .pick label{display:flex;flex-direction:column;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  .pick select{font-family:var(--mono);font-size:var(--t1);color:var(--ink);background:#fff;border:1px solid var(--hairline);padding:var(--s1) var(--s2);margin-top:var(--s1);max-width:88vw}
+  .seed-q{margin:0 0 var(--s1)}
+  .seed-info{color:var(--muted);margin:0 0 var(--s3);line-height:1.7}
   .seed-info b{color:var(--ink);font-weight:600}
-  .seed-q{font-size:16px;margin:0 0 4px}
+  .chip-g{display:flex;flex-wrap:wrap;align-items:center;gap:var(--s1) var(--s2);margin:0 0 var(--s3)}
+  .chip-lbl{letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-right:var(--s1)}
+  .chip{color:var(--muted);background:transparent;border:0;border-bottom:1px solid transparent;padding:var(--s1) 0;margin-right:var(--s2);cursor:pointer}
+  .chip:hover{color:var(--ink)}
+  .chip.on{color:var(--ink);border-bottom-color:var(--ink);font-weight:600}
   /* grade strip */
-  .strip-wrap{overflow-x:auto;margin:0 0 4px}
-  table.strip{border-collapse:separate;border-spacing:2px;font-family:var(--mono);font-size:10.5px;font-variant-numeric:tabular-nums}
-  table.strip th{font-weight:400;color:var(--muted);padding:2px 4px;text-align:center;white-space:nowrap}
-  table.strip th.row{text-align:right;padding-right:8px}
+  .strip-wrap{overflow-x:auto;margin:0 0 var(--s1)}
+  table.strip{border-collapse:separate;border-spacing:2px;font-family:var(--mono);font-size:var(--t1);font-variant-numeric:tabular-nums}
+  table.strip th{font-weight:400;color:var(--muted);padding:2px var(--s1);text-align:center;white-space:nowrap}
+  table.strip th.row{text-align:right;padding-right:var(--s2)}
+  table.strip th.cur{color:var(--ink);font-weight:600;box-shadow:inset 0 -2px 0 var(--ink)}
   table.strip td{min-width:30px;height:24px;text-align:center;padding:0;border:1px solid var(--hairline);background:#fff}
+  table.strip td.cur{outline:2px solid var(--ink);outline-offset:0}
   table.strip td button{all:unset;display:block;width:100%;height:100%;line-height:24px;cursor:pointer}
   table.strip td button:focus-visible{outline:2px solid var(--clinical);outline-offset:1px}
   table.strip td.na,table.strip td.miss{color:var(--muted);background:transparent}
   table.strip td.ng{color:var(--muted);background:repeating-linear-gradient(135deg,transparent 0 4px,var(--hairline) 4px 5px)}
-  table.strip tr.roles th{font-size:9.5px;letter-spacing:.04em}
   /* a grade judged under an earlier judge prompt: shown, never shaded like a current grade */
   table.strip td.sup{color:var(--muted);background:transparent;border:1px dotted var(--muted);font-style:italic}
   .grades .sup{font-style:italic}
-  .no-row{font-size:16.5px;line-height:1.55;margin:0 0 14px;max-width:42em}
-  .no-row code{font-size:.8em;color:var(--muted)}
-  .strip-key{font-family:var(--mono);font-size:10.5px;color:var(--muted);margin:2px 0 14px;line-height:1.7}
-  /* chat: three wordings side by side, exchanges aligned by row */
+  .strip-key{color:var(--muted);margin:0 0 var(--s3);line-height:1.7;max-width:80em}
+  /* one exchange at a time */
+  .pager{display:flex;align-items:center;gap:var(--s3);margin:var(--s3) 0 var(--s2);color:var(--muted)}
+  .pager button{font-family:var(--mono);font-size:var(--t2);color:var(--ink);background:transparent;border:1px solid var(--hairline);width:32px;height:28px;cursor:pointer}
+  .pager button:disabled{color:var(--structural);cursor:default}
+  .pager #ex-label{color:var(--ink);letter-spacing:.06em}
+  /* chat: the three wordings of the chosen exchange side by side */
   .arm-tabs{display:none}
-  .chat{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0 18px;font-family:var(--sans);font-size:14.5px;line-height:1.45}
-  .chat .colhead{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:600;
-    padding:0 0 6px;border-bottom:1px solid var(--ink);margin-bottom:4px}
-  .chat .colhead.a-colloquial{color:var(--patient)} .chat .colhead.a-lay_careful{color:var(--lay)} .chat .colhead.a-clinical{color:var(--clinical)}
-  .chat .exh{grid-column:1 / -1;font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;color:var(--muted);
-    border-top:1px solid var(--hairline);padding:10px 0 4px;margin-top:8px;scroll-margin-top:12px}
-  .chat .exh.hl{color:var(--ink);border-top-color:var(--ink)}
-  .cell{display:flex;flex-direction:column;gap:6px;padding:4px 0 6px}
-  .bub{border-radius:16px;padding:8px 12px;max-width:92%;overflow-wrap:anywhere;white-space:pre-wrap}
-  .bub.user{align-self:flex-end;color:#fff;border-bottom-right-radius:5px}
-  .a-colloquial .bub.user{background:var(--patient)}
-  .a-lay_careful .bub.user{background:var(--lay)}
-  .a-clinical .bub.user{background:var(--clinical)}
+  .chat{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0 var(--s3);font-family:var(--sans);font-size:var(--t2);line-height:1.5}
+  .chat .colhead{font-family:var(--mono);font-size:var(--t1);letter-spacing:.14em;text-transform:uppercase;font-weight:600;padding:0 0 var(--s1);border-bottom:1px solid var(--ink);margin-bottom:var(--s2)}
+  .cell{display:flex;flex-direction:column;gap:var(--s2);padding:0 0 var(--s2)}
+  .bub{border-radius:16px;padding:var(--s2) 12px;max-width:94%;overflow-wrap:anywhere;white-space:pre-wrap}
+  .bub.user{align-self:flex-end;color:var(--ink);border-bottom-right-radius:5px}
+  .a-colloquial .bub.user{background:var(--tint-colloquial);box-shadow:inset 3px 0 0 var(--patient)}
+  .a-lay_careful .bub.user{background:var(--tint-lay);box-shadow:inset 3px 0 0 var(--lay)}
+  .a-clinical .bub.user{background:var(--tint-clinical);box-shadow:inset 3px 0 0 var(--clinical)}
   .bub.reply{align-self:flex-start;background:var(--reply);color:var(--ink);border-bottom-left-radius:5px}
   .bub.reply.ungraded{background:transparent;border:1px dashed var(--structural)}
-  .bub.interim{align-self:flex-start;background:transparent;border:1px solid var(--hairline);color:var(--ink);font-size:13.5px;border-bottom-left-radius:5px}
-  .bub.tool{align-self:stretch;max-width:none;border-radius:6px;background:#fff;border:1px solid var(--structural);font-size:13px}
-  .who{display:block;font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;opacity:.8;margin-bottom:2px;white-space:normal}
-  .grades{font-family:var(--mono);font-size:10.5px;color:var(--muted);line-height:1.6}
+  .bub.interim{align-self:flex-start;background:transparent;border:1px solid var(--hairline);color:var(--ink);border-bottom-left-radius:5px}
+  .bub.tool{align-self:stretch;max-width:none;border-radius:6px;background:#fff;border:1px solid var(--structural)}
+  .who{display:block;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:2px;white-space:normal}
+  .grades{color:var(--muted);line-height:1.6}
   .grades b{color:var(--ink);font-weight:600}
-  .tag{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--penalty)}
-  .rule{font-family:var(--mono);font-size:10.5px;color:var(--muted);line-height:1.6;border-top:1px solid var(--hairline);padding-top:6px;margin-top:10px}
+  .tag{letter-spacing:.1em;text-transform:uppercase;color:var(--penalty)}
+  .tools{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--s3)}
+  .rule{color:var(--muted);line-height:1.6}
   .rule b{color:var(--ink);font-weight:600}
-  details.defs{margin:18px 0 0}
-  details.defs summary{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;cursor:pointer}
-  details.defs dl{margin:10px 0 0}
-  details.defs dt{font-family:var(--mono);font-size:11.5px;font-weight:600;margin-top:8px}
-  details.defs dd{margin:2px 0 0;font-size:14.5px;line-height:1.55;max-width:46em}
-  .back{display:inline-block;margin-top:28px;font-family:var(--mono);font-size:12px;
-    letter-spacing:.1em;text-transform:uppercase;color:var(--ink);text-decoration:none;
-    border-bottom:1px solid var(--ink);padding-bottom:2px}
+  details.more dl{margin:0}
+  #defs dt{font-family:var(--mono);font-size:var(--t1);font-weight:600;margin-top:var(--s2)}
+  #defs dd{margin:2px 0 0;font-size:var(--t2);line-height:1.55;max-width:46em}
+  /* about this analysis: method and limitations side by side, provenance one click away */
+  .about{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:var(--s5)}
+  ul.lim{margin:0;padding-left:20px}
+  ul.lim li{font-size:var(--t2);line-height:1.6;margin:0 0 var(--s1)}
+  .prov dl{display:grid;grid-template-columns:max-content 1fr;gap:var(--s1) var(--s4)}
+  .prov dt{letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-align:right}
+  .prov dd{margin:0;overflow-wrap:anywhere;font-variant-numeric:tabular-nums lining-nums}
+  .prov pre{font-family:var(--mono);font-size:var(--t1);background:#fff;border:1px solid var(--hairline);padding:var(--s2);margin:0;white-space:pre-wrap;overflow-wrap:anywhere}
+  .back{display:inline-block;margin-top:var(--s5);letter-spacing:.1em;text-transform:uppercase;color:var(--ink);text-decoration:none;border-bottom:1px solid var(--ink);padding-bottom:2px}
   .back:hover{color:var(--clinical);border-bottom-color:var(--clinical)}
-  .endnote{border-top:1px solid var(--ink);margin-top:42px;padding-top:14px}
-  footer{font-family:var(--mono);font-size:12px;line-height:1.9;color:var(--muted)}
+  .endnote{border-top:1px solid var(--ink);margin-top:var(--s5);padding-top:var(--s3)}
+  footer{line-height:1.9;color:var(--muted)}
   footer a{color:var(--muted);text-underline-offset:3px}
   @media (max-width:760px){
     .masthead nav{gap:8px 22px}
     .masthead nav a{padding:7px 0}
     body{font-size:16px}
+    .ex3,.about,.tools{grid-template-columns:minmax(0,1fr)}
     .prov dl{grid-template-columns:1fr}
     .prov dt{text-align:left}
-    .ex3{grid-template-columns:1fr}
     /* phone: one wording at a time, chosen by chips */
     .arm-tabs{display:flex}
     .chat{grid-template-columns:minmax(0,1fr)}
@@ -200,11 +212,16 @@
   <hr class="rule-fine">
 </header>
 <main id="main">
-  <!-- 1. The question (hero) -->
+  <!-- 1. The question, then one scripted turn in its three wordings (conversations.example), so the reader sees what
+       varies before any result -->
   <p class="dateline">Multi-turn <span class="mode">· scripted conversations, three wordings</span></p>
   <h1>Does the way a person words their messages change the advice a model gives over a whole conversation?</h1>
   <!-- The model name below is summary.provenance.models.target_label (a dash when absent). -->
   <!-- OWNER-SIGNOFF --><p class="subtitle">The same scripted patient situation, written three ways (colloquial, careful lay and clinical), sent to <span class="v-target">&mdash;</span> as a multi-turn conversation. Each reply is graded on several measures.</p>
+  <div class="example" id="example-wrap" hidden>
+    <span class="lbl" id="example-lbl">One scripted turn in its three wordings</span>
+    <div class="ex3" id="example"></div>
+  </div>
 
   <!-- Banner: the not-medical-advice line always shows. The review-pending line shows while
        summary.status.clinician_review is "pending" (and by default, until the summary says otherwise). -->
@@ -222,7 +239,7 @@
     <code>data/petri_multiturn_conversations.json</code>.</span>
   </div>
 
-  <!-- 2. The headline, verbatim from summary.headline.text -->
+  <!-- 2. The answer: the headline verbatim, then every triple the main test counts, one mark each -->
   <section class="blk" id="sec-headline" hidden>
     <h2>The result</h2>
     <p class="status-line" id="status-line"></p>
@@ -231,33 +248,35 @@
     <div id="no-row" hidden>
       <p class="no-row"><code id="no-row-id"></code></p>
     </div>
-    <div id="style-wrap" hidden>
+    <!-- summary.primary: the triples in the main test, grouped by the sign of D -->
+    <div class="tally" id="tally" role="img" hidden></div>
+    <p class="counts" id="counts"></p>
+    <div class="style" id="style-wrap" hidden>
       <span class="lbl">Writing style or medical terms?</span>
       <p class="style-sentence" id="style-sentence"></p>
     </div>
   </section>
 
-  <!-- 3. D per triple and per scenario -->
+  <!-- 3. The same triples by scenario, with each scenario's mean and how often its runs agreed (summary.repeats) -->
   <section class="blk" id="sec-fig" hidden>
-    <h2>Difference by wording</h2>
+    <h2>By scenario</h2>
     <figure class="fig">
       <figcaption class="fig-cap">D per conversation triple <span class="fig-sub"><!-- OWNER-SIGNOFF -->&times; = left out of the tests</span></figcaption>
       <div id="fig-d" role="img" aria-label="D per triple"></div>
     </figure>
-    <p class="counts" id="counts"></p>
+    <div id="sec-repeats" hidden>
+      <!-- OWNER-SIGNOFF --><p class="note">Each scenario was run several times. The last column counts the runs whose difference had the same direction as the main test.</p>
+      <details class="more">
+        <summary>The same columns as a table</summary>
+        <table class="dt">
+          <thead><tr><th scope="col">Scenario</th><th scope="col" class="num">Runs</th><th scope="col" class="num">Same direction</th></tr></thead>
+          <tbody id="rep-body"></tbody>
+        </table>
+      </details>
+    </div>
   </section>
 
-  <!-- 4. Does it repeat -->
-  <section class="blk" id="sec-repeats" hidden>
-    <h2>Does it repeat?</h2>
-    <!-- OWNER-SIGNOFF --><p class="note">Each scenario was run several times. The last column counts the runs whose difference had the same direction as the main test.</p>
-    <table class="dt">
-      <thead><tr><th scope="col">Scenario</th><th scope="col" class="num">Runs</th><th scope="col" class="num">Same direction</th></tr></thead>
-      <tbody id="rep-body"></tbody>
-    </table>
-  </section>
-
-  <!-- F2: explore viewer -->
+  <!-- 4. The conversations, one exchange at a time -->
   <section class="blk" id="sec-explore" hidden>
     <h2>Explore the conversations</h2>
     <!-- OWNER-SIGNOFF --><p class="note">Examples only. No claim here rests on a single conversation.</p>
@@ -274,43 +293,50 @@
     <div class="strip-wrap"><table class="strip" id="strip"></table></div>
     <p class="strip-key" id="strip-key"></p>
 
+    <!-- the strip's columns and these buttons choose the exchange shown below -->
+    <div class="pager" id="ex-pager" hidden>
+      <button type="button" id="ex-prev" aria-label="Previous exchange">&lsaquo;</button>
+      <span id="ex-label" aria-live="polite"></span>
+      <button type="button" id="ex-next" aria-label="Next exchange">&rsaquo;</button>
+    </div>
     <div class="chip-g arm-tabs" id="arm-chips" role="group" aria-label="Wording shown"></div>
     <div class="chat" id="chat" data-arm="colloquial"></div>
 
-    <details class="defs" id="defs">
+    <details class="more" id="tool-wrap" hidden>
+      <summary>Tool use in these conversations</summary>
+      <div class="tools" id="tools"></div>
+    </details>
+    <details class="more" id="defs">
       <summary>What the measures mean</summary>
       <dl id="defs-list"></dl>
     </details>
   </section>
 
-  <!-- 5. Method -->
-  <section class="blk" id="sec-method">
-    <h2>Method</h2>
-    <!-- The model names and the temperature below are filled from summary.provenance.models (a dash when absent). -->
+  <!-- 5. About this analysis: method and limitations side by side, provenance one click away -->
+  <section class="blk" id="sec-about">
+    <h2>About this analysis</h2>
+    <div class="about">
+      <div id="sec-method">
+        <h3>Method</h3>
+        <!-- The model names and the temperature below are filled from summary.provenance.models (a dash when absent). -->
     <!-- OWNER-SIGNOFF --><p class="note">Each wording is a separate conversation with <span class="v-target">&mdash;</span>, sampled at temperature <span id="m-temp">&mdash;</span>. A grader, <span id="m-also" hidden>also </span><span id="m-judge">&mdash;</span>, codes each reply.</p>
-    <!-- OWNER-SIGNOFF --><p class="note">A conversation triple is one scenario, one run and one speaker, with its three conversations. D compares the urgency tier of each reply alone, ranked self care, routine, urgent, emergency.</p>
-    <!-- OWNER-SIGNOFF --><p class="draft draft-rubric">Draft rubric · clinician review pending</p>
-    <!-- OWNER-SIGNOFF --><p class="note">The main test is an exact sign test on D across triples. A second test gives each scenario equal weight.</p>
-    <div id="example-wrap" hidden>
-      <span class="lbl" id="example-lbl">One scripted turn in its three wordings</span>
-      <div class="ex3" id="example"></div>
-    </div>
-  </section>
-
-  <!-- 6. Limitations -->
-  <section class="blk" id="sec-limits">
-    <h2>Limitations</h2>
-    <ul class="lim">
+        <!-- OWNER-SIGNOFF --><p class="note">A conversation triple is one scenario, one run and one speaker, with its three conversations. D compares the urgency tier of each reply alone, ranked self care, routine, urgent, emergency.</p>
+        <!-- OWNER-SIGNOFF --><p class="draft draft-rubric">Draft rubric · clinician review pending</p>
+        <!-- OWNER-SIGNOFF --><p class="note">The main test is an exact sign test on D across triples. A second test gives each scenario equal weight.</p>
+      </div>
+      <div id="sec-limits">
+        <h3>Limitations</h3>
+        <ul class="lim">
       <!-- OWNER-SIGNOFF --><li>The scenarios were written by an LLM, not taken from real patients.</li>
       <!-- OWNER-SIGNOFF --><li id="lim-review">No clinician has reviewed the scenarios, the rubric or the grades.</li>
       <!-- OWNER-SIGNOFF --><li>The user turns are scripted, so they cannot answer a question the model asks.</li>
     </ul>
-  </section>
-
-  <!-- 7. Provenance -->
-  <section class="blk prov" id="sec-prov" hidden>
-    <h2>Provenance</h2>
-    <dl id="prov-list"></dl>
+      </div>
+    </div>
+    <details class="more prov" id="sec-prov" hidden>
+      <summary>Provenance</summary>
+      <dl id="prov-list"></dl>
+    </details>
   </section>
 
   <a class="back" href="../">← Back home</a>
@@ -405,8 +431,10 @@
       var ss=s.style_sentence&&s.style_sentence.text;
       if(ss){$('style-wrap').hidden=false;$('style-sentence').textContent=ss;}
     }
-    var triples=arr(s.triples);
-    if(triples.length){$('sec-fig').hidden=false;drawD(triples,s.scenario_means||{});window.addEventListener('resize',debounce(function(){drawD(triples,s.scenario_means||{});},150));}
+    var triples=arr(s.triples), reps=arr(s.repeats);
+    if(triples.length){$('sec-fig').hidden=false;drawD(triples,s.scenario_means||{},reps);
+      window.addEventListener('resize',debounce(function(){drawD(triples,s.scenario_means||{},reps);},150));}
+    renderTally(s.primary);
     renderCounts(s.primary);
     renderRepeats(arr(s.repeats),arr(s.triples));
     renderProv(s);
@@ -417,13 +445,12 @@
   function renderCounts(p){
     if(!p){$('counts').textContent='Test results: not recorded in this file.';return;}
     var box=$('counts'); box.textContent='';
-    // each number sits next to what it counts: "Triples counted: 7 · 1 below zero, 5 above, 1 tied · ..."
+    // the tally above shows the split by sign; this line names the test's size and its two p-values
     function t(x){box.appendChild(document.createTextNode(x));}
     function b(x){box.appendChild(el('b',null,x));}
     // a p below 0.001 prints as "< 0.001", never as 0.000
     function pval(v){return typeof v==='number'&&isFinite(v)&&v>0&&v<0.001?'< 0.001':num(v,3);}
-    t('Triples counted: ');b(num(p.triples));
-    t(' · ');b(num(p.negative));t(' below zero, ');b(num(p.positive));t(' above, ');b(num(p.tied));t(' tied');
+    b(num(p.triples));t(' triples in the main test');
     // "p = 0.016", but "p < 0.001" rather than "p = < 0.001"
     function pt(label,v){var x=pval(v);t(label+(x.charAt(0)==='<'?' p ':' p = '));b(x);}
     pt(' · sign test',p.p_two_sided);
@@ -431,12 +458,27 @@
     t(', ');b(p.gate_passed===true?'passed':p.gate_passed===false?'not passed':DASH);
   }
 
+  // one mark per triple in the main test, grouped by the sign of D, each group labelled with its count
+  function renderTally(p){
+    var box=$('tally'); box.textContent='';
+    if(!p||typeof p.negative!=='number'||typeof p.positive!=='number'||typeof p.tied!=='number')return;
+    [['neg',p.negative,'colloquial less urgent'],['tie',p.tied,'tied'],['pos',p.positive,'colloquial more urgent']].forEach(function(g){
+      var d=el('div','tgroup'), marks=el('div','tmarks'), lab=el('div','tlab');
+      for(var i=0;i<g[1];i++)marks.appendChild(el('span','tm '+g[0]));
+      lab.appendChild(el('b',null,String(g[1]))); lab.appendChild(document.createTextNode(g[2]));
+      d.appendChild(marks); d.appendChild(lab); box.appendChild(d);
+    });
+    box.setAttribute('aria-label',p.negative+' triples colloquial less urgent, '+p.tied+' tied, '+p.positive+
+      ' colloquial more urgent');
+    box.hidden=false;
+  }
+
   var NS='http://www.w3.org/2000/svg';
   function sv(tag,attrs,text){var e=document.createElementNS(NS,tag);for(var k in attrs)e.setAttribute(k,attrs[k]);if(text!=null)e.textContent=text;return e;}
 
-  function drawD(triples,means){
+  function drawD(triples,means,repeats){
     var host=$('fig-d'); host.textContent='';
-    var W=Math.max(300,Math.min(760,host.clientWidth||680));
+    var W=Math.max(300,Math.min(1056,host.clientWidth||900)), narrow=W<640;
     // the panel titles use the headline's own words ("the conversations run after the analysis was fixed")
     var PARTS=[{key:'seen_before_plan',title:'Run before the analysis was fixed',short:'Before it was fixed'},
                {key:'prospective',title:'Run after the analysis was fixed',short:'After it was fixed'}];
@@ -445,58 +487,86 @@
     Object.keys(means).forEach(function(k){if(ids.indexOf(k)<0)ids.push(k);});
     ids.sort(function(a,b){var ma=means[a],mb=means[b];
       if(typeof ma==='number'&&typeof mb==='number'&&ma!==mb)return ma-mb;return a<b?-1:a>b?1:0;});
+    // summary.repeats is per seed: a scenario's agreement is shown when one seed makes it, else a dash (the table
+    // below lists each seed)
+    var scen={},bySc={};
+    triples.forEach(function(t){if(t&&t.seed_id&&t.scenario_id)scen[t.seed_id]=t.scenario_id;});
+    arr(repeats).forEach(function(r){var k=scen[r.seed_id];if(k)(bySc[k]=bySc[k]||[]).push(r);});
+    function same(id){var rs=bySc[id]||[];if(rs.length!==1)return DASH;var r=rs[0];
+      return (typeof r.same_direction==='number'&&typeof r.epochs==='number')?r.same_direction+' of '+r.epochs:DASH;}
     var maxAbs=0;triples.forEach(function(t){if(typeof t.D==='number')maxAbs=Math.max(maxAbs,Math.abs(t.D));});
     var dom=Math.max(0.5,Math.ceil(maxAbs*2)/2);
-    var gap=22, top=30, rowH=38, P=PARTS.length;
-    var pw=(W-gap*(P-1))/P;
-    var H=top+ids.length*rowH+34;
-    var svg=sv('svg',{viewBox:'0 0 '+W+' '+H,width:W,height:H});
     var ink='#1c1c19',muted='#6d6c66',hair='#dcdad2',struct='#c3c9d2',pen='#b4483d',pat='#111827';
+    var labelW=narrow?0:184, colsW=narrow?0:280, gap=narrow?16:28;
+    var pw=(W-labelW-colsW-gap)/2, top=narrow?48:30, rowH=narrow?44:26;
+    var yb=top+ids.length*rowH, H=yb+40;
+    var svg=sv('svg',{viewBox:'0 0 '+W+' '+H,width:W,height:H});
+    function x0(pi){return labelW+pi*(pw+gap);}
+    function X(pi,d){return x0(pi)+6+(d+dom)/(2*dom)*(pw-12);}
+    // the mean column: a bar from zero (56 px per axis half-range) and the value; then the agreement column
+    var mx=W-colsW+16, mz=mx+56, mend=mx+156;
+    // column heads: each panel's partition with its count of plotted triples, then the two value columns
     PARTS.forEach(function(part,pi){
-      var x0=pi*(pw+gap), pad=8;
-      function X(d){return x0+pad+(d+dom)/(2*dom)*(pw-2*pad);}
       // n counts the eligible marks drawn; a triple with no numeric D (the exporter writes null when a conversation
       // is missing or no exchange is comparable) has no mark, so it is counted here rather than dropped silently
       var inPart=triples.filter(function(t){return t.partition===part.key;});
       var n=inPart.filter(function(t){return t.eligible!==false&&typeof t.D==='number'&&isFinite(t.D);}).length;
       var noD=inPart.filter(function(t){return !(typeof t.D==='number'&&isFinite(t.D));}).length;
-      var narrow=pw<260;
-      var ttl=sv('text',{x:x0,y:12,'font-size':narrow?10:11,'font-weight':600,fill:ink},narrow?part.short:part.title);
-      ttl.appendChild(sv('tspan',{'font-weight':400,fill:muted},' \u00b7 n = '+n));
-      svg.appendChild(ttl);
-      if(noD)svg.appendChild(sv('text',{x:x0,y:24,'font-size':10,fill:muted},noD+' without D'));
-      var yb=top+ids.length*rowH;
+      var ttl=sv('text',{x:x0(pi),y:12,'font-weight':600,fill:ink},narrow?part.short:part.title);
+      var nn=sv('tspan',{'font-weight':400,fill:muted},(narrow?'':' · ')+'n = '+n+(noD?' · '+noD+' without D':''));
+      if(narrow){nn.setAttribute('x',x0(pi));nn.setAttribute('dy','14');}   // a phone: the count on its own line
+      ttl.appendChild(nn); svg.appendChild(ttl);
+      // the zero line: full height beside the labels' column; on a phone, beside each row's dots only
+      if(!narrow)svg.appendChild(sv('line',{x1:X(pi,0),x2:X(pi,0),y1:top-4,y2:yb,stroke:struct,'stroke-width':1}));
+      svg.appendChild(sv('line',{x1:x0(pi),x2:x0(pi)+pw,y1:yb,y2:yb,stroke:hair,'stroke-width':1}));
       [-dom,0,dom].forEach(function(v){
-        svg.appendChild(sv('text',{x:X(v),y:yb+13,'font-size':10,fill:muted,'text-anchor':v<0?'start':v>0?'end':'middle'},num(v)));});
-      svg.appendChild(sv('text',{x:x0+pad,y:yb+27,'font-size':10,fill:pen},'← colloquial less urgent'));
-      ids.forEach(function(id,ri){
-        var y=top+ri*rowH;
-        svg.appendChild(sv('line',{x1:x0,x2:x0+pw,y1:y+rowH-4,y2:y+rowH-4,stroke:hair,'stroke-width':1}));
-        // zero line per row, below the row's label line so it never crosses text
-        svg.appendChild(sv('line',{x1:X(0),x2:X(0),y1:y+10,y2:y+rowH-4,stroke:struct,'stroke-width':1}));
-        if(pi===0){
-          svg.appendChild(sv('text',{x:x0,y:y+6,'font-size':10,fill:muted},id));
+        svg.appendChild(sv('text',{x:X(pi,v),y:yb+14,fill:muted,'text-anchor':v<0?'start':v>0?'end':'middle'},num(v)));});
+    });
+    if(!narrow){
+      svg.appendChild(sv('text',{x:mend,y:12,'text-anchor':'end','font-weight':600,fill:ink},'Mean'));
+      svg.appendChild(sv('text',{x:W,y:12,'text-anchor':'end','font-weight':600,fill:ink},'Same direction'));
+    }else{
+      svg.appendChild(sv('text',{x:W,y:top-8,'text-anchor':'end',fill:muted},'mean · same direction'));
+    }
+    ids.forEach(function(id,ri){
+      var y=top+ri*rowH, yc=narrow?y+30:y+rowH/2, m=means[id];
+      if(narrow){
+        svg.appendChild(sv('text',{x:0,y:y+12,fill:ink},id));
+        svg.appendChild(sv('text',{x:W,y:y+12,'text-anchor':'end',fill:ink},num(m,2)+' · '+same(id)));
+        PARTS.forEach(function(part,pi){
+          svg.appendChild(sv('line',{x1:X(pi,0),x2:X(pi,0),y1:y+19,y2:y+rowH-3,stroke:struct,'stroke-width':1}));});
+      }else{
+        svg.appendChild(sv('text',{x:0,y:yc+4,fill:ink},id));
+        if(typeof m==='number'&&isFinite(m)&&m!==0){
+          var len=Math.min(56,Math.abs(m)/dom*56);
+          svg.appendChild(sv('rect',{x:m<0?mz-len:mz,y:yc-3,width:len,height:6,fill:m<0?pen:pat}));
         }
-        if(pi===P-1){
-          var m=means[id];
-          svg.appendChild(sv('text',{x:x0+pw,y:y+6,'font-size':10,fill:ink,'text-anchor':'end'},(narrow?'mean ':'scenario mean ')+num(m,2)));
-        }
+        svg.appendChild(sv('line',{x1:mz,x2:mz,y1:yc-7,y2:yc+7,stroke:struct,'stroke-width':1}));
+        svg.appendChild(sv('text',{x:mend,y:yc+4,'text-anchor':'end',fill:ink},num(m,2)));
+        svg.appendChild(sv('text',{x:W,y:yc+4,'text-anchor':'end',fill:ink},same(id)));
+      }
+      PARTS.forEach(function(part,pi){
         var seen={};
         triples.filter(function(t){return t.scenario_id===id&&t.partition===part.key;}).forEach(function(t){
           if(typeof t.D!=='number'||!isFinite(t.D))return;
           var k=t.D.toFixed(3); seen[k]=(seen[k]||0)+1; var j=seen[k]-1;
-          var cy=y+20+(j%2?1:-1)*Math.ceil(j/2)*4, cx=X(t.D);
+          var cy=yc+(j%2?1:-1)*Math.ceil(j/2)*4, cx=X(pi,t.D);
           var tip=(t.seed_id||id)+(typeof t.speaker==='string'&&t.speaker?' · '+t.speaker:'')+' · run '+num(t.epoch)+' · D = '+num(t.D,2)+(t.eligible===false?' · not eligible':'');
-          var g;
+          var g=sv('g',{});
           if(t.eligible===false){
-            g=sv('path',{d:'M'+(cx-3.5)+' '+(cy-3.5)+'L'+(cx+3.5)+' '+(cy+3.5)+'M'+(cx+3.5)+' '+(cy-3.5)+'L'+(cx-3.5)+' '+(cy+3.5),stroke:muted,'stroke-width':1.3,fill:'none'});
-          }else if(t.D<0){g=sv('circle',{cx:cx,cy:cy,r:4.2,fill:pen});}
-          else if(t.D>0){g=sv('circle',{cx:cx,cy:cy,r:4.2,fill:pat});}
-          else{g=sv('circle',{cx:cx,cy:cy,r:3.8,fill:'#faf9f5',stroke:muted,'stroke-width':1.2});}
+            g.appendChild(sv('path',{d:'M'+(cx-3.5)+' '+(cy-3.5)+'L'+(cx+3.5)+' '+(cy+3.5)+'M'+(cx+3.5)+' '+(cy-3.5)+'L'+(cx-3.5)+' '+(cy+3.5),stroke:muted,'stroke-width':1.3,fill:'none'}));
+          }else if(t.D<0){g.appendChild(sv('circle',{cx:cx,cy:cy,r:4.5,fill:pen}));}
+          else if(t.D>0){g.appendChild(sv('circle',{cx:cx,cy:cy,r:4.5,fill:pat}));}
+          else{g.appendChild(sv('circle',{cx:cx,cy:cy,r:4,fill:'#faf9f5',stroke:muted,'stroke-width':1.3}));}
+          // a hit target larger than the mark, carrying the hover text
+          g.appendChild(sv('circle',{cx:cx,cy:cy,r:9,fill:'#000','fill-opacity':0}));
           g.appendChild(sv('title',{},tip)); svg.appendChild(g);
         });
       });
     });
+    // the direction, stated once across both panels
+    svg.appendChild(sv('text',{x:x0(0),y:yb+30,fill:muted},'← colloquial less urgent'));
+    svg.appendChild(sv('text',{x:x0(1)+pw,y:yb+30,'text-anchor':'end',fill:muted},'colloquial more urgent →'));
     host.appendChild(svg);
     var el_=triples.filter(function(t){return t.eligible!==false;});
     host.setAttribute('aria-label','D for each counted triple, '+ids.length+' scenarios: '+el_.filter(function(t){return t.D<0;}).length+
@@ -558,13 +628,14 @@
   }
 
   // ---------- explore viewer ----------
-  var C=null, MEAS={}, state={seed:null,epoch:null,identity:null,measure:'tier_ro',arm:'colloquial'};
+  var C=null, MEAS={}, state={seed:null,epoch:null,identity:null,measure:'tier_ro',arm:'colloquial',ex:0};
+  var CUR={seed:null,triple:{},mids:[]};   // what draw() last drew, for the exchange buttons
 
   function renderExample(c){
     var ex=c.example; if(!ex)return;
     var box=$('example'); box.textContent='';
     var any=false;
-    ARMS.forEach(function(a){if(ex[a]==null)return;any=true;var d=el('div');d.appendChild(el('span','lbl',ARM_LABEL[a]));d.appendChild(el('p',null,ex[a]));box.appendChild(d);});
+    ARMS.forEach(function(a){if(ex[a]==null)return;any=true;var d=el('div','a-'+a);d.appendChild(el('span','lbl',ARM_LABEL[a]));d.appendChild(el('p',null,ex[a]));box.appendChild(d);});
     if(!any)return;
     $('example-wrap').hidden=false;
     $('example-lbl').textContent='One scripted turn in its three wordings'+(ex.seed_id?' · '+ex.seed_id:'')+(ex.turn!=null?' · turn '+ex.turn:'');
@@ -582,7 +653,9 @@
     seedIds.forEach(function(id){var s=seedById(id);var o=el('option',null,(s&&s.topic?s.topic+' · ':'')+id);o.value=id;sel.appendChild(o);});
     sel.addEventListener('change',function(){state.seed=sel.value;fillEpochs();draw();});
     $('pick-epoch').addEventListener('change',function(){state.epoch=+$('pick-epoch').value;fillIdentities();draw();});
-    $('pick-id').addEventListener('change',function(){state.identity=$('pick-id').value;draw();});
+    $('pick-id').addEventListener('change',function(){state.identity=$('pick-id').value;state.ex=0;draw();});
+    $('ex-prev').addEventListener('click',function(){if(state.ex>0)goEx(state.ex-1);});
+    $('ex-next').addEventListener('click',function(){goEx(state.ex+1);});
     // wording chips (phone)
     var ac=$('arm-chips'); ac.appendChild(el('span','chip-lbl','Wording'));
     ARMS.forEach(function(a){var b=el('button','chip',ARM_LABEL[a]);b.type='button';b.dataset.arm=a;
@@ -611,7 +684,7 @@
     var sel=$('pick-id'); sel.textContent='';
     ids.forEach(function(k){var o=el('option',null,k||'none');o.value=k;sel.appendChild(o);});
     $('pick-id-wrap').hidden=ids.length<2;
-    state.identity=ids[0]||'';
+    state.identity=ids[0]||''; state.ex=0;
   }
   function syncArm(){
     $('chat').setAttribute('data-arm',state.arm);
@@ -647,9 +720,14 @@
         // draw() rebuilt the chips, so focus moves to the new chip for this measure
         Array.prototype.forEach.call($('measure-chips').querySelectorAll('.chip'),function(x){if(x.dataset.measure===id)x.focus();});});
       mc.appendChild(b);});
+    CUR={seed:seed,triple:triple,mids:mids};
+    var n=nEx(triple); if(state.ex>n-1)state.ex=Math.max(0,n-1);
     drawStrip(seed,triple);
     drawChat(seed,triple,mids);
+    drawTools(triple);
   }
+
+  function nEx(triple){var n=0;ARMS.forEach(function(a){if(triple[a])n=Math.max(n,arr(triple[a].exchanges).length);});return n;}
 
   function abbr(v){var w=String(v).split('_');return w.length>1?w.map(function(x){return x[0];}).join('').toUpperCase():String(v).slice(0,3);}
 
@@ -662,7 +740,7 @@
     var cap=el('caption','vh');cap.textContent='Grades for '+(m.label||state.measure)+' by exchange and wording';
     cap.style.cssText='position:absolute;left:-9999px';t.appendChild(cap);
     var th=el('thead'), hr=el('tr'), corner=el('th','row','wording'); corner.scope='col'; hr.appendChild(corner);
-    for(var i=0;i<n;i++){var h=el('th',null,String(i+1));h.scope='col';h.title='exchange '+(i+1);hr.appendChild(h);}
+    for(var i=0;i<n;i++){var h=el('th',null,String(i+1));h.scope='col';h.title='exchange '+(i+1);h.setAttribute('data-ex',i);hr.appendChild(h);}
     th.appendChild(hr);
     var roles=arr(seed.roles);
     if(roles.some(function(r){return r;})){
@@ -676,7 +754,7 @@
       var tr=el('tr'), rh=el('th','row',ARM_LABEL[a]); rh.scope='row'; tr.appendChild(rh);
       var ex=triple[a]?arr(triple[a].exchanges):[];
       for(var i=0;i<n;i++){
-        var e=ex[i], td=el('td'), b=el('button'); b.type='button';
+        var e=ex[i], td=el('td'), b=el('button'); b.type='button'; td.setAttribute('data-ex',i);
         var txt=DASH, tip='no value';
         if(!e){td.className='miss';tip=triple[a]?'no exchange recorded':'no conversation recorded';}
         else if(e.reply_is_graded===false){td.className='ng';txt='';tip='not graded';}
@@ -721,79 +799,90 @@
   function abbrRole(r){return {evidence:'evid',pressure:'press',neutral_control:'ctrl'}[r]||String(r).slice(0,5);}
 
   function goEx(k){
-    Array.prototype.forEach.call(document.querySelectorAll('.chat .exh'),function(h){h.classList.remove('hl');});
-    var h=$('ex-'+k); if(!h)return; h.classList.add('hl');
-    h.scrollIntoView({behavior:'smooth',block:'start'});
+    var n=nEx(CUR.triple); if(!n)return;
+    state.ex=Math.max(0,Math.min(n-1,k));
+    drawChat(CUR.seed,CUR.triple,CUR.mids);
+  }
+  function markCur(){
+    Array.prototype.forEach.call(document.querySelectorAll('#strip [data-ex]'),function(c){
+      c.classList.toggle('cur',+c.getAttribute('data-ex')===state.ex);});
   }
 
   function drawChat(seed,triple,mids){
     var chat=$('chat'); chat.textContent='';
     ARMS.forEach(function(a){chat.appendChild(el('div','colhead a-'+a,ARM_LABEL[a]));});
-    var n=0;ARMS.forEach(function(a){if(triple[a])n=Math.max(n,arr(triple[a].exchanges).length);});
+    var n=nEx(triple), pager=$('ex-pager');
     if(!n){
-      // records with no exchange in any wording: say so for each wording, and still show its conversation-level facts
-      chat.appendChild(el('div','exh','No exchange recorded'));
+      // records with no exchange in any wording: say so for each wording (their conversation-level facts are below)
+      pager.hidden=false; $('ex-label').textContent='No exchange recorded';
+      $('ex-prev').disabled=true; $('ex-next').disabled=true;
       ARMS.forEach(function(a){
         var cell=el('div','cell a-'+a);
         cell.appendChild(el('div','grades',ARM_LABEL[a]+': '+(triple[a]?'no exchange recorded':'no conversation recorded')));
-        if(triple[a]&&triple[a].rule)cell.appendChild(ruleBox(triple[a].rule));
         chat.appendChild(cell);
       });
       return;
     }
-    var roles=arr(seed.roles);
-    for(var i=0;i<n;i++){
-      // the wordings can reach an exchange at different turns (a different number of tool messages), so the shared
-      // heading names the reply turn only when every wording's reply sits at it; otherwise each reply names its own
-      // a reply with no recorded turn counts as disagreement, so the heading never asserts a turn for it; each reply then
-      // names its own, or says it has none (a file that records no turns at all shows none)
-      var turns=[],noTurn=false;ARMS.forEach(function(a){var x=triple[a]&&arr(triple[a].exchanges)[i];if(!x)return;
-        if(x.reply_turn==null)noTurn=true;else if(turns.indexOf(x.reply_turn)<0)turns.push(x.reply_turn);});
-      var oneTurn=!noTurn&&turns.length===1, ownTurns=!oneTurn&&turns.length>0;
-      var hd=el('div','exh','Exchange '+(i+1)+(oneTurn?' · reply turn '+turns[0]:'')+(roles[i]?' · '+human(roles[i])+' turn':''));
-      hd.id='ex-'+i; chat.appendChild(hd);
-      ARMS.forEach(function(a){
-        var ex=triple[a]?arr(triple[a].exchanges):[], e=ex[i]||null;
-        // the conversation's rule facts go under its own last exchange (under the last row if it has none)
-        var ruleHere=i===(ex.length?ex.length-1:n-1)&&triple[a]&&triple[a].rule;
-        var cell=el('div','cell a-'+a);
-        if(!e){cell.appendChild(el('div','grades',ARM_LABEL[a]+': '+(triple[a]?'no exchange recorded':'no conversation recorded')));
-          if(ruleHere)cell.appendChild(ruleBox(triple[a].rule));chat.appendChild(cell);return;}
-        var u=el('div','bub user');u.appendChild(el('span','who',ARM_LABEL[a]+' · scripted message'));u.appendChild(document.createTextNode(e.user||DASH));cell.appendChild(u);
-        arr(e.interim).forEach(function(it){
-          var txt=typeof it==='string'?it:(it&&(it.text||it.content||it.reply))||'';
-          var isTool=it&&typeof it==='object'&&(it.fixture===true||it.role==='tool'||it.kind==='tool_result'||it.type==='tool_result');
-          var b=el('div','bub '+(isTool?'tool':'interim'));
-          b.appendChild(el('span','who',isTool?'Lookup result · written by the study, not by the model':'Earlier reply in this exchange'));
-          b.appendChild(document.createTextNode(txt||DASH)); cell.appendChild(b);
-        });
-        var graded=e.reply_is_graded!==false;
-        var r=el('div','bub reply'+(graded?'':' ungraded'));
-        r.appendChild(el('span','who',(TARGET_LABEL||DASH)+' · reply'+(ownTurns?(e.reply_turn!=null?', turn '+e.reply_turn:', turn not recorded'):'')));
-        r.appendChild(document.createTextNode(e.reply||DASH)); cell.appendChild(r);
-        if(!graded){cell.appendChild(el('span','tag','Not graded'));}
-        else{
-          var g=el('div','grades'), vals=e.vals||{}, any=false;
-          mids.forEach(function(id){var x=vals[id];if(!x)return;any=true;
-            if(g.childNodes.length)g.appendChild(document.createTextNode(' · '));
-            g.appendChild(document.createTextNode((MEAS[id].label||id)+' '));
-            var shown=x.na!=null?'n/a':x.v==null?DASH:human(x.v);
-            if(x.superseded!=null){
-              var sp=el('span','sup',shown+' (graded under an earlier grading prompt, '+x.superseded+'; left out of the comparison)');
-              g.appendChild(sp);
-            }else g.appendChild(el('b',null,shown));});
-          if(!any)g.textContent='no grades recorded';
-          cell.appendChild(g);
-        }
-        if(ruleHere)cell.appendChild(ruleBox(triple[a].rule));
-        chat.appendChild(cell);
+    var i=state.ex, roles=arr(seed.roles);
+    // the wordings can reach an exchange at different turns (a different number of tool messages), so the heading
+    // names the reply turn only when every wording's reply sits at it; a reply with no recorded turn counts as
+    // disagreement, and each reply then names its own or says it has none (a file with no turns at all shows none)
+    var turns=[],noTurn=false;ARMS.forEach(function(a){var x=triple[a]&&arr(triple[a].exchanges)[i];if(!x)return;
+      if(x.reply_turn==null)noTurn=true;else if(turns.indexOf(x.reply_turn)<0)turns.push(x.reply_turn);});
+    var oneTurn=!noTurn&&turns.length===1, ownTurns=!oneTurn&&turns.length>0;
+    pager.hidden=false;
+    $('ex-label').textContent='Exchange '+(i+1)+' of '+n+(oneTurn?' · reply turn '+turns[0]:'')+(roles[i]?' · '+human(roles[i])+' turn':'');
+    $('ex-prev').disabled=i<=0; $('ex-next').disabled=i>=n-1;
+    ARMS.forEach(function(a){
+      var ex=triple[a]?arr(triple[a].exchanges):[], e=ex[i]||null;
+      var cell=el('div','cell a-'+a);
+      if(!e){cell.appendChild(el('div','grades',ARM_LABEL[a]+': '+(triple[a]?'no exchange recorded':'no conversation recorded')));
+        chat.appendChild(cell);return;}
+      var u=el('div','bub user');u.appendChild(el('span','who',ARM_LABEL[a]+' · scripted message'));u.appendChild(document.createTextNode(e.user||DASH));cell.appendChild(u);
+      arr(e.interim).forEach(function(it){
+        var txt=typeof it==='string'?it:(it&&(it.text||it.content||it.reply))||'';
+        var isTool=it&&typeof it==='object'&&(it.fixture===true||it.role==='tool'||it.kind==='tool_result'||it.type==='tool_result');
+        var b=el('div','bub '+(isTool?'tool':'interim'));
+        b.appendChild(el('span','who',isTool?'Lookup result · written by the study, not by the model':'Earlier reply in this exchange'));
+        b.appendChild(document.createTextNode(txt||DASH)); cell.appendChild(b);
       });
-    }
+      var graded=e.reply_is_graded!==false;
+      var r=el('div','bub reply'+(graded?'':' ungraded'));
+      r.appendChild(el('span','who',(TARGET_LABEL||DASH)+' · reply'+(ownTurns?(e.reply_turn!=null?', turn '+e.reply_turn:', turn not recorded'):'')));
+      r.appendChild(document.createTextNode(e.reply||DASH)); cell.appendChild(r);
+      if(!graded){cell.appendChild(el('span','tag','Not graded'));}
+      else{
+        var g=el('div','grades'), vals=e.vals||{}, any=false;
+        mids.forEach(function(id){var x=vals[id];if(!x)return;any=true;
+          if(g.childNodes.length)g.appendChild(document.createTextNode(' · '));
+          g.appendChild(document.createTextNode((MEAS[id].label||id)+' '));
+          var shown=x.na!=null?'n/a':x.v==null?DASH:human(x.v);
+          if(x.superseded!=null){
+            var sp=el('span','sup',shown+' (graded under an earlier grading prompt, '+x.superseded+'; left out of the comparison)');
+            g.appendChild(sp);
+          }else g.appendChild(el('b',null,shown));});
+        if(!any)g.textContent='no grades recorded';
+        cell.appendChild(g);
+      }
+      chat.appendChild(cell);
+    });
+    markCur();
+  }
+
+  // each wording's conversation-level tool facts, one column per wording
+  function drawTools(triple){
+    var box=$('tools'); box.textContent=''; var any=false;
+    ARMS.forEach(function(a){
+      var r=triple[a]&&triple[a].rule, col=el('div');
+      col.appendChild(el('span','lbl',ARM_LABEL[a]));
+      if(r){any=true;col.appendChild(ruleBox(r));}else col.appendChild(el('div','rule',DASH));
+      box.appendChild(col);
+    });
+    $('tool-wrap').hidden=!any;
   }
 
   function ruleBox(rule){
     var d=el('div','rule');
-    d.appendChild(el('span','lbl','Tool use in this conversation'));
     // labels say what each field counts (the engine's docs/framework/outcome_dimensions.draft.json); first_call_turn
     // counts the model's replies, not the conversation's turns, so it is labelled as a reply number
     var keys=[['tool_invoked','used a tool'],['first_tool','first tool used'],['first_call_turn','first tool call, in reply number'],
