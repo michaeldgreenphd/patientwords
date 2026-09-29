@@ -535,7 +535,10 @@
 
   function drawD(triples,means,repeats){
     var host=$('fig-d'); host.textContent='';
-    var W=Math.max(300,Math.min(1056,host.clientWidth||900)), narrow=W<640;
+    // the wide layout keeps a 184 px label column and 280 px of value columns beside the two panels, so it is used
+    // only while each panel still gets 170 px; below that the labels go above the dots (Codex on site PR #10: a
+    // fixed 640 px breakpoint left 74 px panels at 684 px)
+    var W=Math.max(300,Math.min(1056,host.clientWidth||900)), narrow=(W-184-280-28)/2<170;
     // the panel titles use the headline's own words ("the conversations run after the analysis was fixed")
     var PARTS=[{key:'seen_before_plan',title:'Run before the analysis was fixed',short:'Before it was fixed'},
                {key:'prospective',title:'Run after the analysis was fixed',short:'After it was fixed'}];
@@ -556,7 +559,9 @@
     // a mark takes the colour of the wording whose reply was less urgent: colloquial left of zero, clinical right
     var ink='#1c1c19',muted='#6d6c66',hair='#dcdad2',struct='#c3c9d2',pen='#2563eb',pat='#047857';
     var labelW=narrow?0:184, colsW=narrow?0:280, gap=narrow?16:28;
-    var pw=(W-labelW-colsW-gap)/2, top=narrow?48:30, rowH=narrow?44:26;
+    var pw=(W-labelW-colsW-gap)/2, rowH=narrow?44:26;
+    // a panel title goes on two lines (a short name, then its count) wherever the full one would pass the panel
+    var twoLine=narrow||pw<300, top=narrow?48:(twoLine?44:30);
     var yb=top+ids.length*rowH, H=yb+40;
     var svg=sv('svg',{viewBox:'0 0 '+W+' '+H,width:W,height:H});
     function x0(pi){return labelW+pi*(pw+gap);}
@@ -570,9 +575,10 @@
       var inPart=triples.filter(function(t){return t.partition===part.key;});
       var n=inPart.filter(function(t){return t.eligible!==false&&typeof t.D==='number'&&isFinite(t.D);}).length;
       var noD=inPart.filter(function(t){return !(typeof t.D==='number'&&isFinite(t.D));}).length;
-      var ttl=sv('text',{x:x0(pi),y:12,'font-weight':600,fill:ink},narrow?part.short:part.title);
-      var nn=sv('tspan',{'font-weight':400,fill:muted},(narrow?'':' · ')+'n = '+n+(noD?' · '+noD+' without D':''));
-      if(narrow){nn.setAttribute('x',x0(pi));nn.setAttribute('dy','14');}   // a phone: the count on its own line
+      // the headline's own words wherever they fit on a line (230 px), the short name otherwise
+      var ttl=sv('text',{x:x0(pi),y:12,'font-weight':600,fill:ink},pw>=230?part.title:part.short);
+      var nn=sv('tspan',{'font-weight':400,fill:muted},(twoLine?'':' · ')+'n = '+n+(noD?' · '+noD+' without D':''));
+      if(twoLine){nn.setAttribute('x',x0(pi));nn.setAttribute('dy','14');}   // the count on its own line
       ttl.appendChild(nn); svg.appendChild(ttl);
       // the zero line: full height beside the labels' column; on a phone, beside each row's dots only
       if(!narrow)svg.appendChild(sv('line',{x1:X(pi,0),x2:X(pi,0),y1:top-4,y2:yb,stroke:struct,'stroke-width':1}));
@@ -685,11 +691,17 @@
     if(s.seed!=null)row('analysis random seed',String(s.seed));
   }
 
-  // a reply's **bold** as bold, every other character as sent (the text itself is never changed)
+  // a reply's markdown as it reads: **bold** as bold, and a heading line ("# Title") as a bold line without its #
+  // marks; every word is shown as sent
   function rich(node,text){
-    String(text).split(/(\*\*[^*\n]+\*\*)/).forEach(function(part){
-      if(/^\*\*[^*\n]+\*\*$/.test(part))node.appendChild(el('strong',null,part.slice(2,-2)));
-      else if(part)node.appendChild(document.createTextNode(part));
+    String(text).split('\n').forEach(function(line,li){
+      if(li)node.appendChild(document.createTextNode('\n'));
+      var h=/^#{1,6}\s+(.*)$/.exec(line), target=node;
+      if(h){target=el('strong');node.appendChild(target);line=h[1];}
+      line.split(/(\*\*[^*\n]+\*\*)/).forEach(function(part){
+        if(/^\*\*[^*\n]+\*\*$/.test(part))target.appendChild(el('strong',null,part.slice(2,-2)));
+        else if(part)target.appendChild(document.createTextNode(part));
+      });
     });
   }
   // the reply-alone urgency of one exchange as a rank on the rubric's scale, or null (ungraded, superseded, n/a, none)
