@@ -19,9 +19,11 @@
     --sans:system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
     --lay:#4b5563; --reply:#efede6;
     /* one colour per wording, everywhere: the bubbles, the lines, and the marks for which wording got the less
-       urgent advice. Blue, amber and green pass the colour-blind check on every pair (worst delta E 7.9, legal with
-       the direct labels every chart carries) and carry white text at 5:1 or better. Red is kept for warnings. */
-    --w-colloquial:#2563eb; --w-lay:#b45309; --w-clinical:#047857; --received:#e9e9eb;
+       urgent advice. Clinical is the site's fixed clinical green; colloquial blue and careful-lay amber are the owner's
+       choice for this page's texting bubbles (AGENTS.md, semantic palette). The three pass the colour-blind check on
+       every pair (worst delta E 6.8, legal with the direct labels every chart carries) and carry white text at 5:1 or
+       better. Red is kept for warnings. */
+    --w-colloquial:#2563eb; --w-lay:#b45309; --w-clinical:var(--clinical); --received:#e9e9eb;
     /* the urgency scale, light to dark, as the grade strip shades it */
     --u0:#ebe8df; --u1:#c9c5b9; --u2:#7d7a71; --u3:#2b2a26;
     /* one type scale (five sizes) and one spacing scale for everything below the masthead */
@@ -294,6 +296,7 @@
        this page from the conversations file; a description of the replies, not a test (the tests count triples) -->
   <section class="blk" id="sec-differ" hidden>
     <h2>How the replies differ</h2>
+    <!-- OWNER-SIGNOFF --><p class="draft draft-rubric">Draft rubric · clinician review pending</p>
     <div class="twofig">
       <figure class="fig">
         <figcaption class="fig-cap">Urgency of every graded reply <span class="fig-sub" id="dist-sub"></span></figcaption>
@@ -332,7 +335,8 @@
     <!-- two exchanges picked by a rule stated on the page, not by hand: the largest gap in urgency between the
          colloquial and clinical replies, in each direction; ties go to the first by scenario, run and exchange -->
     <div id="featured-wrap" hidden>
-      <span class="lbl">Two exchanges, picked by a rule: the largest gap between the colloquial and clinical replies, each way</span>
+      <span class="lbl" id="featured-lbl"></span>
+      <!-- OWNER-SIGNOFF --><p class="draft draft-rubric">Draft rubric · clinician review pending</p>
       <div class="featured" id="featured"></div>
       <span class="lbl">Every conversation</span>
     </div>
@@ -557,7 +561,7 @@
     var maxAbs=0;triples.forEach(function(t){if(typeof t.D==='number')maxAbs=Math.max(maxAbs,Math.abs(t.D));});
     var dom=Math.max(0.5,Math.ceil(maxAbs*2)/2);
     // a mark takes the colour of the wording whose reply was less urgent: colloquial left of zero, clinical right
-    var ink='#1c1c19',muted='#6d6c66',hair='#dcdad2',struct='#c3c9d2',pen='#2563eb',pat='#047857';
+    var ink='#1c1c19',muted='#6d6c66',hair='#dcdad2',struct='#c3c9d2',pen='#2563eb',pat='#15803d';
     var labelW=narrow?0:184, colsW=narrow?0:280, gap=narrow?16:28;
     var pw=(W-labelW-colsW-gap)/2, rowH=narrow?44:26;
     // a panel title goes on two lines (a short name, then its count) wherever the full one would pass the panel
@@ -711,7 +715,7 @@
     if(!g||g.superseded!=null||g.na!=null||g.v==null)return null;
     var r=vals.indexOf(g.v);return r<0?null:r;
   }
-  var WCOL={colloquial:'#2563eb',lay_careful:'#b45309',clinical:'#047857'};
+  var WCOL={colloquial:'#2563eb',lay_careful:'#b45309',clinical:'#15803d'};
 
   // every graded reply's urgency by wording (a 100% bar each), and the mean urgency at each exchange (a line each)
   function renderDiffer(c){
@@ -732,14 +736,19 @@
   }
   function drawDist(vals,dist,n){
     var host=$('fig-dist'); host.textContent='';
-    var W=Math.max(280,host.clientWidth||480), lab=84, bw=W-lab-6, top=34, rowH=34, H=top+ARMS.length*rowH+4;
-    var svg=sv('svg',{viewBox:'0 0 '+W+' '+H,width:W,height:H});
+    var W=Math.max(280,host.clientWidth||480), lab=84, bw=W-lab-6, rowH=34;
     var fills=['#ebe8df','#c9c5b9','#7d7a71','#2b2a26'], inks=['#1c1c19','#1c1c19','#fff','#fff'];
-    // the scale's names once, over the columns of the first bar's segments
-    var lx=lab;vals.forEach(function(v,k){
-      var sw=sv('rect',{x:lx,y:4,width:10,height:10,fill:fills[k]});svg.appendChild(sw);
-      var t=sv('text',{x:lx+14,y:13,fill:'#6d6c66'},human(v));svg.appendChild(t);
-      lx+=14+human(v).length*6.7+16;});
+    // the scale's names once, as a legend that wraps onto another row rather than run past the chart (Codex on
+    // site PR #10: on a phone the last name ran past the viewport)
+    var items=[],lx=lab,ly=4;vals.forEach(function(v,k){
+      var w=14+human(v).length*6.7;
+      if(lx>lab&&lx+w>W){lx=lab;ly+=16;}
+      items.push([lx,ly,k,v]);lx+=w+16;});
+    var top=ly+30, H=top+ARMS.length*rowH+4;
+    var svg=sv('svg',{viewBox:'0 0 '+W+' '+H,width:W,height:H});
+    items.forEach(function(it){
+      svg.appendChild(sv('rect',{x:it[0],y:it[1],width:10,height:10,fill:fills[it[2]]}));
+      svg.appendChild(sv('text',{x:it[0]+14,y:it[1]+9,fill:'#6d6c66'},human(it[3])));});
     var summary=[];
     ARMS.forEach(function(a,ri){
       var y=top+ri*rowH, tot=n[a]||0, x=lab;
@@ -776,7 +785,9 @@
     ARMS.forEach(function(a){
       var pts=[];byEx[a].forEach(function(rs,i){if(rs&&rs.length){var mu=rs.reduce(function(s,x){return s+x;},0)/rs.length;pts.push([i,mu,rs.length]);}});
       if(!pts.length)return;
-      svg.appendChild(sv('path',{d:pts.map(function(p,j){return (j?'L':'M')+X(p[0])+' '+Y(p[1]);}).join(' '),fill:'none',stroke:WCOL[a],'stroke-width':2}));
+      // a new segment after any exchange with no current grade, so the line never bridges a missing value
+      var d='',prev=null;pts.forEach(function(p){d+=(prev!=null&&p[0]===prev+1?'L':'M')+X(p[0])+' '+Y(p[1])+' ';prev=p[0];});
+      svg.appendChild(sv('path',{d:d.trim(),fill:'none',stroke:WCOL[a],'stroke-width':2}));
       pts.forEach(function(p){var g=sv('g',{});
         g.appendChild(sv('circle',{cx:X(p[0]),cy:Y(p[1]),r:3,fill:WCOL[a]}));
         g.appendChild(sv('circle',{cx:X(p[0]),cy:Y(p[1]),r:8,fill:'#000','fill-opacity':0}));
@@ -792,8 +803,8 @@
     host.setAttribute('aria-label','Mean urgency at each exchange, by wording, on the scale '+vals.map(human).join(', ')+'.');
   }
 
-  // the two exchanges the rule picks: the most negative and the most positive gap between the colloquial and the
-  // clinical reply's urgency, over every comparable exchange; ties go to the first by scenario, run, speaker, exchange
+  // the exchanges the rule picks: the most negative and the most positive gap between the colloquial and the clinical
+  // reply's urgency, over every comparable exchange; ties go to the first by scenario, then run, speaker and exchange
   function renderFeatured(c){
     var groups={};
     arr(c.conversations).forEach(function(v){var k=[v.seed_id,epochOf(v),idKey(v)].join('\u0001');
@@ -804,14 +815,19 @@
       for(var i=0;i<Math.min(a.length,b.length);i++){var ra=tierRank(a[i]),rb=tierRank(b[i]);
         if(ra!=null&&rb!=null&&ra!==rb)cands.push({g:g,i:i,gap:ra-rb});}});
     if(!cands.length)return;
-    function first(xs){xs.sort(function(p,q){return p.g.seed<q.g.seed?-1:p.g.seed>q.g.seed?1:
-      p.g.epoch-q.g.epoch||(p.g.identity<q.g.identity?-1:p.g.identity>q.g.identity?1:0)||p.i-q.i;});return xs[0];}
+    function scenOf(x){return String((seedById(x.g.seed)||{}).scenario_id||'');}
+    function cmp(a,b){return a<b?-1:a>b?1:0;}
+    function first(xs){xs.sort(function(p,q){return cmp(scenOf(p),scenOf(q))||cmp(p.g.seed,q.g.seed)||
+      p.g.epoch-q.g.epoch||cmp(p.g.identity,q.g.identity)||p.i-q.i;});return xs[0];}
     var lo=Math.min.apply(null,cands.map(function(x){return x.gap;})), hi=Math.max.apply(null,cands.map(function(x){return x.gap;}));
     var picks=[];
     if(lo<0)picks.push(first(cands.filter(function(x){return x.gap===lo;})));
     if(hi>0)picks.push(first(cands.filter(function(x){return x.gap===hi;})));
     var box=$('featured'); box.textContent='';
     var vals=arr((MEAS.tier_ro||{}).values);
+    $('featured-lbl').textContent=picks.length===2?
+      'Two exchanges, picked by a rule: the largest gap between the colloquial and clinical replies, each way':
+      'One exchange, picked by a rule: the largest gap between the colloquial and clinical replies (no exchange differs the other way)';
     picks.forEach(function(pk){
       var seed=seedById(pk.g.seed)||{}, card=el('div','fcard'), head=el('div','fhead');
       var steps=Math.abs(pk.gap), lvl=steps===1?' level':' levels';

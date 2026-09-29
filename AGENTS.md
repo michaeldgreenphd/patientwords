@@ -43,7 +43,11 @@ A change to shared behavior (masthead, chips, palette variables) means editing e
 
 Semantic palette (do not change): clinical green `#15803d`, patient ink `#111827`,
 structural grey `#c3c9d2`, penalty red `#b4483d`, paper `#faf9f5`, muted `#6d6c66`
-(chosen for WCAG AA on paper). Serif display + mono data.
+(chosen for WCAG AA on paper). Serif display + mono data. One page-level addition, the owner's
+decision of 2026-09-29: the Multi-turn page shows its three wordings as texting bubbles
+and colours each wording the same way in its charts, with colloquial blue `#2563eb`,
+careful-lay amber `#b45309` and the clinical green above (white text at 5:1 or better;
+colour-blind separation checked). Patient ink stays the patient colour on every other page.
 
 ## Data contracts (what page JS reads)
 
