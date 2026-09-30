@@ -257,7 +257,7 @@ reviewer should treat a `CNAME` without it as an incomplete change.
 
 ## Responding to code review
 
-Every pull request here is reviewed by Codex and Copilot. Their findings are
+Every pull request here is reviewed by Codex. Its findings are
 **hypotheses, not defects**, and the disposition is yours to establish:
 
 1. **Verify against the actual file before changing anything.** Read the lines
