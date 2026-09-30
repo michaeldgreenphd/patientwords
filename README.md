@@ -92,7 +92,8 @@ its nightly cycle.
   repo's GitHub Releases.
 - Root and per-section HTML — the gallery pages. `AGENTS.md` records the
   working rules (data contracts, palette, accessibility floor, figure style);
-  `CLAUDE.md` is a one-line pointer to it.
+  `CLAUDE.md` imports it for Claude Code and adds the owner's writing
+  conventions, a section kept identical to the one in the engine's `CLAUDE.md`.
 
 ## Rewriting the narrative
 
