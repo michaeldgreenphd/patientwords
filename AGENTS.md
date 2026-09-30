@@ -1,8 +1,12 @@
 # AGENTS.md
 
 Guidance for coding agents working in this repository. This is the canonical
-instruction file: Codex reads `AGENTS.md` directly, and the root `CLAUDE.md` is a
-one-line pointer to it so Claude Code reads the same rules. Put every agent rule
+instruction file: Codex reads `AGENTS.md` directly, and the root `CLAUDE.md`
+imports it so Claude Code reads the same rules. Below the import, `CLAUDE.md`
+carries only the owner's writing conventions, never a repository rule. That
+section is kept identical to the one in the engine's `CLAUDE.md`, as are the
+generic bullets under **Code Review Rules** below; the engine's
+`tests/test_shared_conventions.py` compares both. Put every agent rule
 here — a rule written only in `CLAUDE.md` reaches one tool and is invisible to the
 agents reviewing the pull request.
 
