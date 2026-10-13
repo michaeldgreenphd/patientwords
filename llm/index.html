@@ -371,7 +371,7 @@
       (<span class="mono-inline" id="jv-note-model">Jev</span>, one stimulus set, <span id="jv-note-n">—</span>
       responses), its cell shows the classifier&rsquo;s probability for each tier, light to dark from self-care to
       emergency, beside the coded tier, and three response features as the published judge and the classifier
-      each read them. Those are agreement checks between two graders, not accuracy: neither is ground truth. The
+      each read them. The tiers are the advice rubric&rsquo;s, a draft pending domain review. Those are agreement checks between two graders, not accuracy: neither is ground truth. The
       comparison as a whole is on the <a href="../methods.html#classifier-agreement">methods page</a>, and the
       classifier never drives the tiers shown here.</p>
   </section>
@@ -456,11 +456,12 @@
     var probs=c.tier_probabilities||{};
     var top=el('div','jv-line');
     var lab=el('span',null,'classifier: ');lab.appendChild(el('b',null,c.pred_tier||'\u2014'));top.appendChild(lab);
+    top.appendChild(el('span',null,'draft tiers, pending domain review'));
     if(c.tier_confidence!=null)top.appendChild(el('span',null,'confidence '+Math.round(c.tier_confidence*100)+'%'));
     box.appendChild(top);
     var bar=el('div','jv-bar'),ticks=el('div','jv-ticks');
     bar.setAttribute('role','img');
-    bar.setAttribute('aria-label','classifier tier probabilities: '+JV_TIERS.map(function(t){
+    bar.setAttribute('aria-label','classifier tier probabilities (draft tiers, pending domain review): '+JV_TIERS.map(function(t){
       return t.replace('_','-')+' '+Math.round((probs[t]||0)*100)+'%';}).join(', '));
     JV_TIERS.forEach(function(t,i){
       var w=Math.max(0,probs[t]||0)*100;
