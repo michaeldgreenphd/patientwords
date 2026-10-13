@@ -98,7 +98,7 @@ export.
 | `retrace_consistency.json` | `methods.html`, `simulated-scenarios/`, `technical/` | `retrace_consistency.py` |
 | `jspace.json` | `methods.html`, `technical/` | `export_jspace.py` |
 | `judge_agreement.json` | `methods.html`, `llm/index.html`, `technical/` | `export_judge_agreement.py` |
-| `jev_calibration.json` | `methods.html` (Step 5b, calibrated classifier) | `export_jev_calibration.py` — **run by hand from a Jev audit report, not the daily Routine** |
+| `jev_calibration.json` | `methods.html` (Step 5b, calibrated classifier), `llm/index.html` (per-cell classifier grading) | `export_jev_calibration.py` — **run by hand from a Jev audit report, not the daily Routine** |
 | `jlens_depth.json` | `methods.html`, `simulated-scenarios/`, `technical/` | `export_jlens_depth.py` |
 | `jlens_loglens.json`, `jlens_transport.json` | `technical/` (j-lens chain) | `export_jlens_loglens.py`, `export_jlens_transport.py` |
 | `jlens_insights.json`, `jlens_swaps.json` | `technical/` (j-lens chain) | `jlens_insights.py`, `export_pair_swaps.py` |
