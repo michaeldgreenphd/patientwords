@@ -178,6 +178,19 @@
   .resp-refusal{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--penalty)}
   .resp-text{font-size:15px;line-height:1.55;margin:0;white-space:pre-wrap;overflow-wrap:break-word}
   .resp-text.missing{color:var(--muted)}
+  .jv{margin:4px 0 6px;font-family:var(--mono);font-size:10.5px;color:var(--muted)}
+  .jv-line{display:flex;flex-wrap:wrap;gap:2px 10px;align-items:baseline;letter-spacing:.04em}
+  .jv-line b{color:var(--ink);font-weight:600}
+  .jv-bar{display:flex;height:8px;margin:3px 0 1px;border:1px solid var(--structural);max-width:320px}
+  .jv-bar span{display:block;height:100%;border-right:1px solid var(--paper);box-sizing:border-box}
+  .jv-bar span:last-child{border-right:0}
+  .jv-bar .t0{background:#e7e5df}.jv-bar .t1{background:#cfccc4}.jv-bar .t2{background:#a29f97}.jv-bar .t3{background:#5f5d57}
+  .jv-ticks{display:flex;max-width:320px;font-size:9.5px}
+  .jv-ticks span{overflow:hidden;white-space:nowrap}
+  .jv-pills{display:flex;flex-wrap:wrap;gap:4px 6px;margin-top:4px}
+  .jv-pill{border:1px solid var(--structural);border-radius:2px;padding:0 5px;font-size:9.5px;letter-spacing:.04em}
+  .jv-pill.both{color:var(--ink);border-color:var(--ink)}
+  .jv-pill.split{color:var(--penalty);border-color:var(--penalty)}
   .resp-foot{font-family:var(--mono);font-size:10.5px;letter-spacing:.04em;color:var(--muted);margin:6px 0 0}
   /* Tufte pass: shared-sentence muting, downgrade marginal line, formatting toggle */
   .muted-overlap{color:var(--muted)}
@@ -354,6 +367,13 @@
       this dagger until a lab claims it. It also re-graded the archive as a second-opinion judge; that agreement
       is quantified on the <a href="../methods.html#judge-agreement">methods page</a>. Second-opinion judgments
       never drive the tiers shown here.</p>
+    <p class="note" id="jv-note" hidden>Where a response is in the set a calibrated classifier also graded
+      (<span class="mono-inline" id="jv-note-model">Jev</span>, one stimulus set, <span id="jv-note-n">—</span>
+      responses), its cell shows the classifier&rsquo;s probability for each tier, light to dark from self-care to
+      emergency, beside the coded tier, and three response features as the published judge and the classifier
+      each read them. Those are agreement checks between two graders, not accuracy: neither is ground truth. The
+      comparison as a whole is on the <a href="../methods.html#classifier-agreement">methods page</a>, and the
+      classifier never drives the tiers shown here.</p>
   </section>
 
   <figure class="fig" id="fig-profiles" hidden>
@@ -401,6 +421,65 @@
   var viewer=document.getElementById('llm-viewer');
   var prov=document.getElementById('llm-prov');
   var current=0, data=null, genByBatch={};
+  // the calibrated classifier's gradings (data/jev_calibration.json), keyed by scenario, wording, attempt and model;
+  // a case is shown only when its id's hash suffix equals the first 8 hex digits of the cell text's sha256, so a
+  // response the classifier did not read is never decorated as if it had been
+  var JV=null, JV_TIERS=null, JV_FLAGS=[['safety_netting','safety netting'],['clarifying_question','clarifying question'],
+    ['professional_referral','referral']];
+  var JV_ID=/^(.+?#\d+)_([a-z]+)_(\d+)_(.+)_([0-9a-f]{8})$/;
+  function jvLoad(){
+    return fetch('../data/jev_calibration.json',{cache:'no-cache'})
+      .then(function(r){return r.ok?r.json():null;})
+      .then(function(j){
+        if(!j||j.is_mock||!j.cases_summary||!Array.isArray(j.tier_order))return;
+        var map={},n=0;
+        Object.keys(j.cases_summary).forEach(function(id){
+          var m=JV_ID.exec(id);if(!m)return;
+          map[m[1]+'|'+m[2]+'|'+m[3]+'|'+m[4]]={hash:m[5],c:j.cases_summary[id]};n++;
+        });
+        JV=map;JV_TIERS=j.tier_order;
+        var nm=document.getElementById('jv-note-model');
+        if(j.models_served&&j.models_served.length)nm.textContent=j.models_served.join(', ');
+        document.getElementById('jv-note-n').textContent=n.toLocaleString();
+        document.getElementById('jv-note').hidden=false;
+      })
+      .catch(function(){JV=null;});
+  }
+  function jvHash(text){
+    if(!(window.crypto&&crypto.subtle&&window.TextEncoder))return Promise.resolve(null);
+    return crypto.subtle.digest('SHA-256',new TextEncoder().encode(text)).then(function(buf){
+      return Array.prototype.map.call(new Uint8Array(buf).slice(0,4),function(b){return ('0'+b.toString(16)).slice(-2);}).join('');
+    }).catch(function(){return null;});
+  }
+  function jvBlock(c){
+    var box=el('div','jv');
+    var probs=c.tier_probabilities||{};
+    var top=el('div','jv-line');
+    var lab=el('span',null,'classifier: ');lab.appendChild(el('b',null,c.pred_tier||'\u2014'));top.appendChild(lab);
+    if(c.tier_confidence!=null)top.appendChild(el('span',null,'confidence '+Math.round(c.tier_confidence*100)+'%'));
+    box.appendChild(top);
+    var bar=el('div','jv-bar'),ticks=el('div','jv-ticks');
+    bar.setAttribute('role','img');
+    bar.setAttribute('aria-label','classifier tier probabilities: '+JV_TIERS.map(function(t){
+      return t.replace('_','-')+' '+Math.round((probs[t]||0)*100)+'%';}).join(', '));
+    JV_TIERS.forEach(function(t,i){
+      var w=Math.max(0,probs[t]||0)*100;
+      var seg=el('span','t'+Math.min(i,3));seg.style.width=w+'%';bar.appendChild(seg);
+      var tk=el('span',null,w>=12?t.replace('_','-')+' '+Math.round(w)+'%':'');tk.style.width=w+'%';ticks.appendChild(tk);
+    });
+    box.appendChild(bar);box.appendChild(ticks);
+    var pills=el('div','jv-pills');
+    JV_FLAGS.forEach(function(f){
+      var fl=(c.flags||{})[f[0]];if(!fl)return;
+      var j=fl.expected,k=fl.predicted,cls='jv-pill',txt;
+      if(j==null){txt=f[1]+': classifier '+(k?'yes':'no');}
+      else if(j===k){cls+=k?' both':'';txt=f[1]+': '+(k?'both yes':'both no');}
+      else{cls+=' split';txt=f[1]+': judge '+(j?'yes':'no')+', classifier '+(k?'yes':'no');}
+      pills.appendChild(el('span',cls,txt));
+    });
+    box.appendChild(pills);
+    return box;
+  }
 
   // generator model per source batch, from the sidecar copies in data/provenance.json
   fetch('../data/provenance.json',{cache:'no-cache'})
@@ -727,6 +806,13 @@
     if(s&&s.tier){head=el('div','resp-head');var t=el('span','resp-tier');t.appendChild(document.createTextNode('coded tier: '));var b=el('b',null,s.tier);t.appendChild(b);head.appendChild(t);out.tierEl=t;}
     if(s&&s.refusal){if(!head)head=el('div','resp-head');head.appendChild(el('span','resp-refusal','refusal'));}
     if(head)wrap.appendChild(head);
+    if(JV&&s&&typeof s.text==='string'&&s.text&&data&&data.scenarios[current]){
+      var hit=JV[data.scenarios[current].id+'|'+d.key+'|'+s.k+'|'+mb.model];
+      if(hit){
+        var slot=el('div',null);wrap.appendChild(slot);
+        jvHash(s.text).then(function(h){if(h===hit.hash)slot.appendChild(jvBlock(hit.c));});
+      }
+    }
     if(s&&typeof s.text==='string'&&s.text){
       var textP=el('p','resp-text',s.text);
       wrap.appendChild(textP);
@@ -1637,6 +1723,7 @@
       document.getElementById('fmt-native').addEventListener('click',function(){setFmt('native');});
       document.getElementById('fmt-plain').addEventListener('click',function(){setFmt('plain');});
       renderFigs();
+      jvLoad().then(function(){render();});
       render();
       renderProv();
       // An explicit deep link (#sN or ?s=N) means the reader came for one scenario:
