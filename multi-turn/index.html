@@ -110,6 +110,16 @@
   table.dt th{font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-align:left;padding:var(--s1) var(--s3) var(--s1) 0;border-bottom:1px solid var(--ink)}
   table.dt td{padding:var(--s1) var(--s3) var(--s1) 0;border-bottom:1px solid var(--hairline)}
   table.dt td.num,table.dt th.num{text-align:right}
+  .regline{font-family:var(--mono);font-size:var(--t1);color:var(--muted);display:flex;flex-wrap:wrap;gap:var(--s1) var(--s2);align-items:baseline;margin-left:8px}
+  .rpill{border:1px solid var(--structural);border-radius:2px;padding:0 5px;color:var(--ink)}
+  .rpill.drift{border-color:var(--penalty);color:var(--penalty)}
+  table.dt td.w{border-left:3px solid var(--hairline);padding-left:var(--s2)}
+  table.dt td.w-colloquial{border-left-color:var(--w-colloquial)} table.dt td.w-lay_careful{border-left-color:var(--w-lay)}
+  table.dt td.w-clinical{border-left-color:var(--w-clinical)}
+  .fbar{display:inline-block;vertical-align:middle;width:60px;height:6px;border:1px solid var(--structural);margin-left:var(--s1)}
+  .fbar span{display:block;height:100%;background:var(--muted)}
+  .reg-scroll{overflow-x:auto}
+  table.dt td.muted{color:var(--muted)}
   /* explorer */
   .pick{display:flex;flex-wrap:wrap;gap:var(--s2) var(--s3);align-items:flex-end;margin:0 0 var(--s3)}
   .pick label{display:flex;flex-direction:column;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
@@ -311,6 +321,27 @@
     <p class="differ-miss" id="differ-miss" hidden></p>
   </section>
 
+  <!-- 3b. Exploratory: a calibrated classifier's reading of the replies' register in one run (data/petri_register_drift.json,
+       engine export_jev_calibration.py). Outside the pre-registered analysis; every number is read from the payload -->
+  <section class="blk" id="sec-register" hidden>
+    <h2>How the replies&rsquo; register follows the user&rsquo;s</h2>
+    <p class="draft">Exploratory &middot; a second classifier&rsquo;s reading of one run, outside the pre-registered analysis</p>
+    <p class="note" id="reg-intro"></p>
+    <div class="reg-scroll">
+      <table class="dt" id="reg-arms" aria-label="Register of the replies by who wrote and how">
+        <thead><tr><th scope="col">Writer</th><th scope="col">Wording</th><th scope="col" class="num">Conversations</th>
+          <th scope="col" class="num">Replies</th><th scope="col">Mean formality, 0&ndash;3</th>
+          <th scope="col">Classifier&rsquo;s tone</th><th scope="col">Drift into jargon</th></tr></thead>
+        <tbody id="reg-body"></tbody>
+      </table>
+    </div>
+    <figure class="fig" id="reg-fig-wrap" hidden>
+      <figcaption class="fig-cap">Drift into jargon, reply by reply <span class="fig-sub" id="reg-fig-sub"></span></figcaption>
+      <div id="reg-fig" role="img"></div>
+    </figure>
+    <p class="note" id="reg-note"></p>
+  </section>
+
   <!-- 4. The same triples by scenario, with each scenario's mean and how often its runs agreed (summary.repeats) -->
   <section class="blk" id="sec-fig" hidden>
     <h2>By scenario</h2>
@@ -453,7 +484,93 @@
     if(usedSample||(summary&&summary.sample)||(conv&&conv.sample))$('sample-banner').hidden=false;
     if(summary)renderSummary(summary);
     if(conv){renderExplore(conv);renderExample(conv);renderDiffer(conv);renderFeatured(conv);}
+    // the classifier's register reading joins the real conversations only; samples are placeholders
+    if(!usedSample&&conv&&!conv.sample)loadRegister();
   });
+
+  // ---------- register (exploratory; data/petri_register_drift.json) ----------
+  // REG: conversation id -> {applies, turns: {transcript turn index -> classifier turn record}}. A graded reply joins its
+  // record by reply_turn = turn_index + 1 (the record indexes the transcript's turns from 0, reply_turn from 1).
+  var REG=null;
+  function loadRegister(){
+    get('../data/petri_register_drift.json').then(function(d){
+      if(!d||d.is_mock||!d.conversations||!Array.isArray(d.by_arm))return;
+      REG={};
+      Object.keys(d.conversations).forEach(function(cid){
+        var c=d.conversations[cid],t={};
+        arr(c.turns).forEach(function(r){if(typeof r.turn_index==='number')t[r.turn_index]=r;});
+        REG[cid]={applies:c.drift_instrument_applies===true,turns:t};
+      });
+      renderRegister(d);
+      if(CUR&&CUR.triple)drawChat(CUR.seed,CUR.triple,CUR.mids);
+    }).catch(function(){REG=null;});
+  }
+  function pct(x){return (typeof x==='number'&&isFinite(x))?(x*100).toFixed(1)+'%':DASH;}
+  function renderRegister(d){
+    var app=(d.headline_metrics||{}).applicable||{}, prov=d.provenance||{}, inst=(d.drift_instrument||{}).applies_to||{};
+    var tp=(prov.petri_transcripts||{}).path||'', run=(tp.split('/').slice(-2,-1)[0])||'one run';
+    var models=arr(d.models_served).join(', ')||d.model_requested||'the classifier';
+    $('reg-intro').textContent='A calibrated classifier ('+models+') read the register of every reply in '+run+': '
+      +num((d.headline_metrics||{}).total_conversations)+' conversations, '+num((d.headline_metrics||{}).total_assistant_turns)
+      +' replies. It rates each reply\u2019s formality from 0 (everyday) to 3 (dense clinical), names its tone, and asks'
+      +' whether the reply drifted into clinical jargon that departs from a patient\u2019s lay wording. That last question'
+      +' applies only when a '+human(inst.user_is||'patient')+' writes in '+arr(inst.registers).map(function(r){
+        return (ARM_LABEL[r]||human(r)).toLowerCase();}).join(' or ')
+      +' wording, so drift is counted only there.';
+    var body=$('reg-body');body.textContent='';
+    var order={patient:0,clinician:1}, worder={colloquial:0,lay_careful:1,clinical:2};
+    arr(d.by_arm).slice().sort(function(a,b){
+      return ((order[a.user_is]==null?9:order[a.user_is])-(order[b.user_is]==null?9:order[b.user_is]))
+        ||((worder[a.register]==null?9:worder[a.register])-(worder[b.register]==null?9:worder[b.register]));
+    }).forEach(function(a){
+      var tr=el('tr');
+      tr.appendChild(el('td',null,human(a.user_is)));
+      tr.appendChild(el('td','w w-'+a.register,ARM_LABEL[a.register]||human(a.register)));
+      tr.appendChild(el('td','num',num(a.conversations)));
+      tr.appendChild(el('td','num',num(a.assistant_turns)));
+      var f=el('td',null,num(a.mean_formality_score,2));
+      if(typeof a.mean_formality_score==='number'){var b=el('span','fbar'),i=el('span');
+        i.style.width=Math.max(0,Math.min(1,a.mean_formality_score/3))*100+'%';b.appendChild(i);f.appendChild(b);}
+      tr.appendChild(f);
+      var tones=a.tone_distribution||{};
+      tr.appendChild(el('td',null,Object.keys(tones).sort().map(function(k){return human(k)+' '+tones[k];}).join(' \u00b7 ')||DASH));
+      tr.appendChild(el('td',a.drift_instrument_applies?null:'muted',a.drift_instrument_applies
+        ?a.conversations_with_drift+' of '+a.conversations+' conversations ('+a.drift_turns+' of '+a.assistant_turns+' replies)'
+        :'question does not apply'));
+      body.appendChild(tr);
+    });
+    // per-reply drift for the conversations the question applies to: rate with its Wilson interval, n on each reply
+    var series=arr(d.drift_by_turn).filter(function(t){return typeof t.n==='number'&&t.n>0;});
+    if(series.length){
+      var W=560,H=184,L=44,R=12,T=14,B=50,top=Math.max(0.3,Math.ceil(Math.max.apply(null,series.map(function(t){return t.ci95_high||0;}))*10)/10);
+      var x=function(i){return L+(series.length===1?(W-L-R)/2:i*(W-L-R)/(series.length-1));},y=function(v){return T+(1-v/top)*(H-T-B);};
+      var ns='http://www.w3.org/2000/svg',svg=document.createElementNS(ns,'svg');
+      svg.setAttribute('viewBox','0 0 '+W+' '+H);svg.setAttribute('width','100%');svg.style.maxWidth=W+'px';
+      function add(tag,attrs,text){var e=document.createElementNS(ns,tag);Object.keys(attrs).forEach(function(k){e.setAttribute(k,attrs[k]);});if(text!=null)e.textContent=text;svg.appendChild(e);return e;}
+      [0,top/2,top].forEach(function(v){add('line',{x1:L,x2:W-R,y1:y(v),y2:y(v),stroke:'#dcdad2','stroke-width':0.5});
+        add('text',{x:L-6,y:y(v)+3,'text-anchor':'end','font-size':10,'font-family':'ui-monospace,Menlo,monospace',fill:'#6d6c66'},Math.round(v*100)+'%');});
+      series.forEach(function(t,i){
+        add('line',{x1:x(i),x2:x(i),y1:y(t.ci95_low),y2:y(t.ci95_high),stroke:'#a29f97','stroke-width':1});
+        add('circle',{cx:x(i),cy:y(t.drift_rate),r:2.6,fill:'#1c1c19'});
+        add('text',{x:x(i),y:H-B+14,'text-anchor':'middle','font-size':10,'font-family':'ui-monospace,Menlo,monospace',fill:'#6d6c66'},String(t.assistant_turn_ordinal));
+        add('text',{x:x(i),y:H-B+26,'text-anchor':'middle','font-size':9,'font-family':'ui-monospace,Menlo,monospace',fill:'#a29f97'},'n '+t.n);
+      });
+      add('text',{x:L,y:H-4,'font-size':10,'font-family':'ui-monospace,Menlo,monospace',fill:'#6d6c66'},'reply in the conversation');
+      var fig=$('reg-fig');fig.textContent='';fig.appendChild(svg);
+      fig.setAttribute('aria-label','Share of replies flagged as drifting into jargon at each reply, for '+human(inst.user_is||'patient')
+        +'s writing in lay wording, with 95% Wilson intervals: '+series.map(function(t){return 'reply '+t.assistant_turn_ordinal+' '
+        +t.drift_turns+' of '+t.n;}).join('; '));
+      $('reg-fig-sub').textContent=human(inst.user_is||'patient')+'s writing in lay wording \u00b7 dot: share of replies; line: 95% Wilson interval';
+      $('reg-fig-wrap').hidden=false;
+    }
+    $('reg-note').textContent='Where the question applies, '+num(app.drift_turns)+' of '+num(app.assistant_turns)
+      +' replies were flagged ('+pct(app.turn_drift_rate)+', descriptive: replies within a conversation are not independent),'
+      +' and '+num(app.conversations_with_drift)+' of '+num(app.conversations)+' conversations had any flagged reply (95% Wilson interval over'
+      +' conversations '+pct(app.conversation_ci95_low)+'\u2013'+pct(app.conversation_ci95_high)+'). Replies to clinical wording, and'
+      +' to clinicians, are more formal; the drift question does not apply to them, because clinical wording there matches the user.'
+      +' This classifier read one run of four, so none of this is a result of the pre-registered analysis.';
+    $('sec-register').hidden=false;
+  }
 
   // ---------- summary ----------
   function renderSummary(s){
@@ -1107,6 +1224,16 @@
           }else g.appendChild(el('b',null,shown));});
         if(!any)g.textContent='no grades recorded';
         cell.appendChild(g);
+        var reg=REG&&triple[a]&&REG[triple[a].conversation_id];
+        var rec=reg&&e.reply_turn!=null?reg.turns[Number(e.reply_turn)-1]:null;
+        if(rec){
+          var line=el('div','regline');
+          line.appendChild(document.createTextNode('classifier\u2019s register'));
+          line.appendChild(el('span','rpill',human(rec.tone_choice)));
+          if(typeof rec.formality_score==='number')line.appendChild(document.createTextNode('formality '+rec.formality_score.toFixed(2)+' / 3'));
+          if(reg.applies&&rec.has_register_drift)line.appendChild(el('span','rpill drift','drifted into jargon'));
+          cell.appendChild(line);
+        }
       }
       chat.appendChild(cell);
     });

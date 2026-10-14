@@ -99,6 +99,7 @@ export.
 | `jspace.json` | `methods.html`, `technical/` | `export_jspace.py` |
 | `judge_agreement.json` | `methods.html`, `llm/index.html`, `technical/` | `export_judge_agreement.py` |
 | `jev_calibration.json` | `methods.html` (Step 5b, calibrated classifier) | `export_jev_calibration.py` — **run by hand from a Jev audit report, not the daily Routine** |
+| `petri_register_drift.json` | `multi-turn/index.html` (exploratory register section; classifier tone on each reply of the run it read) | `export_jev_calibration.py` — **run by hand from a Jev audit report, not the daily Routine**; published only beside `jev_calibration.json` from the same report |
 | `jlens_depth.json` | `methods.html`, `simulated-scenarios/`, `technical/` | `export_jlens_depth.py` |
 | `jlens_loglens.json`, `jlens_transport.json` | `technical/` (j-lens chain) | `export_jlens_loglens.py`, `export_jlens_transport.py` |
 | `jlens_insights.json`, `jlens_swaps.json` | `technical/` (j-lens chain) | `jlens_insights.py`, `export_pair_swaps.py` |
