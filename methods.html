@@ -171,6 +171,14 @@
   .ja-table th.rowaxis span b{color:var(--ink);font-weight:600}
   .ja-axes{font-family:var(--mono);font-size:10.5px;color:var(--muted);margin:6px 0 0}
   .ja-axes b{color:var(--ink);font-weight:600}
+  .jv-sub{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:26px 0 6px}
+  .jv-table{border-collapse:collapse;font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:12.5px;margin:6px 0}
+  .jv-table th{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);
+    text-align:right;padding:4px 12px;border-bottom:1px solid var(--ink)}
+  .jv-table th:first-child,.jv-table td:first-child{text-align:left}
+  .jv-table td{padding:6px 12px;text-align:right;border-bottom:1px solid var(--hairline)}
+  .jv-table td.low{color:var(--penalty);font-weight:600}
+  .jv-note{font-family:var(--mono);font-size:10.5px;color:var(--muted);margin:6px 0 0}
   .slope-cell svg{width:100%;max-width:210px;height:auto}
   .me-legend{font-family:var(--mono);font-size:11px;color:var(--muted);
     letter-spacing:.04em;margin:8px 0 0}
@@ -890,6 +898,149 @@
           +'the two differ, the published tier is usually the less urgent reading. The red cells are '
           +'the '+pct(1-d.within_one.rate)+' of gradings more than one tier apart.';
         lean.hidden=false;
+      })
+      .catch(function(){/* pending line stays */});
+  })();
+  </script>
+
+  <section id="classifier-agreement">
+    <p class="step-no">Step 5b · Calibrated classifier</p>
+    <h2>A calibrated classifier graded the same responses</h2>
+    <p>
+      A third grader of a different kind read the archive: <code id="jv-model">Jev</code>, a decisions
+      classifier that returns a probability for each care-urgency tier rather than a single label. It
+      graded the responses of one stimulus set against the same rubric as the published judge,
+      <code id="jv-judge">claude-haiku-4-5</code>. Neither grader is ground truth, so every rate below is
+      agreement between the two, not accuracy. Like the second judge above, it never drives a published tier.
+    </p>
+    <p id="jv-summary" class="ja-head">agreement pending: the matrix fills in when the export lands</p>
+    <div class="ja-scroll">
+      <table class="ja-table" id="jv-table" hidden
+             aria-label="Tier confusion matrix: rows are the published judge's tiers, columns the classifier's tiers, cells the number of responses">
+        <thead><tr id="jv-cols"><th></th></tr></thead>
+        <tbody id="jv-body"></tbody>
+      </table>
+    </div>
+    <p class="ja-axes" id="jv-axes" hidden>Each cell counts responses: the green diagonal is both graders choosing
+      the same tier; red cells are two or more tiers apart. Tiers are the draft advice rubric&rsquo;s, pending
+      domain review.</p>
+    <p class="jv-sub" id="jv-tier-head" hidden>Agreement by the published judge&rsquo;s tier</p>
+    <div class="ja-scroll"><table class="jv-table" id="jv-tiers" hidden
+      aria-label="Agreement by the published judge's tier, with 95% Wilson intervals"></table></div>
+    <p id="jv-divergence" hidden></p>
+    <p class="jv-sub" id="jv-flag-head" hidden>Response features, read against the published judge&rsquo;s flags</p>
+    <div class="ja-scroll"><table class="jv-table" id="jv-flags" hidden
+      aria-label="Agreement on response features between the classifier and the published judge"></table></div>
+    <p class="jv-note" id="jv-prov" hidden></p>
+  </section>
+  <script>
+  (function(){
+    var TIER_LABEL={self_care:'self-care',routine:'routine',urgent:'urgent',emergency:'emergency'};
+    var FLAG_LABEL={safety_netting:'safety netting',clarifying_question:'clarifying question',
+      professional_referral:'referral',disclaimer:'disclaimer',refusal:'refusal'};
+    function pct(x){return x==null?'\u2014':(x*100).toFixed(1)+'%';}
+    function num(x,d){return x==null?'\u2014':x.toFixed(d);}
+    function el(tag,cls,text){var e=document.createElement(tag);if(cls)e.className=cls;if(text!=null)e.textContent=text;return e;}
+    function label(t){return TIER_LABEL[t]||t;}
+    fetch('data/jev_calibration.json',{cache:'no-cache'})
+      .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
+      .then(function(d){
+        var h=d.headline_metrics,div=h.tier_divergence;
+        if(d.is_mock||!d.confusion_matrix||!d.confusion_matrix.length||!div)return;
+        if(d.models_served&&d.models_served.length)document.getElementById('jv-model').textContent=d.models_served.join(', ');
+        if(d.judge_model)document.getElementById('jv-judge').textContent=d.judge_model;
+        var sum=document.getElementById('jv-summary');sum.textContent='';
+        sum.appendChild(document.createTextNode('n = '+h.total_advice_cases.toLocaleString()+' responses graded by both \u00b7 '));
+        sum.appendChild(el('b',null,pct(h.exact_agreement)+' same tier'));
+        sum.appendChild(document.createTextNode(' \u00b7 '+pct(h.within_one_agreement)+' within one tier \u00b7 Cohen\u2019s \u03ba '
+          +num(h.cohen_kappa,2)+' (quadratic-weighted '+num(h.cohen_kappa_quadratic,2)+') \u00b7 Brier '
+          +num(h.brier_score,3)+' against '+num(h.base_rate_brier,3)+' for always forecasting the published tier mix'
+          +(h.brier_skill_score==null?'':' (skill '+num(h.brier_skill_score,2)+')')));
+        // the matrix: most urgent first, rows the published judge, columns the classifier
+        var T=d.tier_order,order=T.slice().reverse(),M=d.confusion_matrix;
+        function cell(r,c){return M[T.indexOf(r)][T.indexOf(c)];}
+        var cols=document.getElementById('jv-cols');
+        var axisTr=document.createElement('tr');
+        var sp=el('th','axis-spacer');sp.colSpan=2;axisTr.appendChild(sp);
+        var ax=el('th','axis');ax.colSpan=order.length+1;ax.setAttribute('scope','colgroup');
+        ax.appendChild(el('b',null,document.getElementById('jv-model').textContent));
+        ax.appendChild(document.createTextNode(' (classifier) coded it as \u2192'));
+        axisTr.appendChild(ax);cols.parentNode.insertBefore(axisTr,cols);
+        cols.insertBefore(el('th','axis-spacer'),cols.firstElementChild);
+        order.forEach(function(t){var th=el('th',null,label(t));th.scope='col';cols.appendChild(th);});
+        var thAll=el('th','tot','all');thAll.scope='col';cols.appendChild(thAll);
+        var body=document.getElementById('jv-body');
+        order.forEach(function(rt,ri){
+          var tr=document.createElement('tr');
+          if(ri===0){
+            var ra=el('th','rowaxis');ra.rowSpan=order.length+1;ra.setAttribute('scope','rowgroup');
+            var span=document.createElement('span');span.appendChild(el('b',null,d.judge_model||'published judge'));
+            span.appendChild(document.createTextNode(' (published judge) coded it as \u2193'));
+            ra.appendChild(span);tr.appendChild(ra);
+          }
+          var th=el('th',null,label(rt));th.scope='row';tr.appendChild(th);
+          var rs=0;
+          order.forEach(function(ct){
+            var i=T.indexOf(rt),j=T.indexOf(ct),v=cell(rt,ct);rs+=v;
+            tr.appendChild(el('td',i===j?'diag':(Math.abs(i-j)>1?'far':''),v.toLocaleString()));
+          });
+          tr.appendChild(el('td','tot',rs.toLocaleString()));
+          body.appendChild(tr);
+        });
+        var mrow=el('tr','tot');var mth=el('th',null,'all');mth.scope='row';mrow.appendChild(mth);
+        order.forEach(function(ct){mrow.appendChild(el('td',null,order.reduce(function(s,rt){return s+cell(rt,ct);},0).toLocaleString()));});
+        mrow.appendChild(el('td','tot',h.total_advice_cases.toLocaleString()));body.appendChild(mrow);
+        ['jv-table','jv-axes'].forEach(function(id){document.getElementById(id).hidden=false;});
+        // agreement by the published judge's tier, most urgent first
+        var tt=document.getElementById('jv-tiers');
+        var hr=document.createElement('tr');
+        ['published tier','n','same tier','agreement','95% interval','classifier\u2019s most common other tier'].forEach(function(c){
+          var th=el('th',null,c);th.scope='col';hr.appendChild(th);});
+        tt.appendChild(hr);
+        div.per_primary_judge_tier.slice().reverse().forEach(function(t){
+          var tr=document.createElement('tr'),low=t.primary_judge_tier===div.lowest_agreement_tier;
+          var o=t.most_common_jev_tier_otherwise;
+          [label(t.primary_judge_tier),t.n.toLocaleString(),t.agreed.toLocaleString(),pct(t.agreement),
+           t.ci95_low==null?'\u2014':pct(t.ci95_low)+'\u2013'+pct(t.ci95_high),
+           o?label(o.jev_tier)+' ('+o.count.toLocaleString()+', '+pct(o.share_of_primary_judge_tier)+')':'\u2014']
+            .forEach(function(v,k){tr.appendChild(el('td',low&&k===3?'low':'',v));});
+          tt.appendChild(tr);
+        });
+        var low=div.per_primary_judge_tier.filter(function(t){return t.primary_judge_tier===div.lowest_agreement_tier;})[0];
+        var dv=document.getElementById('jv-divergence');
+        var txt='The graders agree least where the published judge chose '+label(low.primary_judge_tier)+': '
+          +low.agreed.toLocaleString()+' of '+low.n.toLocaleString()+' ('+pct(low.agreement)+')';
+        if(low.most_common_jev_tier_otherwise){var o=low.most_common_jev_tier_otherwise;
+          txt+=', and the classifier read '+o.count.toLocaleString()+' of them as '+label(o.jev_tier);}
+        txt+='. Overall the classifier chose the more urgent tier in '+div.jev_higher_tier_count.toLocaleString()
+          +' disagreements and the less urgent in '+div.jev_lower_tier_count.toLocaleString()+'.';
+        if(div.shifts_two_or_more_tiers.length){
+          txt+=' Shifts of two or more tiers: '+div.shifts_two_or_more_tiers.map(function(c){
+            return label(c.primary_judge_tier)+' \u2192 '+label(c.jev_tier)+' '+c.count.toLocaleString();}).join('; ')+'.';}
+        dv.textContent=txt;
+        ['jv-tier-head','jv-tiers','jv-divergence'].forEach(function(id){document.getElementById(id).hidden=false;});
+        // response features, read against the published judge's flags
+        var ft=document.getElementById('jv-flags');
+        var fh=document.createElement('tr');
+        ['feature','agreement','precision','sensitivity','specificity','both yes','classifier only','judge only','both no']
+          .forEach(function(c){var th=el('th',null,c);th.scope='col';fh.appendChild(th);});
+        ft.appendChild(fh);
+        Object.keys(d.flag_metrics).forEach(function(f){
+          var m=d.flag_metrics[f],tr=document.createElement('tr');
+          [FLAG_LABEL[f]||f,pct(m.agreement),pct(m.precision),pct(m.sensitivity),pct(m.specificity),
+           m.tp.toLocaleString(),m.fp.toLocaleString(),m.fn.toLocaleString(),m.tn.toLocaleString()]
+            .forEach(function(v){tr.appendChild(el('td',null,v));});
+          ft.appendChild(tr);
+        });
+        ['jv-flag-head','jv-flags'].forEach(function(id){document.getElementById(id).hidden=false;});
+        var p=d.provenance||{},sp2=h.advice_phase_spend||{};
+        var pv=document.getElementById('jv-prov');
+        pv.textContent='Source: Jev audit report '+String(d.source_report_sha256).slice(0,12)
+          +' \u00b7 rubric '+(p.rubric?p.rubric.path:'\u2014')
+          +' \u00b7 responses '+(p.advice_archive?p.advice_archive.path:'\u2014')
+          +' \u00b7 classifier '+String(p.classifier_sha256||'\u2014').slice(0,12)
+          +(sp2.cost_usd==null?'':' \u00b7 classifier spend $'+sp2.cost_usd.toFixed(4)+' over '+sp2.calls.toLocaleString()+' calls');
+        pv.hidden=false;
       })
       .catch(function(){/* pending line stays */});
   })();
