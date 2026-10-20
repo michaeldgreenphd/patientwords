@@ -18,8 +18,8 @@ Python 3.11. No application environment variables, credentials, live model calls
 database or backend service are needed to serve the committed site.
 
 The full contract and browser checkers live in sibling `../patientwords-engine`.
-Use its [verify.md](../patientwords-engine/verify.md) for engine dependency setup
-and producer tests. A full engine checkout is preferable: contract checks read
+Use its [verify.md](https://github.com/michaeldgreenphd/patientwords-engine/blob/main/verify.md) for engine dependency setup
+and producer tests (`../patientwords-engine/verify.md` in local sibling checkouts). A full engine checkout is preferable: contract checks read
 its `../patientwords-engine/scripts/`, `../patientwords-engine/data/`,
 `../patientwords-engine/ops/` and `../patientwords-engine/docs/`. These include
 publication disclosures and vendor-pack state. Claim/seal checks additionally need their committed sources.
@@ -209,21 +209,22 @@ not proof that today's exported site renders correctly.
 
 Run this when changing the simulated schema/export path, generated response models,
 test client, or scenario-index behavior. The current bounded path lives in engine
-[frontend_boundary.md](../patientwords-engine/docs/exploratory/frontend_boundary.md).
+[frontend_boundary.md](https://github.com/michaeldgreenphd/patientwords-engine/blob/main/docs/exploratory/frontend_boundary.md).
 The fixture is `../patientwords-engine/tests/fixtures/frontend_boundary.json`.
 It deliberately uses synthetic inputs and expected values, not research observations.
 
 Prerequisites are Python 3.13, a separate environment installed from engine
 `../patientwords-engine/scripts/boundary_client/requirements.lock`, and Chromium.
 Setup downloads packages and a browser; the check itself uses only local files and loopback HTTP. Run from
-this site root. Choose a different `PW_BOUNDARY_ENV` directory if the path is
-already used for another purpose.
+this site root. Set `PW_BOUNDARY_ENV` in the parent shell so subsequent checks
+reuse the same environment. Choose a different directory if the path is already
+used for another purpose.
 
 ```bash
+PW_BOUNDARY_ENV=/tmp/pw-boundary-venv
 (
 set -euo pipefail
 cd ../patientwords-engine
-PW_BOUNDARY_ENV=/tmp/pw-boundary-venv
 python3.13 -m venv "$PW_BOUNDARY_ENV"
 "$PW_BOUNDARY_ENV/bin/python" -m pip install -r scripts/boundary_client/requirements.lock
 "$PW_BOUNDARY_ENV/bin/python" -m playwright install chromium
@@ -232,13 +233,16 @@ python3.13 -m venv "$PW_BOUNDARY_ENV"
 )
 ```
 
-With that environment and browser already installed, the repeat command is:
+With that environment and browser already installed, the repeat command is
+below. In a new terminal, first set `PW_BOUNDARY_ENV` to the same existing
+environment path; the command refuses an unset variable rather than choosing one.
 
 ```bash
 (
 set -euo pipefail
 cd ../patientwords-engine
-/tmp/pw-boundary-venv/bin/python scripts/check_frontend_boundary.py \
+: "${PW_BOUNDARY_ENV:?Set PW_BOUNDARY_ENV to the existing boundary environment}"
+"$PW_BOUNDARY_ENV/bin/python" scripts/check_frontend_boundary.py \
   --site ../patientwords --receipt /tmp/patientwords-boundary-receipt.json
 )
 ```
@@ -271,7 +275,7 @@ This gallery consumes exported artifacts, not a live API. The engine's
 batches and report sidecars under `../patientwords-engine/data/simulated/`, plus
 model-specific `../patientwords-engine/trace_out/` summary parts and renders.
 It writes site `data/simulated_scenarios.json` and a capped selection under
-`modes/simulated/`. See the engine [verification guide](../patientwords-engine/verify.md)
+`modes/simulated/`. See the engine [verification guide](https://github.com/michaeldgreenphd/patientwords-engine/blob/main/verify.md)
 for producer setup, focused export tests and safe regeneration. Preserve selected
 stamp order, steered-stamp disclosure, source/model metadata, seeds and existing
 publication decisions. A dry run writes/deletes nothing; a real export can prune
@@ -333,7 +337,7 @@ Stop a manual server with Ctrl-C. The automated page checker owns and terminates
 its own server; if interrupted externally, stop only the process you started.
 Remove or retain `/tmp/patientwords-page-report.json` and
 `/tmp/patientwords-boundary-receipt.json` deliberately; they are session artifacts,
-not repository guidance. Remove the isolated `/tmp/pw-boundary-venv` only when it
+not repository guidance. Remove the isolated environment selected by `PW_BOUNDARY_ENV` only when it
 was created for this work and is no longer needed; do not delete shared browser
 caches. Temporary fixture/staging copies belong outside
 the checkout and should be removed when no longer needed. Do not remove unrelated
