@@ -1,187 +1,78 @@
 # AGENTS.md
 
-Guidance for coding agents working in this repository. This is the canonical
-instruction file: Codex reads `AGENTS.md` directly, and the root `CLAUDE.md`
-imports it so Claude Code reads the same rules. Below the import, `CLAUDE.md`
-carries only the owner's writing conventions, never a repository rule. That
-section is kept identical to the one in the engine's `CLAUDE.md`, as are the
-generic bullets under **Code Review Rules** below; the engine's
-`tests/test_shared_conventions.py` compares both. Put every agent rule
-here — a rule written only in `CLAUDE.md` reaches one tool and is invisible to the
-agents reviewing the pull request.
+Canonical repository instructions; `CLAUDE.md` imports this file. Read any
+applicable ancestor and nested `AGENTS.md` / `AGENTS.override.md` instructions
+(including lowercase variants present in the checkout) before editing.
+Any active override must also direct agents to [verify.md](verify.md).
 
-## What this is
+## Start here
 
-The public GitHub Pages gallery for a mechanistic-interpretability study of clinical vs.
-patient language in language models. Everything shown here is generated or measured by the
-backend repo (`patientwords-engine`, also public — no secrets in either repo, ever;
-expected as a sibling checkout); this repo is presentation only. The voice is a careful research notebook: short declarative sentences,
-exact technical terms, no marketing.
+PatientWords is the public static research gallery. This repository displays
+committed measurements and renders from sibling `../patientwords-engine`; the
+engine owns generation, measurement, statistics, provenance and exports. Pages
+fetch local JSON, not a live backend API. There is deliberately no build system,
+Node dependency, framework or Python source here: self-contained HTML pages use
+inline CSS and vanilla JS, including deliberate cross-page duplication.
+The voice is a careful research notebook: short declarative sentences, exact
+technical terms, no marketing.
 
-## Hard rules
+- [README.md](README.md): purpose, page map and local preview.
+- [verify.md](verify.md): canonical setup, change-specific checks and completion evidence.
+- [docs/agent_reference.md](docs/agent_reference.md): required reference for data ownership,
+  contracts, research limitations, UI conventions and deployment decisions.
+- `index.html`, `methods.html` and section `index.html` files: authored pages;
+  `simulated-scenarios/scenario.html`: detail view using `?sim=`.
+- [docs/boundary-check.md](docs/boundary-check.md): the synthetic index boundary
+  check and inactive workflow proposal; current commands and scope are in `verify.md`.
+- `data/`: published payloads; `modes/`: generated figures;
+  `.github/workflows/site_checks.yml`: actual CI gates and engine pairing.
 
-- **Never edit anything under `modes/`** — engine-generated, self-contained figure renders.
-  They are replaced wholesale by engine exports, never patched here.
-- **Every number on a page must trace to a source in this repo**: a `data/*.json` field, a
-  `modes/` figure, or page JS that computes it at runtime from fetched data. Unverifiable
-  numbers get corrected or cut — never invented, never extrapolated. Provenance numbers
-  copied from engine sidecars live in `data/provenance.json`.
-- **Provenance labels must stay accurate.** The hand-authored demonstration renders that
-  once served as Figs. 1 and 4 were retired at the owner's request (2026-07-08); every
-  figure now shown is a live gemma-2-2b trace and is labeled as such. If a demo render
-  ever returns, its labels and meta tags must disclose it. The methods endnote
-  distinguishes two provenances: LLM-written scenarios with real live traces, and the
-  hand-built dataset from real patient language.
-- **Draft labels are load-bearing.** Urgency-tier content is marked "draft pending domain
-  review" (from `data/urgency_shift.json:vocabulary_status`); do not remove or soften that
-  until the tier vocabulary is approved (`docs/tier_review_checklist.md` in the engine).
-- Intentional misspellings in the phrase dataset are stress-test stimuli. Missing data
-  renders as pending/em-dash states — those paths must keep working.
-- Preserve the provenance & acknowledgments footer content.
+## Working procedure
 
-## No build system
+1. Read applicable nested instructions, the relevant sections of
+   [verify.md](verify.md), and [agent_reference.md](docs/agent_reference.md) while
+   planning. Inspect branch, working tree and both revisions before paired work;
+   preserve unrelated or concurrent edits. Current source/configuration governs;
+   past reports describe their recorded revisions, not today's test result.
+2. Define observable success and the affected data consumer or rendered behavior.
+   Make one focused change, preserving the decisions below.
+3. Run the applicable verification-guide checks. Before declaring completion,
+   reread its change-type and evidence sections; inspect the full diff and run
+   `git diff --check`. Report exact commands, results, warnings, skips and gaps,
+   including the counterpart revision/artifact for paired checks. Keep session
+   logs in the completion report; preserve durable decisions in linked docs.
 
-Every page is a self-contained HTML file: inline CSS, inline vanilla JS, no CDN, no
-imports. **Cross-page duplication of CSS/JS is deliberate** — pages must work standalone.
-A change to shared behavior (masthead, chips, palette variables) means editing each page.
+## Invariants
 
-Semantic palette (do not change): clinical green `#15803d`, patient ink `#111827`,
-structural grey `#c3c9d2`, penalty red `#b4483d`, paper `#faf9f5`, muted `#6d6c66`
-(chosen for WCAG AA on paper). Serif display + mono data. One page-level addition, the owner's
-decision of 2026-09-29: the Multi-turn page shows its three wordings as texting bubbles
-and colours each wording the same way in its charts, with colloquial blue `#2563eb`,
-careful-lay amber `#b45309` and the clinical green above (white text at 5:1 or better;
-colour-blind separation checked). Patient ink stays the patient colour on every other page.
+- Never patch `modes/` or engine-written data here; fix and regenerate in the
+  engine. The exceptions are `data/model_provenance.json` (hand-maintained) and
+  `data/specialties.json` (hand-synced from
+  `../patientwords-engine/data/specialty_map.draft.json`).
+  The reference's writer table defines ownership, including owner-run exports.
+- Every published number traces to committed data, a figure or runtime computation.
+  Keep synthetic scenarios, real measured traces and real-patient-language dataset
+  provenance distinct. Keep sample notices, draft/domain-review labels, intentional
+  misspellings and the provenance/acknowledgments footer.
+- Preserve stable `(batch, batch_index)` identities, per-model metadata and the
+  base-model compatibility mirror. `scenario.index` is display order, not a stable
+  research ID. Missing measurements remain pending/em-dash states, including older
+  payloads without `models_meta`, `models` or `archive`; never borrow another
+  model's measurements under an unmeasured model's label.
+- `../patientwords-engine/scripts/contracts/simulated_scenarios.v1.schema.json`
+  defines structural compatibility; the export validator adds semantic checks. Keep its
+  OpenAPI description, test client and consumer assertions consistent with changes.
+- Preserve holdout/publication restrictions and reproducibility. Do not quietly
+  correct historical measurements or promote one pair's penalty/flip to a research
+  claim. Read the reference's measurement limitations before writing such claims.
+- GitHub Pages publishes at `/patientwords/`. Deployment/source/domain changes are
+  architectural changes requiring explicit justification and project-path checks.
+- Both repositories are public: never commit secrets.
 
-## Data contracts (what page JS reads)
+## Figure style
 
-- `data/simulated_scenarios.json` — payload from the engine exporter. Per-scenario
-  measurements for the base model (gemma-2-2b) sit at the top level; other models under
-  `scenario.models[<id>]`. `payload.models_meta` drives the model-selector chips
-  (`features:false` → grey the clinical-circuit meter; `graphs:false` → say "next-token
-  behavior only", never imply a hidden render). Pages must fall back gracefully when
-  `models_meta`/`models`/`archive` are absent (older payload shapes).
-- `data/urgency_shift.json` — urgency rows joined by `(batch, batch_index, model)`;
-  drives the Urgency column and downgrade badges.
-- `data/model_evaluations.json`, `data/dialects.json`, `data/stress_pairs.json`,
-  `data/provenance.json`, `data/simulated_archive.{csv,json}` (collaborator download).
-- `data/model_stats.json` — claim-grade per-model statistics (engine
-  `paired_stats_rigor.py` site copy, models_meta embedded); drives the cross-model
-  comparison in `technical/` Part 4 (`model-evaluations/` is a redirect stub
-  since the 2026-07-14 consolidation). `data/convergence.json` — cumulative
-  per-model penalty estimates (accumulation fold in `technical/` Part 4;
-  moved from methods Fig. 5 on 2026-07-14, owner decision; methods keeps a
-  pointer). `data/timeline.json` — study
-  timeline from committed artifacts (simulated-scenarios strip). All three are
-  regenerated by the engine's nightly cycle; the generation-engine audit moved to
-  `methods.html#generation-eval` (2026-07-10, owner-directed).
-
-### The rest of the published set, by consuming page
-
-Every file below is fetched by page JS. All of them are written by an engine
-script and overwritten by the next export **except the two whose Engine writer
-column reads "no engine writer"** — those are hand-maintained here, and editing
-them is the documented workflow. That column is load-bearing, not annotation:
-the data-alteration rule below keys off it. The engine's
-`scripts/validate_frontend_contract.py --site` is the machine-readable version
-of this table — it shape-checks each payload and is the gate to run after any
-export.
-
-| File | Read by | Engine writer |
-|---|---|---|
-| `advice_scenarios.json` | `llm/index.html` | `export_advice_scenarios.py` |
-| `advice_coding_sample.json` | `llm/code.html` (human-coding worksheet) | `advice_human_coding.py` |
-| `display_vocab.json` | **no page** (`dialect-differences/` names it only in a code comment; it fetches `dialects.json` and `provenance.json`) | `export_dialect_matrix.py` |
-| `translation_scale.json` | `translation/index.html` | `translation_scale.py` |
-| `drift_series.json` | `methods.html` (daily sentinel series), `technical/` | `drift_sentinel.py` |
-| `tag_mass.json` | `methods.html` (attribution mass by phrasing) | `export_tag_mass.py` |
-| `retrace_consistency.json` | `methods.html`, `simulated-scenarios/`, `technical/` | `retrace_consistency.py` |
-| `jspace.json` | `methods.html`, `technical/` | `export_jspace.py` |
-| `judge_agreement.json` | `methods.html`, `llm/index.html`, `technical/` | `export_judge_agreement.py` |
-| `jev_calibration.json` | `methods.html` (Step 5b, calibrated classifier), `llm/index.html` (per-cell classifier grading) | `export_jev_calibration.py` — **run by hand from a Jev audit report, not the daily Routine** |
-| `petri_register_drift.json` | `multi-turn/index.html` (exploratory register section; classifier tone on each reply of the run it read) | `export_jev_calibration.py` — **run by hand from a Jev audit report, not the daily Routine**; published only beside `jev_calibration.json` from the same report |
-| `jlens_depth.json` | `methods.html`, `simulated-scenarios/`, `technical/` | `export_jlens_depth.py` |
-| `jlens_loglens.json`, `jlens_transport.json` | `technical/` (j-lens chain) | `export_jlens_loglens.py`, `export_jlens_transport.py` |
-| `jlens_insights.json`, `jlens_swaps.json` | `technical/` (j-lens chain) | `jlens_insights.py`, `export_pair_swaps.py` |
-| `simulated_archive.csv` | `simulated-scenarios/scenario.html` (collaborator download) | `export_archive.py` |
-| `simulated_archive.json` | **no page** (written alongside the CSV; staged) | `export_archive.py` |
-| `model_provenance.json` | `technical/` (per-model build info) | **no engine writer** — hand-maintained here |
-| `specialties.json` | `simulated-scenarios/` (specialty filter) | **no engine writer** — hand-synced from the engine's `data/specialty_map.draft.json`; `validate_frontend_contract.py` checks the two agree |
-| `petri_multiturn_summary.json` | `multi-turn/index.html` (headline, D figure, repeats table, provenance) | `export_petri_multiturn.py` (on engine `main` since 2026-09-25, 8575ef9b) — **owner-run, not the daily Routine** |
-| `petri_multiturn_conversations.json` | `multi-turn/index.html` (explore viewer) | `export_petri_multiturn.py` (on engine `main` since 2026-09-25, 8575ef9b) — **owner-run, not the daily Routine** |
-
-`*.sample.json` files are development fixtures, but two ARE fetched by live pages
-when the URL carries `?sample=1` (`llm/index.html` → `advice_scenarios.sample.json`,
-`llm/code.html` → `advice_coding_sample.sample.json`), so their shape is part of the
-contract too.
-
-The Multi-turn page has two more: `petri_multiturn_summary.sample.json` and
-`petri_multiturn_conversations.sample.json`. They are SYNTHETIC (placeholder text,
-random grades, `"sample": true` and a `_note` saying so) and exist only to build the
-page before the real files exist. While the page's `REAL_DATA_PUBLISHED` constant is
-`false` it fetches only these, and it shows a "sample data" notice whenever it
-renders from them. The real files have the same keys without `sample`; the change
-that commits them also sets that constant to `true`, after which the page loads the
-real names. The two files are one unit: if either real file is missing, the page
-renders both samples (never a real summary beside sample transcripts). The constant exists
-because `check_pages.py` fails on any 404 under `data/`, so a real-first fetch
-before the real files exist would turn site CI red. The page was gated on the final
-pre-registered analysis, the engine exporter on `main`, the vendor reproduction pack
-(engine wave-2 decision 16) and the owner's sign-off. The owner set the pack's send
-aside before publication (engine deviation D3, 2026-09-27, in
-`docs/preregistration_advice.md`): the page cites the pack and shows it as not yet
-sent, and the contract gate accepts that for the one pack version the deviation
-names (`data/petri/publication_deviations.json` in the engine).
-
-Five published files currently have **no page consumer** —
-`advice_scenarios_nat.json`, `patch_profile.json`, `specialty_breakdown.json`,
-`simulated_archive.json`, `display_vocab.json`. They are staged data waiting on a page; do not assume a
-page breaks if they change, and do not delete them assuming they are dead. The
-consumer column above is hand-maintained and nothing checks it: the 2026-09-04
-fact-check found two rows missing `technical/`. `validate_frontend_contract.py`
-checks file shapes, not who reads them.
-
-## Established UI conventions
-
-- Filter/model chips: `.chip` buttons in `.chip-g` groups with `role="group"`,
-  `aria-pressed` toggled with the `.on` class.
-- Sortable table headers: real `<button>`s inside `th[data-key]`, `aria-sort` on the
-  active `th`; first click on the Urgency column sorts most-safety-relevant first.
-- Accessibility floor: skip link on every composed page (the five meta-refresh stubs and
-  `share/card.html` lack one), `:focus-visible` outlines (never bare
-  `outline:none`), `scope="col"` on generated headers, iframe `title`s, decorative
-  preview iframes `aria-hidden`.
-- Vocabulary used across flip displays: the model *hedges* (top prediction holds, loses
-  probability) vs. *redirects* (top prediction changes); a redirect that drops a
-  care-urgency tier is a *downgrade*.
-
-## Figure style (standing preference)
-
-Tufte: simple and readable. Maximum data-ink, hairline structure, direct labeling over
-legends, muted context so the semantic colors carry the finding, no chartjunk. Applies to
-any inline SVG/chart built on pages (the engine renders modes/ figures to the same
-standard).
-
-## Verifying changes
-
-Serve and drive the real pages — the scenario tables are JS-heavy:
-
-```bash
-python3 -m http.server 8900          # from the repo root
-# Playwright with the preinstalled browser:
-#   chromium.launch({ executablePath: '/opt/pw-browsers/chromium' })
-```
-
-Check: no console/page errors, row counts match the payload, sorting/filtering/model
-switching still work, and pending/em-dash states render on scenarios lacking data.
-
-## Pull request workflow
-
-Every pull request in this repository is independently reviewed by Codex agents.
-Write changes to be reviewable by one: keep each pull request focused on a single
-concern, make behavior changes testable and tested, and include migration or
-compatibility notes whenever a change alters an API, a data file's shape, a
-configuration key, or anything another repository or a published page reads.
+Tufte: readable figures, direct labels, hairline structure, muted context and
+no chartjunk. Preserve the semantic palette and accessibility conventions in
+[agent_reference.md](docs/agent_reference.md), including the Multi-turn exception.
 
 ## Code Review Rules
 
@@ -197,111 +88,10 @@ Codex applies these requirements during each review:
 
 ### What those rules mean in this repository
 
-This repo is presentation only, so "stored data" and "schema" mean something
-specific here, and a reviewer who does not know it will pass a change that
-silently breaks a published page:
-
-* **Data this repo must not alter:** `modes/` and every `data/` file with an
-  engine writer in the table above are overwritten wholesale by the next export,
-  so a hand edit is data loss and the fix belongs in the engine repo instead.
-  **The two exceptions are hand-maintained here and editing them is the
-  documented workflow:** `data/model_provenance.json`, which has no engine
-  writer at all, and `data/specialties.json`, hand-synced from the engine's
-  `data/specialty_map.draft.json` with `validate_frontend_contract.py` checking
-  the two agree. Rejecting an edit to those two blocks the only route they have.
-* **The schema that breaks silently:** page JS fetches `data/*.json` and reads
-  named fields. A payload shape change without the matching page change produces
-  a blank or `undefined` cell, not an error, so a reviewer must check the
-  consuming page named in the data-contracts table for every field touched. The
-  engine's `scripts/validate_frontend_contract.py --site` is the machine check.
-* **Compatibility path:** older payloads exist. Pages must keep degrading to
-  their pending/em-dash states when `models_meta`, `models`, or `archive` are
-  absent, and a change that assumes a new field is present needs a fallback.
-* **Claims are load-bearing:** every number on a page must trace to a source in
-  this repo, provenance labels must stay accurate, and draft labels on
-  urgency-tier content stay until the vocabulary is approved. Weakening any of
-  those is a correctness finding here, not a wording preference.
-
-## Stack and deployment
-
-* **This repo contains no Python source.** Zero `.py` files as of 2026-09-04.
-  Every page is self-contained HTML with inline CSS and inline vanilla JS. Python
-  appears in two places only: `python3 -m http.server` for local preview, and
-  `.github/workflows/site_checks.yml`, which checks out `patientwords-engine` and
-  runs its two checkers — the code stays over there. All data extraction,
-  statistics, and rendering happen in the engine and arrive here as committed files. A pull request that adds a build step, a
-  bundler, a framework, or a Python dependency to this repo is a change of
-  architecture, not an improvement, and needs to be argued as one.
-* **Served by GitHub Pages from the repository root at the project path
-  `/patientwords/`.** There is no `CNAME` file and no Pages workflow: the site is
-  project pages, not a custom domain, and its root is `/patientwords/`, not `/`.
-* **Deployment safety.** Anything that changes how the site is served — adding a
-  `CNAME`, adding a Pages workflow, moving the publishing source or directory,
-  or changing DNS in front of it — gets scrutinized and must state why. These
-  changes fail in production, not in review: the CI this repo has (`site_checks.yml`)
-  validates payload shapes and drives the pages, and inspects nothing about how the
-  site is served.
-
-### The custom-domain trap, if a custom domain is ever added
-
-`404.html` hard-codes the `/patientwords/` prefix in **12 absolute links**. That
-is correct today and deliberate: GitHub Pages serves `404.html` for a missing
-path at any depth, so relative links there would resolve against the missing
-path and break. Every other page uses relative links — but **16 pages** (12
-composed pages and 4 meta-refresh stubs) carry an absolute
-`<link rel="canonical" href="https://michaeldgreenphd.github.io/patientwords/…">`
-that hard-codes the same host and prefix and goes stale the same way. A custom
-domain therefore touches `404.html` plus those 16 canonicals; count them with
-`grep -rl 'rel="canonical" href="https://michaeldgreenphd.github.io/patientwords' --include=*.html .`
-rather than trusting this number.
-
-But those 12 are absolute *and* carry the project-path prefix. **Adding a custom
-domain moves the site root from `/patientwords/` to `/`, and all 12 become
-404s** — on the very page a lost visitor lands on. So if a `CNAME` ever appears
-in a pull request, `404.html` must change in the same pull request, and a
-reviewer should treat a `CNAME` without it as an incomplete change.
-
-## Responding to code review
-
-Every pull request here is reviewed by Codex. Its findings are
-**hypotheses, not defects**, and the disposition is yours to establish:
-
-1. **Verify against the actual file before changing anything.** Read the lines
-   the finding names. On the first reviewed pull request here (#4, 2026-09-04)
-   five findings arrived across two rounds: four were real — a rule in this file
-   contradicting its own data-contracts table (twice), a stale `CLAUDE.md`
-   reference in `README.md`, and a payload missing from that table — and one was
-   a misreading of how a trailing newline renders in a diff. A later fact-check of
-   this file found eight more false or misleading assertions. Plan for both.
-2. **Give every finding a disposition on its own thread**: fixed, naming the
-   commit; declined, naming the reason and the evidence; or not applicable, and
-   why. Silence is not a disposition.
-3. **Resolve only threads you actually fixed.** Resolving one you dismissed makes
-   the pull request look handled when it is not.
-4. **Never apply a finding you have not checked.** Applying a wrong one puts a
-   defect into the file the reviewers grade against; dismissing a right one ships
-   what the review existed to catch. Both were live on that first pull request.
-
-Findings about page behaviour are checked by driving the pages, not by reading
-the diff — see **Verifying changes** above.
-
-## Numbers published here have known limitations
-
-The engine measures; this repo displays. Two facts about those measurements, as
-of 2026-09-04, matter to anyone writing page text about them. Both are recorded
-in full in the engine's `AGENTS.md` (**Known measurement limitations**) and
-`docs/backend_agreement_20260903.md`:
-
-* Per-pair probabilities from the engine's logits path carry a **bfloat16 error
-  term of up to 0.032** — roughly half the study's mean language penalty. On top
-  of that, the 2026-09-04 negative control showed a neutral four-word clinical
-  insertion moves a pair's penalty by more than the studied effect in a third of
-  cases and flips its top-1 prediction — a "redirect" here — in 14 of 50. **Page copy
-  must not lean on any single pair's probability, penalty, or flip label**; the
-  aggregate estimate is the study's only claim-grade number, and its defensible
-  form is the direction (36/14, p = 0.003), not the −0.06 magnitude.
-* One hosted measurement (index 20 of `pairs_20260710T011743Z`) recorded a
-  neighbouring token's probability. Not yet fixed.
-
-Neither changes a published number, and neither is a reason to edit `data/` here
-— that is the engine's to correct and re-export.
+Review data-writer ownership, compatibility fallbacks and source-backed claims
+against [agent_reference.md](docs/agent_reference.md). Review findings are hypotheses:
+verify each against source or rendered behavior, record its disposition, and resolve
+only findings actually fixed. Keep PRs focused and include compatibility notes for
+cross-repository changes. The generic block above and `CLAUDE.md`'s shared-conventions
+block are compared by `../patientwords-engine/tests/test_shared_conventions.py`.
+Edit both repositories when changing either shared block.
