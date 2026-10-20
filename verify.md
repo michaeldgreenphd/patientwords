@@ -71,6 +71,7 @@ for path in paths:
 print(f'{len(paths)} JSON files parse')
 PY
 git diff --check
+git diff --cached --check
 )
 ```
 
@@ -346,7 +347,7 @@ untracked files or cache directories as cleanup.
 ## Completion evidence
 
 Inspect `git diff --stat`, `git diff`, newly created guidance files, and
-`git diff --check`. Report changed files, observable outcomes, exact commands and
+`git diff --cached`, `git diff --check`, and `git diff --cached --check`. Report changed files, observable outcomes, exact commands and
 working directories, pass/fail/skip counts, warnings and blockers. Distinguish
 fixture coverage, existing-artifact compatibility, fresh generation-to-render
 checks, manual observations and tests not run. Include counterpart revision and
