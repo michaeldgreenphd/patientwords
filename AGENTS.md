@@ -74,6 +74,14 @@ Tufte: readable figures, direct labels, hairline structure, muted context and
 no chartjunk. Preserve the semantic palette and accessibility conventions in
 [agent_reference.md](docs/agent_reference.md), including the Multi-turn exception.
 
+## Dual-AI PR Review Architecture
+
+- **Codex** audits hunk-level diff logic, local edge cases and isolated code correctness.
+- **Gemini CLI ([GEMINI.md](GEMINI.md))** audits whole-repo blast radius, untouched
+  downstream callers, data provenance and `patientwords-engine` ↔ `patientwords`
+  contract sync. It reports only cross-file findings with both changed and untouched
+  evidence; it never duplicates Codex's local syntax, type or isolated logic checks.
+
 ## Code Review Rules
 
 Codex applies these requirements during each review:
