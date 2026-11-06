@@ -117,8 +117,8 @@
   <p class="explainer">We measured how open-weight language models complete the same
     care-seeking sentence when the symptom is stated in clinical terms and when it is
     stated the way patients actually talk. The models are measured subjects, not tools
-    under endorsement; nothing on this page is medical advice. Every number is computed
-    in this page from the study's published data files.</p>
+    under endorsement; nothing on this page is medical advice. Every number comes from
+    the study's published data files.</p>
 
   <div class="stat" id="stats" aria-live="polite">
     <div><div class="n" id="s-pct">—</div><div class="d" id="s-pct-d">of matched scenario pairs lose at least one care-urgency tier in at least one measured model</div></div>
@@ -234,10 +234,22 @@
         var c=+k.split('>')[0],p=+k.split('>')[1];
         if(c===maxTier){em+=downByCell[k]; if(p<=1)emLow+=downByCell[k];}
       });
+      // The collector's headline (summary.headline_observational, engine scripts/urgency_headline.py) wins when
+      // present: observational generation batches only, every measured row in the denominator. The loop above
+      // pools every published row (outcome-selected sets, sentinels, re-runs) and stays only as the fallback for
+      // payloads published before the block existed.
+      var h=(u.summary&&u.summary.headline_observational)||null, popNote='', everyModel=true;
+      if(h&&h.downgrade_cells){
+        nPairs=h.matched_pairs; nDownPairs=h.pairs_with_downgrade; down=h.downgrades;
+        classified=h.classified_measurements; downByCell=h.downgrade_cells;
+        em=h.emergency_downgrades; emLow=h.emergency_to_self_care;
+        everyModel=h.downgrades_exceed_upgrades_in_every_model===true;
+        popNote='observational batches, ';
+      }
       document.getElementById('s-pct').textContent=nPairs?Math.round(100*nDownPairs/nPairs)+'%':'—';
       document.getElementById('s-pct-d').textContent='of '+nPairs.toLocaleString()+' matched scenario pairs ('+nDownPairs.toLocaleString()+') lose at least one care-urgency tier in at least one measured model';
       document.getElementById('s-dn').textContent=down.toLocaleString();
-      document.getElementById('s-dn-d').textContent='tier downgrades across '+classified.toLocaleString()+' classified measurements — downgrades outnumber upgrades in every measured model';
+      document.getElementById('s-dn-d').textContent='tier downgrades across '+classified.toLocaleString()+' classified measurements'+(everyModel?' — downgrades outnumber upgrades in every measured model':'');
       document.getElementById('s-em').textContent=em.toLocaleString();
       document.getElementById('s-em-d').textContent='downgrades out of the emergency tier'+(emLow?', '+emLow+' of them straight to self-care or no action':'');
 
@@ -268,7 +280,7 @@
         });
         body.appendChild(tr);
       });
-      document.getElementById('mx-lab').textContent='tier downgrades, all measured models pooled · '+down.toLocaleString()+' downgrades';
+      document.getElementById('mx-lab').textContent='tier downgrades, '+popNote+'all measured models pooled · '+down.toLocaleString()+' downgrades';
 
       // ----- vignette tier line needs the urgency row; stash for the payload step
       window.__pwTierRow=null;
