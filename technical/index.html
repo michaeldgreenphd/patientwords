@@ -1289,8 +1289,14 @@
           // own check above stays as fallback
           if(typeof jcl.window_capture_exceeds_hijack_at_every_k==='boolean')
             holds=jcl.window_capture_exceeds_hijack_at_every_k;
+          // name the windows where the ordering fails, from the counts themselves; the old false branch said
+          // "at the top-8 window" whatever window failed (after the 2026-10-31 re-measure it was top-2)
+          var failing=['1','2','4','8'].filter(function(k){return ws[k]&&!(ws[k].capture>ws[k].hijack);})
+            .map(function(k){return 'top-'+k;});
           if(parts.length)winNote=' Window check ('+parts.join(', ')+'): capture '+
-            (holds?'exceeds':'does not always exceed')+' hijack at '+(holds?'every':'the top-8')+' window.';
+            (holds?'exceeds hijack at every window.':
+              (failing.length?'does not exceed hijack at the '+failing.join(', ')+' window'+(failing.length>1?'s':'')+'.':
+                'does not always exceed hijack.'));
         }
         // capture-vs-hijack comparative computed from the live counts, never
         // asserted; the generator's dominant_failure_class (audit M7) wins
