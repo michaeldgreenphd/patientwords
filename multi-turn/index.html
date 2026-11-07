@@ -863,32 +863,42 @@
     draw2(); window.addEventListener('resize',debounce(draw2,150));
   }
   function drawDist(vals,dist,n,missNote){
+    // owner decision fig-urgency-dist, 2026-11-07: the lowest tier (1-2% of replies) drew as thin slivers, so it is
+    // a number column; the other tiers keep their true widths and every bar ends on one right edge, so the highest
+    // tier's shares line up. Names sit over the first bar's segments instead of a separate legend.
     var host=$('fig-dist'); host.textContent='';
-    var W=Math.max(280,host.clientWidth||480), lab=84, bw=W-lab-6, rowH=34;
+    var W=Math.max(280,host.clientWidth||480), narrow=W<420, lab=narrow?78:84, sc=narrow?46:64, x0=lab+sc, bw=W-x0-2, rowH=34, cw=6.6;
     var fills=['#ebe8df','#c9c5b9','#737067','#2b2a26'], inks=['#1c1c19','#1c1c19','#fff','#fff'];
-    // the scale's names once, as a legend that wraps onto another row rather than run past the chart (Codex on
-    // site PR #10: on a phone the last name ran past the viewport)
-    var items=[],lx=lab,ly=4;vals.forEach(function(v,k){
-      var w=14+human(v).length*6.7;
-      if(lx>lab&&lx+w>W){lx=lab;ly+=16;}
-      items.push([lx,ly,k,v]);lx+=w+16;});
-    var top=ly+30, H=top+ARMS.length*rowH+4;
+    var first=ARMS.filter(function(a){return n[a];})[0];
+    // header: the lowest tier's name over its number column, the others over the first measured bar's segments;
+    // a name that would overlap the one before it drops to a second line, and none runs past the right edge
+    var heads=[{x:lab+sc/2,t:human(vals[0]),k:0}];
+    if(first){var tf=n[first], off=dist[first][0]/tf*bw;
+      vals.forEach(function(v,k){if(!k)return; var w=dist[first][k]/tf*bw;
+        heads.push({x:x0+off+w/2,t:human(v),k:k}); off+=w;});}
+    var lines=[[]];
+    heads.forEach(function(h){var hw=h.t.length*cw/2; h.x=Math.min(Math.max(h.x,hw),W-hw);
+      var row=0; while(lines[row]&&lines[row].some(function(o){return Math.abs(o.x-h.x)<o.hw+hw+6;}))row++;
+      (lines[row]=lines[row]||[]).push({x:h.x,hw:hw}); h.row=row;});
+    var top=lines.length*13+10, H=top+ARMS.length*rowH+4;
     var svg=sv('svg',{viewBox:'0 0 '+W+' '+H,width:W,height:H});
-    items.forEach(function(it){
-      svg.appendChild(sv('rect',{x:it[0],y:it[1],width:10,height:10,fill:fills[it[2]]}));
-      svg.appendChild(sv('text',{x:it[0]+14,y:it[1]+9,fill:'#6d6c66'},human(it[3])));});
+    heads.forEach(function(h){svg.appendChild(sv('text',{x:h.x,y:10+h.row*13,'text-anchor':'middle',
+      fill:h.k===vals.length-1?'#1c1c19':'#6d6c66'},h.t));});
     var summary=[];
     ARMS.forEach(function(a,ri){
-      var y=top+ri*rowH, tot=n[a]||0, x=lab;
-      var mark=sv('rect',{x:0,y:y+8,width:8,height:8,fill:WCOL[a]});svg.appendChild(mark);
-      svg.appendChild(sv('text',{x:12,y:y+16,fill:'#1c1c19'},ARM_LABEL[a]));
+      var y=top+ri*rowH, tot=n[a]||0;
+      svg.appendChild(sv('text',{x:0,y:y+16,fill:WCOL[a]},ARM_LABEL[a]));
       if(!tot)return;
+      var p0=Math.round(100*dist[a][0]/tot);
+      svg.appendChild(sv('text',{x:lab+sc/2,y:y+16,'text-anchor':'middle',fill:'#6d6c66'},p0+'%'));
+      var x=x0+dist[a][0]/tot*bw;
       vals.forEach(function(v,k){
-        var c=dist[a][k], w=c/tot*bw; if(!c)return;
+        if(!k)return; var c=dist[a][k], w=c/tot*bw; if(!c)return;
         var g=sv('g',{});
-        g.appendChild(sv('rect',{x:x,y:y+2,width:Math.max(0,w-2),height:20,fill:fills[k]}));
+        g.appendChild(sv('rect',{x:x+1,y:y+2,width:Math.max(0,w-2),height:20,fill:fills[k]}));
         var pct=Math.round(100*c/tot);
-        if(w>=30)g.appendChild(sv('text',{x:x+w/2-1,y:y+16,'text-anchor':'middle',fill:inks[k]},pct+'%'));
+        // print the share whenever its text fits inside the segment (on a phone the highest tier's 11% is ~24px)
+        if(w>=(String(pct).length+1)*cw+3)g.appendChild(sv('text',{x:x+w/2,y:y+16,'text-anchor':'middle',fill:inks[k]},pct+'%'));
         g.appendChild(sv('title',{},ARM_LABEL[a]+' · '+human(v)+' · '+pct+'% ('+c+' of '+tot+')'));
         svg.appendChild(g); x+=w;
       });
