@@ -45,16 +45,23 @@
   .masthead nav a:nth-child(3),.masthead nav a:nth-child(10){margin-right:2vw}
   .rule-heavy{border:0;border-top:2px solid var(--ink);margin:0}
   .rule-fine{border:0;border-top:1px solid var(--hairline);margin:3px 0 0}
-  .dateline{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin:26px 0 6px}
   h1{font-size:33px;line-height:1.15;margin:0 0 8px;font-weight:600;letter-spacing:-.01em;max-width:24ch}
   h2{font-size:21px;margin:38px 0 6px;font-weight:600}
   p{margin:.5em 0;max-width:66ch}
   .explainer{color:var(--muted);font-size:16px}
   .draft{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--penalty)}
-  .stat{display:flex;gap:38px;flex-wrap:wrap;margin:20px 0 6px}
-  .stat>div{min-width:150px;max-width:220px}
-  .stat .n{font-family:var(--mono);font-size:34px;font-weight:600;font-variant-numeric:tabular-nums;line-height:1.05}
-  .stat .d{font-size:13.5px;color:var(--muted);line-height:1.4;margin-top:3px}
+  .hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:44px;margin:30px 0 8px}
+  .hero h1{max-width:none}
+  .hero .explainer{font-size:17px;max-width:none}
+  .lean{display:flex;flex-direction:column;justify-content:center;gap:20px;border-left:1px solid var(--hairline);padding-left:28px;min-width:0}
+  .lean .n{font-size:46px;font-weight:600;line-height:1;font-variant-numeric:lining-nums tabular-nums}
+  .lean .n.up{color:var(--muted)}
+  .lean .d{font-size:16px;line-height:1.45;color:var(--ink);margin:6px 0 0;max-width:none}
+  .lean .bar{height:10px;margin-top:8px;width:0}
+  .lean .bar.down{background:var(--penalty)}
+  .lean .bar.up{background:var(--structural)}
+  .lean .note{font-size:15px;color:var(--muted);margin:0;max-width:none}
+  @media (max-width:700px){.hero{grid-template-columns:1fr;gap:22px}.lean{border-left:0;padding-left:0;border-top:1px solid var(--hairline);padding-top:18px}}
   .fig{border:1px solid var(--hairline);background:#fff;padding:18px 20px 14px;margin:18px 0}
   .fig .figlab{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
   .fig .cap{font-size:13.5px;color:var(--muted);margin-top:10px;line-height:1.5;max-width:none}
@@ -112,20 +119,29 @@
   <hr class="rule-fine">
 </header>
 <main id="content">
-  <p class="dateline">Clinical brief · for clinicians and triage teams</p>
-  <h1>The model hears the words, not the symptom.</h1>
-  <p class="explainer">We measured how open-weight language models complete the same
-    care-seeking sentence when the symptom is stated in clinical terms and when it is
-    stated the way patients actually talk. The models are measured subjects, not tools
-    under endorsement; nothing on this page is medical advice. Every number comes from
-    the study's published data files.</p>
-
-  <div class="stat" id="stats" aria-live="polite">
-    <div><div class="n" id="s-pct">—</div><div class="d" id="s-pct-d">of matched scenario pairs lose at least one care-urgency tier in at least one measured model</div></div>
-    <div><div class="n" id="s-dn">—</div><div class="d" id="s-dn-d">tier downgrades across all classified measurements — downgrades outnumber upgrades in every model</div></div>
-    <div><div class="n" id="s-em">—</div><div class="d" id="s-em-d">downgrades out of the emergency tier</div></div>
+  <div class="hero">
+    <div>
+      <h1>The model hears the words, not the symptom.</h1>
+      <p class="explainer">We measured how open-weight language models complete the same
+        care-seeking sentence when the symptom is stated in clinical terms and when it is
+        stated the way patients actually talk. The models are measured subjects, not tools
+        under endorsement; nothing on this page is medical advice. Every number comes from
+        the study's published data files.</p>
+    </div>
+    <div class="lean" id="lean" aria-live="polite">
+      <div>
+        <div class="n" id="l-down">—</div>
+        <p class="d">times a model pointed to less urgent care for everyday words.</p>
+        <div class="bar down" id="l-down-bar" aria-hidden="true"></div>
+      </div>
+      <div>
+        <div class="n up" id="l-up">—</div>
+        <p class="d">times it pointed to more urgent care.</p>
+        <div class="bar up" id="l-up-bar" aria-hidden="true"></div>
+      </div>
+      <p class="note" id="l-note"></p>
+    </div>
   </div>
-  <p class="draft" id="vocab-status">urgency tiers: loading…</p>
 
   <h2>One pair, verbatim</h2>
   <p>Both sentences describe the same complaint. The model reads them and predicts the
@@ -210,48 +226,45 @@
     .then(function(r){return r.ok?r.json():null;})
     .then(function(u){ if(!u||!u.rows) return;
       var vs=u.vocabulary_status||'status unavailable';
-      document.getElementById('vocab-status').textContent='urgency tiers: '+vs;
       document.getElementById('vocab-status-2').textContent='urgency tiers: '+vs;
       document.getElementById('vocab-inline').textContent=vs;
 
       var rows=u.rows, tiers=u.tiers||{};
-      var classified=0, down=0, downByCell={}, maxTier=0;
-      var pairs={}, downPairs={};
+      var classified=0, down=0, up=0, downByCell={}, perModel={};
       rows.forEach(function(r){
         var c=r.tier_top_clinical,p=r.tier_top_patient;
-        pairs[r.batch+'#'+r.index]=1;
         if(c==null||p==null)return;
         classified++;
+        var m=perModel[r.model]||(perModel[r.model]={down:0,up:0});
         if(r.flip_class==='downgrade'){
-          down++; downPairs[r.batch+'#'+r.index]=1;
+          down++; m.down++;
           var k=c+'>'+p; downByCell[k]=(downByCell[k]||0)+1;
-          if(c>maxTier)maxTier=c;
-        }
+        } else if(r.flip_class==='upgrade'){ up++; m.up++; }
       });
-      var nPairs=Object.keys(pairs).length, nDownPairs=Object.keys(downPairs).length;
-      var em=0,emLow=0;
-      Object.keys(downByCell).forEach(function(k){
-        var c=+k.split('>')[0],p=+k.split('>')[1];
-        if(c===maxTier){em+=downByCell[k]; if(p<=1)emLow+=downByCell[k];}
-      });
+      var models=Object.keys(perModel);
+      var everyModel=models.length>0&&models.every(function(k){return perModel[k].down>perModel[k].up;});
       // The collector's headline (summary.headline_observational, engine scripts/urgency_headline.py) wins when
       // present: observational generation batches only, every measured row in the denominator. The loop above
       // pools every published row (outcome-selected sets, sentinels, re-runs) and stays only as the fallback for
       // payloads published before the block existed.
-      var h=(u.summary&&u.summary.headline_observational)||null, popNote='', everyModel=true;
+      var h=(u.summary&&u.summary.headline_observational)||null, popNote='';
       if(h&&h.downgrade_cells){
-        nPairs=h.matched_pairs; nDownPairs=h.pairs_with_downgrade; down=h.downgrades;
-        classified=h.classified_measurements; downByCell=h.downgrade_cells;
-        em=h.emergency_downgrades; emLow=h.emergency_to_self_care;
+        down=h.downgrades; classified=h.classified_measurements; downByCell=h.downgrade_cells;
+        // a headline block without an upgrade count leaves that number pending rather than mixing in the
+        // fallback loop's count, which pools a different population
+        up=typeof h.upgrades==='number'?h.upgrades:null;
         everyModel=h.downgrades_exceed_upgrades_in_every_model===true;
         popNote='observational batches, ';
       }
-      document.getElementById('s-pct').textContent=nPairs?Math.round(100*nDownPairs/nPairs)+'%':'—';
-      document.getElementById('s-pct-d').textContent='of '+nPairs.toLocaleString()+' matched scenario pairs ('+nDownPairs.toLocaleString()+') lose at least one care-urgency tier in at least one measured model';
-      document.getElementById('s-dn').textContent=down.toLocaleString();
-      document.getElementById('s-dn-d').textContent='tier downgrades across '+classified.toLocaleString()+' classified measurements'+(everyModel?' — downgrades outnumber upgrades in every measured model':'');
-      document.getElementById('s-em').textContent=em.toLocaleString();
-      document.getElementById('s-em-d').textContent='downgrades out of the emergency tier'+(emLow?', '+emLow+' of them straight to self-care or no action':'');
+      // the hero: how often everyday words pointed to less urgent care, against how often to more urgent care
+      document.getElementById('l-down').textContent=down.toLocaleString();
+      document.getElementById('l-up').textContent=up==null?'—':up.toLocaleString();
+      var top=Math.max(down,up||0);
+      if(top>0){
+        document.getElementById('l-down-bar').style.width=(100*down/top).toFixed(1)+'%';
+        if(up!=null)document.getElementById('l-up-bar').style.width=(100*up/top).toFixed(1)+'%';
+      }
+      document.getElementById('l-note').textContent='Out of '+classified.toLocaleString()+' comparisons.'+(everyModel?' Every model leaned toward less urgent care.':'');
 
       // ----- matrix: rows = from-tier (desc), cols = to-tier (asc), downgrades only
       var names={}; Object.keys(tiers).forEach(function(k){if(k!=='null')names[+k]=String(tiers[k]).split('/')[0].split(' - ')[0].trim();});
@@ -289,7 +302,7 @@
         return false;});
       window.__pwTierNames=names;
     })
-    .catch(function(){ document.getElementById('vocab-status').textContent='urgency tiers: data pending'; });
+    .catch(function(){ document.getElementById('vocab-status-2').textContent='urgency tiers: data pending'; });
 
   fetch('../data/simulated_scenarios.json',{cache:'no-cache'})
     .then(function(r){return r.ok?r.json():null;})
