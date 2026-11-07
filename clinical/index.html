@@ -82,14 +82,17 @@
   .sb .p{color:var(--muted);font-variant-numeric:tabular-nums}
   .tierline{font-family:var(--mono);font-size:12px;margin-top:10px;color:var(--muted)}
   .tierline b{color:var(--penalty);font-weight:600}
-  .mxwrap{overflow-x:auto;margin-top:8px}
-  table.mx{font-family:var(--mono);font-size:12px;border-collapse:collapse;font-variant-numeric:tabular-nums}
-  .mx th{font-weight:600;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:4px 10px;text-align:center;border:0}
-  .mx th[scope=row]{text-align:right;padding-right:12px;white-space:nowrap}
-  .mx td{width:78px;height:48px;text-align:center;vertical-align:middle;border:1px solid var(--hairline);position:relative}
-  .mx td .dot{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);border-radius:50%;background:var(--penalty);opacity:.8}
-  .mx td .v{position:relative;font-weight:600}
-  .mx td.diag{background:var(--paper)}
+  .dg{display:grid;gap:14px;margin:6px 0 0}
+  .dg-from{font-size:15px;font-variant-caps:all-small-caps;letter-spacing:.05em;color:var(--ink);margin:0 0 2px}
+  .dg-group.top .dg-from{color:var(--penalty)}
+  .dg-row{display:grid;grid-template-columns:minmax(0,15em) minmax(0,1fr);gap:12px;align-items:center;padding-left:1.1em}
+  .dg-to{font-size:16px;line-height:1.35}
+  .dg-val{display:flex;align-items:center;gap:8px;min-width:0}
+  .dg-bar{height:11px;background:var(--muted);min-width:2px;flex:0 0 auto}
+  .dg-group.top .dg-bar{background:var(--penalty)}
+  .dg-n{font-family:var(--mono);font-size:13px;font-variant-numeric:tabular-nums}
+  .dg-group.top .dg-n{color:var(--penalty);font-weight:600}
+  @media (max-width:560px){.dg-row{grid-template-columns:minmax(0,1fr);gap:2px}}
   .pend{color:var(--muted)}
   .box{border-left:3px solid var(--clinical);padding:2px 0 2px 16px;margin:22px 0}
   .box.warn{border-left-color:var(--penalty)}
@@ -168,22 +171,12 @@
 
   <h2>Where the downgrades land</h2>
   <p>Each downgrade moves a scenario from the tier its clinical phrasing reached to the
-    tier its patient phrasing reached. Most slips are one step. The top row is the one
+    tier its patient phrasing reached. Most slips are one step. The first group is the one
     that matters clinically.</p>
   <div class="fig">
-    <div class="figlab" id="mx-lab">tier downgrades, all measured models pooled · loading…</div>
-    <div class="mxwrap">
-      <table class="mx" id="mx" aria-describedby="mx-cap">
-        <caption class="figlab" style="text-align:left;padding:0 0 6px;caption-side:top;display:none">downgrade matrix</caption>
-        <thead><tr id="mx-head"><th></th></tr></thead>
-        <tbody id="mx-body"></tbody>
-      </table>
-    </div>
-    <p class="cap" id="mx-cap">Dot area is proportional to count; the exact count is
-      printed in every cell. Cells on and above the diagonal are empty by construction —
-      this figure shows downgrades only. Computed at load time from the urgency data
-      file; hover a cell for the tier definitions.</p>
-    <p class="draft" id="vocab-status-2"></p>
+    <div class="dg" id="dg" aria-describedby="dg-cap"><p class="dg-n">—</p></div>
+    <p class="cap" id="dg-cap">Each bar counts the times the everyday wording got a lower
+      level of care than the medical wording, grouped by the level the medical wording got.</p>
   </div>
 
   <h2>Why this belongs in clinical conversations</h2>
@@ -226,7 +219,6 @@
     .then(function(r){return r.ok?r.json():null;})
     .then(function(u){ if(!u||!u.rows) return;
       var vs=u.vocabulary_status||'status unavailable';
-      document.getElementById('vocab-status-2').textContent='urgency tiers: '+vs;
       document.getElementById('vocab-inline').textContent=vs;
 
       var rows=u.rows, tiers=u.tiers||{};
@@ -247,14 +239,13 @@
       // present: observational generation batches only, every measured row in the denominator. The loop above
       // pools every published row (outcome-selected sets, sentinels, re-runs) and stays only as the fallback for
       // payloads published before the block existed.
-      var h=(u.summary&&u.summary.headline_observational)||null, popNote='';
+      var h=(u.summary&&u.summary.headline_observational)||null;
       if(h&&h.downgrade_cells){
         down=h.downgrades; classified=h.classified_measurements; downByCell=h.downgrade_cells;
         // a headline block without an upgrade count leaves that number pending rather than mixing in the
         // fallback loop's count, which pools a different population
         up=typeof h.upgrades==='number'?h.upgrades:null;
         everyModel=h.downgrades_exceed_upgrades_in_every_model===true;
-        popNote='observational batches, ';
       }
       // the hero: how often everyday words pointed to less urgent care, against how often to more urgent care
       document.getElementById('l-down').textContent=down.toLocaleString();
@@ -266,34 +257,30 @@
       }
       document.getElementById('l-note').textContent='Out of '+classified.toLocaleString()+' comparisons.'+(everyModel?' Every model leaned toward less urgent care.':'');
 
-      // ----- matrix: rows = from-tier (desc), cols = to-tier (asc), downgrades only
-      var names={}; Object.keys(tiers).forEach(function(k){if(k!=='null')names[+k]=String(tiers[k]).split('/')[0].split(' - ')[0].trim();});
-      var order=Object.keys(names).map(Number).sort(function(a,b){return a-b;});
-      var head=document.getElementById('mx-head');
-      var hcorner=el('th',null,''); hcorner.setAttribute('scope','col'); head.textContent=''; head.appendChild(hcorner);
-      order.slice(0,-1).forEach(function(t){var th=el('th',null,names[t]);th.setAttribute('scope','col');head.appendChild(th);});
-      var body=document.getElementById('mx-body'); body.textContent='';
+      // ----- downgrades as a ranked list: one group per tier the clinical wording reached (highest first), one bar
+      // per lower tier the everyday wording reached; only drops that happened are listed
+      var names={}; Object.keys(tiers).forEach(function(k){if(k!=='null'){var t=String(tiers[k]).split('/')[0].split(' - ')[0].trim();names[+k]=t.charAt(0).toUpperCase()+t.slice(1);}});
+      var order=Object.keys(names).map(Number).sort(function(a,b){return b-a;});
       var maxCell=0; Object.keys(downByCell).forEach(function(k){maxCell=Math.max(maxCell,downByCell[k]);});
-      order.slice(1).reverse().forEach(function(from){
-        var tr=document.createElement('tr');
-        var th=el('th',null,names[from]); th.setAttribute('scope','row'); tr.appendChild(th);
-        order.slice(0,-1).forEach(function(to){
-          var td=document.createElement('td');
-          if(to>=from){td.className='diag';}
-          else{
-            var n=downByCell[from+'>'+to]||0;
-            if(n){
-              var d=el('span','dot'); var px=Math.max(5,Math.round(38*Math.sqrt(n/maxCell)));
-              d.style.width=px+'px'; d.style.height=px+'px'; td.appendChild(d);
-              td.appendChild(el('span','v',String(n)));
-            } else {td.appendChild(el('span','pend','·'));}
-            td.title=(tiers[String(from)]||from)+' → '+(tiers[String(to)]||to)+': '+n+' downgrade'+(n===1?'':'s');
-          }
-          tr.appendChild(td);
+      var dg=document.getElementById('dg'); dg.textContent='';
+      order.forEach(function(from,gi){
+        var dests=order.filter(function(to){return to<from&&(downByCell[from+'>'+to]||0)>0;});
+        if(!dests.length)return;
+        var g=el('div','dg-group'+(from===order[0]?' top':''));
+        g.appendChild(el('p','dg-from',names[from]));
+        var list=document.createElement('ul'); list.style.cssText='list-style:none;margin:0;padding:0;display:grid;gap:6px';
+        dests.forEach(function(to){
+          var n=downByCell[from+'>'+to];
+          var li=el('li','dg-row'); li.title=(tiers[String(from)]||from)+' → '+(tiers[String(to)]||to)+': '+n+' downgrade'+(n===1?'':'s');
+          li.appendChild(el('span','dg-to','→ '+names[to]));
+          var v=el('span','dg-val'); var bar=el('span','dg-bar'); bar.setAttribute('aria-hidden','true');
+          bar.style.width=(maxCell?Math.max(0.5,85*n/maxCell):0).toFixed(1)+'%'; // the longest bar leaves room for its count
+          v.appendChild(bar); v.appendChild(el('span','dg-n',n.toLocaleString())); li.appendChild(v);
+          list.appendChild(li);
         });
-        body.appendChild(tr);
+        g.appendChild(list); dg.appendChild(g);
       });
-      document.getElementById('mx-lab').textContent='tier downgrades, '+popNote+'all measured models pooled · '+down.toLocaleString()+' downgrades';
+      if(!dg.childNodes.length)dg.appendChild(el('p','dg-n','No downgrades in this data file.'));
 
       // ----- vignette tier line needs the urgency row; stash for the payload step
       window.__pwTierRow=null;
@@ -302,7 +289,7 @@
         return false;});
       window.__pwTierNames=names;
     })
-    .catch(function(){ document.getElementById('vocab-status-2').textContent='urgency tiers: data pending'; });
+    .catch(function(){ document.getElementById('vocab-inline').textContent='data pending'; });
 
   fetch('../data/simulated_scenarios.json',{cache:'no-cache'})
     .then(function(r){return r.ok?r.json():null;})
