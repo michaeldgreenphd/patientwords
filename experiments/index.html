@@ -157,6 +157,8 @@
 
   @media (min-width:1001px){
     .tbl td[data-col=method]{white-space:nowrap;overflow-wrap:normal}
+    /* the prompts table holds two 64-character hashes; the variant name is not the cell that wraps */
+    .tbl tr[data-kind=variant] td[data-col=variant]{white-space:nowrap;overflow-wrap:normal}
     .tbl td[data-col=comparison]{min-width:25ch}
     .tbl td[data-col=sign]{min-width:16ch}
     .tbl td[data-col=state]{min-width:27ch}
@@ -552,12 +554,16 @@
   /* ---------------------------------------------------------------- families */
 
   function variantsOf(fam){
-    /* bundle/1 lists variant names only. A later bundle may carry objects with a prompt hash,
-       a token count and, where it may be shown, the prompt text. */
+    /* bundle/1 lists variant names. Since 2026-11-10 the family may also carry variant_inputs:
+       per variant a prompt hash, a token-id hash and a token count, never prompt text. A bundle
+       written before that has no variant_inputs, and the cells then say so. A later bundle may
+       carry variant objects with, where it may be shown, the prompt text. */
     var v=fam&&fam.variants, out=[];
+    var extra=fam&&isObj(fam.variant_inputs)?fam.variant_inputs:{};
+    function added(name){return Object.prototype.hasOwnProperty.call(extra,name)&&isObj(extra[name])?extra[name]:{};}
     if(Array.isArray(v)){
       v.forEach(function(x){
-        if(isStr(x)) out.push({name:x});
+        if(isStr(x)){var r=added(x);out.push({name:x,prompt_sha256:r.prompt_sha256,token_sha256:r.token_sha256,n_tokens:r.n_tokens});}
         else if(isObj(x)) out.push({name:x.variant||x.id||x.name,prompt_sha256:x.prompt_sha256,token_sha256:x.token_sha256,
           n_tokens:x.n_tokens,prompt:x.prompt});
       });
@@ -630,11 +636,12 @@
       return {attrs:{'data-kind':'variant','data-family':fid,'data-variant':v.name},cells:[
         ['variant',String(v.name)],
         ['prompt_sha256',hash(v.prompt_sha256)],
+        ['token_sha256',hash(v.token_sha256)],
         ['n_tokens',isInt(v.n_tokens)?String(v.n_tokens):miss()],
         ['prompt',isStr(v.prompt)&&v.prompt?el('span',{style:'font-family:var(--serif);font-size:14.5px',text:v.prompt}):miss('prompt text is '+NOT_IN_BUNDLE)]
       ]};
     });
-    return table('Paired prompts of '+fid,[['Variant'],['Prompt SHA-256'],['Tokens',true],['Prompt text']],rows);
+    return table('Paired prompts of '+fid,[['Variant'],['Prompt SHA-256'],['Token ids SHA-256'],['Tokens',true],['Prompt text']],rows);
   }
 
   function renderBehavior(b,fam,fid,entries){
@@ -805,16 +812,25 @@
     var out=document.createDocumentFragment();
     out.appendChild(head);
     if(computed.length){
-      var bases=[], labels=[], pre=[];
+      var bases=[], labels=[], pre=[], src=[];
       computed.forEach(function(e){
         if(bases.indexOf(e.ica.basis_manifest_sha256)<0) bases.push(e.ica.basis_manifest_sha256);
         if(labels.indexOf(e.ica.energy_share_label)<0) labels.push(e.ica.energy_share_label);
-        var p=isStr(e.ica.preprocessing)?e.ica.preprocessing:(isObj(e.ica.basis)&&isStr(e.ica.basis.preprocessing)?e.ica.basis.preprocessing:null);
+        /* preprocessing_mode is what the ICA payloads record (bundle/1 since 2026-11-10); the two older
+           spellings are kept for a bundle that carries one of them. An empty string is not a mode. */
+        var p=isStr(e.ica.preprocessing_mode)&&e.ica.preprocessing_mode?e.ica.preprocessing_mode:
+          (isStr(e.ica.preprocessing)&&e.ica.preprocessing?e.ica.preprocessing:
+          (isObj(e.ica.basis)&&isStr(e.ica.basis.preprocessing)&&e.ica.basis.preprocessing?e.ica.basis.preprocessing:null));
         if(pre.indexOf(p)<0) pre.push(p);
+        var from=isStr(e.ica.preprocessing_read_from)&&e.ica.preprocessing_read_from?e.ica.preprocessing_read_from:null;
+        if(src.indexOf(from)<0) src.push(from);
       });
       out.appendChild(kv([
         ['basis sha256',bases.length===1?hash(bases[0]):miss('the comparisons of this family name '+bases.length+' bases'),{'data-col':'ica_basis'}],
-        ['preprocessing mode',pre.length===1&&pre[0]!==null?pre[0]:miss(),{'data-col':'ica_preprocessing'}],
+        ['preprocessing mode',pre.length===1?(pre[0]!==null?pre[0]:miss()):
+          miss('the comparisons of this family record '+pre.length+' preprocessing modes'),{'data-col':'ica_preprocessing'}],
+        pre.length===1&&pre[0]!==null&&src.length===1&&src[0]!==null?
+          ['preprocessing mode read from',src[0],{'data-col':'ica_preprocessing_source'}]:null,
         ['position',computed[0].ica.position],
         ['energy share',labels.length===1&&isStr(labels[0])?labels[0]:miss('label not recorded'),{'data-col':'ica_share_label'}]
       ]));
@@ -971,7 +987,10 @@
   function renderTotals(b){
     var t=b.plan_totals, x=b.execution, c=isObj(x.counts)?x.counts:{}, est=isObj(t.estimates)?t.estimates:null;
     var frag=document.createDocumentFragment();
+    /* Both counts are numbers of journal lines (bundle/1 since 2026-11-10). A bundle written before
+       that carries neither, and each row then says so. */
     var reused=isInt(c.reused_events)?c.reused_events:(isInt(c.reused)?c.reused:null);
+    var executed=isInt(c.executed_attempts)?c.executed_attempts:null;
     frag.appendChild(el('h4',{text:'Plan'}));
     frag.appendChild(kv([
       ['planned tasks',isInt(t.tasks)?t.tasks:null,{'data-col':'planned_tasks'}],
@@ -989,7 +1008,9 @@
       ['missing',isInt(c.missing)?c.missing:null],
       ['uncertain attempts',isInt(c.uncertain_attempts)?c.uncertain_attempts:null],
       ['identical duplicates kept once',isInt(c.duplicate_identical)?c.duplicate_identical:null],
+      ['attempts executed',executed===null?miss('executed count is '+NOT_IN_BUNDLE):executed,{'data-col':'executed'}],
       ['results reused from an earlier run',reused===null?miss('reuse count is '+NOT_IN_BUNDLE):reused,{'data-col':'reused'}],
+      (reused===null&&executed===null)?null:['how these two are counted','journal lines: one per executed attempt, and one each time a run found a completed result and did not execute the task again'],
       ['run complete',typeof x.complete==='boolean'?(x.complete?'yes':'no'):null]
     ]));
     if(Array.isArray(t.estimate_notes)&&t.estimate_notes.length){
