@@ -220,6 +220,11 @@
   details.fold>summary:hover{color:var(--ink)}
 
   .lnk{border:1px solid var(--hairline);background:#fff;padding:10px 14px;margin:12px 0 0}
+  /* a reference page of the external service: dashed, as the other "not verified" marks on this page are */
+  .lnk-ref{border:1px dashed var(--muted)}
+  .ref-tag{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--muted);margin:8px 0 0;overflow-wrap:anywhere}
+  .lnk-ref .ref-a{text-decoration-style:dashed;text-underline-offset:3px}
   .lims{font-family:var(--mono);font-size:12px;line-height:1.75;margin:10px 0 0;padding-left:18px;max-width:110ch}
   .lims li{margin:0 0 4px;overflow-wrap:anywhere}
 
@@ -441,6 +446,17 @@
   var LINK_BUILT='link built from the recorded pattern';
   var VERIFIED='verified_exact';
   var LINK_URL=/^https:\/\/[A-Za-z0-9.-]+(\/[A-Za-z0-9._~\/-]*)?$/;
+  /* A reference link: a page of the external service for a model, a source or a lens. It is a different
+     record from a verified link. The label is the engine's fixed sentence (REFERENCE_LABEL in
+     scripts/experiments/neuronpedia.py); a record with any other label is not shown as a link. */
+  var REFERENCE='reference';
+  var REFERENCE_BUILT='reference link built from the recorded page form';
+  var REFERENCE_LABEL='Reference page on Neuronpedia, an external service: the service record this link was built from names no checkpoint revision, so the hosted checkpoint is not identified and the link is not evidence that the page shows the study\'s model or representation.';
+  var REFERENCE_HOST='www.neuronpedia.org';
+  var REFERENCE_PAGES={model_page:'model page',source_page:'source page of one layer',lens_page:'lens page'};
+  var REFERENCE_TAG='Reference only · external service · not a link to the study\'s model, feature or representation';
+  var REFERENCE_TEXT='Reference page on Neuronpedia (external service)';
+  var IDENTITY_STATUSES=['verified_exact','alias_unverified_checkpoint','hosted_identity_unknown','unverified'];
   var ENDPOINT='Target-token probability';
   var CONFLICT='two comparison blocks record different values';
 
@@ -1387,12 +1403,13 @@
   /* ---------------------------------------------------------------- external links */
 
   function linkRecords(b){
-    /* A record has the shape the engine's link builder returns: {link, reason, detail, local}.
-       bundle/1 as exported carries none. Records are read from a comparison's references and
-       from an ICA component. */
+    /* A record has the shape the engine's link builder returns: {kind, link, reason, detail,
+       reference, reference_reason, reference_detail, local}; a record written before reference
+       links existed has {link, reason, detail, local}. bundle/1 as exported carries none.
+       Records are read from a comparison's references and from an ICA component. */
     var out=[];
     function take(v,where){
-      (Array.isArray(v)?v:[v]).forEach(function(r){if(isObj(r)&&('reason' in r||'link' in r)) out.push({rec:r,where:where});});
+      (Array.isArray(v)?v:[v]).forEach(function(r){if(isObj(r)&&('reason' in r||'link' in r||'reference' in r||r.kind===REFERENCE)) out.push({rec:r,where:where});});
     }
     b.comparisons.forEach(function(f){
       f.comparisons.forEach(function(e){
@@ -1410,24 +1427,80 @@
     });
     return out;
   }
+  /* Returns the reason a reference record is not shown as a link, or null. The address passes the same
+     test as a verified link (LINK_URL: https, a host, id characters only, so no query string and no
+     fragment); then the host must be REFERENCE_HOST and the path must be the form of the record's page.
+     A host under .invalid, which is reserved and reaches no site, is accepted only inside a bundle that is
+     labelled synthetic: the engine's fixture registry links there and nowhere else. The engine applies
+     the same rules to a record in validate_reference_link (scripts/experiments/neuronpedia.py). */
+  function referenceRefusal(ref,synthetic){
+    if(!isObj(ref)) return 'the reference is not a record';
+    if(ref.kind!==REFERENCE) return 'the record kind is not "reference"';
+    if(!isStr(ref.label)||!ref.label) return 'the record has no label';
+    if(ref.label!==REFERENCE_LABEL) return 'the label is not the fixed reference sentence';
+    if(!isStr(ref.url)||!LINK_URL.test(ref.url)) return 'the address is not an https address without a query string or a fragment';
+    var rest=ref.url.slice(8), cut=rest.indexOf('/'), host=cut<0?rest:rest.slice(0,cut), segs=cut<0?[]:rest.slice(cut+1).split('/');
+    if(!(host===REFERENCE_HOST||(synthetic===true&&/^[a-z0-9-]+(\.[a-z0-9-]+)*\.invalid$/.test(host)))) return 'the host is not '+REFERENCE_HOST;
+    if(!isStr(ref.page)||!has(REFERENCE_PAGES,ref.page)) return 'the page form is not a model, source or lens page';
+    var shaped=segs.length>=1&&segs.length<=2&&segs.every(function(s){return /^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$/.test(s);})&&
+      (ref.page==='model_page'?segs.length===1:segs.length===2&&(ref.page==='lens_page'?segs[1]==='jlens':/^\d{1,4}-[A-Za-z0-9]/.test(segs[1])));
+    if(!shaped) return 'the address does not have the path of a '+REFERENCE_PAGES[ref.page];
+    if(ref.reason!==REFERENCE_BUILT) return 'the record does not say the link was built from a recorded page form';
+    if(!isStr(ref.read_utc_date)||!/^\d{4}-\d{2}-\d{2}$/.test(ref.read_utc_date)) return 'the record has no date read';
+    if(IDENTITY_STATUSES.indexOf(ref.identity_status)<0) return 'the record has no identity status';
+    return null;
+  }
   function renderLinks(b){
     var frag=document.createDocumentFragment(), recs=linkRecords(b);
     if(!recs.length){
       frag.appendChild(el('p',{cls:'plain','data-kind':'no-link-records',text:'This bundle carries no external-link record, so no Neuronpedia link is shown. The local record is the tables on this page and the payload hashes under Source hashes.'}));
       return frag;
     }
-    frag.appendChild(el('p',{cls:'note',text:'A link is shown only when the bundle records it as built from a verified mapping. Otherwise the recorded reason and the local record are shown. An external page is context; the numbers on this page do not come from it.'}));
+    /* A record is a link builder's result, or a reference record on its own (kind "reference" with its own url). */
+    function referenceOf(r){
+      if(has(r,'reference')) return r.reference===null||r.reference===undefined?null:{rec:r.reference,bare:false};
+      return r.kind===REFERENCE&&(has(r,'url')||has(r,'label'))?{rec:r,bare:true}:null;
+    }
+    var anyReference=recs.some(function(x){return referenceOf(x.rec)!==null;});
+    frag.appendChild(el('p',{cls:'note',text:anyReference?
+      'A verified link is shown only when the bundle records it as built from a verified mapping. A reference page of the external service is shown as a reference, with its fixed label, the date it was read and the identity status of the entry; it is not a link to the study\'s model, feature or representation. Otherwise the recorded reason and the local record are shown. An external page is context; the numbers on this page do not come from it.':
+      'A link is shown only when the bundle records it as built from a verified mapping. Otherwise the recorded reason and the local record are shown. An external page is context; the numbers on this page do not come from it.'}));
     recs.forEach(function(x){
       var r=x.rec, local=isObj(r.local)?r.local:{}, ver=isObj(local.verification)?local.verification:{};
-      var ok=isStr(r.link)&&LINK_URL.test(r.link)&&r.reason===LINK_BUILT&&ver.status===VERIFIED;
-      var box=el('div',{cls:'lnk','data-kind':'link-record','data-verified':ok?'true':'false'});
+      var held=referenceOf(r), bare=held!==null&&held.bare, ref=held?held.rec:null;
+      var ok=!bare&&isStr(r.link)&&LINK_URL.test(r.link)&&r.reason===LINK_BUILT&&ver.status===VERIFIED;
+      /* A result holds a verified link or a reference, never both, and says which in its kind. */
+      var refWhy=ref===null?null:
+        (!bare&&r.link!==null&&r.link!==undefined?'a record holds a verified link or a reference, never both':
+        (!bare&&r.kind!==REFERENCE?'the record does not say its kind is "reference"':referenceRefusal(ref,isSynthetic(b))));
+      var refOk=ref!==null&&refWhy===null;
+      var box=el('div',{cls:refOk?'lnk lnk-ref':'lnk','data-kind':'link-record','data-verified':ok?'true':'false',
+        'data-link-kind':ok?'exact':(refOk?REFERENCE:'none')});
       box.appendChild(el('p',{cls:'plain',style:'margin:0',text:x.where}));
       if(ok){
         box.appendChild(el('p',{cls:'plain'},['Verified link: ',el('a',{href:r.link,rel:'noopener noreferrer external',text:r.link})]));
+        if(ref!==null) box.appendChild(el('p',{cls:'plain','data-col':'reference-refused',text:'The record also holds a reference record, which is not shown as a link: '+refWhy+'.'}));
+      }else if(refOk){
+        var ev=isObj(ref.evidence)?ref.evidence:{};
+        box.appendChild(el('p',{cls:'ref-tag','data-col':'reference-tag',text:REFERENCE_TAG}));
+        box.appendChild(el('p',{cls:'plain','data-col':'reference-link'},[el('a',{cls:'ref-a',href:ref.url,rel:'noopener noreferrer external','data-kind':'reference-link',
+          text:REFERENCE_TEXT+': '+REFERENCE_PAGES[ref.page]+', '+ref.url})]));
+        box.appendChild(el('p',{cls:'note','data-col':'reference-label',text:ref.label}));
+        box.appendChild(kv([
+          ['date read',ref.read_utc_date,{'data-col':'reference-read'}],
+          ['identity status',ref.identity_status,{'data-col':'reference-identity'}],
+          ['page form',REFERENCE_PAGES[ref.page]+' ('+ref.page+')'],
+          ['registry entry',ref.registry_id],
+          ['service record',isStr(ev.record_id)?ev.record_id+(isStr(ev.retrieved_utc)?' · retrieved '+ev.retrieved_utc:''):null],
+          ['service record sha256',hash(ev.sha256)],
+          bare?null:['verified link',el('span',{cls:'miss',text:'— none. '+(isStr(r.reason)&&r.reason?r.reason:'no reason recorded')+(isStr(r.detail)&&r.detail?' · '+r.detail:'')}),{'data-col':'reference-no-exact'}]
+        ]));
       }else{
-        box.appendChild(el('p',{cls:'plain','data-col':'no-link'},['No link. Reason: '+(isStr(r.reason)&&r.reason?r.reason:'no reason recorded')+
+        box.appendChild(el('p',{cls:'plain','data-col':'no-link'},['No link. Reason: '+
+          (bare?'the reference record is not shown as a link':(isStr(r.reason)&&r.reason?r.reason:'no reason recorded')+
           (isStr(r.detail)&&r.detail?' · '+r.detail:'')+
-          (isStr(r.link)?' · the record holds a link string, which is not shown as a link because the record is not a verified, built link':'')]));
+          (isStr(r.link)?' · the record holds a link string, which is not shown as a link because the record is not a verified, built link':''))+
+          (ref!==null?(bare?': ':' · the record holds a reference record, which is not shown as a link: ')+refWhy:'')]));
       }
       var np=isObj(local.neuronpedia)?local.neuronpedia:null;
       box.appendChild(kv([
@@ -1587,7 +1660,7 @@
     load(values[0]);
   }
   window.addEventListener('hashchange',revealHash);
-  window.pwExperimentViewer={bundleRefusal:bundleRefusal,schema:SCHEMA,indexSchema:INDEX_SCHEMA};
+  window.pwExperimentViewer={bundleRefusal:bundleRefusal,referenceRefusal:referenceRefusal,referenceLabel:REFERENCE_LABEL,schema:SCHEMA,indexSchema:INDEX_SCHEMA};
   start();
 })();
 </script>
