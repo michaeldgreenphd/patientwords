@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Results catalogue — PatientWords</title>
-<meta name="description" content="Every measured run in the PatientWords engine, with its execution state, evidence class, clinical-review status, restrictions and analysis membership. A listing, not a sample and not a claim.">
+<meta name="description" content="Every measured run in the PatientWords engine, with its run status, evidence class, clinical-review status, restrictions and whether an analysis includes it. A listing, not a sample and not a claim.">
 <link rel="canonical" href="https://michaeldgreenphd.github.io/patientwords/results/">
 <meta name="theme-color" content="#faf9f5">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23faf9f5'/%3E%3Crect x='9' y='9' width='30' height='30' fill='%23111827'/%3E%3Crect x='25' y='25' width='30' height='30' fill='%2315803d'/%3E%3C/svg%3E">
@@ -26,6 +26,7 @@
   button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visible{
     outline:2px solid var(--clinical);outline-offset:2px}
   ::selection{background:#dbe9df}
+  code{font-family:var(--mono);font-size:.92em}
   .skip{position:absolute;left:-9999px;top:0;background:var(--paper);color:var(--ink);
     padding:8px 14px;border:1px solid var(--ink);z-index:10}
   .skip:focus{left:8px}
@@ -47,18 +48,27 @@
   .rule-heavy{border:0;border-top:2px solid var(--ink);margin:0}
   .rule-fine{border:0;border-top:1px solid var(--hairline);margin:3px 0 0}
 
+  /* lead: title, one purpose sentence, the page-wide labels, then the runs */
   .dateline{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;
-    color:var(--clinical);font-weight:600;margin:34px 0 14px}
+    color:var(--clinical);font-weight:600;margin:22px 0 8px}
   .dateline .mode{color:var(--muted);font-weight:400;letter-spacing:.06em;text-transform:none}
-  h1{font-size:clamp(30px,4.8vw,42px);line-height:1.14;font-weight:600;letter-spacing:-.006em;margin:0 0 10px}
-  .subtitle{font-style:italic;font-size:20px;line-height:1.5;color:var(--muted);margin:0 0 20px}
-  .explainer{font-size:17px;line-height:1.66;margin:0 0 14px;max-width:78ch}
-  .traced{margin:12px 0 0;font-family:var(--mono);font-size:11px;letter-spacing:.03em;line-height:1.9;
+  h1{font-size:clamp(30px,4.8vw,42px);line-height:1.14;font-weight:600;letter-spacing:-.006em;margin:0 0 6px}
+  .subtitle{font-style:italic;font-size:19px;line-height:1.45;color:var(--muted);margin:0 0 8px}
+  .lead-labels{display:flex;flex-wrap:wrap;align-items:center;gap:4px 16px;margin:0}
+  .traced{margin:0;font-family:var(--mono);font-size:11px;letter-spacing:.03em;line-height:1.9;
     overflow-wrap:anywhere}
-  .traced b{color:var(--clinical);font-weight:600}
+  .traced b{color:var(--ink);font-weight:600}
   .traced .tp{color:var(--muted)}
   .draft-flag{display:inline-block;font-family:var(--mono);font-size:10px;letter-spacing:.14em;
-    text-transform:uppercase;color:var(--penalty);border:1px solid var(--penalty);padding:1px 6px;margin:10px 0 0}
+    text-transform:uppercase;color:var(--penalty);border:1px solid var(--penalty);padding:1px 6px;margin:0}
+  .lead-links{display:flex;flex-wrap:wrap;align-items:baseline;gap:0 22px;margin:4px 0 0}
+  .lead-links>details[open]{flex:1 1 100%}
+  .jump{font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--muted);margin:0;padding:4px 0}
+  .jump a:hover{color:var(--ink)}
+  .about{max-width:86ch;border-left:2px solid var(--ink);padding:2px 0 2px 16px;margin:6px 0 10px}
+  .about p{font-size:15.5px;line-height:1.6;margin:0 0 8px}
+  .about p:last-child{margin-bottom:0}
+  .about b{font-weight:600}
 
   .section-head{border-top:1px solid var(--ink);margin-top:38px;padding-top:10px;display:flex;
     justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:4px 16px}
@@ -68,6 +78,7 @@
   .count{font-family:var(--mono);font-size:12px;color:var(--muted)}
   .note{font-family:var(--mono);font-size:11.5px;line-height:1.8;color:var(--muted);margin:8px 0 0;max-width:110ch}
   .note b{color:var(--ink);font-weight:600}
+  .vh{position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden}
 
   /* page-level states */
   .pending-note{border:1px solid var(--hairline);background:var(--paper);margin:26px 0;
@@ -78,19 +89,18 @@
     line-height:1.8;padding:12px 16px;margin:26px 0}
   .cat-err b{letter-spacing:.12em;text-transform:uppercase}
   .cat-msg{font-family:var(--mono);font-size:12px;line-height:1.7;color:var(--ink);
-    border-left:2px solid var(--ink);padding:2px 12px;margin:14px 0 0}
+    border-left:2px solid var(--ink);padding:2px 12px;margin:10px 0 0}
 
-  /* totals */
-  .tot{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px 28px;margin:18px 0 0}
+  /* inventory figures: counts of the export, kept apart from any measurement */
+  .tot{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px 28px;margin:14px 0 0}
   .tot div{min-width:0}
   .tot dt{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
-  .tot dd{margin:2px 0 0;font-size:clamp(24px,3.4vw,34px);line-height:1.15;font-weight:600}
+  .tot dd{margin:2px 0 0;font-size:clamp(22px,3vw,28px);line-height:1.15;font-weight:600}
   .tot dd small{display:block;font-family:var(--mono);font-size:10.5px;font-weight:400;color:var(--muted);
     letter-spacing:.03em;line-height:1.5;margin-top:3px}
   .two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 44px}
 
   /* plain data tables */
-  .tbl-scroll{overflow-x:auto}
   .tbl{width:100%;border-collapse:collapse;margin:0}
   .tbl th{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;
     color:var(--muted);text-align:left;padding:0 16px 7px 0;border-bottom:1px solid var(--ink);vertical-align:bottom}
@@ -100,6 +110,7 @@
   .tbl td.prose{font-family:var(--serif);font-size:14.5px;line-height:1.5}
   .tbl tr:last-child td{border-bottom:1px solid var(--ink)}
   .tbl th:last-child,.tbl td:last-child{padding-right:0}
+  .tbl td.nw{white-space:nowrap}
 
   .pin{border-left:2px solid var(--ink);padding:2px 0 2px 16px;margin:28px 0 0;max-width:96ch}
   .pin h3{margin:0 0 6px;color:var(--ink)}
@@ -115,27 +126,40 @@
   .bdg-reg{border-color:var(--ink)}
   .bdg-exp{border-style:dashed;border-color:var(--muted)}
   .bdg-unc{border-style:dotted;border-color:var(--muted);color:var(--muted)}
-  .bdg-none{border-style:dotted;border-color:var(--muted);color:var(--muted);white-space:nowrap}
-  .bdg-restricted{border-color:var(--penalty);color:var(--penalty)}
+  .bdg-none{border-style:dotted;border-color:var(--muted);color:var(--muted)}
+  .bdg-restricted,.bdg-draft{border-color:var(--penalty);color:var(--penalty)}
   .dim{color:var(--muted)}
 
-  /* legend fold */
-  details.meth{margin:16px 0 0}
+  /* disclosures */
+  details.meth{margin:0}
   details.meth>summary{font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--muted);
     cursor:pointer;list-style:none;padding:4px 0;display:inline-block}
   details.meth>summary::-webkit-details-marker{display:none}
   details.meth>summary::before{content:'\25B8\00a0'}
   details.meth[open]>summary::before{content:'\25BE\00a0'}
   details.meth>summary:hover{color:var(--ink)}
+  details.src{border-top:1px solid var(--ink);margin-top:38px}
+  details.src>summary{cursor:pointer;list-style:none;padding:10px 0 4px;display:flex;
+    justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:4px 16px}
+  details.src>summary::-webkit-details-marker{display:none}
+  details.src>summary h2{display:inline}
+  details.src>summary h2::before{content:'\25B8\00a0';font-weight:400;color:var(--muted)}
+  details.src[open]>summary h2::before{content:'\25BE\00a0'}
+  details.src>summary:hover h2{color:var(--clinical)}
+  .src-part{margin-top:8px}
   .legend{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 44px}
   .legend h3{margin:16px 0 6px}
-  .legend dl{margin:0;font-family:var(--mono);font-size:11.5px;line-height:1.65}
-  .legend dt{color:var(--ink);font-weight:600;margin-top:6px}
-  .legend dd{margin:0;color:var(--muted)}
-  .legend-notes{font-family:var(--mono);font-size:11.5px;line-height:1.7;color:var(--muted);margin:14px 0 0;padding-left:18px}
+  .legend h3 code{font-weight:400;letter-spacing:0;text-transform:none}
+  .legend dl,.fields{margin:0;font-family:var(--mono);font-size:11.5px;line-height:1.65}
+  .legend dt,.fields dt{color:var(--ink);font-weight:600;margin-top:6px}
+  .legend dd,.fields dd{margin:0;color:var(--muted)}
+  .files{list-style:none;margin:14px 0 0;padding:0;font-family:var(--mono);font-size:12px;line-height:1.9}
+  .files a{font-weight:600}
+  .files a:hover{color:var(--clinical)}
+  .files span{color:var(--muted)}
 
-  /* filters */
-  .flt{display:flex;flex-wrap:wrap;align-items:flex-end;gap:12px 18px;margin:18px 0 0}
+  /* search, quick views and filters */
+  .flt{display:flex;flex-wrap:wrap;align-items:flex-end;gap:10px 18px;margin:12px 0 0}
   .flt-g{display:flex;flex-direction:column;gap:3px;min-width:0}
   .flt-q{flex:1 1 260px}
   .flt-lbl{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
@@ -144,48 +168,66 @@
   .flt input[type=search]{width:100%}
   .flt-sel{cursor:pointer}
   .flt-sel:hover,.flt input[type=search]:hover{border-color:var(--muted)}
-  .flt-chk{flex-direction:row;align-items:center;gap:7px;padding-bottom:6px}
-  .flt-chk label{font-family:var(--mono);font-size:12px;cursor:pointer}
-  .flt-chk input{width:15px;height:15px;margin:0;accent-color:var(--clinical)}
+  .chip-g{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+  .chip-lbl{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--muted);margin-right:2px}
+  .chip{font-family:var(--mono);font-size:11px;color:var(--muted);background:#fff;
+    border:1px solid var(--hairline);padding:5px 10px;cursor:pointer;border-radius:2px}
+  .chip:hover{color:var(--ink);border-color:var(--muted)}
+  .chip.on{color:var(--clinical);border-color:var(--clinical);font-weight:600}
+  .chip-ct{opacity:.7;font-weight:400}
+  .chip.on .chip-ct{color:var(--clinical);opacity:.85}
+  .chip-more{color:var(--ink)}
+  .chip-more::before{content:'\25B8\00a0';color:var(--muted)}
+  .chip-more[aria-expanded=true]::before{content:'\25BE\00a0'}
+  .flt-more{flex:1 1 100%;display:flex;flex-wrap:wrap;align-items:flex-end;gap:10px 18px;
+    border-left:2px solid var(--hairline);padding:2px 0 4px 14px}
   .btn{font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--ink);background:#fff;
-    border:1px solid var(--hairline);padding:6px 12px;cursor:pointer;border-radius:2px}
+    border:1px solid var(--hairline);padding:5px 12px;cursor:pointer;border-radius:2px}
   .btn:hover{border-color:var(--muted)}
-  .cat-bar{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px 18px;margin:18px 0 0}
+  .cat-bar{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:4px 18px;margin:10px 0 0}
+  .cat-bar-l{display:flex;align-items:center;flex-wrap:wrap;gap:4px 12px;min-width:0}
   .cat-count{font-family:var(--mono);font-size:13px;font-weight:600;margin:0}
   .cat-count span{font-weight:400;color:var(--muted)}
+  .cat-order{font-family:var(--mono);font-size:11px;color:var(--muted);margin:0}
   .sum-dl{font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--muted);margin:0}
   .sum-dl a{color:var(--ink)}
   .sum-dl a:hover{color:var(--clinical)}
 
-  /* run table */
-  .cat-scroll{overflow-x:auto;margin:14px 0 0}
-  .cat-table{width:100%;min-width:1080px;border-collapse:collapse}
+  /* run table: five columns; identifiers and rules are in each run's Methods & source */
+  .cat-scroll{margin:8px 0 0}
+  .cat-table{width:100%;border-collapse:collapse;table-layout:fixed}
   .cat-table>thead th{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.12em;
-    text-transform:uppercase;color:var(--muted);text-align:left;padding:0 12px 8px 0;
+    text-transform:uppercase;color:var(--muted);text-align:left;padding:0 14px 6px 0;
     border-bottom:1px solid var(--ink);vertical-align:bottom}
-  .cat-table>thead th small{display:block;font-size:9.5px;font-weight:400;letter-spacing:.04em;text-transform:none}
-  .cat-table>tbody>tr>td{padding:8px 12px 8px 0;border-bottom:1px solid var(--hairline);vertical-align:top;
-    font-family:var(--mono);font-size:11px;line-height:1.55}
+  .cat-table>thead th small{display:block;font-size:10px;font-weight:400;letter-spacing:.02em;text-transform:none}
+  .cat-table>tbody>tr>td{padding:7px 14px 7px 0;border-bottom:1px solid var(--hairline);vertical-align:top;
+    font-family:var(--mono);font-size:11px;line-height:1.55;overflow-wrap:break-word}
   .cat-table>thead th:last-child,.cat-table>tbody>tr>td:last-child{padding-right:0}
   .cat-table>tbody>tr:last-child>td{border-bottom:1px solid var(--ink)}
   .cat-table>tbody>tr.cat-run.is-open>td{border-bottom-color:transparent}
-  .c-run{width:21%}
-  .c-rev{width:13%}
+  .c-exp{width:25%}
+  .c-model{width:14%}
+  .c-meas{width:26%}
+  .c-status{width:12%}
+  .c-ctx{width:23%}
   .cat-x{font-family:var(--mono);font-size:12px;font-weight:600;line-height:1.5;color:var(--ink);background:none;
     border:0;margin:0;padding:1px 0;cursor:pointer;text-align:left;display:inline-flex;gap:6px;
     align-items:baseline;overflow-wrap:anywhere;word-break:break-word}
   .cat-x::before{content:'\25B8';color:var(--muted);flex:none;font-weight:400}
   .cat-x[aria-expanded=true]::before{content:'\25BE'}
   .cat-x:hover{color:var(--clinical)}
+  .x-set{display:block;color:var(--muted);padding-left:16px;margin-top:2px}
   .sg{white-space:nowrap}
-  .ln{display:block;white-space:nowrap}
-  .sg b{font-weight:600}
+  .ln{display:block}
+  .sg b,.ln b{font-weight:600}
   .cat-more{display:flex;justify-content:center;margin:16px 0 0}
 
   /* expanded run */
   .cat-table>tbody>tr.cat-detail>td{padding:0 0 18px 0}
-  .det{border:1px solid var(--hairline);background:#fff;padding:14px 18px 16px}
-  .det h3{margin:0 0 8px;color:var(--ink);letter-spacing:.06em;text-transform:none;font-size:12.5px;overflow-wrap:anywhere}
+  .det{border:1px solid var(--hairline);background:#fff;padding:14px 18px 16px;overflow-wrap:normal}
+  .det h3{margin:0 0 6px;color:var(--ink);letter-spacing:.02em;text-transform:none;font-size:13px;overflow-wrap:anywhere}
+  .det-labels{margin:0 0 8px}
   .det-status{font-family:var(--mono);font-size:12px;line-height:1.7;margin:12px 0 0;padding:8px 12px;
     border:1px solid var(--hairline);overflow-wrap:anywhere}
   .det-status b{letter-spacing:.1em;text-transform:uppercase;font-weight:600;margin-right:6px}
@@ -195,18 +237,23 @@
   .det-status.is-norows{color:var(--ink);border-style:dotted;border-color:var(--muted)}
   .det-status .btn{margin-left:8px;padding:2px 8px}
   .det-status ul{margin:4px 0 0;padding-left:18px}
+  .det-src{margin-top:10px}
+  .det-src>.src-in{border-left:2px solid var(--hairline);padding:4px 0 6px 14px;margin:2px 0 4px}
+  .det-src h4{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--muted);margin:14px 0 6px}
   .part{border-top:1px solid var(--hairline);margin-top:16px;padding-top:10px}
   .part h4{font-family:var(--mono);font-size:12px;font-weight:600;margin:0 0 4px;overflow-wrap:anywhere}
   .part p{font-family:var(--mono);font-size:11.5px;line-height:1.7;margin:0;overflow-wrap:anywhere}
-  .part-in b{font-weight:600}
   .part-out,.part-mass{color:var(--muted)}
   .part-empty{border:1px dotted var(--muted);padding:6px 10px;margin-top:8px!important}
   .row-table{width:100%;border-collapse:collapse;margin:10px 0 0}
-  .row-table th{font-family:var(--mono);font-size:9.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;
+  .row-table th{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;
     color:var(--muted);text-align:left;padding:0 12px 6px 0;border-bottom:1px solid var(--ink);vertical-align:bottom}
+  .row-table th small{display:block;font-size:10px;font-weight:400;letter-spacing:.02em;text-transform:none}
   .row-table td{padding:7px 12px 7px 0;border-bottom:1px solid var(--hairline);vertical-align:top;
     font-family:var(--mono);font-size:11.5px;line-height:1.55}
   .row-table th.num,.row-table td.num{text-align:right;white-space:nowrap}
+  .row-table th.num{white-space:normal;min-width:13ch}
   .row-table th:last-child,.row-table td:last-child{padding-right:0}
   .r-prompt{font-family:var(--serif);font-size:14.5px;line-height:1.45;margin:0}
   .r-c .r-prompt{color:var(--clinical)}
@@ -220,7 +267,7 @@
   .row-table th.w-prompt{width:25%}
   .row-table th.w-notes{width:19%}
   .r-notes span{display:block}
-  .det-foot{font-family:var(--mono);font-size:10.5px;color:var(--muted);margin:10px 0 0;line-height:1.7}
+  .det-foot{font-family:var(--mono);font-size:10.5px;color:var(--muted);margin:10px 0 0;line-height:1.7;max-width:120ch}
 
   .back{display:inline-block;margin-top:30px;font-family:var(--mono);font-size:12px;
     letter-spacing:.1em;text-transform:uppercase;color:var(--ink);text-decoration:none;
@@ -232,41 +279,54 @@
   footer a{color:var(--muted);text-underline-offset:3px}
 
   /* narrow screens: tables marked .stack become labelled blocks, one per row.
-     Explicit ARIA table roles are set in the markup so the block layout keeps table semantics. */
+     Explicit ARIA table roles are set in the markup so the block layout keeps table semantics.
+     The five-column run table stacks below 860px; the wider tables inside a run stack below 1100px. */
   @media (max-width:900px){
     .tot{grid-template-columns:repeat(2,minmax(0,1fr))}
     .two,.legend{grid-template-columns:minmax(0,1fr)}
   }
   @media (max-width:1100px){
-    .cat-table{min-width:0}
-    .stack,.stack>tbody,.stack>tbody>tr,.stack>tbody>tr>td{display:block}
-    .stack>thead{position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden}
-    .stack>tbody>tr{padding:10px 0;border-bottom:1px solid var(--hairline)}
-    .stack>tbody>tr:last-child{border-bottom:1px solid var(--ink)}
-    .stack>tbody>tr>td,.tbl.stack>tbody>tr>td,.cat-table.stack>tbody>tr>td,.row-table.stack>tbody>tr>td{
-      border:0!important;padding:2px 0;text-align:left;white-space:normal}
-    .stack>tbody>tr>td[data-l]{display:grid;grid-template-columns:12ch minmax(0,1fr);gap:0 10px;align-items:baseline}
-    .stack>tbody>tr>td[data-l]::before{content:attr(data-l);font-family:var(--mono);font-size:9.5px;
-      letter-spacing:.08em;text-transform:uppercase;color:var(--muted);line-height:1.9}
-    .stack>tbody>tr>td[data-l]>*{justify-self:start;min-width:0;max-width:100%}
-    .ln{white-space:normal}
+    .stack:not(.cat-table),.stack:not(.cat-table)>tbody,.stack:not(.cat-table)>tbody>tr,.stack:not(.cat-table)>tbody>tr>td{display:block}
+    .stack:not(.cat-table)>thead{position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden}
+    .stack:not(.cat-table)>tbody>tr{padding:10px 0;border-bottom:1px solid var(--hairline)}
+    .stack:not(.cat-table)>tbody>tr:last-child{border-bottom:1px solid var(--ink)}
+    .tbl.stack>tbody>tr>td,.row-table.stack>tbody>tr>td{border:0!important;padding:2px 0;text-align:left;white-space:normal}
+    .stack:not(.cat-table)>tbody>tr>td[data-l]{display:grid;grid-template-columns:13ch minmax(0,1fr);gap:0 10px;align-items:baseline}
+    .stack:not(.cat-table)>tbody>tr>td[data-l]::before{content:attr(data-l);font-family:var(--mono);font-size:10px;
+      letter-spacing:.06em;text-transform:uppercase;color:var(--muted);line-height:1.9}
+    .stack:not(.cat-table)>tbody>tr>td[data-l]>*{justify-self:start;min-width:0;max-width:100%}
+    .det{padding:12px 12px 14px}
+  }
+  @media (max-width:860px){
+    .cat-table{table-layout:auto}
+    .cat-table.stack,.cat-table.stack>tbody,.cat-table.stack>tbody>tr,.cat-table.stack>tbody>tr>td{display:block}
+    .cat-table.stack>thead{position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden}
+    .cat-table.stack>tbody>tr{padding:10px 0;border-bottom:1px solid var(--hairline)}
+    .cat-table.stack>tbody>tr:last-child{border-bottom:1px solid var(--ink)}
+    .cat-table.stack>tbody>tr>td{border:0!important;padding:2px 0;text-align:left;white-space:normal}
+    .cat-table.stack>tbody>tr>td[data-l]{display:grid;grid-template-columns:10ch minmax(0,1fr);gap:0 10px;align-items:baseline}
+    .cat-table.stack>tbody>tr>td[data-l]::before{content:attr(data-l);font-family:var(--mono);font-size:10px;
+      letter-spacing:.06em;text-transform:uppercase;color:var(--muted);line-height:1.9}
+    .cat-table.stack>tbody>tr>td[data-l]>*{justify-self:start;min-width:0;max-width:100%}
     .cat-table.stack>tbody>tr.cat-detail{padding:0 0 12px;border-bottom:1px solid var(--hairline)}
     .cat-table.stack>tbody>tr.cat-run.is-open{border-bottom:0}
     .cat-table.stack>tbody>tr.cat-detail>td{padding:0}
-    .c-run,.c-rev{width:auto}
-    .det{padding:12px 12px 14px}
+    .c-exp,.c-model,.c-meas,.c-status,.c-ctx{width:auto}
     .cat-x{padding:6px 0}
+    .sg{white-space:normal}
   }
   @media (max-width:760px){
     .masthead nav{gap:8px 22px}
     .masthead nav a{padding:7px 0}
     body{font-size:16px}
-    .subtitle{font-size:18px}
+    .subtitle{font-size:17px}
+    .dateline{margin-top:16px}
     .kv{grid-template-columns:minmax(0,1fr)}
     .kv dd{margin:0 0 6px}
-    .flt-g{flex:1 1 100%}
-    .flt-chk{flex:1 1 100%}
+    .flt-more .flt-g{flex:1 1 100%}
     .flt-sel{width:100%}
+    .chip{padding:7px 10px}
+    .btn{padding:7px 12px}
   }
 </style>
 </head>
@@ -295,12 +355,23 @@
 <main id="main">
   <p class="dateline">Results catalogue <span class="mode">· every measured run · a listing, not a claim · simulated data</span></p>
   <h1>Results catalogue</h1>
-  <p class="subtitle">Every run the engine has measured, with its state and what it may be used for.</p>
-  <p class="explainer">This page is the full list of what has been measured. It is not a sample and it is not a claim. A run is listed whether its effect is negative, zero or positive, whether it finished or stopped part-way, and whether or not any analysis includes it.</p>
-  <p class="explainer">Evidence class, clinical-review status and analysis membership are stated for each run. Rows are next-token measurements of language-model behaviour: the probability of the first encoded target token, which is a lexical proxy. They are not medical advice.</p>
-  <p class="explainer">The phrasings are test stimuli written by a model or by hand. They are not statements from patients.</p>
-  <p class="traced" id="cat-prov"><span class="tp">provenance: loading</span></p>
-  <p class="draft-flag" id="cat-review" hidden></p>
+  <p class="subtitle">Every run the engine has measured, with its status and what it may be used for.</p>
+  <div class="lead-labels">
+    <p class="draft-flag" id="cat-review" hidden></p>
+    <p class="traced" id="cat-inv"><span class="tp">inventory: loading</span></p>
+  </div>
+  <div class="lead-links">
+    <details class="meth" id="about">
+      <summary>About this catalogue</summary>
+      <div class="about">
+        <p>This is the full list of measured runs. It is not a sample and it is not a claim. A run is listed whether its effect is negative, zero or positive, whether it finished or stopped part-way, and whether or not any analysis includes it.</p>
+        <p><b>What is measured.</b> Target-token probability: the next-token probability of the first encoded target token, on a scale from 0 to 1. It is a lexical proxy for language-model behaviour. It does not measure whether an answer is correct, how risky a reply is or what a patient understands. Each row is one measurement; the files carry no interval and no effect estimate. Nothing here is medical advice.</p>
+        <p><b>The stimuli.</b> The phrasings are test stimuli written by a model or by hand. They are not statements from patients. Clinical review status of the stimuli: <span id="about-review">not loaded</span>.</p>
+        <p><b>Evidence class.</b> It differs between runs and is stated on each row: <span id="about-evidence">not loaded</span>. Whether an analysis includes a run is a separate fact, decided by a named rule in <a href="#methods-source">Methods &amp; source</a>.</p>
+      </div>
+    </details>
+    <p class="jump"><a href="#downloads">Downloads and field definitions</a> · <a href="#methods-source">Methods &amp; source</a></p>
+  </div>
 
   <div class="pending-note" id="cat-loading" role="status">
     <span class="pending-mark"></span>loading · results catalogue index
@@ -308,142 +379,194 @@
   <div class="cat-err" id="cat-error" role="alert" hidden></div>
 
   <div id="cat-content" hidden>
-    <section id="totals" aria-labelledby="h-totals">
-      <div class="section-head">
-        <h2 id="h-totals">Totals</h2>
-        <span class="count">an inventory of the export, not a statistic</span>
-      </div>
-      <dl class="tot" id="tot-figs"></dl>
-      <p class="note" id="tot-sign"></p>
-      <div class="two">
-        <div>
-          <h3 id="h-ev">By evidence class</h3>
-          <table class="tbl" aria-labelledby="h-ev">
-            <thead><tr><th scope="col">Evidence class</th><th scope="col" class="num">Runs</th><th scope="col" class="num">Parts</th></tr></thead>
-            <tbody id="tot-ev"></tbody>
-          </table>
-        </div>
-        <div>
-          <h3 id="h-ex">By execution state</h3>
-          <table class="tbl" aria-labelledby="h-ex">
-            <thead><tr><th scope="col">Execution state of a part</th><th scope="col" class="num">Parts</th></tr></thead>
-            <tbody id="tot-ex"></tbody>
-          </table>
-          <p class="note" id="tot-noparts"></p>
-        </div>
-      </div>
-      <h3 id="h-mem">Memberships</h3>
-      <table class="tbl stack" role="table" aria-labelledby="h-mem">
-        <thead role="rowgroup"><tr role="row">
-          <th scope="col" role="columnheader">Membership</th>
-          <th scope="col" role="columnheader">Label</th>
-          <th scope="col" role="columnheader">Purpose</th>
-          <th scope="col" role="columnheader" class="num">Parts</th>
-          <th scope="col" role="columnheader" class="num">Rows</th>
-        </tr></thead>
-        <tbody id="tot-mem" role="rowgroup"></tbody>
-      </table>
-      <p class="note">A membership is a named rule that decides which parts may enter an analysis. Being listed here does not place a run in any analysis.</p>
-      <div class="pin" id="pin">
-        <h3>Analysis pin</h3>
-        <p id="pin-lead"></p>
-        <dl class="kv" id="pin-kv"></dl>
-      </div>
-    </section>
-
-    <section id="restrictions" aria-labelledby="h-restr">
-      <div class="section-head">
-        <h2 id="h-restr">Restrictions</h2>
-        <span class="count">sealed rows are counted and never shown</span>
-      </div>
-      <table class="tbl stack" role="table" aria-labelledby="h-restr" style="margin-top:16px">
-        <thead role="rowgroup"><tr role="row">
-          <th scope="col" role="columnheader">Restriction</th>
-          <th scope="col" role="columnheader" class="num">Count</th>
-          <th scope="col" role="columnheader">Scope</th>
-          <th scope="col" role="columnheader">Responsible role</th>
-          <th scope="col" role="columnheader">Release condition</th>
-        </tr></thead>
-        <tbody id="restr-body" role="rowgroup"></tbody>
-      </table>
-      <p class="note">Each count states its unit: rows for a row-scope restriction, parts for the others. For clinical-feature mass it is the number of listed parts whose rows omit that field. A restriction names who can lift it and under what condition. Nothing else is withheld from this catalogue.</p>
-    </section>
-
     <section id="runs" aria-labelledby="h-runs">
-      <div class="section-head">
-        <h2 id="h-runs">Runs</h2>
-        <span class="count">one row per engine run directory</span>
-      </div>
-      <details class="meth" id="cat-legend">
-        <summary>What the labels mean</summary>
-        <div class="legend" id="legend-body"></div>
-        <ul class="legend-notes" id="legend-notes"></ul>
-      </details>
-      <form class="flt" id="cat-filters" role="search" aria-label="Filter runs">
+      <h2 class="vh" id="h-runs">Runs</h2>
+      <form class="flt" id="cat-filters" role="search" aria-label="Search and filter runs">
         <div class="flt-g flt-q">
-          <label class="flt-lbl" for="f-q">Search run directory, stimulus set or model</label>
+          <label class="flt-lbl" for="f-q">Search experiment, model or run id</label>
           <input id="f-q" type="search" autocomplete="off" spellcheck="false">
         </div>
-        <div class="flt-g">
-          <label class="flt-lbl" for="f-evidence">Evidence class</label>
-          <select class="flt-sel" id="f-evidence"><option value="">all</option></select>
+        <div class="chip-g" id="cat-views" role="group" aria-label="Show">
+          <span class="chip-lbl" aria-hidden="true">Show</span>
         </div>
-        <div class="flt-g">
-          <label class="flt-lbl" for="f-stimulus">Stimulus class</label>
-          <select class="flt-sel" id="f-stimulus"><option value="">all</option></select>
+        <button class="chip chip-more" type="button" id="more-btn" aria-expanded="false" aria-controls="more-filters">More filters</button>
+        <div class="flt-more" id="more-filters" hidden>
+          <div class="flt-g">
+            <label class="flt-lbl" for="f-evidence">Evidence class</label>
+            <select class="flt-sel" id="f-evidence"><option value="">all</option></select>
+          </div>
+          <div class="flt-g">
+            <label class="flt-lbl" for="f-membership">Included in analysis</label>
+            <select class="flt-sel" id="f-membership"><option value="">all</option></select>
+          </div>
+          <div class="flt-g">
+            <label class="flt-lbl" for="f-state">Run status</label>
+            <select class="flt-sel" id="f-state"><option value="">all</option></select>
+          </div>
+          <div class="flt-g">
+            <label class="flt-lbl" for="f-rows">Rows</label>
+            <select class="flt-sel" id="f-rows">
+              <option value="">all</option>
+              <option value="1">with public rows</option>
+              <option value="0">no rows listed</option>
+            </select>
+          </div>
+          <div class="flt-g">
+            <label class="flt-lbl" for="f-review">Clinical review</label>
+            <select class="flt-sel" id="f-review"><option value="">all</option></select>
+          </div>
+          <div class="flt-g">
+            <label class="flt-lbl" for="f-stimulus">Stimulus class</label>
+            <select class="flt-sel" id="f-stimulus"><option value="">all</option></select>
+          </div>
+          <div class="flt-g">
+            <label class="flt-lbl" for="f-visibility">Visibility</label>
+            <select class="flt-sel" id="f-visibility"><option value="">all</option></select>
+          </div>
+          <div class="flt-g">
+            <label class="flt-lbl" for="f-sort">Order</label>
+            <select class="flt-sel" id="f-sort">
+              <option value="">run id, A to Z</option>
+              <option value="date">batch date, newest first</option>
+              <option value="model">model, A to Z</option>
+            </select>
+          </div>
         </div>
-        <div class="flt-g">
-          <label class="flt-lbl" for="f-state">Execution state</label>
-          <select class="flt-sel" id="f-state"><option value="">all</option></select>
-        </div>
-        <div class="flt-g">
-          <label class="flt-lbl" for="f-visibility">Visibility</label>
-          <select class="flt-sel" id="f-visibility"><option value="">all</option></select>
-        </div>
-        <div class="flt-g">
-          <label class="flt-lbl" for="f-membership">Study membership</label>
-          <select class="flt-sel" id="f-membership"><option value="">all</option></select>
-        </div>
-        <div class="flt-g flt-chk">
-          <input type="checkbox" id="f-rows">
-          <label for="f-rows">only runs with rows</label>
-        </div>
-        <button class="btn" type="button" id="f-reset">reset filters</button>
       </form>
       <p class="cat-msg" id="cat-msg" role="status" hidden></p>
       <div class="cat-bar">
-        <p class="cat-count" id="cat-count" role="status" aria-live="polite"></p>
-        <p class="sum-dl">download everything:
+        <div class="cat-bar-l">
+          <p class="cat-count" id="cat-count" role="status" aria-live="polite"></p>
+          <p class="cat-order" id="cat-order"></p>
+          <button class="btn" type="button" id="f-reset">reset</button>
+        </div>
+        <p class="sum-dl">download all:
           <a href="../data/results_catalogue/rows.csv" download="rows.csv">rows.csv</a> ·
           <a href="../data/results_catalogue/stimuli.csv" download="stimuli.csv">stimuli.csv</a> ·
-          <a href="../data/results_catalogue/index.json" download="index.json">index.json</a>
-          <span class="dim">· the CSV files join on stem and index, except rows marked <code>own_prompts</code>: those were traced with other text, which <code>rows.csv</code> carries in <code>own_clinical_prompt</code> and <code>own_patient_prompt</code></span></p>
+          <a href="../data/results_catalogue/index.json" download="index.json">index.json</a></p>
       </div>
       <div class="cat-scroll">
         <table class="cat-table stack" role="table" aria-labelledby="h-runs">
           <thead role="rowgroup"><tr role="row">
-            <th scope="col" role="columnheader" class="c-run">Run directory <small>select a run to show its parts and rows</small></th>
-            <th scope="col" role="columnheader">Model or instrument</th>
-            <th scope="col" role="columnheader">Evidence class</th>
-            <th scope="col" role="columnheader" class="c-rev">Clinical review</th>
-            <th scope="col" role="columnheader">Sampling</th>
-            <th scope="col" role="columnheader">Execution state <small>parts per state</small></th>
-            <th scope="col" role="columnheader">Rows <small>public; sealed</small></th>
-            <th scope="col" role="columnheader">Language penalty sign <small>count of public rows</small></th>
-            <th scope="col" role="columnheader">Analysis membership</th>
+            <th scope="col" role="columnheader" class="c-exp">Experiment <small>select a run to open it</small></th>
+            <th scope="col" role="columnheader" class="c-model">Model</th>
+            <th scope="col" role="columnheader" class="c-meas">Measurements <small>public rows · target-token probability after the patient wording, against the clinical</small></th>
+            <th scope="col" role="columnheader" class="c-status">Run status</th>
+            <th scope="col" role="columnheader" class="c-ctx">Study context <small>evidence class · included in analysis · review</small></th>
           </tr></thead>
           <tbody id="cat-body" role="rowgroup"></tbody>
         </table>
       </div>
       <div class="cat-more"><button class="btn" type="button" id="cat-more" hidden>show more</button></div>
-      <p class="note">Language penalty = P(patient) − P(clinical) for the target token. A negative value means the target is less likely after the patient wording. Zero and positive values are results and are listed the same way. Prompts are shown verbatim, including intentional misspellings.</p>
     </section>
+
+    <section id="downloads" aria-labelledby="h-dl">
+      <div class="section-head">
+        <h2 id="h-dl">Downloads</h2>
+        <span class="count">plain files; nothing is generated in the browser</span>
+      </div>
+      <ul class="files">
+        <li><a href="../data/results_catalogue/rows.csv" download="rows.csv">rows.csv</a> <span>· one line per public row of every run</span></li>
+        <li><a href="../data/results_catalogue/stimuli.csv" download="stimuli.csv">stimuli.csv</a> <span>· one line per prompt pair of every stimulus set</span></li>
+        <li><a href="../data/results_catalogue/index.json" download="index.json">index.json</a> <span>· the run list this page reads: every run with its parts, hashes, counts and labels</span></li>
+      </ul>
+      <p class="note">Each open run also links its own rows file and its prompt-pair file.</p>
+      <details class="meth" id="cat-legend">
+        <summary>How the files join, and what the fields mean</summary>
+        <h3>Joining the files</h3>
+        <p class="note">The CSV files join on <code>stem</code> and <code>index</code>, except rows marked <code>own_prompts</code>: those were traced with other text, which <code>rows.csv</code> carries in <code>own_clinical_prompt</code> and <code>own_patient_prompt</code>. Sealed rows are in neither file.</p>
+        <h3>Row fields</h3>
+        <dl class="fields">
+          <dt>run_dir · stem · index · part</dt>
+          <dd>the run id (the engine's run directory name), the stimulus set, the pair's index in that set, and the batch summary part that holds the row</dd>
+          <dt>prob_clinical · prob_patient</dt>
+          <dd>target-token probability after the clinical wording and after the patient wording</dd>
+          <dt>language_penalty</dt>
+          <dd>prob_patient − prob_clinical, shown on this page as Difference. Negative: the target token is less likely after the patient wording. Zero and positive values are results and are listed the same way.</dd>
+          <dt>target_token · top_clinical · top_patient · flipped</dt>
+          <dd>the token whose probability is measured; the most likely next token after each wording; whether those two top tokens differ</dd>
+          <dt>screening_status</dt>
+          <dd>the screening record of the row, when the run recorded one</dd>
+          <dt>part_state · analysis_memberships</dt>
+          <dd>the Run status of the row's part (execution_state) and the analyses that include the part (Included in analysis)</dd>
+        </dl>
+        <h3>Label values</h3>
+        <div class="legend" id="legend-body"></div>
+      </details>
+    </section>
+
+    <details class="src" id="methods-source">
+      <summary><h2 id="h-src">Methods &amp; source</h2><span class="count">inventory · analysis rules and study version · restrictions · export record</span></summary>
+
+      <section id="totals" aria-labelledby="h-totals">
+        <h3 id="h-totals">Inventory of the export</h3>
+        <dl class="tot" id="tot-figs"></dl>
+        <p class="note" id="tot-sign"></p>
+        <div class="two">
+          <div>
+            <h3 id="h-ev">Runs and parts by evidence class</h3>
+            <table class="tbl" aria-labelledby="h-ev">
+              <thead><tr><th scope="col">Evidence class</th><th scope="col" class="num">Runs</th><th scope="col" class="num">Parts</th></tr></thead>
+              <tbody id="tot-ev"></tbody>
+            </table>
+          </div>
+          <div>
+            <h3 id="h-ex">Parts by run status</h3>
+            <table class="tbl" aria-labelledby="h-ex">
+              <thead><tr><th scope="col">Run status of a part</th><th scope="col" class="num">Parts</th></tr></thead>
+              <tbody id="tot-ex"></tbody>
+            </table>
+            <p class="note" id="tot-noparts"></p>
+          </div>
+        </div>
+      </section>
+
+      <section id="memberships" aria-labelledby="h-mem">
+        <h3 id="h-mem">Included in analysis: the rules</h3>
+        <table class="tbl stack" role="table" aria-labelledby="h-mem">
+          <thead role="rowgroup"><tr role="row">
+            <th scope="col" role="columnheader">Rule (membership)</th>
+            <th scope="col" role="columnheader">Label</th>
+            <th scope="col" role="columnheader">Purpose</th>
+            <th scope="col" role="columnheader" class="num">Parts</th>
+            <th scope="col" role="columnheader" class="num">Rows</th>
+          </tr></thead>
+          <tbody id="tot-mem" role="rowgroup"></tbody>
+        </table>
+        <p class="note">A membership is a named rule that decides which parts may enter an analysis. Being listed in this catalogue does not place a run in any analysis. Each run's Methods &amp; source gives the reason for every part outside a rule.</p>
+        <div class="pin" id="pin">
+          <h3>Study version</h3>
+          <p id="pin-lead"></p>
+          <dl class="kv" id="pin-kv"></dl>
+        </div>
+      </section>
+
+      <section id="restrictions" aria-labelledby="h-restr">
+        <h3 id="h-restr">Restrictions</h3>
+        <table class="tbl stack" role="table" aria-labelledby="h-restr">
+          <thead role="rowgroup"><tr role="row">
+            <th scope="col" role="columnheader">Restriction</th>
+            <th scope="col" role="columnheader" class="num">Count</th>
+            <th scope="col" role="columnheader">Scope</th>
+            <th scope="col" role="columnheader">Responsible role</th>
+            <th scope="col" role="columnheader">Release condition</th>
+          </tr></thead>
+          <tbody id="restr-body" role="rowgroup"></tbody>
+        </table>
+        <p class="note">Each count states its unit: rows for a row-scope restriction, parts for the others. For clinical-feature mass it is the number of listed parts whose rows omit that field. A restriction names who can lift it and under what condition. Nothing else is withheld from this catalogue.</p>
+      </section>
+
+      <section id="export-record" aria-labelledby="h-exp">
+        <h3 id="h-exp">Export record</h3>
+        <p class="traced" id="cat-prov"><span class="tp">export record: loading</span></p>
+      </section>
+    </details>
   </div>
 
   <a class="back" href="../">← Back home</a>
 
   <div class="endnote">
-    <p>SIMULATED DATA · the phrasings in this catalogue were written by an LLM or by hand as test stimuli; they are not statements from patients. Clinical review of the stimuli is pending, as stated for each run. Nothing here is medical advice.</p>
+    <p>SIMULATED DATA · test stimuli written by an LLM or by hand, not statements from patients · clinical review of the stimuli is pending · not medical advice.</p>
     <footer>
       Built with the <a href="https://github.com/michaeldgreenphd/patientwords-engine">patientwords-engine</a> pipeline ·
       hosted parts traced on <a href="https://neuronpedia.org">Neuronpedia</a> with <a href="https://github.com/safety-research/circuit-tracer">circuit-tracer</a> ·
@@ -458,10 +581,16 @@
   'use strict';
   var BASE='../data/results_catalogue/';
   var PAGE_SIZE=100;
-  var NCOLS=9;
+  var NCOLS=5;
   var ROWS_RE=/^rows\/[A-Za-z0-9._-]+\.json$/;
   var STIM_RE=/^stimuli\/[A-Za-z0-9._-]+\.json$/;
   var DASH='—';
+  // Display labels only. The schema values stay in titles, in the field definitions and in Methods & source.
+  var CLASS_LABEL={study_batch:'Study batch',hand_authored_exploratory:'Hand-authored set',
+    redistribution_limited_text:'Third-party text set'};
+  var AXIS_LABEL={execution_state:'Run status',artifact_integrity:'Artifact integrity',evidence_class:'Evidence class',
+    sampling:'Sampling'};
+  var SORT_TEXT={'':'run id, A to Z','date':'batch date, newest first','model':'model, A to Z'};
 
   function $(id){return document.getElementById(id);}
   function el(tag,cls,text){
@@ -478,6 +607,7 @@
   function int(v){return isNum(v)?v:0;}
   function fmtInt(v){return isNum(v)?v.toLocaleString('en-US'):DASH;}
   function human(v){return typeof v==='string'&&v?v.replace(/_/g,' '):DASH;}
+  function plural(n,one,many){return fmtInt(n)+' '+(n===1?one:many);}
   // Display only: four decimal places. The stored value stays in the title and in the downloads.
   function fmtNum(v){
     if(!isNum(v))return null;
@@ -499,12 +629,58 @@
   function failLabel(e){return e&&typeof e.label==='string'?e.label:'unexpected error';}
 
   // ---------------------------------------------------------------- state
-  var INDEX=null,RUNS=[],BYDIR=Object.create(null),LEGEND={},MEMBERS={},RESTR={},DEFAULT_M='',ANALYSIS_IDS=[],DISPLAY_IDS=[];
-  var F={q:'',evidence:'',stimulus:'',state:'',visibility:'',membership:'',rows:false};
+  var INDEX=null,RUNS=[],BYDIR=Object.create(null),ORDER=Object.create(null),EXP=Object.create(null);
+  var LEGEND={},MEMBERS={},RESTR={},DEFAULT_M='',ANALYSIS_IDS=[],DISPLAY_IDS=[];
+  var F={q:'',evidence:'',stimulus:'',state:'',visibility:'',membership:'',review:'',rows:'',sort:'',issue:false};
   var filtered=[],limit=PAGE_SIZE,openSet=Object.create(null),openRun='',detNodes=Object.create(null),rowsCache=Object.create(null),stimCache=Object.create(null);
-  var SELECTS={evidence:'f-evidence',stimulus:'f-stimulus',state:'f-state',visibility:'f-visibility',membership:'f-membership'};
+  var SELECTS={evidence:'f-evidence',stimulus:'f-stimulus',state:'f-state',visibility:'f-visibility',
+    membership:'f-membership',review:'f-review',rows:'f-rows',sort:'f-sort'};
+  // the selects inside "More filters"; sort is an ordering, not a filter
+  var MORE_KEYS=['evidence','stimulus','state','visibility','membership','review','rows'];
+  var VIEWS=[];
 
   function legendText(axis,key){var t=obj(LEGEND[axis])[key];return typeof t==='string'?t:'';}
+  function schemaTitle(axis,key){
+    var t=legendText(axis,key);
+    return axis+': '+(key||'not recorded')+(t?' ('+t+')':'');
+  }
+
+  // ---------------------------------------------------------------- derived labels
+  // The experiment label is derived from the stimulus set name (stem) and the stimulus class already in the
+  // index: the family, and the batch date the stem carries. Nothing is looked up elsewhere.
+  function experiment(r){
+    var key=r.run_dir;
+    if(EXP[key])return EXP[key];
+    var stem=str(r.stem)||key,date='',sortKey='',rest=stem;
+    var m=/(?:^|_)(\d{4})(\d{2})(\d{2})(T\d*Z?)?(?=_|$)/.exec(stem);
+    if(m&&+m[1]>=2000&&+m[1]<2100&&+m[2]>=1&&+m[2]<=12&&+m[3]>=1&&+m[3]<=31){
+      date=m[1]+'-'+m[2]+'-'+m[3];sortKey=m[1]+m[2]+m[3];
+      var t=/^T(\d{2})(\d{2})(\d{2})Z$/.exec(m[4]||'');
+      if(t&&+t[1]<24&&+t[2]<60){date+=' '+t[1]+':'+t[2]+' UTC';sortKey+=t[1]+t[2]+t[3];}
+      else sortKey+='000000';
+      rest=stem.slice(0,m.index)+'_'+stem.slice(m.index+m[0].length);
+    }
+    var tokens=rest.split('_').filter(function(x){return x;});
+    var known=CLASS_LABEL[str(r.stimulus_class)]||'',name;
+    if(known)name=known+(tokens.length>1?' '+tokens.slice(1).join(' '):'');
+    else{name=tokens.join(' ')||stem;name=name.charAt(0).toUpperCase()+name.slice(1);}
+    var suffix=key.indexOf(stem+'__')===0?key.slice(stem.length+2):'';
+    EXP[key]={name:name,date:date,title:name+(date?' · '+date:''),sortKey:sortKey,stem:stem,
+      suffix:suffix&&suffix!==str(r.model)?suffix.split('__').join(' · '):''};
+    return EXP[key];
+  }
+  function modelLabel(r){
+    return str(r.model)||(str(r.instrument)?'instrument: '+r.instrument:'not recorded');
+  }
+  function reviewPending(v){return /pending$/.test(str(v));}
+  function hasIssue(r){
+    var st=obj(r.execution_states);
+    if(int(st.empty)>0||int(st.unreadable)>0)return true;
+    return arr(r.parts).some(function(p){
+      var a=str(obj(p).artifact_integrity);
+      return a&&a!=='recorded_match'&&a!=='unrecorded';
+    });
+  }
 
   // ---------------------------------------------------------------- small builders
   function badge(text,cls,title){
@@ -512,9 +688,12 @@
     if(title)b.title=title;
     return b;
   }
-  function evidenceClassBadge(v){
+  function evidenceClassBadge(v,prefix){
     var cls=v==='registered_cohort'?'bdg-reg':(v==='unclassified'||!v?'bdg-unc':'bdg-exp');
-    return badge(human(v),cls,legendText('evidence_class',v));
+    return badge((prefix||'')+human(v),cls,schemaTitle('evidence_class',v));
+  }
+  function statusBadge(k,count,showCount){
+    return badge(human(k)+(showCount?' ×'+fmtInt(count):''),k==='completed'?'':'bdg-exp',schemaTitle('execution_state',k));
   }
   function td(label,cls){
     var c=el('td',cls||'');
@@ -535,21 +714,34 @@
     dl.appendChild(el('dt','',key));
     dl.appendChild(el('dd','',value==null||value===''?DASH:value));
   }
-  function membershipBadges(r){
-    var wrap=document.createDocumentFragment();
-    var parts=obj(r.analysis_parts),n=int(r.n_parts),any=false;
-    ANALYSIS_IDS.forEach(function(m){
-      var k=int(parts[m]);
-      if(k<=0)return;
-      any=true;
-      var text=m+(k<n?' ('+k+' of '+n+' parts)':'');
-      wrap.appendChild(badge(text,m===DEFAULT_M?'bdg-reg':'bdg-exp',str(obj(MEMBERS[m]).label)));
-    });
-    if(!any)wrap.appendChild(badge('in no analysis','bdg-none','no analysis membership includes a part of this run'));
-    return wrap;
+  function memberTitle(m){
+    var label=str(obj(MEMBERS[m]).label);
+    return 'Included in analysis: '+m+(label?' ('+label+')':'');
   }
-  function runDirNode(name){
-    // allow a line break after each "__" in a long directory name
+  // "Included in analysis" for a run: the study version first, then any other analysis rule.
+  function inclusionBadge(r){
+    var parts=obj(r.analysis_parts),n=int(r.n_parts),k=DEFAULT_M?int(parts[DEFAULT_M]):0;
+    if(k>0)return badge('in study analysis'+(k<n?' ('+k+' of '+n+' parts)':''),'bdg-reg',memberTitle(DEFAULT_M));
+    var other=ANALYSIS_IDS.filter(function(m){return m!==DEFAULT_M&&int(parts[m])>0;});
+    if(other.length)return badge('in '+other.join(', ')+' only','bdg-exp',other.map(memberTitle).join('; '));
+    return badge('in no analysis','bdg-none','no analysis rule includes a part of this run');
+  }
+  function inclusionText(r){
+    var parts=obj(r.analysis_parts),n=int(r.n_parts);
+    var bits=ANALYSIS_IDS.map(function(m){
+      return (m===DEFAULT_M?'study version ':'')+m+': '+fmtInt(int(parts[m]))+' of '+fmtInt(n)+' parts';
+    });
+    return bits.length?bits.join(' · '):'no analysis rule is recorded';
+  }
+  // what a part recorded against what was asked of it; either number can be absent from older parts
+  function resultsText(m,recorded,requested){
+    var bits=[];
+    if(isNum(m.n_results))bits.push(fmtInt(m.n_results)+' '+recorded);
+    if(isNum(m.pairs_requested))bits.push(fmtInt(m.pairs_requested)+' '+requested);
+    return bits.join(' · ');
+  }
+  function wrapId(name){
+    // allow a line break after each "__" in a long run id
     var span=el('span','');
     var bits=String(name).split('__');
     bits.forEach(function(b,i){
@@ -559,29 +751,64 @@
     return span;
   }
 
-  // ---------------------------------------------------------------- header blocks
+  // ---------------------------------------------------------------- lead labels
+  function renderLead(){
+    var t=obj(INDEX.totals),prov=obj(INDEX._provenance);
+    var counts={},order=[];
+    RUNS.forEach(function(r){var k=str(r.clinical_review)||'not recorded';if(!(k in counts)){counts[k]=0;order.push(k);}counts[k]++;});
+    var pending=RUNS.filter(function(r){return reviewPending(r.clinical_review);}).length;
+    var flag=$('cat-review');
+    if(RUNS.length){
+      var bits=['clinical review of the stimuli pending: '+fmtInt(pending)+' of '+fmtInt(RUNS.length)+' runs'];
+      order.forEach(function(k){if(!reviewPending(k))bits.push(human(k)+': '+plural(counts[k],'run','runs'));});
+      flag.textContent=bits.join(' · ');
+      flag.title=order.map(function(k){return 'clinical_review: '+k+' ('+plural(counts[k],'run','runs')+')';}).join('; ');
+      flag.hidden=false;
+    }
+    $('about-review').textContent=order.length?order.map(function(k){
+      return human(k)+' ('+plural(counts[k],'run','runs')+')';}).join('; '):'not recorded';
+
+    var ev={},evKeys=[];
+    RUNS.forEach(function(r){var k=str(r.evidence_class);if(!(k in ev)){ev[k]=0;evKeys.push(k);}ev[k]++;});
+    var span=$('about-evidence');span.textContent='';
+    evKeys.sort().forEach(function(k,i){
+      if(i)span.appendChild(document.createTextNode(' '));
+      span.appendChild(evidenceClassBadge(k));
+      span.appendChild(document.createTextNode(plural(ev[k],'run','runs')+(i<evKeys.length-1?';':'')));
+    });
+    if(!evKeys.length)span.textContent='not recorded';
+
+    var inv=$('cat-inv');inv.textContent='';
+    function seg(value,label){
+      if(inv.childNodes.length>1)inv.appendChild(el('span','tp',' · '));
+      inv.appendChild(el('b','',value));
+      inv.appendChild(el('span','tp',' '+label));
+    }
+    inv.appendChild(el('span','tp','inventory, not estimates: '));
+    seg(fmtInt(t.runs),'runs');
+    seg(fmtInt(t.rows_public),'public rows');
+    seg(fmtInt(t.rows_withheld_sealed),'sealed rows, counted and never shown');
+    var restricted=RUNS.filter(function(r){return r.visibility==='restricted';}).length;
+    if(restricted)seg(fmtInt(restricted),'runs restricted');
+    var day=str(prov.generated_utc).slice(0,10);
+    if(/^\d{4}-\d{2}-\d{2}$/.test(day))seg(day,'export date');
+  }
+
+  // ---------------------------------------------------------------- Methods & source for the page
   function renderProvenance(){
     var p=$('cat-prov');p.textContent='';
     var pol=obj(INDEX.policy),prov=obj(INDEX._provenance);
-    function seg(label,value,strong){
+    function seg(label,value){
       if(p.childNodes.length)p.appendChild(el('span','tp',' · '));
       p.appendChild(el('span','tp',label+' '));
-      p.appendChild(el(strong?'b':'span','',value||'not recorded'));
+      p.appendChild(el('b','',value||'not recorded'));
     }
-    seg('policy',str(pol.version),true);
-    seg('default membership',str(pol.default_membership));
+    seg('policy',str(pol.version));
+    seg('study version (default_membership)',str(pol.default_membership));
     seg('engine',str(prov.engine_sha));
     seg('generated',str(prov.generated_utc));
-    if(str(pol.sha256))seg('policy sha256',str(pol.sha256).slice(0,12));
-  }
-  function renderReview(){
-    var counts={},order=[];
-    RUNS.forEach(function(r){var k=str(r.clinical_review)||'not recorded';if(!(k in counts)){counts[k]=0;order.push(k);}counts[k]++;});
-    if(!order.length)return;
-    var p=$('cat-review');
-    p.textContent='clinical review of the stimuli: '+order.map(function(k){
-      return human(k)+' ('+fmtInt(counts[k])+' runs)';}).join(' · ');
-    p.hidden=false;
+    seg('generator',str(prov.generator));
+    if(str(pol.sha256))seg('policy sha256',str(pol.sha256));
   }
   function renderTotals(){
     var t=obj(INDEX.totals);
@@ -598,7 +825,7 @@
       d.appendChild(dd);figs.appendChild(d);
     });
     var s=$('tot-sign');s.textContent='';
-    s.appendChild(document.createTextNode('Language penalty sign over the public rows: '));
+    s.appendChild(document.createTextNode('Sign of the difference (language_penalty) over the '+fmtInt(t.rows_public)+' public rows: '));
     [['negative',t.penalty_negative],['zero',t.penalty_zero],['positive',t.penalty_positive],['not measured',t.penalty_missing]]
       .forEach(function(x,i){
         if(i)s.appendChild(document.createTextNode(' · '));
@@ -623,23 +850,23 @@
     var st=obj(t.execution_state),sk=Object.keys(st).sort();
     sk.forEach(function(k){
       var r=plainRow([{text:human(k)},{cls:'num',text:fmtInt(st[k])}]);
-      r.firstChild.title=legendText('execution_state',k);
+      r.firstChild.title=schemaTitle('execution_state',k);
       ex.appendChild(r);
     });
     if(!sk.length)ex.appendChild(plainRow([{text:'not recorded'},{cls:'num',text:DASH}]));
     var noParts=RUNS.filter(function(r){return int(r.n_parts)===0;}).length;
-    $('tot-noparts').textContent=fmtInt(noParts)+' runs have no batch summary part and so no execution state. They are listed with the reason.';
+    $('tot-noparts').textContent=fmtInt(noParts)+' runs have no batch summary part and so no run status. They are listed with the reason.';
 
     var mem=$('tot-mem');mem.textContent='';
     Object.keys(MEMBERS).forEach(function(m){
       var info=obj(MEMBERS[m]),r=tr('');
-      var c=td('Membership');
+      var c=td('Rule');
       var name=el('span','');
       name.appendChild(el('b','',m));
-      if(m===DEFAULT_M)name.appendChild(document.createTextNode(' (default)'));
+      if(m===DEFAULT_M)name.appendChild(document.createTextNode(' (study version)'));
       c.appendChild(name);r.appendChild(c);
       c=td('Label','prose');c.appendChild(el('span','',str(info.label)||DASH));r.appendChild(c);
-      c=td('Purpose');c.appendChild(el('span','',str(info.purpose)||DASH));r.appendChild(c);
+      c=td('Purpose','nw');c.appendChild(el('span','',str(info.purpose)||DASH));r.appendChild(c);
       c=td('Parts','num');c.appendChild(el('span','',fmtInt(info.parts)));r.appendChild(c);
       c=td('Rows','num');c.appendChild(el('span','',fmtInt(info.rows)));r.appendChild(c);
       mem.appendChild(r);
@@ -648,16 +875,16 @@
 
     var pin=obj(INDEX.policy).analysis_pin,lead=$('pin-lead'),dl=$('pin-kv');
     lead.textContent='';dl.textContent='';
-    lead.appendChild(document.createTextNode('The published statistics follow the default membership, '));
+    lead.appendChild(document.createTextNode('The published statistics follow the study version, '));
     lead.appendChild(el('b','',DEFAULT_M||'not recorded'));
-    lead.appendChild(document.createTextNode('. They change only through a versioned snapshot. This catalogue is re-exported as runs land; the statistics do not move with it.'));
+    lead.appendChild(document.createTextNode(' (the policy’s default membership). They change only through a versioned snapshot. This catalogue is re-exported as runs land; the statistics do not move with it.'));
     if(isObj(pin)){
       if(typeof pin.auto_advance==='boolean')kv(dl,'Automatic advance',pin.auto_advance?'on':'off');
       kv(dl,'Reason',str(pin.reason));
       kv(dl,'Responsible role',str(pin.responsible_role));
       kv(dl,'Release condition',str(pin.release_condition));
     }else{
-      kv(dl,'Pin','no analysis pin is recorded in this policy version');
+      kv(dl,'Pin (analysis_pin)','no analysis pin is recorded in this policy version');
     }
   }
   function renderRestrictions(){
@@ -675,21 +902,19 @@
   }
   function renderLegend(){
     var box=$('legend-body');box.textContent='';
-    ['execution_state','artifact_integrity','evidence_class','sampling'].concat(
-      Object.keys(LEGEND).filter(function(k){return ['execution_state','artifact_integrity','evidence_class','sampling'].indexOf(k)<0;})
-    ).forEach(function(axis){
+    var first=['execution_state','artifact_integrity','evidence_class','sampling'];
+    first.concat(Object.keys(LEGEND).filter(function(k){return first.indexOf(k)<0;})).forEach(function(axis){
       var entries=obj(LEGEND[axis]),keys=Object.keys(entries);
       if(!keys.length)return;
       var d=document.createElement('div');
-      d.appendChild(el('h3','',human(axis)));
+      var h=el('h3','',(AXIS_LABEL[axis]||human(axis))+' ');
+      h.appendChild(el('code','',axis));
+      d.appendChild(h);
       var dl=document.createElement('dl');
-      keys.forEach(function(k){dl.appendChild(el('dt','',human(k)));dl.appendChild(el('dd','',str(entries[k])));});
+      keys.forEach(function(k){dl.appendChild(el('dt','',k));dl.appendChild(el('dd','',str(entries[k])));});
       d.appendChild(dl);box.appendChild(d);
     });
-    if(!box.firstChild)box.appendChild(el('p','note','No legend is recorded in this index.'));
-    var notes=$('legend-notes');notes.textContent='';
-    arr(INDEX.notes).forEach(function(n){if(typeof n==='string')notes.appendChild(el('li','',n));});
-    notes.hidden=!notes.firstChild;
+    if(!box.firstChild)box.appendChild(el('p','note','No label definition is recorded in this index.'));
   }
 
   // ---------------------------------------------------------------- filters
@@ -709,6 +934,7 @@
     }
     fillSelect('f-evidence',opts(countBy(function(r){return [str(r.evidence_class)];})));
     fillSelect('f-stimulus',opts(countBy(function(r){return [str(r.stimulus_class)];})));
+    fillSelect('f-review',opts(countBy(function(r){return [str(r.clinical_review)];})));
     var states=countBy(function(r){return Object.keys(obj(r.execution_states));});
     var st=opts(states);
     var none=RUNS.filter(function(r){return !Object.keys(obj(r.execution_states)).length;}).length;
@@ -717,28 +943,77 @@
     fillSelect('f-visibility',opts(countBy(function(r){return [str(r.visibility)];})));
     var m=DEFAULT_M||'the default membership';
     var inside=RUNS.filter(function(r){return int(obj(r.analysis_parts)[DEFAULT_M])>0;}).length;
-    fillSelect('f-membership',[['inside','inside '+m+' (at least one part) · '+fmtInt(inside)],
-                               ['outside','outside '+m+' (no part) · '+fmtInt(RUNS.length-inside)]]);
+    fillSelect('f-membership',[['inside','in the study analysis, '+m+' (at least one part) · '+fmtInt(inside)],
+                               ['outside','not in the study analysis (no part) · '+fmtInt(RUNS.length-inside)]]);
+
+    // Quick views: the records a default list could bury. Each one sets a single filter that "More filters" also shows.
+    var noRows=RUNS.filter(function(r){return !(int(obj(r.counts).rows_public)>0);}).length;
+    var restricted=RUNS.filter(function(r){return r.visibility==='restricted';}).length;
+    VIEWS=[
+      {id:'all',label:'all',n:RUNS.length,on:function(){return !filtersActive();},set:function(){clearFilters();},
+        title:'every run, with no filter'},
+      {id:'partial',label:'partial',n:int(states.partial),on:function(){return F.state==='partial';},
+        set:function(v){F.state=v?'partial':'';},title:'runs with at least one part whose run status is partial'},
+      {id:'norows',label:'no rows listed',n:noRows,on:function(){return F.rows==='0';},
+        set:function(v){F.rows=v?'0':'';},title:'runs with no public row in the catalogue; each states its reason'},
+      {id:'restricted',label:'restricted',n:restricted,on:function(){return F.visibility==='restricted';},
+        set:function(v){F.visibility=v?'restricted':'';},title:'runs a named restriction keeps from publication'},
+      {id:'issue',label:'empty, unreadable or changed parts',n:RUNS.filter(hasIssue).length,on:function(){return F.issue;},
+        set:function(v){F.issue=v;},title:'runs with a part that is empty or unreadable, or whose bytes differ from a recorded hash or lack required metadata'}
+    ];
+    var box=$('cat-views');
+    VIEWS.forEach(function(v){
+      var b=el('button','chip',v.label+' ');
+      b.type='button';b.id='view-'+v.id;b.title=v.title;
+      b.setAttribute('aria-pressed','false');
+      b.appendChild(el('span','chip-ct',fmtInt(v.n)));
+      b.addEventListener('click',function(){
+        if(v.id==='all')v.set();else v.set(!v.on());
+        syncControls();applyFilters();
+      });
+      v.node=b;box.appendChild(b);
+    });
   }
   function hasOption(id,value){
     var o=$(id).options;
     for(var i=0;i<o.length;i++)if(o[i].value===value)return true;
     return false;
   }
+  function filtersActive(){
+    return !!(F.q||F.issue||MORE_KEYS.some(function(k){return F[k];}));
+  }
+  function setMore(open){
+    $('more-filters').hidden=!open;
+    $('more-btn').setAttribute('aria-expanded',String(open));
+  }
   function syncControls(){
     $('f-q').value=F.q;
     Object.keys(SELECTS).forEach(function(k){$(SELECTS[k]).value=F[k];});
-    $('f-rows').checked=F.rows;
+    VIEWS.forEach(function(v){
+      var on=!!v.on();
+      v.node.setAttribute('aria-pressed',String(on));
+      v.node.className='chip'+(on?' on':'');
+    });
+    var n=MORE_KEYS.filter(function(k){return F[k];}).length;
+    $('more-btn').textContent='More filters'+(n?' ('+n+' set)':'');
   }
-  function clearFilters(){F.q='';F.evidence='';F.stimulus='';F.state='';F.visibility='';F.membership='';F.rows=false;}
+  function clearFilters(){
+    F.q='';MORE_KEYS.forEach(function(k){F[k]='';});F.issue=false;
+  }
+  function searchText(r){
+    var x=experiment(r);
+    return (str(r.run_dir)+' '+str(r.stem)+' '+str(r.model)+' '+str(r.instrument)+' '+x.title+' '+
+      human(r.evidence_class)+' '+Object.keys(obj(r.execution_states)).map(human).join(' ')).toLowerCase();
+  }
   function matches(r){
     if(F.q){
-      var hay=(str(r.run_dir)+' '+str(r.stem)+' '+str(r.model)+' '+str(r.instrument)).toLowerCase();
+      var hay=searchText(r);
       var terms=F.q.toLowerCase().split(/\s+/);
       for(var i=0;i<terms.length;i++)if(terms[i]&&hay.indexOf(terms[i])<0)return false;
     }
     if(F.evidence&&r.evidence_class!==F.evidence)return false;
     if(F.stimulus&&r.stimulus_class!==F.stimulus)return false;
+    if(F.review&&r.clinical_review!==F.review)return false;
     if(F.state){
       var st=obj(r.execution_states);
       if(F.state==='none'){if(Object.keys(st).length)return false;}
@@ -750,9 +1025,31 @@
       if(F.membership==='inside'&&n<=0)return false;
       if(F.membership==='outside'&&n>0)return false;
     }
-    if(F.rows&&!(int(obj(r.counts).rows_public)>0))return false;
+    var hasRows=int(obj(r.counts).rows_public)>0;
+    if(F.rows==='1'&&!hasRows)return false;
+    if(F.rows==='0'&&hasRows)return false;
+    if(F.issue&&!hasIssue(r))return false;
     return true;
   }
+  // Neutral orderings only: by run id (the export's order), by batch date or by model. Never by a measured value.
+  function ordered(list){
+    if(F.sort==='date'){
+      return list.slice().sort(function(a,b){
+        var x=experiment(a).sortKey,y=experiment(b).sortKey;
+        if(x!==y){if(!x)return 1;if(!y)return -1;return x<y?1:-1;}
+        return ORDER[a.run_dir]-ORDER[b.run_dir];
+      });
+    }
+    if(F.sort==='model'){
+      return list.slice().sort(function(a,b){
+        var x=modelLabel(a).toLowerCase(),y=modelLabel(b).toLowerCase();
+        if(x!==y)return x<y?-1:1;
+        return ORDER[a.run_dir]-ORDER[b.run_dir];
+      });
+    }
+    return list;
+  }
+  function visibleRuns(){return ordered(RUNS.filter(matches));}
   function readUrl(){
     var p;
     try{p=new URLSearchParams(window.location.search);}catch(e){return '';}
@@ -761,7 +1058,7 @@
       var v=p.get(k)||'';
       F[k]=v&&hasOption(SELECTS[k],v)?v:'';
     });
-    F.rows=p.get('rows')==='1';
+    F.issue=p.get('issue')==='1';
     return p.get('run')||'';
   }
   function writeUrl(){
@@ -769,7 +1066,7 @@
       var p=new URLSearchParams();
       if(F.q)p.set('q',F.q);
       Object.keys(SELECTS).forEach(function(k){if(F[k])p.set(k,F[k]);});
-      if(F.rows)p.set('rows','1');
+      if(F.issue)p.set('issue','1');
       if(openRun)p.set('run',openRun);
       var s=p.toString();
       window.history.replaceState(null,'',window.location.pathname+(s?'?'+s:'')+window.location.hash);
@@ -778,81 +1075,93 @@
 
   // ---------------------------------------------------------------- run table
   function runRow(r){
-    var c=obj(r.counts),row=tr('cat-run'),cell,name=str(r.run_dir);
+    var c=obj(r.counts),row=tr('cat-run'),cell,name=str(r.run_dir),x=experiment(r),wrap;
     row.setAttribute('data-run',name);
     row.setAttribute('data-evidence',str(r.evidence_class));
     row.setAttribute('data-visibility',str(r.visibility));
 
-    cell=td('','c-run');
+    cell=td('','c-exp');
     var b=el('button','cat-x');
     b.type='button';
     b.setAttribute('aria-expanded','false');
-    b.appendChild(runDirNode(name));
+    b.setAttribute('aria-label',x.title+', '+modelLabel(r)+', run '+name);
+    b.appendChild(el('span','',x.title));
     b.addEventListener('click',function(){toggle(r,row,b);});
-    cell.appendChild(b);row.appendChild(cell);
-
-    cell=td('Model');
-    if(str(r.model))cell.appendChild(el('span','',r.model));
-    else if(str(r.instrument))cell.appendChild(el('span','','instrument: '+r.instrument));
-    else cell.appendChild(el('span','dim','not recorded'));
+    cell.appendChild(b);
+    var set=el('span','x-set',x.stem);
+    set.title='stimulus set (stem). The full run id is in this run’s Methods & source.';
+    cell.appendChild(set);
     row.appendChild(cell);
 
-    cell=td('Evidence');cell.appendChild(evidenceClassBadge(str(r.evidence_class)));row.appendChild(cell);
-    cell=td('Review');cell.appendChild(el('span','',human(r.clinical_review)));row.appendChild(cell);
-    cell=td('Sampling');
-    var sm=el('span','',human(r.sampling));sm.title=legendText('sampling',str(r.sampling));
-    cell.appendChild(sm);row.appendChild(cell);
-
-    cell=td('State');
-    var wrap=el('span',''),st=obj(r.execution_states),sk=Object.keys(st).sort();
-    if(!sk.length)wrap.appendChild(badge('no summary part','bdg-none','this directory holds no batch summary part'));
-    sk.forEach(function(k){
-      wrap.appendChild(badge(human(k)+' ×'+fmtInt(st[k]),k==='completed'?'':'bdg-exp',legendText('execution_state',k)));
-    });
+    cell=td('Model','c-model');
+    wrap=el('span','');
+    wrap.appendChild(el('span',str(r.model)||str(r.instrument)?'ln':'ln dim',modelLabel(r)));
+    if(x.suffix){
+      var sx=el('span','ln dim',x.suffix);
+      sx.title='the rest of the run id after the stimulus set name';
+      wrap.appendChild(sx);
+    }
     cell.appendChild(wrap);row.appendChild(cell);
 
-    cell=td('Rows');
+    cell=td('Measured','c-meas');
     wrap=el('span','');
+    var nPub=int(c.rows_public),nSealed=int(c.rows_withheld_sealed);
     if(r.visibility==='restricted'){
       wrap.appendChild(badge('restricted','bdg-restricted',arr(r.restriction_reasons).join(', ')));
       wrap.appendChild(el('span','ln dim','no rows published'));
-    }else if(int(c.rows_public)>0||int(c.rows_withheld_sealed)>0){
-      wrap.appendChild(el('span','ln',fmtInt(c.rows_public)+' public'));
-      var sealed=el('span','ln dim',fmtInt(c.rows_withheld_sealed)+' sealed');
-      sealed.title=fmtInt(c.rows_withheld_sealed)+' rows withheld by the Tier B seal; counted, never shown';
-      wrap.appendChild(sealed);
-    }else{
-      wrap.appendChild(el('span','dim','no rows listed'));
-    }
-    cell.appendChild(wrap);row.appendChild(cell);
-
-    cell=td('Penalty sign');
-    wrap=el('span','');
-    if(int(c.rows_public)>0){
-      var signs=el('span','ln');
-      [['neg',c.penalty_negative,'negative'],['zero',c.penalty_zero,'zero'],['pos',c.penalty_positive,'positive']]
-        .forEach(function(x,i){
-          if(i)signs.appendChild(document.createTextNode(' · '));
-          var s=el('span','sg');
-          s.setAttribute('data-sign',x[2]);
-          s.title=fmtInt(x[1])+' public rows with a '+x[2]+' language penalty';
-          s.appendChild(document.createTextNode(x[0]+' '));
-          s.appendChild(el('b','',fmtInt(int(x[1]))));
-          signs.appendChild(s);
-        });
-      wrap.appendChild(signs);
-      if(int(c.penalty_missing)>0){
-        var nm=el('span','ln dim','not measured '+fmtInt(c.penalty_missing));
-        nm.setAttribute('data-sign','missing');
-        wrap.appendChild(nm);
+    }else if(nPub>0||nSealed>0){
+      var ln=el('span','ln');
+      ln.appendChild(el('b','',fmtInt(nPub)));
+      ln.appendChild(document.createTextNode(' public '+(nPub===1?'row':'rows')));
+      if(nSealed>0){
+        var sealed=el('span','dim',' · '+fmtInt(nSealed)+' sealed');
+        sealed.title=fmtInt(nSealed)+' rows withheld by the Tier B seal; counted, never shown';
+        ln.appendChild(sealed);
+      }
+      wrap.appendChild(ln);
+      if(nPub>0){
+        var signs=el('span','ln');
+        [['lower',c.penalty_negative,'negative'],['equal',c.penalty_zero,'zero'],['higher',c.penalty_positive,'positive']]
+          .forEach(function(s,i){
+            if(i)signs.appendChild(document.createTextNode(' · '));
+            var sp=el('span','sg');
+            sp.setAttribute('data-sign',s[2]);
+            sp.title=fmtInt(int(s[1]))+' of '+fmtInt(nPub)+' public rows: target-token probability '+s[0]+
+              ' after the patient wording ('+s[2]+' language_penalty)';
+            sp.appendChild(document.createTextNode(s[0]+' '));
+            sp.appendChild(el('b','',fmtInt(int(s[1]))));
+            signs.appendChild(sp);
+          });
+        if(int(c.penalty_missing)>0){
+          signs.appendChild(document.createTextNode(' · '));
+          var nm=el('span','sg dim','not measured '+fmtInt(c.penalty_missing));
+          nm.setAttribute('data-sign','missing');
+          nm.title=fmtInt(c.penalty_missing)+' of '+fmtInt(nPub)+' public rows have no difference recorded';
+          signs.appendChild(nm);
+        }
+        wrap.appendChild(signs);
       }
     }else{
-      wrap.appendChild(el('span','dim','no public rows'));
+      wrap.appendChild(el('span','ln dim','no rows listed'));
+      var why=str(r.rows_reason).split(/[;:]|\.\s/)[0];
+      if(why){var ws=el('span','ln dim',why);ws.title=str(r.rows_reason);wrap.appendChild(ws);}
     }
     cell.appendChild(wrap);row.appendChild(cell);
 
-    cell=td('Membership');
-    wrap=el('span','');wrap.appendChild(membershipBadges(r));
+    cell=td('Status','c-status');
+    wrap=el('span','');
+    var st=obj(r.execution_states),sk=Object.keys(st).sort(),many=int(r.n_parts)>1;
+    if(!sk.length)wrap.appendChild(badge('no summary part','bdg-none','this run directory holds no batch summary part'));
+    sk.forEach(function(k){wrap.appendChild(statusBadge(k,st[k],many));});
+    cell.appendChild(wrap);row.appendChild(cell);
+
+    cell=td('Context','c-ctx');
+    wrap=el('span','');
+    var l1=el('span','ln');l1.appendChild(evidenceClassBadge(str(r.evidence_class)));wrap.appendChild(l1);
+    var l2=el('span','ln');l2.appendChild(inclusionBadge(r));
+    var rv=el('span','dim',reviewPending(r.clinical_review)?'review pending':'review: '+human(r.clinical_review));
+    rv.title='clinical_review: '+(str(r.clinical_review)||'not recorded');
+    l2.appendChild(rv);wrap.appendChild(l2);
     cell.appendChild(wrap);row.appendChild(cell);
     return row;
   }
@@ -878,12 +1187,13 @@
     var p=$('cat-count');p.textContent='';
     p.appendChild(document.createTextNode(fmtInt(filtered.length)+' of '+fmtInt(RUNS.length)+' runs'));
     if(shown<filtered.length)p.appendChild(el('span','',' · first '+fmtInt(shown)+' shown'));
+    $('cat-order').textContent='ordered by '+(SORT_TEXT[F.sort]||SORT_TEXT[''])+'; never by effect';
     var more=$('cat-more'),left=filtered.length-shown;
     more.hidden=left<=0;
     if(left>0)more.textContent='show '+fmtInt(Math.min(PAGE_SIZE,left))+' more ('+fmtInt(left)+' not shown)';
   }
   function render(){
-    filtered=RUNS.filter(matches);
+    filtered=visibleRuns();
     var body=$('cat-body');body.textContent='';
     if(!filtered.length){
       var e=tr('cat-none'),c=td('');
@@ -895,51 +1205,125 @@
     }
     updateBar();
   }
-  function onFilterChange(){
-    F.q=$('f-q').value.trim();
-    Object.keys(SELECTS).forEach(function(k){F[k]=$(SELECTS[k]).value;});
-    F.rows=$('f-rows').checked;
+  function applyFilters(){
     limit=PAGE_SIZE;
     $('cat-msg').hidden=true;
     render();writeUrl();
   }
+  function onFilterChange(){
+    F.q=$('f-q').value.trim();
+    Object.keys(SELECTS).forEach(function(k){F[k]=$(SELECTS[k]).value;});
+    syncControls();applyFilters();
+  }
 
   // ---------------------------------------------------------------- expanded run
-  function detailFor(r){
-    var name=r.run_dir;
-    if(detNodes[name])return detNodes[name];
-    var row=tr('cat-detail');
-    row.id='det-'+RUNS.indexOf(r);
-    var cell=td('');cell.colSpan=NCOLS;
-    var box=el('div','det');
-    var h=el('h3','');h.appendChild(document.createTextNode('Run '));h.appendChild(runDirNode(name));
-    box.appendChild(h);
-
-    var c=obj(r.counts),dl=el('dl','kv');
+  // Methods & source for one run: the full run id, the engine path, every part with its file name, sha256,
+  // integrity and the reason it is outside each analysis rule.
+  function sourceBlock(r,open){
+    var d=el('details','meth det-src');
+    d.open=!!open;
+    d.appendChild(el('summary','','Methods & source'));
+    var inner=el('div','src-in'),dl=el('dl','kv'),c=obj(r.counts);
+    dl.appendChild(el('dt','','Run id'));
+    var idd=el('dd','src-id');idd.appendChild(wrapId(r.run_dir));dl.appendChild(idd);
     kv(dl,'Engine source',str(r.source));
     kv(dl,'Stimulus set',str(r.stem)+' · stimulus class '+human(r.stimulus_class));
     kv(dl,'Model',str(r.model)?r.model+(str(r.model_cohort)?' · cohort '+r.model_cohort:''):(str(r.instrument)?'instrument: '+r.instrument:'not recorded'));
+    kv(dl,'Backends',arr(r.backends).length?arr(r.backends).join(', '):'none recorded');
     kv(dl,'Evidence class',human(r.evidence_class)+(legendText('evidence_class',str(r.evidence_class))?' · '+legendText('evidence_class',str(r.evidence_class)):''));
     kv(dl,'Clinical review',human(r.clinical_review));
     kv(dl,'Sampling',human(r.sampling)+(legendText('sampling',str(r.sampling))?' · '+legendText('sampling',str(r.sampling)):''));
-    kv(dl,'Backends',arr(r.backends).length?arr(r.backends).join(', '):'none recorded');
     kv(dl,'Visibility',str(r.visibility)+(arr(r.restriction_reasons).length?' · '+arr(r.restriction_reasons).join(', '):''));
-    kv(dl,'Rows',fmtInt(c.rows_public)+' public · '+fmtInt(c.rows_withheld_sealed)+' withheld by the Tier B seal (counted, never shown) · '+
-      fmtInt(c.rows_screened_out)+' screened out · '+fmtInt(c.rows_flipped)+' flipped');
+    kv(dl,'Included in analysis',inclusionText(r));
     if(int(c.rows_duplicate_index)||int(c.rows_own_prompts)){
       kv(dl,'Row notes',fmtInt(c.rows_duplicate_index)+' rows repeat an index already listed in this run · '+
         fmtInt(c.rows_own_prompts)+' rows were traced with prompt text that differs from the stimulus set entry');
     }
     var other=obj(r.other_artifacts),ok=Object.keys(other);
     if(ok.length)kv(dl,'Other artifacts',ok.map(function(k){return human(k)+' ×'+fmtInt(other[k]);}).join(', ')+' (not row results; not shown here)');
+    if(str(r.rows_file))kv(dl,'Rows file',str(r.rows_file));
+    if(str(r.stimuli_file))kv(dl,'Prompt-pair file',str(r.stimuli_file));
+    inner.appendChild(dl);
+
+    var parts=arr(r.parts).filter(isObj);
+    inner.appendChild(el('h4','','File parts ('+fmtInt(parts.length)+')'));
+    if(!parts.length){
+      inner.appendChild(el('p','det-foot','This run directory holds no batch summary part.'));
+    }else{
+      var t=el('table','tbl stack');t.setAttribute('role','table');
+      t.setAttribute('aria-label','File parts of run '+str(r.run_dir));
+      var head=document.createElement('thead');head.setAttribute('role','rowgroup');
+      var hr=tr('');
+      [['Part',''],['File and sha256',''],['Run status',''],['Integrity',''],['Results','num'],['Included in analysis','']]
+        .forEach(function(h){var th=el('th',h[1],h[0]);th.scope='col';th.setAttribute('role','columnheader');hr.appendChild(th);});
+      head.appendChild(hr);t.appendChild(head);
+      var tb=document.createElement('tbody');tb.setAttribute('role','rowgroup');
+      parts.forEach(function(m,i){
+        var row=tr('src-part'),cell,w;
+        row.setAttribute('data-part',str(m.name));
+        cell=td('Part');cell.appendChild(el('span','',fmtInt(i+1)+' of '+fmtInt(parts.length)));row.appendChild(cell);
+        cell=td('File');w=el('span','');
+        w.appendChild(el('span','ln',str(m.name)||'unnamed part'));
+        var hash=el('span','ln dim part-sha',str(m.sha256)?'sha256 '+m.sha256:'sha256 not recorded');
+        w.appendChild(hash);
+        if(str(m.backend))w.appendChild(el('span','ln dim','backend '+m.backend));
+        cell.appendChild(w);row.appendChild(cell);
+        cell=td('Status');w=el('span','',human(m.execution_state));w.title=schemaTitle('execution_state',str(m.execution_state));
+        cell.appendChild(w);row.appendChild(cell);
+        cell=td('Integrity');w=el('span','');
+        var ig=el('span','ln',human(m.artifact_integrity));ig.title=schemaTitle('artifact_integrity',str(m.artifact_integrity));
+        w.appendChild(ig);
+        if(str(m.integrity_detail))w.appendChild(el('span','ln dim',m.integrity_detail));
+        cell.appendChild(w);row.appendChild(cell);
+        cell=td('Results','num');
+        cell.appendChild(el('span','',resultsText(m,'recorded','requested')||DASH));
+        row.appendChild(cell);
+        cell=td('Included');w=el('span','');
+        var inside=arr(m['in']);
+        w.appendChild(el('span','ln',inside.length?'in: '+inside.join(', '):'in no rule'));
+        var outside=obj(m.outside);
+        Object.keys(outside).forEach(function(k){w.appendChild(el('span','ln dim','outside '+k+': '+String(outside[k])));});
+        cell.appendChild(w);row.appendChild(cell);
+        tb.appendChild(row);
+      });
+      t.appendChild(tb);inner.appendChild(t);
+    }
+    d.appendChild(inner);
+    return d;
+  }
+  function detailFor(r){
+    var name=r.run_dir;
+    if(detNodes[name])return detNodes[name];
+    var row=tr('cat-detail'),x=experiment(r);
+    row.id='det-'+RUNS.indexOf(r);
+    var cell=td('');cell.colSpan=NCOLS;
+    var box=el('div','det');
+    box.appendChild(el('h3','',x.title+' · '+modelLabel(r)));
+
+    // local labels: this panel can be read or shared without the rest of the page
+    var lab=el('p','det-labels');
+    lab.appendChild(badge('simulated stimuli','','test phrasings written by a model or by hand; not statements from patients'));
+    lab.appendChild(evidenceClassBadge(str(r.evidence_class),'evidence: '));
+    lab.appendChild(badge('clinical review: '+human(r.clinical_review),'bdg-draft','clinical_review: '+(str(r.clinical_review)||'not recorded')));
+    var smp=badge('sampling: '+human(r.sampling),'',schemaTitle('sampling',str(r.sampling)));
+    lab.appendChild(smp);
+    lab.appendChild(badge('a listing, not a claim','bdg-none','being listed in the catalogue places this run in no analysis and makes no claim'));
+    box.appendChild(lab);
+
+    var c=obj(r.counts),dl=el('dl','kv');
+    kv(dl,'Rows',fmtInt(c.rows_public)+' public · '+fmtInt(c.rows_withheld_sealed)+' withheld by the Tier B seal (counted, never shown) · '+
+      fmtInt(c.rows_screened_out)+' screened out · '+fmtInt(c.rows_flipped)+' flipped');
+    kv(dl,'Included in analysis',inclusionText(r));
     box.appendChild(dl);
 
     var status=el('div','det-status');status.setAttribute('role','status');
     box.appendChild(status);
+    var links=el('div','det-links');box.appendChild(links);
+    box.appendChild(sourceBlock(r,!r.rows_file||r.visibility==='restricted'));
     var body=el('div','det-body');box.appendChild(body);
     cell.appendChild(box);row.appendChild(cell);
     detNodes[name]=row;
-    loadDetail(r,status,body);
+    loadDetail(r,status,links,body);
     return row;
   }
   function setStatus(status,cls,label,text){
@@ -950,8 +1334,8 @@
     if(text)status.appendChild(document.createTextNode(text));
     status.hidden=false;
   }
-  function loadDetail(r,status,body){
-    body.textContent='';
+  function loadDetail(r,status,links,body){
+    body.textContent='';links.textContent='';
     if(r.visibility==='restricted'){
       setStatus(status,'is-restricted','Restricted','No rows are published for this run.');
       var ul=document.createElement('ul');
@@ -995,7 +1379,7 @@
     Promise.all([rowsP,stimP]).then(function(res){
       var doc=res[0],stim=res[1];
       status.hidden=true;status.textContent='';status.setAttribute('data-state','loaded');
-      body.textContent='';
+      body.textContent='';links.textContent='';
       var dlp=el('p','sum-dl');
       dlp.appendChild(document.createTextNode('download this run: '));
       var a=el('a','',r.rows_file);a.href=BASE+r.rows_file;a.setAttribute('download','');dlp.appendChild(a);
@@ -1004,20 +1388,22 @@
         var a2=el('a','',stimFile);a2.href=BASE+stimFile;a2.setAttribute('download','');dlp.appendChild(a2);
       }
       dlp.style.marginTop='12px';
-      body.appendChild(dlp);
-      if(str(doc.endpoint))body.appendChild(el('p','det-foot','Endpoint: '+doc.endpoint+'. Values are displayed to four decimal places; the files carry the stored values.'));
+      links.appendChild(dlp);
+      links.appendChild(el('p','det-foot','Values are target-token probabilities on a scale from 0 to 1 (About this catalogue). '+
+        'Each row is one measurement; the files carry no interval. Values are displayed to four decimal places; the files carry the stored values. '+
+        'Prompts are shown verbatim, including intentional misspellings.'));
       if(stim.failed){
         var warn=el('div','det-status is-fail');
         warn.setAttribute('data-state','stimuli-fail');
         warn.appendChild(el('b','','Prompt text failed to load'));
         warn.appendChild(document.createTextNode('('+stim.failed+'). The measurements below are shown without their prompts.'));
-        body.appendChild(warn);
+        links.appendChild(warn);
       }
       renderParts(r,doc,stim.failed?null:stim,body);
     }).catch(function(e){
       setStatus(status,'is-fail','Failed to load','The rows for this run could not be loaded ('+failLabel(e)+'). File: '+str(r.rows_file));
       var retry=el('button','btn','retry');retry.type='button';
-      retry.addEventListener('click',function(){loadDetail(r,status,body);});
+      retry.addEventListener('click',function(){loadDetail(r,status,links,body);});
       status.appendChild(retry);
       body.textContent='';
       try{renderParts(r,null,null,body);}catch(x){/* the status above already states the failure */}
@@ -1044,10 +1430,10 @@
     c.appendChild(w);
     return c;
   }
-  function numCell(label,v){
+  function numCell(label,v,field){
     var c=td(label,'num'),s=fmtNum(v);
     var sp=el('span',s==null?'dim':'',s==null?DASH+' not measured':(v<0?'−':'')+s);
-    if(s!=null)sp.title='stored value '+String(v);
+    if(s!=null)sp.title=field+': stored value '+String(v);
     c.appendChild(sp);
     return c;
   }
@@ -1059,16 +1445,16 @@
     r.appendChild(promptCell('Clinical','r-c',pair.clinical_prompt,row.spread_clinical,haveStimuli||!!own));
     r.appendChild(promptCell('Patient','r-p',pair.patient_prompt,row.spread_patient,haveStimuli||!!own));
     c=td('Target');c.appendChild(el('span',str(row.target_token)?'':'dim',str(row.target_token)||DASH+' not recorded'));r.appendChild(c);
-    r.appendChild(numCell('P(clinical)',row.prob_clinical));
-    r.appendChild(numCell('P(patient)',row.prob_patient));
+    r.appendChild(numCell('P clinical',row.prob_clinical,'prob_clinical'));
+    r.appendChild(numCell('P patient',row.prob_patient,'prob_patient'));
 
-    c=td('Penalty','r-pen');
+    c=td('Difference','r-pen');
     var v=row.language_penalty,word=signWord(v),pw=el('span','');
     pw.setAttribute('data-sign',isNum(v)?word:'missing');
     if(isNum(v)){
       pw.appendChild(el('b','',(v<0?'−':(v>0?'+':''))+fmtNum(v)));
       pw.appendChild(document.createTextNode(' '+word));
-      pw.title='stored value '+String(v);
+      pw.title='language_penalty: stored value '+String(v);
     }else{
       pw.className='dim';pw.textContent=DASH+' not measured';
     }
@@ -1097,9 +1483,12 @@
     t.setAttribute('aria-label',caption);
     var head=document.createElement('thead');head.setAttribute('role','rowgroup');
     var hr=tr('');
-    [['Index','num'],['Clinical phrasing','w-prompt'],['Patient phrasing','w-prompt'],['Target token',''],['P(clinical)','num'],
-     ['P(patient)','num'],['Language penalty',''],['Notes','w-notes']].forEach(function(h){
-      var th=el('th',h[1],h[0]);th.scope='col';th.setAttribute('role','columnheader');hr.appendChild(th);
+    [['Index','num',''],['Clinical wording','w-prompt',''],['Patient wording','w-prompt',''],['Target token','',''],
+     ['Target-token probability','num','clinical wording'],['Target-token probability','num','patient wording'],
+     ['Difference','','patient − clinical'],['Notes','w-notes','']].forEach(function(h){
+      var th=el('th',h[1],h[0]);th.scope='col';th.setAttribute('role','columnheader');
+      if(h[2])th.appendChild(el('small','',h[2]));
+      hr.appendChild(th);
     });
     head.appendChild(hr);t.appendChild(head);
     var tb=document.createElement('tbody');tb.setAttribute('role','rowgroup');
@@ -1116,42 +1505,36 @@
       body.appendChild(el('p','det-foot','This run directory holds no batch summary part.'));
       return;
     }
-    var pairs=stim?stim.pairs:null;
-    list.forEach(function(item){
+    if(!doc){
+      // no rows to show: the parts, with file names, hashes and status, are in Methods & source above
+      body.appendChild(el('p','det-foot','This run has '+plural(list.length,'batch summary part','batch summary parts')+
+        ' and no rows on this page. Each part is listed in Methods & source above with its file name, sha256 and run status.'));
+      return;
+    }
+    var pairs=stim?stim.pairs:null,n=list.length;
+    list.forEach(function(item,i){
       var m=item.meta,rp=item.rows,sec=el('section','part');
       sec.setAttribute('data-part',str(m.name));
-      sec.appendChild(el('h4','',str(m.name)||'unnamed part'));
+      var h=el('h4','',n>1?'Part '+(i+1)+' of '+n:'Rows');
+      h.title=str(m.name);
+      sec.appendChild(h);
       var state=str(rp&&rp.execution_state)||str(m.execution_state);
       var line=el('p','part-state');
-      line.appendChild(badge('state: '+human(state),state==='completed'?'':'bdg-exp',legendText('execution_state',state)));
-      if(str(m.artifact_integrity))line.appendChild(badge('integrity: '+human(m.artifact_integrity),'',legendText('artifact_integrity',m.artifact_integrity)));
-      if(m.n_results!=null||m.pairs_requested!=null){
-        line.appendChild(el('span','dim',fmtInt(m.n_results)+' results recorded · '+fmtInt(m.pairs_requested)+' pairs requested'+
-          (str(m.backend)?' · backend '+m.backend:'')));
-      }
+      line.appendChild(statusBadge(state,0,false));
+      var inside=rp&&Array.isArray(rp.analysis_memberships)?rp.analysis_memberships:
+        arr(m['in']).filter(function(x){return ANALYSIS_IDS.indexOf(x)>=0;});
+      if(DEFAULT_M&&inside.indexOf(DEFAULT_M)>=0)line.appendChild(badge('in study analysis','bdg-reg',memberTitle(DEFAULT_M)));
+      else if(inside.length)line.appendChild(badge('in '+inside.join(', ')+' only','bdg-exp',inside.map(memberTitle).join('; ')));
+      else line.appendChild(badge('in no analysis','bdg-none','no analysis rule includes this part; the reason is in Methods & source'));
+      if(resultsText(m,'results recorded','pairs requested'))line.appendChild(el('span','dim',resultsText(m,'results recorded','pairs requested')));
       sec.appendChild(line);
       if(str(m.integrity_detail))sec.appendChild(el('p','part-out','Integrity detail: '+m.integrity_detail));
 
-      var inside=rp&&Array.isArray(rp.analysis_memberships)?rp.analysis_memberships:
-        arr(m.in).filter(function(x){return ANALYSIS_IDS.indexOf(x)>=0;});
-      var pin=el('p','part-in');
-      if(inside.length){
-        pin.appendChild(document.createTextNode('Analyses that include this part: '));
-        inside.forEach(function(x,i){if(i)pin.appendChild(document.createTextNode(', '));pin.appendChild(el('b','',String(x)));});
-      }else{
-        pin.appendChild(el('b','','in no analysis'));
-      }
-      sec.appendChild(pin);
-      var outside=obj(m.outside);
-      Object.keys(outside).forEach(function(k){
-        sec.appendChild(el('p','part-out','Outside '+k+': '+String(outside[k])));
-      });
-
-      var rows=rp?arr(rp.rows):[];
+      var rows=rp?arr(rp.rows):[],outside=obj(m.outside);
       if(rp&&str(rp.clinical_mass))sec.appendChild(el('p','part-mass','Clinical-feature mass: '+rp.clinical_mass));
       if(rows.length){
         sec.appendChild(rowsTable(rows,pairs,!!stim,'Rows of '+str(m.name)+' in run '+str(r.run_dir)));
-      }else if(doc){
+      }else{
         var why,displayOut=null;
         DISPLAY_IDS.forEach(function(d){if(typeof outside[d]==='string')displayOut=d+' ('+outside[d]+')';});
         if(displayOut)why='No rows are published for this part: it is outside '+displayOut+'.';
@@ -1185,6 +1568,20 @@
     writeUrl();
   }
 
+  // ---------------------------------------------------------------- in-page links
+  // A link or an address that points inside a closed disclosure opens it first, so every section id stays reachable.
+  function reveal(id,scroll){
+    var target=id?document.getElementById(id):null;
+    if(!target)return;
+    for(var n=target;n&&n!==document.body;n=n.parentNode){
+      if(n.tagName==='DETAILS'&&!n.open)n.open=true;
+    }
+    if(scroll){try{target.scrollIntoView({block:'start'});}catch(e){/* optional */}}
+  }
+  function hashId(){
+    try{return decodeURIComponent(window.location.hash.replace(/^#/,''));}catch(e){return '';}
+  }
+
   // ---------------------------------------------------------------- start
   function showError(text){
     $('cat-loading').hidden=true;
@@ -1194,8 +1591,8 @@
     e.appendChild(el('div','',text));
     e.appendChild(el('div','','No runs are shown. The page reads data/results_catalogue/index.json.'));
     e.hidden=false;
-    $('cat-prov').textContent='';
-    $('cat-prov').appendChild(el('span','tp','provenance: not available'));
+    $('cat-inv').textContent='';
+    $('cat-inv').appendChild(el('span','tp','inventory: not available'));
   }
   function start(data){
     if(!isObj(data)||!Array.isArray(data.runs)){
@@ -1204,16 +1601,19 @@
     }
     INDEX=data;
     RUNS=data.runs.filter(function(r){return isObj(r)&&typeof r.run_dir==='string'&&r.run_dir;});
-    RUNS.forEach(function(r){BYDIR[r.run_dir]=r;});
+    RUNS.forEach(function(r,i){BYDIR[r.run_dir]=r;ORDER[r.run_dir]=i;});
     LEGEND=obj(data.legend);MEMBERS=obj(data.memberships);RESTR=obj(data.restrictions);
     DEFAULT_M=str(obj(data.policy).default_membership);
     Object.keys(MEMBERS).forEach(function(m){
       (obj(MEMBERS[m]).purpose==='display'?DISPLAY_IDS:ANALYSIS_IDS).push(m);
     });
 
-    renderProvenance();renderReview();renderTotals();renderRestrictions();renderLegend();buildFilters();
+    renderLead();renderProvenance();renderTotals();renderRestrictions();renderLegend();buildFilters();
     var wanted=readUrl();
     syncControls();
+    // filters that arrive in the address are shown, not applied out of sight
+    var chipKeys={state:'partial',rows:'0',visibility:'restricted'};
+    setMore(MORE_KEYS.some(function(k){return F[k]&&chipKeys[k]!==F[k];})||!!F.sort);
     var msg=$('cat-msg');
     if(wanted){
       var target=BYDIR[wanted];
@@ -1224,7 +1624,7 @@
           clearFilters();syncControls();
           msg.textContent='The filters in the link did not include run '+wanted+'. They were cleared to show it.';msg.hidden=false;
         }
-        var pos=RUNS.filter(matches).indexOf(target);
+        var pos=visibleRuns().indexOf(target);
         limit=Math.max(PAGE_SIZE,Math.ceil((pos+1)/PAGE_SIZE)*PAGE_SIZE);
         openSet[wanted]=true;openRun=wanted;
       }
@@ -1233,7 +1633,9 @@
     $('cat-loading').hidden=true;
     $('cat-content').hidden=false;
     writeUrl();
-    if(openRun){
+    if(hashId()){
+      reveal(hashId(),true);
+    }else if(openRun){
       var rows=$('cat-body').querySelectorAll('tr.cat-run');
       for(var i=0;i<rows.length;i++){
         if(rows[i].getAttribute('data-run')===openRun){
@@ -1245,12 +1647,17 @@
 
     $('f-q').addEventListener('input',onFilterChange);
     Object.keys(SELECTS).forEach(function(k){$(SELECTS[k]).addEventListener('change',onFilterChange);});
-    $('f-rows').addEventListener('change',onFilterChange);
-    $('f-reset').addEventListener('click',function(){clearFilters();syncControls();onFilterChange();});
+    $('f-reset').addEventListener('click',function(){clearFilters();F.sort='';syncControls();applyFilters();});
+    $('more-btn').addEventListener('click',function(){setMore($('more-filters').hidden);});
     $('cat-filters').addEventListener('submit',function(ev){ev.preventDefault();});
     $('cat-more').addEventListener('click',function(){
       var from=limit;limit+=PAGE_SIZE;
       appendRuns(from,limit);updateBar();
+    });
+    window.addEventListener('hashchange',function(){reveal(hashId(),true);});
+    document.addEventListener('click',function(ev){
+      var a=ev.target&&ev.target.closest?ev.target.closest('a[href^="#"]'):null;
+      if(a)reveal(a.getAttribute('href').slice(1),false);
     });
   }
 
