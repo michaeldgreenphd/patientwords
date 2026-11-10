@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Experiment bundles — PatientWords</title>
-<meta name="description" content="Viewer for method-comparison bundles exported by the PatientWords engine's experiment interface. No study bundle is published yet.">
+<title>Compare methods — PatientWords</title>
+<meta name="description" content="Experiment comparisons from the PatientWords engine: one case in several wordings, the recorded model output, then what each internal method measured. No experiment comparison is published yet.">
 <meta name="robots" content="noindex">
 <meta name="theme-color" content="#faf9f5">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23faf9f5'/%3E%3Crect x='9' y='9' width='30' height='30' fill='%23111827'/%3E%3Crect x='25' y='25' width='30' height='30' fill='%2315803d'/%3E%3C/svg%3E">
@@ -46,62 +46,93 @@
   .rule-fine{border:0;border-top:1px solid var(--hairline);margin:3px 0 0}
 
   .dateline{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;
-    color:var(--clinical);font-weight:600;margin:34px 0 14px}
+    color:var(--clinical);font-weight:600;margin:26px 0 10px}
   .dateline .mode{color:var(--muted);font-weight:400;letter-spacing:.06em;text-transform:none}
-  h1{font-size:clamp(30px,4.8vw,42px);line-height:1.14;font-weight:600;letter-spacing:-.006em;margin:0 0 10px}
-  .subtitle{font-style:italic;font-size:20px;line-height:1.5;color:var(--muted);margin:0 0 20px}
-  .explainer{font-size:17px;line-height:1.66;margin:0 0 14px;max-width:78ch}
-  code{font-family:var(--mono);font-size:.82em;overflow-wrap:anywhere}
+  h1{font-size:clamp(30px,4.8vw,42px);line-height:1.14;font-weight:600;letter-spacing:-.006em;margin:0 0 8px}
+  .subtitle{font-style:italic;font-size:19px;line-height:1.45;color:var(--muted);margin:0 0 6px;max-width:74ch}
+  code{font-family:var(--mono);font-size:.92em;overflow-wrap:anywhere}
+  /* a loaded comparison leads with its cases: the page-level subtitle is for the list and the empty statement */
+  body[data-exp-state=ready] .subtitle{display:none}
+  .vh{position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden}
 
-  .section-head{border-top:1px solid var(--ink);margin-top:38px;padding-top:10px;display:flex;
+  .section-head{border-top:1px solid var(--ink);margin-top:34px;padding-top:10px;display:flex;
     justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:4px 16px}
   h2{font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;margin:0}
   h3{font-size:22px;line-height:1.25;font-weight:600;margin:0}
   h4{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;
-    color:var(--ink);margin:28px 0 8px}
-  h5{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.06em;color:var(--muted);margin:18px 0 6px}
+    color:var(--ink);margin:24px 0 8px}
+  h5{font-family:var(--mono);font-size:11.5px;font-weight:600;letter-spacing:.04em;color:var(--ink);margin:18px 0 6px}
   .count{font-family:var(--mono);font-size:12px;color:var(--muted);overflow-wrap:anywhere}
-  .note{font-family:var(--mono);font-size:11.5px;line-height:1.8;color:var(--muted);margin:8px 0 0;max-width:110ch;
+  .note{font-family:var(--mono);font-size:11.5px;line-height:1.75;color:var(--muted);margin:8px 0 0;max-width:110ch;
     overflow-wrap:anywhere}
   .note b{color:var(--ink);font-weight:600}
   .plain{font-family:var(--mono);font-size:12px;line-height:1.7;margin:8px 0 0;max-width:110ch;overflow-wrap:anywhere}
+  .sub{border-top:1px solid var(--hairline);margin-top:26px;padding-top:4px}
+  .sub>h4:first-child{margin-top:12px}
+
+  /* the page with no comparison chosen: the published list, or the empty statement */
+  .idle{margin:22px 0 0;max-width:86ch}
+  .idle p{margin:0 0 10px}
+  .empty-h{font-family:var(--serif);font-size:24px;line-height:1.3;font-weight:600;letter-spacing:0;
+    text-transform:none;margin:0 0 8px}
+  .routes{display:flex;flex-wrap:wrap;gap:10px 14px;margin:16px 0 0}
+  .route{display:inline-block;font-family:var(--mono);font-size:12px;letter-spacing:.06em;color:var(--ink);
+    text-decoration:none;border:1px solid var(--ink);border-radius:2px;padding:9px 14px;background:#fff}
+  .route:hover{border-color:var(--clinical);color:var(--clinical)}
+  .route small{display:block;font-size:11px;letter-spacing:.02em;color:var(--muted);margin-top:2px}
+  .cmp-list{list-style:none;margin:12px 0 0;padding:0;border-top:1px solid var(--ink)}
+  .cmp-list li{border-bottom:1px solid var(--hairline);padding:12px 0}
+  .cmp-list li:last-child{border-bottom:1px solid var(--ink)}
+  .cmp-list a{font-size:20px;font-weight:600;text-underline-offset:4px}
+  .cmp-list a:hover{color:var(--clinical)}
+  .cmp-list .count{display:block;margin-top:3px}
 
   /* page-level states: each carries its own word; border style is a second cue, never the only one */
-  .idle{border-left:2px solid var(--ink);padding:2px 0 2px 16px;margin:26px 0 0;max-width:86ch}
-  .idle p{margin:0 0 8px}
-  .st{font-family:var(--mono);font-size:12px;line-height:1.8;padding:12px 16px;margin:26px 0 0;overflow-wrap:anywhere}
+  .st{font-family:var(--mono);font-size:12px;line-height:1.8;padding:12px 16px;margin:22px 0 0;overflow-wrap:anywhere}
   .st b{letter-spacing:.14em;text-transform:uppercase;font-weight:600;margin-right:8px}
   .st span{display:block}
+  .st a{display:inline-block;margin-top:4px;padding:3px 0}
   .st-loading{border:1px dashed var(--structural);color:var(--muted);text-align:center;padding:26px}
   .st-loading::before{content:'';display:block;width:9px;height:9px;background:var(--structural);margin:0 auto 10px}
   .st-missing{border:1px dotted var(--muted);color:var(--ink);background:#fff}
   .st-refused{border:1px solid var(--penalty);border-left-width:8px;color:var(--penalty)}
   .st-error{border:2px solid var(--penalty);color:var(--penalty)}
-  .st-ready{border-left:2px solid var(--clinical);padding:2px 0 2px 14px;color:var(--muted)}
+  .st-ready{border-left:2px solid var(--clinical);padding:0 0 0 14px;margin-top:14px;color:var(--muted)}
+  .st-ready span{display:inline}
+  .st-ready a{color:var(--ink);margin:0 0 0 14px}
 
-  /* evidence banner and its repeats beside the results */
-  .ev{border:2px solid var(--penalty);padding:12px 16px;margin:18px 0 0}
-  .ev.ev-plain{border:1px solid var(--ink)}
-  .ev p{font-size:15.5px;line-height:1.6;margin:6px 0 0;max-width:96ch}
+  /* shared context of one comparison, and the synthetic marker that repeats beside the results */
+  .ev{border:2px solid var(--penalty);padding:10px 16px 12px;margin:14px 0 0}
+  .ev.ev-plain{border:0;border-left:2px solid var(--ink);padding:2px 0 2px 16px}
+  .ev p{font-size:15.5px;line-height:1.55;margin:4px 0 0;max-width:96ch}
   .syn-tag{font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
     color:var(--penalty);margin:0;overflow-wrap:anywhere}
   .syn-tag small{display:block;font-size:11px;font-weight:400;letter-spacing:.03em;text-transform:none;color:var(--muted)}
   .syn-row{border:1px solid var(--penalty);padding:5px 10px;margin:10px 0 0;display:inline-block;max-width:100%;
     box-sizing:border-box}
+  .ctx{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px 28px;margin:12px 0 0}
+  .ctx-i{min-width:0}
+  .ctx-l{display:block;font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.12em;
+    text-transform:uppercase;color:var(--muted)}
+  .ctx-v{display:block;font-family:var(--mono);font-size:13px;line-height:1.5;overflow-wrap:anywhere}
 
-  .toc{display:flex;flex-wrap:wrap;gap:4px 18px;margin:16px 0 0;font-family:var(--mono);font-size:11px;
+  .toc{display:flex;flex-wrap:wrap;gap:4px 18px;margin:10px 0 0;font-family:var(--mono);font-size:11px;
     letter-spacing:.06em}
   .toc a{color:var(--muted);padding:3px 0}
   .toc a:hover{color:var(--ink)}
 
-  .kv{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:3px 16px;margin:12px 0 0;
+  .kv{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:3px 16px;margin:10px 0 0;
     font-family:var(--mono);font-size:11.5px;line-height:1.7}
   .kv dt{color:var(--muted)}
   .kv dd{margin:0;overflow-wrap:anywhere}
+  .guide{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:6px 18px;margin:12px 0 0;max-width:118ch;
+    font-family:var(--mono);font-size:11.5px;line-height:1.7}
+  .guide dt{color:var(--ink);font-weight:600}
+  .guide dd{margin:0;color:var(--muted);overflow-wrap:anywhere}
 
-  .fam{border-top:1px solid var(--hairline);margin-top:26px;padding-top:14px}
-  .fam:first-child{border-top:0;margin-top:14px;padding-top:0}
-  details.fam-fold{margin:12px 0 0}
+  .fam{border-top:1px solid var(--hairline);margin-top:22px;padding-top:12px}
+  .fam:first-child{border-top:0;margin-top:12px;padding-top:0}
+  details.fam-fold{margin:10px 0 0}
   details.fam-fold>summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;
     align-items:baseline;flex-wrap:wrap;gap:4px 16px;padding:2px 0}
   details.fam-fold>summary::-webkit-details-marker{display:none}
@@ -110,33 +141,79 @@
   details.fam-fold[open]>summary h3::before{content:'\25BE\00a0'}
   details.fam-fold>summary:hover h3{color:var(--clinical)}
   .btn{font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--ink);background:#fff;
-    border:1px solid var(--hairline);padding:6px 12px;cursor:pointer;border-radius:2px}
+    border:1px solid var(--hairline);padding:7px 12px;cursor:pointer;border-radius:2px;margin-left:12px}
+  #exp-guide{max-width:none}
   .btn:hover{border-color:var(--muted)}
   .btn:focus-visible{outline:2px solid var(--clinical);outline-offset:2px}
+
+  /* wording key: a mark beside the name; the name is always printed, colour is never the only cue */
+  .sw{display:inline-block;width:10px;height:10px;border-radius:50%;box-sizing:border-box;margin-right:8px;
+    background:var(--paper);border:2px solid var(--muted);vertical-align:baseline}
+  .sw-clinical{background:var(--clinical);border-color:var(--clinical)}
+  .sw-colloquial{background:var(--patient);border-color:var(--patient)}
+  .sw-normalized{border-color:var(--patient)}
+
+  /* 1 · paired wording */
+  .words{margin:0;border-top:1px solid var(--ink)}
+  .word{display:grid;grid-template-columns:15ch minmax(0,1fr);gap:2px 18px;align-items:baseline;
+    padding:8px 0;border-bottom:1px solid var(--hairline)}
+  .word:last-child{border-bottom:1px solid var(--ink)}
+  .word-n{font-family:var(--mono);font-size:12px;white-space:nowrap}
+  .word-t{font-size:17px;line-height:1.5;overflow-wrap:anywhere;min-width:0}
+  .word-t .miss{font-family:var(--mono);font-size:12px}
+
+  /* 2 · recorded model output: one row per wording on a common 0 to 1 axis, value printed at the dot */
+  .dp-set{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:6px 44px;margin:4px 0 0}
+  .dp{min-width:0}
+  .dp-row{display:grid;grid-template-columns:15ch minmax(0,1fr) 13ch;gap:0 12px;align-items:center;min-height:30px}
+  .dp-row:hover .dp-v{color:var(--clinical)}
+  .dp-n,.dp-r{font-family:var(--mono);font-size:12px;white-space:nowrap}
+  .dp-r{color:var(--muted);font-size:11px;white-space:normal;overflow-wrap:anywhere}
+  .dp-t{position:relative;height:30px;min-width:0;background:
+    linear-gradient(var(--hairline),var(--hairline)) left center/100% 1px no-repeat,
+    linear-gradient(var(--structural),var(--structural)) left/1px 100% no-repeat,
+    linear-gradient(var(--hairline),var(--hairline)) center/1px 100% no-repeat,
+    linear-gradient(var(--structural),var(--structural)) right/1px 100% no-repeat}
+  .dp-d{position:absolute;top:50%;width:10px;height:10px;border-radius:50%;box-sizing:border-box;
+    transform:translate(-50%,-50%);background:var(--paper);border:2px solid var(--muted);
+    box-shadow:0 0 0 2px var(--paper)}
+  .dp-d.sw-clinical{background:var(--clinical);border-color:var(--clinical)}
+  .dp-d.sw-colloquial{background:var(--patient);border-color:var(--patient)}
+  .dp-d.sw-normalized{border-color:var(--patient)}
+  .dp-v{position:absolute;top:50%;transform:translateY(-50%);font-family:var(--mono);font-size:12px;
+    font-variant-numeric:tabular-nums;background:var(--paper);padding:0 4px;white-space:nowrap;line-height:1.3}
+  .dp-v .miss{font-size:11px;white-space:normal}
+  .dp-axis .dp-t{height:16px;background:none}
+  .dp-axis .dp-t span{position:absolute;top:0;font-family:var(--mono);font-size:10px;color:var(--muted);
+    transform:translateX(-50%)}
+  .dp-axis .dp-t span:first-child{transform:none}
+  .dp-axis .dp-t span:last-child{transform:translateX(-100%)}
 
   .tbl-scroll{overflow-x:auto;margin:8px 0 0}
   .tbl{width:100%;border-collapse:collapse;margin:0}
   .tbl th{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;
     color:var(--muted);text-align:left;padding:0 14px 7px 0;border-bottom:1px solid var(--ink);vertical-align:bottom}
-  .tbl td{padding:7px 14px 7px 0;border-bottom:1px solid var(--hairline);vertical-align:top;
-    font-family:var(--mono);font-size:12px;line-height:1.55;overflow-wrap:anywhere}
+  .tbl th small{display:block;font-size:10px;font-weight:400;letter-spacing:.04em;text-transform:none}
+  .tbl td{padding:6px 14px 6px 0;border-bottom:1px solid var(--hairline);vertical-align:top;
+    font-family:var(--mono);font-size:12px;line-height:1.55;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
   .tbl th.num,.tbl td.num{text-align:right}
   .tbl tr:last-child td{border-bottom:1px solid var(--ink)}
   .tbl th:last-child,.tbl td:last-child{padding-right:0}
   .tbl td .ln,.tbl td .cv{display:block}
+  .tbl.fit{width:auto;min-width:min(100%,560px)}
   .miss{color:var(--muted)}
   .hash{font-size:11px;color:var(--ink)}
 
-  /* state badges: the word is always present */
+  /* run-status badges: the word is always present */
   .bdg{display:inline-block;font-family:var(--mono);font-size:11px;line-height:1.5;letter-spacing:.02em;
     color:var(--ink);border:1px solid var(--ink);border-radius:2px;padding:0 5px;margin:0 6px 3px 0;white-space:nowrap}
   .bdg-unsupported,.bdg-unavailable,.bdg-not_run{border-style:dashed;border-color:var(--muted)}
   .bdg-invalid,.bdg-failed{border-color:var(--penalty);color:var(--penalty)}
   .bdg-none{border-style:dotted;border-color:var(--penalty);color:var(--penalty)}
 
-  details.fold{margin:14px 0 0}
+  details.fold{margin:12px 0 0}
   details.fold>summary{font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--muted);
-    cursor:pointer;list-style:none;padding:4px 0;display:inline-block}
+    cursor:pointer;list-style:none;padding:5px 0;display:inline-block}
   details.fold>summary::-webkit-details-marker{display:none}
   details.fold>summary::before{content:'\25B8\00a0'}
   details.fold[open]>summary::before{content:'\25BE\00a0'}
@@ -157,9 +234,8 @@
 
   @media (min-width:1001px){
     .tbl td[data-col=method]{white-space:nowrap;overflow-wrap:normal}
-    /* the prompts table holds two 64-character hashes; the variant name is not the cell that wraps */
-    .tbl tr[data-kind=variant] td[data-col=variant]{white-space:nowrap;overflow-wrap:normal}
-    .tbl td[data-col=comparison]{min-width:25ch}
+    .tbl td[data-col=variant]{white-space:nowrap;overflow-wrap:normal}
+    .tbl td[data-col=comparison]{white-space:nowrap;overflow-wrap:normal}
     .tbl td[data-col=sign]{min-width:16ch}
     .tbl td[data-col=state]{min-width:27ch}
     .tbl td[data-col=capability]{min-width:33ch}
@@ -170,23 +246,37 @@
   @media (max-width:1000px){
     .stack,.stack>tbody,.stack>tbody>tr,.stack>tbody>tr>td{display:block}
     .stack>thead{position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden}
-    .stack>tbody>tr{padding:10px 0;border-bottom:1px solid var(--hairline)}
+    .stack>tbody>tr{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:0 10px;padding:8px 0;
+      border-bottom:1px solid var(--hairline)}
     .stack>tbody>tr:last-child{border-bottom:1px solid var(--ink)}
-    .tbl.stack>tbody>tr>td{border:0;padding:2px 0;text-align:left}
+    .tbl.stack>tbody>tr>td{border:0;padding:2px 0;text-align:left;grid-column:1/-1}
     .stack>tbody>tr>td[data-l]{display:grid;grid-template-columns:13ch minmax(0,1fr);gap:0 10px;align-items:baseline}
-    .stack>tbody>tr>td[data-l]::before{content:attr(data-l);font-family:var(--mono);font-size:9.5px;
-      letter-spacing:.08em;text-transform:uppercase;color:var(--muted);line-height:1.9}
+    .stack>tbody>tr>td[data-l]::before{content:attr(data-l);font-family:var(--mono);font-size:10px;
+      letter-spacing:.06em;text-transform:uppercase;color:var(--muted);line-height:1.8}
     .stack>tbody>tr>td[data-l]>*{justify-self:start;min-width:0;max-width:100%}
+    /* a numeric cell is short: three share one line, each with its label above the value */
+    .tbl.stack>tbody>tr>td.num{grid-column:span 2;display:block}
+    .tbl.stack>tbody>tr>td.num::before{display:block;line-height:1.5}
+    .tbl.stack>tbody>tr>td.brk{grid-column-start:1}
+    .tbl.fit{width:100%}
   }
   @media (max-width:760px){
     .masthead nav{gap:8px 22px}
     .masthead nav a{padding:7px 0}
     body{font-size:16px}
-    .subtitle{font-size:18px}
+    .subtitle{font-size:17.5px}
     h3{font-size:20px}
-    .kv{grid-template-columns:minmax(0,1fr)}
-    .kv dd{margin:0 0 6px}
+    .empty-h{font-size:21px}
+    .kv,.guide{grid-template-columns:minmax(0,1fr)}
+    .kv dd,.guide dd{margin:0 0 6px}
     .toc a{padding:7px 0}
+    .route{padding:11px 14px}
+    .word{grid-template-columns:minmax(0,1fr)}
+    .word-t{font-size:16px}
+    .dp-row{grid-template-columns:11ch minmax(0,1fr);min-height:0;padding:2px 0}
+    .dp-r{grid-column:2;margin:-4px 0 4px}
+    .dp-axis .dp-r{display:none}
+    details.fold>summary{padding:8px 0}
   }
 </style>
 </head>
@@ -213,58 +303,76 @@
   <hr class="rule-fine">
 </header>
 <main id="main">
-  <p class="dateline">Experiment bundles <span class="mode">· a viewer · no study bundle is published</span></p>
-  <h1>Method-comparison bundles</h1>
-  <p class="subtitle">One bundle, one protocol: the original output first, then each internal analysis in its own block.</p>
+  <p class="dateline">Experiments <span class="mode">· one case, several wordings, several methods</span></p>
+  <h1>Compare methods</h1>
+  <p class="subtitle">For each case: the paired wording, the model output that was recorded, then what each internal method measured.</p>
 
   <div class="idle" id="exp-idle">
-    <p>This page displays method-comparison bundles exported by the engine's experiment interface.</p>
-    <p>No study bundle is published yet.</p>
-    <p>Synthetic fixtures are never published.</p>
-    <p class="note">The page requests no data file unless its address names a bundle: <code>?bundle=&lt;path under data/&gt;</code>. A path that is absolute, has a scheme or contains <code>..</code> is refused.</p>
+    <div id="exp-index" hidden>
+      <div class="section-head"><h2 id="h-index">Published comparisons</h2><span class="count" id="exp-index-count"></span></div>
+      <ul class="cmp-list" id="exp-index-list" aria-labelledby="h-index"></ul>
+    </div>
+    <div id="exp-empty">
+      <h2 class="empty-h" id="exp-empty-head">No experiment comparisons published yet</h2>
+      <p id="exp-empty-text">A comparison takes one case written in several wordings and shows, for one model, what it output for each wording and what each internal method measured. None has been published. The results that exist are in the catalogue.</p>
+      <p class="routes">
+        <a class="route" href="../results/">Browse the results catalogue<small>every measured run, with its run status</small></a>
+        <a class="route" href="../methods.html">Read the methods<small>how the measurements are made</small></a>
+      </p>
+      <p class="note" id="exp-index-note" hidden></p>
+    </div>
   </div>
-  <noscript><p class="plain">This viewer needs JavaScript to display a bundle. Without it the page shows only the statement above.</p></noscript>
+  <noscript><p class="plain">This page needs JavaScript to list or display a comparison. Without it the page shows only the statement above.</p></noscript>
 
   <div class="st" id="exp-state" hidden></div>
 
   <div id="exp-results" hidden>
     <nav class="toc" aria-label="On this page">
-      <a href="#evidence">Evidence class</a>
-      <a href="#protocol">Protocol and model</a>
-      <a href="#families">Case families</a>
-      <a href="#methods">Methods and execution state</a>
-      <a href="#totals">Plan totals</a>
-      <a href="#links">External links</a>
-      <a href="#provenance">Provenance</a>
+      <a href="#evidence">About this comparison</a>
+      <a href="#families">Cases</a>
+      <a href="#methods">Run status</a>
+      <a href="#provenance">Methods &amp; source</a>
       <a href="#limitations">Limitations</a>
     </nav>
 
     <section id="evidence" aria-labelledby="h-evidence">
-      <div class="section-head"><h2 id="h-evidence">Evidence class</h2></div>
+      <h2 class="vh" id="h-evidence">About this comparison</h2>
       <div id="exp-evidence"></div>
-    </section>
-
-    <section id="protocol" aria-labelledby="h-protocol">
-      <div class="section-head"><h2 id="h-protocol">Protocol and model</h2></div>
-      <div id="exp-protocol"></div>
+      <details class="fold" id="protocol">
+        <summary>Shared context: evidence labels, protocol, model and tokenizer as recorded</summary>
+        <div id="exp-protocol"></div>
+      </details>
     </section>
 
     <section id="families" aria-labelledby="h-families">
-      <div class="section-head"><h2 id="h-families">Case families</h2><span class="count" id="exp-families-count"></span></div>
-      <p class="note">Each family is read in one order: the paired prompts, the original model output, the internal analyses that exist, then intervention evidence. The blocks have different units. The bundle never adds them and this page does not either. The first family is open; the others open from their headings.</p>
-      <p class="plain"><button type="button" class="btn" id="exp-fam-toggle" aria-controls="exp-families" hidden>Open every family</button></p>
+      <div class="section-head"><h2 id="h-families">Cases</h2><span class="count"><span id="exp-families-count"></span>
+        <button type="button" class="btn" id="exp-fam-toggle" aria-controls="exp-families" hidden>Open every case</button></span></div>
+      <p class="note" id="exp-guide"><b>Target-token probability</b> is the model's next-token probability of the first encoded token of the target, over the full vocabulary. A target that encodes to several tokens is scored on its first token only. It is not answer accuracy, not a clinical risk and not a measure of patient understanding. <span id="exp-endpoint-unit"></span></p>
+      <details class="fold" id="exp-guide-more">
+        <summary>How to read the ranks and the internal measurements</summary>
+        <dl class="guide">
+          <dt>Vocabulary rank</dt>
+          <dd>The rank printed beside a target-token probability is the rank of that token among all vocabulary tokens at the output.</dd>
+          <dt>Readout rank</dt>
+          <dd>The rank of the target token when one internal layer state is read out. It is not the model's output. Raw rank counts every vocabulary token; filtered rank counts only the tokens the filter keeps.</dd>
+          <dt>ICA component</dt>
+          <dd>A signed component score is the coordinate of the layer state along one component of a fixed basis; it can be negative. A squared-coordinate share is that coordinate squared, divided by the sum over all components; it is not a probability. A name given to a component is a hypothesis.</dd>
+          <dt>Units</dt>
+          <dd>Each block keeps its own unit. Nothing on this page adds or averages a probability, a rank, a component score and a review label.</dd>
+        </dl>
+      </details>
       <div id="exp-families"></div>
     </section>
 
     <section id="methods" aria-labelledby="h-methods">
-      <div class="section-head"><h2 id="h-methods">Methods planned and their execution state</h2><span class="count" id="exp-methods-count"></span></div>
+      <div class="section-head"><h2 id="h-methods">Run status</h2><span class="count" id="exp-methods-count"></span></div>
       <div id="exp-methods-syn"></div>
-      <p class="note">Every method the protocol planned is listed, including those that could not run. <b>Execution state</b> counts completed tasks from the payload records under Provenance and every other state from the bundle's list of methods that did not complete. A planned task with neither is shown as <b>state not recorded</b>. <b>Capability status</b> is the capability matrix row the planner used; it is not an execution state.</p>
+      <p class="note">Every method the protocol planned, including those that did not run. <b>Run status</b> is the schema's execution state: <code>completed</code>, <code>unsupported</code>, <code>unavailable</code>, <code>not_run</code>, <code>invalid</code> or <code>failed</code>. A planned task with no recorded state reads <b>state not recorded</b>. <b>Capability status</b> is the capability-matrix row the planner used; it is not a run status.</p>
       <div class="tbl-scroll">
         <table class="tbl stack" role="table" aria-labelledby="h-methods">
           <thead role="rowgroup"><tr role="row">
             <th scope="col" role="columnheader">Method</th>
-            <th scope="col" role="columnheader">Execution state</th>
+            <th scope="col" role="columnheader" title="schema: execution state (execution.by_state, methods_not_run[].states)">Run status</th>
             <th scope="col" role="columnheader">Reason</th>
             <th scope="col" role="columnheader">Capability status</th>
             <th scope="col" role="columnheader">Planned state</th>
@@ -275,34 +383,46 @@
       </div>
     </section>
 
-    <section id="totals" aria-labelledby="h-totals">
-      <div class="section-head"><h2 id="h-totals">Plan totals and execution counts</h2></div>
-      <div id="exp-totals"></div>
-    </section>
-
-    <section id="links" aria-labelledby="h-links">
-      <div class="section-head"><h2 id="h-links">External links</h2></div>
-      <div id="exp-links"></div>
-    </section>
-
     <section id="provenance" aria-labelledby="h-provenance">
-      <div class="section-head"><h2 id="h-provenance">Provenance</h2></div>
-      <div id="exp-provenance"></div>
-    </section>
+      <div class="section-head"><h2 id="h-provenance">Methods &amp; source</h2></div>
+      <dl class="guide" id="exp-terms" aria-label="Labels on this page and the schema terms they stand for">
+        <dt>Compare methods</dt><dd>A method-comparison bundle: one file of schema <code>patientwords.experiment-bundle/1</code>, written by the engine's experiment interface.</dd>
+        <dt>Cases</dt><dd>Case families: <code>protocol.families</code> and <code>comparisons[].family_id</code>. One family is one case in several wordings (variants).</dd>
+        <dt>Run status</dt><dd>Execution state: <code>execution.by_state</code> and <code>methods_not_run[].states</code>.</dd>
+        <dt>Included in analysis</dt><dd>Analysis membership: <code>evidence.analysis_memberships</code>. Being listed here is separate from being in a statistic.</dd>
+        <dt>Study version</dt><dd>The analysis pin: <code>protocol.id</code>, <code>protocol.version</code> and <code>protocol.sha256</code>, the hash every task of the run is bound to.</dd>
+        <dt>Methods &amp; source</dt><dd>Provenance: <code>provenance</code>, <code>plan_totals</code> and <code>execution</code>.</dd>
+      </dl>
 
-    <section id="limitations" aria-labelledby="h-limitations">
-      <div class="section-head"><h2 id="h-limitations">Limitations</h2></div>
-      <div id="exp-limitations"></div>
+      <section class="sub" id="totals" aria-labelledby="h-totals">
+        <h4 id="h-totals">Planned tasks and run counts</h4>
+        <div id="exp-totals"></div>
+      </section>
+
+      <section class="sub" id="links" aria-labelledby="h-links">
+        <h4 id="h-links">External links</h4>
+        <div id="exp-links"></div>
+      </section>
+
+      <section class="sub" aria-labelledby="h-source">
+        <h4 id="h-source">Source hashes</h4>
+        <div id="exp-provenance"></div>
+      </section>
+
+      <section class="sub" id="limitations" aria-labelledby="h-limitations">
+        <h4 id="h-limitations">Limitations</h4>
+        <div id="exp-limitations"></div>
+      </section>
     </section>
   </div>
 
   <a class="back" href="../">← Back home</a>
 
   <div class="endnote">
-    <p>This page is a viewer. It displays the numbers in the bundle file named in its address and computes no measurement. An internal metric shown here describes a language model's internal state; it is not a clinical risk score, and nothing here is medical advice.</p>
+    <p>This page displays the numbers in one comparison file and computes no measurement. An internal measurement describes a language model's internal state; it is not a clinical risk score, and nothing here is medical advice.</p>
     <footer>
-      Bundles are written by the experiment interface of the <a href="https://github.com/michaeldgreenphd/patientwords-engine">patientwords-engine</a> pipeline ·
-      a published bundle will be a data file <a href="https://github.com/michaeldgreenphd/patientwords/tree/main/data">in this repository</a>; none is published yet ·
+      Comparison files are written by the experiment interface of the <a href="https://github.com/michaeldgreenphd/patientwords-engine">patientwords-engine</a> pipeline ·
+      a published comparison is a data file <a href="https://github.com/michaeldgreenphd/patientwords/tree/main/data">in this repository</a>, listed in <a href="../data/experiments/index.json">the index this page reads</a> ·
       <a href="../methods.html">how the pipeline works</a>
     </footer>
   </div>
@@ -311,6 +431,8 @@
 (function(){
   'use strict';
   var SCHEMA='patientwords.experiment-bundle/1';
+  var INDEX_SCHEMA='patientwords.experiment-index/1';
+  var INDEX_PATH='experiments/index.json';
   var STATES=['completed','unsupported','unavailable','not_run','invalid','failed'];
   var SYNTHETIC_TEXT='synthetic fixture - not a measurement';
   var NOT_IN_BUNDLE='not in this bundle';
@@ -319,6 +441,8 @@
   var LINK_BUILT='link built from the recorded pattern';
   var VERIFIED='verified_exact';
   var LINK_URL=/^https:\/\/[A-Za-z0-9.-]+(\/[A-Za-z0-9._~\/-]*)?$/;
+  var ENDPOINT='Target-token probability';
+  var CONFLICT='two comparison blocks record different values';
 
   var $=function(id){return document.getElementById(id);};
   var stateBox=$('exp-state'), idleBox=$('exp-idle'), results=$('exp-results');
@@ -327,7 +451,8 @@
 
   /* Returns the reason a bundle parameter is refused, or null. The engine's preview check
      (scripts/check_experiment_preview.py, bundle_param_refusal) mirrors this rule and
-     compares the two on a table of cases. */
+     compares the two on a table of cases. The rule is documented for developers in the
+     engine's docs/experiment_interface/preview.md, not on this page. */
   function bundleRefusal(v){
     if(v==='') return 'the bundle parameter is empty';
     if(v.length>200) return 'the bundle parameter is longer than 200 characters';
@@ -349,11 +474,12 @@
   function isNum(x){return typeof x==='number'&&isFinite(x);}
   function isInt(x){return isNum(x)&&Math.floor(x)===x;}
   function isStr(x){return typeof x==='string';}
+  function has(o,k){return Object.prototype.hasOwnProperty.call(o,k);}
   function txt(s){return document.createTextNode(String(s));}
   function el(tag,attrs,kids){
     var n=document.createElement(tag),k;
     if(attrs){for(k in attrs){
-      if(!Object.prototype.hasOwnProperty.call(attrs,k)||attrs[k]===undefined||attrs[k]===null) continue;
+      if(!has(attrs,k)||attrs[k]===undefined||attrs[k]===null) continue;
       if(k==='text') n.textContent=String(attrs[k]);
       else if(k==='cls') n.className=attrs[k];
       else n.setAttribute(k,String(attrs[k]));
@@ -403,11 +529,15 @@
     return dl;
   }
 
-  /* heads: [label, numeric?]; rows: {attrs, cells:[[col, node-or-string], ...]} */
-  function table(label,heads,rows){
-    var t=el('table',{cls:'tbl stack',role:'table','aria-label':label});
+  /* heads: [label, numeric?, small second line?, narrow-layout label?]; rows: {attrs, cells:[[col, node-or-string, extra td attrs?], ...]} */
+  function table(label,heads,rows,cls){
+    var t=el('table',{cls:'tbl stack'+(cls?' '+cls:''),role:'table','aria-label':label});
     var hr=el('tr',{role:'row'});
-    heads.forEach(function(h){hr.appendChild(el('th',{scope:'col',role:'columnheader',cls:h[1]?'num':null,text:h[0]}));});
+    heads.forEach(function(h){
+      var th=el('th',{scope:'col',role:'columnheader',cls:h[1]?'num':null,text:h[0]});
+      if(h[2]) th.appendChild(el('small',{text:h[2]}));
+      hr.appendChild(th);
+    });
     t.appendChild(el('thead',{role:'rowgroup'},[hr]));
     var tb=el('tbody',{role:'rowgroup'});
     rows.forEach(function(r){tb.appendChild(row(heads,r));});
@@ -420,10 +550,13 @@
     var tr=el('tr',attrs);
     r.cells.forEach(function(c,i){
       var h=heads[i]||['',false];
-      var td=el('td',{role:'cell','data-l':h[0],'data-col':c[0],cls:h[1]?'num':null});
+      /* data-l is the label the narrow block layout prints beside the value: h[3] when given, else the head */
+      var a={role:'cell','data-l':h[3]||h[0],'data-col':c[0],cls:h[1]?'num':null},x;
+      if(c[2]) for(x in c[2]) a[x]=c[2][x];
+      var td=el('td',a);
       /* one wrapper per cell: in the narrow block layout the cell is a two-column grid of label and value */
       var v=c[1], box=el('span',{cls:'cv'});
-      (Array.isArray(v)?v:[v]).forEach(function(x){box.appendChild(x instanceof Node?x:txt(x));});
+      (Array.isArray(v)?v:[v]).forEach(function(y){box.appendChild(y instanceof Node?y:txt(y));});
       td.appendChild(box);
       tr.appendChild(td);
     });
@@ -440,10 +573,19 @@
     if(state===null||state===undefined) return NOT_RECORDED;
     return 'unrecognised state "'+String(state)+'"';
   }
+  function fold(summary,kids,attrs){
+    var a={cls:'fold'},k;
+    for(k in (attrs||{})) a[k]=attrs[k];
+    return el('details',a,[el('summary',{text:summary})].concat(kids));
+  }
+  function swatchClass(name){
+    return name==='clinical'||name==='colloquial'||name==='normalized'?' sw-'+name:'';
+  }
+  function wordingName(name){return el('span',null,[el('span',{cls:'sw'+swatchClass(name),'aria-hidden':'true'}),String(name)]);}
 
   /* ---------------------------------------------------------------- page states */
 
-  function setState(state,label,messages){
+  function setState(state,label,messages,link){
     document.body.setAttribute('data-exp-state',state);
     idleBox.hidden=(state!=='idle');
     if(state==='idle'){stateBox.hidden=true;return;}
@@ -454,10 +596,72 @@
     stateBox.textContent='';
     stateBox.appendChild(el('b',{text:label}));
     messages.forEach(function(m){stateBox.appendChild(el('span',{text:m}));});
+    if(link) stateBox.appendChild(link);
   }
+  function listLink(){return el('a',{href:'./','data-kind':'to-index',text:'See the published comparisons'});}
   function fail(state,label,messages){
     results.hidden=true;
-    setState(state,label,messages);
+    setState(state,label,messages,listLink());
+  }
+
+  /* One request site for both files this page reads. The body is read before the status is acted on:
+     an unread error body keeps the request open. */
+  function getText(url){
+    return fetch(url,{cache:'no-cache',redirect:'error'}).then(function(r){
+      return r.text().then(function(text){return {status:r.status,ok:r.ok,text:text};});
+    });
+  }
+
+  /* ---------------------------------------------------------------- the list of published comparisons */
+
+  function indexState(kind,note){
+    /* kind: 'listed' | 'empty' | 'unreadable'. The static HTML already holds the empty statement. */
+    document.body.setAttribute('data-exp-index',kind);
+    $('exp-index').hidden=(kind!=='listed');
+    $('exp-empty').hidden=(kind==='listed');
+    if(kind==='unreadable'){
+      $('exp-empty-head').textContent='The list of comparisons could not be read';
+      $('exp-empty-text').textContent='This page reads its list from one data file. '+note+' No comparison is shown.';
+    }
+    var n=$('exp-index-note');
+    n.hidden=!(kind==='empty'&&note);
+    n.textContent=(kind==='empty'&&note)?note:'';
+    setState('idle');
+  }
+  function renderIndex(d){
+    var list=$('exp-index-list'), skipped=0;
+    list.textContent='';
+    d.comparisons.forEach(function(c){
+      /* An entry is linked only when its path passes this page's own address rule and its labels say
+         it is public and not synthetic. The engine writer applies the same rule before it lists one. */
+      if(!isObj(c)||!isStr(c.bundle)||bundleRefusal(c.bundle)!==null||c.visibility!=='public'||
+         c.evidence_class==='synthetic_fixture'){skipped++;return;}
+      var p=isObj(c.protocol)?c.protocol:{}, m=isObj(c.model)?c.model:{};
+      var li=el('li',{'data-kind':'index-entry','data-bundle':c.bundle});
+      li.appendChild(el('a',{href:'?bundle='+encodeURIComponent(c.bundle),
+        text:(isStr(p.id)?p.id:c.bundle)+(isStr(p.version)?' · version '+p.version:'')}));
+      li.appendChild(el('span',{cls:'count',text:'model '+(isStr(m.hf_id)?m.hf_id:(isStr(m.study_id)?m.study_id:'not recorded'))+
+        ' · '+(isInt(c.cases)?c.cases+(c.cases===1?' case':' cases'):'case count not recorded')+
+        (Array.isArray(c.methods)&&c.methods.length?' · methods '+c.methods.join(', '):'')}));
+      li.appendChild(el('span',{cls:'count',text:'evidence class '+String(c.evidence_class)+' · clinical review '+String(c.clinical_review)+
+        ' · included in analysis: '+(Array.isArray(c.analysis_memberships)&&c.analysis_memberships.length?c.analysis_memberships.join(', '):'no')}));
+      list.appendChild(li);
+    });
+    var shown=list.children.length;
+    $('exp-index-count').textContent=shown+(shown===1?' comparison':' comparisons')+(skipped?' · '+skipped+' index '+(skipped===1?'entry':'entries')+' not shown':'');
+    if(shown) indexState('listed');
+    else indexState('empty',skipped?skipped+' index '+(skipped===1?'entry is':'entries are')+' not shown: the path or the labels do not allow a link.':'');
+  }
+  function loadIndex(){
+    getText('../data/'+INDEX_PATH).then(function(res){
+      if(!res.ok){indexState('unreadable','The request for it failed (HTTP '+res.status+').');return;}
+      var d;
+      try{d=JSON.parse(res.text);}catch(e){indexState('unreadable','The file is not JSON.');return;}
+      if(!isObj(d)||d.schema_version!==INDEX_SCHEMA||!Array.isArray(d.comparisons)){
+        indexState('unreadable','The file is not a '+INDEX_SCHEMA+' document.');return;
+      }
+      renderIndex(d);
+    }).catch(function(){indexState('unreadable','The request for it did not complete.');});
   }
 
   /* ---------------------------------------------------------------- structure checks */
@@ -495,42 +699,71 @@
   }
   function isSynthetic(b){return b.evidence.synthetic===true;}
 
-  /* ---------------------------------------------------------------- evidence */
+  /* ---------------------------------------------------------------- about this comparison */
 
   function synTag(b,extra){
     var p=el('p',{cls:'syn-tag','data-kind':'synthetic-banner'},[SYNTHETIC_TEXT]);
     p.appendChild(el('small',{text:'evidence class '+b.evidence.evidence_class+(extra?' · '+extra:'')}));
     return p;
   }
+  function ctxItem(label,value,schema,col){
+    /* the reader-facing label and the value; the schema field is in the title and in the fold below */
+    return el('div',{cls:'ctx-i'},[
+      el('span',{cls:'ctx-l',title:'schema: '+schema,text:label}),
+      el('span',{cls:'ctx-v','data-col':col},[value instanceof Node?value:show(value)])]);
+  }
   function renderEvidence(b){
-    var e=b.evidence, box=el('div',{cls:isSynthetic(b)?'ev':'ev ev-plain','data-synthetic':isSynthetic(b)?'true':'false'});
+    var e=b.evidence, p=b.protocol, m=p.model;
+    var box=el('div',{cls:isSynthetic(b)?'ev':'ev ev-plain','data-synthetic':isSynthetic(b)?'true':'false'});
     if(isSynthetic(b)){
       box.appendChild(synTag(b));
       box.appendChild(el('p',{text:'Every value on this page comes from hand-written fixture numbers. No model was loaded. Nothing here is a finding.'}));
     }
-    box.appendChild(kv([
-      ['evidence class',e.evidence_class,{'data-col':'evidence_class'}],
-      ['clinical review',e.clinical_review],
-      ['visibility',e.visibility===null||e.visibility===undefined?miss('not recorded'):e.visibility],
-      ['analysis memberships',e.analysis_memberships],
-      ['restriction reasons',e.restriction_reasons]
-    ]));
+    var members=Array.isArray(e.analysis_memberships)?e.analysis_memberships:null;
+    var reasons=Array.isArray(e.restriction_reasons)?e.restriction_reasons:null;
+    var restricted=reasons!==null&&reasons.length>0;
+    var grid=el('div',{cls:'ctx'},[
+      ctxItem('Model',isStr(m.hf_id)?m.hf_id:null,'protocol.model.hf_id','model'),
+      ctxItem('Evidence class',e.evidence_class,'evidence.evidence_class','evidence_class'),
+      ctxItem('Clinical review',e.clinical_review,'evidence.clinical_review','clinical_review'),
+      ctxItem('Included in analysis',members===null?miss('not recorded'):(members.length?'yes: '+members.join(', '):'no'),
+        'analysis membership, evidence.analysis_memberships','analysis_memberships'),
+      ctxItem('Study version',p.id+' · version '+p.version,'analysis pin: protocol.id, protocol.version, protocol.sha256','study_version'),
+      /* visibility is shown beside the labels only when it is not plain "public"; the fold always has it */
+      (e.visibility==='public'&&!restricted)?null:ctxItem('Visibility',
+        (e.visibility===null||e.visibility===undefined?miss('not recorded'):e.visibility)+(restricted?' · '+reasons.join(', '):''),
+        'evidence.visibility, evidence.restriction_reasons','visibility')
+    ]);
+    box.appendChild(grid);
     return box;
   }
 
   /* ---------------------------------------------------------------- protocol and model */
 
+  function endpointText(ep){
+    if(!isObj(ep)) return null;
+    var named=(ep.method==='behavior_next_token'&&ep.metric==='full_vocab_probability')?ENDPOINT+' of target '+ep.target+' · ':'';
+    return named+'method '+ep.method+' · metric '+ep.metric+' · target '+ep.target;
+  }
   function renderProtocol(b){
-    var p=b.protocol, m=p.model, frag=document.createDocumentFragment();
-    frag.appendChild(el('h4',{text:'Protocol'}));
+    var p=b.protocol, m=p.model, e=b.evidence, frag=document.createDocumentFragment();
+    frag.appendChild(el('h4',{text:'Evidence labels (schema fields)'}));
+    frag.appendChild(kv([
+      ['evidence.evidence_class',e.evidence_class],
+      ['evidence.clinical_review',e.clinical_review],
+      ['evidence.visibility',e.visibility===null||e.visibility===undefined?miss('not recorded'):e.visibility,{'data-col':'schema_visibility'}],
+      ['evidence.restriction_reasons',e.restriction_reasons,{'data-col':'schema_restriction_reasons'}],
+      ['evidence.analysis_memberships (analysis membership)',e.analysis_memberships,{'data-col':'schema_analysis_memberships'}],
+      ['evidence.synthetic',e.synthetic]
+    ]));
+    frag.appendChild(el('h4',{text:'Protocol (study version; schema: the analysis pin)'}));
     frag.appendChild(kv([
       ['protocol id',p.id,{'data-col':'protocol_id'}],
       ['protocol version',p.version,{'data-col':'protocol_version'}],
       ['protocol sha256',hash(p.sha256),{'data-col':'protocol_sha256'}],
       ['seed',p.seed],
       ['replicates',p.replicates],
-      ['primary endpoint',isObj(p.primary_endpoint)?
-        'method '+p.primary_endpoint.method+' · metric '+p.primary_endpoint.metric+' · target '+p.primary_endpoint.target:null],
+      ['primary endpoint',endpointText(p.primary_endpoint)],
       ['comparisons',p.comparisons.map(function(c){return isObj(c)?c.id+' ('+c.a+' minus '+c.b+')':String(c);})],
       ['families excluded',Array.isArray(p.excluded)?(p.excluded.length?p.excluded:'none'):null]
     ]));
@@ -551,19 +784,21 @@
     return frag;
   }
 
-  /* ---------------------------------------------------------------- families */
+  /* ---------------------------------------------------------------- cases */
 
   function variantsOf(fam){
-    /* bundle/1 lists variant names. Since 2026-11-10 the family may also carry variant_inputs:
-       per variant a prompt hash, a token-id hash and a token count, never prompt text. A bundle
-       written before that has no variant_inputs, and the cells then say so. A later bundle may
-       carry variant objects with, where it may be shown, the prompt text. */
+    /* bundle/1 lists variant names. Since 2026-11-10 the family may also carry variant_inputs (per variant
+       a prompt hash, a token-id hash and a token count, never text) and variant_text (per variant the
+       prompt text, written by the engine only for a family its protocol marks as approved for publication).
+       A bundle without either says so in the cells. */
     var v=fam&&fam.variants, out=[];
     var extra=fam&&isObj(fam.variant_inputs)?fam.variant_inputs:{};
-    function added(name){return Object.prototype.hasOwnProperty.call(extra,name)&&isObj(extra[name])?extra[name]:{};}
+    var text=fam&&isObj(fam.variant_text)?fam.variant_text:{};
+    function added(name){return has(extra,name)&&isObj(extra[name])?extra[name]:{};}
+    function prompt(name){return has(text,name)&&isObj(text[name])&&isStr(text[name].prompt)?text[name].prompt:undefined;}
     if(Array.isArray(v)){
       v.forEach(function(x){
-        if(isStr(x)){var r=added(x);out.push({name:x,prompt_sha256:r.prompt_sha256,token_sha256:r.token_sha256,n_tokens:r.n_tokens});}
+        if(isStr(x)){var r=added(x);out.push({name:x,prompt_sha256:r.prompt_sha256,token_sha256:r.token_sha256,n_tokens:r.n_tokens,prompt:prompt(x)});}
         else if(isObj(x)) out.push({name:x.variant||x.id||x.name,prompt_sha256:x.prompt_sha256,token_sha256:x.token_sha256,
           n_tokens:x.n_tokens,prompt:x.prompt});
       });
@@ -576,12 +811,41 @@
     }
     return out;
   }
+  function targetOf(fam,id){
+    return (fam&&Array.isArray(fam.targets)?fam.targets:[]).filter(function(x){return isObj(x)&&x.id===id;})[0]||null;
+  }
   function targetLabel(fam,id){
-    var t=(fam&&Array.isArray(fam.targets)?fam.targets:[]).filter(function(x){return isObj(x)&&x.id===id;})[0];
+    var t=targetOf(fam,id);
     if(!t) return String(id);
     return String(id)+(isStr(t.role)?' · '+t.role:'')+(Array.isArray(t.token_ids)?' · token id '+t.token_ids.join(' '):'');
   }
   function pairLabel(e){return e.a+' (a) minus '+e.b+' (b)';}
+  function comparisonCell(e){return [pairLabel(e),el('span',{cls:'miss',text:' · '+e.comparison_id})];}
+  function orderOf(fam){return variantsOf(fam).map(function(v){return v.name;});}
+
+  /* Per-wording values. A comparison block holds the value of each of its two wordings, so a wording that
+     is in two comparisons is recorded twice. It is shown once; if the two records differ, the cell says so
+     and shows neither. key: (variant, side letter, entry) -> [key parts]; value: -> any JSON value. */
+  function byWording(items,each){
+    var seen={}, order=[];
+    items.forEach(function(it){
+      [['a',it.entry.a],['b',it.entry.b]].forEach(function(s){
+        each(it,s[0],s[1],function(parts,value,meta){
+          var key=JSON.stringify(parts), packed=JSON.stringify(value===undefined?null:value);
+          if(!seen[key]){seen[key]={parts:parts,value:value,packed:packed,meta:meta,conflict:false};order.push(key);}
+          else if(seen[key].packed!==packed) seen[key].conflict=true;
+        });
+      });
+    });
+    return order.map(function(k){return seen[k];});
+  }
+  function sortByWording(rows,names){
+    /* stable: wording order of the family first, the block's own order within one wording */
+    return rows.map(function(r,i){return [r,i];}).sort(function(x,y){
+      var ia=names.indexOf(x[0].parts[0]), ib=names.indexOf(y[0].parts[0]);
+      return (ia-ib)||(x[1]-y[1]);
+    }).map(function(p){return p[0];});
+  }
 
   function sideStates(block,e){
     /* one line per side for a block that was not computed; never reads a missing state as completed */
@@ -591,33 +855,44 @@
       return {side:s,variant:e[s],state:stateWord(st),reason:isStr(why)&&why?why:'no reason recorded'};
     });
   }
-  function notComputed(method,fid,items){
-    /* items: [{entry, block}] with one signature; grouped so a repeated reason is printed once */
+  function reasonNode(b,method,reason){
+    /* The Run status table prints each method's reasons once. When this block's reason is the one reason
+       that table holds for the method, the block points there and does not repeat the paragraph. */
+    var rows=b.methods_not_run.filter(function(r){return isObj(r)&&r.method===method;});
+    var listed=rows.length===1&&Array.isArray(rows[0].reasons)?rows[0].reasons:[];
+    if(listed.length===1&&listed[0]===reason){
+      return el('span',{'data-col':'reason','data-reason':'in-run-status'},['Reason: under ',el('a',{href:'#methods',text:'Run status'}),'.']);
+    }
+    return el('span',{'data-col':'reason','data-reason':'inline',text:'Reason: '+reason});
+  }
+  function notComputed(b,method,fid,items){
+    /* items: [{entry, block}] with one signature; grouped so a repeated state is printed once */
     var first=items[0], sides=sideStates(first.block,first.entry);
     var p=el('p',{cls:'plain','data-kind':'not-computed','data-method':method,'data-family':fid});
     p.appendChild(el('b',{text:method}));
     p.appendChild(txt(' · not computed in '+items.map(function(i){return i.entry.comparison_id;}).join(', ')+'. '));
     if(sides[0].state===sides[1].state&&sides[0].reason===sides[1].reason){
-      p.appendChild(txt('State of both variants: '));
+      p.appendChild(txt('Run status of both wordings: '));
       p.appendChild(el('span',{'data-col':'state',text:sides[0].state}));
-      p.appendChild(txt('. Reason: '+sides[0].reason));
+      p.appendChild(txt('. '));
+      p.appendChild(reasonNode(b,method,sides[0].reason));
     }else{
       sides.forEach(function(s,i){
-        p.appendChild(txt((i?' ':'')+'Variant '+s.side+': '));
+        p.appendChild(txt((i?' ':'')+'Wording '+s.side+' ('+s.variant+'): '));
         p.appendChild(el('span',{'data-col':'state',text:s.state}));
         p.appendChild(txt('. Reason: '+s.reason));
       });
     }
     return p;
   }
-  function groupNotComputed(method,fid,pairs){
+  function groupNotComputed(b,method,fid,pairs){
     var groups={}, order=[];
     pairs.forEach(function(x){
       var key=JSON.stringify([x.block.states||null,x.block.reasons||null]);
       if(!groups[key]){groups[key]=[];order.push(key);}
       groups[key].push(x);
     });
-    return order.map(function(k){return notComputed(method,fid,groups[k]);});
+    return order.map(function(k){return notComputed(b,method,fid,groups[k]);});
   }
   function blockStatus(block){
     if(!isObj(block)) return 'absent';
@@ -629,82 +904,113 @@
       el('b',{text:method}),' · '+e.comparison_id+' · block '+NOT_RECORDED+'. Its values are not shown.']);
   }
 
-  function renderPrompts(fam,fid){
-    var vs=variantsOf(fam);
-    if(!vs.length) return el('p',{cls:'plain'},[miss('the bundle lists no variant for this family')]);
+  /* 1 · paired wording */
+  function renderWording(b,fam,fid){
+    var frag=document.createDocumentFragment(), vs=variantsOf(fam);
+    if(!vs.length){frag.appendChild(el('p',{cls:'plain'},[miss('the bundle lists no wording for this case')]));return frag;}
+    var list=el('div',{cls:'words',role:'table','aria-label':'Paired wording of '+fid});
+    var anyText=false;
+    vs.forEach(function(v){
+      var hasText=isStr(v.prompt);
+      anyText=anyText||hasText;
+      list.appendChild(el('div',{cls:'word',role:'row','data-kind':'wording','data-family':fid,'data-variant':v.name,
+        'data-text':hasText?'exported':'absent'},[
+        el('span',{cls:'word-n',role:'rowheader'},[wordingName(v.name)]),
+        el('span',{cls:'word-t',role:'cell','data-col':'prompt'},[
+          hasText?(v.prompt===''?miss('the prompt is empty (zero characters)'):txt(v.prompt)):miss('prompt text is '+NOT_IN_BUNDLE)])]));
+    });
+    frag.appendChild(list);
+    var ex=fam&&isObj(fam.prompt_text_export)?fam.prompt_text_export:null;
+    if(anyText) frag.appendChild(el('p',{cls:'note','data-kind':'text-basis'},[
+      'Prompt text exported by the engine because the protocol marks this case as approved for publication'+
+      (ex&&isStr(ex.marker)?' ('+ex.marker+')':'')+'.'+(isSynthetic(b)?' It is placeholder text of a synthetic fixture.':'')]));
+    var join=fam&&isObj(fam.legacy_join)?fam.legacy_join:null;
+    if(join) frag.appendChild(el('p',{cls:'plain','data-kind':'catalogue-ref'},[
+      'This case is row '+String(join.batch)+', index '+String(join.batch_index)+(isStr(join.model)?', model '+join.model:'')+' of the ',
+      el('a',{href:'../results/',text:'results catalogue'}),'. A row the catalogue publishes is shown there with its wording.']));
     var rows=vs.map(function(v){
       return {attrs:{'data-kind':'variant','data-family':fid,'data-variant':v.name},cells:[
         ['variant',String(v.name)],
         ['prompt_sha256',hash(v.prompt_sha256)],
         ['token_sha256',hash(v.token_sha256)],
-        ['n_tokens',isInt(v.n_tokens)?String(v.n_tokens):miss()],
-        ['prompt',isStr(v.prompt)&&v.prompt?el('span',{style:'font-family:var(--serif);font-size:14.5px',text:v.prompt}):miss('prompt text is '+NOT_IN_BUNDLE)]
-      ]};
+        ['n_tokens',isInt(v.n_tokens)?String(v.n_tokens):miss()]]};
     });
-    return table('Paired prompts of '+fid,[['Variant'],['Prompt SHA-256'],['Token ids SHA-256'],['Tokens',true],['Prompt text']],rows);
+    frag.appendChild(fold('Prompt and token-id hashes, token counts ('+vs.length+' wordings)',[
+      table('Input identity of '+fid,[['Wording'],['Prompt SHA-256'],['Token ids SHA-256'],['Tokens',true]],rows)],
+      {'data-kind':'input-identity'}));
+    return frag;
   }
 
+  /* 2 · recorded model output */
+  function dotRow(fid,r,multi){
+    var value=r.conflict?null:r.value.p, rank=r.conflict?null:r.value.rank;
+    var track=el('span',{cls:'dp-t',role:'cell'});
+    var label=el('span',{cls:'dp-v','data-col':'probability'});
+    if(isNum(value)&&value>=0&&value<=1){
+      var pct=(value*100).toFixed(4)+'%';
+      track.appendChild(el('span',{cls:'dp-d'+swatchClass(r.parts[0]),'data-kind':'dot',style:'left:'+pct,
+        title:String(r.parts[0])+' · '+ENDPOINT+' '+String(value)+' (recorded value)'}));
+      /* the value is printed at its dot: to the right of it, or to the left when the dot is near the right end */
+      if(value>0.62) label.setAttribute('style','right:calc('+(100-value*100).toFixed(4)+'% + 10px)');
+      else label.setAttribute('style','left:calc('+pct+' + 10px)');
+      label.textContent=plainNum(value);
+    }else{
+      label.setAttribute('style','left:10px');
+      label.appendChild(r.conflict?miss(CONFLICT):numCell(plainNum(value)));
+    }
+    track.appendChild(label);
+    return el('div',{cls:'dp-row',role:'row','data-kind':'behavior-variant','data-family':fid,'data-variant':r.parts[0],
+      'data-target':r.parts[1],'data-replicate':r.parts[2],'data-value':isNum(value)?String(value):null},[
+      el('span',{cls:'dp-n',role:'rowheader','data-col':'variant'},[wordingName(r.parts[0]),multi?' · replicate '+r.parts[2]:'']),
+      track,
+      el('span',{cls:'dp-r',role:'cell','data-col':'raw_rank'},[
+        r.conflict?miss(CONFLICT):(isInt(rank)?'rank '+rank+(isInt(r.value.of)?' of '+r.value.of:''):miss('rank not recorded'))])]);
+  }
   function renderBehavior(b,fam,fid,entries){
     var frag=document.createDocumentFragment(), computed=[], other=[];
     entries.forEach(function(e){
       var s=blockStatus(e.behavior);
-      if(s==='computed'&&Array.isArray(e.behavior.targets)) computed.push(e);
+      if(s==='computed'&&Array.isArray(e.behavior.targets)) computed.push({entry:e,block:e.behavior});
       else if(s==='not_computed') other.push({entry:e,block:e.behavior});
       else if(s==='absent') frag.appendChild(el('p',{cls:'plain','data-kind':'block-absent','data-family':fid},[
         miss('no behaviour block in this bundle for '+e.comparison_id)]));
       else frag.appendChild(unrecorded('behavior_next_token',fid,e));
     });
-    groupNotComputed('behavior_next_token',fid,other).forEach(function(p){frag.appendChild(p);});
+    groupNotComputed(b,'behavior_next_token',fid,other).forEach(function(p){frag.appendChild(p);});
     if(!computed.length) return frag;
 
-    var kinds=[];
-    computed.forEach(function(e){var k=e.behavior.probability_kind;if(kinds.indexOf(k)<0) kinds.push(k);});
-    frag.appendChild(el('p',{cls:'note'},['Probability of the target token at the next-token position, over the full vocabulary. Probability kind recorded by the bundle: ',
-      el('b',{text:kinds.map(String).join(', ')}),'. First target token only.']));
-
-    /* per variant: the value each comparison block records for that variant */
-    var seen={}, order=[], multi=b.protocol.replicates>1;
-    computed.forEach(function(e){
-      e.behavior.targets.forEach(function(t){
-        if(!isObj(t)) return;
-        [['a',e.a],['b',e.b]].forEach(function(s){
-          var key=JSON.stringify([s[1],t.target_id,e.replicate]);
-          var rec={variant:s[1],target:t.target_id,replicate:e.replicate,p:t[s[0]],rank:t['raw_rank_'+s[0]],conflict:false};
-          if(!seen[key]){seen[key]=rec;order.push(key);}
-          else if(seen[key].p!==rec.p||seen[key].rank!==rec.rank) seen[key].conflict=true;
-        });
+    var multi=b.protocol.replicates>1, names=orderOf(fam);
+    var values=sortByWording(byWording(computed,function(it,side,variant,put){
+      it.block.targets.forEach(function(t){
+        if(isObj(t)) put([variant,t.target_id,it.entry.replicate],{p:t[side],rank:t['raw_rank_'+side],of:it.block.vocabulary_size});
       });
+    }),names);
+    var targets=[], primary=isObj(b.protocol.primary_endpoint)?b.protocol.primary_endpoint.target:null;
+    values.forEach(function(r){if(targets.indexOf(r.parts[1])<0) targets.push(r.parts[1]);});
+    targets.sort(function(x,y){return (y===primary)-(x===primary);});
+    var set=el('div',{cls:'dp-set'});
+    targets.forEach(function(tid){
+      var panel=el('div',{cls:'dp',role:'table','data-kind':'dotplot','data-family':fid,'data-target':tid,
+        'aria-label':ENDPOINT+' of target '+targetLabel(fam,tid)+' for each wording of '+fid+', on an axis from 0 to 1'});
+      panel.appendChild(el('h5',{text:ENDPOINT+' · target '+targetLabel(fam,tid)+(tid===primary?' · primary endpoint':'')}));
+      values.filter(function(r){return r.parts[1]===tid;}).forEach(function(r){panel.appendChild(dotRow(fid,r,multi));});
+      panel.appendChild(el('div',{cls:'dp-row dp-axis','aria-hidden':'true'},[el('span'),
+        el('span',{cls:'dp-t'},[el('span',{style:'left:0',text:'0'}),el('span',{style:'left:50%',text:'0.5'}),el('span',{style:'left:100%',text:'1'})]),
+        el('span',{cls:'dp-r'})]));
+      set.appendChild(panel);
     });
-    var names=variantsOf(fam).map(function(v){return v.name;});
-    order.sort(function(x,y){
-      var a=seen[x], c=seen[y], ia=names.indexOf(a.variant), ic=names.indexOf(c.variant);
-      return (ia-ic)||0;
-    });
-    var heads=[['Variant'],['Target'],['Full-vocabulary probability',true],['Raw rank',true]];
-    if(multi) heads.splice(1,0,['Replicate',true]);
-    frag.appendChild(table('Original model output per variant, '+fid,heads,order.map(function(k){
-      var r=seen[k], cells=[
-        ['variant',String(r.variant)],
-        ['target',targetLabel(fam,r.target)],
-        ['probability',r.conflict?miss('two comparison blocks record different values'):numCell(plainNum(r.p))],
-        ['raw_rank',r.conflict?miss('two comparison blocks record different values'):(isInt(r.rank)?String(r.rank):miss('not recorded'))]];
-      if(multi) cells.splice(1,0,['replicate',String(r.replicate)]);
-      return {attrs:{'data-kind':'behavior-variant','data-family':fid,'data-variant':r.variant,'data-target':r.target,
-        'data-replicate':r.replicate},cells:cells};
-    })));
+    frag.appendChild(set);
 
-    frag.appendChild(el('p',{cls:'note'},['Signed difference, a minus b. ',isStr(b.sign_convention)?'Sign convention recorded by the bundle: '+b.sign_convention+'.':'']));
-    var dheads=[['Comparison'],['Target'],['a',true],['b',true],['Signed difference',true],['Sign']];
+    var dheads=[['Comparison'],['Target'],['Signed difference',true,'a minus b, in probability'],['Higher wording']];
     if(multi) dheads.splice(1,0,['Replicate',true]);
     var drows=[];
-    computed.forEach(function(e){
+    computed.forEach(function(x){
+      var e=x.entry;
       e.behavior.targets.forEach(function(t){
         if(!isObj(t)) return;
         var d=t.difference_a_minus_b, cells=[
-          ['comparison',lines([e.comparison_id,pairLabel(e)])],
+          ['comparison',comparisonCell(e)],
           ['target',targetLabel(fam,t.target_id)],
-          ['a',numCell(plainNum(t.a))],
-          ['b',numCell(plainNum(t.b))],
           ['difference',numCell(signedNum(d))],
           ['sign',numCell(signText(d,e.a,e.b))]];
         if(multi) cells.splice(1,0,['replicate',String(e.replicate)]);
@@ -712,7 +1018,8 @@
           'data-target':t.target_id,'data-replicate':e.replicate},cells:cells});
       });
     });
-    frag.appendChild(table('Original model output, signed differences, '+fid,dheads,drows));
+    frag.appendChild(el('h5',{text:'Signed difference in '+ENDPOINT.toLowerCase()+' between two wordings'}));
+    frag.appendChild(table(ENDPOINT+', signed differences, '+fid,dheads,drows,'fit'));
     return frag;
   }
 
@@ -738,8 +1045,9 @@
     if(key==='filtered_rank'&&side.excluded_candidate===true) return miss('not ranked: the filter excludes the target token');
     return miss('not recorded');
   }
+  /* 3 · internal measurements: readout ranks, one row per wording, layer and target */
   function renderReadouts(b,fam,fid,entries){
-    var frag=document.createDocumentFragment(), methods=[];
+    var frag=document.createDocumentFragment(), methods=[], names=orderOf(fam), multi=b.protocol.replicates>1;
     entries.forEach(function(e){
       if(isObj(e.readout)) Object.keys(e.readout).forEach(function(m){if(methods.indexOf(m)<0) methods.push(m);});
     });
@@ -755,39 +1063,38 @@
       });
       if(computed.length){
         var first=computed[0].block;
-        frag.appendChild(el('h5',{text:'Readout: '+m}));
-        frag.appendChild(el('p',{cls:'note'},['Target rank read from an internal layer state. It is not the model\'s output. Raw rank counts every vocabulary token; filtered rank counts only tokens the filter keeps. Both are shown. Position: '+
-          String(first.position)+'. Filter: '+(isObj(first.filter)?String(first.filter.id)+
+        frag.appendChild(el('h5',{text:'Readout rank · '+m}));
+        frag.appendChild(el('p',{cls:'note','data-kind':'readout-settings'},['Position: '+String(first.position)+
+          '. Filter: '+(isObj(first.filter)?String(first.filter.id)+
           (Array.isArray(first.filter.excluded_token_ids)?', '+first.filter.excluded_token_ids.length+' token ids excluded':''):'not recorded')+
           '. Tie rule: '+String(first.rank_tie_rule)+'.']));
-        var rows=[];
-        computed.forEach(function(x){
-          x.block.layers.forEach(function(L){
+        var values=sortByWording(byWording(computed,function(it,side,variant,put){
+          it.block.layers.forEach(function(L){
             if(!isObj(L)||!Array.isArray(L.targets)) return;
             L.targets.forEach(function(t){
-              if(!isObj(t)) return;
-              rows.push({attrs:{'data-kind':'readout','data-family':fid,'data-method':m,'data-comparison':x.entry.comparison_id,
-                'data-layer':L.layer,'data-target':t.target_id,'data-replicate':x.entry.replicate},cells:[
-                ['comparison',lines([x.entry.comparison_id,'a '+x.entry.a+' · b '+x.entry.b])],
-                ['layer',String(L.layer)],
-                ['target',targetLabel(fam,t.target_id)],
-                ['raw_a',rankCell(t.a,'raw_rank')],
-                ['filtered_a',rankCell(t.a,'filtered_rank')],
-                ['window_a',windowText(isObj(t.a)?t.a.top_k:null)],
-                ['raw_b',rankCell(t.b,'raw_rank')],
-                ['filtered_b',rankCell(t.b,'filtered_rank')],
-                ['window_b',windowText(isObj(t.b)?t.b.top_k:null)]]});
+              if(isObj(t)) put([variant,L.layer,t.target_id,it.entry.replicate],isObj(t[side])?t[side]:null);
             });
           });
-        });
-        frag.appendChild(table('Readout ranks, '+m+', '+fid,[['Comparison'],['Layer',true],['Target'],['a: raw rank',true],['a: filtered rank',true],
-          ['a: top-k window'],['b: raw rank',true],['b: filtered rank',true],['b: top-k window']],rows));
+        }),names);
+        var heads=[['Wording'],['Target'],['Layer',true],['Raw rank',true],['Filtered rank',true],['Top-k window']];
+        if(multi) heads.splice(2,0,['Replicate',true]);
+        frag.appendChild(table('Readout ranks, '+m+', '+fid,heads,values.map(function(r){
+          var side=r.value, cells=[
+            ['variant',wordingName(r.parts[0])],
+            ['target',targetLabel(fam,r.parts[2])],
+            ['layer',String(r.parts[1])],
+            ['raw',r.conflict?miss(CONFLICT):rankCell(side,'raw_rank')],
+            ['filtered',r.conflict?miss(CONFLICT):rankCell(side,'filtered_rank')],
+            ['window',r.conflict?[miss(CONFLICT)]:windowText(isObj(side)?side.top_k:null)]];
+          if(multi) cells.splice(2,0,['replicate',String(r.parts[3])]);
+          return {attrs:{'data-kind':'readout','data-family':fid,'data-method':m,'data-variant':r.parts[0],
+            'data-layer':r.parts[1],'data-target':r.parts[2],'data-replicate':r.parts[3]},cells:cells};
+        })));
       }
-      groupNotComputed(m,fid,other).forEach(function(p){later.push(p);});
+      groupNotComputed(b,m,fid,other).forEach(function(p){later.push(p);});
     });
-    later.forEach(function(p){frag.appendChild(p);});
-    if(!methods.length) frag.appendChild(el('p',{cls:'plain'},[miss('no readout block in this bundle for this family')]));
-    return frag;
+    if(!methods.length) frag.appendChild(el('p',{cls:'plain'},[miss('no readout block in this bundle for this case')]));
+    return {computed:frag,notComputed:later};
   }
 
   function shareCell(v,status){
@@ -796,73 +1103,113 @@
     if(status==='not_computed_component_list_incomplete') return miss('not computed: component list incomplete');
     return miss('not recorded');
   }
+  /* 3 · internal measurements: ICA. Signed component scores and squared-coordinate shares stay in
+     separately labelled columns; differences are given for the signed score only, as the bundle does. */
   function renderIca(b,fam,fid,entries){
-    /* returns null when no entry of this family carries an ICA block */
-    var frag=document.createDocumentFragment(), computed=[], other=[], any=false;
+    /* returns null when no entry of this case carries an ICA block */
+    var frag=document.createDocumentFragment(), computed=[], other=[], any=false, names=orderOf(fam);
     entries.forEach(function(e){
       var s=blockStatus(e.ica);
       if(s==='absent') return;
       any=true;
-      if(s==='computed'&&Array.isArray(e.ica.layers)) computed.push(e);
+      if(s==='computed'&&Array.isArray(e.ica.layers)) computed.push({entry:e,block:e.ica});
       else if(s==='not_computed') other.push({entry:e,block:e.ica});
       else frag.appendChild(unrecorded('ica_lens',fid,e));
     });
     if(!any) return null;
-    var head=el('h5',{text:'ICA component scores'});
     var out=document.createDocumentFragment();
-    out.appendChild(head);
+    out.appendChild(el('h5',{text:'ICA components · ica_lens'}));
     if(computed.length){
-      var bases=[], labels=[], pre=[], src=[];
-      computed.forEach(function(e){
-        if(bases.indexOf(e.ica.basis_manifest_sha256)<0) bases.push(e.ica.basis_manifest_sha256);
-        if(labels.indexOf(e.ica.energy_share_label)<0) labels.push(e.ica.energy_share_label);
+      var bases=[], labels=[], pre=[], src=[], multi=b.protocol.replicates>1;
+      computed.forEach(function(x){
+        var ica=x.block;
+        if(bases.indexOf(ica.basis_manifest_sha256)<0) bases.push(ica.basis_manifest_sha256);
+        if(labels.indexOf(ica.energy_share_label)<0) labels.push(ica.energy_share_label);
         /* preprocessing_mode is what the ICA payloads record (bundle/1 since 2026-11-10); the two older
            spellings are kept for a bundle that carries one of them. An empty string is not a mode. */
-        var p=isStr(e.ica.preprocessing_mode)&&e.ica.preprocessing_mode?e.ica.preprocessing_mode:
-          (isStr(e.ica.preprocessing)&&e.ica.preprocessing?e.ica.preprocessing:
-          (isObj(e.ica.basis)&&isStr(e.ica.basis.preprocessing)&&e.ica.basis.preprocessing?e.ica.basis.preprocessing:null));
+        var p=isStr(ica.preprocessing_mode)&&ica.preprocessing_mode?ica.preprocessing_mode:
+          (isStr(ica.preprocessing)&&ica.preprocessing?ica.preprocessing:
+          (isObj(ica.basis)&&isStr(ica.basis.preprocessing)&&ica.basis.preprocessing?ica.basis.preprocessing:null));
         if(pre.indexOf(p)<0) pre.push(p);
-        var from=isStr(e.ica.preprocessing_read_from)&&e.ica.preprocessing_read_from?e.ica.preprocessing_read_from:null;
+        var from=isStr(ica.preprocessing_read_from)&&ica.preprocessing_read_from?ica.preprocessing_read_from:null;
         if(src.indexOf(from)<0) src.push(from);
       });
+      var shareLabel=labels.length===1&&isStr(labels[0])?labels[0]:null;
       out.appendChild(kv([
-        ['basis sha256',bases.length===1?hash(bases[0]):miss('the comparisons of this family name '+bases.length+' bases'),{'data-col':'ica_basis'}],
+        ['basis sha256',bases.length===1?hash(bases[0]):miss('the comparisons of this case name '+bases.length+' bases'),{'data-col':'ica_basis'}],
         ['preprocessing mode',pre.length===1?(pre[0]!==null?pre[0]:miss()):
-          miss('the comparisons of this family record '+pre.length+' preprocessing modes'),{'data-col':'ica_preprocessing'}],
+          miss('the comparisons of this case record '+pre.length+' preprocessing modes'),{'data-col':'ica_preprocessing'}],
         pre.length===1&&pre[0]!==null&&src.length===1&&src[0]!==null?
           ['preprocessing mode read from',src[0],{'data-col':'ica_preprocessing_source'}]:null,
-        ['position',computed[0].ica.position],
-        ['energy share',labels.length===1&&isStr(labels[0])?labels[0]:miss('label not recorded'),{'data-col':'ica_share_label'}]
+        ['position',computed[0].block.position],
+        ['share label recorded by the bundle',shareLabel!==null?shareLabel:miss('label not recorded'),{'data-col':'ica_share_label'}]
       ]));
-      out.appendChild(el('p',{cls:'note',text:'Signed coordinates of the layer state in one fixed basis. Both variants are scored under the basis named above. A component is a direction in the model\'s internal state; any name given to one is a hypothesis.'}));
-      var rows=[];
-      computed.forEach(function(e){
-        e.ica.layers.forEach(function(L){
+
+      var values=byWording(computed,function(it,side,variant,put){
+        it.block.layers.forEach(function(L){
           if(!isObj(L)||!Array.isArray(L.components)) return;
           L.components.forEach(function(c){
-            if(!isObj(c)) return;
-            var d=c.difference_a_minus_b;
-            rows.push({attrs:{'data-kind':'ica','data-family':fid,'data-comparison':e.comparison_id,'data-layer':L.layer,
-              'data-component':c.component,'data-replicate':e.replicate},cells:[
-              ['comparison',lines([e.comparison_id,pairLabel(e)])],
-              ['layer',String(L.layer)],
-              ['component',String(c.component)],
-              ['score_a',numCell(signedNum(c.score_a))],
-              ['score_b',numCell(signedNum(c.score_b))],
-              ['difference',numCell(signedNum(d),'not computed: one side has no score')],
-              ['sign',numCell(signText(d,e.a,e.b),'not computed')],
-              ['share_a',shareCell(c.energy_share_a,L.energy_share_status_a)],
-              ['share_b',shareCell(c.energy_share_b,L.energy_share_status_b)]]});
+            if(isObj(c)) put([variant,L.layer,c.component,it.entry.replicate],
+              {score:c['score_'+side],share:c['energy_share_'+side],status:L['energy_share_status_'+side]});
           });
         });
       });
-      var shareHead=labels.length===1&&isStr(labels[0])?labels[0]:'share';
-      out.appendChild(table('ICA component scores, '+fid,[['Comparison'],['Layer',true],['Component',true],['a: signed score',true],
-        ['b: signed score',true],['Signed difference',true],['Sign'],['a: '+shareHead,true],['b: '+shareHead,true]],rows));
+      var cols=names.filter(function(n){return values.some(function(r){return r.parts[0]===n;});});
+      values.forEach(function(r){if(cols.indexOf(r.parts[0])<0) cols.push(r.parts[0]);});
+      var keys=[], cell={};
+      values.forEach(function(r){
+        var k=JSON.stringify([r.parts[1],r.parts[2],r.parts[3]]);
+        if(!cell[k]){cell[k]={layer:r.parts[1],component:r.parts[2],replicate:r.parts[3],by:{}};keys.push(k);}
+        cell[k].by[r.parts[0]]=r;
+      });
+      var shareHead=shareLabel!==null?shareLabel:'share, label not recorded';
+      var heads=[['Layer',true],['Component',true]];
+      if(multi) heads.push(['Replicate',true]);
+      cols.forEach(function(n){heads.push([n,true,'signed component score',n+' · signed score']);});
+      cols.forEach(function(n){heads.push([n,true,shareHead,n+' · squared-coordinate share']);});
+      out.appendChild(table('ICA signed component scores and squared-coordinate shares by wording, '+fid,heads,keys.map(function(k){
+        var c=cell[k], cells=[['layer',String(c.layer)],['component',String(c.component)]];
+        if(multi) cells.push(['replicate',String(c.replicate)]);
+        cols.forEach(function(n){
+          var r=c.by[n];
+          cells.push(['score',!r?miss('not recorded'):(r.conflict?miss(CONFLICT):numCell(signedNum(r.value.score))),
+            {'data-variant':n,cls:'num'+(n===cols[0]?' brk':'')}]);
+        });
+        cols.forEach(function(n){
+          var r=c.by[n];
+          cells.push(['share',!r?miss('not recorded'):(r.conflict?miss(CONFLICT):shareCell(r.value.share,r.value.status)),
+            {'data-variant':n,cls:'num'+(n===cols[0]?' brk':'')}]);
+        });
+        return {attrs:{'data-kind':'ica-wording','data-family':fid,'data-layer':c.layer,'data-component':c.component,
+          'data-replicate':c.replicate},cells:cells};
+      })));
+
+      var rows=[];
+      computed.forEach(function(x){
+        var e=x.entry;
+        x.block.layers.forEach(function(L){
+          if(!isObj(L)||!Array.isArray(L.components)) return;
+          L.components.forEach(function(c){
+            if(!isObj(c)) return;
+            var d=c.difference_a_minus_b, cells=[
+              ['comparison',comparisonCell(e)],
+              ['layer',String(L.layer)],
+              ['component',String(c.component)],
+              ['difference',numCell(signedNum(d),'not computed: one side has no score')],
+              ['sign',numCell(signText(d,e.a,e.b),'not computed')]];
+            if(multi) cells.splice(1,0,['replicate',String(e.replicate)]);
+            rows.push({attrs:{'data-kind':'ica','data-family':fid,'data-comparison':e.comparison_id,'data-layer':L.layer,
+              'data-component':c.component,'data-replicate':e.replicate},cells:cells});
+          });
+        });
+      });
+      var dheads=[['Comparison'],['Layer',true],['Component',true],['Signed difference',true,'a minus b, in signed component score'],['Higher wording']];
+      if(multi) dheads.splice(1,0,['Replicate',true]);
+      out.appendChild(el('h5',{text:'Signed difference in component score between two wordings'}));
+      out.appendChild(table('ICA signed score differences, '+fid,dheads,rows,'fit'));
     }
     out.appendChild(frag);
-    groupNotComputed('ica_lens',fid,other).forEach(function(p){out.appendChild(p);});
-    return out;
+    return {computed:out,notComputed:groupNotComputed(b,'ica_lens',fid,other)};
   }
 
   function interventionKeys(b,entries){
@@ -881,43 +1228,60 @@
       var fam=b.protocol.families.filter(function(x){return isObj(x)&&x.family_id===fid;})[0]||null;
       var entries=f.comparisons;
       var outer=el('section',{cls:'fam','data-family':fid,'aria-labelledby':'h-fam-'+i});
-      if(isSynthetic(b)) outer.appendChild(el('div',{cls:'syn-row'},[synTag(b,'family '+fid)]));
+      if(isSynthetic(b)) outer.appendChild(el('div',{cls:'syn-row'},[synTag(b,'case '+fid)]));
       var sec=el('details',{cls:'fam-fold'});
       if(i===0) sec.setAttribute('open','');
       sec.appendChild(el('summary',null,[
-        el('h3',{id:'h-fam-'+i,text:'Case family '+fid}),
-        el('span',{cls:'count',text:'split '+String(f.split)+' · review status '+String(f.review_status)+
-          ' · legacy join '+(fam&&fam.legacy_join?JSON.stringify(fam.legacy_join):'none')})]));
+        el('h3',{id:'h-fam-'+i,text:'Case '+fid}),
+        el('span',{cls:'count','data-col':'case-labels',text:'clinical review of this case: '+String(f.review_status)+' · split '+String(f.split)})]));
       outer.appendChild(sec);
-      if(!fam) sec.appendChild(el('p',{cls:'plain'},[miss('the protocol summary of this bundle does not list this family')]));
+      if(!fam) sec.appendChild(el('p',{cls:'plain'},[miss('the protocol summary of this bundle does not list this case')]));
 
-      sec.appendChild(el('h4',{text:'1 · Paired prompts'}));
-      sec.appendChild(renderPrompts(fam,fid));
+      sec.appendChild(el('h4',{text:'1 · Paired wording'}));
+      sec.appendChild(renderWording(b,fam,fid));
 
-      sec.appendChild(el('h4',{text:'2 · Original model output'}));
+      sec.appendChild(el('h4',{text:'2 · Recorded model output'}));
       sec.appendChild(renderBehavior(b,fam,fid,entries));
 
-      sec.appendChild(el('h4',{text:'3 · Internal analyses in this bundle'}));
-      sec.appendChild(renderReadouts(b,fam,fid,entries));
-      var ica=renderIca(b,fam,fid,entries);
+      sec.appendChild(el('h4',{'data-kind':'internal',text:'3 · Internal measurements'}));
+      var readouts=renderReadouts(b,fam,fid,entries);
+      sec.appendChild(readouts.computed);
+      var ica=renderIca(b,fam,fid,entries), late=readouts.notComputed;
       if(ica){
         var wrap=el('div',{'data-kind':'ica-block','data-family':fid});
-        wrap.appendChild(ica);
+        wrap.appendChild(ica.computed);
         sec.appendChild(wrap);
+        late=late.concat(ica.notComputed);
       }
+      late.forEach(function(p){sec.appendChild(p);});
 
       sec.appendChild(el('h4',{text:'4 · Intervention evidence'}));
       var ik=interventionKeys(b,entries);
       sec.appendChild(ik.length?
-        el('p',{cls:'plain','data-kind':'intervention'},['This bundle carries an intervention record ('+ik.join(', ')+'). This viewer does not render it. Read the bundle file.']):
+        el('p',{cls:'plain','data-kind':'intervention'},['This bundle carries an intervention record ('+ik.join(', ')+'). This page does not render it. Read the comparison file.']):
         el('p',{cls:'plain','data-kind':'intervention',text:'no intervention in this bundle'}));
       frag.appendChild(outer);
     });
-    if(!b.comparisons.length) frag.appendChild(el('p',{cls:'plain'},[miss('the bundle holds no case family')]));
+    if(!b.comparisons.length) frag.appendChild(el('p',{cls:'plain'},[miss('the bundle holds no case')]));
     return frag;
   }
+  function endpointUnit(b){
+    /* Unit, denominator and uncertainty of the target-token probability, stated once for the comparison. */
+    var kinds=[], sizes=[], blocks=0;
+    b.comparisons.forEach(function(f){f.comparisons.forEach(function(e){
+      if(blockStatus(e.behavior)!=='computed') return;
+      blocks++;
+      if(kinds.indexOf(e.behavior.probability_kind)<0) kinds.push(e.behavior.probability_kind);
+      if(sizes.indexOf(e.behavior.vocabulary_size)<0) sizes.push(e.behavior.vocabulary_size);
+    });});
+    if(!blocks) return '';
+    var size=sizes.every(isInt)?'a vocabulary of '+sizes.join(' or ')+' tokens':'the full vocabulary (its size is '+NOT_IN_BUNDLE+')';
+    var stats=isObj(b.statistics)&&b.statistics.computed===true?'The bundle says statistics were computed; see Limitations.':
+      'Uncertainty: none computed. There is one recorded value per case, wording and replicate (replicates: '+String(b.protocol.replicates)+').';
+    return 'In this comparison: a probability from 0 to 1 over '+size+' (probability kind '+kinds.map(String).join(', ')+'). '+stats;
+  }
 
-  /* ---------------------------------------------------------------- methods table */
+  /* ---------------------------------------------------------------- run status table */
 
   function methodRows(b){
     var order=[];
@@ -929,7 +1293,7 @@
     b.methods_not_run.forEach(function(r){if(isObj(r)) add(r.method);});
     var payloads=Array.isArray(b.provenance.payloads)?b.provenance.payloads:null;
     var adapters=isObj(b.plan_totals.adapters)?b.plan_totals.adapters:{};
-    var heads=[['Method'],['Execution state'],['Reason'],['Capability status'],['Planned state'],['Capability evidence']];
+    var heads=[['Method'],['Run status'],['Reason'],['Capability status'],['Planned state'],['Capability evidence']];
 
     return order.map(function(m){
       var planned=isObj(byMethod[m])&&isInt(byMethod[m].total)?byMethod[m].total:null;
@@ -977,7 +1341,7 @@
     });
   }
 
-  /* ---------------------------------------------------------------- totals */
+  /* ---------------------------------------------------------------- planned tasks and run counts */
 
   function countsLine(obj,keys){
     if(!isObj(obj)) return null;
@@ -991,18 +1355,11 @@
        that carries neither, and each row then says so. */
     var reused=isInt(c.reused_events)?c.reused_events:(isInt(c.reused)?c.reused:null);
     var executed=isInt(c.executed_attempts)?c.executed_attempts:null;
-    frag.appendChild(el('h4',{text:'Plan'}));
     frag.appendChild(kv([
       ['planned tasks',isInt(t.tasks)?t.tasks:null,{'data-col':'planned_tasks'}],
       ['by planned state',countsLine(t.by_planned_state),{'data-col':'by_planned_state'}],
-      ['estimated tokens',est&&isInt(est.tokens)?est.tokens+' (ready tasks: '+String(est.ready_tokens)+') · an estimate, not measured':null],
-      ['estimated activation bytes',est&&isInt(est.activation_bytes)?est.activation_bytes+' (ready tasks: '+String(est.ready_activation_bytes)+') · an estimate, not measured':null],
-      ['runtime estimate',t.runtime_seconds_estimate===null?'none: no measured rate was supplied':
-        (isNum(t.runtime_seconds_estimate)?t.runtime_seconds_estimate+' seconds':null)]
-    ]));
-    frag.appendChild(el('h4',{text:'Execution'}));
-    frag.appendChild(kv([
-      ['tasks by execution state',countsLine(x.by_state,STATES.filter(function(s){return isObj(x.by_state)&&x.by_state[s]!==undefined;})),{'data-col':'by_state'}],
+      ['tasks by run status',countsLine(x.by_state,STATES.filter(function(s){return isObj(x.by_state)&&x.by_state[s]!==undefined;})),{'data-col':'by_state'}],
+      ['run complete',typeof x.complete==='boolean'?(x.complete?'yes':'no'):null],
       ['envelopes',isInt(c.with_envelope)&&isInt(c.planned)?c.with_envelope+' of '+c.planned+' planned tasks have an envelope':null],
       ['ready tasks completed',isInt(c.ready_completed)&&isInt(c.ready_planned)?c.ready_completed+' of '+c.ready_planned:null],
       ['missing',isInt(c.missing)?c.missing:null],
@@ -1010,16 +1367,20 @@
       ['identical duplicates kept once',isInt(c.duplicate_identical)?c.duplicate_identical:null],
       ['attempts executed',executed===null?miss('executed count is '+NOT_IN_BUNDLE):executed,{'data-col':'executed'}],
       ['results reused from an earlier run',reused===null?miss('reuse count is '+NOT_IN_BUNDLE):reused,{'data-col':'reused'}],
-      (reused===null&&executed===null)?null:['how these two are counted','journal lines: one per executed attempt, and one each time a run found a completed result and did not execute the task again'],
-      ['run complete',typeof x.complete==='boolean'?(x.complete?'yes':'no'):null]
+      (reused===null&&executed===null)?null:['how these two are counted','journal lines: one per executed attempt, and one each time a run found a completed result and did not execute the task again']
     ]));
+    var estimates=[
+      ['estimated tokens',est&&isInt(est.tokens)?est.tokens+' (ready tasks: '+String(est.ready_tokens)+') · an estimate, not measured':null],
+      ['estimated activation bytes',est&&isInt(est.activation_bytes)?est.activation_bytes+' (ready tasks: '+String(est.ready_activation_bytes)+') · an estimate, not measured':null],
+      ['runtime estimate',t.runtime_seconds_estimate===null?'none: no measured rate was supplied':
+        (isNum(t.runtime_seconds_estimate)?t.runtime_seconds_estimate+' seconds':null)]];
+    var inner=[kv(estimates)];
     if(Array.isArray(t.estimate_notes)&&t.estimate_notes.length){
-      var d=el('details',{cls:'fold'},[el('summary',{text:'Estimate assumptions ('+t.estimate_notes.length+')'})]);
       var ul=el('ul',{cls:'lims'});
       t.estimate_notes.forEach(function(n){ul.appendChild(el('li',{text:String(n)}));});
-      d.appendChild(ul);
-      frag.appendChild(d);
+      inner.push(ul);
     }
+    frag.appendChild(fold('Plan estimates and their assumptions',inner));
     return frag;
   }
 
@@ -1052,7 +1413,7 @@
   function renderLinks(b){
     var frag=document.createDocumentFragment(), recs=linkRecords(b);
     if(!recs.length){
-      frag.appendChild(el('p',{cls:'plain','data-kind':'no-link-records',text:'This bundle carries no external-link record, so no Neuronpedia link is shown. The local record is the tables on this page and the payload hashes under Provenance.'}));
+      frag.appendChild(el('p',{cls:'plain','data-kind':'no-link-records',text:'This bundle carries no external-link record, so no Neuronpedia link is shown. The local record is the tables on this page and the payload hashes under Source hashes.'}));
       return frag;
     }
     frag.appendChild(el('p',{cls:'note',text:'A link is shown only when the bundle records it as built from a verified mapping. Otherwise the recorded reason and the local record are shown. An external page is context; the numbers on this page do not come from it.'}));
@@ -1085,7 +1446,7 @@
     return frag;
   }
 
-  /* ---------------------------------------------------------------- provenance and limitations */
+  /* ---------------------------------------------------------------- source hashes and limitations */
 
   function renderProvenance(b){
     var v=b.provenance, frag=document.createDocumentFragment(), cm=isObj(v.capability_matrix)?v.capability_matrix:null;
@@ -1101,20 +1462,18 @@
       ['digest convention',v.digest_convention]
     ]));
     if(isObj(v.source_files_sha256)&&Object.keys(v.source_files_sha256).length){
-      frag.appendChild(el('h4',{text:'Source file hashes'}));
-      frag.appendChild(table('Source file hashes',[['File'],['SHA-256']],Object.keys(v.source_files_sha256).sort().map(function(k){
-        return {attrs:{'data-kind':'source-file'},cells:[['file',k],['sha256',hash(v.source_files_sha256[k])]]};
-      })));
+      frag.appendChild(fold('Source file hashes ('+Object.keys(v.source_files_sha256).length+' files)',[
+        table('Source file hashes',[['File'],['SHA-256']],Object.keys(v.source_files_sha256).sort().map(function(k){
+          return {attrs:{'data-kind':'source-file'},cells:[['file',k],['sha256',hash(v.source_files_sha256[k])]]};
+        }))]));
     }
     if(Array.isArray(v.payloads)){
-      var d=el('details',{cls:'fold'},[el('summary',{text:'Payload hashes ('+v.payloads.length+' completed tasks)'})]);
-      if(v.payloads.length) d.appendChild(table('Payload hashes',[['Task'],['Replicate',true],['Method'],['Payload kind'],['SHA-256']],
-        v.payloads.filter(isObj).map(function(p){
-          return {attrs:{'data-kind':'payload'},cells:[['task',String(p.task_id)],['replicate',String(p.replicate)],['method',String(p.method)],
-            ['kind',String(p.kind)],['sha256',hash(p.sha256)]]};
-        })));
-      else d.appendChild(el('p',{cls:'plain',text:'The bundle lists no payload: no task completed.'}));
-      frag.appendChild(d);
+      frag.appendChild(fold('Payload hashes ('+v.payloads.length+' completed tasks)',[
+        v.payloads.length?table('Payload hashes',[['Task'],['Replicate',true],['Method'],['Payload kind'],['SHA-256']],
+          v.payloads.filter(isObj).map(function(p){
+            return {attrs:{'data-kind':'payload'},cells:[['task',String(p.task_id)],['replicate',String(p.replicate)],['method',String(p.method)],
+              ['kind',String(p.kind)],['sha256',hash(p.sha256)]]};
+          })):el('p',{cls:'plain',text:'The bundle lists no payload: no task completed.'})]));
     }else{
       frag.appendChild(el('p',{cls:'plain'},[miss('the payload list is '+NOT_IN_BUNDLE)]));
     }
@@ -1125,26 +1484,33 @@
     b.limitations.forEach(function(code){ul.appendChild(el('li',{'data-limitation':String(code),text:words(code)}));});
     if(!b.limitations.length) ul.appendChild(el('li',{text:'The bundle lists no limitation.'}));
     frag.appendChild(ul);
-    var stated=[
+    frag.appendChild(el('h5',{text:'Stated by the bundle'}));
+    frag.appendChild(kv([
       ['statistics',isObj(b.statistics)?(b.statistics.computed===true?'computed. ':'none computed. ')+(isStr(b.statistics.note)?b.statistics.note:''):null],
       ['block rule',b.block_rule],
       ['sign convention',b.sign_convention],
       ['execution guarantee',b.execution.execution_guarantee],
       ['timing',b.execution.timing_caveat]
-    ];
-    frag.appendChild(el('h4',{text:'Stated by the bundle'}));
-    frag.appendChild(kv(stated));
-    frag.appendChild(el('h4',{text:'Stated by this page'}));
+    ]));
+    frag.appendChild(el('h5',{text:'Stated by this page'}));
     var own=el('ul',{cls:'lims'});
     ['No value on this page is a clinical risk score. A readout rank or a component score describes the model\'s internal state for one prompt; it says nothing about a patient.',
      'A readout is not a transcript of reasoning, and a component name is a hypothesis.',
-     'This page displays one bundle. It does not test it, compare it with another bundle or pool anything.'
+     'This page displays one comparison file. It does not test it, compare it with another file or pool anything.'
     ].forEach(function(s){own.appendChild(el('li',{text:s}));});
     frag.appendChild(own);
     return frag;
   }
 
   /* ---------------------------------------------------------------- render */
+
+  function revealHash(){
+    /* A link to a part that sits inside a closed fold opens the fold, so that old section links keep working. */
+    var id=window.location.hash.slice(1), node=id?document.getElementById(id):null;
+    if(!node||!results.contains(node)) return;
+    for(var n=node;n&&n!==results;n=n.parentNode){if(n.tagName==='DETAILS') n.open=true;}
+    node.scrollIntoView();
+  }
 
   function render(b,path){
     /* Build every part first. Nothing is attached unless all of it built, so a failure leaves no partial page. */
@@ -1158,69 +1524,70 @@
       provenance:renderProvenance(b),
       limitations:renderLimitations(b)
     };
+    var unit=endpointUnit(b);
     ['evidence','protocol','families','totals','links','provenance','limitations'].forEach(function(k){
       var box=$('exp-'+k);
       box.textContent='';
       box.appendChild(parts[k]);
     });
+    $('exp-endpoint-unit').textContent=unit;
     var body=$('exp-methods-body');
     body.textContent='';
     if(parts.methods.length) parts.methods.forEach(function(tr){body.appendChild(tr);});
     else body.appendChild(el('tr',{role:'row'},[el('td',{role:'cell',colspan:6},[miss('the bundle plans no method')])]));
     var syn=$('exp-methods-syn');
     syn.textContent='';
-    if(isSynthetic(b)) syn.appendChild(el('div',{cls:'syn-row'},[synTag(b,'methods table')]));
-    $('exp-families-count').textContent=b.comparisons.length+' of '+b.protocol.families.length+' families in the protocol summary';
+    if(isSynthetic(b)) syn.appendChild(el('div',{cls:'syn-row'},[synTag(b,'run status table')]));
+    $('exp-families-count').textContent=b.comparisons.length+' of '+b.protocol.families.length+' cases in the protocol summary';
     $('exp-methods-count').textContent=parts.methods.length+' methods planned';
     var folds=Array.prototype.slice.call($('exp-families').querySelectorAll('details.fam-fold'));
     var toggle=$('exp-fam-toggle');
     function allOpen(){return folds.every(function(d){return d.open;});}
-    function label(){toggle.textContent=allOpen()?'Close every family':'Open every family';}
+    function label(){toggle.textContent=allOpen()?'Close every case':'Open every case';}
     toggle.hidden=folds.length<2;
     toggle.onclick=function(){var open=!allOpen();folds.forEach(function(d){d.open=open;});label();};
     folds.forEach(function(d){d.addEventListener('toggle',label);});
     label();
     results.hidden=false;
-    setState('ready','Loaded',['bundle '+path+' · schema '+b.schema_version+' · protocol '+b.protocol.id+' version '+b.protocol.version]);
+    setState('ready','Loaded',['comparison '+b.protocol.id+' version '+b.protocol.version+' · file data/'+path+' · schema '+b.schema_version],
+      el('a',{href:'../data/'+path,download:'','data-kind':'download',text:'Download this comparison file (JSON)'}));
+    revealHash();
   }
 
   function load(path){
-    var url='../data/'+path;
-    setState('loading','Loading',['bundle '+path]);
-    /* The body is read before the status is acted on: an unread error body keeps the request open. */
-    fetch(url,{cache:'no-cache',redirect:'error'}).then(function(r){
-      return r.text().then(function(text){return {status:r.status,ok:r.ok,text:text};});
-    }).then(function(res){
-      if(res.status===404){fail('missing','Missing',['bundle not found \u00b7 HTTP 404','path data/'+path,'Nothing is displayed.']);return;}
-      if(!res.ok){fail('error','Error',['the bundle request failed \u00b7 HTTP '+res.status,'path data/'+path,'Nothing is displayed.']);return;}
+    setState('loading','Loading',['comparison file data/'+path]);
+    getText('../data/'+path).then(function(res){
+      if(res.status===404){fail('missing','Missing',['comparison file not found · HTTP 404','path data/'+path,'Nothing is displayed.']);return;}
+      if(!res.ok){fail('error','Error',['the request for the comparison file failed · HTTP '+res.status,'path data/'+path,'Nothing is displayed.']);return;}
       var b;
       try{b=JSON.parse(res.text);}
       catch(e){fail('error','Error',['the file at data/'+path+' is not JSON','Nothing is displayed.']);return;}
       if(!isObj(b)){fail('error','Error',['the file at data/'+path+' is not a JSON object','Nothing is displayed.']);return;}
       if(b.schema_version!==SCHEMA){
         fail('error','Error',['schema_version is '+JSON.stringify(b.schema_version===undefined?null:b.schema_version)+
-          '; this viewer reads '+SCHEMA+' only','Nothing is displayed.']);return;
+          '; this page reads '+SCHEMA+' only','Nothing is displayed.']);return;
       }
       var problems=structureProblems(b);
-      if(problems.length){fail('error','Error',['the bundle does not have the '+SCHEMA+' structure: '+problems.join('; '),'Nothing is displayed.']);return;}
+      if(problems.length){fail('error','Error',['the file does not have the '+SCHEMA+' structure: '+problems.join('; '),'Nothing is displayed.']);return;}
       try{render(b,path);}
-      catch(e){fail('error','Error',['the viewer could not render this bundle: '+(e&&e.message?e.message:String(e)),'Nothing is displayed.']);}
+      catch(e){fail('error','Error',['this page could not render the comparison file: '+(e&&e.message?e.message:String(e)),'Nothing is displayed.']);}
     }).catch(function(e){
-      fail('error','Error',['the bundle request did not complete: '+(e&&e.message?e.message:String(e)),'path data/'+path,'Nothing is displayed.']);
+      fail('error','Error',['the request for the comparison file did not complete: '+(e&&e.message?e.message:String(e)),'path data/'+path,'Nothing is displayed.']);
     });
   }
 
   function start(){
     var values=new URLSearchParams(window.location.search).getAll('bundle');
-    if(!values.length){setState('idle');return;}
+    if(!values.length){loadIndex();return;}
     var reason=values.length>1?'the address has more than one bundle parameter':bundleRefusal(values[0]);
     if(reason){
-      fail('refused','Refused',[reason,'No request was made. A bundle is named by a relative path under data/, for example ?bundle=folder/bundle.json']);
+      fail('refused','Refused',[reason,'No request was made. This address does not name a comparison this page can open.']);
       return;
     }
     load(values[0]);
   }
-  window.pwExperimentViewer={bundleRefusal:bundleRefusal,schema:SCHEMA};
+  window.addEventListener('hashchange',revealHash);
+  window.pwExperimentViewer={bundleRefusal:bundleRefusal,schema:SCHEMA,indexSchema:INDEX_SCHEMA};
   start();
 })();
 </script>
