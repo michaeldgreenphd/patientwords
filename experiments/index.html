@@ -1,0 +1,1207 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Experiment bundles — PatientWords</title>
+<meta name="description" content="Viewer for method-comparison bundles exported by the PatientWords engine's experiment interface. No study bundle is published yet.">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#faf9f5">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23faf9f5'/%3E%3Crect x='9' y='9' width='30' height='30' fill='%23111827'/%3E%3Crect x='25' y='25' width='30' height='30' fill='%2315803d'/%3E%3C/svg%3E">
+<style>
+  :root{
+    --paper:#faf9f5; --ink:#1c1c19; --patient:#111827; --clinical:#15803d;
+    --penalty:#b4483d; --muted:#6d6c66; --structural:#c3c9d2; --hairline:#dcdad2;
+    --serif:'Iowan Old Style','Palatino Linotype',Palatino,'Book Antiqua',Georgia,serif;
+    --mono:ui-monospace,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace;
+  }
+  html{background:var(--paper)}
+  body{margin:0;padding:0;background:var(--paper);color:var(--ink);
+    font-family:var(--serif);font-size:17px;line-height:1.62;
+    -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+  main{max-width:1240px;margin:0 auto;padding:0 22px 56px}
+  [hidden]{display:none!important}
+  a{color:inherit}
+  a:focus-visible{outline:2px solid var(--clinical);outline-offset:3px;border-radius:1px}
+  summary:focus-visible{outline:2px solid var(--clinical);outline-offset:2px}
+  ::selection{background:#dbe9df}
+  .skip{position:absolute;left:-9999px;top:0;background:var(--paper);color:var(--ink);
+    padding:8px 14px;border:1px solid var(--ink);z-index:10}
+  .skip:focus{left:8px}
+
+  .masthead{max-width:1240px;margin:0 auto;padding:20px 22px 0}
+  .masthead-row{display:flex;align-items:baseline;justify-content:space-between;
+    flex-wrap:wrap;gap:8px 24px;padding:10px 0 12px}
+  .wordmark{font-family:var(--serif);font-size:19px;font-weight:600;letter-spacing:.02em;text-decoration:none}
+  .wordmark .pw-p{color:var(--patient)}
+  .wordmark .pw-w{color:var(--clinical);font-style:italic}
+  .wordmark .pw-w::before{content:'·';color:var(--muted);font-style:normal;font-weight:400;margin:0 3px 0 2px}
+  .masthead nav{display:flex;flex-wrap:wrap;gap:6px 20px}
+  .masthead nav a{font-family:var(--mono);font-size:11px;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--muted);text-decoration:none;padding:2px 0}
+  .masthead nav a:hover{color:var(--ink);text-decoration:underline;text-underline-offset:4px}
+  /* nav grouping by whitespace: after Technical and Phrase Dataset */
+  .masthead nav a:nth-child(3),.masthead nav a:nth-child(10){margin-right:2vw}
+  .rule-heavy{border:0;border-top:2px solid var(--ink);margin:0}
+  .rule-fine{border:0;border-top:1px solid var(--hairline);margin:3px 0 0}
+
+  .dateline{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--clinical);font-weight:600;margin:34px 0 14px}
+  .dateline .mode{color:var(--muted);font-weight:400;letter-spacing:.06em;text-transform:none}
+  h1{font-size:clamp(30px,4.8vw,42px);line-height:1.14;font-weight:600;letter-spacing:-.006em;margin:0 0 10px}
+  .subtitle{font-style:italic;font-size:20px;line-height:1.5;color:var(--muted);margin:0 0 20px}
+  .explainer{font-size:17px;line-height:1.66;margin:0 0 14px;max-width:78ch}
+  code{font-family:var(--mono);font-size:.82em;overflow-wrap:anywhere}
+
+  .section-head{border-top:1px solid var(--ink);margin-top:38px;padding-top:10px;display:flex;
+    justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:4px 16px}
+  h2{font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;margin:0}
+  h3{font-size:22px;line-height:1.25;font-weight:600;margin:0}
+  h4{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--ink);margin:28px 0 8px}
+  h5{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.06em;color:var(--muted);margin:18px 0 6px}
+  .count{font-family:var(--mono);font-size:12px;color:var(--muted);overflow-wrap:anywhere}
+  .note{font-family:var(--mono);font-size:11.5px;line-height:1.8;color:var(--muted);margin:8px 0 0;max-width:110ch;
+    overflow-wrap:anywhere}
+  .note b{color:var(--ink);font-weight:600}
+  .plain{font-family:var(--mono);font-size:12px;line-height:1.7;margin:8px 0 0;max-width:110ch;overflow-wrap:anywhere}
+
+  /* page-level states: each carries its own word; border style is a second cue, never the only one */
+  .idle{border-left:2px solid var(--ink);padding:2px 0 2px 16px;margin:26px 0 0;max-width:86ch}
+  .idle p{margin:0 0 8px}
+  .st{font-family:var(--mono);font-size:12px;line-height:1.8;padding:12px 16px;margin:26px 0 0;overflow-wrap:anywhere}
+  .st b{letter-spacing:.14em;text-transform:uppercase;font-weight:600;margin-right:8px}
+  .st span{display:block}
+  .st-loading{border:1px dashed var(--structural);color:var(--muted);text-align:center;padding:26px}
+  .st-loading::before{content:'';display:block;width:9px;height:9px;background:var(--structural);margin:0 auto 10px}
+  .st-missing{border:1px dotted var(--muted);color:var(--ink);background:#fff}
+  .st-refused{border:1px solid var(--penalty);border-left-width:8px;color:var(--penalty)}
+  .st-error{border:2px solid var(--penalty);color:var(--penalty)}
+  .st-ready{border-left:2px solid var(--clinical);padding:2px 0 2px 14px;color:var(--muted)}
+
+  /* evidence banner and its repeats beside the results */
+  .ev{border:2px solid var(--penalty);padding:12px 16px;margin:18px 0 0}
+  .ev.ev-plain{border:1px solid var(--ink)}
+  .ev p{font-size:15.5px;line-height:1.6;margin:6px 0 0;max-width:96ch}
+  .syn-tag{font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--penalty);margin:0;overflow-wrap:anywhere}
+  .syn-tag small{display:block;font-size:11px;font-weight:400;letter-spacing:.03em;text-transform:none;color:var(--muted)}
+  .syn-row{border:1px solid var(--penalty);padding:5px 10px;margin:10px 0 0;display:inline-block;max-width:100%;
+    box-sizing:border-box}
+
+  .toc{display:flex;flex-wrap:wrap;gap:4px 18px;margin:16px 0 0;font-family:var(--mono);font-size:11px;
+    letter-spacing:.06em}
+  .toc a{color:var(--muted);padding:3px 0}
+  .toc a:hover{color:var(--ink)}
+
+  .kv{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:3px 16px;margin:12px 0 0;
+    font-family:var(--mono);font-size:11.5px;line-height:1.7}
+  .kv dt{color:var(--muted)}
+  .kv dd{margin:0;overflow-wrap:anywhere}
+
+  .fam{border-top:1px solid var(--hairline);margin-top:26px;padding-top:14px}
+  .fam:first-child{border-top:0;margin-top:14px;padding-top:0}
+  details.fam-fold{margin:12px 0 0}
+  details.fam-fold>summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;
+    align-items:baseline;flex-wrap:wrap;gap:4px 16px;padding:2px 0}
+  details.fam-fold>summary::-webkit-details-marker{display:none}
+  details.fam-fold>summary h3{display:inline}
+  details.fam-fold>summary h3::before{content:'\25B8\00a0';color:var(--muted);font-weight:400}
+  details.fam-fold[open]>summary h3::before{content:'\25BE\00a0'}
+  details.fam-fold>summary:hover h3{color:var(--clinical)}
+  .btn{font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--ink);background:#fff;
+    border:1px solid var(--hairline);padding:6px 12px;cursor:pointer;border-radius:2px}
+  .btn:hover{border-color:var(--muted)}
+  .btn:focus-visible{outline:2px solid var(--clinical);outline-offset:2px}
+
+  .tbl-scroll{overflow-x:auto;margin:8px 0 0}
+  .tbl{width:100%;border-collapse:collapse;margin:0}
+  .tbl th{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--muted);text-align:left;padding:0 14px 7px 0;border-bottom:1px solid var(--ink);vertical-align:bottom}
+  .tbl td{padding:7px 14px 7px 0;border-bottom:1px solid var(--hairline);vertical-align:top;
+    font-family:var(--mono);font-size:12px;line-height:1.55;overflow-wrap:anywhere}
+  .tbl th.num,.tbl td.num{text-align:right}
+  .tbl tr:last-child td{border-bottom:1px solid var(--ink)}
+  .tbl th:last-child,.tbl td:last-child{padding-right:0}
+  .tbl td .ln,.tbl td .cv{display:block}
+  .miss{color:var(--muted)}
+  .hash{font-size:11px;color:var(--ink)}
+
+  /* state badges: the word is always present */
+  .bdg{display:inline-block;font-family:var(--mono);font-size:11px;line-height:1.5;letter-spacing:.02em;
+    color:var(--ink);border:1px solid var(--ink);border-radius:2px;padding:0 5px;margin:0 6px 3px 0;white-space:nowrap}
+  .bdg-unsupported,.bdg-unavailable,.bdg-not_run{border-style:dashed;border-color:var(--muted)}
+  .bdg-invalid,.bdg-failed{border-color:var(--penalty);color:var(--penalty)}
+  .bdg-none{border-style:dotted;border-color:var(--penalty);color:var(--penalty)}
+
+  details.fold{margin:14px 0 0}
+  details.fold>summary{font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--muted);
+    cursor:pointer;list-style:none;padding:4px 0;display:inline-block}
+  details.fold>summary::-webkit-details-marker{display:none}
+  details.fold>summary::before{content:'\25B8\00a0'}
+  details.fold[open]>summary::before{content:'\25BE\00a0'}
+  details.fold>summary:hover{color:var(--ink)}
+
+  .lnk{border:1px solid var(--hairline);background:#fff;padding:10px 14px;margin:12px 0 0}
+  .lims{font-family:var(--mono);font-size:12px;line-height:1.75;margin:10px 0 0;padding-left:18px;max-width:110ch}
+  .lims li{margin:0 0 4px;overflow-wrap:anywhere}
+
+  .back{display:inline-block;margin-top:30px;font-family:var(--mono);font-size:12px;
+    letter-spacing:.1em;text-transform:uppercase;color:var(--ink);text-decoration:none;
+    border-bottom:1px solid var(--ink);padding-bottom:2px}
+  .back:hover{color:var(--clinical);border-bottom-color:var(--clinical)}
+  .endnote{border-top:1px solid var(--ink);margin-top:42px;padding-top:14px}
+  .endnote p{font-family:var(--mono);font-size:12px;line-height:1.8;color:var(--muted);margin:0 0 14px}
+  footer{font-family:var(--mono);font-size:12px;line-height:1.9;color:var(--muted)}
+  footer a{color:var(--muted);text-underline-offset:3px}
+
+  @media (min-width:1001px){
+    .tbl td[data-col=method]{white-space:nowrap;overflow-wrap:normal}
+    .tbl td[data-col=comparison]{min-width:25ch}
+    .tbl td[data-col=sign]{min-width:16ch}
+    .tbl td[data-col=state]{min-width:27ch}
+    .tbl td[data-col=capability]{min-width:33ch}
+    .tbl td[data-col=planned_state]{min-width:12ch}
+  }
+  /* narrow screens: tables become labelled blocks, one per row. ARIA table roles are set
+     in the markup so the block layout keeps table semantics. */
+  @media (max-width:1000px){
+    .stack,.stack>tbody,.stack>tbody>tr,.stack>tbody>tr>td{display:block}
+    .stack>thead{position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden}
+    .stack>tbody>tr{padding:10px 0;border-bottom:1px solid var(--hairline)}
+    .stack>tbody>tr:last-child{border-bottom:1px solid var(--ink)}
+    .tbl.stack>tbody>tr>td{border:0;padding:2px 0;text-align:left}
+    .stack>tbody>tr>td[data-l]{display:grid;grid-template-columns:13ch minmax(0,1fr);gap:0 10px;align-items:baseline}
+    .stack>tbody>tr>td[data-l]::before{content:attr(data-l);font-family:var(--mono);font-size:9.5px;
+      letter-spacing:.08em;text-transform:uppercase;color:var(--muted);line-height:1.9}
+    .stack>tbody>tr>td[data-l]>*{justify-self:start;min-width:0;max-width:100%}
+  }
+  @media (max-width:760px){
+    .masthead nav{gap:8px 22px}
+    .masthead nav a{padding:7px 0}
+    body{font-size:16px}
+    .subtitle{font-size:18px}
+    h3{font-size:20px}
+    .kv{grid-template-columns:minmax(0,1fr)}
+    .kv dd{margin:0 0 6px}
+    .toc a{padding:7px 0}
+  }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="masthead">
+  <hr class="rule-heavy"><hr class="rule-fine">
+  <div class="masthead-row">
+    <a class="wordmark" href="../" aria-label="PatientWords home, the overview page"><span class="pw-p">Patient</span><span class="pw-w">Words</span></a>
+    <nav aria-label="Site">
+      <a href="../start-here/">Start Here</a>
+      <a href="../methods.html">Methods</a>
+      <a href="../technical/">Technical</a>
+      <a href="../wording-differences/">Wording Differences</a>
+      <a href="../dialect-differences/">Dialect Differences</a>
+      <a href="../translation/">Translation</a>
+      <a href="../simulated-scenarios/">Simulated Scenarios</a>
+      <a href="../llm/">LLM</a>
+      <a href="../multi-turn/">Multi-turn</a>
+      <a href="../phrase-dataset/">Phrase Dataset</a>
+      <a href="https://github.com/michaeldgreenphd/patientwords">GitHub</a>
+    </nav>
+  </div>
+  <hr class="rule-fine">
+</header>
+<main id="main">
+  <p class="dateline">Experiment bundles <span class="mode">· a viewer · no study bundle is published</span></p>
+  <h1>Method-comparison bundles</h1>
+  <p class="subtitle">One bundle, one protocol: the original output first, then each internal analysis in its own block.</p>
+
+  <div class="idle" id="exp-idle">
+    <p>This page displays method-comparison bundles exported by the engine's experiment interface.</p>
+    <p>No study bundle is published yet.</p>
+    <p>Synthetic fixtures are never published.</p>
+    <p class="note">The page requests no data file unless its address names a bundle: <code>?bundle=&lt;path under data/&gt;</code>. A path that is absolute, has a scheme or contains <code>..</code> is refused.</p>
+  </div>
+  <noscript><p class="plain">This viewer needs JavaScript to display a bundle. Without it the page shows only the statement above.</p></noscript>
+
+  <div class="st" id="exp-state" hidden></div>
+
+  <div id="exp-results" hidden>
+    <nav class="toc" aria-label="On this page">
+      <a href="#evidence">Evidence class</a>
+      <a href="#protocol">Protocol and model</a>
+      <a href="#families">Case families</a>
+      <a href="#methods">Methods and execution state</a>
+      <a href="#totals">Plan totals</a>
+      <a href="#links">External links</a>
+      <a href="#provenance">Provenance</a>
+      <a href="#limitations">Limitations</a>
+    </nav>
+
+    <section id="evidence" aria-labelledby="h-evidence">
+      <div class="section-head"><h2 id="h-evidence">Evidence class</h2></div>
+      <div id="exp-evidence"></div>
+    </section>
+
+    <section id="protocol" aria-labelledby="h-protocol">
+      <div class="section-head"><h2 id="h-protocol">Protocol and model</h2></div>
+      <div id="exp-protocol"></div>
+    </section>
+
+    <section id="families" aria-labelledby="h-families">
+      <div class="section-head"><h2 id="h-families">Case families</h2><span class="count" id="exp-families-count"></span></div>
+      <p class="note">Each family is read in one order: the paired prompts, the original model output, the internal analyses that exist, then intervention evidence. The blocks have different units. The bundle never adds them and this page does not either. The first family is open; the others open from their headings.</p>
+      <p class="plain"><button type="button" class="btn" id="exp-fam-toggle" aria-controls="exp-families" hidden>Open every family</button></p>
+      <div id="exp-families"></div>
+    </section>
+
+    <section id="methods" aria-labelledby="h-methods">
+      <div class="section-head"><h2 id="h-methods">Methods planned and their execution state</h2><span class="count" id="exp-methods-count"></span></div>
+      <div id="exp-methods-syn"></div>
+      <p class="note">Every method the protocol planned is listed, including those that could not run. <b>Execution state</b> counts completed tasks from the payload records under Provenance and every other state from the bundle's list of methods that did not complete. A planned task with neither is shown as <b>state not recorded</b>. <b>Capability status</b> is the capability matrix row the planner used; it is not an execution state.</p>
+      <div class="tbl-scroll">
+        <table class="tbl stack" role="table" aria-labelledby="h-methods">
+          <thead role="rowgroup"><tr role="row">
+            <th scope="col" role="columnheader">Method</th>
+            <th scope="col" role="columnheader">Execution state</th>
+            <th scope="col" role="columnheader">Reason</th>
+            <th scope="col" role="columnheader">Capability status</th>
+            <th scope="col" role="columnheader">Planned state</th>
+            <th scope="col" role="columnheader">Capability evidence</th>
+          </tr></thead>
+          <tbody id="exp-methods-body" role="rowgroup"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="totals" aria-labelledby="h-totals">
+      <div class="section-head"><h2 id="h-totals">Plan totals and execution counts</h2></div>
+      <div id="exp-totals"></div>
+    </section>
+
+    <section id="links" aria-labelledby="h-links">
+      <div class="section-head"><h2 id="h-links">External links</h2></div>
+      <div id="exp-links"></div>
+    </section>
+
+    <section id="provenance" aria-labelledby="h-provenance">
+      <div class="section-head"><h2 id="h-provenance">Provenance</h2></div>
+      <div id="exp-provenance"></div>
+    </section>
+
+    <section id="limitations" aria-labelledby="h-limitations">
+      <div class="section-head"><h2 id="h-limitations">Limitations</h2></div>
+      <div id="exp-limitations"></div>
+    </section>
+  </div>
+
+  <a class="back" href="../">← Back home</a>
+
+  <div class="endnote">
+    <p>This page is a viewer. It displays the numbers in the bundle file named in its address and computes no measurement. An internal metric shown here describes a language model's internal state; it is not a clinical risk score, and nothing here is medical advice.</p>
+    <footer>
+      Bundles are written by the experiment interface of the <a href="https://github.com/michaeldgreenphd/patientwords-engine">patientwords-engine</a> pipeline ·
+      a published bundle will be a data file <a href="https://github.com/michaeldgreenphd/patientwords/tree/main/data">in this repository</a>; none is published yet ·
+      <a href="../methods.html">how the pipeline works</a>
+    </footer>
+  </div>
+</main>
+<script>
+(function(){
+  'use strict';
+  var SCHEMA='patientwords.experiment-bundle/1';
+  var STATES=['completed','unsupported','unavailable','not_run','invalid','failed'];
+  var SYNTHETIC_TEXT='synthetic fixture - not a measurement';
+  var NOT_IN_BUNDLE='not in this bundle';
+  var NOT_RECORDED='state not recorded';
+  var WINDOW_MISS='not observed in the top-k window';
+  var LINK_BUILT='link built from the recorded pattern';
+  var VERIFIED='verified_exact';
+  var LINK_URL=/^https:\/\/[A-Za-z0-9.-]+(\/[A-Za-z0-9._~\/-]*)?$/;
+
+  var $=function(id){return document.getElementById(id);};
+  var stateBox=$('exp-state'), idleBox=$('exp-idle'), results=$('exp-results');
+
+  /* ---------------------------------------------------------------- address parameter */
+
+  /* Returns the reason a bundle parameter is refused, or null. The engine's preview check
+     (scripts/check_experiment_preview.py, bundle_param_refusal) mirrors this rule and
+     compares the two on a table of cases. */
+  function bundleRefusal(v){
+    if(v==='') return 'the bundle parameter is empty';
+    if(v.length>200) return 'the bundle parameter is longer than 200 characters';
+    if(/^[A-Za-z][A-Za-z0-9+.\-]*:/.test(v)) return 'the bundle parameter has a scheme';
+    if(v.charAt(0)==='/'||v.charAt(0)==='\\') return 'the bundle parameter is an absolute path';
+    if(v.indexOf('..')!==-1) return 'the bundle parameter contains ".."';
+    if(!/^[A-Za-z0-9._\/-]+$/.test(v)) return 'the bundle parameter has a character outside A-Z a-z 0-9 . _ - /';
+    var parts=v.split('/');
+    for(var i=0;i<parts.length;i++){
+      if(!/^[A-Za-z0-9_-][A-Za-z0-9._-]*$/.test(parts[i])) return 'the bundle parameter has an empty or dot-leading path segment';
+    }
+    if(!/\.json$/.test(v)) return 'the bundle parameter does not name a .json file';
+    return null;
+  }
+
+  /* ---------------------------------------------------------------- small helpers */
+
+  function isObj(x){return x!==null&&typeof x==='object'&&!Array.isArray(x);}
+  function isNum(x){return typeof x==='number'&&isFinite(x);}
+  function isInt(x){return isNum(x)&&Math.floor(x)===x;}
+  function isStr(x){return typeof x==='string';}
+  function txt(s){return document.createTextNode(String(s));}
+  function el(tag,attrs,kids){
+    var n=document.createElement(tag),k;
+    if(attrs){for(k in attrs){
+      if(!Object.prototype.hasOwnProperty.call(attrs,k)||attrs[k]===undefined||attrs[k]===null) continue;
+      if(k==='text') n.textContent=String(attrs[k]);
+      else if(k==='cls') n.className=attrs[k];
+      else n.setAttribute(k,String(attrs[k]));
+    }}
+    (kids||[]).forEach(function(c){
+      if(c===null||c===undefined) return;
+      n.appendChild(typeof c==='string'?txt(c):c);
+    });
+    return n;
+  }
+  function miss(why){return el('span',{cls:'miss',text:'— '+(why||NOT_IN_BUNDLE)});}
+  function show(v){
+    if(v===null||v===undefined) return miss();
+    if(typeof v==='boolean') return txt(v?'true':'false');
+    if(Array.isArray(v)) return v.length?txt(v.map(function(x){return isObj(x)?JSON.stringify(x):String(x);}).join(', ')):txt('none');
+    if(isObj(v)) return txt(JSON.stringify(v));
+    return txt(String(v));
+  }
+  function hash(v){return isStr(v)&&v?el('span',{cls:'hash',text:v}):miss();}
+  function words(code){return String(code).replace(/_/g,' ');}
+
+  /* Numbers. A zero is the digit 0; a missing value is a dash with words. They never share a form. */
+  function fixed(x){var a=Math.abs(x);return (a!==0&&a<0.00005)?a.toExponential(2):a.toFixed(4);} /* 0.00005 is DISPLAY_STEP */
+  function plainNum(x){return isNum(x)?((x<0?'−':'')+fixed(x)):null;}
+  function signedNum(x){
+    if(!isNum(x)) return null;
+    if(x===0) return '0';
+    return (x>0?'+':'−')+fixed(x);
+  }
+  var DISPLAY_STEP=0.00005; /* half a unit of the fourth decimal: below it a non-zero value would print as 0.0000 */
+  function signText(x,a,b){
+    /* The sign of the recorded value, in words. A recorded value below the printed precision keeps its
+       sign and says so; the page applies no tolerance of its own and never rounds it to "no difference". */
+    if(!isNum(x)) return null;
+    if(x===0) return 'no difference';
+    return (x>0?a:b)+' higher'+(Math.abs(x)<DISPLAY_STEP?', below the 4 decimals shown':'');
+  }
+  function numCell(s,why){return s===null?miss(why||'not recorded'):txt(s);}
+
+  function kv(pairs){
+    var dl=el('dl',{cls:'kv'});
+    pairs.forEach(function(p){
+      if(!p) return;
+      dl.appendChild(el('dt',{text:p[0]}));
+      dl.appendChild(el('dd',p[2]||null,[p[1] instanceof Node?p[1]:show(p[1])]));
+    });
+    return dl;
+  }
+
+  /* heads: [label, numeric?]; rows: {attrs, cells:[[col, node-or-string], ...]} */
+  function table(label,heads,rows){
+    var t=el('table',{cls:'tbl stack',role:'table','aria-label':label});
+    var hr=el('tr',{role:'row'});
+    heads.forEach(function(h){hr.appendChild(el('th',{scope:'col',role:'columnheader',cls:h[1]?'num':null,text:h[0]}));});
+    t.appendChild(el('thead',{role:'rowgroup'},[hr]));
+    var tb=el('tbody',{role:'rowgroup'});
+    rows.forEach(function(r){tb.appendChild(row(heads,r));});
+    t.appendChild(tb);
+    return el('div',{cls:'tbl-scroll'},[t]);
+  }
+  function row(heads,r){
+    var attrs={role:'row'},k;
+    for(k in (r.attrs||{})) attrs[k]=r.attrs[k];
+    var tr=el('tr',attrs);
+    r.cells.forEach(function(c,i){
+      var h=heads[i]||['',false];
+      var td=el('td',{role:'cell','data-l':h[0],'data-col':c[0],cls:h[1]?'num':null});
+      /* one wrapper per cell: in the narrow block layout the cell is a two-column grid of label and value */
+      var v=c[1], box=el('span',{cls:'cv'});
+      (Array.isArray(v)?v:[v]).forEach(function(x){box.appendChild(x instanceof Node?x:txt(x));});
+      td.appendChild(box);
+      tr.appendChild(td);
+    });
+    return tr;
+  }
+  function lines(items){return items.map(function(s){return el('span',{cls:'ln'},[s instanceof Node?s:txt(s)]);});}
+  function badge(state){
+    if(STATES.indexOf(state)>=0) return el('span',{cls:'bdg bdg-'+state,text:state});
+    if(state===null||state===undefined) return el('span',{cls:'bdg bdg-none',text:NOT_RECORDED});
+    return el('span',{cls:'bdg bdg-none',text:'unrecognised state "'+String(state)+'"'});
+  }
+  function stateWord(state){
+    if(STATES.indexOf(state)>=0) return state;
+    if(state===null||state===undefined) return NOT_RECORDED;
+    return 'unrecognised state "'+String(state)+'"';
+  }
+
+  /* ---------------------------------------------------------------- page states */
+
+  function setState(state,label,messages){
+    document.body.setAttribute('data-exp-state',state);
+    idleBox.hidden=(state!=='idle');
+    if(state==='idle'){stateBox.hidden=true;return;}
+    stateBox.hidden=false;
+    stateBox.className='st st-'+state;
+    stateBox.setAttribute('data-state',state);
+    stateBox.setAttribute('role',(state==='error'||state==='refused'||state==='missing')?'alert':'status');
+    stateBox.textContent='';
+    stateBox.appendChild(el('b',{text:label}));
+    messages.forEach(function(m){stateBox.appendChild(el('span',{text:m}));});
+  }
+  function fail(state,label,messages){
+    results.hidden=true;
+    setState(state,label,messages);
+  }
+
+  /* ---------------------------------------------------------------- structure checks */
+
+  function structureProblems(b){
+    var out=[];
+    function need(ok,what){if(!ok) out.push(what);}
+    need(isObj(b.protocol),'protocol is not an object');
+    need(isObj(b.evidence),'evidence is not an object');
+    need(isObj(b.plan_totals),'plan_totals is not an object');
+    need(isObj(b.execution),'execution is not an object');
+    need(isObj(b.provenance),'provenance is not an object');
+    need(Array.isArray(b.comparisons),'comparisons is not a list');
+    need(Array.isArray(b.methods_not_run),'methods_not_run is not a list');
+    need(Array.isArray(b.capability_rows),'capability_rows is not a list');
+    need(Array.isArray(b.limitations),'limitations is not a list');
+    if(out.length) return out;
+    var p=b.protocol;
+    need(isStr(p.id)&&isStr(p.version),'protocol.id or protocol.version is not text');
+    need(isObj(p.model),'protocol.model is not an object');
+    need(Array.isArray(p.methods),'protocol.methods is not a list');
+    need(Array.isArray(p.families),'protocol.families is not a list');
+    need(Array.isArray(p.comparisons),'protocol.comparisons is not a list');
+    need(isStr(b.evidence.evidence_class),'evidence.evidence_class is not text');
+    b.comparisons.forEach(function(f,i){
+      if(!isObj(f)||!isStr(f.family_id)||!Array.isArray(f.comparisons)){out.push('comparisons['+i+'] lacks family_id or its comparison list');return;}
+      f.comparisons.forEach(function(e,j){
+        if(!isObj(e)||!isStr(e.comparison_id)||!isStr(e.a)||!isStr(e.b)) out.push('comparisons['+i+'].comparisons['+j+'] lacks comparison_id, a or b');
+      });
+    });
+    var flags=[b.evidence.synthetic===true,p.synthetic===true,b.evidence.evidence_class==='synthetic_fixture'];
+    var n=flags.filter(Boolean).length;
+    need(n===0||n===3,'the synthetic labels disagree (evidence.synthetic, protocol.synthetic, evidence_class)');
+    return out;
+  }
+  function isSynthetic(b){return b.evidence.synthetic===true;}
+
+  /* ---------------------------------------------------------------- evidence */
+
+  function synTag(b,extra){
+    var p=el('p',{cls:'syn-tag','data-kind':'synthetic-banner'},[SYNTHETIC_TEXT]);
+    p.appendChild(el('small',{text:'evidence class '+b.evidence.evidence_class+(extra?' · '+extra:'')}));
+    return p;
+  }
+  function renderEvidence(b){
+    var e=b.evidence, box=el('div',{cls:isSynthetic(b)?'ev':'ev ev-plain','data-synthetic':isSynthetic(b)?'true':'false'});
+    if(isSynthetic(b)){
+      box.appendChild(synTag(b));
+      box.appendChild(el('p',{text:'Every value on this page comes from hand-written fixture numbers. No model was loaded. Nothing here is a finding.'}));
+    }
+    box.appendChild(kv([
+      ['evidence class',e.evidence_class,{'data-col':'evidence_class'}],
+      ['clinical review',e.clinical_review],
+      ['visibility',e.visibility===null||e.visibility===undefined?miss('not recorded'):e.visibility],
+      ['analysis memberships',e.analysis_memberships],
+      ['restriction reasons',e.restriction_reasons]
+    ]));
+    return box;
+  }
+
+  /* ---------------------------------------------------------------- protocol and model */
+
+  function renderProtocol(b){
+    var p=b.protocol, m=p.model, frag=document.createDocumentFragment();
+    frag.appendChild(el('h4',{text:'Protocol'}));
+    frag.appendChild(kv([
+      ['protocol id',p.id,{'data-col':'protocol_id'}],
+      ['protocol version',p.version,{'data-col':'protocol_version'}],
+      ['protocol sha256',hash(p.sha256),{'data-col':'protocol_sha256'}],
+      ['seed',p.seed],
+      ['replicates',p.replicates],
+      ['primary endpoint',isObj(p.primary_endpoint)?
+        'method '+p.primary_endpoint.method+' · metric '+p.primary_endpoint.metric+' · target '+p.primary_endpoint.target:null],
+      ['comparisons',p.comparisons.map(function(c){return isObj(c)?c.id+' ('+c.a+' minus '+c.b+')':String(c);})],
+      ['families excluded',Array.isArray(p.excluded)?(p.excluded.length?p.excluded:'none'):null]
+    ]));
+    frag.appendChild(el('h4',{text:'Model and tokenizer'}));
+    frag.appendChild(kv([
+      ['study id',m.study_id],
+      ['model id',m.hf_id,{'data-col':'model_id'}],
+      ['model revision',hash(m.revision),{'data-col':'model_revision'}],
+      ['tokenizer id',m.tokenizer_id,{'data-col':'tokenizer_id'}],
+      ['tokenizer revision',hash(m.tokenizer_revision),{'data-col':'tokenizer_revision'}],
+      ['backend',m.backend],
+      ['dtype',m.dtype],
+      ['hidden size',m.hidden_size],
+      ['layers',m.n_layers],
+      ['input settings',isObj(p.input_settings)?Object.keys(p.input_settings).sort().map(function(k){
+        return k+': '+String(p.input_settings[k]);}):null]
+    ]));
+    return frag;
+  }
+
+  /* ---------------------------------------------------------------- families */
+
+  function variantsOf(fam){
+    /* bundle/1 lists variant names only. A later bundle may carry objects with a prompt hash,
+       a token count and, where it may be shown, the prompt text. */
+    var v=fam&&fam.variants, out=[];
+    if(Array.isArray(v)){
+      v.forEach(function(x){
+        if(isStr(x)) out.push({name:x});
+        else if(isObj(x)) out.push({name:x.variant||x.id||x.name,prompt_sha256:x.prompt_sha256,token_sha256:x.token_sha256,
+          n_tokens:x.n_tokens,prompt:x.prompt});
+      });
+    }else if(isObj(v)){
+      Object.keys(v).forEach(function(k){
+        var x=isObj(v[k])?v[k]:{};
+        out.push({name:k,prompt_sha256:x.prompt_sha256,token_sha256:x.token_sha256,
+          n_tokens:isInt(x.n_tokens)?x.n_tokens:(Array.isArray(x.token_ids)?x.token_ids.length:undefined),prompt:x.prompt});
+      });
+    }
+    return out;
+  }
+  function targetLabel(fam,id){
+    var t=(fam&&Array.isArray(fam.targets)?fam.targets:[]).filter(function(x){return isObj(x)&&x.id===id;})[0];
+    if(!t) return String(id);
+    return String(id)+(isStr(t.role)?' · '+t.role:'')+(Array.isArray(t.token_ids)?' · token id '+t.token_ids.join(' '):'');
+  }
+  function pairLabel(e){return e.a+' (a) minus '+e.b+' (b)';}
+
+  function sideStates(block,e){
+    /* one line per side for a block that was not computed; never reads a missing state as completed */
+    return ['a','b'].map(function(s){
+      var st=isObj(block.states)?block.states[s]:undefined;
+      var why=isObj(block.reasons)?block.reasons[s]:undefined;
+      return {side:s,variant:e[s],state:stateWord(st),reason:isStr(why)&&why?why:'no reason recorded'};
+    });
+  }
+  function notComputed(method,fid,items){
+    /* items: [{entry, block}] with one signature; grouped so a repeated reason is printed once */
+    var first=items[0], sides=sideStates(first.block,first.entry);
+    var p=el('p',{cls:'plain','data-kind':'not-computed','data-method':method,'data-family':fid});
+    p.appendChild(el('b',{text:method}));
+    p.appendChild(txt(' · not computed in '+items.map(function(i){return i.entry.comparison_id;}).join(', ')+'. '));
+    if(sides[0].state===sides[1].state&&sides[0].reason===sides[1].reason){
+      p.appendChild(txt('State of both variants: '));
+      p.appendChild(el('span',{'data-col':'state',text:sides[0].state}));
+      p.appendChild(txt('. Reason: '+sides[0].reason));
+    }else{
+      sides.forEach(function(s,i){
+        p.appendChild(txt((i?' ':'')+'Variant '+s.side+': '));
+        p.appendChild(el('span',{'data-col':'state',text:s.state}));
+        p.appendChild(txt('. Reason: '+s.reason));
+      });
+    }
+    return p;
+  }
+  function groupNotComputed(method,fid,pairs){
+    var groups={}, order=[];
+    pairs.forEach(function(x){
+      var key=JSON.stringify([x.block.states||null,x.block.reasons||null]);
+      if(!groups[key]){groups[key]=[];order.push(key);}
+      groups[key].push(x);
+    });
+    return order.map(function(k){return notComputed(method,fid,groups[k]);});
+  }
+  function blockStatus(block){
+    if(!isObj(block)) return 'absent';
+    if(block.status==='computed'||block.status==='not_computed'||block.status==='reference_only') return block.status;
+    return 'unrecorded';
+  }
+  function unrecorded(method,fid,e){
+    return el('p',{cls:'plain','data-kind':'block-unrecorded','data-method':method,'data-family':fid},[
+      el('b',{text:method}),' · '+e.comparison_id+' · block '+NOT_RECORDED+'. Its values are not shown.']);
+  }
+
+  function renderPrompts(fam,fid){
+    var vs=variantsOf(fam);
+    if(!vs.length) return el('p',{cls:'plain'},[miss('the bundle lists no variant for this family')]);
+    var rows=vs.map(function(v){
+      return {attrs:{'data-kind':'variant','data-family':fid,'data-variant':v.name},cells:[
+        ['variant',String(v.name)],
+        ['prompt_sha256',hash(v.prompt_sha256)],
+        ['n_tokens',isInt(v.n_tokens)?String(v.n_tokens):miss()],
+        ['prompt',isStr(v.prompt)&&v.prompt?el('span',{style:'font-family:var(--serif);font-size:14.5px',text:v.prompt}):miss('prompt text is '+NOT_IN_BUNDLE)]
+      ]};
+    });
+    return table('Paired prompts of '+fid,[['Variant'],['Prompt SHA-256'],['Tokens',true],['Prompt text']],rows);
+  }
+
+  function renderBehavior(b,fam,fid,entries){
+    var frag=document.createDocumentFragment(), computed=[], other=[];
+    entries.forEach(function(e){
+      var s=blockStatus(e.behavior);
+      if(s==='computed'&&Array.isArray(e.behavior.targets)) computed.push(e);
+      else if(s==='not_computed') other.push({entry:e,block:e.behavior});
+      else if(s==='absent') frag.appendChild(el('p',{cls:'plain','data-kind':'block-absent','data-family':fid},[
+        miss('no behaviour block in this bundle for '+e.comparison_id)]));
+      else frag.appendChild(unrecorded('behavior_next_token',fid,e));
+    });
+    groupNotComputed('behavior_next_token',fid,other).forEach(function(p){frag.appendChild(p);});
+    if(!computed.length) return frag;
+
+    var kinds=[];
+    computed.forEach(function(e){var k=e.behavior.probability_kind;if(kinds.indexOf(k)<0) kinds.push(k);});
+    frag.appendChild(el('p',{cls:'note'},['Probability of the target token at the next-token position, over the full vocabulary. Probability kind recorded by the bundle: ',
+      el('b',{text:kinds.map(String).join(', ')}),'. First target token only.']));
+
+    /* per variant: the value each comparison block records for that variant */
+    var seen={}, order=[], multi=b.protocol.replicates>1;
+    computed.forEach(function(e){
+      e.behavior.targets.forEach(function(t){
+        if(!isObj(t)) return;
+        [['a',e.a],['b',e.b]].forEach(function(s){
+          var key=JSON.stringify([s[1],t.target_id,e.replicate]);
+          var rec={variant:s[1],target:t.target_id,replicate:e.replicate,p:t[s[0]],rank:t['raw_rank_'+s[0]],conflict:false};
+          if(!seen[key]){seen[key]=rec;order.push(key);}
+          else if(seen[key].p!==rec.p||seen[key].rank!==rec.rank) seen[key].conflict=true;
+        });
+      });
+    });
+    var names=variantsOf(fam).map(function(v){return v.name;});
+    order.sort(function(x,y){
+      var a=seen[x], c=seen[y], ia=names.indexOf(a.variant), ic=names.indexOf(c.variant);
+      return (ia-ic)||0;
+    });
+    var heads=[['Variant'],['Target'],['Full-vocabulary probability',true],['Raw rank',true]];
+    if(multi) heads.splice(1,0,['Replicate',true]);
+    frag.appendChild(table('Original model output per variant, '+fid,heads,order.map(function(k){
+      var r=seen[k], cells=[
+        ['variant',String(r.variant)],
+        ['target',targetLabel(fam,r.target)],
+        ['probability',r.conflict?miss('two comparison blocks record different values'):numCell(plainNum(r.p))],
+        ['raw_rank',r.conflict?miss('two comparison blocks record different values'):(isInt(r.rank)?String(r.rank):miss('not recorded'))]];
+      if(multi) cells.splice(1,0,['replicate',String(r.replicate)]);
+      return {attrs:{'data-kind':'behavior-variant','data-family':fid,'data-variant':r.variant,'data-target':r.target,
+        'data-replicate':r.replicate},cells:cells};
+    })));
+
+    frag.appendChild(el('p',{cls:'note'},['Signed difference, a minus b. ',isStr(b.sign_convention)?'Sign convention recorded by the bundle: '+b.sign_convention+'.':'']));
+    var dheads=[['Comparison'],['Target'],['a',true],['b',true],['Signed difference',true],['Sign']];
+    if(multi) dheads.splice(1,0,['Replicate',true]);
+    var drows=[];
+    computed.forEach(function(e){
+      e.behavior.targets.forEach(function(t){
+        if(!isObj(t)) return;
+        var d=t.difference_a_minus_b, cells=[
+          ['comparison',lines([e.comparison_id,pairLabel(e)])],
+          ['target',targetLabel(fam,t.target_id)],
+          ['a',numCell(plainNum(t.a))],
+          ['b',numCell(plainNum(t.b))],
+          ['difference',numCell(signedNum(d))],
+          ['sign',numCell(signText(d,e.a,e.b))]];
+        if(multi) cells.splice(1,0,['replicate',String(e.replicate)]);
+        drows.push({attrs:{'data-kind':'behavior-diff','data-family':fid,'data-comparison':e.comparison_id,
+          'data-target':t.target_id,'data-replicate':e.replicate},cells:cells});
+      });
+    });
+    frag.appendChild(table('Original model output, signed differences, '+fid,dheads,drows));
+    return frag;
+  }
+
+  function windowText(topk){
+    if(!isObj(topk)) return [miss('not recorded')];
+    var ks=Object.keys(topk).sort(function(a,c){return Number(a)-Number(c);});
+    if(!ks.length) return [miss('not recorded')];
+    var seen=[],missed=[],odd=[];
+    ks.forEach(function(k){
+      var v=topk[k];
+      (v==='observed'?seen:(v==='not_observed_in_window'?missed:odd)).push('top-'+k);
+    });
+    var out=[];
+    if(seen.length) out.push('observed in '+seen.join(', '));
+    if(missed.length) out.push(WINDOW_MISS+': '+missed.join(', '));
+    if(odd.length) out.push('unrecognised value for '+odd.join(', '));
+    return lines(out);
+  }
+  function rankCell(side,key){
+    if(!isObj(side)) return miss('not recorded');
+    var v=side[key];
+    if(isInt(v)) return txt(String(v));
+    if(key==='filtered_rank'&&side.excluded_candidate===true) return miss('not ranked: the filter excludes the target token');
+    return miss('not recorded');
+  }
+  function renderReadouts(b,fam,fid,entries){
+    var frag=document.createDocumentFragment(), methods=[];
+    entries.forEach(function(e){
+      if(isObj(e.readout)) Object.keys(e.readout).forEach(function(m){if(methods.indexOf(m)<0) methods.push(m);});
+    });
+    methods.sort();
+    var later=[];
+    methods.forEach(function(m){
+      var computed=[], other=[];
+      entries.forEach(function(e){
+        var block=isObj(e.readout)?e.readout[m]:undefined, s=blockStatus(block);
+        if(s==='computed'&&Array.isArray(block.layers)) computed.push({entry:e,block:block});
+        else if(s==='not_computed') other.push({entry:e,block:block});
+        else if(s!=='absent') later.push(unrecorded(m,fid,e));
+      });
+      if(computed.length){
+        var first=computed[0].block;
+        frag.appendChild(el('h5',{text:'Readout: '+m}));
+        frag.appendChild(el('p',{cls:'note'},['Target rank read from an internal layer state. It is not the model\'s output. Raw rank counts every vocabulary token; filtered rank counts only tokens the filter keeps. Both are shown. Position: '+
+          String(first.position)+'. Filter: '+(isObj(first.filter)?String(first.filter.id)+
+          (Array.isArray(first.filter.excluded_token_ids)?', '+first.filter.excluded_token_ids.length+' token ids excluded':''):'not recorded')+
+          '. Tie rule: '+String(first.rank_tie_rule)+'.']));
+        var rows=[];
+        computed.forEach(function(x){
+          x.block.layers.forEach(function(L){
+            if(!isObj(L)||!Array.isArray(L.targets)) return;
+            L.targets.forEach(function(t){
+              if(!isObj(t)) return;
+              rows.push({attrs:{'data-kind':'readout','data-family':fid,'data-method':m,'data-comparison':x.entry.comparison_id,
+                'data-layer':L.layer,'data-target':t.target_id,'data-replicate':x.entry.replicate},cells:[
+                ['comparison',lines([x.entry.comparison_id,'a '+x.entry.a+' · b '+x.entry.b])],
+                ['layer',String(L.layer)],
+                ['target',targetLabel(fam,t.target_id)],
+                ['raw_a',rankCell(t.a,'raw_rank')],
+                ['filtered_a',rankCell(t.a,'filtered_rank')],
+                ['window_a',windowText(isObj(t.a)?t.a.top_k:null)],
+                ['raw_b',rankCell(t.b,'raw_rank')],
+                ['filtered_b',rankCell(t.b,'filtered_rank')],
+                ['window_b',windowText(isObj(t.b)?t.b.top_k:null)]]});
+            });
+          });
+        });
+        frag.appendChild(table('Readout ranks, '+m+', '+fid,[['Comparison'],['Layer',true],['Target'],['a: raw rank',true],['a: filtered rank',true],
+          ['a: top-k window'],['b: raw rank',true],['b: filtered rank',true],['b: top-k window']],rows));
+      }
+      groupNotComputed(m,fid,other).forEach(function(p){later.push(p);});
+    });
+    later.forEach(function(p){frag.appendChild(p);});
+    if(!methods.length) frag.appendChild(el('p',{cls:'plain'},[miss('no readout block in this bundle for this family')]));
+    return frag;
+  }
+
+  function shareCell(v,status){
+    if(isNum(v)) return txt(fixed(v));
+    if(status==='not_computed_zero_or_non_finite_energy') return miss('not computed: zero or non-finite energy');
+    if(status==='not_computed_component_list_incomplete') return miss('not computed: component list incomplete');
+    return miss('not recorded');
+  }
+  function renderIca(b,fam,fid,entries){
+    /* returns null when no entry of this family carries an ICA block */
+    var frag=document.createDocumentFragment(), computed=[], other=[], any=false;
+    entries.forEach(function(e){
+      var s=blockStatus(e.ica);
+      if(s==='absent') return;
+      any=true;
+      if(s==='computed'&&Array.isArray(e.ica.layers)) computed.push(e);
+      else if(s==='not_computed') other.push({entry:e,block:e.ica});
+      else frag.appendChild(unrecorded('ica_lens',fid,e));
+    });
+    if(!any) return null;
+    var head=el('h5',{text:'ICA component scores'});
+    var out=document.createDocumentFragment();
+    out.appendChild(head);
+    if(computed.length){
+      var bases=[], labels=[], pre=[];
+      computed.forEach(function(e){
+        if(bases.indexOf(e.ica.basis_manifest_sha256)<0) bases.push(e.ica.basis_manifest_sha256);
+        if(labels.indexOf(e.ica.energy_share_label)<0) labels.push(e.ica.energy_share_label);
+        var p=isStr(e.ica.preprocessing)?e.ica.preprocessing:(isObj(e.ica.basis)&&isStr(e.ica.basis.preprocessing)?e.ica.basis.preprocessing:null);
+        if(pre.indexOf(p)<0) pre.push(p);
+      });
+      out.appendChild(kv([
+        ['basis sha256',bases.length===1?hash(bases[0]):miss('the comparisons of this family name '+bases.length+' bases'),{'data-col':'ica_basis'}],
+        ['preprocessing mode',pre.length===1&&pre[0]!==null?pre[0]:miss(),{'data-col':'ica_preprocessing'}],
+        ['position',computed[0].ica.position],
+        ['energy share',labels.length===1&&isStr(labels[0])?labels[0]:miss('label not recorded'),{'data-col':'ica_share_label'}]
+      ]));
+      out.appendChild(el('p',{cls:'note',text:'Signed coordinates of the layer state in one fixed basis. Both variants are scored under the basis named above. A component is a direction in the model\'s internal state; any name given to one is a hypothesis.'}));
+      var rows=[];
+      computed.forEach(function(e){
+        e.ica.layers.forEach(function(L){
+          if(!isObj(L)||!Array.isArray(L.components)) return;
+          L.components.forEach(function(c){
+            if(!isObj(c)) return;
+            var d=c.difference_a_minus_b;
+            rows.push({attrs:{'data-kind':'ica','data-family':fid,'data-comparison':e.comparison_id,'data-layer':L.layer,
+              'data-component':c.component,'data-replicate':e.replicate},cells:[
+              ['comparison',lines([e.comparison_id,pairLabel(e)])],
+              ['layer',String(L.layer)],
+              ['component',String(c.component)],
+              ['score_a',numCell(signedNum(c.score_a))],
+              ['score_b',numCell(signedNum(c.score_b))],
+              ['difference',numCell(signedNum(d),'not computed: one side has no score')],
+              ['sign',numCell(signText(d,e.a,e.b),'not computed')],
+              ['share_a',shareCell(c.energy_share_a,L.energy_share_status_a)],
+              ['share_b',shareCell(c.energy_share_b,L.energy_share_status_b)]]});
+          });
+        });
+      });
+      var shareHead=labels.length===1&&isStr(labels[0])?labels[0]:'share';
+      out.appendChild(table('ICA component scores, '+fid,[['Comparison'],['Layer',true],['Component',true],['a: signed score',true],
+        ['b: signed score',true],['Signed difference',true],['Sign'],['a: '+shareHead,true],['b: '+shareHead,true]],rows));
+    }
+    out.appendChild(frag);
+    groupNotComputed('ica_lens',fid,other).forEach(function(p){out.appendChild(p);});
+    return out;
+  }
+
+  function interventionKeys(b,entries){
+    var keys=[];
+    ['intervention','interventions'].forEach(function(k){
+      if(b[k]!==undefined&&b[k]!==null) keys.push(k);
+      entries.forEach(function(e){if(e[k]!==undefined&&e[k]!==null&&keys.indexOf(e.comparison_id+'.'+k)<0) keys.push(e.comparison_id+'.'+k);});
+    });
+    return keys;
+  }
+
+  function renderFamilies(b){
+    var frag=document.createDocumentFragment();
+    b.comparisons.forEach(function(f,i){
+      var fid=f.family_id;
+      var fam=b.protocol.families.filter(function(x){return isObj(x)&&x.family_id===fid;})[0]||null;
+      var entries=f.comparisons;
+      var outer=el('section',{cls:'fam','data-family':fid,'aria-labelledby':'h-fam-'+i});
+      if(isSynthetic(b)) outer.appendChild(el('div',{cls:'syn-row'},[synTag(b,'family '+fid)]));
+      var sec=el('details',{cls:'fam-fold'});
+      if(i===0) sec.setAttribute('open','');
+      sec.appendChild(el('summary',null,[
+        el('h3',{id:'h-fam-'+i,text:'Case family '+fid}),
+        el('span',{cls:'count',text:'split '+String(f.split)+' · review status '+String(f.review_status)+
+          ' · legacy join '+(fam&&fam.legacy_join?JSON.stringify(fam.legacy_join):'none')})]));
+      outer.appendChild(sec);
+      if(!fam) sec.appendChild(el('p',{cls:'plain'},[miss('the protocol summary of this bundle does not list this family')]));
+
+      sec.appendChild(el('h4',{text:'1 · Paired prompts'}));
+      sec.appendChild(renderPrompts(fam,fid));
+
+      sec.appendChild(el('h4',{text:'2 · Original model output'}));
+      sec.appendChild(renderBehavior(b,fam,fid,entries));
+
+      sec.appendChild(el('h4',{text:'3 · Internal analyses in this bundle'}));
+      sec.appendChild(renderReadouts(b,fam,fid,entries));
+      var ica=renderIca(b,fam,fid,entries);
+      if(ica){
+        var wrap=el('div',{'data-kind':'ica-block','data-family':fid});
+        wrap.appendChild(ica);
+        sec.appendChild(wrap);
+      }
+
+      sec.appendChild(el('h4',{text:'4 · Intervention evidence'}));
+      var ik=interventionKeys(b,entries);
+      sec.appendChild(ik.length?
+        el('p',{cls:'plain','data-kind':'intervention'},['This bundle carries an intervention record ('+ik.join(', ')+'). This viewer does not render it. Read the bundle file.']):
+        el('p',{cls:'plain','data-kind':'intervention',text:'no intervention in this bundle'}));
+      frag.appendChild(outer);
+    });
+    if(!b.comparisons.length) frag.appendChild(el('p',{cls:'plain'},[miss('the bundle holds no case family')]));
+    return frag;
+  }
+
+  /* ---------------------------------------------------------------- methods table */
+
+  function methodRows(b){
+    var order=[];
+    function add(m){if(isStr(m)&&order.indexOf(m)<0) order.push(m);}
+    b.protocol.methods.forEach(add);
+    var byMethod=isObj(b.plan_totals.by_method)?b.plan_totals.by_method:{};
+    Object.keys(byMethod).sort().forEach(add);
+    b.capability_rows.forEach(function(r){if(isObj(r)) add(r.method);});
+    b.methods_not_run.forEach(function(r){if(isObj(r)) add(r.method);});
+    var payloads=Array.isArray(b.provenance.payloads)?b.provenance.payloads:null;
+    var adapters=isObj(b.plan_totals.adapters)?b.plan_totals.adapters:{};
+    var heads=[['Method'],['Execution state'],['Reason'],['Capability status'],['Planned state'],['Capability evidence']];
+
+    return order.map(function(m){
+      var planned=isObj(byMethod[m])&&isInt(byMethod[m].total)?byMethod[m].total:null;
+      var completed=payloads===null?0:payloads.filter(function(p){return isObj(p)&&p.method===m&&isStr(p.sha256);}).length;
+      var notRun=b.methods_not_run.filter(function(r){return isObj(r)&&r.method===m;});
+      var counts=[], recorded=completed, reasons=[], notes=[];
+      if(completed>0) counts.push(['completed',completed]);
+      notRun.forEach(function(r){
+        if(isObj(r.states)){
+          Object.keys(r.states).sort().forEach(function(s){
+            var n=r.states[s];
+            if(s==='completed'){notes.push('The list of methods that did not complete names "completed"; the completed count shown is the number of payload records.');return;}
+            if(isInt(n)&&n>0){counts.push([s,n]);recorded+=n;}
+          });
+        }
+        if(Array.isArray(r.reasons)) r.reasons.forEach(function(x){if(isStr(x)&&x&&reasons.indexOf(x)<0) reasons.push(x);});
+      });
+      var unrecordedN=planned===null?(recorded===0?null:0):planned-recorded;
+      var stateCell=[];
+      function countText(n){return planned===null?n+' tasks (planned count '+NOT_IN_BUNDLE+')':n+' of '+planned+' tasks';}
+      counts.forEach(function(c){stateCell.push(el('span',{cls:'ln','data-state':STATES.indexOf(c[0])>=0?c[0]:'unrecognised'},[badge(c[0]),' '+countText(c[1])]));});
+      if(unrecordedN===null) stateCell.push(el('span',{cls:'ln','data-state':'not-recorded'},[badge(null),' no task count in this bundle']));
+      else if(unrecordedN>0) stateCell.push(el('span',{cls:'ln','data-state':'not-recorded'},[badge(null),' '+countText(unrecordedN)]));
+      else if(unrecordedN<0) stateCell.push(el('span',{cls:'ln','data-state':'inconsistent'},[
+        el('span',{cls:'bdg bdg-none',text:'inconsistent'}),' '+recorded+' states recorded for '+planned+' planned tasks']));
+
+      var reasonCell=lines(reasons);
+      if(unrecordedN===null||unrecordedN>0) reasonCell.push(el('span',{cls:'ln',text:'The bundle records no execution state for '+
+        (unrecordedN===null?'this method':unrecordedN+' planned task'+(unrecordedN===1?'':'s'))+'.'}));
+      if(!reasonCell.length) reasonCell.push(el('span',{cls:'ln miss',text:completed>0&&completed===planned?'none recorded: every planned task completed':'none recorded'}));
+      notes.forEach(function(n){reasonCell.push(el('span',{cls:'ln',text:n}));});
+
+      var caps=b.capability_rows.filter(function(r){return isObj(r)&&r.method===m;});
+      var capCell=caps.length?lines(caps.map(function(r){return String(r.status)+(isInt(r.tasks)?' · '+r.tasks+' tasks':'');})):[miss('no capability row in this bundle')];
+      function said(text){return reasons.some(function(r){return r.indexOf(text)>=0;});}
+      var planCell=caps.length?lines(caps.map(function(r){
+        return String(r.planned_state)+(isStr(r.reason)&&r.reason&&!said(r.reason)?': '+r.reason:'');})):[miss()];
+      var evCell=caps.length?lines(caps.map(function(r){
+        return String(r.evidence)+(isStr(r.status_note)&&r.status_note&&!said(r.status_note)?' · '+r.status_note:'')+
+          (isStr(r.backend)?' · backend '+r.backend:'');})):[miss()];
+      if(isStr(adapters[m])) evCell.push(el('span',{cls:'ln',text:'adapter: '+adapters[m]}));
+
+      return row(heads,{attrs:{'data-method':m},cells:[['method',m],['state',stateCell],['reason',reasonCell],
+        ['capability',capCell],['planned_state',planCell],['evidence',evCell]]});
+    });
+  }
+
+  /* ---------------------------------------------------------------- totals */
+
+  function countsLine(obj,keys){
+    if(!isObj(obj)) return null;
+    var ks=keys||Object.keys(obj).sort();
+    return ks.filter(function(k){return obj[k]!==undefined;}).map(function(k){return k+' '+String(obj[k]);}).join(' · ');
+  }
+  function renderTotals(b){
+    var t=b.plan_totals, x=b.execution, c=isObj(x.counts)?x.counts:{}, est=isObj(t.estimates)?t.estimates:null;
+    var frag=document.createDocumentFragment();
+    var reused=isInt(c.reused_events)?c.reused_events:(isInt(c.reused)?c.reused:null);
+    frag.appendChild(el('h4',{text:'Plan'}));
+    frag.appendChild(kv([
+      ['planned tasks',isInt(t.tasks)?t.tasks:null,{'data-col':'planned_tasks'}],
+      ['by planned state',countsLine(t.by_planned_state),{'data-col':'by_planned_state'}],
+      ['estimated tokens',est&&isInt(est.tokens)?est.tokens+' (ready tasks: '+String(est.ready_tokens)+') · an estimate, not measured':null],
+      ['estimated activation bytes',est&&isInt(est.activation_bytes)?est.activation_bytes+' (ready tasks: '+String(est.ready_activation_bytes)+') · an estimate, not measured':null],
+      ['runtime estimate',t.runtime_seconds_estimate===null?'none: no measured rate was supplied':
+        (isNum(t.runtime_seconds_estimate)?t.runtime_seconds_estimate+' seconds':null)]
+    ]));
+    frag.appendChild(el('h4',{text:'Execution'}));
+    frag.appendChild(kv([
+      ['tasks by execution state',countsLine(x.by_state,STATES.filter(function(s){return isObj(x.by_state)&&x.by_state[s]!==undefined;})),{'data-col':'by_state'}],
+      ['envelopes',isInt(c.with_envelope)&&isInt(c.planned)?c.with_envelope+' of '+c.planned+' planned tasks have an envelope':null],
+      ['ready tasks completed',isInt(c.ready_completed)&&isInt(c.ready_planned)?c.ready_completed+' of '+c.ready_planned:null],
+      ['missing',isInt(c.missing)?c.missing:null],
+      ['uncertain attempts',isInt(c.uncertain_attempts)?c.uncertain_attempts:null],
+      ['identical duplicates kept once',isInt(c.duplicate_identical)?c.duplicate_identical:null],
+      ['results reused from an earlier run',reused===null?miss('reuse count is '+NOT_IN_BUNDLE):reused,{'data-col':'reused'}],
+      ['run complete',typeof x.complete==='boolean'?(x.complete?'yes':'no'):null]
+    ]));
+    if(Array.isArray(t.estimate_notes)&&t.estimate_notes.length){
+      var d=el('details',{cls:'fold'},[el('summary',{text:'Estimate assumptions ('+t.estimate_notes.length+')'})]);
+      var ul=el('ul',{cls:'lims'});
+      t.estimate_notes.forEach(function(n){ul.appendChild(el('li',{text:String(n)}));});
+      d.appendChild(ul);
+      frag.appendChild(d);
+    }
+    return frag;
+  }
+
+  /* ---------------------------------------------------------------- external links */
+
+  function linkRecords(b){
+    /* A record has the shape the engine's link builder returns: {link, reason, detail, local}.
+       bundle/1 as exported carries none. Records are read from a comparison's references and
+       from an ICA component. */
+    var out=[];
+    function take(v,where){
+      (Array.isArray(v)?v:[v]).forEach(function(r){if(isObj(r)&&('reason' in r||'link' in r)) out.push({rec:r,where:where});});
+    }
+    b.comparisons.forEach(function(f){
+      f.comparisons.forEach(function(e){
+        var at=f.family_id+' · '+e.comparison_id;
+        if(isObj(e.references)) Object.keys(e.references).sort().forEach(function(k){
+          var ref=e.references[k];
+          if(isObj(ref)&&ref.neuronpedia!==undefined) take(ref.neuronpedia,at+' · reference '+k);
+        });
+        if(isObj(e.ica)&&Array.isArray(e.ica.layers)) e.ica.layers.forEach(function(L){
+          if(isObj(L)&&Array.isArray(L.components)) L.components.forEach(function(c){
+            if(isObj(c)&&c.neuronpedia!==undefined) take(c.neuronpedia,at+' · ICA layer '+L.layer+' component '+c.component);
+          });
+        });
+      });
+    });
+    return out;
+  }
+  function renderLinks(b){
+    var frag=document.createDocumentFragment(), recs=linkRecords(b);
+    if(!recs.length){
+      frag.appendChild(el('p',{cls:'plain','data-kind':'no-link-records',text:'This bundle carries no external-link record, so no Neuronpedia link is shown. The local record is the tables on this page and the payload hashes under Provenance.'}));
+      return frag;
+    }
+    frag.appendChild(el('p',{cls:'note',text:'A link is shown only when the bundle records it as built from a verified mapping. Otherwise the recorded reason and the local record are shown. An external page is context; the numbers on this page do not come from it.'}));
+    recs.forEach(function(x){
+      var r=x.rec, local=isObj(r.local)?r.local:{}, ver=isObj(local.verification)?local.verification:{};
+      var ok=isStr(r.link)&&LINK_URL.test(r.link)&&r.reason===LINK_BUILT&&ver.status===VERIFIED;
+      var box=el('div',{cls:'lnk','data-kind':'link-record','data-verified':ok?'true':'false'});
+      box.appendChild(el('p',{cls:'plain',style:'margin:0',text:x.where}));
+      if(ok){
+        box.appendChild(el('p',{cls:'plain'},['Verified link: ',el('a',{href:r.link,rel:'noopener noreferrer external',text:r.link})]));
+      }else{
+        box.appendChild(el('p',{cls:'plain','data-col':'no-link'},['No link. Reason: '+(isStr(r.reason)&&r.reason?r.reason:'no reason recorded')+
+          (isStr(r.detail)&&r.detail?' · '+r.detail:'')+
+          (isStr(r.link)?' · the record holds a link string, which is not shown as a link because the record is not a verified, built link':'')]));
+      }
+      var np=isObj(local.neuronpedia)?local.neuronpedia:null;
+      box.appendChild(kv([
+        ['local record',local.registry_id===null||local.registry_id===undefined?miss('no registry entry'):local.registry_id],
+        ['representation type',local.representation_type],
+        ['method',local.method],
+        ['layer',local.layer],
+        ['component',local.component_id],
+        ['verification',isStr(ver.status)?ver.status+(isStr(ver.checked_utc_date)?' · checked '+ver.checked_utc_date:''):null],
+        ['fitted artifact sha256',local.fitted_artifact_sha256],
+        ['hosted ids',np?countsLine(np,['model_id','source_set','source_id']):null],
+        ['recorded values',isObj(local.record)?JSON.stringify(local.record):null]
+      ]));
+      frag.appendChild(box);
+    });
+    return frag;
+  }
+
+  /* ---------------------------------------------------------------- provenance and limitations */
+
+  function renderProvenance(b){
+    var v=b.provenance, frag=document.createDocumentFragment(), cm=isObj(v.capability_matrix)?v.capability_matrix:null;
+    frag.appendChild(kv([
+      ['protocol sha256',hash(v.protocol_sha256)],
+      ['plan sha256',hash(v.plan_sha256)],
+      ['assembly sha256',hash(v.assembly_sha256)],
+      ['comparison sha256',hash(v.comparison_sha256)],
+      ['capability matrix',cm?String(cm.schema_version)+' · as of '+String(cm.as_of)+' · sha256 '+String(cm.sha256):null],
+      ['engine commits',Array.isArray(v.engine_commits)&&v.engine_commits.length?v.engine_commits:miss('not recorded')],
+      ['an envelope without a recorded commit',typeof v.engine_commit_not_recorded==='boolean'?(v.engine_commit_not_recorded?'yes':'no'):null],
+      ['package versions',isObj(v.packages)&&Object.keys(v.packages).length?countsLine(v.packages):miss('not recorded'),{'data-col':'packages'}],
+      ['digest convention',v.digest_convention]
+    ]));
+    if(isObj(v.source_files_sha256)&&Object.keys(v.source_files_sha256).length){
+      frag.appendChild(el('h4',{text:'Source file hashes'}));
+      frag.appendChild(table('Source file hashes',[['File'],['SHA-256']],Object.keys(v.source_files_sha256).sort().map(function(k){
+        return {attrs:{'data-kind':'source-file'},cells:[['file',k],['sha256',hash(v.source_files_sha256[k])]]};
+      })));
+    }
+    if(Array.isArray(v.payloads)){
+      var d=el('details',{cls:'fold'},[el('summary',{text:'Payload hashes ('+v.payloads.length+' completed tasks)'})]);
+      if(v.payloads.length) d.appendChild(table('Payload hashes',[['Task'],['Replicate',true],['Method'],['Payload kind'],['SHA-256']],
+        v.payloads.filter(isObj).map(function(p){
+          return {attrs:{'data-kind':'payload'},cells:[['task',String(p.task_id)],['replicate',String(p.replicate)],['method',String(p.method)],
+            ['kind',String(p.kind)],['sha256',hash(p.sha256)]]};
+        })));
+      else d.appendChild(el('p',{cls:'plain',text:'The bundle lists no payload: no task completed.'}));
+      frag.appendChild(d);
+    }else{
+      frag.appendChild(el('p',{cls:'plain'},[miss('the payload list is '+NOT_IN_BUNDLE)]));
+    }
+    return frag;
+  }
+  function renderLimitations(b){
+    var frag=document.createDocumentFragment(), ul=el('ul',{cls:'lims'});
+    b.limitations.forEach(function(code){ul.appendChild(el('li',{'data-limitation':String(code),text:words(code)}));});
+    if(!b.limitations.length) ul.appendChild(el('li',{text:'The bundle lists no limitation.'}));
+    frag.appendChild(ul);
+    var stated=[
+      ['statistics',isObj(b.statistics)?(b.statistics.computed===true?'computed. ':'none computed. ')+(isStr(b.statistics.note)?b.statistics.note:''):null],
+      ['block rule',b.block_rule],
+      ['sign convention',b.sign_convention],
+      ['execution guarantee',b.execution.execution_guarantee],
+      ['timing',b.execution.timing_caveat]
+    ];
+    frag.appendChild(el('h4',{text:'Stated by the bundle'}));
+    frag.appendChild(kv(stated));
+    frag.appendChild(el('h4',{text:'Stated by this page'}));
+    var own=el('ul',{cls:'lims'});
+    ['No value on this page is a clinical risk score. A readout rank or a component score describes the model\'s internal state for one prompt; it says nothing about a patient.',
+     'A readout is not a transcript of reasoning, and a component name is a hypothesis.',
+     'This page displays one bundle. It does not test it, compare it with another bundle or pool anything.'
+    ].forEach(function(s){own.appendChild(el('li',{text:s}));});
+    frag.appendChild(own);
+    return frag;
+  }
+
+  /* ---------------------------------------------------------------- render */
+
+  function render(b,path){
+    /* Build every part first. Nothing is attached unless all of it built, so a failure leaves no partial page. */
+    var parts={
+      evidence:renderEvidence(b),
+      protocol:renderProtocol(b),
+      families:renderFamilies(b),
+      methods:methodRows(b),
+      totals:renderTotals(b),
+      links:renderLinks(b),
+      provenance:renderProvenance(b),
+      limitations:renderLimitations(b)
+    };
+    ['evidence','protocol','families','totals','links','provenance','limitations'].forEach(function(k){
+      var box=$('exp-'+k);
+      box.textContent='';
+      box.appendChild(parts[k]);
+    });
+    var body=$('exp-methods-body');
+    body.textContent='';
+    if(parts.methods.length) parts.methods.forEach(function(tr){body.appendChild(tr);});
+    else body.appendChild(el('tr',{role:'row'},[el('td',{role:'cell',colspan:6},[miss('the bundle plans no method')])]));
+    var syn=$('exp-methods-syn');
+    syn.textContent='';
+    if(isSynthetic(b)) syn.appendChild(el('div',{cls:'syn-row'},[synTag(b,'methods table')]));
+    $('exp-families-count').textContent=b.comparisons.length+' of '+b.protocol.families.length+' families in the protocol summary';
+    $('exp-methods-count').textContent=parts.methods.length+' methods planned';
+    var folds=Array.prototype.slice.call($('exp-families').querySelectorAll('details.fam-fold'));
+    var toggle=$('exp-fam-toggle');
+    function allOpen(){return folds.every(function(d){return d.open;});}
+    function label(){toggle.textContent=allOpen()?'Close every family':'Open every family';}
+    toggle.hidden=folds.length<2;
+    toggle.onclick=function(){var open=!allOpen();folds.forEach(function(d){d.open=open;});label();};
+    folds.forEach(function(d){d.addEventListener('toggle',label);});
+    label();
+    results.hidden=false;
+    setState('ready','Loaded',['bundle '+path+' · schema '+b.schema_version+' · protocol '+b.protocol.id+' version '+b.protocol.version]);
+  }
+
+  function load(path){
+    var url='../data/'+path;
+    setState('loading','Loading',['bundle '+path]);
+    /* The body is read before the status is acted on: an unread error body keeps the request open. */
+    fetch(url,{cache:'no-cache',redirect:'error'}).then(function(r){
+      return r.text().then(function(text){return {status:r.status,ok:r.ok,text:text};});
+    }).then(function(res){
+      if(res.status===404){fail('missing','Missing',['bundle not found \u00b7 HTTP 404','path data/'+path,'Nothing is displayed.']);return;}
+      if(!res.ok){fail('error','Error',['the bundle request failed \u00b7 HTTP '+res.status,'path data/'+path,'Nothing is displayed.']);return;}
+      var b;
+      try{b=JSON.parse(res.text);}
+      catch(e){fail('error','Error',['the file at data/'+path+' is not JSON','Nothing is displayed.']);return;}
+      if(!isObj(b)){fail('error','Error',['the file at data/'+path+' is not a JSON object','Nothing is displayed.']);return;}
+      if(b.schema_version!==SCHEMA){
+        fail('error','Error',['schema_version is '+JSON.stringify(b.schema_version===undefined?null:b.schema_version)+
+          '; this viewer reads '+SCHEMA+' only','Nothing is displayed.']);return;
+      }
+      var problems=structureProblems(b);
+      if(problems.length){fail('error','Error',['the bundle does not have the '+SCHEMA+' structure: '+problems.join('; '),'Nothing is displayed.']);return;}
+      try{render(b,path);}
+      catch(e){fail('error','Error',['the viewer could not render this bundle: '+(e&&e.message?e.message:String(e)),'Nothing is displayed.']);}
+    }).catch(function(e){
+      fail('error','Error',['the bundle request did not complete: '+(e&&e.message?e.message:String(e)),'path data/'+path,'Nothing is displayed.']);
+    });
+  }
+
+  function start(){
+    var values=new URLSearchParams(window.location.search).getAll('bundle');
+    if(!values.length){setState('idle');return;}
+    var reason=values.length>1?'the address has more than one bundle parameter':bundleRefusal(values[0]);
+    if(reason){
+      fail('refused','Refused',[reason,'No request was made. A bundle is named by a relative path under data/, for example ?bundle=folder/bundle.json']);
+      return;
+    }
+    load(values[0]);
+  }
+  window.pwExperimentViewer={bundleRefusal:bundleRefusal,schema:SCHEMA};
+  start();
+})();
+</script>
+</body>
+</html>

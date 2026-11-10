@@ -17,6 +17,9 @@ repository are licensed under
   per-model statistics, urgency rows, lens readout summaries, timelines, and
   the rest).
 - `data/simulated_archive.csv` / `.json` — the collaborator download.
+- `data/results_catalogue/` — the results catalogue: the run index, per-run row
+  files, per-set stimulus files and the two CSV downloads. Its phrasings are
+  model-written or hand-written test stimuli, not patient statements.
 - The figure renders under `modes/` (engine-generated from the same
   measurements).
 
