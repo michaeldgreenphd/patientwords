@@ -413,26 +413,69 @@
   var src=sample?'../data/advice_scenarios.sample.json':'../data/advice_scenarios.json';
 
   // Merged payloads pool several stimulus families into one scenario list and
-  // one set of figures (owner direction 2026-07-29). The note states the mix
-  // and any registered-total shortfall, with every number read from the payload.
-  function renderFamNote(d){
-    var fams=d.families||[];
-    if(fams.length<2)return;
-    function label(f){return f.family==='natural_questions'?'natural questions':'sentence completions';}
-    var text='This page pools two stimulus families in one scenario list and one set of figures: '+
-      fams.map(function(f){return f.n_scenarios_published+' '+label(f);}).join(' and ')+'. '+
-      'Natural questions ask each situation as a complete, human-sounding question in one of eight '+
-      'registered syntax styles; sentence completions use the original open-ended frame.';
-    fams.forEach(function(f){
-      if(f.n_items_registered&&f.n_scenarios_published<f.n_items_registered){
-        text+=' The '+label(f)+' family is published at '+f.n_scenarios_published+
-          ' of its registered '+f.n_items_registered+
-          ' stimuli (owner-directed stop, logged as a pre-registration deviation 2026-07-29).';
-      }
+  // one set of figures (owner direction 2026-07-29). The note states the mix,
+  // counted from the scenarios by their family label.
+  //
+  // The payload's "families" list is NOT one entry per family: it has one record
+  // per stimulus file, and the exporter writes each record's n_scenarios_published
+  // as the count for the record's family LABEL. Two files of one family therefore
+  // both carry the family's total. Printing the records one by one gave "74 natural
+  // questions and 74 natural questions" for one set of 74, and "74 of its registered
+  // 75" for a file that published 25 of 75. Each file's registration and any
+  // shortfall are in Provenance (famFileCounts, "stimulus sets").
+  function famLabel(f,n){
+    return f==='natural_questions'?(n===1?'natural question':'natural questions'):
+      f==='sentence_completions'?(n===1?'sentence completion':'sentence completions'):
+      String(f).replace(/_/g,' ');
+  }
+  function famCounts(d){
+    var order=[],n={};
+    (d.scenarios||[]).forEach(function(s){
+      var f=s.family; if(!f)return;
+      if(!(f in n)){n[f]=0;order.push(f);}
+      n[f]++;
     });
+    return {order:order,n:n};
+  }
+  function renderFamNote(d){
+    var fc=famCounts(d);
+    if(fc.order.length<2)return;
+    var words=['zero','one','two','three','four','five','six'];
+    var text='This page pools '+(words[fc.order.length]||fc.order.length)+
+      ' stimulus families in one scenario list and one set of figures: '+
+      fc.order.map(function(f){return fc.n[f]+' '+famLabel(f,fc.n[f]);}).join(' and ')+'.';
+    if(fc.n.natural_questions&&fc.n.sentence_completions){
+      text+=' Natural questions ask each situation as a complete, human-sounding question in one of eight '+
+        'registered syntax styles; sentence completions use the original open-ended frame.';
+    }
     var n=document.getElementById('fam-note');
     n.textContent=text;
     n.hidden=false;
+  }
+  // Scenarios published from each stimulus file, in the order of d.families.
+  // A family with one file: the family's scenario count. A family with several
+  // files: the scenarios whose id names one of that file's source batches
+  // (selection.paths). If those do not add up to the family's scenarios, the
+  // family's files get null and no per-file count is shown: a count is never guessed.
+  function famFileCounts(d){
+    var fams=d.families||[],fc=famCounts(d),by={},out=[];
+    fams.forEach(function(f){(by[f.family]=by[f.family]||[]).push(f);});
+    fams.forEach(function(f){
+      if(by[f.family].length===1){out.push(fc.n[f.family]||0);return;}
+      var stems=((f.selection&&f.selection.paths)||[]).map(function(p){
+        return String(p).split('/').pop().replace(/\.json$/,'');});
+      var n=0;
+      (d.scenarios||[]).forEach(function(s){
+        if(s.family===f.family&&stems.indexOf(String(s.id||'').split('#')[0])>=0)n++;});
+      out.push(n);
+    });
+    Object.keys(by).forEach(function(k){
+      if(by[k].length<2)return;
+      var sum=0;
+      fams.forEach(function(f,i){if(f.family===k)sum+=out[i];});
+      if(sum!==(fc.n[k]||0))fams.forEach(function(f,i){if(f.family===k)out[i]=null;});
+    });
+    return out;
   }
   var pending=document.getElementById('llm-pending');
   var viewer=document.getElementById('llm-viewer');
@@ -1635,6 +1678,22 @@
     }
     provRow(list,'queries ran',win);
     provRow(list,'scenarios shown',String(data.scenarios.length));
+    // the stimulus sets behind the scenario list: one line per stimulus file, with how many of its registered
+    // stimuli are published here (the note under the page title gives the family totals only)
+    var fams=data.families||[];
+    if(fams.length){
+      var perFile=famFileCounts(data), sbox=el('div','prov-mline');
+      fams.forEach(function(f,i){
+        var reg=f.n_items_registered, pub=perFile[i], bits=famLabel(f.family,2);
+        if(pub!=null&&reg)bits+=' · '+pub+' of '+reg+' registered stimuli published';
+        else if(reg)bits+=' · '+reg+' stimuli registered';
+        if(pub!=null&&reg&&pub<reg)bits+=' (owner-directed stop, logged as a pre-registration deviation 2026-07-29)';
+        var line=el('div',null,bits+(f.stimuli_file?' · ':''));
+        if(f.stimuli_file)line.appendChild(repoLink(f.stimuli_file));
+        sbox.appendChild(line);
+      });
+      provRow(list,'stimulus sets',sbox);
+    }
     provRow(list,'samples per model per wording',dash(run.samples_per_cell));
     provRow(list,'temperature',dash(run.temperature));
     provRow(list,'total calls',dash(run.n_calls));
@@ -1692,15 +1751,23 @@
     var first3=true;
     function artRow(label,valueNode){provRow(list,label,valueNode,first3?'grp':null);first3=false;}
     if(data.rubric_version)artRow('tier rubric',String(data.rubric_version)+' \u00b7 coded by claude-haiku-4-5, blinded to model identity per response. The judge is itself a measured assistant and shares a vendor with claude-sonnet-5 \u2014 it grades its own responses; the judge\u2013human agreement note under Limitations bounds this, and a second model\u2019s re-grade of the archive is quantified on the methods page.');
+    // a merged payload names several files in one field, joined by " + ": one link per file (one link over the
+    // joined string pointed at no file)
     function repoLink(path){
       if(!path)return document.createTextNode('—');
-      var a=el('a',null,path);
-      a.href='https://github.com/michaeldgreenphd/patientwords-engine/tree/main/'+String(path).replace(/^\.\//,'');
-      a.target='_blank';a.rel='noopener';
-      return a;
+      var box=document.createDocumentFragment();
+      String(path).split(' + ').forEach(function(p,i){
+        if(i)box.appendChild(document.createTextNode(' + '));
+        var a=el('a',null,p);
+        a.href='https://github.com/michaeldgreenphd/patientwords-engine/tree/main/'+p.replace(/^\.\//,'');
+        a.target='_blank';a.rel='noopener';
+        box.appendChild(a);
+      });
+      return box;
     }
     artRow('response archive',repoLink(srcInfo.responses_file));
-    artRow('stimuli file',repoLink(srcInfo.stimuli_file));
+    // "stimulus sets" above already links each stimuli file when the payload carries its families block
+    if(!fams.length)artRow('stimuli file',repoLink(srcInfo.stimuli_file));
     if(srcInfo.judgments_file)artRow('tier codings',repoLink(srcInfo.judgments_file));
     if(data.chain_head){
       var ch=el('span',null,String(data.chain_head).slice(0,16)+'…');

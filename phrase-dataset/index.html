@@ -146,11 +146,11 @@ body{font-size:16px}}
   <hr class="rule-fine">
 </header>
 <main id="main">
-  <p class="dateline">Hand-measured <span class="mode">· the study's ground truth</span> (will be updated with patient language)</p>
+  <p class="dateline">Hand-measured <span class="mode">· hand-built sentence pairs</span></p>
   <h1>Phrase dataset</h1>
   <p class="subtitle">Every hand-built sentence pair.</p>
   <p class="explainer">Each pair was built by hand and measured on gemma-2-2b via the Neuronpedia circuit tracer; the table records the observed next token, its probability, and, where captured, a link to the live trace. The <a href="../simulated-scenarios/">simulated scenarios</a> extend this set by machine.</p>
-  <p class="explainer">The starkest case in the set illustrates a change in the recommended clinical advice. “Since her urinary tract was completely blocked up, they had to urgently call a” continues with uro(logist) at 20%; phrase it as “her water was completely blocked up” and the model calls a plumber — at 68%. The patient language changed what was recommended. (Pair 16 below.)</p>
+  <p class="explainer">In pair 16 the wording changes the most likely next token. “Since her urinary tract was completely blocked up, they had to urgently call a” continues with uro(logist) at 20%; with “her water was completely blocked up” it continues with plumber at 68%.</p>
   <section id="phrase-dataset" hidden>
     <div class="section-head" style="border-top:1px solid var(--ink);margin-top:26px;padding-top:10px;display:flex;justify-content:space-between;align-items:baseline">
       <h2 style="font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;margin:0">All pairs</h2>
@@ -181,8 +181,8 @@ body{font-size:16px}}
     <footer>
       Built with the patientwords-engine pipeline on <a href="https://neuronpedia.org">Neuronpedia</a> ·
       attribution graphs by <a href="https://github.com/safety-research/circuit-tracer">circuit-tracer</a> ·
-      features from <a href="https://huggingface.co/google/gemma-scope-2b-pt-transcoders">Gemma Scope</a> transcoders<br>
-      set in Iowan Old Style &amp; ui-monospace · every number on this page traces to a data file <a href="https://github.com/michaeldgreenphd/patientwords/tree/main/data">in this repository</a> ·
+      features from <a href="https://huggingface.co/google/gemma-scope-2b-pt-transcoders">Gemma Scope</a> transcoders ·
+      <a href="https://github.com/michaeldgreenphd/patientwords/tree/main/data">data files</a> ·
       <a href="../methods.html">how the pipeline works</a>
     </footer>
   </div>

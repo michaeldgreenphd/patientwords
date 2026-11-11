@@ -230,7 +230,7 @@
   <hr class="rule-fine">
 </header>
 <main id="main">
-  <p class="dateline"><span class="mode">translation recovery · live trace · traced July 7, 2026 · re-traced July 9, 2026 · renders re-traced July 30, 2026</span></p>
+  <p class="dateline"><span class="mode">translation recovery · live trace</span></p>
   <h1>Translation</h1>
   <p class="subtitle">Translating the patient sentence back into clinical terms restores the prediction in 8 of the 20 hardest cases.</p>
   <p class="explainer">The mitigation: an LLM rewrites the patient sentence in standard terms, and that rewrite is traced directly. Of the 20 reviewed downgrades: 8 recovered, 7 unrecovered, 5 unclassifiable. In the cases translation fixes, the clinical features reappear and the target probability recovers; the worsened rewrites are labeled on their cards below.</p>
@@ -239,7 +239,7 @@
      <em>“Grandma’s been all bunged up for a week, so before dinner
      she took a”</em> continues with <em>nap</em> (30%); rewritten in clinical terms, the
      top word becomes <em>lax(ative)</em>, above the original clinical phrasing (26%):
-     45% in the July 7 study trace, 41% on the July 9 re-trace shown below.
+     45% in the July 7 study trace, 41% on the July 9 re-trace.
      It is not a cure-all: in one case the rewrite replaced the
      <em>prescription</em> (38%) with <em>topical</em> (15%).</p>
   <div class="flow" id="tx-flow" hidden>
@@ -289,7 +289,10 @@
   <p class="traced" data-mode="translation" data-traced="gemma-2-2b">
     <span class="tm"><b>live trace:</b> gemma-2-2b</span>
     <span class="tp" id="fold-meta">hosted circuit-tracer via Neuronpedia · re-traced July 30, 2026 · phrase 17 of the
-      reviewed downgrade set (predictions that fell to a lower care tier), three panels (clinical / patient / LLM-translated)</span>
+      reviewed downgrade set (predictions that fell to a lower care tier), three panels (clinical / patient / LLM-translated)</span><br>
+    <span class="tm"><b>runs:</b></span>
+    <span class="tp">study trace July 7, 2026 (case counts and cards) · phrase 17 re-traced July 9, 2026 (the 41%) ·
+      every inline render re-traced July 30, 2026</span>
   </p>
 
   <div class="tabs" role="group" aria-label="Trace panels">
@@ -303,7 +306,7 @@
             title="Live translation mitigation: nap under patient wording, laxative after translation"></iframe>
   </div>
   </div>
-  <p class="embed-caption" id="flip-cap">Live trace: under patient wording the top word is “ nap” (30%); after rewriting to clinical wording it’s “ lax(ative)” (41%) — above the original clinical phrasing (26%). Captioned probabilities are the July 7 study measurement; the inline render is an independent July 30, 2026 re-trace of the same phrase (same top word in every panel).</p>
+  <p class="embed-caption" id="flip-cap">Live trace: under patient wording the top word is “ nap” (30%); after rewriting to clinical wording it’s “ lax(ative)” (41%) — above the original clinical phrasing (26%). Captioned probabilities are the July 7 study measurement, except 41%, which is the July 9 re-trace; the inline render is an independent July 30, 2026 re-trace of the same phrase (same top word in every panel).</p>
   </details>
 
 
@@ -408,13 +411,13 @@
 
   <div class="endnote">
     <p>The traces here are live gemma-2-2b runs.</p>
-    <p>SIMULATED DATA: the sentence pairs measured across this site are written by an LLM and checked automatically. The scenarios are simulated; the testing is real. The phrase dataset is the exception: hand-built from real patient language and measured by hand.</p>
+    <p>SIMULATED DATA: the sentence pairs measured across this site are written by an LLM and checked automatically. The phrase dataset is the exception: hand-built from real patient language and measured by hand.</p>
     <footer>
       Built with the <a href="https://github.com/michaeldgreenphd/patientwords-engine">patientwords-engine</a> pipeline
       on <a href="https://neuronpedia.org">Neuronpedia</a> ·
       attribution graphs by <a href="https://github.com/safety-research/circuit-tracer">circuit-tracer</a> ·
-      features from <a href="https://huggingface.co/google/gemma-scope-2b-pt-transcoders">Gemma Scope</a> transcoders<br>
-      set in Iowan Old Style &amp; ui-monospace · every number on this page traces to a data file <a href="https://github.com/michaeldgreenphd/patientwords/tree/main/data">in this repository</a>
+      features from <a href="https://huggingface.co/google/gemma-scope-2b-pt-transcoders">Gemma Scope</a> transcoders ·
+      <a href="https://github.com/michaeldgreenphd/patientwords/tree/main/data">data files</a>
     </footer>
   </div>
 </main>
