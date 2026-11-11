@@ -9,324 +9,306 @@
 <meta name="theme-color" content="#faf9f5">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23faf9f5'/%3E%3Crect x='9' y='9' width='30' height='30' fill='%23111827'/%3E%3Crect x='25' y='25' width='30' height='30' fill='%2315803d'/%3E%3C/svg%3E">
 <style>
+  /* One scale for the page: three text sizes, three heading sizes, seven spacings, one corner radius.
+     Serif for headings and prose, sans for data and controls, monospace for code and identifiers only. */
   :root{
     --paper:#faf9f5; --ink:#1c1c19; --patient:#111827; --clinical:#15803d;
-    --penalty:#b4483d; --muted:#6d6c66; --structural:#c3c9d2; --hairline:#dcdad2;
+    --alert:#b4483d; --muted:#6d6c66; --structural:#c3c9d2; --hairline:#dcdad2;
     --serif:'Iowan Old Style','Palatino Linotype',Palatino,'Book Antiqua',Georgia,serif;
+    --sans:system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
     --mono:ui-monospace,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace;
+    --t-meta:13px; --t-ui:14px; --t-body:17px; --t-h3:20px; --t-h2:26px;
+    --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:24px; --s6:32px; --s7:48px;
+    --radius:2px; --wide:1120px; --measure:68ch;
   }
   html{background:var(--paper)}
-  body{margin:0;padding:0;background:var(--paper);color:var(--ink);
-    font-family:var(--serif);font-size:17px;line-height:1.62;
-    -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
-  main{max-width:1240px;margin:0 auto;padding:0 22px 56px}
+  body{margin:0;padding:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:var(--t-ui);
+    line-height:1.55;overflow-wrap:break-word;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+  main{max-width:var(--wide);margin:0 auto;padding:0 var(--s4) var(--s7)}
   [hidden]{display:none!important}
   a{color:inherit}
-  a:focus-visible{outline:2px solid var(--clinical);outline-offset:3px;border-radius:1px}
+  a:focus-visible{outline:2px solid var(--clinical);outline-offset:3px;border-radius:var(--radius)}
   button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visible{
     outline:2px solid var(--clinical);outline-offset:2px}
   ::selection{background:#dbe9df}
-  code{font-family:var(--mono);font-size:.92em}
+  code,.id{font-family:var(--mono);font-size:var(--t-meta);overflow-wrap:anywhere}
   .skip{position:absolute;left:-9999px;top:0;background:var(--paper);color:var(--ink);
-    padding:8px 14px;border:1px solid var(--ink);z-index:10}
-  .skip:focus{left:8px}
+    padding:var(--s2) var(--s4);border:1px solid var(--ink);z-index:30}
+  .skip:focus{left:var(--s2)}
+  .vh{position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden}
 
-  .masthead{max-width:1240px;margin:0 auto;padding:20px 22px 0}
-  .masthead-row{display:flex;align-items:baseline;justify-content:space-between;
-    flex-wrap:wrap;gap:8px 24px;padding:10px 0 12px}
+  .masthead{max-width:var(--wide);margin:0 auto;padding:var(--s4) var(--s4) 0}
+  .masthead-row{display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:0 var(--s5);
+    padding:var(--s2) 0}
   .wordmark{font-family:var(--serif);font-size:19px;font-weight:600;letter-spacing:.02em;text-decoration:none}
   .wordmark .pw-p{color:var(--patient)}
   .wordmark .pw-w{color:var(--clinical);font-style:italic}
   .wordmark .pw-w::before{content:'·';color:var(--muted);font-style:normal;font-weight:400;margin:0 3px 0 2px}
-  .masthead nav{display:flex;flex-wrap:wrap;gap:6px 20px}
-  .masthead nav a{font-family:var(--mono);font-size:11px;letter-spacing:.16em;
-    text-transform:uppercase;color:var(--muted);text-decoration:none;padding:2px 0}
-  .masthead nav a:hover{color:var(--ink);text-decoration:underline;text-underline-offset:4px}
-  .masthead nav a[aria-current=page]{color:var(--ink);border-bottom:1px solid var(--ink)}
-  /* nav grouping by whitespace: after Technical and Phrase Dataset */
-  .masthead nav a:nth-child(3),.masthead nav a:nth-child(10){margin-right:2vw}
+  .masthead-row{position:relative}
+  .masthead nav{display:flex;flex-wrap:wrap;align-items:baseline;gap:0 22px}
+  .masthead nav a,.nav-more>summary{font-family:var(--serif);font-size:15px;line-height:1.4;color:var(--muted);
+    text-decoration:none;padding:6px 0}
+  .masthead nav a:hover,.nav-more>summary:hover{color:var(--ink);text-decoration:underline;text-underline-offset:4px}
+  .masthead nav a[aria-current=page]{color:var(--ink);text-decoration:underline;text-decoration-thickness:1px;
+    text-underline-offset:6px}
+  /* supporting pages sit in one disclosure: a details element, so it opens from the keyboard and without JavaScript */
+  .nav-more{margin:0}
+  .nav-more>summary{cursor:pointer;list-style:none}
+  .nav-more>summary::-webkit-details-marker{display:none}
+  .nav-more>summary::after{content:'\00a0\25BE'}
+  .nav-more[open]>summary{color:var(--ink)}
+  .nav-more[open]>summary::after{content:'\00a0\25B4'}
+  .nav-more>summary:focus-visible{outline:2px solid var(--clinical);outline-offset:3px}
+  .nav-more .nav-here{color:var(--ink)}
+  .nav-more-list{position:absolute;left:0;right:0;top:100%;z-index:20;display:flex;flex-wrap:wrap;gap:0 22px;
+    background:var(--paper);border-top:1px solid var(--hairline);border-bottom:1px solid var(--ink);padding:6px 0 8px}
   .rule-heavy{border:0;border-top:2px solid var(--ink);margin:0}
   .rule-fine{border:0;border-top:1px solid var(--hairline);margin:3px 0 0}
 
-  /* lead: title, one purpose sentence, the page-wide labels, then the runs */
-  .dateline{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;
-    color:var(--clinical);font-weight:600;margin:22px 0 8px}
-  .dateline .mode{color:var(--muted);font-weight:400;letter-spacing:.06em;text-transform:none}
-  h1{font-size:clamp(30px,4.8vw,42px);line-height:1.14;font-weight:600;letter-spacing:-.006em;margin:0 0 6px}
-  .subtitle{font-style:italic;font-size:19px;line-height:1.45;color:var(--muted);margin:0 0 8px}
-  .lead-labels{display:flex;flex-wrap:wrap;align-items:center;gap:4px 16px;margin:0}
-  .traced{margin:0;font-family:var(--mono);font-size:11px;letter-spacing:.03em;line-height:1.9;
-    overflow-wrap:anywhere}
+  /* lead: the title, one purpose sentence, what all runs share, then the runs */
+  h1{font-family:var(--serif);font-size:clamp(30px,4.6vw,40px);line-height:1.15;font-weight:600;letter-spacing:-.006em;
+    margin:var(--s6) 0 var(--s2)}
+  h2{font-family:var(--serif);font-size:var(--t-h2);line-height:1.2;font-weight:600;margin:0}
+  h3{font-family:var(--sans);font-size:var(--t-ui);line-height:1.4;font-weight:600;margin:var(--s5) 0 var(--s2)}
+  h4{font-family:var(--sans);font-size:var(--t-ui);line-height:1.4;font-weight:600;margin:var(--s4) 0 var(--s1)}
+  .subtitle{font-family:var(--serif);font-size:var(--t-body);line-height:1.6;color:var(--muted);margin:0 0 var(--s3);
+    max-width:var(--measure)}
+  .shared{font-size:var(--t-ui);line-height:1.55;margin:0;max-width:110ch}
+  .shared b{font-weight:600}
+  .traced{margin:var(--s1) 0 0;font-size:var(--t-meta);line-height:1.55;color:var(--muted);overflow-wrap:anywhere;
+    font-variant-numeric:tabular-nums}
   .traced b{color:var(--ink);font-weight:600}
-  .traced .tp{color:var(--muted)}
-  .draft-flag{display:inline-block;font-family:var(--mono);font-size:10px;letter-spacing:.14em;
-    text-transform:uppercase;color:var(--penalty);border:1px solid var(--penalty);padding:1px 6px;margin:0}
-  .lead-links{display:flex;flex-wrap:wrap;align-items:baseline;gap:0 22px;margin:4px 0 0}
+  .lead-links{display:flex;flex-wrap:wrap;align-items:baseline;gap:0 var(--s5);margin:var(--s2) 0 0}
   .lead-links>details[open]{flex:1 1 100%}
-  .jump{font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--muted);margin:0;padding:4px 0}
-  .jump a:hover{color:var(--ink)}
-  .about{max-width:86ch;border-left:2px solid var(--ink);padding:2px 0 2px 16px;margin:6px 0 10px}
-  .about p{font-size:15.5px;line-height:1.6;margin:0 0 8px}
+  .jump{font-size:var(--t-ui);margin:0;padding:var(--s1) 0}
+  .jump a{text-underline-offset:4px}
+  .jump a:hover{color:var(--clinical)}
+  .about{max-width:var(--measure);margin:var(--s2) 0 var(--s3)}
+  .about p{font-family:var(--serif);font-size:var(--t-body);line-height:1.6;margin:0 0 var(--s2)}
   .about p:last-child{margin-bottom:0}
   .about b{font-weight:600}
 
-  .section-head{border-top:1px solid var(--ink);margin-top:38px;padding-top:10px;display:flex;
-    justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:4px 16px}
-  h2{font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;margin:0}
-  h3{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;
-    color:var(--muted);margin:26px 0 8px}
-  .count{font-family:var(--mono);font-size:12px;color:var(--muted)}
-  .note{font-family:var(--mono);font-size:11.5px;line-height:1.8;color:var(--muted);margin:8px 0 0;max-width:110ch}
+  .section-head{border-top:1px solid var(--ink);margin-top:var(--s7);padding-top:var(--s3);display:flex;
+    justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:var(--s1) var(--s4)}
+  .count{font-size:var(--t-meta);color:var(--muted)}
+  .note{font-size:var(--t-meta);line-height:1.55;color:var(--muted);margin:var(--s2) 0 0;max-width:110ch}
   .note b{color:var(--ink);font-weight:600}
-  .vh{position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden}
 
-  /* page-level states */
-  .pending-note{border:1px solid var(--hairline);background:var(--paper);margin:26px 0;
-    padding:26px;text-align:center;font-family:var(--mono);font-size:11px;
-    letter-spacing:.16em;text-transform:uppercase;color:var(--muted);line-height:2}
-  .pending-mark{display:block;width:9px;height:9px;background:var(--structural);margin:0 auto 10px}
-  .cat-err{border:2px solid var(--penalty);color:var(--penalty);font-family:var(--mono);font-size:12px;
-    line-height:1.8;padding:12px 16px;margin:26px 0}
-  .cat-err b{letter-spacing:.12em;text-transform:uppercase}
-  .cat-msg{font-family:var(--mono);font-size:12px;line-height:1.7;color:var(--ink);
-    border-left:2px solid var(--ink);padding:2px 12px;margin:10px 0 0}
+  /* page-level states. The alert colour is used for a file that failed to load, and nowhere else on this page. */
+  .pending-note{border:1px dashed var(--structural);margin:var(--s5) 0;padding:var(--s5);text-align:center;
+    font-size:var(--t-ui);color:var(--muted)}
+  .cat-err{border:2px solid var(--alert);color:var(--alert);font-size:var(--t-ui);line-height:1.6;
+    padding:var(--s3) var(--s4);margin:var(--s5) 0}
+  .cat-err b{font-weight:600}
+  .cat-msg{font-size:var(--t-ui);line-height:1.55;color:var(--ink);border-left:2px solid var(--ink);
+    padding:2px var(--s3);margin:var(--s3) 0 0}
 
-  /* inventory figures: counts of the export, kept apart from any measurement */
-  .tot{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px 28px;margin:14px 0 0}
-  .tot div{min-width:0}
-  .tot dt{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
-  .tot dd{margin:2px 0 0;font-size:clamp(22px,3vw,28px);line-height:1.15;font-weight:600}
-  .tot dd small{display:block;font-family:var(--mono);font-size:10.5px;font-weight:400;color:var(--muted);
-    letter-spacing:.03em;line-height:1.5;margin-top:3px}
-  .two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 44px}
+  /* inventory of the export: counts, set as an ordinary list and kept apart from any measurement */
+  .tot{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:var(--s1) var(--s4);margin:var(--s2) 0 0;
+    font-size:var(--t-ui);line-height:1.55;font-variant-numeric:tabular-nums}
+  .tot div{display:contents}
+  .tot dt{color:var(--muted)}
+  .tot dd{margin:0}
+  .tot dd small{font-size:var(--t-meta);color:var(--muted);margin-left:var(--s2)}
+  .two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 var(--s7)}
 
   /* plain data tables */
   .tbl{width:100%;border-collapse:collapse;margin:0}
-  .tbl th{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;
-    color:var(--muted);text-align:left;padding:0 16px 7px 0;border-bottom:1px solid var(--ink);vertical-align:bottom}
-  .tbl td{padding:7px 16px 7px 0;border-bottom:1px solid var(--hairline);vertical-align:top;
-    font-family:var(--mono);font-size:12px;line-height:1.55;overflow-wrap:anywhere}
+  .tbl th{font-size:var(--t-meta);font-weight:600;color:var(--muted);text-align:left;padding:0 var(--s4) var(--s2) 0;
+    border-bottom:1px solid var(--ink);vertical-align:bottom}
+  .tbl td{padding:6px var(--s4) 6px 0;border-bottom:1px solid var(--hairline);vertical-align:top;
+    font-size:var(--t-ui);line-height:1.5;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
   .tbl th.num,.tbl td.num{text-align:right;white-space:nowrap}
-  .tbl td.prose{font-family:var(--serif);font-size:14.5px;line-height:1.5}
   .tbl tr:last-child td{border-bottom:1px solid var(--ink)}
   .tbl th:last-child,.tbl td:last-child{padding-right:0}
   .tbl td.nw{white-space:nowrap}
 
-  .pin{border-left:2px solid var(--ink);padding:2px 0 2px 16px;margin:28px 0 0;max-width:96ch}
-  .pin h3{margin:0 0 6px;color:var(--ink)}
-  .pin p{font-size:15.5px;line-height:1.6;margin:0 0 8px}
-  .kv{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:3px 16px;margin:0;
-    font-family:var(--mono);font-size:11.5px;line-height:1.7}
-  .kv dt{color:var(--muted)}
+  .pin{margin:var(--s5) 0 0;max-width:96ch}
+  .pin p{font-size:var(--t-ui);line-height:1.55;margin:0 0 var(--s2)}
+  .kv{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:var(--s1) var(--s4);margin:0;
+    font-size:var(--t-meta);line-height:1.6;font-variant-numeric:tabular-nums}
+  .kv dt{color:var(--muted);overflow-wrap:anywhere;min-width:0}
   .kv dd{margin:0;overflow-wrap:anywhere}
 
-  /* badges: every state carries its text; border style is a second cue, never the only one */
-  .bdg{display:inline-block;font-family:var(--mono);font-size:10.5px;line-height:1.5;letter-spacing:.02em;
-    color:var(--ink);border:1px solid var(--structural);border-radius:2px;padding:0 5px;margin:0 4px 3px 0}
-  .bdg-reg{border-color:var(--ink)}
-  .bdg-exp{border-style:dashed;border-color:var(--muted)}
-  .bdg-unc{border-style:dotted;border-color:var(--muted);color:var(--muted)}
-  .bdg-none{border-style:dotted;border-color:var(--muted);color:var(--muted)}
-  .bdg-restricted,.bdg-draft{border-color:var(--penalty);color:var(--penalty)}
+  /* a label is plain text. It is an identifier of the file only where it is printed as code. */
+  .bdg{display:inline;margin-right:var(--s2)}
+  .bdg+.bdg::before{content:'· ';color:var(--muted)}
   .dim{color:var(--muted)}
 
   /* disclosures */
   details.meth{margin:0}
-  details.meth>summary{font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--muted);
-    cursor:pointer;list-style:none;padding:4px 0;display:inline-block}
+  details.meth>summary{font-size:var(--t-ui);color:var(--ink);cursor:pointer;list-style:none;padding:var(--s1) 0;
+    display:inline-block;text-decoration:underline;text-decoration-color:var(--structural);text-underline-offset:4px}
   details.meth>summary::-webkit-details-marker{display:none}
-  details.meth>summary::before{content:'\25B8\00a0'}
+  details.meth>summary::before{content:'\25B8\00a0';color:var(--muted)}
   details.meth[open]>summary::before{content:'\25BE\00a0'}
-  details.meth>summary:hover{color:var(--ink)}
-  details.src{border-top:1px solid var(--ink);margin-top:38px}
-  details.src>summary{cursor:pointer;list-style:none;padding:10px 0 4px;display:flex;
-    justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:4px 16px}
+  details.meth>summary:hover{color:var(--clinical)}
+  details.src{border-top:1px solid var(--ink);margin-top:var(--s7)}
+  details.src>summary{cursor:pointer;list-style:none;padding:var(--s3) 0 var(--s1);display:flex;
+    justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:var(--s1) var(--s4)}
   details.src>summary::-webkit-details-marker{display:none}
   details.src>summary h2{display:inline}
   details.src>summary h2::before{content:'\25B8\00a0';font-weight:400;color:var(--muted)}
   details.src[open]>summary h2::before{content:'\25BE\00a0'}
   details.src>summary:hover h2{color:var(--clinical)}
-  .src-part{margin-top:8px}
-  .legend{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 44px}
-  .legend h3{margin:16px 0 6px}
-  .legend h3 code{font-weight:400;letter-spacing:0;text-transform:none}
-  .legend dl,.fields{margin:0;font-family:var(--mono);font-size:11.5px;line-height:1.65}
-  .legend dt,.fields dt{color:var(--ink);font-weight:600;margin-top:6px}
+  .legend{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 var(--s7)}
+  .legend dl,.fields{margin:0;font-size:var(--t-meta);line-height:1.6}
+  .legend dt,.fields dt{color:var(--ink);font-family:var(--mono);margin-top:var(--s2);overflow-wrap:anywhere}
   .legend dd,.fields dd{margin:0;color:var(--muted)}
-  .files{list-style:none;margin:14px 0 0;padding:0;font-family:var(--mono);font-size:12px;line-height:1.9}
+  .files{list-style:none;margin:var(--s3) 0 0;padding:0;font-size:var(--t-ui);line-height:1.8}
   .files a{font-weight:600}
   .files a:hover{color:var(--clinical)}
   .files span{color:var(--muted)}
 
   /* search, quick views and filters */
-  .flt{display:flex;flex-wrap:wrap;align-items:flex-end;gap:10px 18px;margin:12px 0 0}
-  .flt-g{display:flex;flex-direction:column;gap:3px;min-width:0}
+  .flt{display:flex;flex-wrap:wrap;align-items:flex-end;gap:var(--s3) var(--s4);margin:var(--s4) 0 0}
+  .flt-g{display:flex;flex-direction:column;gap:var(--s1);min-width:0}
   .flt-q{flex:1 1 260px}
-  .flt-lbl{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
-  .flt input[type=search],.flt-sel{font-family:var(--mono);font-size:12px;color:var(--ink);background:#fff;
-    border:1px solid var(--hairline);padding:6px 8px;border-radius:2px;max-width:100%;box-sizing:border-box}
+  .flt-lbl,.chip-lbl{font-size:var(--t-meta);color:var(--muted)}
+  .flt input[type=search],.flt-sel{font-family:var(--sans);font-size:var(--t-ui);color:var(--ink);background:#fff;
+    border:1px solid var(--muted);padding:6px var(--s2);border-radius:var(--radius);max-width:100%;box-sizing:border-box}
   .flt input[type=search]{width:100%}
   .flt-sel{cursor:pointer}
-  .flt-sel:hover,.flt input[type=search]:hover{border-color:var(--muted)}
-  .chip-g{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
-  .chip-lbl{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;
-    color:var(--muted);margin-right:2px}
-  .chip{font-family:var(--mono);font-size:11px;color:var(--muted);background:#fff;
-    border:1px solid var(--hairline);padding:5px 10px;cursor:pointer;border-radius:2px}
-  .chip:hover{color:var(--ink);border-color:var(--muted)}
-  .chip.on{color:var(--clinical);border-color:var(--clinical);font-weight:600}
-  .chip-ct{opacity:.7;font-weight:400}
-  .chip.on .chip-ct{color:var(--clinical);opacity:.85}
-  .chip-more{color:var(--ink)}
+  .flt-sel:hover,.flt input[type=search]:hover{border-color:var(--ink)}
+  .chip-g{display:flex;flex-wrap:wrap;align-items:center;gap:var(--s2)}
+  .chip,.btn{font-family:var(--sans);font-size:var(--t-ui);color:var(--ink);background:#fff;border:1px solid var(--muted);
+    padding:6px var(--s3);cursor:pointer;border-radius:var(--radius)}
+  .chip:hover,.btn:hover{border-color:var(--ink)}
+  /* a pressed view: a heavier border and a check mark, with aria-pressed; never colour alone */
+  .chip.on{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink);font-weight:600}
+  .chip.on::before{content:'\2713\00a0'}
+  .chip-ct{color:var(--muted);font-weight:400;font-variant-numeric:tabular-nums}
   .chip-more::before{content:'\25B8\00a0';color:var(--muted)}
   .chip-more[aria-expanded=true]::before{content:'\25BE\00a0'}
-  .flt-more{flex:1 1 100%;display:flex;flex-wrap:wrap;align-items:flex-end;gap:10px 18px;
-    border-left:2px solid var(--hairline);padding:2px 0 4px 14px}
-  .btn{font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--ink);background:#fff;
-    border:1px solid var(--hairline);padding:5px 12px;cursor:pointer;border-radius:2px}
-  .btn:hover{border-color:var(--muted)}
-  .cat-bar{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:4px 18px;margin:10px 0 0}
-  .cat-bar-l{display:flex;align-items:center;flex-wrap:wrap;gap:4px 12px;min-width:0}
-  .cat-count{font-family:var(--mono);font-size:13px;font-weight:600;margin:0}
+  .flt-more{flex:1 1 100%;display:flex;flex-wrap:wrap;align-items:flex-end;gap:var(--s3) var(--s4);
+    border-left:2px solid var(--hairline);padding:2px 0 var(--s1) var(--s3)}
+  .cat-bar{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:var(--s1) var(--s4);
+    margin:var(--s3) 0 0}
+  .cat-bar-l{display:flex;align-items:center;flex-wrap:wrap;gap:var(--s1) var(--s3);min-width:0}
+  .cat-count{font-size:var(--t-ui);font-weight:600;margin:0;font-variant-numeric:tabular-nums}
   .cat-count span{font-weight:400;color:var(--muted)}
-  .cat-order{font-family:var(--mono);font-size:11px;color:var(--muted);margin:0}
-  .sum-dl{font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--muted);margin:0}
+  .cat-order,.sum-dl{font-size:var(--t-meta);color:var(--muted);margin:0;overflow-wrap:anywhere;min-width:0}
   .sum-dl a{color:var(--ink)}
   .sum-dl a:hover{color:var(--clinical)}
 
   /* run table: five columns; identifiers and rules are in each run's Methods & source */
-  .cat-scroll{margin:8px 0 0}
+  .cat-scroll{margin:var(--s2) 0 0}
   .cat-table{width:100%;border-collapse:collapse;table-layout:fixed}
-  .cat-table>thead th{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.12em;
-    text-transform:uppercase;color:var(--muted);text-align:left;padding:0 14px 6px 0;
-    border-bottom:1px solid var(--ink);vertical-align:bottom}
-  .cat-table>thead th small{display:block;font-size:10px;font-weight:400;letter-spacing:.02em;text-transform:none}
-  .cat-table>tbody>tr>td{padding:7px 14px 7px 0;border-bottom:1px solid var(--hairline);vertical-align:top;
-    font-family:var(--mono);font-size:11px;line-height:1.55;overflow-wrap:break-word}
+  .cat-table>thead th{font-size:var(--t-meta);font-weight:600;color:var(--muted);text-align:left;
+    padding:0 var(--s4) var(--s2) 0;border-bottom:1px solid var(--ink);vertical-align:bottom}
+  .cat-table>thead th small{display:block;font-size:var(--t-meta);font-weight:400}
+  .cat-table>tbody>tr>td{padding:var(--s2) var(--s4) var(--s2) 0;border-bottom:1px solid var(--hairline);
+    vertical-align:top;font-size:var(--t-ui);line-height:1.5;overflow-wrap:break-word;font-variant-numeric:tabular-nums}
   .cat-table>thead th:last-child,.cat-table>tbody>tr>td:last-child{padding-right:0}
   .cat-table>tbody>tr:last-child>td{border-bottom:1px solid var(--ink)}
   .cat-table>tbody>tr.cat-run.is-open>td{border-bottom-color:transparent}
-  .c-exp{width:25%}
+  .c-exp{width:27%}
   .c-model{width:14%}
-  .c-meas{width:26%}
-  .c-status{width:12%}
-  .c-ctx{width:23%}
-  .cat-x{font-family:var(--mono);font-size:12px;font-weight:600;line-height:1.5;color:var(--ink);background:none;
+  .c-meas{width:25%}
+  .c-status{width:13%}
+  .c-ctx{width:21%}
+  .cat-x{font-family:var(--sans);font-size:var(--t-ui);font-weight:600;line-height:1.5;color:var(--ink);background:none;
     border:0;margin:0;padding:1px 0;cursor:pointer;text-align:left;display:inline-flex;gap:6px;
     align-items:baseline;overflow-wrap:anywhere;word-break:break-word}
   .cat-x::before{content:'\25B8';color:var(--muted);flex:none;font-weight:400}
   .cat-x[aria-expanded=true]::before{content:'\25BE'}
   .cat-x:hover{color:var(--clinical)}
-  .x-set{display:block;color:var(--muted);padding-left:16px;margin-top:2px}
+  .x-set{display:block;font-family:var(--mono);font-size:var(--t-meta);color:var(--muted);padding-left:var(--s4);
+    margin-top:2px;overflow-wrap:anywhere}
   .sg{white-space:nowrap}
   .ln{display:block}
   .sg b,.ln b{font-weight:600}
-  .cat-more{display:flex;justify-content:center;margin:16px 0 0}
+  .cat-more{display:flex;justify-content:center;margin:var(--s4) 0 0}
 
-  /* expanded run */
-  .cat-table>tbody>tr.cat-detail>td{padding:0 0 18px 0}
-  .det{border:1px solid var(--hairline);background:#fff;padding:14px 18px 16px;overflow-wrap:normal}
-  .det h3{margin:0 0 6px;color:var(--ink);letter-spacing:.02em;text-transform:none;font-size:13px;overflow-wrap:anywhere}
-  .det-labels{margin:0 0 8px}
-  .det-status{font-family:var(--mono);font-size:12px;line-height:1.7;margin:12px 0 0;padding:8px 12px;
+  /* an open run: its own label line, its rows, then its source */
+  .cat-table>tbody>tr.cat-detail>td{padding:0 0 var(--s5) 0}
+  .det{border-left:2px solid var(--ink);padding:var(--s1) 0 var(--s2) var(--s4)}
+  .det h3{font-family:var(--serif);font-size:var(--t-h3);margin:0 0 var(--s1);overflow-wrap:anywhere}
+  .det-labels{font-size:var(--t-meta);line-height:1.55;color:var(--muted);margin:0 0 var(--s2)}
+  .det-labels .bdg{color:var(--ink)}
+  .det-status{font-size:var(--t-ui);line-height:1.55;margin:var(--s3) 0 0;padding:var(--s2) var(--s3);
     border:1px solid var(--hairline);overflow-wrap:anywhere}
-  .det-status b{letter-spacing:.1em;text-transform:uppercase;font-weight:600;margin-right:6px}
+  .det-status b{font-weight:600;margin-right:6px}
   .det-status.is-loading{color:var(--muted);border-style:dashed}
-  .det-status.is-fail{color:var(--penalty);border:2px solid var(--penalty)}
-  .det-status.is-restricted{color:var(--penalty);border-color:var(--penalty)}
-  .det-status.is-norows{color:var(--ink);border-style:dotted;border-color:var(--muted)}
-  .det-status .btn{margin-left:8px;padding:2px 8px}
-  .det-status ul{margin:4px 0 0;padding-left:18px}
-  .det-src{margin-top:10px}
-  .det-src>.src-in{border-left:2px solid var(--hairline);padding:4px 0 6px 14px;margin:2px 0 4px}
-  .det-src h4{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;
-    color:var(--muted);margin:14px 0 6px}
-  .part{border-top:1px solid var(--hairline);margin-top:16px;padding-top:10px}
-  .part h4{font-family:var(--mono);font-size:12px;font-weight:600;margin:0 0 4px;overflow-wrap:anywhere}
-  .part p{font-family:var(--mono);font-size:11.5px;line-height:1.7;margin:0;overflow-wrap:anywhere}
+  .det-status.is-fail{color:var(--alert);border:2px solid var(--alert)}
+  .det-status.is-restricted{border:1px solid var(--ink)}
+  .det-status.is-norows{border-style:dotted;border-color:var(--muted)}
+  .det-status .btn{margin-left:var(--s2);padding:2px var(--s2)}
+  .det-status ul{margin:var(--s1) 0 0;padding-left:18px}
+  .det-src{margin-top:var(--s3)}
+  .det-src>.src-in{border-left:2px solid var(--hairline);padding:var(--s1) 0 6px var(--s3);margin:2px 0 var(--s1)}
+  .part{border-top:1px solid var(--hairline);margin-top:var(--s4);padding-top:var(--s3)}
+  .part h4{margin:0 0 var(--s1);overflow-wrap:anywhere}
+  .part p{font-size:var(--t-meta);line-height:1.55;margin:0;overflow-wrap:anywhere}
   .part-out,.part-mass{color:var(--muted)}
-  .part-empty{border:1px dotted var(--muted);padding:6px 10px;margin-top:8px!important}
-  .row-table{width:100%;border-collapse:collapse;margin:10px 0 0}
-  .row-table th{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;
-    color:var(--muted);text-align:left;padding:0 12px 6px 0;border-bottom:1px solid var(--ink);vertical-align:bottom}
-  .row-table th small{display:block;font-size:10px;font-weight:400;letter-spacing:.02em;text-transform:none}
-  .row-table td{padding:7px 12px 7px 0;border-bottom:1px solid var(--hairline);vertical-align:top;
-    font-family:var(--mono);font-size:11.5px;line-height:1.55}
+  .part-empty{border:1px dotted var(--muted);padding:6px var(--s3);margin-top:var(--s2)!important}
+  .row-table{width:100%;border-collapse:collapse;margin:var(--s3) 0 0}
+  .row-table th{font-size:var(--t-meta);font-weight:600;color:var(--muted);text-align:left;padding:0 var(--s3) 6px 0;
+    border-bottom:1px solid var(--ink);vertical-align:bottom}
+  .row-table th small{display:block;font-size:var(--t-meta);font-weight:400}
+  .row-table td{padding:var(--s2) var(--s3) var(--s2) 0;border-bottom:1px solid var(--hairline);vertical-align:top;
+    font-size:var(--t-ui);line-height:1.5;font-variant-numeric:tabular-nums}
   .row-table th.num,.row-table td.num{text-align:right;white-space:nowrap}
-  .row-table th.num{white-space:normal;min-width:13ch}
+  .row-table th.num{white-space:normal;min-width:11ch}
   .row-table th:last-child,.row-table td:last-child{padding-right:0}
-  .r-prompt{font-family:var(--serif);font-size:14.5px;line-height:1.45;margin:0}
+  /* wording identity: medical wording in green, everyday wording in ink, each under its column head or label */
+  .r-prompt{font-family:var(--serif);font-size:var(--t-body);line-height:1.45;margin:0}
   .r-c .r-prompt{color:var(--clinical)}
   .r-p .r-prompt{color:var(--patient)}
-  .r-top{color:var(--muted);font-size:11px;margin:2px 0 0;overflow-wrap:anywhere}
-  .r-top b{font-weight:600}
-  .r-c .r-top b{color:var(--clinical)}
-  .r-p .r-top b{color:var(--patient)}
+  .r-top{color:var(--muted);font-size:var(--t-meta);margin:2px 0 0;overflow-wrap:anywhere}
+  .r-top b{font-weight:600;color:var(--ink)}
   .r-pen b{font-weight:600}
   .r-pen>span{white-space:nowrap}
+  .r-target{font-family:var(--mono);font-size:var(--t-meta)}
   .row-table th.w-prompt{width:25%}
-  .row-table th.w-notes{width:19%}
+  .row-table th.w-notes{width:17%}
+  .r-notes{font-size:var(--t-meta)}
   .r-notes span{display:block}
-  .det-foot{font-family:var(--mono);font-size:10.5px;color:var(--muted);margin:10px 0 0;line-height:1.7;max-width:120ch}
+  .det-foot{font-size:var(--t-meta);color:var(--muted);margin:var(--s3) 0 0;line-height:1.55;max-width:110ch}
 
-  .back{display:inline-block;margin-top:30px;font-family:var(--mono);font-size:12px;
-    letter-spacing:.1em;text-transform:uppercase;color:var(--ink);text-decoration:none;
-    border-bottom:1px solid var(--ink);padding-bottom:2px}
-  .back:hover{color:var(--clinical);border-bottom-color:var(--clinical)}
-  .endnote{border-top:1px solid var(--ink);margin-top:42px;padding-top:14px}
-  .endnote p{font-family:var(--mono);font-size:12px;line-height:1.8;color:var(--muted);margin:0 0 14px}
-  footer{font-family:var(--mono);font-size:12px;line-height:1.9;color:var(--muted)}
+  .back{display:inline-block;margin-top:var(--s6);font-size:var(--t-ui);color:var(--ink);text-underline-offset:4px}
+  .back:hover{color:var(--clinical)}
+  .endnote{border-top:1px solid var(--ink);margin-top:var(--s6);padding-top:var(--s3)}
+  .endnote p,footer{font-size:var(--t-meta);line-height:1.6;color:var(--muted);margin:0 0 var(--s3);max-width:110ch}
   footer a{color:var(--muted);text-underline-offset:3px}
 
-  /* narrow screens: tables marked .stack become labelled blocks, one per row.
+  /* narrow screens: tables marked .stack become labelled blocks, one per row, the label above its value.
      Explicit ARIA table roles are set in the markup so the block layout keeps table semantics.
      The five-column run table stacks below 860px; the wider tables inside a run stack below 1100px. */
   @media (max-width:900px){
-    .tot{grid-template-columns:repeat(2,minmax(0,1fr))}
     .two,.legend{grid-template-columns:minmax(0,1fr)}
   }
   @media (max-width:1100px){
     .stack:not(.cat-table),.stack:not(.cat-table)>tbody,.stack:not(.cat-table)>tbody>tr,.stack:not(.cat-table)>tbody>tr>td{display:block}
     .stack:not(.cat-table)>thead{position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden}
-    .stack:not(.cat-table)>tbody>tr{padding:10px 0;border-bottom:1px solid var(--hairline)}
+    .stack:not(.cat-table)>tbody>tr{padding:var(--s3) 0;border-bottom:1px solid var(--hairline)}
     .stack:not(.cat-table)>tbody>tr:last-child{border-bottom:1px solid var(--ink)}
     .tbl.stack>tbody>tr>td,.row-table.stack>tbody>tr>td{border:0!important;padding:2px 0;text-align:left;white-space:normal}
-    .stack:not(.cat-table)>tbody>tr>td[data-l]{display:grid;grid-template-columns:13ch minmax(0,1fr);gap:0 10px;align-items:baseline}
-    .stack:not(.cat-table)>tbody>tr>td[data-l]::before{content:attr(data-l);font-family:var(--mono);font-size:10px;
-      letter-spacing:.06em;text-transform:uppercase;color:var(--muted);line-height:1.9}
-    .stack:not(.cat-table)>tbody>tr>td[data-l]>*{justify-self:start;min-width:0;max-width:100%}
-    .det{padding:12px 12px 14px}
+    .stack:not(.cat-table)>tbody>tr>td[data-l]::before{content:attr(data-l);display:block;font-family:var(--sans);
+      font-size:var(--t-meta);color:var(--muted)}
+    .det{padding-left:var(--s3)}
   }
   @media (max-width:860px){
     .cat-table{table-layout:auto}
     .cat-table.stack,.cat-table.stack>tbody,.cat-table.stack>tbody>tr,.cat-table.stack>tbody>tr>td{display:block}
     .cat-table.stack>thead{position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden}
-    .cat-table.stack>tbody>tr{padding:10px 0;border-bottom:1px solid var(--hairline)}
+    .cat-table.stack>tbody>tr{padding:var(--s3) 0;border-bottom:1px solid var(--hairline)}
     .cat-table.stack>tbody>tr:last-child{border-bottom:1px solid var(--ink)}
     .cat-table.stack>tbody>tr>td{border:0!important;padding:2px 0;text-align:left;white-space:normal}
-    .cat-table.stack>tbody>tr>td[data-l]{display:grid;grid-template-columns:10ch minmax(0,1fr);gap:0 10px;align-items:baseline}
-    .cat-table.stack>tbody>tr>td[data-l]::before{content:attr(data-l);font-family:var(--mono);font-size:10px;
-      letter-spacing:.06em;text-transform:uppercase;color:var(--muted);line-height:1.9}
-    .cat-table.stack>tbody>tr>td[data-l]>*{justify-self:start;min-width:0;max-width:100%}
-    .cat-table.stack>tbody>tr.cat-detail{padding:0 0 12px;border-bottom:1px solid var(--hairline)}
+    .cat-table.stack>tbody>tr>td[data-l]::before{content:attr(data-l);display:block;font-size:var(--t-meta);color:var(--muted)}
+    .cat-table.stack>tbody>tr.cat-detail{padding:0 0 var(--s3);border-bottom:1px solid var(--hairline)}
     .cat-table.stack>tbody>tr.cat-run.is-open{border-bottom:0}
     .cat-table.stack>tbody>tr.cat-detail>td{padding:0}
     .c-exp,.c-model,.c-meas,.c-status,.c-ctx{width:auto}
     .cat-x{padding:6px 0}
     .sg{white-space:normal}
+    .x-set{padding-left:0}
   }
   @media (max-width:760px){
-    .masthead nav{gap:8px 22px}
-    .masthead nav a{padding:7px 0}
-    body{font-size:16px}
-    .subtitle{font-size:17px}
-    .dateline{margin-top:16px}
-    .kv{grid-template-columns:minmax(0,1fr)}
-    .kv dd{margin:0 0 6px}
+    .kv,.tot{grid-template-columns:minmax(0,1fr)}
+    .kv dd,.tot dd{margin:0 0 6px}
     .flt-more .flt-g{flex:1 1 100%}
     .flt-sel{width:100%}
-    .chip{padding:7px 10px}
-    .btn{padding:7px 12px}
   }
 </style>
 </head>
@@ -337,45 +319,47 @@
   <div class="masthead-row">
     <a class="wordmark" href="../" aria-label="PatientWords home, the overview page"><span class="pw-p">Patient</span><span class="pw-w">Words</span></a>
     <nav aria-label="Site">
-      <a href="../start-here/">Start Here</a>
+      <a href="../start-here/">Start here</a>
+      <a href="../simulated-scenarios/">Scenarios</a>
+      <a href="./" aria-current="page">Results</a>
       <a href="../methods.html">Methods</a>
-      <a href="../technical/">Technical</a>
-      <a href="../wording-differences/">Wording Differences</a>
-      <a href="../dialect-differences/">Dialect Differences</a>
-      <a href="../translation/">Translation</a>
-      <a href="../simulated-scenarios/">Simulated Scenarios</a>
-      <a href="../llm/">LLM</a>
-      <a href="../multi-turn/">Multi-turn</a>
-      <a href="../phrase-dataset/">Phrase Dataset</a>
-      <a href="https://github.com/michaeldgreenphd/patientwords">GitHub</a>
+      <details class="nav-more">
+        <summary>More</summary>
+        <div class="nav-more-list">
+          <a href="../wording-differences/">Wording differences</a>
+          <a href="../dialect-differences/">Dialect differences</a>
+          <a href="../translation/">Translation</a>
+          <a href="../llm/">LLM responses</a>
+          <a href="../multi-turn/">Multi-turn</a>
+          <a href="../phrase-dataset/">Phrase dataset</a>
+          <a href="../technical/">Technical</a>
+          <a href="../clinical/">Clinical brief</a>
+          <a href="https://github.com/michaeldgreenphd/patientwords">GitHub</a>
+        </div>
+      </details>
     </nav>
   </div>
   <hr class="rule-fine">
 </header>
 <main id="main">
-  <p class="dateline">Results catalogue <span class="mode">· every measured run · a listing, not a claim · simulated data</span></p>
   <h1>Results catalogue</h1>
-  <p class="subtitle">Every run the engine has measured, with its status and what it may be used for.</p>
-  <div class="lead-labels">
-    <p class="draft-flag" id="cat-review" hidden></p>
-    <p class="traced" id="cat-inv"><span class="tp">inventory: loading</span></p>
-  </div>
+  <p class="subtitle">Every run the engine has measured, with its status and what it may be used for. A listing, not a sample and not a claim.</p>
+  <p class="shared" id="cat-review" hidden></p>
+  <p class="traced" id="cat-inv"><span class="tp">Inventory: loading</span></p>
   <div class="lead-links">
     <details class="meth" id="about">
       <summary>About this catalogue</summary>
       <div class="about">
         <p>This is the full list of measured runs. It is not a sample and it is not a claim. A run is listed whether its effect is negative, zero or positive, whether it finished or stopped part-way, and whether or not any analysis includes it.</p>
-        <p><b>What is measured.</b> Target-token probability: the next-token probability of the first encoded target token, on a scale from 0 to 1. It is a lexical proxy for language-model behaviour. It does not measure whether an answer is correct, how risky a reply is or what a patient understands. Each row is one measurement; the files carry no interval and no effect estimate. Nothing here is medical advice.</p>
-        <p><b>The stimuli.</b> The phrasings are test stimuli written by a model or by hand. They are not statements from patients. Clinical review status of the stimuli: <span id="about-review">not loaded</span>.</p>
+        <p><b>What is measured.</b> Target-token probability: the next-token probability of the first encoded target token, on a scale from 0 to 1. It is one token after one sentence-completion prompt. It does not measure whether an answer is correct, how risky a reply is or what a patient understands, and it is not a score of a whole answer. Each row is one measurement; the files carry no interval and no effect estimate. Nothing here is medical advice.</p>
+        <p><b>The stimuli.</b> The phrasings are test stimuli written by a model or by hand. They are not statements from patients. The two wordings of a pair are meant to describe one clinical situation; whether they do is what clinical review decides. Clinical review status of the stimuli: <span id="about-review">not loaded</span>.</p>
         <p><b>Evidence class.</b> It differs between runs and is stated on each row: <span id="about-evidence">not loaded</span>. Whether an analysis includes a run is a separate fact, decided by a named rule in <a href="#methods-source">Methods &amp; source</a>.</p>
       </div>
     </details>
     <p class="jump"><a href="#downloads">Downloads and field definitions</a> · <a href="#methods-source">Methods &amp; source</a></p>
   </div>
 
-  <div class="pending-note" id="cat-loading" role="status">
-    <span class="pending-mark"></span>loading · results catalogue index
-  </div>
+  <div class="pending-note" id="cat-loading" role="status">Loading the results catalogue index</div>
   <div class="cat-err" id="cat-error" role="alert" hidden></div>
 
   <div id="cat-content" hidden>
@@ -438,9 +422,9 @@
         <div class="cat-bar-l">
           <p class="cat-count" id="cat-count" role="status" aria-live="polite"></p>
           <p class="cat-order" id="cat-order"></p>
-          <button class="btn" type="button" id="f-reset">reset</button>
+          <button class="btn" type="button" id="f-reset">Reset</button>
         </div>
-        <p class="sum-dl">download all:
+        <p class="sum-dl">Download all:
           <a href="../data/results_catalogue/rows.csv" download="rows.csv">rows.csv</a> ·
           <a href="../data/results_catalogue/stimuli.csv" download="stimuli.csv">stimuli.csv</a> ·
           <a href="../data/results_catalogue/index.json" download="index.json">index.json</a></p>
@@ -450,14 +434,14 @@
           <thead role="rowgroup"><tr role="row">
             <th scope="col" role="columnheader" class="c-exp">Experiment <small>select a run to open it</small></th>
             <th scope="col" role="columnheader" class="c-model">Model</th>
-            <th scope="col" role="columnheader" class="c-meas">Measurements <small>public rows · target-token probability after the patient wording, against the clinical</small></th>
+            <th scope="col" role="columnheader" class="c-meas">Measurements <small>public rows; lower, equal, higher: the everyday wording against the medical</small></th>
             <th scope="col" role="columnheader" class="c-status">Run status</th>
-            <th scope="col" role="columnheader" class="c-ctx">Study context <small>evidence class · included in analysis · review</small></th>
+            <th scope="col" role="columnheader" class="c-ctx">Study context <small>evidence class; inclusion in an analysis</small></th>
           </tr></thead>
           <tbody id="cat-body" role="rowgroup"></tbody>
         </table>
       </div>
-      <div class="cat-more"><button class="btn" type="button" id="cat-more" hidden>show more</button></div>
+      <div class="cat-more"><button class="btn" type="button" id="cat-more" hidden>Show more</button></div>
     </section>
 
     <section id="downloads" aria-labelledby="h-dl">
@@ -480,9 +464,9 @@
           <dt>run_dir · stem · index · part</dt>
           <dd>the run id (the engine's run directory name), the stimulus set, the pair's index in that set, and the batch summary part that holds the row</dd>
           <dt>prob_clinical · prob_patient</dt>
-          <dd>target-token probability after the clinical wording and after the patient wording</dd>
+          <dd>target-token probability after the medical wording (the files call it clinical) and after the everyday wording (the files call it patient)</dd>
           <dt>language_penalty</dt>
-          <dd>prob_patient − prob_clinical, shown on this page as Difference. Negative: the target token is less likely after the patient wording. Zero and positive values are results and are listed the same way.</dd>
+          <dd>prob_patient − prob_clinical, shown on this page as Difference, everyday − medical, in probability. Negative: the target token is less likely after the everyday wording. Zero and positive values are results and are listed the same way. The field name is the files'; it describes the sign and makes no claim about either wording.</dd>
           <dt>target_token · top_clinical · top_patient · flipped</dt>
           <dd>the token whose probability is measured; the most likely next token after each wording; whether those two top tokens differ</dd>
           <dt>screening_status</dt>
@@ -558,15 +542,15 @@
 
       <section id="export-record" aria-labelledby="h-exp">
         <h3 id="h-exp">Export record</h3>
-        <p class="traced" id="cat-prov"><span class="tp">export record: loading</span></p>
+        <p class="traced" id="cat-prov"><span class="tp">Export record: loading</span></p>
       </section>
     </details>
   </div>
 
-  <a class="back" href="../">← Back home</a>
+  <a class="back" href="../">Back to the overview</a>
 
   <div class="endnote">
-    <p>SIMULATED DATA · test stimuli written by an LLM or by hand, not statements from patients · clinical review of the stimuli is pending · not medical advice.</p>
+    <p>Simulated data: the test stimuli were written by a language model or by hand and are not statements from patients. Clinical review of the stimuli is pending. Nothing here is medical advice.</p>
     <footer>
       Built with the <a href="https://github.com/michaeldgreenphd/patientwords-engine">patientwords-engine</a> pipeline ·
       hosted parts traced on <a href="https://neuronpedia.org">Neuronpedia</a> with <a href="https://github.com/safety-research/circuit-tracer">circuit-tracer</a> ·
@@ -631,6 +615,8 @@
   // ---------------------------------------------------------------- state
   var INDEX=null,RUNS=[],BYDIR=Object.create(null),ORDER=Object.create(null),EXP=Object.create(null);
   var LEGEND={},MEMBERS={},RESTR={},DEFAULT_M='',ANALYSIS_IDS=[],DISPLAY_IDS=[];
+  // the clinical-review status most runs record: stated once above the list, and in a row only where it differs
+  var SHARED_REVIEW='';
   var F={q:'',evidence:'',stimulus:'',state:'',visibility:'',membership:'',review:'',rows:'',sort:'',issue:false};
   var filtered=[],limit=PAGE_SIZE,openSet=Object.create(null),openRun='',detNodes=Object.create(null),rowsCache=Object.create(null),stimCache=Object.create(null);
   var SELECTS={evidence:'f-evidence',stimulus:'f-stimulus',state:'f-state',visibility:'f-visibility',
@@ -683,17 +669,18 @@
   }
 
   // ---------------------------------------------------------------- small builders
+  // A label is plain text; consecutive labels are separated by a middle dot in the stylesheet. The schema value
+  // stays in the title and in Methods & source.
   function badge(text,cls,title){
     var b=el('span','bdg'+(cls?' '+cls:''),text);
     if(title)b.title=title;
     return b;
   }
   function evidenceClassBadge(v,prefix){
-    var cls=v==='registered_cohort'?'bdg-reg':(v==='unclassified'||!v?'bdg-unc':'bdg-exp');
-    return badge((prefix||'')+human(v),cls,schemaTitle('evidence_class',v));
+    return badge((prefix||'')+human(v),'',schemaTitle('evidence_class',v));
   }
   function statusBadge(k,count,showCount){
-    return badge(human(k)+(showCount?' ×'+fmtInt(count):''),k==='completed'?'':'bdg-exp',schemaTitle('execution_state',k));
+    return badge(human(k)+(showCount?' ×'+fmtInt(count):''),'',schemaTitle('execution_state',k));
   }
   function td(label,cls){
     var c=el('td',cls||'');
@@ -721,10 +708,10 @@
   // "Included in analysis" for a run: the study version first, then any other analysis rule.
   function inclusionBadge(r){
     var parts=obj(r.analysis_parts),n=int(r.n_parts),k=DEFAULT_M?int(parts[DEFAULT_M]):0;
-    if(k>0)return badge('in study analysis'+(k<n?' ('+k+' of '+n+' parts)':''),'bdg-reg',memberTitle(DEFAULT_M));
+    if(k>0)return badge('in study analysis'+(k<n?' ('+k+' of '+n+' parts)':''),'',memberTitle(DEFAULT_M));
     var other=ANALYSIS_IDS.filter(function(m){return m!==DEFAULT_M&&int(parts[m])>0;});
-    if(other.length)return badge('in '+other.join(', ')+' only','bdg-exp',other.map(memberTitle).join('; '));
-    return badge('in no analysis','bdg-none','no analysis rule includes a part of this run');
+    if(other.length)return badge('in '+other.join(', ')+' only','',other.map(memberTitle).join('; '));
+    return badge('in no analysis','dim','no analysis rule includes a part of this run');
   }
   function inclusionText(r){
     var parts=obj(r.analysis_parts),n=int(r.n_parts);
@@ -757,11 +744,19 @@
     var counts={},order=[];
     RUNS.forEach(function(r){var k=str(r.clinical_review)||'not recorded';if(!(k in counts)){counts[k]=0;order.push(k);}counts[k]++;});
     var pending=RUNS.filter(function(r){return reviewPending(r.clinical_review);}).length;
+    SHARED_REVIEW=order.slice().sort(function(a,b){return counts[b]-counts[a];})[0]||'';
     var flag=$('cat-review');
     if(RUNS.length){
-      var bits=['clinical review of the stimuli pending: '+fmtInt(pending)+' of '+fmtInt(RUNS.length)+' runs'];
-      order.forEach(function(k){if(!reviewPending(k))bits.push(human(k)+': '+plural(counts[k],'run','runs'));});
-      flag.textContent=bits.join(' · ');
+      // Shared status, in one place. A row repeats none of it; it states its own review status only where
+      // that differs from the status most runs record.
+      flag.textContent='';
+      flag.appendChild(el('b','','Shared by the runs listed here. '));
+      var said='Simulated stimuli: test phrasings written by a model or by hand, not statements from patients. '+
+        'Clinical review of the stimuli is pending for '+
+        (pending===RUNS.length?'all '+fmtInt(RUNS.length)+' runs':fmtInt(pending)+' of '+fmtInt(RUNS.length)+' runs')+'.';
+      order.forEach(function(k){if(!reviewPending(k))said+=' '+human(k)+': '+plural(counts[k],'run','runs')+'.';});
+      if(order.length>1)said+=' A row states its review status only where it is not "'+human(SHARED_REVIEW)+'".';
+      flag.appendChild(document.createTextNode(said));
       flag.title=order.map(function(k){return 'clinical_review: '+k+' ('+plural(counts[k],'run','runs')+')';}).join('; ');
       flag.hidden=false;
     }
@@ -784,7 +779,7 @@
       inv.appendChild(el('b','',value));
       inv.appendChild(el('span','tp',' '+label));
     }
-    inv.appendChild(el('span','tp','inventory, not estimates: '));
+    inv.appendChild(el('span','tp','Inventory, not estimates: '));
     seg(fmtInt(t.runs),'runs');
     seg(fmtInt(t.rows_public),'public rows');
     seg(fmtInt(t.rows_withheld_sealed),'sealed rows, counted and never shown');
@@ -825,7 +820,7 @@
       d.appendChild(dd);figs.appendChild(d);
     });
     var s=$('tot-sign');s.textContent='';
-    s.appendChild(document.createTextNode('Sign of the difference (language_penalty) over the '+fmtInt(t.rows_public)+' public rows: '));
+    s.appendChild(document.createTextNode('Sign of the difference, everyday − medical (language_penalty), over the '+fmtInt(t.rows_public)+' public rows: '));
     [['negative',t.penalty_negative],['zero',t.penalty_zero],['positive',t.penalty_positive],['not measured',t.penalty_missing]]
       .forEach(function(x,i){
         if(i)s.appendChild(document.createTextNode(' · '));
@@ -1107,7 +1102,8 @@
     wrap=el('span','');
     var nPub=int(c.rows_public),nSealed=int(c.rows_withheld_sealed);
     if(r.visibility==='restricted'){
-      wrap.appendChild(badge('restricted','bdg-restricted',arr(r.restriction_reasons).join(', ')));
+      var held=el('span','ln');held.appendChild(el('b','','restricted'));held.title=arr(r.restriction_reasons).join(', ');
+      wrap.appendChild(held);
       wrap.appendChild(el('span','ln dim','no rows published'));
     }else if(nPub>0||nSealed>0){
       var ln=el('span','ln');
@@ -1127,7 +1123,7 @@
             var sp=el('span','sg');
             sp.setAttribute('data-sign',s[2]);
             sp.title=fmtInt(int(s[1]))+' of '+fmtInt(nPub)+' public rows: target-token probability '+s[0]+
-              ' after the patient wording ('+s[2]+' language_penalty)';
+              ' after the everyday wording than after the medical wording ('+s[2]+' language_penalty)';
             sp.appendChild(document.createTextNode(s[0]+' '));
             sp.appendChild(el('b','',fmtInt(int(s[1]))));
             signs.appendChild(sp);
@@ -1151,17 +1147,21 @@
     cell=td('Status','c-status');
     wrap=el('span','');
     var st=obj(r.execution_states),sk=Object.keys(st).sort(),many=int(r.n_parts)>1;
-    if(!sk.length)wrap.appendChild(badge('no summary part','bdg-none','this run directory holds no batch summary part'));
+    if(!sk.length)wrap.appendChild(badge('no summary part','dim','this run directory holds no batch summary part'));
     sk.forEach(function(k){wrap.appendChild(statusBadge(k,st[k],many));});
     cell.appendChild(wrap);row.appendChild(cell);
 
     cell=td('Context','c-ctx');
     wrap=el('span','');
     var l1=el('span','ln');l1.appendChild(evidenceClassBadge(str(r.evidence_class)));wrap.appendChild(l1);
-    var l2=el('span','ln');l2.appendChild(inclusionBadge(r));
-    var rv=el('span','dim',reviewPending(r.clinical_review)?'review pending':'review: '+human(r.clinical_review));
-    rv.title='clinical_review: '+(str(r.clinical_review)||'not recorded');
-    l2.appendChild(rv);wrap.appendChild(l2);
+    var l2=el('span','ln');l2.appendChild(inclusionBadge(r));wrap.appendChild(l2);
+    // the review status is stated once above the list; a row gives its own only where it differs
+    if((str(r.clinical_review)||'not recorded')!==SHARED_REVIEW){
+      var rv=el('span','ln','review: '+human(r.clinical_review));
+      rv.setAttribute('data-exception','review');
+      rv.title='clinical_review: '+(str(r.clinical_review)||'not recorded');
+      wrap.appendChild(rv);
+    }
     cell.appendChild(wrap);row.appendChild(cell);
     return row;
   }
@@ -1190,7 +1190,7 @@
     $('cat-order').textContent='ordered by '+(SORT_TEXT[F.sort]||SORT_TEXT[''])+'; never by effect';
     var more=$('cat-more'),left=filtered.length-shown;
     more.hidden=left<=0;
-    if(left>0)more.textContent='show '+fmtInt(Math.min(PAGE_SIZE,left))+' more ('+fmtInt(left)+' not shown)';
+    if(left>0)more.textContent='Show '+fmtInt(Math.min(PAGE_SIZE,left))+' more ('+fmtInt(left)+' not shown)';
   }
   function render(){
     filtered=visibleRuns();
@@ -1225,7 +1225,7 @@
     d.appendChild(el('summary','','Methods & source'));
     var inner=el('div','src-in'),dl=el('dl','kv'),c=obj(r.counts);
     dl.appendChild(el('dt','','Run id'));
-    var idd=el('dd','src-id');idd.appendChild(wrapId(r.run_dir));dl.appendChild(idd);
+    var idd=el('dd','src-id id');idd.appendChild(wrapId(r.run_dir));dl.appendChild(idd);
     kv(dl,'Engine source',str(r.source));
     kv(dl,'Stimulus set',str(r.stem)+' · stimulus class '+human(r.stimulus_class));
     kv(dl,'Model',str(r.model)?r.model+(str(r.model_cohort)?' · cohort '+r.model_cohort:''):(str(r.instrument)?'instrument: '+r.instrument:'not recorded'));
@@ -1263,8 +1263,8 @@
         row.setAttribute('data-part',str(m.name));
         cell=td('Part');cell.appendChild(el('span','',fmtInt(i+1)+' of '+fmtInt(parts.length)));row.appendChild(cell);
         cell=td('File');w=el('span','');
-        w.appendChild(el('span','ln',str(m.name)||'unnamed part'));
-        var hash=el('span','ln dim part-sha',str(m.sha256)?'sha256 '+m.sha256:'sha256 not recorded');
+        w.appendChild(el('span','ln id',str(m.name)||'unnamed part'));
+        var hash=el('span','ln dim id part-sha',str(m.sha256)?'sha256 '+m.sha256:'sha256 not recorded');
         w.appendChild(hash);
         if(str(m.backend))w.appendChild(el('span','ln dim','backend '+m.backend));
         cell.appendChild(w);row.appendChild(cell);
@@ -1302,12 +1302,13 @@
 
     // local labels: this panel can be read or shared without the rest of the page
     var lab=el('p','det-labels');
+    lab.appendChild(document.createTextNode('This run: '));
     lab.appendChild(badge('simulated stimuli','','test phrasings written by a model or by hand; not statements from patients'));
     lab.appendChild(evidenceClassBadge(str(r.evidence_class),'evidence: '));
-    lab.appendChild(badge('clinical review: '+human(r.clinical_review),'bdg-draft','clinical_review: '+(str(r.clinical_review)||'not recorded')));
+    lab.appendChild(badge('clinical review: '+human(r.clinical_review),'','clinical_review: '+(str(r.clinical_review)||'not recorded')));
     var smp=badge('sampling: '+human(r.sampling),'',schemaTitle('sampling',str(r.sampling)));
     lab.appendChild(smp);
-    lab.appendChild(badge('a listing, not a claim','bdg-none','being listed in the catalogue places this run in no analysis and makes no claim'));
+    lab.appendChild(badge('a listing, not a claim','','being listed in the catalogue places this run in no analysis and makes no claim'));
     box.appendChild(lab);
 
     var c=obj(r.counts),dl=el('dl','kv');
@@ -1381,7 +1382,7 @@
       status.hidden=true;status.textContent='';status.setAttribute('data-state','loaded');
       body.textContent='';links.textContent='';
       var dlp=el('p','sum-dl');
-      dlp.appendChild(document.createTextNode('download this run: '));
+      dlp.appendChild(document.createTextNode('Download this run: '));
       var a=el('a','',r.rows_file);a.href=BASE+r.rows_file;a.setAttribute('download','');dlp.appendChild(a);
       if(STIM_RE.test(stimFile)){
         dlp.appendChild(document.createTextNode(' · prompt pairs: '));
@@ -1390,6 +1391,7 @@
       dlp.style.marginTop='12px';
       links.appendChild(dlp);
       links.appendChild(el('p','det-foot','Values are target-token probabilities on a scale from 0 to 1 (About this catalogue). '+
+        'A difference is the everyday wording’s value minus the medical wording’s, in probability: 0.01 is one percentage point. '+
         'Each row is one measurement; the files carry no interval. Values are displayed to four decimal places; the files carry the stored values. '+
         'Prompts are shown verbatim, including intentional misspellings.'));
       if(stim.failed){
@@ -1402,7 +1404,7 @@
       renderParts(r,doc,stim.failed?null:stim,body);
     }).catch(function(e){
       setStatus(status,'is-fail','Failed to load','The rows for this run could not be loaded ('+failLabel(e)+'). File: '+str(r.rows_file));
-      var retry=el('button','btn','retry');retry.type='button';
+      var retry=el('button','btn','Retry');retry.type='button';
       retry.addEventListener('click',function(){loadDetail(r,status,links,body);});
       status.appendChild(retry);
       body.textContent='';
@@ -1426,7 +1428,7 @@
     var p=el('p','r-prompt');
     if(typeof text==='string'&&text)p.textContent=text;
     else{p.textContent=haveStimuli?'prompt not recorded':'prompt not loaded';p.className='r-prompt dim';}
-    w.appendChild(p);w.appendChild(spreadLine(spread,'top tokens'));
+    w.appendChild(p);w.appendChild(spreadLine(spread,'most probable next tokens'));
     c.appendChild(w);
     return c;
   }
@@ -1442,13 +1444,13 @@
     var r=tr('res'),c,own=isObj(row.prompts)?row.prompts:null;
     var pair=own||obj(obj(pairs)[String(row.index)]);
     c=td('Index','num');c.appendChild(el('span','',row.index==null?DASH:String(row.index)));r.appendChild(c);
-    r.appendChild(promptCell('Clinical','r-c',pair.clinical_prompt,row.spread_clinical,haveStimuli||!!own));
-    r.appendChild(promptCell('Patient','r-p',pair.patient_prompt,row.spread_patient,haveStimuli||!!own));
-    c=td('Target');c.appendChild(el('span',str(row.target_token)?'':'dim',str(row.target_token)||DASH+' not recorded'));r.appendChild(c);
-    r.appendChild(numCell('P clinical',row.prob_clinical,'prob_clinical'));
-    r.appendChild(numCell('P patient',row.prob_patient,'prob_patient'));
+    r.appendChild(promptCell('Medical wording','r-c',pair.clinical_prompt,row.spread_clinical,haveStimuli||!!own));
+    r.appendChild(promptCell('Everyday wording','r-p',pair.patient_prompt,row.spread_patient,haveStimuli||!!own));
+    c=td('Target token');c.appendChild(el('span',str(row.target_token)?'r-target':'dim',str(row.target_token)||DASH+' not recorded'));r.appendChild(c);
+    r.appendChild(numCell('Target-token probability, medical wording',row.prob_clinical,'prob_clinical'));
+    r.appendChild(numCell('Target-token probability, everyday wording',row.prob_patient,'prob_patient'));
 
-    c=td('Difference','r-pen');
+    c=td('Difference, everyday − medical','r-pen');
     var v=row.language_penalty,word=signWord(v),pw=el('span','');
     pw.setAttribute('data-sign',isNum(v)?word:'missing');
     if(isNum(v)){
@@ -1471,8 +1473,8 @@
     if(str(row.sampling))notes.appendChild(el('span','','sampling: '+human(row.sampling)));
     if(own)notes.appendChild(el('span','','traced with its own prompt text, which differs from the stimulus set entry'));
     if(isObj(row.clinical_mass)){
-      notes.appendChild(el('span','dim','clinical-feature mass: clinical '+(fmtNum(row.clinical_mass.clinical)||DASH)+
-        ' · patient '+(fmtNum(row.clinical_mass.patient)||DASH)));
+      notes.appendChild(el('span','dim','clinical-feature mass: medical wording '+(fmtNum(row.clinical_mass.clinical)||DASH)+
+        ' · everyday wording '+(fmtNum(row.clinical_mass.patient)||DASH)));
     }
     c.appendChild(notes);r.appendChild(c);
     return r;
@@ -1483,9 +1485,9 @@
     t.setAttribute('aria-label',caption);
     var head=document.createElement('thead');head.setAttribute('role','rowgroup');
     var hr=tr('');
-    [['Index','num',''],['Clinical wording','w-prompt',''],['Patient wording','w-prompt',''],['Target token','',''],
-     ['Target-token probability','num','clinical wording'],['Target-token probability','num','patient wording'],
-     ['Difference','','patient − clinical'],['Notes','w-notes','']].forEach(function(h){
+    [['Index','num',''],['Medical wording','w-prompt',''],['Everyday wording','w-prompt',''],['Target token','',''],
+     ['Target-token probability','num','medical wording'],['Target-token probability','num','everyday wording'],
+     ['Difference','','everyday − medical, in probability'],['Notes','w-notes','']].forEach(function(h){
       var th=el('th',h[1],h[0]);th.scope='col';th.setAttribute('role','columnheader');
       if(h[2])th.appendChild(el('small','',h[2]));
       hr.appendChild(th);
@@ -1523,10 +1525,10 @@
       line.appendChild(statusBadge(state,0,false));
       var inside=rp&&Array.isArray(rp.analysis_memberships)?rp.analysis_memberships:
         arr(m['in']).filter(function(x){return ANALYSIS_IDS.indexOf(x)>=0;});
-      if(DEFAULT_M&&inside.indexOf(DEFAULT_M)>=0)line.appendChild(badge('in study analysis','bdg-reg',memberTitle(DEFAULT_M)));
-      else if(inside.length)line.appendChild(badge('in '+inside.join(', ')+' only','bdg-exp',inside.map(memberTitle).join('; ')));
-      else line.appendChild(badge('in no analysis','bdg-none','no analysis rule includes this part; the reason is in Methods & source'));
-      if(resultsText(m,'results recorded','pairs requested'))line.appendChild(el('span','dim',resultsText(m,'results recorded','pairs requested')));
+      if(DEFAULT_M&&inside.indexOf(DEFAULT_M)>=0)line.appendChild(badge('in study analysis','',memberTitle(DEFAULT_M)));
+      else if(inside.length)line.appendChild(badge('in '+inside.join(', ')+' only','',inside.map(memberTitle).join('; ')));
+      else line.appendChild(badge('in no analysis','','no analysis rule includes this part; the reason is in Methods & source'));
+      if(resultsText(m,'results recorded','pairs requested'))line.appendChild(badge(resultsText(m,'results recorded','pairs requested'),'dim',''));
       sec.appendChild(line);
       if(str(m.integrity_detail))sec.appendChild(el('p','part-out','Integrity detail: '+m.integrity_detail));
 
@@ -1592,7 +1594,7 @@
     e.appendChild(el('div','','No runs are shown. The page reads data/results_catalogue/index.json.'));
     e.hidden=false;
     $('cat-inv').textContent='';
-    $('cat-inv').appendChild(el('span','tp','inventory: not available'));
+    $('cat-inv').appendChild(el('span','tp','Inventory: not available'));
   }
   function start(data){
     if(!isObj(data)||!Array.isArray(data.runs)){
