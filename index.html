@@ -301,7 +301,7 @@
   <section class="ruled" id="methods-source" aria-labelledby="h-source">
     <h2 id="h-source">Methods and source</h2>
     <p>The <a href="methods.html">methods page</a> describes the pipeline step by step, with its <a href="methods.html#limitations">limitations</a>. The example pair and the summary on this page are read, when the page loads, from <a href="https://github.com/michaeldgreenphd/patientwords/blob/main/data/simulated_scenarios.json">the scenario measurements file</a>; the paraphrase comparison is read from <a href="https://github.com/michaeldgreenphd/patientwords/blob/main/data/provenance.json">the provenance file</a>.</p>
-    <p><strong>Simulated data.</strong> The sentence pairs across this site are written and checked by language models; the predictions and traces are recorded model behaviour. The phrase dataset is the exception: Michael D. Green assembled its pairs by hand on Neuronpedia. The team is interviewing patients about how they use language models and what they ask them.</p>
+    <p><strong>Simulated data.</strong> Most sentence pairs across this site are written and checked by language models; the predictions and traces are recorded model behaviour. The exceptions are labelled where they appear: the <a href="phrase-dataset/">phrase dataset</a>, which Michael D. Green assembled by hand on Neuronpedia, and the hand-authored and third-party sets in the <a href="results/">Results catalogue</a>. The team is interviewing patients about how they use language models and what they ask them.</p>
     <footer>
       Built with the <a href="https://github.com/michaeldgreenphd/patientwords-engine">patientwords-engine</a> pipeline
       on <a href="https://neuronpedia.org">Neuronpedia</a> ·
@@ -447,8 +447,8 @@
       var lower=scored.filter(function(s){return s.language_penalty<sc.language_penalty;}).length;
       var higher=scored.filter(function(s){return s.language_penalty>sc.language_penalty;}).length;
       $('ex-rank').textContent=sc.language_penalty<0
-        ?'Its difference is the '+ordinal(lower+1)+' largest decrease among the '+count(scored.length)+' scored pairs; it is not a typical pair.'
-        :'Its difference is the '+ordinal(higher+1)+' largest increase among the '+count(scored.length)+' scored pairs; it is not a typical pair.';
+        ?'Its difference is the '+ordinal(lower+1)+' largest decrease among the '+count(scored.length)+' scored pairs in the published file; it is not a typical pair.'
+        :'Its difference is the '+ordinal(higher+1)+' largest increase among the '+count(scored.length)+' scored pairs in the published file; it is not a typical pair.';
     }
     if(typeof sc.index==='number'){
       $('ex-record').href='simulated-scenarios/scenario.html?sim='+sc.index;
@@ -466,7 +466,7 @@
     var sum=payload.summary||{}, pen=sum.penalty||{}, box=$('hero-caveat');
     var text='';
     if(isNum(pen.mean_phrase_deduped)&&isNum(pen.n_phrases)){
-      text='Across all '+count(pen.n_phrases)+' distinct scored phrases, the mean difference (everyday '+MINUS+' medical) on '+
+      text='Across the '+count(pen.n_phrases)+' distinct scored phrases in the published file, the mean difference (everyday '+MINUS+' medical) on '+
         String(sum.model||'the reference model')+' is '+pp(pen.mean_phrase_deduped)+' percentage points';
       if(Array.isArray(pen.ci95)&&isNum(pen.ci95[0])&&isNum(pen.ci95[1])){
         text+=' (95% bootstrap interval over phrases: '+pp(pen.ci95[0])+' to '+pp(pen.ci95[1])+')';
@@ -475,7 +475,7 @@
     }else if(scored.length){
       /* an older file without the summary block: the plain mean over scored rows, with no interval */
       var mean=scored.reduce(function(a,s){return a+s.language_penalty;},0)/scored.length;
-      text='Across all '+count(scored.length)+' scored pairs, the mean difference (everyday '+MINUS+' medical) is '+pp(mean)+
+      text='Across the '+count(scored.length)+' scored pairs in the published file, the mean difference (everyday '+MINUS+' medical) is '+pp(mean)+
         ' percentage points; this file carries no interval. Registered per-model estimates are on the ';
     }
     if(text){

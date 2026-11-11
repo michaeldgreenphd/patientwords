@@ -148,7 +148,7 @@ Model gemma-2-2b · hosted circuit-tracer via Neuronpedia · traced July 7, 2026
 The methods page describes the pipeline step by step, with its limitations. The example pair and the summary on this page are read, when the page loads, from the scenario measurements file; the paraphrase comparison is read from the provenance file.
 
 <!-- id: index.b040 -->
-Simulated data. The sentence pairs across this site are written and checked by language models; the predictions and traces are recorded model behaviour. The phrase dataset is the exception: Michael D. Green assembled its pairs by hand on Neuronpedia. The team is interviewing patients about how they use language models and what they ask them.
+Simulated data. Most sentence pairs across this site are written and checked by language models; the predictions and traces are recorded model behaviour. The exceptions are labelled where they appear: the phrase dataset, which Michael D. Green assembled by hand on Neuronpedia, and the hand-authored and third-party sets in the Results catalogue. The team is interviewing patients about how they use language models and what they ask them.
 
 <!-- id: index.b041 -->
 *footer (provenance):* Built with the patientwords-engine pipeline on Neuronpedia · attribution graphs by circuit-tracer · every number on this page traces to a data file in this repository · how the pipeline works
@@ -157,7 +157,7 @@ Simulated data. The sentence pairs across this site are written and checked by l
 
 ## Start Here — PatientWords — `start-here/index.html`
 
-> ⚑ meta description: A plain-language introduction: doctors interpret many ways of saying the same thing; a language model can answer each one differently. What we trace and measure.
+> ⚑ meta description: A plain-language introduction: doctors interpret many ways of saying the same thing; a language model’s next-word prediction can differ for each one. What we trace and measure.
 
 <!-- id: start-here.b001 -->
 *dateline:* Start here · the whole idea simplified
@@ -208,10 +208,10 @@ If an assistant responds less well to everyday words, the people affected are th
 ### Three phrasings, three different predictions
 
 <!-- id: start-here.b017 -->
-We gave a language model the same complaint in three phrasings and recorded its most likely next word. After the medical phrasing it is the start of “antacid”. After the other two it is a food word, even in the sentence that uses a formal term.
+We gave a language model similar complaints in three phrasings and recorded its most likely next word. After the medical phrasing it is the start of “antacid”. After the other two it is a food word, even in the sentence that uses a formal term.
 
 <!-- id: start-here.b018 -->
-Gemma 2 2B · model-generated prompts · clinical review pending · the model predicts word pieces: “ant” begins “antacid” · the formal-term row is one case
+Gemma 2 2B · model-generated prompts · clinical review pending · sentences shortened; the formal-term row is one case, from a different sentence and run · the model predicts word pieces: “ant” begins “antacid”
 
 <!-- id: start-here.b019 -->
 3 · Try it
@@ -295,60 +295,63 @@ Research direction · illustration
 No single fix closes this gap. Language evolves; dialects, slang, and communities change, and a test built once goes stale. The method has to be a loop.
 
 <!-- id: start-here.b046 -->
-- Pair each medical phrasing with its everyday phrasing. Count how often the most likely next word drops in urgency.
+Illustration of the method · select a stage to read its steps
 
 <!-- id: start-here.b047 -->
-- nowsimulated phrases, pre-registered, a tenth sealed for checking.
+- Pair each medical phrasing with its everyday phrasing. Count how often the most likely next word drops in urgency.
 
 <!-- id: start-here.b048 -->
-- nextreal patient language, clinician-checked, community-validated dialects.
+- nowsimulated phrases, pre-registered, a tenth sealed for checking.
 
 <!-- id: start-here.b049 -->
-- Fortify the model: put a line of medical context in front of the question.
+- nextreal patient language, clinician-checked, community-validated dialects.
 
 <!-- id: start-here.b050 -->
-- Train on patient language: include the way people actually speak in the training data. Models learn idioms, misspellings, and dialects the way clinicians do.
+- Fortify the model: put a line of medical context in front of the question.
 
 <!-- id: start-here.b051 -->
-- Translate only behind a regression check: re-test every rewrite, because rewrites can lose clinical content.
+- Train on patient language: include the way people actually speak in the training data. Models learn idioms, misspellings, and dialects the way clinicians do.
 
 <!-- id: start-here.b052 -->
-- Re-run the audit on a schedule.
+- Translate only behind a regression check: re-test every rewrite, because rewrites can lose clinical content.
 
 <!-- id: start-here.b053 -->
-- Refresh the phrase sets and urgency of recommendations with clinician and community review.
+- Re-run the audit on a schedule.
 
 <!-- id: start-here.b054 -->
-- Stress-test the edges with supplementary sets.
+- Refresh the phrase sets and urgency of recommendations with clinician and community review.
 
 <!-- id: start-here.b055 -->
-- nextMore edge sets: alarm-sounding wording, misspellings.
+- Stress-test the edges with supplementary sets.
 
 <!-- id: start-here.b056 -->
-- Watch the circuit for drift as models update.
+- nextMore edge sets: alarm-sounding wording, misspellings.
 
 <!-- id: start-here.b057 -->
-#### Two kinds of loss, two kinds of fix
+- Watch the circuit for drift as models update.
 
 <!-- id: start-here.b058 -->
-A layer-by-layer readout shows where the target is lost: some targets form and drop out at the last step, some never form at all. The running census, pair by pair, lives on the Technical page; the methods page shows the causal check.
+#### Two kinds of loss, two kinds of fix
 
 <!-- id: start-here.b059 -->
-9 · The mended system
+A layer-by-layer readout shows where the target is lost: some targets form and drop out at the last step, some never form at all. The running census, pair by pair, lives on the Technical page; the methods page shows the causal check.
 
 <!-- id: start-here.b060 -->
-### Closing the loop: Native orchestration and human handoff
+9 · The mended system
 
 <!-- id: start-here.b061 -->
-The goal is a model that no longer relies on a translation patch. It would map patient wording to safe clinical pathways itself, giving immediate guidance (while communicating confidence) and handing off to human clinicians.
+### Closing the loop: Native orchestration and human handoff
 
 <!-- id: start-here.b062 -->
-Research direction · illustration
+The goal is a model that no longer relies on a translation patch. It would map patient wording to safe clinical pathways itself, giving immediate guidance (while communicating confidence) and handing off to human clinicians.
 
 <!-- id: start-here.b063 -->
-SIMULATED DATA: the sentence pairs measured across this site are written by an LLM and checked automatically.
+Research direction · illustration
 
 <!-- id: start-here.b064 -->
+SIMULATED DATA: the sentence pairs measured across this site are written by an LLM and checked automatically.
+
+<!-- id: start-here.b065 -->
 *footer (provenance):* Built with the patientwords-engine pipeline on Neuronpedia · attribution graphs by circuit-tracer ·
 
 *Not extracted: text this page's JS generates at runtime from data files (tables, counts, chart labels).*

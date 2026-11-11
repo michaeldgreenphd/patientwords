@@ -767,7 +767,7 @@
     evKeys.sort().forEach(function(k,i){
       if(i)span.appendChild(document.createTextNode(' '));
       span.appendChild(evidenceClassBadge(k));
-      span.appendChild(document.createTextNode(plural(ev[k],'run','runs')+(i<evKeys.length-1?';':'')));
+      span.appendChild(document.createTextNode(plural(ev[k],'run','runs')));   /* the stylesheet's middle dot separates the items */
     });
     if(!evKeys.length)span.textContent='not recorded';
 
