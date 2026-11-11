@@ -551,10 +551,22 @@
       // panels:{clinical|patient|translation:{input,trigger,concepts:[...],output,
       // on_target}}, note}), swap the real tokens in AND relabel. The disclaimer
       // only flips to "Empirical" when the content is actually a measurement.
+      // The grid has role="img", so its aria-label is all a screen reader gets of
+      // the panels: the label in the markup describes the hand-authored panels,
+      // and the measured label is built below from the panels as displayed. When
+      // the file is absent, does not load, is not empirical or leaves a panel
+      // incomplete, the panels, the caption and the label all stay the
+      // illustrative ones. The Technical page's three-panel figure does the same.
       fetch('data/jspace.json',{cache:'no-cache'}).then(function(r){return r.ok?r.json():null;}).then(function(d){
         if(!d||!d.empirical||!d.panels)return;
         var fig=document.querySelector('.jspace'); if(!fig)return;
-        [].forEach.call(fig.querySelectorAll('.jspanel'),function(panel){
+        var panels=fig.querySelectorAll('.jspanel');
+        // Bind every panel or none. A panel the file left incomplete would stay hand-authored beside a measured
+        // one, under a caption and a label that call the figure measured.
+        var complete=[].every.call(panels,function(panel){var q=d.panels[panel.getAttribute('data-jsrole')];
+          return q&&q.input&&q.concepts&&q.concepts.length&&q.output;});
+        if(!complete)return;
+        [].forEach.call(panels,function(panel){
           var p=d.panels[panel.getAttribute('data-jsrole')]; if(!p)return;
           var off=(p.on_target===false);
           var inEl=panel.querySelector('.jspanel-in');
@@ -597,6 +609,20 @@
           }
           cap.appendChild(document.createTextNode('.'));
         }
+        // The text alternative, from what each panel now displays: its heading, its sentence, its pills, its output
+        // box, and whether that box is the green one (the output is the pair's clinical target) or the red one.
+        function listed(w){return w.length>1?w.slice(0,-1).join(', ')+' and '+w[w.length-1]:(w[0]||'');}
+        function describe(panel){
+          function shown(sel){var n=panel.querySelector(sel);return n?n.textContent.replace(/\s+/g,' ').trim():'';}
+          var head=shown('.jspanel-head').split('·'), out=panel.querySelector('.jsout');
+          var pills=[].map.call(panel.querySelectorAll('.jspill'),function(x){return x.textContent.trim();});
+          return head[0].trim()+', '+(head[1]||'').trim().toLowerCase()+' '+shown('.jspanel-in')+
+            ': the lens reads '+listed(pills)+' at the middle layers, and the output is “'+shown('.jsout')+'”, which is '+
+            (out&&/\bjsout-ok\b/.test(out.className)?'':'not ')+'the pair’s clinical target.';
+        }
+        var grid=fig.querySelector('.jspace-grid');
+        if(grid)grid.setAttribute('aria-label',({2:'Two',3:'Three'}[panels.length]||panels.length)+
+          ' panels, one measured pair. '+[].map.call(panels,describe).join(' '));
       }).catch(function(){});
     })();
     </script>

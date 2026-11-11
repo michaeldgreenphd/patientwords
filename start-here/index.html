@@ -532,8 +532,10 @@
     <h2>Measure, mend, maintain: a cycle, not a patch</h2>
     <p>No single fix closes this gap. Language evolves; dialects, slang, and communities change, and a test built once goes stale. The method has to be a loop.</p>
     <div class="cycle-svg">
-      <svg viewBox="0 0 360 268" role="img"
-        aria-label="A circular three-stage cycle. Measure leads to mend, labelled wording gap quantified. Mend leads to maintain, labelled baseline set. A teal return curve labelled language drifts, re-measure leads from maintain back to measure.">
+      <!-- The svg carries no role of its own (role="none"): an element with role="img" hides everything inside it
+           from assistive technology, and the three tabs below must reach it. The tab list and the drawing are two
+           siblings: the tab list, then the arrows and their labels as one image with the text alternative. -->
+      <svg viewBox="0 0 360 268" role="none">
         <g class="cyc-tabs" role="tablist" aria-label="Choose a loop stage to read its steps">
           <g class="cyc-tab" id="tab-measure" role="tab" aria-selected="true" aria-controls="panel-measure" tabindex="0">
             <rect x="132" y="37" width="96" height="22" rx="3" fill="transparent"/>
@@ -548,6 +550,7 @@
             <text x="90" y="208" text-anchor="middle">MAINTAIN</text>
           </g>
         </g>
+        <g role="img" aria-label="A circular three-stage cycle. Measure leads to mend, labelled wording gap quantified. Mend leads to maintain, labelled baseline set. A teal return curve labelled language drifts, re-measure leads from maintain back to measure.">
         <g style="stroke:var(--ink);stroke-width:1.2;fill:none">
           <path d="M222.3,57.0 A104,104 0 0 1 283.0,166.5"/>
           <path d="M287.5,158.7 L283.0,166.5 L280.8,157.8"/>
@@ -570,6 +573,7 @@
         <text style="font-family:var(--mono);font-size:9px;fill:var(--muted)">
           <textPath href="#cyc-fwd2-label" startOffset="50%" text-anchor="middle">baseline set</textPath>
         </text>
+        </g>
       </svg>
     </div>
     <p class="cap cyc-hint">Select a stage</p>
@@ -709,7 +713,7 @@
 </script>
 <script>
 (function(){
-  // Step 7 cycle: the SVG stage labels are an ARIA tablist; selecting one
+  // Step 8 cycle: the SVG stage labels are an ARIA tablist; selecting one
   // reveals only that stage's steps. Default is Measure (set in markup).
   var tabs=[].slice.call(document.querySelectorAll('.cyc-tab'));
   if(!tabs.length)return;

@@ -97,13 +97,15 @@ The Multi-turn page has two more sample fixtures: `petri_multiturn_summary.sampl
 random grades, `"sample": true` and a `_note` saying so). They were created to build
 the page before publication and remain explicit development fixtures. The current
 `REAL_DATA_PUBLISHED` constant is `true`, so the page loads committed real files
-by default; `?sample=1` selects the synthetic fixtures. When
-that constant is `false`, the page fetches only samples. It shows a "sample data"
-notice whenever it renders them. Real files have the same keys without `sample`.
-The two files are one unit: if either real file is missing, the page renders both
-samples (never a real summary beside sample transcripts). The constant exists
-because `check_pages.py` fails on any 404 under `data/`, so a real-first fetch
-before the real files exist would turn site CI red. The page was gated on the final
+by default; `?sample=1` selects the synthetic fixtures, and nothing else does. When
+that constant is `false`, the page requests no result file and says that no results
+are published. It shows a "sample data" notice whenever it renders the fixtures. Real
+files have the same keys without `sample`. The two files are one unit: if either real
+file fails to load, the page says the results did not load and draws nothing from
+either file (a sample never replaces a published file). A pair that loads and lists no
+triple and no conversation reads as no results published. The constant exists because
+`check_pages.py` fails on any 404 under `data/`, so a fetch of the real files before
+they exist would turn site CI red. The page was gated on the final
 pre-registered analysis, the engine exporter on `main`, the vendor reproduction pack
 (engine wave-2 decision 16) and the owner's sign-off. The owner set the pack's send
 aside before publication (engine deviation D3, 2026-09-27, in
@@ -130,6 +132,17 @@ checks file shapes, not who reads them.
   JavaScript. The current page's link carries `aria-current="page"`; when that link is
   inside the disclosure the summary reads "More · <page name>" (`.nav-here`).
   `experiments/` stays `noindex` and is not linked from the navigation.
+  `docs/site_routes.json` states this navigation: the labels, their order, the href each
+  page uses and which link is current. It also lists every public route, the five
+  redirect stubs with their targets, the established anchors, and the address parameters
+  and fragments a page reads at run time (`scenario.html?sim=`, `#s<N>` on the LLM page).
+  No page loads the file. The engine's
+  `../patientwords-engine/scripts/check_site_links.py` compares the pages with it and
+  resolves every internal link and fragment. A fragment that is not an element's `id` in
+  the page source passes only where the definition declares it. Change the definition in
+  the same change as the pages; the command is in [verify.md](../verify.md).
+  Ownership: `docs/site_routes.json` is hand-maintained in this repository. No engine
+  script writes it.
 - Filter/model chips: `.chip` buttons in `.chip-g` groups with `role="group"`,
   `aria-pressed` toggled with the `.on` class.
 - Sortable table headers: real `<button>`s inside `th[data-key]`, `aria-sort` on the

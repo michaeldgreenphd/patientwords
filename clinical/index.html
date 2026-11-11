@@ -232,6 +232,24 @@
   function el(t,c,x){var e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e;}
   var PREF_BATCH='pairs_20260710T050657Z', PREF_INDEX=5, VIG_MODEL='gemma-2-2b';
 
+  // The line under the verbatim pair needs both files: the pair the vignette shows (simulated_scenarios.json) and
+  // the urgency rows (urgency_shift.json). Each handler stores its part and calls tierLine(), so the line is drawn
+  // once both are in, whichever file arrives first. The row is the one of the pair shown, joined on batch, the
+  // pair's index in its batch and the model; a fallback pair never gets the preferred pair's tiers.
+  var shownPair=null, urgencyRows=null, tierNames={};
+  function tierLine(){
+    var line=document.getElementById('vig-tier'); line.textContent='';
+    if(!shownPair||!urgencyRows)return;
+    var idx=shownPair.batch_index||shownPair.index, tr=null;
+    urgencyRows.some(function(r){
+      if(r.batch===shownPair.batch&&r.index===idx&&r.model===VIG_MODEL){tr=r;return true;}
+      return false;});
+    if(!tr||tr.flip_class!=='downgrade')return;
+    line.appendChild(document.createTextNode('care-urgency tier of the top word: '+(tierNames[tr.tier_top_clinical]||tr.tier_top_clinical)+' → '));
+    line.appendChild(el('b',null,String(tierNames[tr.tier_top_patient]||tr.tier_top_patient)));
+    line.appendChild(document.createTextNode(' (a downgrade)'));
+  }
+
   fetch('../data/urgency_shift.json',{cache:'no-cache'})
     .then(function(r){return r.ok?r.json():null;})
     .then(function(u){ if(!u||!u.rows) return;
@@ -303,12 +321,9 @@
       });
       if(!dg.childNodes.length)dg.appendChild(el('p','dg-n','No downgrades in this data file.'));
 
-      // ----- vignette tier line needs the urgency row; stash for the payload step
-      window.__pwTierRow=null;
-      rows.some(function(r){
-        if(r.batch===PREF_BATCH&&r.index===PREF_INDEX&&r.model===VIG_MODEL){window.__pwTierRow=r;return true;}
-        return false;});
-      window.__pwTierNames=names;
+      // ----- the vignette's tier line reads these rows once the pair shown is known (tierLine above)
+      urgencyRows=rows; tierNames=names;
+      tierLine();
     })
     .catch(function(){ document.getElementById('vocab-inline').textContent='data pending'; });
 
@@ -353,13 +368,8 @@
       bars('vig-cl-sb',s.spread_clinical);
       bars('vig-pt-sb',s.spread_patient);
       document.getElementById('vig-lab').textContent='live trace · '+VIG_MODEL+' · batch '+s.batch+' #'+(s.batch_index||s.index);
-      var tr=window.__pwTierRow, tn=window.__pwTierNames||{};
-      if(tr&&tr.flip_class==='downgrade'){
-        var line=document.getElementById('vig-tier'); line.textContent='';
-        line.appendChild(document.createTextNode('care-urgency tier of the top word: '+(tn[tr.tier_top_clinical]||tr.tier_top_clinical)+' → '));
-        line.appendChild(el('b',null,String(tn[tr.tier_top_patient]||tr.tier_top_patient)));
-        line.appendChild(document.createTextNode(' (a downgrade)'));
-      }
+      shownPair=s;
+      tierLine();
     })
     .catch(function(){ /* pending states already rendered */ });
 })();

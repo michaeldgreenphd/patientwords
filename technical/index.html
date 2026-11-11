@@ -132,7 +132,7 @@
   .me-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:22px 0 12px}
   .scroll-hint{display:none;font-family:var(--mono);font-size:10px;letter-spacing:.08em;
     color:var(--muted);margin:12px 0 -14px}
-  @media (max-width:700px){.scroll-hint{display:block}}
+  @media (max-width:700px){.scroll-hint:not([hidden]){display:block}}
   .me-table{width:100%;min-width:520px;border-collapse:collapse}
   .me-table th{font-family:var(--mono);font-size:10.5px;font-weight:600;letter-spacing:.14em;
     text-transform:uppercase;color:var(--muted);text-align:left;white-space:nowrap;
@@ -370,7 +370,7 @@
       Circuit Tracer answer different questions about the same failure.</p>
     <div id="traj-sents" class="traj-sents"></div>
     <div class="fig" role="img" aria-label="Line chart of the clinical answer's rank across the model's layers under both wordings, drawn from a real measured pair. Under clinical wording the answer enters the readable window and holds to the end. Under patient wording it forms and is then pushed out before the final layer." id="fig-traj">
-      <span class="pend">figure pending: the lens readouts have not loaded</span>
+      <span class="pend" data-state="loading">Loading the figure…</span>
     </div>
     <p class="cap" id="cap-traj"></p>
     <details class="fold" id="traj-source" hidden>
@@ -443,11 +443,23 @@
       // empirical readout (data/jspace.json: {empirical:true, panels:{clinical|
       // patient|translation:{input,trigger,concepts:[...],output,on_target}}, note}),
       // swap in the real tokens AND relabel. The disclaimer flips to "Empirical"
-      // only when the content is actually a measurement.
-      fetch('../data/jspace.json',{cache:'no-cache'}).then(function(r){return r.ok?r.json():null;}).then(function(d){
+      // only when the content is actually a measurement. The grid has role="img",
+      // so its aria-label is all a screen reader gets of the panels: the label in
+      // the markup describes the hand-authored panels, and the measured label is
+      // built below from the panels as displayed. When the file is absent, does
+      // not load, is not empirical or leaves a panel incomplete, the panels, the
+      // caption and the label all stay the illustrative ones.
+      fetch('../data/jspace.json',{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();}).then(function(d){
         if(!d||!d.empirical||!d.panels)return;
         var fig=document.querySelector('.jspace'); if(!fig)return;
-        [].forEach.call(fig.querySelectorAll('.jspanel'),function(panel){
+        var panels=fig.querySelectorAll('.jspanel');
+        // Bind every panel or none. A panel the file left incomplete would stay hand-authored beside measured ones,
+        // under a caption and a label that call the figure measured. The engine's export_jspace.py refuses to write
+        // such a file; if the page meets one, the figure stays illustrative.
+        var complete=[].every.call(panels,function(panel){var q=d.panels[panel.getAttribute('data-jsrole')];
+          return q&&q.input&&q.concepts&&q.concepts.length&&q.output;});
+        if(!complete)return;
+        [].forEach.call(panels,function(panel){
           var p=d.panels[panel.getAttribute('data-jsrole')]; if(!p)return;
           var off=(p.on_target===false);
           var inEl=panel.querySelector('.jspanel-in');
@@ -475,9 +487,27 @@
         if(cap){cap.textContent='';var b=document.createElement('b');
           b.textContent='Empirical J-lens residual stream readout at middle layers.';cap.appendChild(b);
           cap.appendChild(document.createTextNode(' gemma-2-2b · one measured pair. Pills: the top words the lens reads at the middle layers. Box: the top word at the final layer, the output. Green: the output is the pair’s clinical target. Red: it is not.'));}
+        // The text alternative, from what each panel now displays: its heading, its sentence, its pills, its output
+        // box, and whether that box is the green one (the pair's clinical target) or the red one.
+        function listed(w){return w.length>1?w.slice(0,-1).join(', ')+' and '+w[w.length-1]:(w[0]||'');}
+        function describe(panel){
+          function shown(sel){var n=panel.querySelector(sel);return n?n.textContent.replace(/\s+/g,' ').trim():'';}
+          var head=shown('.jspanel-head').split('·'), out=panel.querySelector('.jsout');
+          var pills=[].map.call(panel.querySelectorAll('.jspill'),function(x){return x.textContent.trim();});
+          return head[0].trim()+', '+(head[1]||'').trim().toLowerCase()+
+            (panel.querySelector('.jsxlate')?', the wording rewritten into clinical terms,':'')+' '+shown('.jspanel-in')+
+            ': the lens reads '+listed(pills)+' at the middle layers, and the output is “'+shown('.jsout')+'”, which is '+
+            (out&&/\bjsout-ok\b/.test(out.className)?'':'not ')+'the pair’s clinical target.';
+        }
+        var grid=fig.querySelector('.jspace-grid');
+        if(grid)grid.setAttribute('aria-label',({2:'Two',3:'Three'}[panels.length]||panels.length)+
+          ' panels, one measured pair. '+[].map.call(panels,describe).join(' '));
         var noteBox=document.getElementById('jspace-note');
         if(noteBox&&d.note){document.getElementById('jspace-note-text').textContent=d.note;noteBox.hidden=false;}
-      }).catch(function(){});
+      }).catch(function(e){
+        // the file did not load: the figure stays the illustrative schematic, and the console says why
+        if(window.console&&console.warn)console.warn('Technical: data/jspace.json: '+((e&&e.message)||'the request failed'));
+      });
     })();
     </script>
   </section>
@@ -485,13 +515,13 @@
   <section id="data">
     <p class="part">Part 3 · Data dive</p>
     <h2>First readings, exploratory</h2>
-    <p class="stat-line" id="dd-head">loading the lens readouts</p>
+    <p class="stat-line" id="dd-head" data-state="loading">Loading the lens readouts…</p>
 
     <h3>Where answers form</h3>
     <p id="dd-form-text">Based on our testing so far, when the clinical answer forms at all,
       it forms late, and patient wording barely moves that depth.</p>
     <div class="fig" role="img" aria-label="Dot strip of formation layers for every measured pair, one row for clinical wording and one for patient wording, with counts of pairs whose answer never formed shown at the right edge." id="fig-form">
-      <span class="pend">figure pending: the lens readouts have not loaded</span>
+      <span class="pend" data-state="loading">Loading the figure…</span>
     </div>
 
     <h3>Capture versus hijack</h3>
@@ -503,7 +533,7 @@
       commits to its next word.</p>
     <div id="tr-tabs" class="chip-g" role="group" aria-label="Choose an example pair"></div>
     <div class="fig" id="fig-transport">
-      <span class="pend">figure pending: the transport readout has not loaded</span>
+      <span class="pend" data-state="loading">Loading the figure…</span>
     </div>
     <div id="tr-readout" aria-live="polite"></div>
     <p class="stat-line" id="dd-tr-census"></p>
@@ -516,7 +546,7 @@
       <div><dt class="cls cls-suppressed">lost late</dt><dd>the answer becomes readable in the middle layers, then drops out before the model speaks. The model did the work and lost the result.</dd></div>
       <div><dt class="cls cls-absent">never formed</dt><dd>the answer is not readable at any layer.</dd></div>
     </dl>
-    <div id="ad-blocks"><span class="pend">figure pending: the depth census has not loaded</span></div>
+    <div id="ad-blocks"><span class="pend" data-state="loading">Loading the figure…</span></div>
     <p class="cap">one square per pair · hover a square for its clinical target · the generated sets are in the
       <a href="../simulated-scenarios/">scenario gallery</a> · per-pair depth classes:
       <a href="https://github.com/michaeldgreenphd/patientwords/blob/main/data/jlens_depth.json" rel="noopener">jlens_depth.json</a></p>
@@ -530,7 +560,7 @@
         clinical hold first, capped at four, plus the two never-formed pairs whose
         clinical wording holds best at the output. All sentences are generated
         stress-test stimuli.</p>
-      <div id="ad-examples"><span class="pend">examples pending: the depth census has not loaded</span></div>
+      <div id="ad-examples"><span class="pend" data-state="loading">Loading the examples…</span></div>
     </details>
 
     <h3>Read the failure, pick the fix</h3>
@@ -548,7 +578,7 @@
       </tr></thead>
       <tbody id="router-body"></tbody>
     </table>
-    <p class="cap" id="cap-router">exploratory · care-urgency tiers owner-reviewed v1, clinician review pending · steering column: pilot</p>
+    <p class="cap" id="cap-router" data-state="loading">exploratory · care-urgency tiers owner-reviewed v1, clinician review pending · steering column: pilot</p>
     <details class="fold" id="router-notes">
       <summary>Selection rules and registration</summary>
       <p class="cap" id="router-rules">Translation: recovery is probability-weighted and joined per pair, on the lens-measured sets whose rows carry a translated wording. Steering: a pair counts as restored when the clinical answer reads at rank 1 after the swap at either of the two fixed layers. Amendment 4 (adopted July 17) registers the confirmatory version of the steering comparison. The depth classes are observational lens readouts; the swap is an intervention, and the activation-patching lane is on the methods page.</p>
@@ -558,7 +588,7 @@
       <summary>Does tuning move the depth?</summary>
     <p id="dd-it-text"></p>
     <div class="fig" role="img" aria-label="Paired dots: for each phrase measured under both model ids, the layer where the answer formed under the base id and under the instruction-tuned id, connected by a hairline. The two ids serve separate hosts since 2026-07-31, so the rows can differ." id="fig-it">
-      <span class="pend">figure pending: the lens readouts have not loaded</span>
+      <span class="pend" data-state="loading">Loading the figure…</span>
     </div>
     <p class="cap" id="cap-it"></p>
     </details>
@@ -569,7 +599,7 @@
         lens instead of the Jacobian lens. If the formation story were an artifact of the
         Jacobian transport, the two lenses would disagree.</p>
       <div class="fig" role="img" aria-label="Two dot strips of patient-side formation layers for the same pairs, one read through the Jacobian lens and one through the plain logit lens, each with a median tick and a count of pairs whose answer never formed." id="fig-loglens">
-        <span class="pend">figure pending: the logit-lens arm has not loaded</span>
+        <span class="pend" data-state="loading">Loading the figure…</span>
       </div>
       <p class="stat-line" id="dd-ll-stat"></p>
       <p class="cap" id="cap-loglens">gemma-2-2b · one dot per pair: the layer where the answer forms under patient wording · never: pairs whose answer never forms</p>
@@ -593,7 +623,7 @@
       interval, sized for reading all the models at once.
       <span id="forest-sim"></span></p>
     <div id="forest"></div>
-    <p class="me-caption" id="forest-cap"></p>
+    <p class="me-caption" id="forest-cap" data-state="loading"></p>
 
     <details class="fold">
       <summary>How confidence accumulated: each model's estimate, batch by batch</summary>
@@ -619,7 +649,7 @@
       size, tuned on medical text. If domain tuning fixed register sensitivity, the
       pair would separate. <span id="twin-line">It does not.</span></p>
     <div id="twin" aria-label="Interval comparison of a base model and its medical fine-tune"></div>
-    <p class="me-caption" id="twin-cap"></p>
+    <p class="me-caption" id="twin-cap" data-state="loading"></p>
     <p class="explainer" id="twin-others"></p>
 
     <p class="explainer" id="rival-note">A rival reading we cannot fully exclude: the models may be
@@ -634,12 +664,12 @@
       survives multiple-comparison correction within the model's registration
       family; hover a row for the exact value.</p>
     <div id="dumbbells"></div>
-    <p class="me-caption">filled red = downgrades · hollow = upgrades · * significant after correction (q &lt; 0.05)</p>
+    <p class="me-caption" id="asym-cap" data-state="loading">filled red = downgrades · hollow = upgrades · * significant after correction (q &lt; 0.05)</p>
 
     <details class="fold">
       <summary>The interim table: every model with its maker, release month, registration, evidence kind, and exact statistics</summary>
-      <p class="scroll-hint" aria-hidden="true">table scrolls sideways →</p>
-      <div class="me-scroll">
+      <p class="scroll-hint" id="ev-hint" aria-hidden="true">table scrolls sideways →</p>
+      <div class="me-scroll" id="ev-scroll">
         <table class="me-table" id="ev-table">
           <thead><tr>
             <th scope="col">Model</th>
@@ -653,7 +683,7 @@
           <tbody id="ev-body"></tbody>
         </table>
       </div>
-      <p class="me-caption" id="ev-cap"></p>
+      <p class="me-caption" id="ev-cap" data-state="loading"></p>
       <p class="sm-h">Statistical methods</p>
       <ul class="sm-l">
         <li>Population: plain generated scenario batches only; steered, screened, imported, and re-traced rows are reported as a labeled sensitivity analysis in the statistics file on GitHub.</li>
@@ -689,7 +719,7 @@
         <tbody>
           <tr><td>pre-registration</td><td>endpoints and primary models fixed before measurement; departures logged in <a href="https://github.com/michaeldgreenphd/patientwords-engine/blob/main/docs/prereg_divergence_log.md">the divergence log</a></td><td id="rg-prereg">&mdash;</td></tr>
           <tr><td>sealed holdout</td><td>a slice of phrases withheld from every published file until the registered endpoint runs &mdash; the contamination guard</td><td id="rg-holdout">&mdash;</td></tr>
-          <tr><td>backend cross-check</td><td>the anchor model is measured twice &mdash; hosted attribution graphs and independent CPU inference &mdash; and the two must agree</td><td id="rg-backend">accumulating; reported when parity lands</td></tr>
+          <tr><td>backend cross-check</td><td>the anchor model is measured twice &mdash; hosted attribution graphs and independent CPU inference &mdash; and the two must agree</td><td id="rg-backend">no value is published yet</td></tr>
           <tr><td>drift sentinel</td><td>the same probe re-traced daily against a pinned baseline, so a silent host change cannot masquerade as a finding</td><td id="rg-drift">&mdash;</td></tr>
           <tr><td>retrace consistency</td><td>pairs that happened to be traced repeatedly, checked for agreement</td><td id="rg-retrace">&mdash;</td></tr>
           <tr><td>multiplicity</td><td>Benjamini&ndash;Hochberg correction within the registration family</td><td id="rg-bh">&mdash;</td></tr>
@@ -699,6 +729,47 @@
 
 
   </section>
+
+  <script>
+  /* Shared: the state of an element that waits on a data file. The static markup is the loading state
+     (data-state="loading", on the element or on the .pend span inside a figure's host). pwDataState moves an
+     element that is still loading to "failed" (the request errored, answered an HTTP error status or returned
+     invalid JSON, or drawing stopped) or to "none" (the file loaded and holds no measurement for this element).
+     An element that was drawn or filled is never overwritten. The sentence shown names no file: the file and the
+     reason go in the element's title and, through pwDataLog, in the console, for maintainers. A figure host with
+     role="img" also takes the sentence as its text alternative, because its fixed label describes the drawn figure. */
+  function pwDataState(id, state, file, reason, text){
+    var host = document.getElementById(id);
+    if(!host) return false;
+    var node = host.hasAttribute('data-state') ? host : host.querySelector('[data-state]');
+    if(!node || node.getAttribute('data-state') !== 'loading') return false;
+    node.setAttribute('data-state', state);
+    node.textContent = text;
+    node.title = 'data/' + file + ': ' + reason;
+    if(node !== host && host.getAttribute('role') === 'img') host.setAttribute('aria-label', text);
+    return true;
+  }
+  /* A table with no row to show. Its caption takes the sentence (pwDataState), and the elements `hide` selects
+     (the table, or the box it scrolls in) are hidden, so no header row is left over an empty body. No placeholder
+     row is written: the engine's scripts/check_pages.py fails on a table that is visible with no row, and a
+     table hidden here always has its sentence beside it. */
+  function pwDataNoTable(captionId, hide, state, file, reason, text){
+    if(!pwDataState(captionId, state, file, reason, text)) return false;
+    [].forEach.call(document.querySelectorAll(hide), function(n){ n.hidden = true; });
+    return true;
+  }
+  function pwDataLog(state, file, reason){
+    if(!window.console) return;
+    var line = 'Technical: data/' + file + ': ' + reason;
+    if(state === 'failed' && console.warn) console.warn(line);
+    else if(console.info) console.info(line);
+  }
+  /* the reason a fetch chain stopped, for a title or the console: before the file loaded, or while drawing it */
+  function pwDataWhy(e, loaded){
+    var m = (e && e.message) || 'the request failed';
+    return loaded ? 'loaded; drawing stopped: ' + m : m;
+  }
+  </script>
 
   <script>
   /* ox-alpha paragraph: evaluation window read from the judge-agreement export
@@ -828,12 +899,24 @@
       if (style) e.setAttribute('style', style);
       return e;
     }
-    function pending(){
-      grid.outerHTML = '<p class="conv-pending">Convergence data pending: this figure draws itself once the data file lands.</p>';
+    // What takes the figure's place when there is nothing to draw: "failed" (the file did not load, or drawing
+    // stopped) or "none" (the file loaded and no model has enough phrases to draw). The file and the reason go
+    // in the sentence's title and in the console.
+    var convLoaded = false;
+    function noFigure(state, reason){
+      if(!grid.parentNode) return;
+      var p = document.createElement('p');
+      p.className = 'conv-pending';
+      p.setAttribute('data-state', state);
+      p.textContent = state === 'failed' ? 'The convergence figure did not load.' : 'No convergence data are published yet.';
+      p.title = 'data/convergence.json: ' + reason;
+      grid.parentNode.replaceChild(p, grid);
+      pwDataLog(state, 'convergence.json', reason);
     }
     fetch('../data/convergence.json')
-      .then(function(r){ if(!r.ok) throw new Error('missing'); return r.json(); })
-      .then(draw).catch(pending);
+      .then(function(r){ if(!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(function(payload){ convLoaded = true; draw(payload); })
+      .catch(function(e){ noFigure('failed', pwDataWhy(e, convLoaded)); });
     function draw(payload){
       var models = payload.models || {};
       var ids = Object.keys(models);
@@ -845,7 +928,7 @@
         var pts = (models[id] && models[id].points) || [];
         return pts.length && (pts[pts.length - 1].n_phrases || 0) >= minN;
       });
-      if (!ids.length) return pending();
+      if (!ids.length) return noFigure('none', 'loaded, with no model at or above render_min_n');
       // the base model headlines regardless of payload key order
       if (ids.indexOf('gemma-2-2b') > 0) {
         ids.splice(ids.indexOf('gemma-2-2b'), 1);
@@ -991,7 +1074,7 @@
   </script>
 
   <div class="endnote">
-    <p id="credit-line">Method credit pending data load.</p>
+    <p id="credit-line" data-state="loading">Loading the method credit…</p>
     <p>Everything in the lens sections (Parts 1 to 3) is exploratory: the pairs
       are the ones with landed lens readouts, not a designed sample, and all of
       it predates the second amendment (adopted July 14), which pre-registers
@@ -1035,9 +1118,75 @@
   }
   function mount(id,svg){var host=document.getElementById(id);host.textContent='';host.appendChild(svg);}
 
+  // The elements this block fills from jlens_insights.json, and their states (pwDataState, defined above): each
+  // starts as loading, and one that is still loading when the block stops says whether the file failed to load
+  // or holds no readout.
+  var LENS='jlens_insights.json', LENS_FIGS=['fig-traj','fig-form','fig-it'], lensLoaded=false;
+  function filled(id,text){var n=document.getElementById(id);n.textContent=text;n.setAttribute('data-state','loaded');}
+
+  /* Fig 4: router table. Each repair keeps its own metric and its own count: translation's mean recovery over
+     the pairs with a translated wording (translation.by_class), steering's rank-1 restoration over the swap
+     pilot's pairs (steering.by_class). They are different sets of pairs, so no column of counts is shared.
+     The table reads jlens_depth.json and no other file, so its fetch stands outside the jlens_insights.json
+     chain below: a lens file that fails to load does not empty this table. The caption under the table carries
+     its state. When the file fails to load, or lists none of the three classes, the caption says so and the
+     table, which would be a header row with no rows, is hidden (pwDataNoTable). */
+  (function(){
+    var DEPTH='jlens_depth.json',depthLoaded=false;
+    fetch('../data/jlens_depth.json',{cache:'no-cache'})
+      .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
+      .then(function(j){
+        depthLoaded=true;
+        var bc=(j&&j.translation&&j.translation.by_class)||{};
+        var label={retained:'held to the end',suppressed:'formed, then lost (hijack)',absent:'never formed (capture)'};
+        var order=['suppressed','absent','retained'];
+        // the file loaded and lists none of the three classes: no row can be drawn, and nothing is published
+        if(!order.some(function(k){return bc[k];})){
+          var none='loaded, with no depth class listed (translation.by_class)';
+          pwDataNoTable('cap-router','table.router','none',DEPTH,none,'No repair results by depth class are published yet.');
+          pwDataLog('none',DEPTH,none);
+          return;
+        }
+        var body=document.getElementById('router-body'),small=[];
+        var st=(j.steering&&j.steering.by_class)||null;
+        order.forEach(function(k){
+          if(!bc[k])return;
+          var tr=document.createElement('tr');
+          function td(s,cls){var c=document.createElement('td');if(cls)c.className=cls;c.textContent=s;tr.appendChild(c);}
+          td(label[k]||k);
+          if(bc[k].n<3){small.push(label[k]||k);td('held back · n = '+bc[k].n,'num queued');}
+          else{td((bc[k].mean_recovery>0?'+':'')+bc[k].mean_recovery.toFixed(2)+' tiers · n = '+bc[k].n,'num');}
+          if(st&&st[k]&&st[k].n>0){
+            td(st[k].restored+' of '+st[k].n+' pairs','num');
+          }else if(st&&k==='retained'){td('not swap-eligible','num queued');}
+          else{td('queued','num queued');}
+          body.appendChild(tr);
+        });
+        // caption: the model, read from the file. The rules that hold a mean back, exclude pairs or leave
+        // pairs out of the table go in the fold under it, each counted from the file.
+        var cap=document.getElementById('cap-router');
+        if(cap){if(j.model)cap.textContent=j.model+' · '+cap.textContent;cap.setAttribute('data-state','loaded');}
+        var rules=document.getElementById('router-rules'),extra=[];
+        if(small.length)extra.push('A class mean is held back below n = 3: '+small.join(', ')+'.');
+        if(st){
+          var unres=order.filter(function(k){return st[k]&&st[k].unresolvable>0;})
+            .map(function(k){return st[k].unresolvable+' '+(label[k]||k);});
+          if(unres.length)extra.push('Excluded before the steering comparison, because the clinical answer is more than one wordpiece: '+unres.join(', ')+'.');
+          if(st.unknown&&st.unknown.n>0)extra.push(st.unknown.n+' pilot pairs carry no depth class and are not in the table.');
+        }
+        if(rules&&extra.length)rules.textContent+=' '+extra.join(' ');
+      })
+      .catch(function(e){
+        // a failed load, or drawing that stopped before every row was written: the caption says so
+        var why=pwDataWhy(e,depthLoaded);
+        pwDataNoTable('cap-router','table.router','failed',DEPTH,why,'This table did not load.');
+        pwDataLog('failed',DEPTH,why);
+      });
+  })();
+
   Promise.all([
     fetch('../data/jlens_insights.json',{cache:'no-cache'})
-      .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();}),
+      .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();}),
     fetch('../data/jlens_depth.json',{cache:'no-cache'})
       .then(function(r){return r.ok?r.json():null;}).catch(function(){return null;}),
     fetch('../data/simulated_scenarios.json',{cache:'no-cache'})
@@ -1045,6 +1194,17 @@
   ])
     .then(function(res){
       var d=res[0],dep=res[1],simPay=res[2];
+      lensLoaded=true;
+      // the file loaded and lists no pair with a lens readout: nothing is published, and nothing below is drawn
+      if(!d||!(d.n_pairs>0)||!d.formation){
+        var none='loaded, with no pair listed (n_pairs)';
+        pwDataState('dd-head','none',LENS,none,'No lens readouts are published yet.');
+        LENS_FIGS.forEach(function(id){pwDataState(id,'none',LENS,none,'No lens readouts are published yet.');});
+        if(d&&d.method_credit)filled('credit-line',d.method_credit);
+        else pwDataState('credit-line','none',LENS,none,'No method credit is published yet.');
+        pwDataLog('none',LENS,none);
+        return;
+      }
       var L=(d.formation&&d.formation.n_layers)||26;
       var SCN={};
       (((simPay&&simPay.scenarios)||[])).forEach(function(x){SCN[x.batch+'#'+x.batch_index]=x;});
@@ -1052,9 +1212,9 @@
       var W=700,PAD=124,PW=W-PAD-120;
       function lx(layer){return PAD+layer/(L-1)*PW;}
 
-      document.getElementById('dd-head').textContent=
-        d.n_pairs+' pairs with landed lens readouts · '+d.model+' · '+L+' layers · exploratory · observational readout';
-      document.getElementById('credit-line').textContent=d.method_credit;
+      filled('dd-head',
+        d.n_pairs+' pairs with landed lens readouts · '+d.model+' · '+L+' layers · exploratory · observational readout');
+      filled('credit-line',d.method_credit);
 
       /* Fig 1: exemplar trajectory (hijack) — layers 0..24 = internal workspace, 25 = final output */
       // prefer the engine-picked exemplar (d.featured_exemplar); the class
@@ -1266,6 +1426,8 @@
           host.appendChild(cRow);
           host.appendChild(row(pr.patient,pr.clinical,'ts-p','patient'));
         })();
+      }else{
+        pwDataState('fig-traj','none',LENS,'loaded, with no exemplar to draw','No example pair is published for this figure yet.');
       }
 
       /* Fig 2: formation strip */
@@ -1359,53 +1521,16 @@
           ' and is pushed out near the end'+(lockMed!=null?(', the winner locking in around layer '+lockMed):'')+'.'+compare+winNote;
       })();
 
-      /* Fig 4: router table. Each repair keeps its own metric and its own count: translation's mean recovery over
-         the pairs with a translated wording (translation.by_class), steering's rank-1 restoration over the swap
-         pilot's pairs (steering.by_class). They are different sets of pairs, so no column of counts is shared. */
-      (function(){
-        fetch('../data/jlens_depth.json',{cache:'no-cache'})
-          .then(function(r){return r.ok?r.json():null;})
-          .then(function(j){
-            if(!j||!j.translation||!j.translation.by_class)return;
-            var bc=j.translation.by_class;
-            var label={retained:'held to the end',suppressed:'formed, then lost (hijack)',absent:'never formed (capture)'};
-            var order=['suppressed','absent','retained'];
-            var body=document.getElementById('router-body'),small=[];
-            var st=(j.steering&&j.steering.by_class)||null;
-            order.forEach(function(k){
-              if(!bc[k])return;
-              var tr=document.createElement('tr');
-              function td(s,cls){var c=document.createElement('td');if(cls)c.className=cls;c.textContent=s;tr.appendChild(c);}
-              td(label[k]||k);
-              if(bc[k].n<3){small.push(label[k]||k);td('held back · n = '+bc[k].n,'num queued');}
-              else{td((bc[k].mean_recovery>0?'+':'')+bc[k].mean_recovery.toFixed(2)+' tiers · n = '+bc[k].n,'num');}
-              if(st&&st[k]&&st[k].n>0){
-                td(st[k].restored+' of '+st[k].n+' pairs','num');
-              }else if(st&&k==='retained'){td('not swap-eligible','num queued');}
-              else{td('queued','num queued');}
-              body.appendChild(tr);
-            });
-            // caption: the model, read from the file. The rules that hold a mean back, exclude pairs or leave
-            // pairs out of the table go in the fold under it, each counted from the file.
-            var cap=document.getElementById('cap-router');
-            if(cap&&j.model)cap.textContent=j.model+' · '+cap.textContent;
-            var rules=document.getElementById('router-rules'),extra=[];
-            if(small.length)extra.push('A class mean is held back below n = 3: '+small.join(', ')+'.');
-            if(st){
-              var unres=order.filter(function(k){return st[k]&&st[k].unresolvable>0;})
-                .map(function(k){return st[k].unresolvable+' '+(label[k]||k);});
-              if(unres.length)extra.push('Excluded before the steering comparison, because the clinical answer is more than one wordpiece: '+unres.join(', ')+'.');
-              if(st.unknown&&st.unknown.n>0)extra.push(st.unknown.n+' pilot pairs carry no depth class and are not in the table.');
-            }
-            if(rules&&extra.length)rules.textContent+=' '+extra.join(' ');
-          }).catch(function(){});
-      })();
+      /* Fig 4, the router table, is drawn above this chain: it reads jlens_depth.json only. */
 
       /* Fig 5: instruction tuning paired dots */
       (function(){
         var it=d.instruction_tuning;
         var host=document.getElementById('fig-it');
-        if(!it||!it.pairs||!it.pairs.length){host.innerHTML='<span class="pend">no paired readouts yet</span>';return;}
+        if(!it||!it.pairs||!it.pairs.length){
+          pwDataState('fig-it','none',LENS,'loaded, with no instruction_tuning pair','No paired readouts are published yet.');
+          return;
+        }
         var H5=120,svg=el('svg',{viewBox:'0 0 '+W+' '+H5});
         var rows=[['base model',function(p){return p.base;},'#15803d',36],
                   ['instruction-tuned',function(p){return p.it;},'#111827',76]];
@@ -1437,8 +1562,13 @@
           +' The panel now reads as a base-versus-tuned comparison under one host state.';
       })();
     })
-    .catch(function(){
-      document.getElementById('dd-head').textContent='data pending: the figures fill in when jlens_insights.json lands';
+    .catch(function(e){
+      // a failed load, or drawing that stopped: every element of this block that is still loading says so
+      var why=pwDataWhy(e,lensLoaded);
+      pwDataState('dd-head','failed',LENS,why,'The lens readouts did not load.');
+      LENS_FIGS.forEach(function(id){pwDataState(id,'failed',LENS,why,'This figure did not load.');});
+      pwDataState('credit-line','failed',LENS,why,'The method credit did not load.');
+      pwDataLog('failed',LENS,why);
     });
 })();
 </script>
@@ -1453,9 +1583,11 @@
     'text-anchor':anchor||'start','font-family':mono?'var(--mono)':'var(--serif)'});t.textContent=s;return t;}
   function mount(id,svg){var h=document.getElementById(id);if(!h)return;h.textContent='';h.appendChild(svg);}
   var CLIN='#15803d',PAT='#111827',MUT='#6d6c66',RED='#b4483d',RULE='#e7e5dd';
+  var TRANSPORT='jlens_transport.json', transportLoaded=false;
   fetch('../data/jlens_transport.json',{cache:'no-cache'})
-    .then(function(r){if(!r.ok)throw 0;return r.json();})
+    .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
     .then(function(d){
+      transportLoaded=true;
       var exs=(d.exemplars&&d.exemplars.length)?d.exemplars:(d.exemplar?[d.exemplar]:[]);
       exs=exs.filter(function(e){return e&&e.sides&&e.layers&&e.layers.length;});
       // owner-directed display exclusion (2026-07-30): these targets stay in the
@@ -1463,7 +1595,13 @@
       // featured chips on this page
       var EXCLUDE_TARGETS=['semen'];
       exs=exs.filter(function(e){return EXCLUDE_TARGETS.indexOf(String(e.target||'').trim())<0;});
-      if(!exs.length)throw 0;
+      // the file loaded and holds no exemplar this figure can draw: nothing is published
+      if(!exs.length){
+        var none='loaded, with no exemplar to draw';
+        pwDataState('fig-transport','none',TRANSPORT,none,'No transport readout is published yet.');
+        pwDataLog('none',TRANSPORT,none);
+        return;
+      }
       var W=800,LABEL=140,RPAD=160,gx0=LABEL,gx1=W-RPAD,gw=gx1-gx0,rowH=11;
       function rows(side){
         var out=[],t=side.tokens||[],g=side.grid||[],ans=side.answer_position;
@@ -1649,7 +1787,12 @@
         'the sentence but gone by the answer in '+c.transport_gap+' (a transport gap), and never '+
         'legible at any position in '+c.never_readable+'.'+tail;
     })
-    .catch(function(){/* leave the pending span; graceful fallback */});
+    .catch(function(e){
+      // a failed load, or drawing that stopped: the figure's place says so if nothing was drawn there
+      var why=pwDataWhy(e,transportLoaded);
+      pwDataState('fig-transport','failed',TRANSPORT,why,'This figure did not load.');
+      pwDataLog('failed',TRANSPORT,why);
+    });
 })();
 </script>
 <script>
@@ -1664,10 +1807,19 @@
     'text-anchor':anchor||'start','font-family':mono?'var(--mono)':'var(--serif)'});t.textContent=s;return t;}
   function mount(id,svg){var h=document.getElementById(id);if(!h)return;h.textContent='';h.appendChild(svg);}
   var INK='#111827',BASE='#6d6c66',RED='#b4483d',RULE='#dcdad2';
+  var LOGLENS='jlens_loglens.json', loglensLoaded=false;
   fetch('../data/jlens_loglens.json',{cache:'no-cache'})
-    .then(function(r){if(!r.ok)throw 0;return r.json();})
+    .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
     .then(function(d){
-      var pp=d.per_pair||[]; if(!pp.length)throw 0;
+      loglensLoaded=true;
+      var pp=d.per_pair||[];
+      // the file loaded and lists no pair: nothing is published
+      if(!pp.length){
+        var none='loaded, with no pair listed (per_pair)';
+        pwDataState('fig-loglens','none',LOGLENS,none,'No logit-lens readout is published yet.');
+        pwDataLog('none',LOGLENS,none);
+        return;
+      }
       var L=26,W=700,PAD=124,PW=W-PAD-96,H=150;
       function lx(l){return PAD+l/(L-1)*PW;}
       var svg=el('svg',{viewBox:'0 0 '+W+' '+H,role:'img'});
@@ -1703,7 +1855,12 @@
         (ag.formed_agree==null?'—':ag.formed_agree)+' of '+np+', and on the failure class in '+
         (ag.class_agree==null?'—':ag.class_agree)+'.';
     })
-    .catch(function(){/* leave the pending span; graceful fallback */});
+    .catch(function(e){
+      // a failed load, or drawing that stopped: the figure's place says so if nothing was drawn there
+      var why=pwDataWhy(e,loglensLoaded);
+      pwDataState('fig-loglens','failed',LOGLENS,why,'This figure did not load.');
+      pwDataLog('failed',LOGLENS,why);
+    });
 })();
 </script>
 <script>
@@ -1723,11 +1880,25 @@
     .then(function(r){return r.ok?r.json():{};})
     .then(function(p){PROV=(p&&p.models)||{};})
     .catch(function(){});
+  var STATS='model_stats.json', statsLoaded=false;
   fetch('../data/model_stats.json',{cache:'no-cache'})
-    .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
-    .then(function(d){return provReady.then(function(){draw(d);});})
-    .catch(function(){var n=document.getElementById('forest-cap');
-      if(n)n.textContent='data pending: the figures fill in when model_stats.json lands';});
+    .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
+    .then(function(d){statsLoaded=true;return provReady.then(function(){draw(d);});})
+    .catch(function(e){
+      // a failed load, or drawing that stopped: each of the three places that is still loading says so
+      statsState('failed',pwDataWhy(e,statsLoaded),
+        'The model statistics did not load.','This figure did not load.','This table did not load.');
+    });
+  // The three places this block fills: the forest's caption, the asymmetry figure's legend and the interim
+  // table's caption. Each starts as loading, and one that is still loading when the block stops takes its
+  // sentence. The legend of a figure that was not drawn is replaced by the sentence. The interim table would be
+  // a header row with no rows, so it is hidden under its caption (pwDataNoTable).
+  function statsState(state,why,forest,figure,table){
+    pwDataState('forest-cap',state,STATS,why,forest);
+    pwDataState('asym-cap',state,STATS,why,figure);
+    pwDataNoTable('ev-cap','#ev-hint,#ev-scroll',state,STATS,why,table);
+    pwDataLog(state,STATS,why);
+  }
   function draw(d){
     var per=d.per_model||{}; var ids=(d.models||Object.keys(per)).filter(function(m){return per[m];});
     var meta={}; (d.models_meta||[]).forEach(function(m){meta[m.id]=m;});
@@ -1735,6 +1906,12 @@
     var w=words[ids.length]||String(ids.length);
     var c2=document.getElementById('me-count-h');
     if(c2)c2.textContent=w.charAt(0).toUpperCase()+w.slice(1);
+    // the file loaded and lists no model: nothing is published, and no figure or table is drawn
+    if(!ids.length){
+      var published='No model statistics are published yet.';
+      statsState('none','loaded, with no model listed (per_model)',published,published,published);
+      return;
+    }
 
     var lo=0,hi=0.005;
     ids.forEach(function(id){
@@ -1797,6 +1974,7 @@
     document.getElementById('forest-cap').textContent=
       '−5 pp ≈ the clinical answer’s probability dropping from, say, 20% to 15% · '+
       'phrase-deduped bootstrap, seed '+d.seed+' × '+d.boot+' · hairline: simultaneous (Bonferroni) interval';
+    document.getElementById('forest-cap').setAttribute('data-state','loaded');
 
     var maxC=0; ids.forEach(function(id){var s=per[id].sign_test;maxC=Math.max(maxC,s.downgrades,s.upgrades);});
     // asymmetry comparative computed from the loaded stats (owner D2, 2026-07-30):
@@ -1828,6 +2006,7 @@
       svg2.appendChild(g2);
     });
     document.getElementById('dumbbells').appendChild(svg2);
+    document.getElementById('asym-cap').setAttribute('data-state','loaded');   // the figure is drawn: its legend stays
 
     function fmtMonth(ym){
       var m=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -1906,6 +2085,7 @@
     document.getElementById('ev-cap').textContent=
       'dedupe: '+d.dedupe+' · downgrade-rate CI: '+d.ci_method_downgrade+' · sign tests two-sided, BH-corrected within registration family'+
       ((d.below_floor&&d.below_floor.length)?' · greyed models enter the comparison at '+(d.site_floor_n_phrases||30)+' measured phrases':'');
+    document.getElementById('ev-cap').setAttribute('data-state','loaded');
     var evTable=document.getElementById('ev-table');
     pwEnhanceTable(evTable, {
       pageSize: 15, container: evTable.closest('.me-scroll') || evTable,
@@ -1944,15 +2124,24 @@
   var CLASSES=[['retained','#15803d'],['suppressed','#b4483d'],['absent','#c3c9d2']];
   var SWAPS={};
 
+  var DEPTH='jlens_depth.json', depthLoaded=false;
   fetch('../data/jlens_swaps.json',{cache:'no-cache'})
     .then(function(r){return r.ok?r.json():{};})
     .then(function(s){SWAPS=(s&&s.swaps)||{};},function(){})
     .then(function(){return fetch('../data/jlens_depth.json',{cache:'no-cache'});})
-    .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
+    .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
     .then(function(data){
+      depthLoaded=true;
       var labels=data.class_labels||{retained:'kept',suppressed:'lost late',absent:'never formed'};
       var blocks=data.blocks||(data.units?[data.units]:[]);
-      if(!blocks.length)return;
+      // the file loaded and lists no measured set: nothing is published
+      if(!blocks.length){
+        var none='loaded, with no measured set listed (blocks)';
+        pwDataState('ad-blocks','none',DEPTH,none,'No depth census is published yet.');
+        pwDataState('ad-examples','none',DEPTH,none,'No examples are published yet.');
+        pwDataLog('none',DEPTH,none);
+        return;
+      }
 
       // --- unit rows per measured set -----------------------------------
       // generated batches merge into one group (run date is not a finding); the
@@ -2204,9 +2393,17 @@
           det.appendChild(body);
           emount.appendChild(det);
         });
+      }else{
+        pwDataState('ad-examples','none',DEPTH,'loaded, with no worked example listed (examples)','No examples are published yet.');
       }
     })
-    .catch(function(){/* pending states stay */});
+    .catch(function(e){
+      // a failed load, or drawing that stopped: each place that is still loading says so
+      var why=pwDataWhy(e,depthLoaded);
+      pwDataState('ad-blocks','failed',DEPTH,why,'This figure did not load.');
+      pwDataState('ad-examples','failed',DEPTH,why,'The examples did not load.');
+      pwDataLog('failed',DEPTH,why);
+    });
 })();
 </script>
 
@@ -2218,8 +2415,17 @@
   var NS='http://www.w3.org/2000/svg';
   function sv(t,a){var e=document.createElementNS(NS,t);for(var k in a)e.setAttribute(k,a[k]);return e;}
   function pp(x){return (100*x).toFixed(1);}
+  // An integrity value whose file did not load says so in its cell. A file that loads without the value leaves
+  // the cell's dash, the page's mark for a value that is not published. The file and the reason go in the cell's
+  // title and in the console.
+  function notLoaded(ids,file,e){
+    var why=pwDataWhy(e,false);
+    ids.forEach(function(id){var h=document.getElementById(id);if(!h)return;
+      h.textContent='did not load';h.setAttribute('data-state','failed');h.title='data/'+file+': '+why;});
+    pwDataLog('failed',file,why);
+  }
   fetch('../data/model_stats.json',{cache:'no-cache'})
-    .then(function(r){if(!r.ok)throw 0;return r.json();})
+    .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
     .then(function(d){
       var per=d.per_model||{};
       var base=per['gemma-3-4b-it'],med=per['medgemma-4b-it'];
@@ -2255,7 +2461,12 @@
           :overlap?'It does not: the two intervals overlap.'
           :'The intervals separate \u2014 read the exact values below.';
         var tc=document.getElementById('twin-cap');
-        if(tc)tc.textContent='open marker = medical fine-tune \u00b7 line: 95% interval \u00b7 base '+pp(base.penalty.mean)+' pp vs fine-tune '+pp(med.penalty.mean)+' pp';
+        if(tc){tc.textContent='open marker = medical fine-tune \u00b7 line: 95% interval \u00b7 base '+pp(base.penalty.mean)+' pp vs fine-tune '+pp(med.penalty.mean)+' pp';
+          tc.setAttribute('data-state','loaded');}
+      }else{
+        // the file loaded without one model of the pair, or both: no comparison is drawn, and the caption says so
+        pwDataState('twin-cap','none','model_stats.json','loaded, without both gemma-3-4b-it and medgemma-4b-it (per_model)',
+          'No statistics are published for this pair yet.');
       }
       var m3=per['meditron3-8b'],ap=per['apertus-8b-meditronfo'];
       var to=document.getElementById('twin-others');
@@ -2273,14 +2484,23 @@
       var bh=(d.benjamini_hochberg||{}).families;
       if(bhv&&bh){var fams=Object.keys(bh);
         bhv.textContent=fams.map(function(f){return f+': '+(bh[f].n_tests||'?')+' tests';}).join(' \u00b7 ');}
-    }).catch(function(){});
+    },function(e){
+      // the file did not load: the comparison's caption and the two integrity cells say so
+      pwDataState('twin-cap','failed','model_stats.json',pwDataWhy(e,false),'This figure did not load.');
+      notLoaded(['rg-prereg','rg-bh'],'model_stats.json',e);
+    }).catch(function(e){
+      // drawing stopped: the comparison's caption says so if it was not yet written
+      var why=pwDataWhy(e,true);
+      if(pwDataState('twin-cap','failed','model_stats.json',why,'This figure did not load.'))pwDataLog('failed','model_stats.json',why);
+    });
   fetch('../data/simulated_scenarios.json',{cache:'no-cache'})
-    .then(function(r){if(!r.ok)throw 0;return r.json();})
+    .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
     .then(function(p2){var h=document.getElementById('rg-holdout');
-      if(h&&p2.holdout_withheld!=null)h.textContent=p2.holdout_withheld+' scenario rows withheld from this payload';})
+      if(h&&p2.holdout_withheld!=null)h.textContent=p2.holdout_withheld+' scenario rows withheld from this payload';},
+      function(e){notLoaded(['rg-holdout'],'simulated_scenarios.json',e);})
     .catch(function(){});
   fetch('../data/drift_series.json',{cache:'no-cache'})
-    .then(function(r){if(!r.ok)throw 0;return r.json();})
+    .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
     .then(function(ds){var h=document.getElementById('rg-drift');
       if(!h||ds.days_measured==null)return;
       var dm=ds.days_measured,n=Array.isArray(dm)?dm.length:dm;
@@ -2288,12 +2508,14 @@
       if(last.length===8)last=last.slice(0,4)+'-'+last.slice(4,6)+'-'+last.slice(6);
       var fm=ds.first_moved;var fmd=fm&&typeof fm==='object'?(fm.day||fm.date||''):(fm||'');
       if(String(fmd).length===8)fmd=String(fmd).slice(0,4)+'-'+String(fmd).slice(4,6)+'-'+String(fmd).slice(6);
-      h.textContent=n+' days measured'+(last?(' \u00b7 through '+last):'')+(fmd?(' \u00b7 first movement '+fmd):'');})
+      h.textContent=n+' days measured'+(last?(' \u00b7 through '+last):'')+(fmd?(' \u00b7 first movement '+fmd):'');},
+      function(e){notLoaded(['rg-drift'],'drift_series.json',e);})
     .catch(function(){});
   fetch('../data/retrace_consistency.json',{cache:'no-cache'})
-    .then(function(r){if(!r.ok)throw 0;return r.json();})
+    .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
     .then(function(rc){var h=document.getElementById('rg-retrace');
-      if(h&&rc.pairs_retraced!=null)h.textContent=rc.pairs_retraced+' pairs retraced \u00b7 '+(rc.top_word_stable_pairs!=null?rc.top_word_stable_pairs+' with a stable top word':'');})
+      if(h&&rc.pairs_retraced!=null)h.textContent=rc.pairs_retraced+' pairs retraced \u00b7 '+(rc.top_word_stable_pairs!=null?rc.top_word_stable_pairs+' with a stable top word':'');},
+      function(e){notLoaded(['rg-retrace'],'retrace_consistency.json',e);})
     .catch(function(){});
 })();
 </script>
