@@ -264,7 +264,7 @@
     <figure class="fig" id="fig-translation">
       <figcaption>
         <h3>A rewritten sentence, traced</h3>
-        <p>A language model rewrote an everyday sentence in medical terms, and the rewrite was traced in the same way. Recorded target-token probability in this case: 0.45 after translation (clinical baseline 0.26) · July 7 trace. It is one traced case. The Translation page gives the outcome of every reviewed case, including those where the probability did not return.</p>
+        <p>A language model rewrote an everyday sentence in medical terms, and the rewrite was traced in the same way. Recorded target-token probability in this case: <span id="tr-claim">0.45 after translation (clinical baseline 0.26) · July 7 trace</span>. It is one traced case. The Translation page gives the outcome of every reviewed case, including those where the probability did not return.</p>
       </figcaption>
       <div class="fig-media">
         <div class="embed preview"><div class="frame">
@@ -494,11 +494,19 @@
       box.hidden=false;
     }
   }
+  /* the rewritten-sentence caption: the two recorded probabilities of that one case, read from the provenance
+     file. The text in the page is the checked copy; the claims manifest compares both numbers with this record. */
+  function translationCase(prov){
+    var rec=prov&&prov.translation_cases&&prov.translation_cases.grandma_laxative, box=$('tr-claim');
+    var after=rec&&Array.isArray(rec.translated)?rec.translated[1]:null, base=rec&&Array.isArray(rec.clinical)?rec.clinical[1]:null;
+    if(box&&isNum(after)&&isNum(base))box.textContent=after.toFixed(2)+' after translation (clinical baseline '+base.toFixed(2)+') · July 7 trace';
+  }
   function getJson(url){
     return fetch(url,{cache:'no-cache'}).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;});
   }
   if(!window.fetch||!window.Promise){fallback();return;}
   Promise.all([getJson('data/simulated_scenarios.json'),getJson('data/provenance.json')]).then(function(res){
+    try{translationCase(res[1]);}catch(e){}
     if(!res[0]){fallback();return;}
     try{render(res[0],res[1]);}catch(e){fallback();}
   });
