@@ -45,13 +45,24 @@
   .wordmark .pw-p{color:var(--patient)}
   .wordmark .pw-w{color:var(--clinical);font-style:italic}
   .wordmark .pw-w::before{content:'·';color:var(--muted);font-style:normal;font-weight:400;margin:0 3px 0 2px}
-  .masthead nav{display:flex;flex-wrap:wrap;gap:6px 20px}
-  .masthead nav a{font-family:var(--mono);font-size:11px;letter-spacing:.16em;
-    text-transform:uppercase;color:var(--muted);text-decoration:none;padding:2px 0}
-  .masthead nav a:hover{color:var(--ink);text-decoration:underline;text-underline-offset:4px}
-  .masthead nav a[aria-current=page]{color:var(--ink);border-bottom:1px solid var(--ink)}
-  /* 3 + 5 + 1 nav grouping by pure whitespace: after Technical and Phrase Dataset */
-  .masthead nav a:nth-child(3),.masthead nav a:nth-child(10){margin-right:2vw}
+  .masthead-row{position:relative}
+  .masthead nav{display:flex;flex-wrap:wrap;align-items:baseline;gap:0 22px}
+  .masthead nav a,.nav-more>summary{font-family:var(--serif);font-size:15px;line-height:1.4;color:var(--muted);
+    text-decoration:none;padding:6px 0}
+  .masthead nav a:hover,.nav-more>summary:hover{color:var(--ink);text-decoration:underline;text-underline-offset:4px}
+  .masthead nav a[aria-current=page]{color:var(--ink);text-decoration:underline;text-decoration-thickness:1px;
+    text-underline-offset:6px}
+  /* supporting pages sit in one disclosure: a details element, so it opens from the keyboard and without JavaScript */
+  .nav-more{margin:0}
+  .nav-more>summary{cursor:pointer;list-style:none}
+  .nav-more>summary::-webkit-details-marker{display:none}
+  .nav-more>summary::after{content:'\00a0\25BE'}
+  .nav-more[open]>summary{color:var(--ink)}
+  .nav-more[open]>summary::after{content:'\00a0\25B4'}
+  .nav-more>summary:focus-visible{outline:2px solid var(--clinical);outline-offset:3px}
+  .nav-more .nav-here{color:var(--ink)}
+  .nav-more-list{position:absolute;left:0;right:0;top:100%;z-index:20;display:flex;flex-wrap:wrap;gap:0 22px;
+    background:var(--paper);border-top:1px solid var(--hairline);border-bottom:1px solid var(--ink);padding:6px 0 8px}
   .rule-heavy{border:0;border-top:2px solid var(--ink);margin:0}
   .rule-fine{border:0;border-top:1px solid var(--hairline);margin:3px 0 0}
 
@@ -261,8 +272,6 @@
   .limits li b{font-weight:600}
 
   @media (max-width:760px){
-    .masthead nav{gap:8px 22px}
-    .masthead nav a{padding:7px 0}
 
     body{font-size:16px}
     .masthead{padding-top:12px}
@@ -297,17 +306,24 @@
   <div class="masthead-row">
     <a class="wordmark" href="./" aria-label="PatientWords home, the overview page"><span class="pw-p">Patient</span><span class="pw-w">Words</span></a>
     <nav aria-label="Site">
-      <a href="start-here/">Start Here</a>
+      <a href="start-here/">Start here</a>
+      <a href="simulated-scenarios/">Scenarios</a>
+      <a href="results/">Results</a>
       <a href="methods.html" aria-current="page">Methods</a>
-      <a href="technical/">Technical</a>
-      <a href="wording-differences/">Wording Differences</a>
-      <a href="dialect-differences/">Dialect Differences</a>
-      <a href="translation/">Translation</a>
-      <a href="simulated-scenarios/">Simulated Scenarios</a>
-      <a href="llm/">LLM</a>
-      <a href="multi-turn/">Multi-turn</a>
-      <a href="phrase-dataset/">Phrase Dataset</a>
-      <a href="https://github.com/michaeldgreenphd/patientwords">GitHub</a>
+      <details class="nav-more">
+        <summary>More</summary>
+        <div class="nav-more-list">
+          <a href="wording-differences/">Wording differences</a>
+          <a href="dialect-differences/">Dialect differences</a>
+          <a href="translation/">Translation</a>
+          <a href="llm/">LLM responses</a>
+          <a href="multi-turn/">Multi-turn</a>
+          <a href="phrase-dataset/">Phrase dataset</a>
+          <a href="technical/">Technical</a>
+          <a href="clinical/">Clinical brief</a>
+          <a href="https://github.com/michaeldgreenphd/patientwords">GitHub</a>
+        </div>
+      </details>
     </nav>
   </div>
   <hr class="rule-fine">
@@ -1068,11 +1084,12 @@
     <p>This project measures how the probability of a single next word changes when clinical wording is replaced by patient wording. That is not an observed clinical outcome.</p>
     <p>A gap is not necessarily bad. The model may be tracking how people actually write, or it may be giving less clinical information to people who write informally. Telling the two apart requires testing the advice itself.</p>
     <details class="fold">
-      <summary>In brief: one small model carries the circuit evidence · attribution graphs are interpretive · feature labels are machine-generated · measurements are a point in time · translation can fail · the stimuli are constructed. Expand for the full statements.</summary>
+      <summary>In brief: one small model carries the circuit evidence · attribution graphs are interpretive · feature labels are machine-generated · the instruments are untested across wordings · measurements are a point in time · translation can fail · the stimuli are constructed. Expand for the full statements.</summary>
     <ul class="limits">
       <li><b>One small model carries the circuit evidence.</b> Every graph here comes from gemma-2-2b, chosen because its transcoders are public. The behavioral checks on the other models measure next-word probabilities only.</li>
       <li><b>Attribution graphs are an interpretive tool.</b> They reconstruct the model’s computation through features and prune heavily; error nodes absorb what’s missed.</li>
       <li><b>Feature labels are machine-generated.</b> The clinical / off-target categories come from keyword-matching (description in GitHub).</li>
+      <li id="instrument-question"><b>The instruments are untested across wordings.</b> A transcoder and its feature labels may describe everyday wording less faithfully than medical wording. If they do, a difference between two graphs can come from the instrument, from the model, or from both. An experiment with matched wordings and control conditions is drafted to test this (<a href="https://github.com/michaeldgreenphd/patientwords-engine/blob/main/docs/protocols/instrument_register_experiment_20261111.md">protocol draft</a>); it has not been run.</li>
       <li><b>Measurements are a point in time.</b> The probabilities were observed on specific dates against a hosted service. The <span id="lim-rt-n">&mdash;</span> pairs re-traced so far reproduce the same top word in every case; recorded probabilities moved by at most 0.027. A re-trace can move a probability slightly, and a value near zero can fall below what the trace resolves.</li>
       <li><b>Translation can fail.</b> The fix in the Translation figure is itself an LLM step.</li>
       <li><b>The stimuli are constructed.</b> Most phrase pairs were written by a language model and checked automatically, not collected from patients. We are currently interviewing patients about their LLM use.</li>

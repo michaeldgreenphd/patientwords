@@ -16,7 +16,8 @@ A change to shared behavior (masthead, chips, palette variables) means editing e
 
 Semantic palette (do not change): clinical green `#15803d`, patient ink `#111827`,
 structural grey `#c3c9d2`, penalty red `#b4483d`, paper `#faf9f5`, muted `#6d6c66`
-(chosen for WCAG AA on paper). Serif display + mono data. One page-level addition, the owner's
+(chosen for WCAG AA on paper). Serif display + mono data on the pages not listed under
+*Reading pages* below; those three pages have their own type and colour rules. One page-level addition, the owner's
 decision of 2026-09-29: the Multi-turn page shows its three wordings as texting bubbles
 and colours each wording the same way in its charts, with colloquial blue `#2563eb`,
 careful-lay amber `#b45309` and the clinical green above (white text at 5:1 or better;
@@ -74,12 +75,17 @@ consumer column in this table.
 | `jlens_depth.json` | `methods.html`, `simulated-scenarios/`, `technical/` | `export_jlens_depth.py` |
 | `jlens_loglens.json`, `jlens_transport.json` | `technical/` (j-lens chain) | `export_jlens_loglens.py`, `export_jlens_transport.py` |
 | `jlens_insights.json`, `jlens_swaps.json` | `technical/` (j-lens chain) | `jlens_insights.py`, `export_pair_swaps.py` |
+| `results_catalogue/index.json`, `results_catalogue/rows/*.json`, `results_catalogue/stimuli/*.json`, `results_catalogue/rows.csv`, `results_catalogue/stimuli.csv` | `results/index.html` (the results catalogue: search and filters, then the runs with five columns per run — experiment, model, measurements, run status, study context — then downloads; the status every run shares is stated once above the table and a row states its clinical-review status only where it differs; rows and prompts loaded per run, with the difference headed "everyday − medical, in probability"; run ids, part hashes, membership rules and release conditions under Methods & source; address parameters `q`, `evidence`, `stimulus`, `state`, `visibility`, `membership`, `review`, `rows`, `sort`, `issue`, `run`) | `export_results_catalogue.py` (publish chain step 6b, since 2026-11-10). Structure: `../patientwords-engine/scripts/contracts/results_catalogue.v1.schema.json`; `validate_frontend_contract.py` also checks that every named file exists, that none is orphaned and that the totals equal the per-run sums |
+| `data/experiments/index.json` (path from the site root) | `experiments/index.html` (lists the published experiment comparisons; an empty list shows "No experiment comparisons published yet" with links to `results/` and `methods.html`) | `export_experiment_index.py`, run by hand after a bundle file is added or removed; not in the publish chain. Lists a bundle only when its evidence block says not synthetic, `public`, no restriction reason. Structure: `../patientwords-engine/scripts/contracts/experiment_index.v1.schema.json`; checked by `experiment_index_contract.py` |
+| *(no committed file today)* a bundle the index lists, or one named by the page's `bundle` address parameter (a relative path under the site's data directory; an optional `case` parameter opens one case by its family id) | `experiments/index.html` ("Compare methods": per case the paired wording and one plot of the primary target's probability first, then the other targets, internal measurements and intervention evidence in folds; then run status, and methods & source with the labels, hashes and schema strings; target text is shown only where the bundle exports `target_text`; a synthetic bundle keeps the line "Synthetic fixture: not a measurement" in view; `noindex`, not in the navigation) | `python -m scripts.experiments.cli bundle` in the engine. No study bundle exists and synthetic fixture bundles are never published. Structure: `../patientwords-engine/schemas/experiments/bundle.v1.schema.json`. Checked by `../patientwords-engine/scripts/check_experiment_preview.py` against a synthetic bundle in a temporary copy of the site; the same script with `--serve` serves that temporary copy for a developer to open |
 | `simulated_archive.csv` | `simulated-scenarios/scenario.html` (collaborator download) | `export_archive.py` |
 | `simulated_archive.json` | **no page** (written alongside the CSV; staged) | `export_archive.py` |
 | `model_provenance.json` | `technical/` (per-model build info) | **no engine writer** — hand-maintained here |
 | `specialties.json` | `simulated-scenarios/` (specialty filter) | **no engine writer** — hand-synced from the engine's `../patientwords-engine/data/specialty_map.draft.json`; `validate_frontend_contract.py` checks the two agree |
 | `petri_multiturn_summary.json` | `multi-turn/index.html` (headline, D figure, repeats table, provenance) | `export_petri_multiturn.py` (on engine `main` since 2026-09-25, 8575ef9b) — **owner-run, not the daily Routine** |
 | `petri_multiturn_conversations.json` | `multi-turn/index.html` (explore viewer) | `export_petri_multiturn.py` (on engine `main` since 2026-09-25, 8575ef9b) — **owner-run, not the daily Routine** |
+
+Every file under `data/` is classified in the engine's `../patientwords-engine/scripts/results_snapshot.py`, either as a published statistics file (`STATISTICS_FILES`) or as data a snapshot does not version. A new data file is added to one of the two lists in the engine in the same change: the engine's release check refuses a publish that changes an unclassified file, and `../patientwords-engine/tests/test_results_release.py` fails while the site tracks one.
 
 `*.sample.json` files are development fixtures, but two ARE fetched by live pages
 when the URL carries `?sample=1` (`llm/index.html` → `advice_scenarios.sample.json`,
@@ -115,6 +121,15 @@ checks file shapes, not who reads them.
 
 ## Established UI conventions
 
+- Masthead navigation, the same markup on the 16 pages that have a masthead (edit each
+  page; nothing generates it): `<nav aria-label="Site">` with four primary links
+  (Start here, Scenarios, Results, Methods) and one `<details class="nav-more">`
+  disclosure, "More", that holds nine links (Wording differences, Dialect differences,
+  Translation, LLM responses, Multi-turn, Phrase dataset, Technical, Clinical brief,
+  GitHub). It is a native disclosure, so it opens from the keyboard and without
+  JavaScript. The current page's link carries `aria-current="page"`; when that link is
+  inside the disclosure the summary reads "More · <page name>" (`.nav-here`).
+  `experiments/` stays `noindex` and is not linked from the navigation.
 - Filter/model chips: `.chip` buttons in `.chip-g` groups with `role="group"`,
   `aria-pressed` toggled with the `.on` class.
 - Sortable table headers: real `<button>`s inside `th[data-key]`, `aria-sort` on the
@@ -126,6 +141,69 @@ checks file shapes, not who reads them.
 - Vocabulary used across flip displays: the model *hedges* (top prediction holds, loses
   probability) vs. *redirects* (top prediction changes); a redirect that drops a
   care-urgency tier is a *downgrade*.
+
+### Start here (owner's standing preference, 2026-11-11)
+
+Preserve `start-here/index.html` as it is designed: the opening question, the sequence
+of nine steps, the diagrams (clinician and model, the feature-map sketch, the two
+translation drawings, orchestration, the Measure / Mend / Maintain cycle, the mended
+system) and the interactions (the "say it the other way" toggle, the care-urgency
+ladder, the cycle's three tabs). A redesign of 2026-11-10 was rejected and the page was
+restored from its design of 2026-10-27 (`ac82473`). Later work makes small, justified
+edits: correct a claim in place, bind a value to its record, improve a narrow-screen
+drawing. A qualification goes in a caption or a label ("Illustration", "Research
+direction", "Gemma 2 2B · model-generated prompts · clinical review pending"), not in
+an added warning block. The engine's `../patientwords-engine/tests/test_start_here_page.py`
+and the `start-here/index.html` entries of its claims manifest check the steps, the
+diagrams, the interactions and the recorded values.
+
+### Reading pages (2026-11-11): `index.html`, `results/`, `experiments/`
+
+These three pages were revised together as a reading path: research question, one wording
+pair, its recorded result, aggregate context, internal measurements, methods and source.
+The other pages keep their earlier styles; only their navigation changed. Start here is
+not one of them: it keeps its own serif-and-monospace design and palette (above).
+
+- Order. The pair and its recorded output come before aggregate context, and hashes,
+  schema strings, run ids and release conditions sit under "Methods & source"
+  ("Methods and source" on the homepage). A status that every item shares is stated
+  once; an item repeats it only where it differs (the results catalogue's rows state a
+  review status only where it is not the shared one).
+- Type. Serif for headings and prose; the system sans-serif for tables, controls and
+  labels, with `font-variant-numeric: tabular-nums` on numbers; monospace only for code
+  and identifiers (file paths, run ids, hashes, variant names). Sentence case, no
+  letter-spaced capitals. Sizes come from five variables: `--t-body` 17 px for prose,
+  `--t-ui` 14 px for controls and tables, `--t-meta` 13 px for metadata, `--t-h3`,
+  `--t-h2`. No visible text is below 12 px; the engine's two page checks fail below
+  that at 1280 px and at 390 px.
+- Spacing and corners. One spacing scale (`--s1` to `--s7`: 4, 8, 12, 16, 24, 32, 48 px)
+  and one corner radius (`--radius`, 2 px).
+- Colour. The medical wording is green `#15803d` and the everyday wording is ink
+  `#111827`, each beside its printed name. No value, difference or status is coloured by
+  its sign or by whether it is good or bad: they are in ink, and the sign and the
+  subtraction order are printed in words ("everyday − medical"). `#b4483d` appears on
+  these pages only as an alert (`--alert`): a file that failed to load
+  (`results/` `.cat-err`, `.det-status.is-fail`; `experiments/` `.st-error`) and a
+  refused address (`experiments/` `.st-refused`). `index.html` uses no red. The engine's generated figures under `modes/` still draw their negative curve in
+  red; that is engine output and is not changed here.
+- Names of the wordings. "Medical wording" and "Everyday wording". The experiments page
+  shows the bundle's third variant, `normalized`, as "Rewritten wording" and never prints
+  that word as a label; the engine's `../patientwords-engine/docs/experiment_interface/preview.md`
+  says why and where the file's own name still appears as code.
+- Qualifications are stated once, where they apply: a caption under a figure, a label
+  beside a value, a source note. A status shared by every item is one line, not a
+  repeated block, and a load error, a missing measurement, a restriction and a review
+  status keep their own wording.
+- Evidence levels stay separate in headings and labels: a change in next-token
+  probability, a judged answer, an internal readout, an intervention. The first-token
+  probability is never labelled as a score of a whole answer.
+- The homepage example is the pair the engine's `../patientwords-engine/data/editorial_pins.json`
+  names as `tap_demo` (`featured.tap_demo` in `data/simulated_scenarios.json`), chosen by
+  hand. The page says it was chosen and prints, from the payload at run time, where the
+  pair's difference ranks among the scored pairs. Its two fallback values in the page
+  source are tracked by the engine's `../patientwords-engine/data/claims_manifest.json`.
+- Layout floor: no horizontal scroll at 390 px, also with every text size doubled; the
+  two page checks test `results/` and `experiments/` for it.
 
 ## Figure style (standing preference)
 
@@ -183,7 +261,9 @@ silently breaks a published page:
 
 ### The custom-domain trap, if a custom domain is ever added
 
-`404.html` hard-codes the `/patientwords/` prefix in **12 absolute links**. That
+`404.html` hard-codes the `/patientwords/` prefix in **14 absolute links** (12 before the
+navigation of 2026-11-11 added Start here and Results; count them with
+`grep -o 'href="/patientwords/' 404.html | wc -l`). That
 is correct today and deliberate: GitHub Pages serves `404.html` for a missing
 path at any depth, so relative links there would resolve against the missing
 path and break. Every other page uses relative links — but **16 pages** (12
@@ -194,8 +274,8 @@ domain therefore touches `404.html` plus those 16 canonicals; count them with
 `rg -l 'rel="canonical" href="https://michaeldgreenphd.github.io/patientwords' -g '*.html' -g '!modes/**' .`
 rather than trusting this number.
 
-But those 12 are absolute *and* carry the project-path prefix. **Adding a custom
-domain moves the site root from `/patientwords/` to `/`, and all 12 become
+But those 14 are absolute *and* carry the project-path prefix. **Adding a custom
+domain moves the site root from `/patientwords/` to `/`, and all 14 become
 404s** — on the very page a lost visitor lands on. So if a `CNAME` ever appears
 in a pull request, `404.html` must change in the same pull request, and a
 reviewer should treat a `CNAME` without it as an incomplete change.

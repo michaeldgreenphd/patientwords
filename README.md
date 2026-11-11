@@ -29,6 +29,11 @@ Nothing here is medical advice; the study measures model behavior.
 
 ## What's on the site
 
+The homepage states the research question, shows one wording pair with its recorded
+result, then the summary over all scored pairs, what is measured, the internal
+measurements, and the methods and source. The navigation has four primary
+links (Start here, Scenarios, Results, Methods); the other pages are under "More".
+
 | Page | What it shows |
 |---|---|
 | [Start Here](https://michaeldgreenphd.github.io/patientwords/start-here/) | The study in plain language |
@@ -38,6 +43,8 @@ Nothing here is medical advice; the study measures model behavior.
 | [Dialect Differences](https://michaeldgreenphd.github.io/patientwords/dialect-differences/) | Clinical terms held fixed across LLM-approximated dialect/register framings |
 | [Translation](https://michaeldgreenphd.github.io/patientwords/translation/) | Rewriting patient wording into clinical terms restores circuit and prediction |
 | [Simulated Scenarios](https://michaeldgreenphd.github.io/patientwords/simulated-scenarios/) | The generated stress-pair corpus: every measurement, searchable, per model |
+| [Results catalogue](https://michaeldgreenphd.github.io/patientwords/results/) | Every measured run, whatever its effect: evidence class, review status, run status and which analyses include it, with per-row results and downloads. Identifiers, hashes, analysis rules and restrictions are under Methods & source. Not a sample and not a claim |
+| [Compare methods](https://michaeldgreenphd.github.io/patientwords/experiments/) | Experiment comparisons exported by the engine's experiment interface: per case the paired wording and the recorded model output first, then the internal measurements, run status, and methods and source. None is published yet; the page lists what `data/experiments/index.json` names and says so when the list is empty. Not in the navigation and marked `noindex` |
 | [LLM](https://michaeldgreenphd.github.io/patientwords/llm/) | The advice arm: verbatim assistant responses to both wordings |
 | [Multi-turn](https://michaeldgreenphd.github.io/patientwords/multi-turn/) | Scripted multi-turn conversations in three wordings, each reply graded (Claude Haiku 4.5, pilot of eight scenarios) |
 | [Phrase Dataset](https://michaeldgreenphd.github.io/patientwords/phrase-dataset/) | The hand-built set from real patient language, measured by hand |

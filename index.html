@@ -3,315 +3,168 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>PatientWords — clinical vs. patient language in medical AI circuits</title>
-<meta name="description" content="Attribution-graph comparisons of clinical vs. colloquial patient language in gemma-2-2b, built on Neuronpedia and circuit-tracer.">
+<title>PatientWords — does wording change what AI predicts?</title>
+<meta name="description" content="PatientWords compares the same clinical situation written in everyday patient wording and in medical wording, and records in small open-weight language models the probability of the first token of a chosen target word. Simulated stimuli; clinical review pending.">
 <link rel="canonical" href="https://michaeldgreenphd.github.io/patientwords/">
 <meta name="theme-color" content="#faf9f5">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="PatientWords">
-<meta property="og:title" content="PatientWords — clinical vs. patient language in medical AI circuits">
-<meta property="og:description" content="Patients don’t speak like doctors. Small open language models change their next-word predictions when the wording does. Attribution-graph comparisons of clinical vs. patient language in gemma-2-2b.">
+<meta property="og:title" content="PatientWords — does wording change what AI predicts?">
+<meta property="og:description" content="The same clinical situation in everyday patient wording and in medical wording: the recorded next-token probabilities of small open-weight language models. Simulated stimuli; clinical review pending.">
 <meta property="og:url" content="https://michaeldgreenphd.github.io/patientwords/">
 <meta property="og:image" content="https://michaeldgreenphd.github.io/patientwords/assets/share_card.png">
 <meta property="og:image:width" content="2400">
 <meta property="og:image:height" content="1260">
 <meta property="og:image:alt" content="Patients don't speak like doctors. Small open models change their next-word predictions when the way a question is framed changes. Scenario 85, re-traced July 30, 2026: the clinical wording predicts inhaler at 68%; the everyday wording predicts shirt at 20%, and inhaler is not in the top five.">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="PatientWords — clinical vs. patient language in medical AI circuits">
-<meta name="twitter:description" content="Patients don’t speak like doctors. Small open language models change their next-word predictions when the wording does.">
+<meta name="twitter:title" content="PatientWords — does wording change what AI predicts?">
+<meta name="twitter:description" content="The same clinical situation in everyday patient wording and in medical wording: the recorded next-token probabilities of small open-weight language models.">
 <meta name="twitter:image" content="https://michaeldgreenphd.github.io/patientwords/assets/share_card.png">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23faf9f5'/%3E%3Crect x='9' y='9' width='30' height='30' fill='%23111827'/%3E%3Crect x='25' y='25' width='30' height='30' fill='%2315803d'/%3E%3C/svg%3E">
 <style>
+  /* One scale for the page: three text sizes, three heading sizes, seven spacings, one corner radius.
+     Serif for headings and prose, sans for data and controls, monospace for code and identifiers only. */
   :root{
     --paper:#faf9f5; --ink:#1c1c19; --patient:#111827; --clinical:#15803d;
-    --penalty:#b4483d; --muted:#6d6c66; --structural:#c3c9d2; --hairline:#dcdad2;
+    --muted:#6d6c66; --structural:#c3c9d2; --hairline:#dcdad2;
     --serif:'Iowan Old Style','Palatino Linotype',Palatino,'Book Antiqua',Georgia,serif;
+    --sans:system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
     --mono:ui-monospace,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace;
+    --t-meta:13px; --t-ui:14px; --t-body:17px; --t-h3:20px; --t-h2:26px;
+    --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:24px; --s6:32px; --s7:48px;
+    --radius:2px; --read:760px;
   }
   html{background:var(--paper)}
-  body{margin:0;padding:0;background:var(--paper);color:var(--ink);
-    font-family:var(--serif);font-size:17px;line-height:1.62;
-    -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
-  main{max-width:900px;margin:0 auto;padding:0 22px 56px}
-  a{color:inherit}
-  a:focus-visible{outline:2px solid var(--clinical);outline-offset:3px;border-radius:1px}
+  body{margin:0;padding:0;background:var(--paper);color:var(--ink);font-family:var(--serif);font-size:var(--t-body);
+    line-height:1.6;overflow-wrap:break-word;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+  main{max-width:var(--read);margin:0 auto;padding:0 var(--s4) var(--s7)}
+  [hidden]{display:none!important}
+  a{color:inherit;text-underline-offset:3px}
+  a:hover{color:var(--clinical)}
+  a:focus-visible{outline:2px solid var(--clinical);outline-offset:3px;border-radius:var(--radius)}
+  summary:focus-visible{outline:2px solid var(--clinical);outline-offset:2px}
   ::selection{background:#dbe9df}
+  code{font-family:var(--mono);font-size:var(--t-meta);overflow-wrap:anywhere}
+  .skip{position:absolute;left:-9999px;top:0;background:var(--paper);color:var(--ink);
+    padding:var(--s2) var(--s4);border:1px solid var(--ink);z-index:30}
+  .skip:focus{left:var(--s2)}
 
-  /* Masthead */
-  .masthead{max-width:900px;margin:0 auto;padding:20px 22px 0}
-  .masthead-row{display:flex;align-items:baseline;justify-content:space-between;
-    flex-wrap:wrap;gap:8px 24px;padding:10px 0 12px}
-  .wordmark{font-family:var(--serif);font-size:19px;font-weight:600;letter-spacing:.02em;
-    text-decoration:none}
+  .masthead{max-width:var(--read);margin:0 auto;padding:var(--s4) var(--s4) 0}
+  .masthead-row{display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:0 var(--s5);
+    padding:var(--s2) 0}
+  .wordmark{font-family:var(--serif);font-size:19px;font-weight:600;letter-spacing:.02em;text-decoration:none}
   .wordmark .pw-p{color:var(--patient)}
   .wordmark .pw-w{color:var(--clinical);font-style:italic}
   .wordmark .pw-w::before{content:'·';color:var(--muted);font-style:normal;font-weight:400;margin:0 3px 0 2px}
-  .masthead nav{display:flex;flex-wrap:wrap;gap:6px 20px}
-  .masthead nav a{font-family:var(--mono);font-size:11px;letter-spacing:.16em;
-    text-transform:uppercase;color:var(--muted);text-decoration:none;padding:2px 0}
-  .masthead nav a:hover{color:var(--ink);text-decoration:underline;text-underline-offset:4px}
-  .masthead nav a[aria-current=page]{color:var(--ink);border-bottom:1px solid var(--ink)}
-  /* 3 + 5 + 1 nav grouping by pure whitespace: after Technical and Phrase Dataset */
-  .masthead nav a:nth-child(3),.masthead nav a:nth-child(10){margin-right:2vw}
+  .masthead-row{position:relative}
+  .masthead nav{display:flex;flex-wrap:wrap;align-items:baseline;gap:0 22px}
+  .masthead nav a,.nav-more>summary{font-family:var(--serif);font-size:15px;line-height:1.4;color:var(--muted);
+    text-decoration:none;padding:6px 0}
+  .masthead nav a:hover,.nav-more>summary:hover{color:var(--ink);text-decoration:underline;text-underline-offset:4px}
+  .masthead nav a[aria-current=page]{color:var(--ink);text-decoration:underline;text-decoration-thickness:1px;
+    text-underline-offset:6px}
+  /* supporting pages sit in one disclosure: a details element, so it opens from the keyboard and without JavaScript */
+  .nav-more{margin:0}
+  .nav-more>summary{cursor:pointer;list-style:none}
+  .nav-more>summary::-webkit-details-marker{display:none}
+  .nav-more>summary::after{content:'\00a0\25BE'}
+  .nav-more[open]>summary{color:var(--ink)}
+  .nav-more[open]>summary::after{content:'\00a0\25B4'}
+  .nav-more>summary:focus-visible{outline:2px solid var(--clinical);outline-offset:3px}
+  .nav-more .nav-here{color:var(--ink)}
+  .nav-more-list{position:absolute;left:0;right:0;top:100%;z-index:20;display:flex;flex-wrap:wrap;gap:0 22px;
+    background:var(--paper);border-top:1px solid var(--hairline);border-bottom:1px solid var(--ink);padding:6px 0 8px}
   .rule-heavy{border:0;border-top:2px solid var(--ink);margin:0}
   .rule-fine{border:0;border-top:1px solid var(--hairline);margin:3px 0 0}
 
-  /* Front matter */
-  .dateline{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;
-    color:var(--muted);margin:34px 0 20px}
-  .dateline b{color:var(--clinical);font-weight:600}
-  h1{font-size:clamp(31px,5.4vw,46px);line-height:1.14;font-weight:600;
-    letter-spacing:-.006em;margin:0 0 1rem}
-  h1 .patient{color:var(--patient);font-weight:700}
-  h1 .clinical{color:var(--clinical);font-weight:700}
-  p.lede{font-size:18.5px;line-height:1.66;margin:0 0 16px}
-  p.lede em{font-style:italic}
-  .keyline{font-family:var(--mono);font-size:12.5px;color:var(--muted);
-    letter-spacing:.02em;margin:26px 0 0;line-height:2}
-  .keyline .swatch{display:inline-block;width:9px;height:9px;margin:0 7px 0 0;vertical-align:baseline}
-  /* keyline lives as the color legend atop the first figure card */
-  .fig .keyline{grid-column:1/-1;margin:0 0 1.5rem}
+  /* the reading path: question, pair, result, context, limits, internal measurements, methods and source */
+  h1{font-size:clamp(30px,4.6vw,40px);line-height:1.15;font-weight:600;letter-spacing:-.006em;margin:var(--s6) 0 var(--s3)}
+  h2{font-size:var(--t-h2);line-height:1.2;font-weight:600;margin:0 0 var(--s2)}
+  h3{font-size:var(--t-h3);line-height:1.3;font-weight:600;margin:var(--s5) 0 var(--s2)}
+  p{margin:0 0 var(--s3)}
+  section{margin-top:var(--s7)}
+  section.ruled{border-top:1px solid var(--ink);padding-top:var(--s4)}
+  .meta{font-family:var(--sans);font-size:var(--t-meta);line-height:1.55;color:var(--muted);margin:0 0 var(--s2)}
+  .meta b,.meta strong{color:var(--ink);font-weight:600}
+  .num{font-family:var(--sans);font-variant-numeric:tabular-nums;font-weight:600}
 
-  .specimen{border:1px solid var(--ink);background:#fff;margin:26px 0 8px}
-  .spec-head{border-bottom:1px solid var(--hairline);padding:14px 18px 12px;margin:0}
-  .spec-eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
-  .spec-head h2,.spec-head h3{font-size:22px;margin:4px 0 0;letter-spacing:-.005em;text-wrap:balance}
-  .spec-rows{padding:4px 0}
-  .spec-row{display:grid;grid-template-columns:186px 1fr max-content;gap:14px;align-items:baseline;
-    padding:8px 18px;border-bottom:1px solid #f0eee7}
-  .spec-row:last-child{border-bottom:0}
-  .spec-dial{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
-  .spec-txt{font-style:italic;font-size:15.5px;line-height:1.5}
-  .spec-out{font-family:var(--mono);font-size:12.5px;white-space:nowrap;color:var(--clinical)}
-  .spec-out.flip{color:var(--penalty);font-weight:600}
-  .spec-note{font-family:var(--mono);font-size:11px;color:var(--muted);padding:10px 18px 12px;margin:0;
-    border-top:1px solid var(--hairline);line-height:1.7}
-  @media (max-width:640px){.spec-row{grid-template-columns:1fr;gap:2px}.spec-out{justify-self:start}}
-
-  /* Section heads */
-  .section-head{display:flex;align-items:baseline;justify-content:space-between;gap:16px;
-    border-top:1px solid var(--ink);margin-top:46px;padding-top:10px}
-  .section-head h2{font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.2em;
-    text-transform:uppercase;color:var(--ink);margin:0}
-  .section-head .count{font-family:var(--mono);font-size:12px;color:var(--muted)}
-
-  /* Figures */
-  .fig{display:grid;grid-template-columns:400px 1fr;gap:16px 34px;align-items:start;
-    padding:30px 0 34px;border-bottom:1px solid var(--hairline);
-    text-decoration:none;color:inherit}
-  .fig:last-of-type{border-bottom:0}
-  .fig-media{margin:0;min-width:0}
-  .fig-media figcaption{font-family:var(--mono);font-size:11px;color:var(--muted);
-    letter-spacing:.04em;margin-top:8px}
-  .embed{border:1px solid var(--hairline);background:#fff;overflow:hidden;
-    transition:border-color .15s ease}
-  .embed iframe{width:100%;border:0;display:block}
-  .preview{width:100%;height:469px}
-  .preview.wide{height:245px}
-  .preview .frame{width:1180px;transform:scale(.339);transform-origin:top left}
-  .preview.wide .frame{width:2424px;transform:scale(.165)}
-  .preview iframe{pointer-events:none}
-  .embed.pending{background:var(--paper);display:flex;align-items:center;justify-content:center}
-  .pending-inner{font-family:var(--mono);font-size:11px;letter-spacing:.16em;
-    text-transform:uppercase;color:var(--muted);text-align:center;line-height:2;padding:20px}
-  .pending-mark{display:block;width:9px;height:9px;background:var(--structural);margin:0 auto 10px}
-  .fig-no{font-family:var(--mono);font-size:11.5px;letter-spacing:.18em;text-transform:uppercase;
-    color:var(--clinical);font-weight:600;margin:2px 0 8px}
-  .fig-no .mode{color:var(--muted);font-weight:400;letter-spacing:.06em;text-transform:none}
-  .fig h3{font-size:24px;font-weight:600;line-height:1.22;margin:0 0 10px;letter-spacing:-.004em}
-  .fig p{font-size:15.5px;line-height:1.62;margin:0 0 14px}
-  .stat{font-family:var(--mono);font-size:13px;font-weight:600;letter-spacing:.01em}
-  .stat-note{font-family:var(--mono);font-size:12px;line-height:1.7;color:var(--muted);margin:4px 0 0}
-  .stat.penalty{color:var(--penalty)}
-  .stat.recovery{color:var(--clinical)}
-  .traced{margin:12px 0 0;font-family:var(--mono);font-size:11px;letter-spacing:.03em;
-    line-height:1.9;font-weight:400}
-  .traced .tm{color:var(--ink)}
-  .traced .tm b{color:var(--clinical);font-weight:600}
-  .traced .tp{color:var(--muted)}
-
-  /* Phrase dataset */
-  .sp-scroll{overflow-x:auto}
-  .tier-table{border-collapse:collapse;margin:14px 0 6px;font-size:14.5px}
-  .tier-table th{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;
-    color:var(--muted);text-align:left;font-weight:400;padding:4px 22px 6px 0;border-bottom:1px solid var(--ink)}
-  .tier-table td{padding:6px 22px 6px 0;border-bottom:1px solid var(--hairline);vertical-align:baseline}
-  .tier-table .tn{font-family:var(--mono);font-weight:600}
-  .tier-table .tex{font-family:var(--mono);font-size:13px;color:var(--muted)}
-  .tier-cap{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.04em;margin:0 0 18px}
-  .sp-scroll,.me-scroll{background:
-    linear-gradient(90deg,var(--paper) 35%,rgba(250,249,245,0)),
-    linear-gradient(270deg,var(--paper) 35%,rgba(250,249,245,0)) 100% 0,
-    linear-gradient(90deg,rgba(28,28,25,.14),rgba(28,28,25,0)),
-    linear-gradient(270deg,rgba(28,28,25,.14),rgba(28,28,25,0)) 100% 0;
-    background-repeat:no-repeat;background-size:46px 100%,46px 100%,12px 100%,12px 100%;
-    background-attachment:local,local,scroll,scroll}
-  .sp-table th:first-child,.sp-table td:first-child,.me-table th:first-child,.me-table td:first-child{position:sticky;left:0;background:var(--paper);z-index:2}
-
-  .sp-table{width:100%;min-width:640px;border-collapse:collapse;margin:22px 0 12px}
-  .sp-table th{font-family:var(--mono);font-size:10.5px;font-weight:600;letter-spacing:.14em;
-    text-transform:uppercase;color:var(--muted);text-align:left;
-    padding:0 18px 8px 0;border-bottom:1px solid var(--ink)}
-  .sp-table th.sp-w-idx{width:112px}
-  .sp-table td{padding:14px 18px 14px 0;border-bottom:1px solid var(--hairline);vertical-align:top}
-  .sp-table tr:last-child td{border-bottom:1px solid var(--ink)}
-  .sp-idx{font-family:var(--mono);font-size:11px;color:var(--muted);white-space:nowrap}
-  .sp-target{font-family:var(--mono);font-size:10.5px;color:var(--muted)}
-  .sp-target::before{content:'· ';color:var(--muted)}
-  .sp-side{display:none}
-  .sp-prompt{font-size:15.5px;line-height:1.5;margin:0}
-  .sp-p .sp-prompt{color:var(--patient)}
-  .sp-c .sp-prompt{color:var(--clinical)}
-  .sp-obs{font-family:var(--mono);font-size:12px;color:var(--muted);margin-top:6px}
-  .sp-p .sp-obs b{color:var(--patient);font-weight:600}
-  .sp-c .sp-obs b{color:var(--clinical);font-weight:600}
-  .sp-link{font-family:var(--mono);font-size:11px;color:var(--clinical);text-decoration:none;
-    border:1px solid var(--hairline);padding:0 5px;margin-left:8px}
-  .sp-link:hover,.sp-link:focus-visible{border-color:var(--clinical)}
-  .sp-caption{font-size:15.5px;line-height:1.62;margin:0 0 10px}
-  .sp-foot{font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--muted);margin:0 0 46px}
-
-  /* Model evaluations */
-  .me-scroll{overflow-x:auto}
-  .me-table{width:100%;min-width:560px;border-collapse:collapse;margin:22px 0 12px}
-  .me-table th{font-family:var(--mono);font-size:10.5px;font-weight:600;letter-spacing:.14em;
-    text-transform:uppercase;color:var(--muted);text-align:left;
-    padding:0 18px 8px 0;border-bottom:1px solid var(--ink)}
-  .me-table th.num{text-align:right}
-  .me-table td{padding:11px 18px 11px 0;border-bottom:1px solid var(--hairline);
+  /* wording key: a mark beside the name; the name is always printed, colour is never the only cue */
+  .sw{display:inline-block;width:10px;height:10px;border-radius:50%;box-sizing:border-box;margin-right:var(--s2);
     vertical-align:baseline}
-  .me-table td.num{text-align:right}
-  .me-table tr:last-child td{border-bottom:1px solid var(--ink)}
-  .me-model{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--ink)}
-  .me-pending-note{display:block;font-family:var(--mono);font-size:10.5px;
-    letter-spacing:.06em;color:var(--muted);margin-top:2px}
-  .me-num{font-family:var(--mono);font-size:13px;font-weight:600}
-  .me-num.me-null{color:var(--muted);font-weight:400}
-  .me-patient{color:var(--patient)}
-  .me-clin{color:var(--clinical)}
-  .me-delta.pos{color:var(--clinical)}
-  .me-delta.neg{color:var(--penalty)}
-  .me-audit{font-family:var(--mono);font-size:11px;color:var(--muted)}
-  .me-caption{font-size:15.5px;line-height:1.62;margin:0 0 10px}
-  .me-foot{font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--muted);margin:0 0 46px}
+  .sw-clinical{background:var(--clinical)}
+  .sw-patient{background:var(--patient)}
 
-  .open{display:inline-block;margin-top:14px;font-family:var(--mono);font-size:12px;
-    letter-spacing:.1em;text-transform:uppercase;color:var(--ink);
-    border-bottom:1px solid var(--ink);padding-bottom:2px}
-  .fig:hover .open,.fig:focus-visible .open{color:var(--clinical);border-bottom-color:var(--clinical)}
-  .fig:hover .embed,.fig:focus-visible .embed{border-color:var(--ink)}
-  .fig:hover h3{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:5px;
-    text-decoration-color:var(--structural)}
+  /* the pair */
+  .words{margin:var(--s3) 0 0;border-top:1px solid var(--ink)}
+  .word{display:grid;grid-template-columns:minmax(0,10.5rem) minmax(0,1fr);gap:2px var(--s4);align-items:baseline;
+    padding:var(--s2) 0;border-bottom:1px solid var(--hairline)}
+  .word:last-child{border-bottom:1px solid var(--ink)}
+  .word-n{font-family:var(--sans);font-size:var(--t-ui);font-weight:600}
+  .word-t{margin:0}
+  .term{border-bottom:2px solid var(--muted)}
+  .word[data-variant=clinical] .term{border-bottom-color:var(--clinical)}
+  .word[data-variant=patient] .term{border-bottom-color:var(--patient)}
 
-  /* End matter */
-  .endnote{border-top:1px solid var(--ink);margin-top:8px;padding-top:14px}
-  .endnote p{font-family:var(--mono);font-size:12px;line-height:1.8;color:var(--muted);
-    ;margin:0 0 14px}
-  footer{font-family:var(--mono);font-size:12px;line-height:1.9;color:var(--muted)}
-  footer a{color:var(--muted);text-underline-offset:3px}
-  footer a:hover{color:var(--ink)}
+  /* the recorded result: one row per wording on a common 0 to 1 axis, the value printed at its dot */
+  .dp{margin:var(--s2) 0 0}
+  .dp-row{display:grid;grid-template-columns:minmax(0,10.5rem) minmax(0,1fr);gap:0 var(--s4);align-items:center;min-height:32px}
+  .dp-n{font-family:var(--sans);font-size:var(--t-ui);font-weight:600}
+  .dp-t{position:relative;height:32px;min-width:0;background:
+    linear-gradient(var(--hairline),var(--hairline)) left center/100% 1px no-repeat,
+    linear-gradient(var(--structural),var(--structural)) left/1px 100% no-repeat,
+    linear-gradient(var(--hairline),var(--hairline)) center/1px 100% no-repeat,
+    linear-gradient(var(--structural),var(--structural)) right/1px 100% no-repeat}
+  .dp-d{position:absolute;top:50%;width:10px;height:10px;border-radius:50%;transform:translate(-50%,-50%);
+    box-shadow:0 0 0 2px var(--paper)}
+  .dp-v{position:absolute;top:50%;transform:translateY(-50%);font-family:var(--sans);font-size:var(--t-ui);font-weight:600;
+    font-variant-numeric:tabular-nums;background:var(--paper);padding:0 var(--s1);white-space:nowrap;line-height:1.3}
+  .dp-axis{min-height:0}
+  .dp-axis .dp-t{height:20px;background:none}
+  .dp-axis .dp-t span{position:absolute;top:0;font-family:var(--sans);font-size:var(--t-meta);color:var(--muted);
+    transform:translateX(-50%)}
+  .dp-axis .dp-t span:first-child{transform:none}
+  .dp-axis .dp-t span:last-child{transform:translateX(-100%)}
+  .result{font-size:var(--t-body);margin:var(--s3) 0 var(--s2)}
 
-  @media (max-width:760px){
-    .masthead nav{gap:8px 22px}
-    .masthead nav a{padding:7px 0}
+  .routes{list-style:none;margin:var(--s3) 0 0;padding:0;border-top:1px solid var(--hairline)}
+  .routes li{padding:var(--s2) 0;border-bottom:1px solid var(--hairline)}
+  .routes a{font-weight:600}
+  .routes span{color:var(--muted)}
+  .inline-routes{margin:var(--s3) 0 0}
+  .inline-routes a{margin-right:var(--s4);white-space:nowrap}
 
-    body{font-size:16px}
-    .masthead{padding-top:12px}
-    .masthead-row{padding-bottom:10px}
-    .fig{grid-template-columns:minmax(0,1fr);gap:14px}
-    .sp-scroll{overflow:visible}
-    .sp-table{min-width:0}
-    .sp-table thead{display:none}
-    .sp-table,.sp-table tbody,.sp-table tr,.sp-table td{display:block}
-    .sp-table td{border:0;padding:5px 0}
-    .sp-table tr{border-bottom:1px solid var(--hairline);padding:14px 0}
-    .sp-table tr:last-child{border-bottom:1px solid var(--ink)}
-    /* label hugs its sentence so patient/clinical each read as one block */
-    .sp-side{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.14em;
-      text-transform:uppercase;color:var(--muted);margin-bottom:1px}
-    .sp-obs{margin-top:3px}
-    .fig-media{order:2}
-    .fig-body{order:1}
-    .fig p{max-width:none}
-    p.lede{font-size:17px}
-    .sv-asym svg{min-width:var(--sv-natural)}
+  /* internal measurements: a preview of an engine-rendered figure, its caption, and a link to the full figure */
+  .fig{margin:var(--s5) 0 0}
+  .fig-media{margin:0}
+  .embed{border:1px solid var(--hairline);background:#fff;overflow:hidden}
+  .embed iframe{width:100%;border:0;display:block;pointer-events:none}
+  .preview{width:100%;height:469px}
+  .preview .frame{width:1180px;transform:scale(.339);transform-origin:top left}
+  .fig figcaption h3{margin-top:0}
+  .fig .inline-routes{margin-top:var(--s2)}
+  details.fold{margin:var(--s2) 0 0}
+  details.fold>summary{font-family:var(--sans);font-size:var(--t-ui);cursor:pointer;list-style:none;padding:var(--s1) 0;
+    display:inline-block;text-decoration:underline;text-decoration-color:var(--structural);text-underline-offset:4px}
+  details.fold>summary::-webkit-details-marker{display:none}
+  details.fold>summary::before{content:'\25B8\00a0';color:var(--muted)}
+  details.fold[open]>summary::before{content:'\25BE\00a0'}
+  details.fold>summary:hover{color:var(--clinical)}
+  details.fold p{font-family:var(--sans);font-size:var(--t-ui);line-height:1.55;margin:var(--s1) 0 0}
+
+  footer{font-family:var(--sans);font-size:var(--t-meta);line-height:1.6;color:var(--muted)}
+  footer a{color:var(--muted)}
+
+  @media (max-width:640px){
+    .word,.dp-row{grid-template-columns:minmax(0,1fr)}
+    .dp-row{padding:var(--s1) 0}
+    .dp-axis .dp-n{display:none}
+    .inline-routes a{display:block;margin:0 0 var(--s2);white-space:normal}
   }
   @media print{
     html,body{background:#fff;color:#000}
-    .masthead nav,.open{display:none}
-    a{text-decoration:none;color:inherit}
-    .fig{break-inside:avoid;border-bottom:1px solid #999}
-    .embed{border-color:#999}
-    .keyline,.dateline,.endnote p,footer{color:#444}
+    .masthead nav{display:none}
+    .fig{break-inside:avoid}
   }
-  /* Safety view: per-model urgency cards */
-  .prov{font-family:var(--mono);font-size:10.5px;color:var(--muted);margin-top:2px;letter-spacing:.02em}
-  .prov a{color:var(--muted);text-underline-offset:3px}
-  .prov a:hover{color:var(--ink)}
-  .fold{margin:14px 0 6px}
-  .fold>summary{font-family:var(--mono);font-size:12px;color:var(--muted);cursor:pointer;
-    letter-spacing:.02em;line-height:1.7}
-  .fold>summary:hover{color:var(--ink)}
-  .fold>summary:focus-visible{outline:2px solid var(--clinical);outline-offset:2px}
-  .fold[open]>summary{color:var(--ink);margin-bottom:6px}
-  /* trace metadata collapsed by default so figures stay above the fold on mobile */
-  .trace-fold{margin:8px 0 2px}
-  .trace-fold>summary{font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--muted);
-    cursor:pointer;list-style:none;padding:2px 0}
-  .trace-fold>summary::-webkit-details-marker{display:none}
-  .trace-fold>summary::before{content:'\25B8\00a0'}
-  .trace-fold[open]>summary::before{content:'\25BE\00a0'}
-  .trace-fold>summary:hover{color:var(--ink)}
-  .trace-fold>summary:focus-visible{outline:2px solid var(--clinical);outline-offset:2px}
-  .trace-fold .traced{margin-top:6px}
-  .trace-fold .read-graph{font-size:14px;line-height:1.6;color:var(--muted);margin:6px 0 0}
-  .stat .pen{color:var(--penalty)}
-  /* live aggregate caveat beside the extreme-case hero demo */
-  .hero-caveat{font-family:var(--mono);font-size:11.5px;color:var(--muted);margin:10px 0 0;max-width:640px;line-height:1.75}
-  .hero-caveat b{color:var(--ink);font-weight:600}
-  /* safety-view chart swipes horizontally on narrow screens instead of compressing labels */
-  .sv-asym{margin:22px 0 0;max-width:680px;overflow-x:auto;-webkit-overflow-scrolling:touch}
-  .sv-asym svg{width:100%;height:auto;display:block}
-  .safety-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin:20px 0 8px}
-  .safety-card{border:1px solid var(--hairline);background:#fff;padding:14px 16px}
-  .safety-card h3{font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.08em;margin:0 0 10px}
-  .safety-card dl{margin:0;font-size:14px;line-height:1.7}
-  .safety-card dt{float:left;clear:left;color:var(--muted);font-size:13px}
-  .safety-card dd{margin:0 0 2px 0;text-align:right;font-family:var(--mono);font-size:12.5px}
-  .safety-card .bad{color:var(--penalty);font-weight:600}
-  .safety-card .ok{color:var(--clinical);font-weight:600}
-  .safety-note{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.03em;margin:10px 0 0;line-height:1.8}
-  .safety-note b{color:var(--penalty)}
-  .draft-flag{display:inline-block;font-family:var(--mono);font-size:10px;letter-spacing:.14em;
-    text-transform:uppercase;color:var(--penalty);border:1px solid var(--penalty);
-    padding:2px 8px;margin-left:10px;vertical-align:middle}
-  .skip{position:absolute;left:-9999px;top:0;background:var(--paper);color:var(--ink);padding:8px 14px;border:1px solid var(--ink);z-index:10}
-  .skip:focus{left:8px}
-  /* say-it-two-ways demo (front door; same widget pattern as start-here step 3,
-     colors mapped to this page's semantic keyline) */
-  .tg{border:1px solid var(--hairline);background:#fff;padding:18px 20px;margin:18px 0 2rem;max-width:640px}
-  .tg-sentence{font-size:17px;line-height:1.6;margin:0 0 4px}
-  .tg-swap{display:inline-block;border-bottom:2px solid var(--clinical);cursor:default}
-  .tg.pat .tg-swap{border-bottom-color:var(--patient)}
-  .tg button{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;
-    background:none;border:1px solid var(--clinical);color:var(--clinical);padding:6px 12px;cursor:pointer;margin:10px 0 14px}
-  .tg button:hover{background:var(--clinical);color:#fff}
-  .tg.pat button{border-color:var(--patient);color:var(--patient)}
-  .tg.pat button:hover{background:var(--patient);color:#fff}
-  .tg button:focus-visible{outline:2px solid var(--clinical);outline-offset:2px}
-  .tg .bar-head{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;
-    color:var(--muted);text-align:right;margin:0 0 2px}
-  .tg .bar-row{display:flex;align-items:center;gap:10px;margin:6px 0}
-  .tg .bar-lbl{font-family:var(--mono);font-size:12.5px;min-width:8ch;text-align:right}
-  .tg .bar-track{flex:1;height:16px;background:none}
-  .tg .bar-fill{height:16px;transition:width .7s ease}
-  .tg .bar-val{font-family:var(--mono);font-size:11.5px;color:var(--muted);min-width:4ch}
-  .tg-cap{font-family:var(--mono);font-size:11.5px;color:var(--muted);margin:2px 0 0;max-width:640px}
-  @media (prefers-reduced-motion:reduce){.tg .bar-fill{transition:none}}
-
-  .onramp{font-family:var(--mono);font-size:12px;letter-spacing:.04em;margin:10px 0 0;color:var(--muted)}
-  .onramp span{letter-spacing:.14em;text-transform:uppercase;font-size:10.5px;margin-right:6px}
-  .onramp a{color:var(--ink);text-decoration:underline;text-underline-offset:3px}
 </style>
 </head>
 <body>
@@ -321,224 +174,134 @@
   <div class="masthead-row">
     <a class="wordmark" href="./" aria-current="page" aria-label="PatientWords home, the overview page"><span class="pw-p">Patient</span><span class="pw-w">Words</span></a>
     <nav aria-label="Site">
-      <a href="start-here/">Start Here</a>
+      <a href="start-here/">Start here</a>
+      <a href="simulated-scenarios/">Scenarios</a>
+      <a href="results/">Results</a>
       <a href="methods.html">Methods</a>
-      <a href="technical/">Technical</a>
-      <a href="wording-differences/">Wording Differences</a>
-      <a href="dialect-differences/">Dialect Differences</a>
-      <a href="translation/">Translation</a>
-      <a href="simulated-scenarios/">Simulated Scenarios</a>
-      <a href="llm/">LLM</a>
-      <a href="multi-turn/">Multi-turn</a>
-      <a href="phrase-dataset/">Phrase Dataset</a>
-      <a href="https://github.com/michaeldgreenphd/patientwords">GitHub</a>
+      <details class="nav-more">
+        <summary>More</summary>
+        <div class="nav-more-list">
+          <a href="wording-differences/">Wording differences</a>
+          <a href="dialect-differences/">Dialect differences</a>
+          <a href="translation/">Translation</a>
+          <a href="llm/">LLM responses</a>
+          <a href="multi-turn/">Multi-turn</a>
+          <a href="phrase-dataset/">Phrase dataset</a>
+          <a href="technical/">Technical</a>
+          <a href="clinical/">Clinical brief</a>
+          <a href="https://github.com/michaeldgreenphd/patientwords">GitHub</a>
+        </div>
+      </details>
     </nav>
   </div>
   <hr class="rule-fine">
 </header>
 <main id="main">
-  <p class="dateline">mechanistic interpretability of medical v. patient language</p>
-  <h1><span class="patient">Patients</span> don’t speak like doctors.<br><span class="clinical">Small open models</span> change their next-word predictions when the way a question is framed changes. This might scale to LLMs</h1>
-  <p class="lede">We evaluate how gemma-2-2b (an open weight model from Google) reads clinical terms versus the everyday words patients use. Wording can change the model's top next word in addition to its confidence. Try the case below.</p>
+  <h1>Does wording change what AI predicts?</h1>
+  <p class="lede">PatientWords writes the same clinical situation twice, in everyday wording and in medical wording, and measures how a language model’s next-token prediction differs. If models respond less well to everyday words, the people affected are those who describe symptoms in their own language.</p>
+  <p class="meta" id="scope"><span id="scope-models">gemma-2-2b and other models</span> · small open-weight language models · endpoint: the probability that the next token is the first token of a chosen target word</p>
 
-  <p class="onramp"><span>Two ways in:</span>
-    <a href="clinical/">for clinicians &mdash; the brief</a> ·
-    <a href="technical/">for AI researchers &mdash; the technical page</a></p>
-
-  <div class="tg" id="home-tg">
-    <p class="tg-sentence">“When the dust kicks up my
-      <span class="tg-swap" id="tg-swap">asthma flares</span>,
-      so at work I keep a spare&nbsp;___”</p>
-    <button id="tg-btn" type="button" aria-label="Switch between clinical and patient wording">say it the other way</button>
-    <div class="bar-head" aria-hidden="true">model’s next-word guesses</div>
-    <div id="tg-bars" aria-live="polite"></div>
-  </div>
-  <p class="tg-cap">live measurements, scenario 85 · <a href="modes/simulated/pairs_20260707T171223Z/index_49.html">open the full trace</a> · <a href="simulated-scenarios/">browse all scenarios</a> · <a href="start-here/">new to this? start here →</a></p>
-  <p class="hero-caveat" id="hero-caveat" hidden></p>
-
-  <div class="section-head">
-    <h2>Four comparison engines</h2>
-  </div>
-
-  <a class="fig" href="wording-differences/#word">
-    <p class="keyline">
-      <span class="swatch" style="background:#15803d"></span>clinical / recovery &nbsp;&nbsp;
-      <span class="swatch" style="background:#111827"></span>off-target (the patient-language direction) &nbsp;&nbsp;
-      <span class="swatch" style="background:#c3c9d2"></span>structural / context &nbsp;&nbsp;
-      <span class="swatch" style="background:#b4483d"></span>wording gap
-    </p>
-    <p class="keyline">Wording gap: the percentage points of next-word probability the clinical answer loses when the sentence is worded the way an everyday patient would say it, as opposed to standard medical terms.</p>
-    <figure class="fig-media">
-      <div class="embed preview"><div class="frame">
-        <iframe class="live" src="modes/simulated/featured_sim85/index_01.html" loading="lazy"
-                title="Live preview: two stacked attribution graphs comparing clinical and patient wording" tabindex="-1" aria-hidden="true"></iframe>
-      </div></div>
-      <figcaption>live trace</figcaption>
-    </figure>
-    <div class="fig-body">
-      <p class="fig-no">Wording <span class="mode">· one-word swap</span></p>
-      <h3>Swap the word</h3>
-      <p></p>
-      <details class="trace-fold">
-        <summary>How to read this graph</summary>
-        <p class="read-graph">Columns are the prompt’s words in order; height is depth in the model; the predicted next word sits at the top. Nodes (the dots) are features. For the features: size is contribution, color is category (patient or clinical). Curves are paths of influence; the spread at the top shows the different next-word predictions ranked by probability. Hover any dot for its identity and size.</p>
-      </details>
-      <details class="trace-fold">
-        <summary>Trace details</summary>
-        <p class="traced" data-mode="2panel" data-traced="gemma-2-2b">
-          <span class="tm"><b>live trace:</b> gemma-2-2b</span>
-          <span class="tp">circuit-tracer via Neuronpedia · traced July 7, 2026 · render re-traced July 30, 2026 · scenario 85 of the simulated sentences</span>
-        </p>
-      </details>
-      <span class="open">Open the comparison →</span>
-    </div>
-  </a>
-
-  <a class="fig" href="wording-differences/#grammar">
-    <figure class="fig-media">
-      <div class="embed preview wide"><div class="frame">
-        <iframe class="live" src="modes/4quadrant2/index_07.html" loading="lazy"
-                title="Live preview: four-quadrant matrix factorizing vocabulary and grammar effects" tabindex="-1" aria-hidden="true"></iframe>
-      </div></div>
-      <figcaption>live render · simulated scenario</figcaption>
-    </figure>
-    <div class="fig-body">
-      <p class="fig-no">Wording <span class="mode">· grammar × medical wording</span></p>
-      <h3>Swap the grammar</h3>
-      <p>A 2×2 grid crossing wording (patient vs. medical) with grammar (standard vs. nonstandard). From the circuit trace, the top guess is “doctor” only with the clinical word and standard grammar (Box A); changing the grammar alone (Box B) redirects it toward “gym”, and patient words make “gym” the top prediction.</p>
-      <span class="stat penalty">Top by cell: A “doctor” 0.295 · B “gym”/“doctor” tie 0.177 · C “gym” 0.355 · D “gym” 0.289</span>
-      <details class="trace-fold">
-        <summary>Trace details</summary>
-        <p class="traced" data-mode="4quadrant" data-traced="gemma-2-2b">
-          <span class="tm"><b>traced model:</b> gemma-2-2b</span>
-          <span class="tp">hosted circuit-tracer via Neuronpedia</span>
-        </p>
-      </details>
-      <span class="open">Open the matrix →</span>
-    </div>
-  </a>
-
-  <figure class="specimen" id="dialect-specimen" hidden>
-    <figcaption class="spec-head">
-      <p class="fig-no">Dialect <span class="mode">· </span></p>
-      <h3>Same medical situation + Different wording = Different prediction.</h3>
-    </figcaption>
-    <div class="spec-rows" id="spec-rows"></div>
-    <p class="spec-note" id="spec-note"></p>
-    <details class="trace-fold" style="padding:0 18px">
-      <summary>Trace details</summary>
-      <p class="traced" data-mode="dialect" data-traced="gemma-2-2b">
-        <span class="tm"><b>traced model:</b> gemma-2-2b</span>
-        <span class="tp">from the <a href="https://github.com/michaeldgreenphd/patientwords-engine/blob/main/data/simulated/dialects_20260708T120729Z.json">dialect experiment on July 8, 2026</a></span>
-      </p>
-    </details>
-    <a class="open" href="dialect-differences/" style="margin:0 18px 14px;display:inline-block">Open the dialect study →</a>
-  </figure>
-
-  <a class="fig" href="translation/">
-    <figure class="fig-media">
-      <div class="embed preview"><div class="frame">
-        <iframe class="live" src="modes/simulated/urgency_downgrades_20260707T1/index_17.html" loading="lazy"
-                title="Live preview: translation mitigation restoring the clinical continuation" tabindex="-1" aria-hidden="true"></iframe>
-      </div></div>
-      <figcaption>live trace</figcaption>
-    </figure>
-    <div class="fig-body">
-      <p class="fig-no">Translation <span class="mode">· recovery</span></p>
-      <h3>Translation</h3>
-      <p>An LLM is instructed to rewrite the patient sentence into clinical terms, and the rewrite is evaluated. The clinical features and the target probability often both come back after the LLM "translates" the patient wording.</p>
-      <span class="stat recovery">Recovered target probability: 0.45 after translation (clinical baseline 0.26) · July 7 trace</span>
-      <details class="trace-fold">
-        <summary>Trace details</summary>
-        <p class="traced" data-mode="translation" data-traced="gemma-2-2b">
-          <span class="tm"><b>live trace:</b> gemma-2-2b</span>
-          <span class="tp">hosted circuit-tracer via Neuronpedia · traced July 7, 2026 · render re-traced July 30, 2026 · phrase 17 of a set of reviewed terms which downgrade urgency in advice (predictions that fell to a lower care tier, e.g. emergency → routine)</span>
-        </p>
-      </details>
-      <span class="open">Open the mitigation chain →</span>
-    </div>
-  </a>
-
-  <div class="section-head">
-    <h2>Simulated scenarios</h2>
-    <span class="count" id="sim-count"></span>
-  </div>
-
-  <a class="fig" href="simulated-scenarios/">
-    <figure class="fig-media">
-      <div class="embed preview pending" data-live-src="modes/simulated/preview.html"
-           data-live-title="Live preview: simulated scenario traced as two stacked attribution graphs">
-        <div class="pending-inner"><span class="pending-mark"></span>loading · simulated series</div>
+  <section id="example" aria-labelledby="h-example">
+    <h2 id="h-example">One pair and its recorded result</h2>
+    <p class="meta" id="ex-label">Example pair · <span id="ex-model">gemma-2-2b</span> · model-generated prompts · clinical review pending</p>
+    <div class="words" id="home-tg" role="table" aria-label="The example pair">
+      <div class="word" role="row" data-kind="example-pair" data-variant="clinical">
+        <span class="word-n" role="rowheader"><span class="sw sw-clinical" aria-hidden="true"></span>Medical wording</span>
+        <p class="word-t" role="cell" id="ex-clinical">“When the dust kicks up my <span class="term">asthma flares</span>, so at work I keep a spare&nbsp;___”</p>
       </div>
-      <figcaption>live renders · simulated data</figcaption>
-    </figure>
-    <div class="fig-body">
-      <p class="fig-no">Sim series <span class="mode">· simulated data</span></p>
-      <h3>Simulated Scenarios</h3>
-      <p>Claude writes new patient-vs-clinical pairs, and LLM validators accept or reject each (based on formatting). Accepted pairs are traced on gemma-2-2b and published with the generator’s rationale and cost.</p>
-      <span class="stat" id="sim-stat" hidden></span>
-      <p class="stat-note">Batches here were generated to stress specific topics, so flip-prone scenarios are over-represented by design; the pooled share is a property of this stress-test set, not an estimate of how often models flip in general.</p>
-      <details class="trace-fold">
-        <summary>Trace details</summary>
-        <p class="traced" data-mode="simulated" data-traced="gemma-2-2b">
-          <span class="tm"><b>traced model:</b> gemma-2-2b</span>
-          <span class="tp">simulated data · </span>
-        </p>
+      <div class="word" role="row" data-kind="example-pair" data-variant="patient">
+        <span class="word-n" role="rowheader"><span class="sw sw-patient" aria-hidden="true"></span>Everyday wording</span>
+        <p class="word-t" role="cell" id="ex-patient">“When the dust kicks up my <span class="term">chest gets all tight</span>, so at work I keep a spare&nbsp;___”</p>
+      </div>
+    </div>
+
+    <h3 id="ex-question">Probability that the next token is the first token of the target word “inhaler”</h3>
+    <div class="dp" id="ex-plot" data-kind="example-result" role="table" aria-labelledby="ex-question"></div>
+    <p class="result" id="ex-diff" hidden></p>
+    <p class="meta" id="ex-top" hidden></p>
+    <noscript><p class="meta">The recorded values load with JavaScript. They are also on <a href="simulated-scenarios/">the scenario pages</a> and in <a href="https://github.com/michaeldgreenphd/patientwords/blob/main/data/simulated_scenarios.json">the data file</a>.</p></noscript>
+
+    <p id="ex-why">Chosen by hand as an illustration (<a href="https://github.com/michaeldgreenphd/patientwords-engine/blob/main/data/editorial_pins.json">editorial pin</a>). <span id="ex-rank">Its difference is among the largest in the published file; it is not a typical pair.</span></p>
+    <p data-kind="aggregate" id="hero-caveat" hidden></p>
+    <p class="inline-routes">
+      <a id="ex-record" href="simulated-scenarios/">Open this pair's record</a>
+      <a id="ex-trace" href="modes/simulated/pairs_20260707T171223Z/index_49.html">Open its attribution graphs</a>
+      <a href="simulated-scenarios/">Browse all scenarios</a>
+      <a href="start-here/">New to this? Start here</a>
+    </p>
+  </section>
+
+  <section class="ruled" id="limits" aria-labelledby="h-limits">
+    <h2 id="h-limits">What is measured</h2>
+    <p>One token’s probability after an unfinished sentence: a small, repeatable measurement of a model, not an assistant’s reply, its clinical quality or an effect on patients. <a href="llm/">Whole replies</a> are measured separately. Whether the two wordings of a pair are clinically equivalent has not yet been reviewed. Everyday wording is not defective language; the question is whether models and instruments handle it as well as medical wording.</p>
+  </section>
+
+  <section class="ruled" id="internal" aria-labelledby="h-internal">
+    <h2 id="h-internal">Internal measurements</h2>
+    <p>An attribution graph is computed for one prompt. It lists the features an instrument (a transcoder trained on gemma-2-2b) finds in the model's activations and estimates how much each contributed to the predicted token. It is a readout from that instrument: a difference between two wordings’ graphs is not by itself a causal explanation. The <a href="methods.html#reading-layers">methods page</a> describes the intervention checks.</p>
+
+    <figure class="fig" id="fig-pair">
+      <figcaption>
+        <h3>The example pair, traced</h3>
+        <p>Two attribution graphs of the pair above: the medical wording on top, the everyday wording below. The preview shows the top of the figure. It is a later re-trace of the pair, so the probabilities printed in it can differ slightly from the recorded values above.</p>
+      </figcaption>
+      <div class="fig-media">
+        <div class="embed preview"><div class="frame">
+          <iframe class="live" src="modes/simulated/featured_sim85/index_01.html" loading="lazy"
+                  title="Preview: two stacked attribution graphs, one for the medical wording and one for the everyday wording of the example pair" tabindex="-1" aria-hidden="true"></iframe>
+        </div></div>
+      </div>
+      <p class="inline-routes"><a href="wording-differences/#word">Open the full comparison on the Wording differences page</a></p>
+      <details class="fold">
+        <summary>How to read this graph</summary>
+        <p>Columns are the prompt's words in order; height is depth in the model; the predicted next token sits at the top with its probability. Each dot is a feature, and its size is its attribution. Its colour is the label the instrument gives it: green for a feature labelled medical (the figure's legend says clinical), dark ink for a feature labelled everyday (the legend says off-target), grey for structural context. Curves are attribution paths; a red curve has a negative weight. Hover a dot in the full figure for its identity and size.</p>
       </details>
-      <span class="open">Open the simulated series →</span>
-    </div>
-  </a>
+      <details class="fold">
+        <summary>Trace details</summary>
+        <p data-mode="2panel" data-traced="gemma-2-2b">Model gemma-2-2b · circuit-tracer via Neuronpedia · traced July 7, 2026 · render re-traced July 30, 2026 · <span id="ex-index">the example scenario</span> of the simulated sentences</p>
+      </details>
+    </figure>
 
-  <section id="safety-view" hidden>
-    <div class="section-head">
-      <h2>Safety view — urgency of the predicted action<span class="draft-flag">tiers owner-reviewed v1 · domain review pending</span></h2>
-      <span class="count" id="sv-count"></span>
-    </div>
-    <p class="lede" style="font-size:16px">Not every flip is equal: the model <em>hedges</em> (top answer holds, loses probability) or <em>redirects</em>. Sometimes the clinical urgency of the recommended next word changes from situations which warrant more attention or specialized care to one that a patient can solve on their own. A redirect down the care urgency tiers is a <em>“downgrade”</em>. Definitions for this care ladder that presents the tiers of medical care are presented in <a href="methods.html#step-4">methods step 4</a>. These are next-word probabilities in small open models on LLM-written test sentences, not clinical outcomes; scope and caveats are on the <a href="methods.html#limitations">methods page</a>.</p>
-    <div class="sv-asym" id="sv-asym" hidden></div>
-    <p class="safety-note" id="sv-asym-cap" hidden>when a wording change moves the top answer across care tiers, the move is mostly down · red arrows: answers landing on a lower tier of clinical urgency · grey: a higher one · LLM-authored stimuli</p>
-    <p class="safety-note">Per-model statistics with multiple-comparison correction: <a href="technical/#models">the interim table on the Technical page</a> — that table counts only the registered observational batches, so its per-model figures sit slightly below the all-measured-phrase counts charted here.</p>
+    <figure class="fig" id="fig-translation">
+      <figcaption>
+        <h3>A rewritten sentence, traced</h3>
+        <p>A language model rewrote an everyday sentence in medical terms, and the rewrite was traced in the same way. Recorded target-token probability in this case: <span id="tr-claim">0.45 after translation (clinical baseline 0.26) · July 7 trace</span>. One traced case; the Translation page gives every reviewed case, including those where the probability did not return.</p>
+      </figcaption>
+      <div class="fig-media">
+        <div class="embed preview"><div class="frame">
+          <iframe class="live" src="modes/simulated/urgency_downgrades_20260707T1/index_17.html" loading="lazy"
+                  title="Preview: attribution graphs of a medical wording, an everyday wording and a rewrite of the everyday wording in medical terms" tabindex="-1" aria-hidden="true"></iframe>
+        </div></div>
+      </div>
+      <p class="inline-routes"><a href="translation/">Open the Translation page</a></p>
+      <details class="fold">
+        <summary>Trace details</summary>
+        <p data-mode="translation" data-traced="gemma-2-2b">Model gemma-2-2b · hosted circuit-tracer via Neuronpedia · traced July 7, 2026 · render re-traced July 30, 2026 · phrase 17 of a reviewed set of pairs in which the most probable next token moved to a lower level of the draft care-urgency ladder</p>
+      </details>
+    </figure>
   </section>
 
-  <section id="phrase-dataset" hidden>
-    <div class="section-head">
-      <h2>Phrase dataset</h2>
-      <span class="count" id="sp-count"></span>
-    </div>
-    <details class="trace-fold">
-      <summary>Measurement details</summary>
-      <p class="traced">
-        <span class="tm"><b>measured on:</b> <span id="sp-model">gemma-2-2b · gemma scope transcoders</span></span>
-        <span class="tp">→ observed next token · p = observed next-token probability · via the neuronpedia circuit tracer</span>
-      </p>
-    </details>
-    <details class="fold">
-      <summary>The five pairs with the largest observed effect, from an initial set built by Michael D. Green, Ph.D. to demonstrate failure modes for the models.</summary>
-    <div class="sp-scroll">
-      <table class="sp-table">
-        <thead><tr>
-          <th scope="col" class="sp-w-idx">Pair</th>
-          <th scope="col">Patient phrasing</th>
-          <th scope="col">Clinical phrasing</th>
-        </tr></thead>
-        <tbody id="sp-body"></tbody>
-      </table>
-    </div>
-    <p class="sp-caption">Measured on gemma-2-2b (Gemma Scope transcoders) via the Neuronpedia circuit tracer; next-token probabilities as observed at measurement time.</p>
-    </details>
-    <p class="sp-foot">preview: observed-token flips and biggest probability gaps first · <a href="phrase-dataset/">full dataset (all pairs) →</a></p>
+  <section class="ruled" id="more" aria-labelledby="h-more">
+    <h2 id="h-more">More comparisons</h2>
+    <ul class="routes">
+      <li><a href="simulated-scenarios/">Simulated scenarios</a> <span>· every published pair with its measurements and traces</span></li>
+      <li><a href="results/">Results catalogue</a> <span>· every measured run, with its status and what it may be used for</span></li>
+      <li><a href="wording-differences/">Wording differences</a> <span>· one-word swaps, and wording crossed with grammar</span></li>
+      <li id="dialect-specimen"><a href="dialect-differences/">Dialect differences</a> <span>· one instruction in several language-model-written approximations of English varieties</span></li>
+      <li><a href="translation/">Translation</a> <span>· rewriting the everyday sentence in medical terms, case by case</span></li>
+      <li id="model-evaluations"><a href="llm/">LLM responses</a> <span>· whole replies of deployed assistants, judged; a different endpoint from the one above</span></li>
+      <li><a href="multi-turn/">Multi-turn</a> <span>· wording across a whole conversation</span></li>
+      <li id="phrase-dataset"><a href="phrase-dataset/">Phrase dataset</a> <span>· a hand-built set of pairs, assembled by Michael D. Green on Neuronpedia</span></li>
+      <li id="safety-view"><a href="technical/#models">Urgency of the most probable next token</a> <span>· per-model statistics on a draft care-urgency ladder: <span id="sv-flag">tiers owner-reviewed v1 · domain review pending</span></span></li>
+      <li><a href="clinical/">Clinical brief</a> <span>· a short version for clinicians</span></li>
+      <li><a href="technical/">Technical page</a> <span>· layer-by-layer readouts and model comparisons, for AI researchers</span></li>
+    </ul>
   </section>
 
-  <section id="model-evaluations">
-    <div class="section-head">
-      <h2>Model evaluations</h2>
-    </div>
-    <p class="lede" style="font-size:16px">One set of AIs writes the test, another takes it, and translating patient words into clinician language loses information.</p>
-  </section>
-
-  <div class="endnote">
-    <p>The comparison figures above, the simulated scenarios, and the phrase-dataset measurements are gemma-2-2b traces.</p>
-    <p>SIMULATED DATA: the sentence pairs measured across this site are written by an LLM and checked by an LLM. The clinical scenarios are llm generated but the tracing and next-token predictions are real model behavior. The phrase dataset is the exception: currently these were assembled by Michael D. Green directly through testing on Neuronpedia. Our team are currently interviewing patients about their LLM use, and questions they ask them.</p>
+  <section class="ruled" id="methods-source" aria-labelledby="h-source">
+    <h2 id="h-source">Methods and source</h2>
+    <p>The <a href="methods.html">methods page</a> describes the pipeline step by step, with its <a href="methods.html#limitations">limitations</a>. The example pair and the summary on this page are read, when the page loads, from <a href="https://github.com/michaeldgreenphd/patientwords/blob/main/data/simulated_scenarios.json">the scenario measurements file</a>; the paraphrase comparison is read from <a href="https://github.com/michaeldgreenphd/patientwords/blob/main/data/provenance.json">the provenance file</a>.</p>
+    <p><strong>Simulated data.</strong> Most sentence pairs across this site are written and checked by language models; the predictions and traces are recorded model behaviour. The exceptions are labelled where they appear: the <a href="phrase-dataset/">phrase dataset</a>, which Michael D. Green assembled by hand on Neuronpedia, and the hand-authored and third-party sets in the <a href="results/">Results catalogue</a>. The team is interviewing patients about how they use language models and what they ask them.</p>
     <footer>
       Built with the <a href="https://github.com/michaeldgreenphd/patientwords-engine">patientwords-engine</a> pipeline
       on <a href="https://neuronpedia.org">Neuronpedia</a> ·
@@ -546,479 +309,209 @@
       every number on this page traces to a data file <a href="https://github.com/michaeldgreenphd/patientwords/tree/main/data">in this repository</a> ·
       <a href="methods.html">how the pipeline works</a>
     </footer>
-  </div>
+  </section>
 </main>
 <script>
 (function(){
+  'use strict';
+  /* previews of engine-rendered figures: scale each frame to the column and cap its height */
   function fitAll(){
     document.querySelectorAll('iframe.live').forEach(function(f){
       try{
         var d=f.contentDocument;
         if(!d||!d.documentElement)return;
-        // A below-fold loading="lazy" iframe reports its placeholder about:blank
-        // document (scrollHeight 150) until Chromium actually loads it; measuring
-        // it there would lock the preview at a ~44px sliver. Skip until loaded;
-        // the load handler re-runs fitAll with the real document.
+        /* A below-fold lazy iframe reports its placeholder document until Chromium loads it; measuring it there
+           would lock the preview at a sliver. The load handler runs this again with the real document. */
         if(!d.URL||d.URL==='about:blank')return;
         var h=d.documentElement.scrollHeight;
         if(!h)return;
         f.style.height=h+'px';
-        var pv=f.closest('.preview');
-        if(pv){
-          var fr=f.closest('.frame');
+        var pv=f.closest('.preview'),fr=f.closest('.frame');
+        if(pv&&fr){
           var s=pv.clientWidth/fr.offsetWidth;
           fr.style.transform='scale('+s+')';
-          // Cap the thumbnail so a very tall render (e.g. the 7-graph dialect
-          // page) can't grow into a screen-burying strip; .embed crops the rest.
-          pv.style.height=Math.min(h*s,pv.classList.contains('wide')?260:520)+'px';
+          pv.style.height=Math.min(h*s,520)+'px';
         }
-      }catch(e){}
+      }catch(e){/* a preview that cannot be measured keeps its default size */}
     });
   }
-  document.querySelectorAll('iframe.live').forEach(function(f){
-    f.addEventListener('load',fitAll);
-  });
+  document.querySelectorAll('iframe.live').forEach(function(f){f.addEventListener('load',fitAll);});
   window.addEventListener('resize',fitAll);
   setTimeout(fitAll,300);
   setTimeout(fitAll,1200);
-  if(window.fetch){
-    document.querySelectorAll('.embed[data-live-src]').forEach(function(box){
-      var src=box.getAttribute('data-live-src');
-      fetch(src,{method:'HEAD',cache:'no-cache'}).then(function(r){
-        if(!r.ok)return;
-        box.classList.remove('pending');
-        box.removeAttribute('data-live-src');
-        box.textContent='';
-        var f=document.createElement('iframe');
-        f.className='live';f.src=src;f.loading='lazy';f.tabIndex=-1;
-        f.title=box.getAttribute('data-live-title')||'Live preview: dialect-mode attribution graphs';
-        box.removeAttribute('data-live-title');
-        if(box.classList.contains('preview')){
-          var fr=document.createElement('div');
-          fr.className='frame';fr.appendChild(f);box.appendChild(fr);
-        }else{box.appendChild(f);}
-        f.addEventListener('load',fitAll);
-      }).catch(function(){});
-    });
-  }
 })();
 (function(){
-  var sec=document.getElementById('phrase-dataset');
-  if(!sec||!window.fetch)return;
-  var spModel=function(){var el=document.getElementById('sp-model');return el?el.textContent:'';};
-  function obsLine(side,o){
-    var wrap=document.createElement('p');
-    wrap.className='sp-obs';
-    wrap.title='observed next token and probability · '+spModel();
-    var tok=o?o.observed_next_token:null;
-    var prob=o?o.observed_prob:null;
-    var link=o?o.circuit_link:null;
-    if(tok==null&&prob==null&&link==null){wrap.textContent='—';return wrap;}
-    wrap.appendChild(document.createTextNode('→ '));
-    var b=document.createElement('b');
-    b.textContent=tok==null?'—':tok;
-    wrap.appendChild(b);
-    wrap.appendChild(document.createTextNode(' · p '+(typeof prob==='number'?prob.toFixed(2):'—')));
-    if(typeof link==='string'&&/^https?:\/\//.test(link)){
-      var a=document.createElement('a');
-      a.className='sp-link';a.href=link;a.target='_blank';a.rel='noopener';
-      a.textContent='↗';
-      a.title='open '+side+' circuit trace on neuronpedia.org';
-      a.setAttribute('aria-label','open '+side+' circuit trace on neuronpedia.org');
-      wrap.appendChild(document.createTextNode(' '));
-      wrap.appendChild(a);
+  'use strict';
+  /* The example pair and the summary beside it. Every number is read from data/simulated_scenarios.json and
+     data/provenance.json when the page loads. The two values below are the page's checked copy of the pair's
+     two target-token probabilities (engine data/claims_manifest.json); they are shown only when the data
+     file cannot be read, and the page then says so. */
+  var FALLBACK={clinical:['inhaler',0.692],patient:['inhaler (5th)',0.043]};
+  var PIN={batch:'pairs_20260707T171223Z',batch_index:49};
+  var MINUS='−';
+  function $(id){return document.getElementById(id);}
+  function isNum(v){return typeof v==='number'&&isFinite(v);}
+  function el(tag,cls,text){var n=document.createElement(tag);if(cls)n.className=cls;if(text!=null)n.textContent=text;return n;}
+  function prob(v){return v.toFixed(3);}
+  function signed(v,digits){return (v<0?MINUS:(v>0?'+':''))+Math.abs(v).toFixed(digits);}
+  function pp(v){return signed(v*100,1);}
+  function count(n){return n.toLocaleString('en-US');}
+  function ordinal(n){
+    var t=n%100,u=n%10;
+    return n+((t>=11&&t<=13)?'th':(u===1?'st':(u===2?'nd':(u===3?'rd':'th'))));
+  }
+  /* one row of the plot: the wording's name, a dot at its value on a 0 to 1 axis, the value printed at the dot */
+  function dotRow(variant,label,value){
+    var row=el('div','dp-row');
+    row.setAttribute('role','row');row.setAttribute('data-variant',variant);row.setAttribute('data-value',String(value));
+    var name=el('span','dp-n');name.setAttribute('role','rowheader');
+    var mark=el('span','sw sw-'+variant);mark.setAttribute('aria-hidden','true');
+    name.appendChild(mark);name.appendChild(document.createTextNode(label));
+    var track=el('span','dp-t');track.setAttribute('role','cell');
+    var dot=el('span','dp-d sw-'+variant);dot.style.left=(value*100).toFixed(4)+'%';
+    var text=el('span','dp-v',prob(value));
+    if(value>0.5)text.style.right='calc('+(100-value*100).toFixed(4)+'% + 10px)';
+    else text.style.left='calc('+(value*100).toFixed(4)+'% + 10px)';
+    track.appendChild(dot);track.appendChild(text);
+    row.appendChild(name);row.appendChild(track);
+    return row;
+  }
+  function plot(medical,everyday){
+    var box=$('ex-plot');box.textContent='';
+    box.appendChild(dotRow('clinical','Medical wording',medical));
+    box.appendChild(dotRow('patient','Everyday wording',everyday));
+    var axis=el('div','dp-row dp-axis');axis.setAttribute('aria-hidden','true');
+    var ticks=el('span','dp-t');
+    [['0','0'],['0.5','50%'],['1','100%']].forEach(function(t){var s=el('span','',t[0]);s.style.left=t[1];ticks.appendChild(s);});
+    axis.appendChild(el('span','dp-n'));axis.appendChild(ticks);
+    box.appendChild(axis);
+  }
+  function difference(everyday,medical,stored){
+    /* everyday minus medical: the file's own difference when it stores one, and the same subtraction otherwise */
+    var d=isNum(stored)?stored:everyday-medical, p=$('ex-diff');
+    p.textContent='';
+    p.appendChild(document.createTextNode('Difference (everyday '+MINUS+' medical): '));
+    p.appendChild(el('span','num',pp(d)));
+    p.appendChild(document.createTextNode(' percentage points.'));
+    p.hidden=false;
+  }
+  function quote(prompt,term){
+    /* the sentence with the span that differs between the two wordings underlined */
+    var frag=document.createDocumentFragment(), at=term?prompt.indexOf(term):-1;
+    if(at<0){frag.appendChild(document.createTextNode('“'+prompt+' ___”'));return frag;}
+    frag.appendChild(document.createTextNode('“'+prompt.slice(0,at)));
+    frag.appendChild(el('span','term',term));
+    frag.appendChild(document.createTextNode(prompt.slice(at+term.length)+' ___”'));
+    return frag;
+  }
+  function fallback(why){
+    plot(FALLBACK.clinical[1],FALLBACK.patient[1]);
+    difference(FALLBACK.patient[1],FALLBACK.clinical[1],null);
+    var note=$('ex-top');
+    note.textContent=(why||'The data file did not load.')+' These two values are the page’s checked copy of the recorded probabilities.';
+    note.hidden=false;
+  }
+  function render(payload,prov){
+    var scenarios=Array.isArray(payload.scenarios)?payload.scenarios:[];
+    var pin=(payload.featured&&payload.featured.tap_demo)||PIN;
+    var sc=scenarios.filter(function(s){return s.batch===pin.batch&&s.batch_index===pin.batch_index;})[0];
+    /* the scored pairs of the file; the example's rank and the older-file mean below both read them */
+    var scored=scenarios.filter(function(s){return isNum(s.language_penalty)&&!s.steered;});
+    /* a file without the pinned pair (an older or a partial file) still gets its own aggregate below */
+    if(!sc||!isNum(sc.prob_clinical)||!isNum(sc.prob_patient))fallback('The example pair is not in the data file that loaded.');
+    else example(sc,scored);
+    context(payload,prov,scored);
+  }
+  function example(sc,scored){
+    /* the pair, as the file records it */
+    if(typeof sc.clinical_prompt==='string'){$('ex-clinical').textContent='';$('ex-clinical').appendChild(quote(sc.clinical_prompt,sc.clinical_term));}
+    if(typeof sc.patient_prompt==='string'){$('ex-patient').textContent='';$('ex-patient').appendChild(quote(sc.patient_prompt,sc.patient_term));}
+    var word=String(sc.intended_target||'').trim(), token=String(sc.target_token||'').trim();
+    if(word){
+      $('ex-question').textContent=(token&&token!==word)
+        ?'Probability that the next token is “'+token+'”, the first token of the target word “'+word+'”'
+        :'Probability that the next token is the target word “'+word+'”';
     }
-    return wrap;
-  }
-  function cellFor(cls,label,prompt,side,o){
-    var td=document.createElement('td');
-    td.className=cls;
-    var lab=document.createElement('span');
-    lab.className='sp-side';lab.textContent=label;
-    td.appendChild(lab);
-    var p=document.createElement('p');
-    p.className='sp-prompt';p.textContent=prompt==null?'—':prompt;
-    td.appendChild(p);
-    td.appendChild(obsLine(side,o));
-    return td;
-  }
-  fetch('data/stress_pairs.json',{cache:'no-cache'})
-    .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
-    .then(function(data){
-      var pairs=Array.isArray(data)?data:(data&&Array.isArray(data.pairs)?data.pairs:null);
-      if(!pairs||!pairs.length)throw new Error('empty');
-      // Home shows the most consequential switches: observed-token flips
-      // first, then the largest observed-probability gaps. Full table on the
-      // Phrase Dataset page. Prefer the engine-computed featured ranking
-      // (data.featured.rows, same metric computed once at export); the
-      // in-page scoring below stays as fallback for the bare-list shape.
-      var total=pairs.length;
-      function consequence(pr){
-        var prov=pr.provenance||{},p=prov.patient||{},c=prov.clinical||{};
-        var flip=(p.observed_next_token&&c.observed_next_token
-                  &&p.observed_next_token!==c.observed_next_token)?1:0;
-        var gap=(typeof p.observed_prob==='number'&&typeof c.observed_prob==='number')
-          ?Math.abs(c.observed_prob-p.observed_prob):0;
-        return flip*10+gap;
-      }
-      var frows=(!Array.isArray(data)&&data.featured&&Array.isArray(data.featured.rows))
-        ?data.featured.rows.map(function(r){return pairs[r.row];}).filter(Boolean):null;
-      pairs=(frows&&frows.length)?frows.slice(0,5)
-        :pairs.slice().sort(function(a,b){return consequence(b)-consequence(a);}).slice(0,5);
-      if(!Array.isArray(data)&&typeof data.model==='string'&&data.model){
-        document.getElementById('sp-model').textContent=
-          data.model+(typeof data.source_set==='string'&&data.source_set?' · '+data.source_set:'');
-      }
-      var tb=document.getElementById('sp-body');
-      pairs.forEach(function(pr,i){
-        var prov=pr.provenance||{};
-        var tr=document.createElement('tr');
-        if(typeof prov.notes==='string'&&prov.notes)tr.title=prov.notes;
-        var idx=document.createElement('td');
-        var n=document.createElement('span');
-        n.className='sp-idx';
-        n.textContent='#'+(prov.source_row!=null?prov.source_row:(i+1));
-        idx.appendChild(n);
-        if(pr.target_clinical_token!=null){
-          var t=document.createElement('span');
-          t.className='sp-target';
-          t.textContent='target: '+pr.target_clinical_token;
-          idx.appendChild(t);
-        }
-        tr.appendChild(idx);
-        tr.appendChild(cellFor('sp-p','patient phrasing',pr.bottom_prompt,'patient',prov.patient));
-        tr.appendChild(cellFor('sp-c','clinical phrasing',pr.top_prompt,'clinical',prov.clinical));
-        tb.appendChild(tr);
-      });
-      var cnt=document.getElementById('sp-count');
-      cnt.textContent='';
-      cnt.appendChild(document.createTextNode('top '+pairs.length+' of '+total+' by observed effect · '));
-      var all=document.createElement('a');
-      all.href='phrase-dataset/';
-      all.textContent='see all '+total+' →';
-      cnt.appendChild(all);
-      sec.hidden=false;
-      if(location.hash==='#'+sec.id)sec.scrollIntoView();
-    })
-    .catch(function(){sec.hidden=true;});
-})();
-(function(){
-  if(!window.fetch)return;
-  fetch('data/urgency_shift.json',{cache:'no-cache'})
-    .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
-    .then(function(u){
-      var s=u.summary||{}, pm=s.per_model||{};
-      // phrase-deduped headline counts (engine collector, mirrors paired_stats_rigor):
-      // re-traced phrases collapse to one record per model, so counts are not
-      // inflated by pseudoreplication. Older payloads lack the field — fall back.
-      var pmd=(s.per_model_deduped&&Object.keys(s.per_model_deduped).length)?s.per_model_deduped:null;
-      var models=Object.keys(pm);
-      if(!models.length)return;
-      // per-model statistics live on technical/#models (interim, corrected);
-      // this section keeps the concept, the deduped counts, and one graphic.
-      // direction of error: one down/up arrow pair per model, deduped counts.
-      // Older payloads without per_model_deduped simply skip the figure.
-      if(pmd){
-        var NSs='http://www.w3.org/2000/svg';
-        function sel(n,a,txt){var e=document.createElementNS(NSs,n);for(var k in a)e.setAttribute(k,a[k]);if(txt!=null)e.textContent=txt;return e;}
-        // only models with observed movement: probe models measured on a
-        // handful of pairs would render as 0/0 and read as "never downgrades";
-        // the payload-level render_min_n additionally gates under-powered cells
-        var aMinN=u.render_min_n;
-        var ams=models.filter(function(m){var d=pmd[m];
-          return d&&typeof d.downgrades==='number'&&typeof d.upgrades==='number'&&(d.downgrades+d.upgrades)>0
-            &&(typeof aMinN!=='number'||(d.n_phrases||0)>=aMinN);});
-        if(ams.length){
-          var slot=92,W2=ams.length*slot,maxLen=84;
-          var maxC=1,maxUp=1;
-          ams.forEach(function(m){maxC=Math.max(maxC,pmd[m].downgrades,pmd[m].upgrades);maxUp=Math.max(maxUp,pmd[m].upgrades);});
-          var base=26+Math.ceil(maxUp/maxC*maxLen)+14;
-          var H2=base+maxLen+46;
-          var svg2=sel('svg',{viewBox:'0 0 '+W2+' '+H2,role:'img',
-            'aria-label':'In 9 of 10 measured models, more answers move down the care ladder than up when the wording turns colloquial; one model ties on very few flips.'});
-          // record the chart's natural width; on phones (media query below) the
-          // svg holds this width and the .sv-asym wrapper swipes horizontally
-          // instead of squeezing the labels. Desktop keeps its fit-to-column look.
-          svg2.style.setProperty('--sv-natural',W2+'px');
-          svg2.appendChild(sel('line',{x1:6,y1:base,x2:W2-6,y2:base,stroke:'#dcdad2','stroke-width':1}));
-          ams.forEach(function(m,i){
-            var d=pmd[m],x0=i*slot+slot/2;
-            var dn=Math.max(6,d.downgrades/maxC*maxLen), up=Math.max(4,d.upgrades/maxC*maxLen);
-            svg2.appendChild(sel('line',{x1:x0-13,y1:base,x2:x0-13,y2:base+dn,stroke:'#b4483d','stroke-width':2.5}));
-            svg2.appendChild(sel('path',{d:'M '+(x0-17.5)+' '+(base+dn)+' L '+(x0-13)+' '+(base+dn+7)+' L '+(x0-8.5)+' '+(base+dn)+' Z',fill:'#b4483d'}));
-            svg2.appendChild(sel('text',{x:x0-13,y:base+dn+21,'text-anchor':'middle','font-family':'ui-monospace,Menlo,monospace','font-size':'11.5',fill:'#b4483d'},String(d.downgrades)));
-            svg2.appendChild(sel('line',{x1:x0+13,y1:base,x2:x0+13,y2:base-up,stroke:'#9aa1ad','stroke-width':2}));
-            svg2.appendChild(sel('path',{d:'M '+(x0+8.5)+' '+(base-up)+' L '+(x0+13)+' '+(base-up-7)+' L '+(x0+17.5)+' '+(base-up)+' Z',fill:'#9aa1ad'}));
-            svg2.appendChild(sel('text',{x:x0+13,y:base-up-11,'text-anchor':'middle','font-family':'ui-monospace,Menlo,monospace','font-size':'11.5',fill:'#6d6c66'},String(d.upgrades)));
-            svg2.appendChild(sel('text',{x:x0,y:H2-6,'text-anchor':'middle','font-family':'ui-monospace,Menlo,monospace','font-size':'10',fill:'#6d6c66'},m));
-          });
-          var asym=document.getElementById('sv-asym');
-          asym.appendChild(svg2);asym.hidden=false;
-          var acap=document.getElementById('sv-asym-cap');if(acap)acap.hidden=false;
-        }
-      }
-      var flag=document.querySelector('#safety-view .draft-flag');
-      if(flag&&u.vocabulary_status)flag.textContent=u.vocabulary_status.indexOf('draft')>=0
-        ?'draft · tiers pending domain review':u.vocabulary_status;
-      var svc=models.length+' models · '+(s.flips||0)+' redirects';
-      var dedupComplete=!!pmd&&models.every(function(mid){
-        var d=pmd[mid];return d&&typeof d.flips==='number';});
-      if(dedupComplete){
-        var dedupFlips=models.reduce(function(a,mid){return a+pmd[mid].flips;},0);
-        svc=models.length+' models · '+dedupFlips+' redirects (phrase-deduped, summed across models)';
-      }
-      document.getElementById('sv-count').textContent=svc;
-      document.getElementById('safety-view').hidden=false;
-    })
-    .catch(function(){/* section stays hidden without data */});
+    plot(sc.prob_clinical,sc.prob_patient);
+    difference(sc.prob_patient,sc.prob_clinical,sc.language_penalty);
 
-})();
-(function(){
-  var stat=document.getElementById('sim-stat');
-  var count=document.getElementById('sim-count');
-  if(!stat||!window.fetch)return;
-  fetch('data/simulated_scenarios.json',{cache:'no-cache'})
-    .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
-    .then(function(data){
-      var batches=data.batches||[];
-      // payload.summary is the engine's one definition of these headline
-      // numbers (phrase-deduped, population-labeled); the row-level
-      // computations remain as fallback for older payload shapes.
-      var sum=data.summary||{};
-      var tot=sum.totals||{};
-      var accepted=(typeof tot.accepted_public==='number')?tot.accepted_public
-        :batches.reduce(function(a,b){
-          return a+((b.generated&&b.generated.accepted)||0);
-        },0);
-      var scenarios=data.scenarios||[];
-      var scored=scenarios.filter(function(s){
-        return typeof s.language_penalty==='number'&&!s.steered;
-      });
-      var screened=(typeof tot.screened_out==='number')?tot.screened_out
-        :scenarios.filter(function(s){
-          return s.screening&&s.screening.status==='screened_out';
-        }).length;
-      var nMeasured=(typeof tot.measured==='number')?tot.measured
-        :scenarios.length-screened;
-      // Steered batches are published and labelled, but every figure on this
-      // page is computed without them: a share over a set chosen to flip
-      // measures the selection, not the model.
-      var nSteered=(typeof tot.steered_measured==='number')?tot.steered_measured:0;
-      if(count)count.textContent=(accepted||scenarios.length)
-        +' generated pairs · '+nMeasured+' measured'
-        +(screened?' · '+screened+' screened out':'')
-        +(nSteered?' · '+nSteered+' steered, shown but not pooled':'');
-      if(!scenarios.length)return;
-      var measured=scenarios.filter(function(s){
-        return !(s.screening&&s.screening.status==='screened_out')&&!s.steered;
-      });
-      var flips=(typeof tot.flipped_base==='number')?tot.flipped_base
-        :measured.filter(function(s){return s.flipped;}).length;
-      // paragraph text stays default ink; red highlights only the data points
-      // (the penalty and the flip count) so the sentence doesn't read as one alarm.
-      stat.className='stat';
-      stat.textContent='';
-      function pen(t){var s=document.createElement('span');s.className='pen';s.textContent=t;return s;}
-      function txt(t){return document.createTextNode(t);}
-      var sp=sum.penalty||{};
-      var useSum=typeof sp.mean_phrase_deduped==='number';
-      if(useSum||scored.length){
-        var mean=useSum?sp.mean_phrase_deduped
-          :scored.reduce(function(a,s){return a+s.language_penalty;},0)/scored.length;
-        stat.appendChild(txt('Mean wording gap: '));
-        stat.appendChild(pen((mean>0?'+':'−')+Math.abs(mean*100).toFixed(0)+'%'));
-        stat.appendChild(txt(useSum
-          ?(' across '+sp.n_phrases+' distinct phrases · top prediction flipped in ')
-          :(' across '+scored.length+' scored pairs · top prediction flipped in ')));
-        stat.appendChild(pen(flips+' of '+nMeasured));
-        stat.appendChild(txt(' measured'));
-      }else{
-        stat.appendChild(txt('Top prediction flipped in '));
-        stat.appendChild(pen(flips+' of '+nMeasured));
-        stat.appendChild(txt(' measured pairs'));
-      }
-      stat.hidden=false;
-    })
-    .catch(function(){});
-})();
-(function(){
-  // dialect-variance specimen: picks its own example from the data, so the
-  // panel stays current as batches change (no hand-named scenarios here)
-  function el(t,c,x){var e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e;}
-  fetch('data/dialects.json',{cache:'no-cache'}).then(function(r){return r.json();}).then(function(d){
-    var items=(d&&d.items)||[];
-    if(!items.length)return;
-    function spread(it){
-      var ds=it.variants.map(function(v){return Math.abs(v.delta||0);});
-      return Math.max.apply(null,ds.concat([0]));
+    var top=$('ex-top');
+    if(Array.isArray(sc.top_clinical)&&Array.isArray(sc.top_patient)&&isNum(sc.top_clinical[1])&&isNum(sc.top_patient[1])){
+      top.textContent='Most probable next token after the medical wording: “'+String(sc.top_clinical[0]).trim()+'” at '+
+        prob(sc.top_clinical[1])+'. After the everyday wording: “'+String(sc.top_patient[0]).trim()+'” at '+prob(sc.top_patient[1])+'.';
+      top.hidden=false;
     }
-    function stem(t){return String(t||'').trim().toLowerCase().slice(0,3);}
-    function crossFlips(it){
-      return it.variants.filter(function(v){
-        return v.flip&&stem(v.top_token)!==stem(it.target_token);
-      }).length;
+
+    /* where the example sits among the scored pairs of the file: it was picked by hand, and it is extreme */
+    if(isNum(sc.language_penalty)&&scored.length){
+      var lower=scored.filter(function(s){return s.language_penalty<sc.language_penalty;}).length;
+      var higher=scored.filter(function(s){return s.language_penalty>sc.language_penalty;}).length;
+      $('ex-rank').textContent=sc.language_penalty<0
+        ?'Its difference is the '+ordinal(lower+1)+' largest decrease among the '+count(scored.length)+' scored pairs in the published file; it is not a typical pair.'
+        :'Its difference is the '+ordinal(higher+1)+' largest increase among the '+count(scored.length)+' scored pairs in the published file; it is not a typical pair.';
     }
-    // prefer the engine-picked specimen (d.featured_specimen, same rule
-    // computed once at export); the in-page sort stays as fallback
-    var fs=d&&d.featured_specimen;
-    var it=(fs&&typeof fs.item==='number'&&items[fs.item])||null;
-    if(!it){
-      items=items.slice().sort(function(a,b){
-        var xa=crossFlips(a),xb=crossFlips(b);
-        var fa=a.variants.filter(function(v){return v.flip;}).length;
-        var fb=b.variants.filter(function(v){return v.flip;}).length;
-        return (xb-xa)||(fb-fa)||(spread(b)-spread(a));
-      });
-      it=items[0];
-      fs=null;
+    if(typeof sc.index==='number'){
+      $('ex-record').href='simulated-scenarios/scenario.html?sim='+sc.index;
+      $('ex-index').textContent='scenario '+sc.index;
     }
-    var rows=document.getElementById('spec-rows');
-    function row(lbl,txt,out,isFlip){
-      var r=el('div','spec-row');
-      r.appendChild(el('span','spec-dial',lbl));
-      r.appendChild(el('span','spec-txt','\u201C'+txt+'\u201D'));
-      r.appendChild(el('span','spec-out'+(isFlip?' flip':''),out));
-      rows.appendChild(r);
-    }
-    row('baseline framing', it.baseline_prompt,
-        '\u2192 '+it.target_token+' ('+Math.round(it.baseline_p*100)+'%)', false);
-    var vs=(fs&&Array.isArray(fs.show_variants))
-      ?fs.show_variants.map(function(n){
-        return it.variants.filter(function(v){return v.dialect===n;})[0];
-      }).filter(Boolean).slice(0,4):null;
-    if(!vs||!vs.length)vs=it.variants.slice().sort(function(a,b){
-      function w(v){return (v.flip&&stem(v.top_token)!==stem(it.target_token))?2:(v.flip?1:0);}
-      return w(b)-w(a)||Math.abs(b.delta||0)-Math.abs(a.delta||0);
-    }).slice(0,4);
-    vs.forEach(function(v){
-      row(v.dialect, v.prompt, '\u2192 '+v.top_token+' ('+Math.round(v.top_p*100)+'%)', !!v.flip);
-    });
-    var flips=it.variants.filter(function(v){return v.flip;}).length;
-    var note=document.getElementById('spec-note');
-    var bm=/^dialects_(\d{4})(\d{2})(\d{2})/.exec(d.batch||'');
-    var bWhen=bm?(['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][+bm[2]-1]+' '+(+bm[3])+', '+bm[1]):'';
-    note.textContent='one instruction \u00b7 '+it.variants.length+' LLM-approximated framings measured, '
-      +vs.length+' shown \u00b7 '+flips+' change the top prediction (red) \u00b7 each framing is a Claude-written approximation of the variety, not a recording of a speaker \u00b7 gemma-2-2b live'
-      +(bWhen?(' \u00b7 framings batch of '+bWhen):'')+' \u00b7 this panel picks its example from the measured dialect data and updates with the study \u00b7 ';
-    var a=el('a',null,'full study \u2192 Dialect Differences');
-    a.href='dialect-differences/';
-    note.appendChild(a);
-    // scale reference: innocuous paraphrases alone move these single-sentence
-    // probabilities; number fetched so it can never go stale
-    fetch('data/provenance.json',{cache:'no-cache'}).then(function(r){return r.json();})
-      .then(function(p){
-        var pr=p&&(p.paraphrase_robustness_floor_v2||p.paraphrase_robustness);
-        var m=pr&&pr.mean_abs_delta_vs_baseline;
-        if(typeof m!=='number')return;
-        note.insertBefore(document.createTextNode('for scale: meaning-preserving paraphrases '+
-          'alone move these single-sentence probabilities by \u00b1'+(m*100).toFixed(1)+
-          ' pp on average \u00b7 '),a);
-      }).catch(function(){});
-    document.getElementById('dialect-specimen').hidden=false;
-  }).catch(function(){});
-})();
-(function(){
-  // Live aggregate caveat under the hero demo. The demo shows one of the
-  // largest single cases; this frames it against the corpus mean and the
-  // paraphrase-noise floor, both computed at runtime so they never go stale.
-  // Sources: simulated_scenarios.json (language_penalty) and
-  // provenance.json (paraphrase_robustness.mean_abs_delta_vs_baseline).
-  var el=document.getElementById('hero-caveat');
-  if(!el||!window.fetch)return;
-  Promise.all([
-    fetch('data/simulated_scenarios.json',{cache:'no-cache'}).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;}),
-    fetch('data/provenance.json',{cache:'no-cache'}).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;})
-  ]).then(function(res){
-    var sim=res[0], prov=res[1];
-    if(!sim||!Array.isArray(sim.scenarios))return;
-    // prefer the engine-computed phrase-deduped mean (payload.summary);
-    // the row-level mean stays as fallback for older payloads
-    var sp=sim.summary&&sim.summary.penalty;
-    var useSum=!!(sp&&typeof sp.mean_phrase_deduped==='number');
-    var scored=sim.scenarios.filter(function(s){
-      return typeof s.language_penalty==='number'&&!s.steered;});
-    if(!useSum&&!scored.length)return;
-    var mean=useSum?sp.mean_phrase_deduped
-      :scored.reduce(function(a,s){return a+s.language_penalty;},0)/scored.length;
-    el.textContent='';
-    el.appendChild(document.createTextNode(useSum
-      ?('One of the largest cases. Across the '+sp.n_phrases+' distinct scored phrases the average wording gap is ')
-      :('One of the largest cases. Across all '+scored.length+' scored pairs the average wording gap is ')));
-    var b1=document.createElement('b');b1.textContent=(mean>0?'+':'−')+Math.abs(mean*100).toFixed(0)+' pp';el.appendChild(b1);
-    var provFloor=prov&&(prov.paraphrase_robustness_floor_v2||prov.paraphrase_robustness);
-    var floor=provFloor&&provFloor.mean_abs_delta_vs_baseline;
-    if(typeof floor==='number'){
-      el.appendChild(document.createTextNode('; a single measurement is itself noisy — meaning-preserving rewording alone shifts it by ±'));
-      var b2=document.createElement('b');b2.textContent=(floor*100).toFixed(1)+' pp';el.appendChild(b2);
-    }
-    el.appendChild(document.createTextNode('.'));
-    el.hidden=false;
-  }).catch(function(){});
-})();
-(function(){
-  // The four comparison figures are whole-card links, so a trace-fold summary
-  // sits inside an <a>. Toggle the fold on click/Enter without letting the click
-  // bubble up and navigate the card. Folds outside a link keep native behavior.
-  document.querySelectorAll('a.fig .trace-fold>summary').forEach(function(sum){
-    sum.addEventListener('click',function(e){
-      e.preventDefault();
-      e.stopPropagation();
-      var d=sum.parentNode;
-      d.open=!d.open;
-    });
-  });
-})();
-</script>
-<script>
-(function(){
-  // say-it-two-ways demo. Numbers are scenario 85's measured spreads
-  // (data/simulated_scenarios.json: batch pairs_20260707T171223Z, index 49);
-  // 'inhaler' is the continuation-disambiguated label for the 'inhal' wordpiece.
-  var states={
-    clinical:{swap:'asthma flares',bars:[['inhaler',0.692,'#15803d'],['mask',0.059,'#c3c9d2'],['set',0.028,'#c3c9d2']]},
-    patient:{swap:'chest gets all tight',bars:[['shirt',0.183,'#b4483d'],['t-',0.068,'#c3c9d2'],['inhaler (5th)',0.043,'#15803d']]}
-  };
-  var cur='clinical';
-  var wrap=document.getElementById('tg-bars');
-  if(!wrap)return;
-  // prefer the engine-derived demo (payload.featured.tap_demo: the pinned
-  // scenario's measured spreads, labels from the engine's pins data); the
-  // inline numbers above stay as fallback for older payloads. Roles map to
-  // the semantic palette: target green, redirected top red, context grey.
-  var ROLE_COLORS={target:'#15803d',top:'#b4483d',other:'#c3c9d2'};
-  fetch('data/simulated_scenarios.json',{cache:'no-cache'})
-    .then(function(r){return r.ok?r.json():null;})
-    .then(function(d){
-      var td=d&&d.featured&&d.featured.tap_demo;
-      if(!td||!td.clinical||!td.patient)return;
-      function side(sd){return {swap:sd.swap,bars:(sd.bars||[]).map(function(b){
-        return [b.label,b.p,ROLE_COLORS[b.role]||ROLE_COLORS.other];})};}
-      states={clinical:side(td.clinical),patient:side(td.patient)};
-      render();
-    }).catch(function(){});
-  function render(){
-    var st=states[cur];
-    var tgWrap=document.getElementById('home-tg');
-    tgWrap.classList.toggle('pat',cur==='patient');
-    document.getElementById('tg-swap').textContent=st.swap;
-    wrap.textContent='';
-    st.bars.forEach(function(b){
-      var row=document.createElement('div');row.className='bar-row';
-      var l=document.createElement('span');l.className='bar-lbl';l.textContent=b[0];
-      var t=document.createElement('div');t.className='bar-track';
-      var f=document.createElement('div');f.className='bar-fill';
-      f.style.background=b[2];f.style.width='0%';
-      t.appendChild(f);
-      var v=document.createElement('span');v.className='bar-val';v.textContent=Math.round(b[1]*100)+'%';
-      row.appendChild(l);row.appendChild(t);row.appendChild(v);
-      wrap.appendChild(row);
-      requestAnimationFrame(function(){f.style.width=(b[1]*100)+'%';});
-    });
+    if(typeof sc.html==='string'&&/^modes\/[A-Za-z0-9._\/-]+\.html$/.test(sc.html)&&sc.html.indexOf('..')<0)$('ex-trace').href=sc.html;
   }
-  document.getElementById('tg-btn').addEventListener('click',function(){
-    cur=(cur==='clinical')?'patient':'clinical';render();
+  function context(payload,prov,scored){
+    /* the models the scope sentence names */
+    var models=Array.isArray(payload.models_meta)?payload.models_meta.filter(function(m){return m&&m.available!==false&&typeof m.id==='string';}).map(function(m){return m.id;}):[];
+    if(models.length>1)$('scope-models').textContent=models.slice(0,-1).join(', ')+' and '+models[models.length-1];
+
+    /* aggregate context, stated once: the engine's phrase-deduplicated summary of the published file, and the
+       size of the change that rewording alone produces */
+    var sum=payload.summary||{}, pen=sum.penalty||{}, box=$('hero-caveat');
+    var text='';
+    if(isNum(pen.mean_phrase_deduped)&&isNum(pen.n_phrases)){
+      text='Across the '+count(pen.n_phrases)+' distinct scored phrases in the published file, the mean difference (everyday '+MINUS+' medical) on '+
+        String(sum.model||'the reference model')+' is '+pp(pen.mean_phrase_deduped)+' percentage points';
+      if(Array.isArray(pen.ci95)&&isNum(pen.ci95[0])&&isNum(pen.ci95[1])){
+        text+=' (95% bootstrap interval over phrases: '+pp(pen.ci95[0])+' to '+pp(pen.ci95[1])+')';
+      }
+      text+='. Registered per-model estimates use a different population; see the ';
+    }else if(scored.length){
+      /* an older file without the summary block: the plain mean over scored rows, with no interval */
+      var mean=scored.reduce(function(a,s){return a+s.language_penalty;},0)/scored.length;
+      text='Across the '+count(scored.length)+' scored pairs in the published file, the mean difference (everyday '+MINUS+' medical) is '+pp(mean)+
+        ' percentage points; this file carries no interval. Registered per-model estimates are on the ';
+    }
+    if(text){
+      box.textContent='';
+      box.appendChild(document.createTextNode(text));
+      var a=el('a','','Technical page');a.href='technical/#models';box.appendChild(a);
+      box.appendChild(document.createTextNode('.'));
+      var floorRec=prov&&(prov.paraphrase_robustness_floor_v2||prov.paraphrase_robustness);
+      var floor=floorRec&&floorRec.mean_abs_delta_vs_baseline;
+      if(isNum(floor)){
+        box.appendChild(document.createTextNode(' For scale: rewording a sentence while keeping its term and its register moved this probability by '+
+          (floor*100).toFixed(1)+' percentage points on average (mean absolute change).'));
+      }
+      box.hidden=false;
+    }
+  }
+  /* the rewritten-sentence caption: the two recorded probabilities of that one case, read from the provenance
+     file. The text in the page is the checked copy; the claims manifest compares both numbers with this record. */
+  function translationCase(prov){
+    var rec=prov&&prov.translation_cases&&prov.translation_cases.grandma_laxative, box=$('tr-claim');
+    var after=rec&&Array.isArray(rec.translated)?rec.translated[1]:null, base=rec&&Array.isArray(rec.clinical)?rec.clinical[1]:null;
+    if(box&&isNum(after)&&isNum(base))box.textContent=after.toFixed(2)+' after translation (clinical baseline '+base.toFixed(2)+') · July 7 trace';
+  }
+  function getJson(url){
+    return fetch(url,{cache:'no-cache'}).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;});
+  }
+  if(!window.fetch||!window.Promise){fallback();return;}
+  Promise.all([getJson('data/simulated_scenarios.json'),getJson('data/provenance.json')]).then(function(res){
+    try{translationCase(res[1]);}catch(e){}
+    if(!res[0]){fallback();return;}
+    try{render(res[0],res[1]);}catch(e){fallback();}
   });
-  render();
+  /* the status of the draft urgency ladder, as the urgency file states it */
+  getJson('data/urgency_shift.json').then(function(u){
+    if(u&&typeof u.vocabulary_status==='string'&&u.vocabulary_status)$('sv-flag').textContent='tiers '+u.vocabulary_status.replace(/^tiers\s+/,'');
+  });
 })();
 </script>
 </body>

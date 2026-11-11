@@ -17,6 +17,9 @@ The voice is a careful research notebook: short declarative sentences, exact
 technical terms, no marketing.
 
 - [README.md](README.md): purpose, page map and local preview.
+- `../patientwords-engine/docs/start_here.md`: reading paths by role, including the
+  frontend contributor's; `../patientwords-engine/docs/ecosystem.md`: the map of the
+  sibling repositories and what each supplies.
 - [verify.md](verify.md): canonical setup, change-specific checks and completion evidence.
 - [docs/agent_reference.md](docs/agent_reference.md): required reference for data ownership,
   contracts, research limitations, UI conventions and deployment decisions.
@@ -61,9 +64,14 @@ technical terms, no marketing.
 - `../patientwords-engine/scripts/contracts/simulated_scenarios.v1.schema.json`
   defines structural compatibility; the export validator adds semantic checks. Keep its
   OpenAPI description, test client and consumer assertions consistent with changes.
-- Preserve holdout/publication restrictions and reproducibility. Do not quietly
-  correct historical measurements or promote one pair's penalty/flip to a research
-  claim. Read the reference's measurement limitations before writing such claims.
+- Preserve the holdout seal, the named data restrictions and reproducibility. Sharing
+  follows the engine's open-results policy
+  (`../patientwords-engine/docs/open_results_policy.md`): an intact, unrestricted
+  result is listed in `data/results_catalogue/` whatever its effect, with its evidence
+  class and review status; being listed is not a claim, and a published statistic
+  changes only through a versioned snapshot. Do not quietly correct historical
+  measurements or promote one pair's penalty/flip to a research claim. Read the
+  reference's measurement limitations before writing such claims.
 - GitHub Pages publishes at `/patientwords/`. Deployment/source/domain changes are
   architectural changes requiring explicit justification and project-path checks.
 - Both repositories are public: never commit secrets.
