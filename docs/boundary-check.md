@@ -19,15 +19,18 @@ either needs the paired engine change in the same review.
   (today `scripts`, `data`, `ops`, `docs`) plus the engine's root files. It refuses to
   run when the file has no such block, has more than one, or lists a pattern instead
   of a directory name.
-- **Three sentences that print the scenario summary.** `#sim-stat` and
-  `#hero-caveat` in `index.html` and `#word-caveat` in
-  `wording-differences/index.html` print `summary.penalty.n_phrases` and
-  `summary.penalty.mean_phrase_deduped` from `data/simulated_scenarios.json`. The
-  check loads both pages on a synthetic payload in which one clinical phrase occurs in
-  two batches, and compares each sentence with a full sentence typed in the engine's
-  `tests/fixtures/frontend_boundary.json` (`expected.summary_sentences`). Rewording
-  one of the three sentences, or renaming one of the three elements, fails the check
-  until that fixture is updated. On those two pages only these sentences read the
+- **Two sentences that print the scenario summary.** `#hero-caveat` in `index.html`
+  and `#word-caveat` in `wording-differences/index.html` print
+  `summary.penalty.n_phrases` and `summary.penalty.mean_phrase_deduped` from
+  `data/simulated_scenarios.json`. The check loads both pages on a synthetic payload in
+  which one clinical phrase occurs in two batches, and compares each sentence with a
+  full sentence typed in the engine's `tests/fixtures/frontend_boundary.json`
+  (`expected.summary_sentences`). Rewording one of the two sentences, or renaming one
+  of the two elements, fails the check until that fixture is updated. Until 2026-11-11
+  the home page printed the summary twice and a third element, `#sim-stat`, was
+  compared. The synthetic payload does not hold the home page's pinned example pair,
+  so the check also exercises the page's rule that the aggregate is printed from
+  whatever file loaded, whether or not the example pair is in it. On those two pages only these sentences read the
   synthetic payload; the rest is this repository's published content, and the
   temporary disclosure inserted in the copy says so.
 

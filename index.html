@@ -405,19 +405,25 @@
     frag.appendChild(document.createTextNode(prompt.slice(at+term.length)+' ___”'));
     return frag;
   }
-  function fallback(){
+  function fallback(why){
     plot(FALLBACK.clinical[1],FALLBACK.patient[1]);
     difference(FALLBACK.patient[1],FALLBACK.clinical[1],null);
     var note=$('ex-top');
-    note.textContent='The data file did not load. These two values are the page’s checked copy of the recorded probabilities.';
+    note.textContent=(why||'The data file did not load.')+' These two values are the page’s checked copy of the recorded probabilities.';
     note.hidden=false;
   }
   function render(payload,prov){
     var scenarios=Array.isArray(payload.scenarios)?payload.scenarios:[];
     var pin=(payload.featured&&payload.featured.tap_demo)||PIN;
     var sc=scenarios.filter(function(s){return s.batch===pin.batch&&s.batch_index===pin.batch_index;})[0];
-    if(!sc||!isNum(sc.prob_clinical)||!isNum(sc.prob_patient)){fallback();return;}
-
+    /* the scored pairs of the file; the example's rank and the older-file mean below both read them */
+    var scored=scenarios.filter(function(s){return isNum(s.language_penalty)&&!s.steered;});
+    /* a file without the pinned pair (an older or a partial file) still gets its own aggregate below */
+    if(!sc||!isNum(sc.prob_clinical)||!isNum(sc.prob_patient))fallback('The example pair is not in the data file that loaded.');
+    else example(sc,scored);
+    context(payload,prov,scored);
+  }
+  function example(sc,scored){
     /* the pair, as the file records it */
     if(typeof sc.clinical_prompt==='string'){$('ex-clinical').textContent='';$('ex-clinical').appendChild(quote(sc.clinical_prompt,sc.clinical_term));}
     if(typeof sc.patient_prompt==='string'){$('ex-patient').textContent='';$('ex-patient').appendChild(quote(sc.patient_prompt,sc.patient_term));}
@@ -438,7 +444,6 @@
     }
 
     /* where the example sits among the scored pairs of the file: it was picked by hand, and it is extreme */
-    var scored=scenarios.filter(function(s){return isNum(s.language_penalty)&&!s.steered;});
     if(isNum(sc.language_penalty)&&scored.length){
       var lower=scored.filter(function(s){return s.language_penalty<sc.language_penalty;}).length;
       var higher=scored.filter(function(s){return s.language_penalty>sc.language_penalty;}).length;
@@ -451,7 +456,8 @@
       $('ex-index').textContent='scenario '+sc.index;
     }
     if(typeof sc.html==='string'&&/^modes\/[A-Za-z0-9._\/-]+\.html$/.test(sc.html)&&sc.html.indexOf('..')<0)$('ex-trace').href=sc.html;
-
+  }
+  function context(payload,prov,scored){
     /* the models the scope sentence names */
     var models=Array.isArray(payload.models_meta)?payload.models_meta.filter(function(m){return m&&m.available!==false&&typeof m.id==='string';}).map(function(m){return m.id;}):[];
     if(models.length>1)$('scope-models').textContent=models.slice(0,-1).join(', ')+' and '+models[models.length-1]+', which are small open-weight language models,';
