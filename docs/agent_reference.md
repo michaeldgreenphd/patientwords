@@ -17,7 +17,7 @@ A change to shared behavior (masthead, chips, palette variables) means editing e
 Semantic palette (do not change): clinical green `#15803d`, patient ink `#111827`,
 structural grey `#c3c9d2`, penalty red `#b4483d`, paper `#faf9f5`, muted `#6d6c66`
 (chosen for WCAG AA on paper). Serif display + mono data on the pages not listed under
-*Reading pages* below; those four pages have their own type and colour rules. One page-level addition, the owner's
+*Reading pages* below; those three pages have their own type and colour rules. One page-level addition, the owner's
 decision of 2026-09-29: the Multi-turn page shows its three wordings as texting bubbles
 and colours each wording the same way in its charts, with colloquial blue `#2563eb`,
 careful-lay amber `#b45309` and the clinical green above (white text at 5:1 or better;
@@ -142,11 +142,27 @@ checks file shapes, not who reads them.
   probability) vs. *redirects* (top prediction changes); a redirect that drops a
   care-urgency tier is a *downgrade*.
 
-### Reading pages (2026-11-11): `index.html`, `start-here/`, `results/`, `experiments/`
+### Start here (owner's standing preference, 2026-11-11)
 
-These four pages were revised together as a reading path: research question, one wording
+Preserve `start-here/index.html` as it is designed: the opening question, the sequence
+of nine steps, the diagrams (clinician and model, the feature-map sketch, the two
+translation drawings, orchestration, the Measure / Mend / Maintain cycle, the mended
+system) and the interactions (the "say it the other way" toggle, the care-urgency
+ladder, the cycle's three tabs). A redesign of 2026-11-10 was rejected and the page was
+restored from its design of 2026-10-27 (`ac82473`). Later work makes small, justified
+edits: correct a claim in place, bind a value to its record, improve a narrow-screen
+drawing. A qualification goes in a caption or a label ("Illustration", "Research
+direction", "Gemma 2 2B · model-generated prompts · clinical review pending"), not in
+an added warning block. The engine's `../patientwords-engine/tests/test_start_here_page.py`
+and the `start-here/index.html` entries of its claims manifest check the steps, the
+diagrams, the interactions and the recorded values.
+
+### Reading pages (2026-11-11): `index.html`, `results/`, `experiments/`
+
+These three pages were revised together as a reading path: research question, one wording
 pair, its recorded result, aggregate context, internal measurements, methods and source.
-The other pages keep their earlier styles; only their navigation changed.
+The other pages keep their earlier styles; only their navigation changed. Start here is
+not one of them: it keeps its own serif-and-monospace design and palette (above).
 
 - Order. The pair and its recorded output come before aggregate context, and hashes,
   schema strings, run ids and release conditions sit under "Methods & source"
@@ -168,13 +184,16 @@ The other pages keep their earlier styles; only their navigation changed.
   subtraction order are printed in words ("everyday − medical"). `#b4483d` appears on
   these pages only as an alert (`--alert`): a file that failed to load
   (`results/` `.cat-err`, `.det-status.is-fail`; `experiments/` `.st-error`) and a
-  refused address (`experiments/` `.st-refused`). `index.html` and `start-here/` use no
-  red. The engine's generated figures under `modes/` still draw their negative curve in
+  refused address (`experiments/` `.st-refused`). `index.html` uses no red. The engine's generated figures under `modes/` still draw their negative curve in
   red; that is engine output and is not changed here.
 - Names of the wordings. "Medical wording" and "Everyday wording". The experiments page
   shows the bundle's third variant, `normalized`, as "Rewritten wording" and never prints
   that word as a label; the engine's `../patientwords-engine/docs/experiment_interface/preview.md`
   says why and where the file's own name still appears as code.
+- Qualifications are stated once, where they apply: a caption under a figure, a label
+  beside a value, a source note. A status shared by every item is one line, not a
+  repeated block, and a load error, a missing measurement, a restriction and a review
+  status keep their own wording.
 - Evidence levels stay separate in headings and labels: a change in next-token
   probability, a judged answer, an internal readout, an intervention. The first-token
   probability is never labelled as a score of a whole answer.

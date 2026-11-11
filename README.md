@@ -30,8 +30,8 @@ Nothing here is medical advice; the study measures model behavior.
 ## What's on the site
 
 The homepage states the research question, shows one wording pair with its recorded
-result, then the summary over all scored pairs, what the evidence does not establish,
-the internal measurements, and the methods and source. The navigation has four primary
+result, then the summary over all scored pairs, what is measured, the internal
+measurements, and the methods and source. The navigation has four primary
 links (Start here, Scenarios, Results, Methods); the other pages are under "More".
 
 | Page | What it shows |

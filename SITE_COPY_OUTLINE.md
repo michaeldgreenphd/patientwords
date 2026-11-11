@@ -11,8 +11,8 @@ stimuli and must survive any rewrite).
 historical home of this outline is the engine repo's `ops/` (2026-07-09 directive);
 this root copy exists at owner request, 2026-07-30. Regenerate rather than hand-sync.
 The `index.html` and `start-here/index.html` sections were regenerated on 2026-11-11 with
-the same script, after those two pages were rewritten (headings moved one level down to
-match this file); every other section is as generated on 2026-07-30, and the pages added
+the same script: `index.html` after its rewrite, and `start-here/index.html` after it was
+restored to its design of 2026-10-27 (headings moved one level down to match this file); every other section is as generated on 2026-07-30, and the pages added
 since then (`multi-turn/`, `results/`, `experiments/`) are not in this copy.
 
 **How to use it.** Each block is preceded by an HTML comment id
@@ -34,334 +34,322 @@ load-bearing — reword only with equal precision.
 ### Does wording change what AI predicts?
 
 <!-- id: index.b002 -->
-*subtitle:* PatientWords writes the same intended clinical situation twice, once in everyday patient wording and once in medical wording, and records for gemma-2-2b and other small open-weight language models one endpoint: the probability that the next token is the first token of a chosen target word.
+*subtitle:* PatientWords writes the same clinical situation twice, in everyday wording and in medical wording, and measures how a language model’s next-token prediction differs. If models respond less well to everyday words, the people affected are those who describe symptoms in their own language.
 
 <!-- id: index.b003 -->
-### One pair and its recorded result
+gemma-2-2b and other models · small open-weight language models · endpoint: the probability that the next token is the first token of a chosen target word
 
 <!-- id: index.b004 -->
-Example pair · simulated stimulus, written by a language model · measured on gemma-2-2b · clinical review of the pair is pending
+### One pair and its recorded result
 
 <!-- id: index.b005 -->
-“When the dust kicks up my asthma flares, so at work I keep a spare ___”
+Example pair · gemma-2-2b · model-generated prompts · clinical review pending
 
 <!-- id: index.b006 -->
-“When the dust kicks up my chest gets all tight, so at work I keep a spare ___”
+“When the dust kicks up my asthma flares, so at work I keep a spare ___”
 
 <!-- id: index.b007 -->
-#### Probability that the next token is the first token of the target word “inhaler”
+“When the dust kicks up my chest gets all tight, so at work I keep a spare ___”
 
 <!-- id: index.b008 -->
-The recorded values load with JavaScript. They are also on the scenario pages and in the data file.
+#### Probability that the next token is the first token of the target word “inhaler”
 
 <!-- id: index.b009 -->
-This pair was chosen by hand as an illustration. The choice is recorded as an editorial pin in the engine's pins file; no rule picked it. Its difference is among the largest in the published file, so it is not a typical pair.
+The recorded values load with JavaScript. They are also on the scenario pages and in the data file.
 
 <!-- id: index.b010 -->
-Open this pair's record Open its attribution graphs Browse all scenarios New to this? Start here
+Chosen by hand as an illustration (editorial pin). Its difference is among the largest in the published file; it is not a typical pair.
 
 <!-- id: index.b011 -->
-### What this evidence does not establish
+Open this pair's record Open its attribution graphs Browse all scenarios New to this? Start here
 
 <!-- id: index.b012 -->
-The endpoint is the probability of one token after an unfinished sentence. It is not a score of a whole answer, not a judgement of the clinical quality of an answer, and not a measurement of any effect on patients. The pairs were written and checked by language models, and whether the two wordings of a pair are clinically equivalent has not been reviewed: clinical review is pending. Everyday wording is not defective language; the question is whether models and instruments handle it as they handle medical wording.
+### What is measured
 
 <!-- id: index.b013 -->
-### Internal measurements
+One token’s probability after an unfinished sentence: a small, repeatable measurement of a model, not an assistant’s reply, its clinical quality or an effect on patients. Whole replies are measured separately. Whether the two wordings of a pair are clinically equivalent has not yet been reviewed. Everyday wording is not defective language; the question is whether models and instruments handle it as well as medical wording.
 
 <!-- id: index.b014 -->
-An attribution graph is computed for one prompt. It lists features that an instrument (a transcoder trained on gemma-2-2b) finds in the model's activations, and estimates how much each contributed to the predicted token. It is a readout from that instrument. A difference between the graphs of two wordings is not by itself a causal explanation; the methods page describes the intervention checks.
+### Internal measurements
 
 <!-- id: index.b015 -->
-*caption:* The example pair, traced Two attribution graphs of the pair above: the medical wording on top, the everyday wording below. The preview shows the top of the figure. It is a later re-trace of the pair, so the probabilities printed in it can differ slightly from the recorded values above.
+An attribution graph is computed for one prompt. It lists the features an instrument (a transcoder trained on gemma-2-2b) finds in the model's activations and estimates how much each contributed to the predicted token. It is a readout from that instrument: a difference between two wordings’ graphs is not by itself a causal explanation. The methods page describes the intervention checks.
 
 <!-- id: index.b016 -->
-Open the full comparison on the Wording differences page
+*caption:* The example pair, traced Two attribution graphs of the pair above: the medical wording on top, the everyday wording below. The preview shows the top of the figure. It is a later re-trace of the pair, so the probabilities printed in it can differ slightly from the recorded values above.
 
 <!-- id: index.b017 -->
-*fold:* How to read this graph
+Open the full comparison on the Wording differences page
 
 <!-- id: index.b018 -->
-Columns are the prompt's words in order; height is depth in the model; the predicted next token sits at the top with its probability. Each dot is a feature, and its size is its attribution. Its colour is the label the instrument gives it: green for a feature labelled medical (the figure's legend says clinical), dark ink for a feature labelled everyday (the legend says off-target), grey for structural context. Curves are attribution paths; a red curve has a negative weight. Hover a dot in the full figure for its identity and size.
+*fold:* How to read this graph
 
 <!-- id: index.b019 -->
-*fold:* Trace details
+Columns are the prompt's words in order; height is depth in the model; the predicted next token sits at the top with its probability. Each dot is a feature, and its size is its attribution. Its colour is the label the instrument gives it: green for a feature labelled medical (the figure's legend says clinical), dark ink for a feature labelled everyday (the legend says off-target), grey for structural context. Curves are attribution paths; a red curve has a negative weight. Hover a dot in the full figure for its identity and size.
 
 <!-- id: index.b020 -->
-Model gemma-2-2b · circuit-tracer via Neuronpedia · traced July 7, 2026 · render re-traced July 30, 2026 · the example scenario of the simulated sentences
-
-<!-- id: index.b021 -->
-*caption:* A rewritten sentence, traced A language model rewrote an everyday sentence in medical terms, and the rewrite was traced in the same way. Recorded target-token probability in this case: 0.45 after translation (clinical baseline 0.26) · July 7 trace. It is one traced case. The Translation page gives the outcome of every reviewed case, including those where the probability did not return.
-
-<!-- id: index.b022 -->
-Open the Translation page
-
-<!-- id: index.b023 -->
 *fold:* Trace details
 
+<!-- id: index.b021 -->
+Model gemma-2-2b · circuit-tracer via Neuronpedia · traced July 7, 2026 · render re-traced July 30, 2026 · the example scenario of the simulated sentences
+
+<!-- id: index.b022 -->
+*caption:* A rewritten sentence, traced A language model rewrote an everyday sentence in medical terms, and the rewrite was traced in the same way. Recorded target-token probability in this case: 0.45 after translation (clinical baseline 0.26) · July 7 trace. One traced case; the Translation page gives every reviewed case, including those where the probability did not return.
+
+<!-- id: index.b023 -->
+Open the Translation page
+
 <!-- id: index.b024 -->
-Model gemma-2-2b · hosted circuit-tracer via Neuronpedia · traced July 7, 2026 · render re-traced July 30, 2026 · phrase 17 of a reviewed set of pairs in which the most probable next token moved to a lower level of the draft care-urgency ladder
+*fold:* Trace details
 
 <!-- id: index.b025 -->
-### More comparisons
+Model gemma-2-2b · hosted circuit-tracer via Neuronpedia · traced July 7, 2026 · render re-traced July 30, 2026 · phrase 17 of a reviewed set of pairs in which the most probable next token moved to a lower level of the draft care-urgency ladder
 
 <!-- id: index.b026 -->
-- Simulated scenarios · every published pair with its measurements and traces
+### More comparisons
 
 <!-- id: index.b027 -->
-- Results catalogue · every measured run, with its status and what it may be used for
+- Simulated scenarios · every published pair with its measurements and traces
 
 <!-- id: index.b028 -->
-- Wording differences · one-word swaps, and wording crossed with grammar
+- Results catalogue · every measured run, with its status and what it may be used for
 
 <!-- id: index.b029 -->
-- Dialect differences · one instruction in several language-model-written approximations of English varieties
+- Wording differences · one-word swaps, and wording crossed with grammar
 
 <!-- id: index.b030 -->
-- Translation · rewriting the everyday sentence in medical terms, case by case
+- Dialect differences · one instruction in several language-model-written approximations of English varieties
 
 <!-- id: index.b031 -->
-- LLM responses · whole replies of deployed assistants, judged; a different endpoint from the one above
+- Translation · rewriting the everyday sentence in medical terms, case by case
 
 <!-- id: index.b032 -->
-- Multi-turn · wording across a whole conversation
+- LLM responses · whole replies of deployed assistants, judged; a different endpoint from the one above
 
 <!-- id: index.b033 -->
-- Phrase dataset · a hand-built set of pairs, assembled by Michael D. Green on Neuronpedia
+- Multi-turn · wording across a whole conversation
 
 <!-- id: index.b034 -->
-- Urgency of the most probable next token · per-model statistics on a draft care-urgency ladder: tiers owner-reviewed v1 · domain review pending
+- Phrase dataset · a hand-built set of pairs, assembled by Michael D. Green on Neuronpedia
 
 <!-- id: index.b035 -->
-- Clinical brief · a short version for clinicians
+- Urgency of the most probable next token · per-model statistics on a draft care-urgency ladder: tiers owner-reviewed v1 · domain review pending
 
 <!-- id: index.b036 -->
-- Technical page · layer-by-layer readouts and model comparisons, for AI researchers
+- Clinical brief · a short version for clinicians
 
 <!-- id: index.b037 -->
-### Methods and source
+- Technical page · layer-by-layer readouts and model comparisons, for AI researchers
 
 <!-- id: index.b038 -->
-The methods page describes the pipeline step by step, with its limitations. Every number on this page is read from a data file in this repository when the page loads; the example and the summary come from the scenario measurements file.
+### Methods and source
 
 <!-- id: index.b039 -->
-Simulated data. The sentence pairs measured across this site are written by a language model and checked by a language model. The clinical scenarios are model-generated; the tracing and the next-token predictions are recorded model behaviour. The phrase dataset is the exception: its pairs were assembled by Michael D. Green directly through testing on Neuronpedia. The team is interviewing patients about how they use language models and what they ask them.
+The methods page describes the pipeline step by step, with its limitations. The example pair and the summary on this page are read, when the page loads, from the scenario measurements file; the paraphrase comparison is read from the provenance file.
 
 <!-- id: index.b040 -->
-*footer (provenance):* Built with the patientwords-engine pipeline on Neuronpedia · attribution graphs by circuit-tracer · how the pipeline works
+Simulated data. The sentence pairs across this site are written and checked by language models; the predictions and traces are recorded model behaviour. The phrase dataset is the exception: Michael D. Green assembled its pairs by hand on Neuronpedia. The team is interviewing patients about how they use language models and what they ask them.
+
+<!-- id: index.b041 -->
+*footer (provenance):* Built with the patientwords-engine pipeline on Neuronpedia · attribution graphs by circuit-tracer · every number on this page traces to a data file in this repository · how the pipeline works
 
 *Not extracted: text this page's JS generates at runtime from data files (tables, counts, chart labels).*
 
-## Start here — PatientWords — `start-here/index.html`
+## Start Here — PatientWords — `start-here/index.html`
 
-> ⚑ meta description: A plain-language introduction to PatientWords: the same clinical situation written in everyday patient wording and in medical wording, what is measured in a language model for each, and what the measurements can and cannot show.
+> ⚑ meta description: A plain-language introduction: doctors interpret many ways of saying the same thing; a language model can answer each one differently. What we trace and measure.
 
 <!-- id: start-here.b001 -->
-### People say the same thing in many ways. Does a language model predict the same next word?
+*dateline:* Start here · the whole idea simplified
 
 <!-- id: start-here.b002 -->
-*subtitle:* A plain-language introduction to what PatientWords measures, and to what the measurements can and cannot show.
+### People say the same thing many ways. What does a machine "hear"?
 
 <!-- id: start-here.b003 -->
-### Research question
+*subtitle:* What happens inside a language model when the same medical question is asked in patient words instead of clinical words.
 
 <!-- id: start-here.b004 -->
-Do language models respond differently when the same intended clinical content is written in everyday patient language and in medical language, and do the instruments we use to look inside a model favour medical descriptions? To find out, we write pairs of unfinished sentences that differ in one span of wording, record for each the probability the model gives to the first token of a chosen target word, and compare what an attribution graph reports for the two wordings.
+Research question
 
 <!-- id: start-here.b005 -->
-Scope: the models studied here are open-weight, chosen so that their internal activations can be read. Whether the same differences appear in larger closed-source models, whose internals cannot be read, is an open question; a pilot with deployed assistants is on the LLM responses page.
+Does the language patients use change how a language model responds to their situation, compared with standard medical wording? To find out, we pair everyday phrasings of a health concern with their medical equivalents, record which internal features of the model each phrasing activates, and measure how far the everyday wording moves the model’s next-word prediction away from a medical target.
 
 <!-- id: start-here.b006 -->
-The endpoint is one number: after an unfinished sentence, the probability the model gives to the first token of the target word as its next token. It is defined, it can be repeated, and it can be compared between two wordings. It is not the advice a deployed assistant would give and it is not a score of a whole answer: an assistant receives a question in a chat format and writes many tokens, and its replies are studied separately on the LLM responses and Multi-turn pages. The attribution graph in step 5 reports which internal features an instrument finds for one prompt. A difference in those features between two wordings is a difference in the instrument's readout; it is not by itself a causal explanation of the change in the endpoint.
+Scope: the models studied here are open-weight, chosen so their internal activity can be traced directly. Whether the same effects hold in larger closed-source models is an open question; a pilot with deployed assistants is on the LLM responses page.
 
 <!-- id: start-here.b007 -->
-Step 1 · the premise
+The next word is a small, repeatable measurement: how probable is the first piece of a chosen medical word after an unfinished sentence? It is not an assistant’s advice; whole replies are studied separately. The circuit view (step 5) shows which internal features differ between the wordings: a readout, not proof of a cause.
 
 <!-- id: start-here.b008 -->
-### One complaint, several wordings
+1 · A doctor converges
 
 <!-- id: start-here.b009 -->
-People often describe symptoms in words that are not the terms of a medical textbook. The premise of the study is that a clinician can read different wordings as the same clinical content. The table is an illustration of that premise. Whether three such sentences are clinically equivalent is a judgement that needs clinical review, and for the pairs measured on this site that review is pending.
+### Three phrasings, one interpretation
 
 <!-- id: start-here.b010 -->
-Illustration of the premise, not a measurement
+Patients rarely use words that appear in medical textbooks. A clinician can understand multiple different wordings, recognizes the same stomach problem, and reaches the same recommendation.
 
 <!-- id: start-here.b011 -->
-Why we ask
+Illustration · interpretation absorbs the wording
 
 <!-- id: start-here.b012 -->
-### The motivation is equity; it is not a finding
+· Why it matters
 
 <!-- id: start-here.b013 -->
-If assistants respond less well to everyday wording, the people affected would be those who describe symptoms in their own words, including people with less access to medical vocabulary. That concern is why this work exists. It is not something these data show. The measurements here are token probabilities in small open models on sentences written by a language model; they do not measure effects on patients or on populations. Everyday wording is not defective language. The question is whether models, and the instruments used to study them, handle it as they handle medical wording.
+### Why wording matters
 
 <!-- id: start-here.b014 -->
-Step 2 · what the model does
+If an assistant responds less well to everyday words, the people affected are those who describe symptoms in their own language, often those with the least access to clinical vocabulary. The direction that worries us most is understating urgency. This motivates the work; we measure models here, not yet patients.
 
 <!-- id: start-here.b015 -->
-### Three wordings, three different top next tokens
+2 · The model diverges
 
 <!-- id: start-here.b016 -->
-We gave gemma-2-2b three unfinished sentences about one complaint and recorded the most probable next token after each. After the sentence with the medical term it is the first token of the target word “antacid”. After the two other wordings it is another token, including after the sentence that puts the formal term “dyspepsia” in a casual sentence.
+### Three phrasings, three different predictions
 
 <!-- id: start-here.b017 -->
-Recorded on gemma-2-2b. The sentences are shortened here; the full prompts of the first two rows are in the scenario record. The third row is one case. It does not show that casual wording alone moves the prediction.
+We gave a language model the same complaint in three phrasings and recorded its most likely next word. After the medical phrasing it is the start of “antacid”. After the other two it is a food word, even in the sentence that uses a formal term.
 
 <!-- id: start-here.b018 -->
-Step 3 · one pair in full
+Gemma 2 2B · model-generated prompts · clinical review pending · the model predicts word pieces: “ant” begins “antacid” · the formal-term row is one case
 
 <!-- id: start-here.b019 -->
-### The most probable next tokens after each wording
+3 · Try it
 
 <!-- id: start-here.b020 -->
-A language model assigns a probability to every token that could come next. The two lists show the most probable tokens after each wording of one pair. The target token is marked; where it is not among the most probable, it is added with its rank.
+### Watch wording change the prediction
 
 <!-- id: start-here.b021 -->
-#### Medical wording
+A language model works by guessing the next word. Flip the phrasing and watch its guesses reshuffle.
 
 <!-- id: start-here.b022 -->
 “When the dust kicks up my asthma flares, so at work I keep a spare ___”
 
 <!-- id: start-here.b023 -->
-The recorded probabilities load with JavaScript.
+Gemma 2 2B · model-generated prompts · clinical review pending · a hand-picked pair with one of the largest differences · “inhaler” is recorded as its first piece, “inhal” · open scenario 85’s full trace · browse all scenarios
 
 <!-- id: start-here.b024 -->
-#### Everyday wording
+4 · What we measure
 
 <!-- id: start-here.b025 -->
-“When the dust kicks up my chest gets all tight, so at work I keep a spare ___”
+### Two numbers per sentence pair
 
 <!-- id: start-here.b026 -->
-Recorded on gemma-2-2b. The bar length is the probability, on one scale for both lists. A label gives the word a token begins where the token is a piece of a word. This pair was chosen by hand and its difference is among the largest in the published file; the overview gives the average over all pairs. Open this pair's record · open its attribution graphs · browse all scenarios
+How far the target word’s probability falls when the wording turns everyday, and whether the most likely next word changes. When it changes to a word lower on our draft care-urgency ladder (like “inhaler” becoming “shirt” in step 3), we count an urgency downgrade.
 
 <!-- id: start-here.b027 -->
-Step 4 · what we measure
+5 · Look inside
 
 <!-- id: start-here.b028 -->
-### Two records per sentence pair
+### Looking inside the prediction
 
 <!-- id: start-here.b029 -->
-For each pair we record two things. The first is the difference in the probability of the target's first token between the two wordings, everyday minus medical. The second is whether the most probable next token is the same after both. When it differs, and the two tokens sit on different levels of a draft ladder of care urgency, we record the direction; a move to a lower level is labelled a downgrade. The ladder is a draft and its review by clinicians is pending.
+A circuit trace is a look inside the guess you see in step 3. It records which internal features are active as the model reads, in the instant before it predicts a word. In the sketch below, the medical term lights up features labelled medical (teal); the everyday phrase lights up more everyday ones (dark).
 
 <!-- id: start-here.b030 -->
-The urgency measurements have not loaded.
+*fold:* Read more about circuit traces
 
 <!-- id: start-here.b031 -->
-Step 5 · looking inside
+Inside the model, small units called “features” switch on as it reads. Some respond to medical ideas; others to non-medical ones. A circuit trace records which features fired and how strongly each fed the predicted next word. The trace is a diagnostic that researchers compute from the model’s internals with a separate instrument. A difference between two traces shows what that instrument reads; it does not by itself show why the prediction changed, which takes an intervention (see Methods). We also ask whether the instrument itself picks up medical terms more readily than everyday descriptions; that is an open question.
 
 <!-- id: start-here.b032 -->
-### An attribution graph is a readout, not an explanation
+Illustration of a trace’s layout · larger node = stronger influence · faint = barely fired · the recorded traces of this pair hold 732 and 787 features and share 465; the sketch draws a few
 
 <!-- id: start-here.b033 -->
-An attribution graph, also called a circuit trace, is computed for one prompt. It lists internal features, which are directions that a separately trained instrument finds in the model's activations, and estimates how much each contributed to the predicted next token. In the sketch, the sentence with the medical term activates more features that the instrument labels medical, and the everyday sentence activates more that it labels everyday.
+Most figures on PatientWords are circuit traces like this sketch.
 
 <!-- id: start-here.b034 -->
-*fold:* Read more about attribution graphs
+6 · The patch
 
 <!-- id: start-here.b035 -->
-A feature is defined by the instrument, and its label is a hypothesis about what it responds to. A difference in feature activation between two wordings is a difference in what the instrument reads out. It does not by itself show why the prediction changed. Evidence for a causal account needs an intervention, such as patching activations from one prompt into the other; the methods page describes those checks. Whether the instrument itself responds more readily to medical terms than to everyday descriptions of the same thing is one of the questions this project studies.
+### A translation layer, for now
 
 <!-- id: start-here.b036 -->
-Sketch of the layout of an attribution graph, not its data
+One stopgap we tested is a clinical translator. It sits between the patient and the model and, before the model ever answers, rewrites the everyday sentence into medical wording.
 
 <!-- id: start-here.b037 -->
-Green dots stand for features labelled medical, dark dots for features labelled everyday; a larger dot stands for a larger attribution and a faint one for a small one. The recorded graphs of the acid-reflux pair hold several hundred features each. Most figures on PatientWords are attribution graphs; the sketch shows their layout only.
+Gemma 2 2B · one recorded case, sentences shortened · the dashed path was not measured · in other reviewed cases the rewrite did not restore the prediction
 
 <!-- id: start-here.b038 -->
-Step 6 · one tested change to the input
+See the live translation traces.
 
 <!-- id: start-here.b039 -->
-### Rewriting the sentence before the model reads it
+7 · The smart patch
 
 <!-- id: start-here.b040 -->
-One thing we tested is rewriting. A second language model rewrites the everyday sentence in medical terms, and the rewritten sentence is measured in the same way. In the case below, the most probable next token after the rewrite is again the first token of the target word. A rewrite changes the input. It can also drop or add clinical content, and the patient's own words are not an error to be corrected.
+### Beyond translation: Orchestrating care
 
 <!-- id: start-here.b041 -->
-One recorded case on gemma-2-2b. The Translation page gives the outcome of every reviewed case, including those where the target probability did not return.
+A rewrite is fragile. An intermediary could instead route a query by confidence and context, and ask for more detail when the wording is ambiguous.
 
 <!-- id: start-here.b042 -->
-Step 7 · a proposal we have not tested
+Research direction · illustration
 
 <!-- id: start-here.b043 -->
-### Routing instead of rewriting
+8 · The lasting fix
 
 <!-- id: start-here.b044 -->
-A rewrite can lose clinical content. A different design would keep the patient's words and route the question by confidence and context, or ask for more information. The list sketches that idea. Nothing on this site tests it.
+### Measure, mend, maintain: a cycle, not a patch
 
 <!-- id: start-here.b045 -->
-Sketch of a proposal, not a measurement
+No single fix closes this gap. Language evolves; dialects, slang, and communities change, and a test built once goes stale. The method has to be a loop.
 
 <!-- id: start-here.b046 -->
-- The question“My stomach’s on fire.”
+- Pair each medical phrasing with its everyday phrasing. Count how often the most likely next word drops in urgency.
 
 <!-- id: start-here.b047 -->
-- Route 1 · a clinical model, checked against guidelinesStart guideline-concordant therapy, for example an antacid.
+- nowsimulated phrases, pre-registered, a tenth sealed for checking.
 
 <!-- id: start-here.b048 -->
-- Route 2 · care navigationSuggest an over-the-counter remedy and book a primary-care follow-up.
+- nextreal patient language, clinician-checked, community-validated dialects.
 
 <!-- id: start-here.b049 -->
-- Route 3 · an uncertainty checkThe question is too vague to route. Log it, and refer the person to a clinician.
+- Fortify the model: put a line of medical context in front of the question.
 
 <!-- id: start-here.b050 -->
-Step 8 · a plan
+- Train on patient language: include the way people actually speak in the training data. Models learn idioms, misspellings, and dialects the way clinicians do.
 
 <!-- id: start-here.b051 -->
-### Measurement has to be repeated
+- Translate only behind a regression check: re-test every rewrite, because rewrites can lose clinical content.
 
 <!-- id: start-here.b052 -->
-Language changes. Dialects, slang and communities shift, and a set of test sentences written once goes out of date. We therefore treat measurement as a cycle of three stages. The list describes a plan; the tags say what exists now.
+- Re-run the audit on a schedule.
 
 <!-- id: start-here.b053 -->
-- Measure. Pair each medical wording with an everyday wording. Record the difference in target probability, and how often the most probable token moves to another level of the draft urgency ladder. Now: simulated sentences, pre-registered, with a tenth sealed for checking. Next: real patient language, checked by clinicians, and dialects validated with their communities.
+- Refresh the phrase sets and urgency of recommendations with clinician and community review.
 
 <!-- id: start-here.b054 -->
-- Mend. Put a line of medical context in front of the question. Tested on one small set; the result is in the provenance file. Rewrite only behind a regression check: measure every rewrite again, because a rewrite can lose clinical content. Tested; see step 6. Train on the ways people write, including idioms, misspellings and dialects. Not tested here; a hypothesis.
+- Stress-test the edges with supplementary sets.
 
 <!-- id: start-here.b055 -->
-- Maintain. Repeat the measurement on a schedule, and when a model is updated. Refresh the sentence sets and the urgency ladder with clinician and community review. Next: more edge sets, such as alarm-sounding wording and misspellings.
+- nextMore edge sets: alarm-sounding wording, misspellings.
 
 <!-- id: start-here.b056 -->
-#### Where in the model the target token appears
+- Watch the circuit for drift as models update.
 
 <!-- id: start-here.b057 -->
-A layer-by-layer readout reports, for each layer, how highly the target token ranks when that layer's state is read out. In some pairs the target ranks high at intermediate layers and falls at the output; in others it never ranks high. These are readouts of an instrument. The Technical page lists them pair by pair, and the methods page describes the patching check that serves as intervention evidence.
+#### Two kinds of loss, two kinds of fix
 
 <!-- id: start-here.b058 -->
-See the recorded traces
+A layer-by-layer readout shows where the target is lost: some targets form and drop out at the last step, some never form at all. The running census, pair by pair, lives on the Technical page; the methods page shows the causal check.
 
 <!-- id: start-here.b059 -->
-Step 9 · an aim, not a result
+9 · The mended system
 
 <!-- id: start-here.b060 -->
-### A model that handles everyday wording directly
+### Closing the loop: Native orchestration and human handoff
 
 <!-- id: start-here.b061 -->
-The aim beyond a rewrite is a model that handles everyday wording directly, states its confidence, and hands off to a clinician when it should. The list sketches that aim. No such system has been built or measured here.
+The goal is a model that no longer relies on a translation patch. It would map patient wording to safe clinical pathways itself, giving immediate guidance (while communicating confidence) and handing off to human clinicians.
 
 <!-- id: start-here.b062 -->
-Sketch of an aim, not a measurement
+Research direction · illustration
 
 <!-- id: start-here.b063 -->
-- The question“My stomach’s on fire.”
+SIMULATED DATA: the sentence pairs measured across this site are written by an LLM and checked automatically.
 
 <!-- id: start-here.b064 -->
-- Immediate guidance, with stated confidenceRecommend an over-the-counter antacid.
-
-<!-- id: start-here.b065 -->
-- Handoff to a clinician, in a structured format“Patient reports acute dyspepsia…”
-
-<!-- id: start-here.b066 -->
-### Sources
-
-<!-- id: start-here.b067 -->
-The tokens and probabilities on this page are recorded gemma-2-2b measurements, read from the data files when the page loads. Steps 2 and 5: the acid-reflux pair in the scenario measurements file; step 2's third row and its register comparison, step 6 and step 8's context result: the provenance file. Step 3: the asthma pair in the scenario measurements file. Step 4: the urgency file. Steps 1, 7 and 9 are illustrations and sketches, not measurements.
-
-<!-- id: start-here.b068 -->
-Simulated data. The sentence pairs measured across this site are written by a language model and checked automatically. Clinical review of the pairs is pending.
-
-<!-- id: start-here.b069 -->
-*footer (provenance):* Built with the patientwords-engine pipeline on Neuronpedia · attribution graphs by circuit-tracer
+*footer (provenance):* Built with the patientwords-engine pipeline on Neuronpedia · attribution graphs by circuit-tracer ·
 
 *Not extracted: text this page's JS generates at runtime from data files (tables, counts, chart labels).*
 
