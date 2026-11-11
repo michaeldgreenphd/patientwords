@@ -156,11 +156,12 @@
   .sum-controls input:focus{border-color:var(--clinical)}
   .sum-controls input:focus-visible{outline:2px solid var(--clinical);outline-offset:2px}
   .sum-chips{display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px;margin:22px 0 0}
-  /* compact filter dropdowns (replacing the pill arrays) */
-  .sel-g{display:flex;align-items:center;gap:6px}
+  /* compact filter dropdowns (replacing the pill arrays); a group is never wider than
+     its row and its select shrinks, so a long option does not widen the page */
+  .sel-g{display:flex;align-items:center;gap:6px;min-width:0;max-width:100%}
   .sel-lbl{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
   .sum-sel{font-family:var(--mono);font-size:12px;color:var(--ink);background:#fff;
-    border:1px solid var(--hairline);padding:5px 8px;cursor:pointer;border-radius:2px;max-width:46ch}
+    border:1px solid var(--hairline);padding:5px 8px;cursor:pointer;border-radius:2px;max-width:46ch;min-width:0}
   .sum-sel:hover{border-color:var(--muted)}
   .sum-sel:focus-visible{outline:2px solid var(--clinical);outline-offset:2px}
   /* generation log: minimalist borderless table inside a light fold */
@@ -406,7 +407,7 @@
   <p class="subtitle">Stress scenarios authored by an LLM, validated, traced live on gemma-2-2b, and kept apart from the hand-measured set.</p>
   <details class="meth">
     <summary>View generation methodology</summary>
-  <p class="explainer">This section adds simulated scenarios to the <a href="../#phrase-dataset">hand-measured dataset</a>. Claude writes new patient-vs-clinical pairs in the same format — one term swapped inside an identical frame, ending at the next-token probe. Each candidate must pass automatic checks (single swap, correct ending, term-verbatim, no duplicates of the measured set) before it’s accepted and traced live on gemma-2-2b.</p>
+  <p class="explainer">This section adds simulated scenarios to the <a href="../phrase-dataset/">hand-measured dataset</a>. Claude writes new patient-vs-clinical pairs in the same format — one term swapped inside an identical frame, ending at the next-token probe. Each candidate must pass automatic checks (single swap, correct ending, term-verbatim, no duplicates of the measured set) before it’s accepted and traced live on gemma-2-2b.</p>
   <p class="explainer">Each scenario shows the two phrasings, the traced probabilities with the wording gap, and the generator’s reason the swap should matter.</p>
   </details>
   <p class="explainer">Wording gap: the percentage points of next-word probability the clinical answer loses when the sentence is worded the way an everyday patient would say it, as opposed to standard medical terms.</p>

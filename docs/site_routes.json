@@ -1,0 +1,206 @@
+{
+  "schema": "patientwords.site_routes.v1",
+  "about": [
+    "Hand-maintained definition of the site's public routes and of the masthead navigation.",
+    "No page loads this file. The navigation markup stays static in each page. The engine's scripts/check_site_links.py reads this file and compares every composed page with it.",
+    "Edit it in the same change that adds, moves or removes a page, changes the navigation, or adds an address parameter or an anchor that a page creates at run time."
+  ],
+  "public_base": "https://michaeldgreenphd.github.io/patientwords/",
+  "base_path": "/patientwords/",
+  "kinds": {
+    "home": "The homepage. It has the masthead. The wordmark links to it and the navigation does not, so no navigation link is marked current.",
+    "primary": "A page with the masthead and a link in the primary navigation. Its own link carries aria-current=\"page\".",
+    "more": "A page with the masthead and a link inside the More disclosure. Its own link carries aria-current=\"page\" and the summary reads \"More · <label>\".",
+    "detail": "A page with the masthead that is opened from links another page builds. The navigation link named by \"current\" carries aria-current=\"page\".",
+    "unlinked": "A page with the masthead that no masthead links to. No navigation link is marked current. It stays noindex and keeps each \"required_text\".",
+    "error": "The not-found page. It has the masthead with absolute links under base_path, because it is served at any depth. No navigation link is marked current.",
+    "standalone": "A page without the masthead.",
+    "redirect": "A meta-refresh stub without the masthead. \"redirect_to\" is where it sends a reader."
+  },
+  "fields": {
+    "path": "The route, relative to the site root. An empty path is the homepage; a path that ends with a slash is served from its index.html.",
+    "title": "The page's name. For a page in the navigation it is the link's label.",
+    "hrefs": "\"absolute\" where the navigation links start with base_path. Otherwise they are relative to the page, and a link to the page's own directory is \"./\".",
+    "anchors": "Established ids that links from outside the page rely on. Each must stay an id of an element in the page's source, whether or not a page of this site still links to it.",
+    "generated": "What the page reads from the address or creates at run time. \"query\" names address parameters. \"fragment\" gives a fragment that is not the id of any element in the source: \"prefix\" is its fixed start and \"pattern\" its full form. A link that uses one is listed by the check as declared; a link with a parameter or a fragment that is neither declared nor a static id is reported.",
+    "noindex": "true where the page must keep <meta name=\"robots\" content=\"noindex\">. The check reads it for an unlinked page.",
+    "required_text": "Text an unlinked page's source must keep."
+  },
+  "navigation": {
+    "aria_label": "Site",
+    "primary": [
+      {"label": "Start here", "route": "start-here/"},
+      {"label": "Scenarios", "route": "simulated-scenarios/"},
+      {"label": "Results", "route": "results/"},
+      {"label": "Methods", "route": "methods.html"}
+    ],
+    "more": {
+      "summary": "More",
+      "current_separator": " · ",
+      "links": [
+        {"label": "Wording differences", "route": "wording-differences/"},
+        {"label": "Dialect differences", "route": "dialect-differences/"},
+        {"label": "Translation", "route": "translation/"},
+        {"label": "LLM responses", "route": "llm/"},
+        {"label": "Multi-turn", "route": "multi-turn/"},
+        {"label": "Phrase dataset", "route": "phrase-dataset/"},
+        {"label": "Technical", "route": "technical/"},
+        {"label": "Clinical brief", "route": "clinical/"},
+        {"label": "GitHub", "href": "https://github.com/michaeldgreenphd/patientwords"}
+      ]
+    }
+  },
+  "routes": [
+    {
+      "path": "",
+      "title": "Home",
+      "kind": "home",
+      "anchors": ["phrase-dataset"]
+    },
+    {
+      "path": "start-here/",
+      "title": "Start here",
+      "kind": "primary"
+    },
+    {
+      "path": "simulated-scenarios/",
+      "title": "Scenarios",
+      "kind": "primary"
+    },
+    {
+      "path": "simulated-scenarios/scenario.html",
+      "title": "Scenario detail",
+      "kind": "detail",
+      "current": "simulated-scenarios/",
+      "generated": [
+        {"type": "query", "names": ["sim"], "reason": "The display index of the scenario to show, from scenario.index in data/simulated_scenarios.json. It is display order and can change on re-export."},
+        {"type": "query", "names": ["model"], "reason": "The model whose measurements to show. Without it the page shows the base model."}
+      ]
+    },
+    {
+      "path": "results/",
+      "title": "Results",
+      "kind": "primary",
+      "generated": [
+        {"type": "query", "names": ["q", "evidence", "stimulus", "state", "visibility", "membership", "review", "rows", "sort", "issue", "run"], "reason": "The search text, the filters, the sort order and the open run. The page writes them to the address so a filtered view can be linked."}
+      ]
+    },
+    {
+      "path": "methods.html",
+      "title": "Methods",
+      "kind": "primary",
+      "anchors": ["reading-layers", "instrument-question", "generation-eval", "judge-agreement", "classifier-agreement", "limitations"]
+    },
+    {
+      "path": "wording-differences/",
+      "title": "Wording differences",
+      "kind": "more",
+      "anchors": ["word", "grammar"]
+    },
+    {
+      "path": "dialect-differences/",
+      "title": "Dialect differences",
+      "kind": "more"
+    },
+    {
+      "path": "translation/",
+      "title": "Translation",
+      "kind": "more"
+    },
+    {
+      "path": "llm/",
+      "title": "LLM responses",
+      "kind": "more",
+      "generated": [
+        {"type": "fragment", "prefix": "s", "pattern": "^s[0-9]+$", "reason": "#s<N> selects scenario N in the scenario list. No element has this id: the page reads the fragment and draws that scenario."},
+        {"type": "query", "names": ["s"], "reason": "The same selection as #s<N>, for a link that passes through software that removes fragments."},
+        {"type": "query", "names": ["sample"], "reason": "sample=1 loads the labelled development fixture data/advice_scenarios.sample.json."}
+      ]
+    },
+    {
+      "path": "llm/code.html",
+      "title": "Coding instrument",
+      "kind": "standalone",
+      "generated": [
+        {"type": "query", "names": ["sample"], "reason": "sample=1 loads the labelled development fixture data/advice_coding_sample.sample.json."}
+      ]
+    },
+    {
+      "path": "multi-turn/",
+      "title": "Multi-turn",
+      "kind": "more",
+      "generated": [
+        {"type": "query", "names": ["sample"], "reason": "sample=1 loads the two labelled synthetic fixtures in place of the published files."}
+      ]
+    },
+    {
+      "path": "phrase-dataset/",
+      "title": "Phrase dataset",
+      "kind": "more"
+    },
+    {
+      "path": "technical/",
+      "title": "Technical",
+      "kind": "more",
+      "anchors": ["data", "models"]
+    },
+    {
+      "path": "clinical/",
+      "title": "Clinical brief",
+      "kind": "more"
+    },
+    {
+      "path": "experiments/",
+      "title": "Compare methods",
+      "kind": "unlinked",
+      "noindex": true,
+      "required_text": ["Synthetic fixture: not a measurement"],
+      "reason": "No comparison is published. The page stays out of the navigation and out of search indexes until one is.",
+      "generated": [
+        {"type": "query", "names": ["bundle"], "reason": "The comparison file to show, as a relative path under data/."},
+        {"type": "query", "names": ["case"], "reason": "Opens one case of the comparison by its family id."}
+      ]
+    },
+    {
+      "path": "404.html",
+      "title": "Not found",
+      "kind": "error",
+      "hrefs": "absolute"
+    },
+    {
+      "path": "share/card.html",
+      "title": "Share card source",
+      "kind": "standalone"
+    },
+    {
+      "path": "answer-depth/",
+      "title": "Answer depth (moved)",
+      "kind": "redirect",
+      "redirect_to": "technical/#data"
+    },
+    {
+      "path": "model-evaluations/",
+      "title": "Model evaluations (moved)",
+      "kind": "redirect",
+      "redirect_to": "technical/#models"
+    },
+    {
+      "path": "syntax-differences/",
+      "title": "Syntax differences (moved)",
+      "kind": "redirect",
+      "redirect_to": "wording-differences/#grammar"
+    },
+    {
+      "path": "word-differences/",
+      "title": "Word differences (moved)",
+      "kind": "redirect",
+      "redirect_to": "wording-differences/#word"
+    },
+    {
+      "path": "llm/natural.html",
+      "title": "LLM responses, natural questions (moved)",
+      "kind": "redirect",
+      "redirect_to": "llm/"
+    }
+  ]
+}

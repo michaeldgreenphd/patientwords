@@ -297,11 +297,14 @@
 
   <div class="sample-banner" id="sample-banner" hidden>Sample data: made-up placeholder files used to build this page. Nothing on this page is a result.</div>
 
-  <div class="pending" id="mt-pending">
+  <!-- Where loading stands, one sentence at a time. data-state is "loading" (this markup, before the script answers),
+       "failed" (a file did not load), "none" (nothing is published) or "loaded" (the block is hidden and the results
+       are drawn). The sentences name no file: the files and the reason go in the shown sentence's title and in the
+       browser console, for maintainers. -->
+  <div class="pending" id="mt-pending" role="status" data-state="loading">
     <span id="mt-loading">Loading the results…</span>
-    <span id="mt-none" hidden>No results are published yet. This page shows them once the engine writes
-    <code>data/petri_multiturn_summary.json</code> and
-    <code>data/petri_multiturn_conversations.json</code>.</span>
+    <span id="mt-failed" hidden>The results did not load. Reload the page to try again.</span>
+    <span id="mt-none" hidden>No results are published yet.</span>
   </div>
 
   <!-- 2. The answer: the headline verbatim, then every triple the main test counts, one mark each -->
@@ -459,17 +462,17 @@
 (function(){
   'use strict';
   // REAL_DATA_PUBLISHED: false until the engine exporter's real files are committed to data/.
-  // While false, the page requests only the .sample.json files, so the site's page check
-  // (engine scripts/check_pages.py, which fails on any HTTP 404 under data/) stays green.
+  // While false, the page requests no result file and says that no results are published, so the
+  // site's page check (engine scripts/check_pages.py, which fails on any HTTP 404 under data/) stays green.
   // Set it to true in the same change that adds data/petri_multiturn_{summary,conversations}.json;
-  // the page then loads the real files and still falls back to the samples if one is missing.
+  // the page then loads the two published files. It never replaces a published file with a sample.
   var REAL_DATA_PUBLISHED=true;
-  var FORCE_SAMPLE=!REAL_DATA_PUBLISHED||/[?&]sample=1/.test(location.search);
+  // The sample fixtures are drawn only on request: the address carries ?sample=1.
+  var FORCE_SAMPLE=/[?&]sample=1/.test(location.search);
   var ARMS=['colloquial','lay_careful','clinical'];
   var ARM_LABEL={colloquial:'Colloquial',lay_careful:'Careful lay',clinical:'Clinical'};
   var DASH='—';
   var TARGET_LABEL=null; // summary.provenance.models.target_label, for the chat's reply label
-  var usedSample=false;
   // friendly scenario labels: topic by scenario id and by seed id, from the conversations file's seeds. A scenario
   // with no topic keeps its identifier; nothing is derived from the identifier itself.
   var TOPIC={}, SEED_TOPIC={};
@@ -488,25 +491,62 @@
   function num(v,dp){return (typeof v==='number'&&isFinite(v))?(dp==null?String(v):v.toFixed(dp)).replace('-','−'):DASH;}
   function arr(v){return Array.isArray(v)?v:[];}
 
-  // The two files are one publication unit: the page shows both real files or both
-  // samples, never a real summary beside sample transcripts (or the reverse). If either
-  // real file is missing, both come from the samples and the sample notice shows.
+  // The two files are one publication unit, read from one source: the two published files, or, only when the
+  // address carries ?sample=1, the two sample fixtures. A published file that does not load is never replaced by a
+  // sample. The page then says the results did not load and draws nothing, so a summary is never shown beside
+  // conversations from another source.
   var NAMES=['petri_multiturn_summary','petri_multiturn_conversations'];
-  function get(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u+' '+r.status);return r.json();});}
-  function getAll(suffix){return Promise.all(NAMES.map(function(n){return get('../data/'+n+suffix);}));}
-  function samples(){
-    usedSample=true;
-    // each sample may be absent on its own; the page renders whatever loads
-    return Promise.all(NAMES.map(function(n){return get('../data/'+n+'.sample.json').catch(function(){return null;});}));
+  function file(n){return 'data/'+n+(FORCE_SAMPLE?'.sample.json':'.json');}
+  // a JSON file by its address; rejects on a failed request or an HTTP error status (the register reading uses it)
+  function get(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();});}
+  // one file of the pair, settled either way: {name, data} when it loads as a JSON object, {name, error} when it
+  // does not
+  function getOne(n){
+    return get('../'+file(n))
+      .then(function(d){if(!d||typeof d!=='object'||Array.isArray(d))throw new Error('not a JSON object');return d;})
+      .then(function(d){return {name:n,data:d};},
+            function(e){return {name:n,error:(e&&e.message)||'the request failed'};});
   }
-  var loadAll=FORCE_SAMPLE?samples():getAll('.json').catch(function(){return samples();});
+  // The status block: one sentence for the reader (the static markup's, or `text`), with the files and the reason
+  // in that sentence's title and in the console, for maintainers.
+  function showState(state,detail,text){
+    ['loading','failed','none'].forEach(function(s){$('mt-'+s).hidden=(s!==state);});
+    if(text)$('mt-'+state).textContent=text;
+    $('mt-'+state).title=detail;
+    $('mt-pending').setAttribute('data-state',state);
+    if(window.console&&console.warn&&state==='failed')console.warn('Multi-turn: '+detail);
+    else if(window.console&&console.info)console.info('Multi-turn: '+detail);
+  }
+  function why(list){return list.map(function(r){return file(r.name)+': '+r.error;}).join('; ');}
 
-  loadAll.then(function(res){
-    var summary=res[0], conv=res[1];
-    // nothing loaded: only now say so (while the files load, the block says it is loading)
-    if(!summary&&!conv){$('mt-loading').hidden=true;$('mt-none').hidden=false;return;}
+  if(!REAL_DATA_PUBLISHED&&!FORCE_SAMPLE){
+    // nothing is published: say so, and request no file
+    showState('none',NAMES.map(file).join(' and ')+': not requested, REAL_DATA_PUBLISHED is false');
+  }else Promise.all(NAMES.map(getOne)).then(function(res){
+    var summary=res[0].data||null, conv=res[1].data||null;
+    var failed=res.filter(function(r){return !r.data;});
+    if(FORCE_SAMPLE){
+      // sample mode, on request only: each fixture may be absent on its own, and the page draws whichever loads
+      if(!summary&&!conv){showState('failed',why(failed),'The sample files did not load. Reload the page to try again.');return;}
+    }else{
+      // a published file did not load: failed, whichever file it was, and nothing is drawn from the other
+      if(failed.length){showState('failed',why(failed));return;}
+      // one file marked as a sample beside one that is not: two sources, so neither is drawn
+      if((summary.sample===true)!==(conv.sample===true)){
+        showState('failed',NAMES.map(file).join(' and ')+': one carries sample: true and the other does not',
+          'The two result files do not come from the same source, so neither is shown.');
+        return;
+      }
+      // Both files loaded and record no result: the summary lists no triple (summary.triples) and the conversations
+      // file lists no conversation (conversations), the two lists the engine's export_petri_multiturn.py writes.
+      if(!arr(summary.triples).length&&!arr(conv.conversations).length){
+        showState('none',NAMES.map(file).join(' and ')+': loaded, with no triple and no conversation listed');
+        return;
+      }
+    }
     $('mt-pending').hidden=true;
-    if(usedSample||(summary&&summary.sample)||(conv&&conv.sample))$('sample-banner').hidden=false;
+    $('mt-pending').setAttribute('data-state','loaded');
+    if(FORCE_SAMPLE||(summary&&summary.sample)||(conv&&conv.sample))$('sample-banner').hidden=false;
     // a scenario's label on this page is its seed's topic, which only the conversations file carries (the summary
     // holds identifiers); read the topics before the summary draws its figure
     if(conv)arr(conv.seeds).forEach(function(s){
@@ -517,7 +557,7 @@
     if(summary)renderSummary(summary);
     if(conv){renderExplore(conv);renderExample(conv);renderDiffer(conv);renderFeatured(conv);}
     // the classifier's register reading joins the real conversations only; samples are placeholders
-    if(!usedSample&&conv&&!conv.sample)loadRegister();
+    if(!FORCE_SAMPLE&&conv&&!conv.sample)loadRegister();
   });
 
   // ---------- register (exploratory; data/petri_register_drift.json) ----------

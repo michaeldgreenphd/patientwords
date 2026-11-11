@@ -92,10 +92,14 @@
 
   <div class="sample-banner" id="sample-banner" hidden>SAMPLE DATA — synthetic placeholder items for layout verification only.</div>
 
-  <div class="pending" id="cd-pending">
-    No coding sample is published yet. This page renders from
-    <code>data/advice_coding_sample.json</code> once the engine's
-    <code>advice_human_coding.py build-sample</code> publishes it.
+  <!-- Where loading stands. data-state is "loading" (this markup, before the script answers), "failed" (the file did
+       not load), "none" (the file loaded and lists no item) or "loaded" (the block is hidden and the instrument is
+       shown). The sentences name no file: the file, the engine command that writes it and the reason go in the shown
+       sentence's title and in the browser console, for maintainers. -->
+  <div class="pending" id="cd-pending" role="status" data-state="loading">
+    <span id="cd-loading">Loading the coding sample…</span>
+    <span id="cd-failed" hidden>The coding sample did not load. Reload the page to try again.</span>
+    <span id="cd-none" hidden>No coding sample is published yet.</span>
   </div>
 
   <section id="cd-app" hidden>
@@ -272,15 +276,29 @@
       +'Commit the file to patientwords-engine data/advice/human/ then run advice_human_coding.py score.';
   }
 
+  // The status block: one sentence for the reader, with the file, its writer and the reason in that sentence's
+  // title and in the console, for maintainers.
+  function showState(state,reason){
+    ['loading','failed','none'].forEach(function(s){document.getElementById('cd-'+s).hidden=(s!==state);});
+    var detail=src.replace('../','')+' (written by the engine\'s advice_human_coding.py build-sample): '+reason;
+    document.getElementById('cd-'+state).title=detail;
+    document.getElementById('cd-pending').setAttribute('data-state',state);
+    if(window.console&&console.warn&&state==='failed')console.warn('Coding instrument: '+detail);
+    else if(window.console&&console.info)console.info('Coding instrument: '+detail);
+  }
+  var loaded=false;
   fetch(src,{cache:'no-cache'})
-    .then(function(r){return r.ok?r.json():null;})
+    .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
     .then(function(d){
-      if(!d||!Array.isArray(d.items)||!d.items.length)return;
+      loaded=true;
+      // the file loaded and lists no item: nothing is published
+      if(!d||!Array.isArray(d.items)||!d.items.length){showState('none','loaded, with no item listed');return;}
       data=d;
       storeKey='pw-coding-'+(d.rubric&&d.rubric.sha256?d.rubric.sha256.slice(0,12):'x')+'-'+(d.generated_utc||'');
       try{store=JSON.parse(localStorage.getItem(storeKey))||{};}catch(e){store={};}
       if(sample||d._sample)document.getElementById('sample-banner').hidden=false;
       document.getElementById('cd-pending').hidden=true;
+      document.getElementById('cd-pending').setAttribute('data-state','loaded');
       document.getElementById('cd-app').hidden=false;
       var sel=document.getElementById('coder');
       var ph=document.createElement('option');
@@ -302,7 +320,13 @@
       document.getElementById('cd-export').addEventListener('click',doExport);
       render();
     })
-    .catch(function(){});
+    .catch(function(e){
+      // A request that errors, an HTTP error status or invalid JSON is a failed load. An error thrown while
+      // drawing a file that did load leaves what was drawn, as before, and is reported in the console.
+      var why=(e&&e.message)||'the request failed';
+      if(!loaded)showState('failed',why);
+      else if(window.console&&console.warn)console.warn('Coding instrument: drawing stopped: '+why);
+    });
 })();
 </script>
 </body>
