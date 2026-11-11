@@ -191,6 +191,14 @@ requires an explicit immutable engine SHA if later authorized. A local run prove
 the recorded local pairing only. No fetch, branch switch or publication is required
 for verification; do not silently replace a dirty checkout to match CI.
 
+Engine pull requests are paired in the other direction. The engine's pull-request
+checks (`../patientwords-engine/verify.md`, *Pull-request checks*) test an engine
+pull request beside the site branch that has the same name as the engine branch, and
+beside site `main` when no such branch exists. The job summary records the site
+commit it used and which rule chose it. A site change that an engine pull request's
+tests depend on therefore goes on a site branch of that name before the engine pull
+request is opened; against an older site commit the engine's paired job fails.
+
 ## Claims, holdouts and shared instructions
 
 Start from the site root with the engine verification environment active:
