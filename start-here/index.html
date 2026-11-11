@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Start Here — PatientWords</title>
-<meta name="description" content="A plain-language introduction: doctors interpret many ways of saying the same thing; a language model can answer each one differently. What we trace and measure.">
+<meta name="description" content="A plain-language introduction: doctors interpret many ways of saying the same thing; a language model&rsquo;s next-word prediction can differ for each one. What we trace and measure.">
 <link rel="canonical" href="https://michaeldgreenphd.github.io/patientwords/start-here/">
 <meta name="theme-color" content="#faf9f5">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23faf9f5'/%3E%3Crect x='9' y='9' width='30' height='30' fill='%23111827'/%3E%3Crect x='25' y='25' width='30' height='30' fill='%2315803d'/%3E%3C/svg%3E">
@@ -233,9 +233,9 @@
       <text x="0" y="24" class="sv-q">“I have <tspan style="fill:var(--teal);font-weight:700">acid reflux</tspan>.”</text>
       <text x="0" y="64" class="sv-q">“My stomach’s on fire.”</text>
       <text x="0" y="104" class="sv-q">“My dyspepsia flared up.”</text>
-      <path class="sv-line" d="M172,18 C200,18 204,58 222,58"/>
-      <path class="sv-line" d="M172,58 L222,58"/>
-      <path class="sv-line" d="M172,98 C200,98 204,58 222,58"/>
+      <path class="sv-line" d="M188,18 C208,18 208,58 222,58"/>
+      <path class="sv-line" d="M188,58 L222,58"/>
+      <path class="sv-line" d="M188,98 C208,98 208,58 222,58"/>
       <circle cx="238" cy="58" r="14" fill="none" stroke="var(--teal)" stroke-width="2"/>
       <text x="238" y="35" class="sv-m" text-anchor="middle" style="fill:var(--teal);font-weight:700">clinician</text>
       <path class="sv-line" d="M252,58 L282,58" stroke="#0f766e" stroke-width="2.2"/>
@@ -257,8 +257,8 @@
   <section>
     <p class="step-no">2 · The model diverges</p>
     <h2>Three phrasings, three different predictions</h2>
-    <p>We gave a language model the same complaint in three phrasings and recorded its most likely next word. After the medical phrasing it is the start of &ldquo;antacid&rdquo;. After the other two it is a food word, even in the sentence that uses a formal term.</p>
-    <div class="fig" role="img" aria-label="The same three phrasings pass through a language model and come out as three different next-word predictions: the start of antacid, ice, and apple.">
+    <p>We gave a language model similar complaints in three phrasings and recorded its most likely next word. After the medical phrasing it is the start of &ldquo;antacid&rdquo;. After the other two it is a food word, even in the sentence that uses a formal term.</p>
+    <div class="fig" role="img" data-label="The same three phrasings pass through a language model and come out as three different next-word predictions: {s2-clin} (the start of “antacid”), {s2-pat} and {s2-formal}." aria-label="The same three phrasings pass through a language model and come out as three different next-word predictions: “ant” (the start of “antacid”), “ice” and “apple”.">
     <svg class="fig-wide" viewBox="0 0 800 190">
       <text x="0" y="28" class="sv-q">“I have <tspan style="fill:var(--teal);font-weight:700">acid reflux</tspan>.”</text>
       <text x="0" y="88" class="sv-q">“My stomach’s on fire.”</text>
@@ -276,25 +276,28 @@
       <path class="sv-line" d="M500,142 L540,142" stroke="#b45309" stroke-width="2.2"/>
       <text x="552" y="147" class="sv-a" fill="#b45309" data-rec="s2-formal">“apple”</text>
     </svg>
-    <svg class="fig-narrow" viewBox="0 0 360 142">
+    <svg class="fig-narrow" viewBox="0 0 360 152">
       <text x="0" y="24" class="sv-q">“I have <tspan style="fill:var(--teal);font-weight:700">acid reflux</tspan>.”</text>
-      <text x="0" y="64" class="sv-q">“My stomach’s on fire.”</text>
-      <text x="0" y="104" class="sv-q">“My dyspepsia flared up.”</text>
-      <path class="sv-line" d="M172,18 L200,18"/>
-      <path class="sv-line" d="M172,58 L200,58"/>
-      <path class="sv-line" d="M172,98 L200,98"/>
-      <rect x="200" y="4" width="52" height="108" fill="none" stroke="#6d6c66" stroke-width="1.2" stroke-dasharray="5 5"/>
-      <text x="226" y="130" class="sv-m" text-anchor="middle">language model</text>
+      <text x="0" y="74" class="sv-q">“My stomach’s on fire.”</text>
+      <text x="0" y="114" class="sv-q">“My dyspepsia flared up.”</text>
+      <path class="sv-line" d="M188,18 L200,18"/>
+      <path class="sv-line" d="M188,68 L200,68"/>
+      <path class="sv-line" d="M188,108 L200,108"/>
+      <rect x="200" y="4" width="52" height="118" fill="none" stroke="#6d6c66" stroke-width="1.2" stroke-dasharray="5 5"/>
+      <text x="226" y="140" class="sv-m" text-anchor="middle">language model</text>
       <path class="sv-line" d="M252,18 L276,18" stroke="#0f766e" stroke-width="2.2"/>
       <text x="284" y="23" class="sv-a" fill="#0f766e" data-rec="s2-clin">“ant”</text>
-      <path class="sv-line" d="M252,58 L276,58" stroke="#b45309" stroke-width="2.2"/>
-      <text x="284" y="63" class="sv-a" fill="#b45309" data-rec="s2-pat">“ice”</text>
-      <path class="sv-line" d="M252,98 L276,98" stroke="#b45309" stroke-width="2.2"/>
-      <text x="284" y="103" class="sv-a" fill="#b45309" data-rec="s2-formal">“apple”</text>
+      <text x="284" y="38" class="sv-m">start of</text>
+      <text x="284" y="51" class="sv-m">“antacid”</text>
+      <path class="sv-line" d="M252,68 L276,68" stroke="#b45309" stroke-width="2.2"/>
+      <text x="284" y="73" class="sv-a" fill="#b45309" data-rec="s2-pat">“ice”</text>
+      <path class="sv-line" d="M252,108 L276,108" stroke="#b45309" stroke-width="2.2"/>
+      <text x="284" y="113" class="sv-a" fill="#b45309" data-rec="s2-formal">“apple”</text>
     </svg>
     </div>
-    <p class="cap">Gemma 2 2B · model-generated prompts · clinical review pending · the model predicts word pieces:
-      &ldquo;ant&rdquo; begins &ldquo;antacid&rdquo; · the formal-term row is one case</p>
+    <p class="cap">Gemma 2 2B · model-generated prompts · clinical review pending · sentences shortened; the
+      formal-term row is one case, from a different sentence and run · the model predicts word pieces:
+      &ldquo;ant&rdquo; begins &ldquo;antacid&rdquo;</p>
   </section>
 
   <section>
@@ -303,10 +306,10 @@
     <p>A language model works by guessing the next word. Flip the phrasing and
        watch its guesses reshuffle.</p>
     <div class="tg">
-      <p class="tg-sentence">“When the dust kicks up my
+      <p class="tg-sentence" aria-live="polite" aria-atomic="true">“When the dust kicks up my
         <span class="tg-swap" id="tg-swap">asthma flares</span>,
         so at work I keep a spare&nbsp;___”</p>
-      <button id="tg-btn" type="button" aria-label="Switch between clinical and patient wording">say it the other way</button>
+      <button id="tg-btn" type="button" aria-label="Say it the other way: switch between the medical and the everyday wording">say it the other way</button>
       <div class="bar-head" aria-hidden="true">probability of each next word</div>
       <div id="tg-bars" aria-live="polite"></div>
     </div>
@@ -331,7 +334,7 @@
       <summary>Read more about circuit traces</summary>
       <p>Inside the model, small units called &ldquo;features&rdquo; switch on as it reads. Some respond to medical ideas; others to non-medical ones. A circuit trace records which features fired and how strongly each fed the predicted next word. The trace is a diagnostic that researchers compute from the model&rsquo;s internals with a separate instrument. A difference between two traces shows what that instrument reads; it does not by itself show why the prediction changed, which takes an intervention (see <a href="../methods.html#reading-layers">Methods</a>). We also ask whether the instrument itself picks up medical terms more readily than everyday descriptions; that is <a href="../methods.html#instrument-question">an open question</a>.</p>
     </details>
-    <div class="fig" role="img" aria-label="Two parallel tracks of feature nodes reading left to right through the network, from early layers to deep layers, each with a scatter of faint weak-firing features behind a handful of strong ones. The medical term acid reflux lights up teal medical nodes and leads to the start of antacid. The everyday phrase stomach on fire lights up dark everyday nodes and leads to ice.">
+    <div class="fig" role="img" data-label="Two parallel tracks of feature nodes reading left to right through the network, from early layers to deep layers, each with a scatter of faint weak-firing features behind a handful of strong ones. The medical term acid reflux lights up teal medical nodes and leads to {s2-clin}. The everyday phrase stomach on fire lights up dark everyday nodes and leads to {s2-pat}." aria-label="Two parallel tracks of feature nodes reading left to right through the network, from early layers to deep layers, each with a scatter of faint weak-firing features behind a handful of strong ones. The medical term acid reflux lights up teal medical nodes and leads to “ant”. The everyday phrase stomach on fire lights up dark everyday nodes and leads to “ice”.">
     <svg class="fig-wide" viewBox="0 0 720 136">
       <text x="0" y="40" class="sv-q">“acid reflux”</text>
       <path d="M120,35 L188,35" stroke="#dcdad2" stroke-width="1" fill="none"/>
@@ -423,7 +426,7 @@
     <h2>A translation layer, for now</h2>
     <p>One stopgap we tested is a <b>clinical translator</b>. It sits between the patient and the model and,
       before the model ever answers, rewrites the everyday sentence into medical wording.</p>
-    <div class="fig" role="img" aria-label="Without translation: the two phrasings go straight into the language model and come out as ice at 29% and apple.">
+    <div class="fig" role="img" data-label="Without translation: the two phrasings go straight into the language model and come out as {s6-pat} and {s2-formal}." aria-label="Without translation: the two phrasings go straight into the language model and come out as “ice” 29% and “apple”.">
     <svg class="fig-wide" viewBox="0 0 800 150">
       <text x="0" y="14" class="sv-m" style="letter-spacing:.14em;text-transform:uppercase">without translation</text>
       <text x="0" y="49" class="sv-q">“My stomach’s on fire.”</text>
@@ -441,8 +444,8 @@
       <text x="0" y="12" class="sv-m" style="letter-spacing:.14em;text-transform:uppercase">without translation</text>
       <text x="0" y="44" class="sv-q">“My stomach’s on fire.”</text>
       <text x="0" y="84" class="sv-q">“My dyspepsia flared up.”</text>
-      <path class="sv-line" d="M172,38 L200,38" stroke-width="1.2"/>
-      <path class="sv-line" d="M172,78 L200,78" stroke-width="1.2"/>
+      <path class="sv-line" d="M188,38 L200,38" stroke-width="1.2"/>
+      <path class="sv-line" d="M188,78 L200,78" stroke-width="1.2"/>
       <rect x="200" y="24" width="52" height="68" fill="none" stroke="#6d6c66" stroke-width="1.2" stroke-dasharray="5 5"/>
       <text x="226" y="110" class="sv-m" text-anchor="middle">language model</text>
       <path d="M252,38 L270,38" style="stroke:#b45309;stroke-width:2.2;fill:none"/>
@@ -451,33 +454,33 @@
       <text x="276" y="83" class="sv-a" fill="#b45309" data-rec="s2-formal">“apple”</text>
     </svg>
     </div>
-    <div class="fig" role="img" aria-label="With translation: the first phrasing passes through a translation layer, emerges in medical wording, enters the language model, and comes out as the start of antacid at 31%. The second phrasing's path is dashed: it was not measured.">
+    <div class="fig" role="img" data-label="With translation: the first phrasing passes through a translation layer, emerges in medical wording, enters the language model, and comes out as {s6-trans}. The second phrasing's path is dashed: it was not measured." aria-label="With translation: the first phrasing passes through a translation layer, emerges in medical wording, enters the language model, and comes out as “ant” 31%. The second phrasing's path is dashed: it was not measured.">
     <svg class="fig-wide" viewBox="0 0 800 150">
       <text x="0" y="14" class="sv-m" style="letter-spacing:.14em;text-transform:uppercase">with translation</text>
       <text x="0" y="49" class="sv-q">“My stomach’s on fire.”</text>
       <text x="0" y="109" class="sv-q">“My dyspepsia flared up.”</text>
-      <path class="sv-line" d="M232,44 C262,44 266,70 282,72" stroke-width="1.2"/>
-      <path class="sv-line" d="M232,104 C262,104 266,78 282,76" stroke-width="1.2" stroke-dasharray="4 4"/>
-      <rect x="282" y="52" width="124" height="44" rx="22" fill="#eceae3"/>
-      <text x="344" y="79" class="sv-m" text-anchor="middle" fill="#0f766e">translation layer</text>
-      <path class="sv-line" d="M406,74 L410,74" stroke-width="1.2"/>
-      <text x="416" y="79" class="sv-q">“…<tspan style="fill:var(--teal);font-weight:700">epigastric burning</tspan>…”</text>
-      <path class="sv-line" d="M566,74 L584,74" stroke-width="1.2"/>
-      <rect x="584" y="38" width="70" height="72" fill="none" stroke="#6d6c66" stroke-width="1.2" stroke-dasharray="5 5"/>
-      <text x="619" y="130" class="sv-m" text-anchor="middle">language model</text>
-      <path d="M654,74 L674,74" style="stroke:#0f766e;stroke-width:2.2;fill:none"/>
-      <text x="680" y="79" class="sv-a" fill="#0f766e" data-rec="s6-trans">“ant” 31%</text>
+      <path class="sv-line" d="M212,44 C242,44 246,70 262,72" stroke-width="1.2"/>
+      <path class="sv-line" d="M212,104 C242,104 246,78 262,76" stroke-width="1.2" stroke-dasharray="4 4"/>
+      <rect x="262" y="52" width="124" height="44" rx="22" fill="#eceae3"/>
+      <text x="324" y="79" class="sv-m" text-anchor="middle" fill="#0f766e">translation layer</text>
+      <path class="sv-line" d="M386,74 L390,74" stroke-width="1.2"/>
+      <text x="396" y="79" class="sv-q">“…<tspan style="fill:var(--teal);font-weight:700">epigastric burning</tspan>…”</text>
+      <path class="sv-line" d="M600,74 L616,74" stroke-width="1.2"/>
+      <rect x="616" y="38" width="70" height="72" fill="none" stroke="#6d6c66" stroke-width="1.2" stroke-dasharray="5 5"/>
+      <text x="651" y="130" class="sv-m" text-anchor="middle">language model</text>
+      <path d="M686,74 L704,74" style="stroke:#0f766e;stroke-width:2.2;fill:none"/>
+      <text x="710" y="79" class="sv-a" fill="#0f766e" data-rec="s6-trans">“ant” 31%</text>
     </svg>
     <svg class="fig-narrow" viewBox="0 0 360 262">
       <text x="0" y="12" class="sv-m" style="letter-spacing:.14em;text-transform:uppercase">with translation</text>
       <text x="0" y="42" class="sv-q">“My stomach’s on fire.”</text>
       <text x="0" y="70" class="sv-q">“My dyspepsia flared up.”</text>
-      <path class="sv-line" d="M172,36 C212,36 222,60 222,92" stroke-width="1.2"/>
-      <path class="sv-line" d="M172,64 C200,64 214,74 216,92" stroke-width="1.2" stroke-dasharray="4 4"/>
+      <path class="sv-line" d="M190,36 C216,36 222,60 222,92" stroke-width="1.2"/>
+      <path class="sv-line" d="M190,64 C206,64 214,74 216,92" stroke-width="1.2" stroke-dasharray="4 4"/>
       <rect x="150" y="92" width="140" height="40" rx="20" fill="#eceae3"/>
       <text x="220" y="116" class="sv-m" text-anchor="middle" fill="#0f766e">translation layer</text>
       <path class="sv-line" d="M220,132 L220,146" stroke-width="1.2"/>
-      <text x="220" y="164" class="sv-q" text-anchor="middle">“…my <tspan style="fill:var(--teal);font-weight:700">epigastric burning</tspan> started…”</text>
+      <text x="220" y="164" class="sv-q" text-anchor="middle">“…<tspan style="fill:var(--teal);font-weight:700">epigastric burning</tspan>…”</text>
       <path class="sv-line" d="M220,172 L220,186" stroke-width="1.2"/>
       <rect x="150" y="186" width="140" height="34" fill="none" stroke="#6d6c66" stroke-width="1.2" stroke-dasharray="5 5"/>
       <text x="220" y="207" class="sv-m" text-anchor="middle">language model</text>
@@ -576,7 +579,7 @@
         </text>
       </svg>
     </div>
-    <p class="cap cyc-hint"></p>
+    <p class="cap cyc-hint">Illustration of the method · select a stage to read its steps</p>
     <div class="cycle">
       <div class="cyc-panel" id="panel-measure" role="tabpanel" aria-labelledby="tab-measure">
         <ul>
@@ -651,7 +654,7 @@
     Sources: the model&rsquo;s predictions and probabilities are recorded gemma-2-2b measurements, read from the data files when the page loads:
     scenario 48 (steps 2 and 5) and scenario 85 (step 3) in <a href="https://github.com/michaeldgreenphd/patientwords/blob/main/data/simulated_scenarios.json">the scenario measurements file on GitHub</a>;
     the formal-term row (step 2) and the translation case (step 6) in <a href="https://github.com/michaeldgreenphd/patientwords/blob/main/data/provenance.json">the provenance file on GitHub</a>.
-    The clinician, orchestration and mended-system panels (1, 7, 9) are illustrations. Limitations and definitions are on the <a href="../methods.html#limitations">methods page</a>.
+    The clinician, orchestration, cycle and mended-system panels (1, 7, 8, 9) are illustrations. Limitations and definitions are on the <a href="../methods.html#limitations">methods page</a>.
   </div>
   <div class="endnote" style="border-top:1px solid var(--ink);margin-top:42px;padding-top:14px">
     <p style="font-family:var(--mono);font-size:12px;line-height:1.8;color:var(--muted);margin:0 0 10px">SIMULATED DATA: the sentence pairs measured across this site are written by an LLM and checked automatically.</p>
@@ -677,12 +680,14 @@
   window.pwTapDemo=function(demo){
     function side(d){
       if(!d||typeof d.swap!=='string'||!Array.isArray(d.bars)||!d.bars.length)return null;
-      var bars=d.bars.filter(function(b){return b&&typeof b.label==='string'&&typeof b.p==='number'&&isFinite(b.p);})
-        .map(function(b){return [b.label,b.p,COLOUR[b.role]||COLOUR.other];});
-      return bars.length?{swap:d.swap,bars:bars}:null;
+      var ok=d.bars.every(function(b){return b&&typeof b.label==='string'&&b.label&&typeof b.p==='number'&&isFinite(b.p);});
+      if(!ok||!d.swap)return null;   /* one bad bar: the whole checked copy stays, not a chart with a bar missing */
+      return {swap:d.swap,bars:d.bars.map(function(b){return [b.label,b.p,COLOUR[b.role]||COLOUR.other];})};
     }
     var c=side(demo&&demo.clinical), p=side(demo&&demo.patient);
     if(!c||!p)return;
+    /* the committed file equals the checked copy: redrawing would replay the bars and re-announce the same text */
+    if(JSON.stringify([c,p])===JSON.stringify([states.clinical,states.patient]))return;
     states.clinical=c;states.patient=p;render();
   };
   function render(){
@@ -763,8 +768,21 @@
   function rec(key,text){
     [].forEach.call(document.querySelectorAll('[data-rec="'+key+'"]'),function(n){n.textContent=text;});
   }
+  /* a figure that prints recorded values names them in its text alternative too: data-label is the sentence with
+     a {key} for each value, and the alternative is rebuilt from the values the figure shows at that moment */
+  function relabel(){
+    [].forEach.call(document.querySelectorAll('.fig[data-label]'),function(fig){
+      var missing=false;
+      var text=fig.getAttribute('data-label').replace(/\{([a-z0-9-]+)\}/g,function(_,key){
+        var shown=fig.querySelector('[data-rec="'+key+'"]')||document.querySelector('[data-rec="'+key+'"]');
+        if(!shown){missing=true;return '';}
+        return shown.textContent;
+      });
+      if(!missing)fig.setAttribute('aria-label',text);
+    });
+  }
   function num(v){return typeof v==='number'&&isFinite(v);}
-  function tok(pair){return (Array.isArray(pair)&&typeof pair[0]==='string')?'\u201c'+pair[0].trim()+'\u201d':null;}
+  function tok(pair){return (Array.isArray(pair)&&typeof pair[0]==='string'&&pair[0].trim())?'\u201c'+pair[0].trim()+'\u201d':null;}
   function pct(v){return Math.floor(v*100+0.5+1e-9);}   /* half up on the recorded decimal: 0.285 is 29, not 28 */
   function tokPct(pair){var t=tok(pair);return (t&&num(pair[1]))?t+' '+pct(pair[1])+'%':null;}
   function bindPayload(payload){
@@ -790,8 +808,8 @@
   }
   function getJson(url){return fetch(url,{cache:'no-cache'}).then(function(r){return r.json();});}
   var payloadReady=getJson('../data/simulated_scenarios.json');
-  payloadReady.then(function(p){try{bindPayload(p);}catch(e){}}).catch(function(){/* the checked copy stays */});
-  getJson('../data/provenance.json').then(function(p){try{bindProvenance(p);}catch(e){}}).catch(function(){/* the checked copy stays */});
+  payloadReady.then(function(p){try{bindPayload(p);}catch(e){}relabel();}).catch(function(){/* the checked copy stays */});
+  getJson('../data/provenance.json').then(function(p){try{bindProvenance(p);}catch(e){}relabel();}).catch(function(){/* the checked copy stays */});
   Promise.all([
     getJson('../data/urgency_shift.json'),
     payloadReady
