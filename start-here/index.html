@@ -329,7 +329,7 @@
     <p>A circuit trace is a look inside the guess you see in step&nbsp;3. It records which internal features are active as the model reads, in the instant before it predicts a word. In the sketch below, the medical term lights up features labelled medical (teal); the everyday phrase lights up more everyday ones (dark).</p>
     <details class="explain">
       <summary>Read more about circuit traces</summary>
-      <p>Inside the model, small units called &ldquo;features&rdquo; switch on as it reads. Some respond to medical ideas; others to non-medical ones. A circuit trace records which features fired and how strongly each fed the predicted next word. The trace is a diagnostic that researchers compute from the model&rsquo;s internals with a separate instrument. A difference between two traces shows what that instrument reads; it does not by itself show why the prediction changed, which takes an intervention (see <a href="../methods.html#reading-layers">Methods</a>). We also ask whether the instrument itself picks up medical terms more readily than everyday descriptions.</p>
+      <p>Inside the model, small units called &ldquo;features&rdquo; switch on as it reads. Some respond to medical ideas; others to non-medical ones. A circuit trace records which features fired and how strongly each fed the predicted next word. The trace is a diagnostic that researchers compute from the model&rsquo;s internals with a separate instrument. A difference between two traces shows what that instrument reads; it does not by itself show why the prediction changed, which takes an intervention (see <a href="../methods.html#reading-layers">Methods</a>). We also ask whether the instrument itself picks up medical terms more readily than everyday descriptions; that is <a href="../methods.html#instrument-question">an open question</a>.</p>
     </details>
     <div class="fig" role="img" aria-label="Two parallel tracks of feature nodes reading left to right through the network, from early layers to deep layers, each with a scatter of faint weak-firing features behind a handful of strong ones. The medical term acid reflux lights up teal medical nodes and leads to the start of antacid. The everyday phrase stomach on fire lights up dark everyday nodes and leads to ice.">
     <svg class="fig-wide" viewBox="0 0 720 136">
@@ -409,8 +409,8 @@
       <text x="278" y="107" class="sv-a" fill="#b45309" data-rec="s2-pat">“ice”</text>
       <g aria-hidden="true">
         <path d="M14,124 H235 M14,124 v3 M88,124 v3 M161,124 v3 M235,124 v3" stroke="#dcdad2" stroke-width="1" fill="none"/>
-        <text x="14" y="140" style="font:10px ui-monospace,Menlo,monospace;fill:#6d6c66;letter-spacing:.04em">early layers</text>
-        <text x="235" y="140" text-anchor="end" style="font:10px ui-monospace,Menlo,monospace;fill:#6d6c66;letter-spacing:.04em">deep layers →</text>
+        <text x="14" y="140" style="font:10.5px ui-monospace,Menlo,monospace;fill:#6d6c66;letter-spacing:.04em">early layers</text>
+        <text x="235" y="140" text-anchor="end" style="font:10.5px ui-monospace,Menlo,monospace;fill:#6d6c66;letter-spacing:.04em">deep layers →</text>
       </g>
     </svg>
     </div>
@@ -486,7 +486,7 @@
     </svg>
     </div>
     <p class="cap">Gemma 2 2B · one recorded case, sentences shortened · the dashed path was not measured ·
-      across the tested downgrade cases the rewrite <span data-rec="s6-summary">restored the top prediction in 8 of 20</span></p>
+      in other reviewed cases the rewrite did not restore the prediction</p>
     <p><a href="../translation/">See the live translation traces</a>.</p>
   </section>
 
@@ -650,7 +650,7 @@
   <div class="src">
     Sources: the model&rsquo;s predictions and probabilities are recorded gemma-2-2b measurements, read from the data files when the page loads:
     scenario 48 (steps 2 and 5) and scenario 85 (step 3) in <a href="https://github.com/michaeldgreenphd/patientwords/blob/main/data/simulated_scenarios.json">the scenario measurements file on GitHub</a>;
-    the formal-term row (step 2), the translation outcome (step 6) and step 8&rsquo;s context result in <a href="https://github.com/michaeldgreenphd/patientwords/blob/main/data/provenance.json">the provenance file on GitHub</a>.
+    the formal-term row (step 2) and the translation case (step 6) in <a href="https://github.com/michaeldgreenphd/patientwords/blob/main/data/provenance.json">the provenance file on GitHub</a>.
     The clinician, orchestration and mended-system panels (1, 7, 9) are illustrations. Limitations and definitions are on the <a href="../methods.html#limitations">methods page</a>.
   </div>
   <div class="endnote" style="border-top:1px solid var(--ink);margin-top:42px;padding-top:14px">
@@ -782,12 +782,11 @@
   function bindProvenance(prov){
     var ladder=prov.ladder_digestive;
     if(ladder&&tok(ladder.baseline_top))rec('s2-formal',tok(ladder.baseline_top));
-    var cases=prov.translation_cases||{}, tr=cases.icecream_antacid, sum=cases.summary;
+    var cases=prov.translation_cases||{}, tr=cases.icecream_antacid;
     if(tr){
       if(tokPct(tr.patient))rec('s6-pat',tokPct(tr.patient));
       if(tokPct(tr.translated))rec('s6-trans',tokPct(tr.translated));
     }
-    if(sum&&num(sum.recovered)&&num(sum.n_downgrades))rec('s6-summary','restored the top prediction in '+sum.recovered+' of '+sum.n_downgrades);
   }
   function getJson(url){return fetch(url,{cache:'no-cache'}).then(function(r){return r.json();});}
   var payloadReady=getJson('../data/simulated_scenarios.json');
