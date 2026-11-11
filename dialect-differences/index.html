@@ -286,17 +286,20 @@
       </table>
     </div>
     <p class="dl-caption">Each cell is one traced sentence (n=1), drawn as a dot pair on a
-       shared 0&ndash;100% probability track: the grey dot is the term&rsquo;s standard-English
-       baseline p(target), the moved dot is that framing&rsquo;s p(target) &mdash; clinical
-       green for a gain, red for a loss &mdash; and a red underline beneath the moved dot marks
-       a framing that also flips the model&rsquo;s top prediction away from the baseline target.
+       shared 0&ndash;100% probability track. The grey dot is the term&rsquo;s standard-English
+       baseline p(target); the moved dot is that framing&rsquo;s p(target), green for a gain and
+       red for a loss. A red underline beneath the moved dot marks a framing that also flips the
+       model&rsquo;s top prediction away from the baseline target.
        Hover any cell for the exact sentence, the new top prediction, and the precise numbers.
-       Column labels are the instructions given to the generating LLM.
-       Rows whose target is a function word (&ldquo;my&rdquo;, &ldquo;the&rdquo;) are tagged and
-       their flips sit outside the headline count. Rows open ordered by the mean change across
-       framings, most fragile term first; click a column header to re-sort by that column, click
-       again to reverse. <span id="dl-noise"></span><span id="dl-rowhelp">Click any row to open
-       that term&rsquo;s standalone render.</span></p>
+       <span id="dl-noise"></span></p>
+    <details class="trace-fold">
+      <summary>Row order, function-word rows and row views</summary>
+      <p class="dl-caption">Rows open ordered by the mean change across framings, most negative
+         first; click a column header to re-sort by that column, click again to reverse.
+         Rows whose target is a function word (&ldquo;my&rdquo;, &ldquo;the&rdquo;) are tagged, and
+         their flips are counted separately from the content-word flips.
+         <span id="dl-rowhelp">Click any row to open that term&rsquo;s standalone render.</span></p>
+    </details>
   </section>
 
   <section id="dl-featured" hidden>
@@ -362,20 +365,20 @@
     <iframe class="live" src="../modes/simulated/dialects_20260708T011831Z/index_01.html" loading="lazy"
             title="Live dose-response ladder: five register rungs around the fixed clinical term"></iframe>
   </div>
-  <p class="embed-caption">Live trace: a baseline plus five rungs from formal clinical wording to casual speech, the clinical term unchanged throughout. The top word is “ antacid” at 32% (rung 1) and 11% (rung 2), then “ apple” from the mixed rung on.</p>
+  <p class="embed-caption">Live trace: a baseline plus five rungs from formal clinical wording to casual speech, the clinical term unchanged throughout.</p>
   <p class="explainer">Wording style alone moves the target less than swapping the term. In the ladder above, “dyspepsia” is held fixed while the sentence slides from clinical to casual, and the top word degrades from antacid (32%, then 11%) to apple. But across ten baselines traced the same way, the mean target probability stays flat across the rungs (27%–34%).</p>
   </details>
 
   <a class="back" href="../">← Back home</a>
 
   <div class="endnote">
-    <p>The graphs above are live gemma-2-2b traces. The dialect framings were written by an LLM to hold the clinical term fixed while changing the surrounding words. Treat them as probes: an LLM’s version of a dialect is an approximation and may miss how a community actually speaks.</p>
+    <p>The graphs above are live gemma-2-2b traces. The dialect framings were written by an LLM.</p>
     <footer>
       Built with the <a href="https://github.com/michaeldgreenphd/patientwords-engine">patientwords-engine</a> pipeline
       on <a href="https://neuronpedia.org">Neuronpedia</a> ·
       attribution graphs by <a href="https://github.com/safety-research/circuit-tracer">circuit-tracer</a> ·
-      features from <a href="https://huggingface.co/google/gemma-scope-2b-pt-transcoders">Gemma Scope</a> transcoders<br>
-      set in Iowan Old Style &amp; ui-monospace · every number on this page traces to a data file <a href="https://github.com/michaeldgreenphd/patientwords/tree/main/data">in this repository</a>
+      features from <a href="https://huggingface.co/google/gemma-scope-2b-pt-transcoders">Gemma Scope</a> transcoders ·
+      <a href="https://github.com/michaeldgreenphd/patientwords/tree/main/data">data files</a>
     </footer>
   </div>
 </main>

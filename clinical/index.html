@@ -4,17 +4,17 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Clinical Brief — PatientWords</title>
-<meta name="description" content="For clinicians: language models triage the same symptom differently depending on whether it is phrased in clinical terms or the way patients actually talk. Three numbers, one verbatim pair, and where the downgrades land.">
+<meta name="description" content="For clinicians: open language models predict a different next word for the same symptom when it is worded in clinical terms and when it is worded in everyday words. Three numbers, one verbatim pair, and the care-urgency tiers the downgrades move between.">
 <link rel="canonical" href="https://michaeldgreenphd.github.io/patientwords/clinical/">
 <meta name="theme-color" content="#faf9f5">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="PatientWords">
 <meta property="og:title" content="Clinical Brief — PatientWords">
-<meta property="og:description" content="Same symptom, two phrasings, different dispositions: how language models move care advice down the urgency ladder when the patient speaks colloquially.">
+<meta property="og:description" content="Same symptom, two wordings: how often a model's top next word falls in a lower care-urgency tier under everyday wording.">
 <meta property="og:url" content="https://michaeldgreenphd.github.io/patientwords/clinical/">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Clinical Brief — PatientWords">
-<meta name="twitter:description" content="Same symptom, two phrasings, different dispositions.">
+<meta name="twitter:description" content="Same symptom, two wordings, different next words.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23faf9f5'/%3E%3Crect x='9' y='9' width='30' height='30' fill='%23111827'/%3E%3Crect x='25' y='25' width='30' height='30' fill='%2315803d'/%3E%3C/svg%3E">
 <style>
   :root{
@@ -148,19 +148,19 @@
       <h1>The model hears the words, not the symptom.</h1>
       <p class="explainer">We measured how open-weight language models complete the same
         care-seeking sentence when the symptom is stated in clinical terms and when it is
-        stated the way patients actually talk. The models are measured subjects, not tools
-        under endorsement; nothing on this page is medical advice. Every number comes from
-        the study's published data files.</p>
+        stated in everyday words. Each wording's top next word is looked up in a word list
+        that gives its care-urgency tier. The models are measured subjects, not tools
+        under endorsement; nothing on this page is medical advice.</p>
     </div>
     <div class="lean" id="lean" aria-live="polite">
       <div>
         <div class="n" id="l-down">—</div>
-        <p class="d">times a model pointed to less urgent care for everyday words.</p>
+        <p class="d">comparisons where the everyday wording's top next word is in a lower care-urgency tier than the clinical wording's.</p>
         <div class="bar down" id="l-down-bar" aria-hidden="true"></div>
       </div>
       <div>
         <div class="n up" id="l-up">—</div>
-        <p class="d">times it pointed to more urgent care.</p>
+        <p class="d">comparisons where it is in a higher tier.</p>
         <div class="bar up" id="l-up-bar" aria-hidden="true"></div>
       </div>
       <p class="note" id="l-note"></p>
@@ -168,8 +168,8 @@
   </div>
 
   <h2>One pair, verbatim</h2>
-  <p>Both sentences describe the same complaint. The model reads them and predicts the
-    next word — the kind of professional the speaker should see.</p>
+  <p>Both sentences describe the same complaint. The model reads each one and predicts the
+    next word.</p>
   <div class="fig">
     <div class="figlab" id="vig-lab">live trace · loading…</div>
     <div class="vig" id="vig">
@@ -185,49 +185,45 @@
       </div>
     </div>
     <div class="tierline" id="vig-tier"></div>
-    <p class="cap" id="vig-cap">A live published trace; the bars are the model's top
-      next-word probabilities for each phrasing. When the payload has not loaded, this
-      panel stays pending.</p>
+    <p class="cap" id="vig-cap">Bars: the model's top next-word probabilities under each
+      wording.</p>
   </div>
 
   <h2>Where the downgrades land</h2>
-  <p>Each downgrade moves a scenario from the tier its clinical phrasing reached to the
-    tier its patient phrasing reached. Most slips are one step. The first group is the one
-    that matters clinically.</p>
+  <p>A downgrade is a comparison where the everyday wording's top next word is in a lower
+    care-urgency tier than the clinical wording's. <span id="dg-onestep"></span></p>
   <div class="fig">
     <div class="dg" id="dg" aria-describedby="dg-cap"><p class="dg-n">—</p></div>
-    <p class="cap" id="dg-cap">Each bar counts the times the everyday wording got a lower
-      level of care than the medical wording, grouped by the level the medical wording got.</p>
+    <p class="cap" id="dg-cap">Each bar counts downgrades. Groups: the tier of the clinical
+      wording's top word. Rows: the tier of the everyday wording's top word. Red: the highest tier.</p>
   </div>
 
   <h2>Why this belongs in clinical conversations</h2>
-  <p>The register these models penalize is not random. It is the register of lower
-    health literacy — hedged, narrative, metaphor-heavy, sometimes misspelled. That is
-    the same population clinical communication research already treats as at risk, the
-    reason teach-back and literacy-sensitive practice exist. As language models move
-    into triage-adjacent products, phrasing sensitivity becomes a safety property of
-    the deployment, and the people most likely to phrase colloquially are the people
-    with the least slack when advice arrives a tier low.</p>
-  <p>Two cautions in the other direction. These are next-word measurements on open
-    models, not evaluations of any deployed product; and part of the effect may be the
-    model accommodating the speaker's register rather than losing the concept — the
+  <p>Patients often describe symptoms in everyday words, and language models are moving into
+    triage-related products. If a deployed model responds to wording the way these open
+    models do, wording sensitivity is a safety property of the deployment. Whether the
+    effect is larger for patients with lower health literacy is not established here: a
+    language model wrote the everyday wordings, which are hedged, narrative and sometimes
+    misspelled, and the study measured no patient's health literacy.</p>
+  <p>Two further limits. These are next-word measurements on open models, not
+    evaluations of any deployed product. Part of the effect may be the model matching
+    the speaker's register rather than losing the concept; the
     <a href="../technical/">technical page</a> reports the evidence on both sides.</p>
 
   <div class="box warn">
     <p><b>Review status.</b> The care-urgency tier vocabulary behind every number on
       this page is <span id="vocab-inline">owner-reviewed, physician review pending</span>.
       Until a clinician signs off the tier assignments, treat tier-level counts as
-      provisional. The <a href="https://github.com/michaeldgreenphd/patientwords-engine/blob/main/docs/tier_review_checklist.md">review
-      checklist</a> is a ~30-minute task; the blinded response-coding worksheet
-      (<a href="../llm/code.html">here</a>) takes about 20 more.</p>
+      provisional. Reviewer tasks are in the
+      <a href="https://github.com/michaeldgreenphd/patientwords-engine/blob/main/docs/review_packet_clinician.md">clinician review packet</a>.</p>
   </div>
 
   <footer>
     Built with the <a href="https://github.com/michaeldgreenphd/patientwords-engine">patientwords-engine</a> pipeline
     on <a href="https://neuronpedia.org">Neuronpedia</a> ·
     attribution graphs by <a href="https://github.com/safety-research/circuit-tracer">circuit-tracer</a> ·
-    features from <a href="https://huggingface.co/google/gemma-scope-2b-pt-transcoders">Gemma Scope</a> transcoders<br>
-    set in Iowan Old Style &amp; ui-monospace · every number on this page traces to a data file <a href="https://github.com/michaeldgreenphd/patientwords/tree/main/data">in this repository</a>
+    features from <a href="https://huggingface.co/google/gemma-scope-2b-pt-transcoders">Gemma Scope</a> transcoders ·
+    <a href="https://github.com/michaeldgreenphd/patientwords/tree/main/data">data files</a>
   </footer>
 </main>
 <script>
@@ -268,7 +264,7 @@
         up=typeof h.upgrades==='number'?h.upgrades:null;
         everyModel=h.downgrades_exceed_upgrades_in_every_model===true;
       }
-      // the hero: how often everyday words pointed to less urgent care, against how often to more urgent care
+      // the hero: how often the everyday wording's top next word is in a lower tier, against how often in a higher one
       document.getElementById('l-down').textContent=down.toLocaleString();
       document.getElementById('l-up').textContent=up==null?'—':up.toLocaleString();
       var top=Math.max(down,up||0);
@@ -276,7 +272,11 @@
         document.getElementById('l-down-bar').style.width=(100*down/top).toFixed(1)+'%';
         if(up!=null)document.getElementById('l-up-bar').style.width=(100*up/top).toFixed(1)+'%';
       }
-      document.getElementById('l-note').textContent='Out of '+classified.toLocaleString()+' comparisons.'+(everyModel?' Every model leaned toward less urgent care.':'');
+      document.getElementById('l-note').textContent='Out of '+classified.toLocaleString()+' comparisons in which both top words have a tier. A comparison is one sentence pair on one model.'+(everyModel?' In every model, lower outnumbers higher.':'');
+      // how many downgrades drop exactly one tier, from the same cells the bars below draw
+      var oneStep=0, allDown=0;
+      Object.keys(downByCell).forEach(function(k){var ft=k.split('>'), n=downByCell[k]; allDown+=n; if(+ft[0]-+ft[1]===1)oneStep+=n;});
+      if(allDown)document.getElementById('dg-onestep').textContent=oneStep.toLocaleString()+' of '+allDown.toLocaleString()+' downgrades are one tier lower.';
 
       // ----- downgrades as a ranked list: one group per tier the clinical wording reached (highest first), one bar
       // per lower tier the everyday wording reached; only drops that happened are listed
@@ -356,9 +356,9 @@
       var tr=window.__pwTierRow, tn=window.__pwTierNames||{};
       if(tr&&tr.flip_class==='downgrade'){
         var line=document.getElementById('vig-tier'); line.textContent='';
-        line.appendChild(document.createTextNode('care-urgency tier: '+(tn[tr.tier_top_clinical]||tr.tier_top_clinical)+' → '));
+        line.appendChild(document.createTextNode('care-urgency tier of the top word: '+(tn[tr.tier_top_clinical]||tr.tier_top_clinical)+' → '));
         line.appendChild(el('b',null,String(tn[tr.tier_top_patient]||tr.tier_top_patient)));
-        line.appendChild(document.createTextNode(' — a downgrade on phrasing alone'));
+        line.appendChild(document.createTextNode(' (a downgrade)'));
       }
     })
     .catch(function(){ /* pending states already rendered */ });

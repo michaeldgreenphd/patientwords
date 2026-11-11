@@ -151,9 +151,14 @@ system) and the interactions (the "say it the other way" toggle, the care-urgenc
 ladder, the cycle's three tabs). A redesign of 2026-11-10 was rejected and the page was
 restored from its design of 2026-10-27 (`ac82473`). Later work makes small, justified
 edits: correct a claim in place, bind a value to its record, improve a narrow-screen
-drawing. A qualification goes in a caption or a label ("Illustration", "Research
-direction", "Gemma 2 2B · model-generated prompts · clinical review pending"), not in
-an added warning block. The engine's `../patientwords-engine/tests/test_start_here_page.py`
+drawing. A figure caption stays only where it identifies the model, explains a visual
+encoding or prevents a specific misreading; it does not repeat the paragraph, narrate an
+obvious arrow, repeat a site-wide status or add numerical detail the diagram does not
+need. Removing a visible caption does not remove the figure's text alternative
+(`aria-label`, `data-label`). A status the page's examples share is stated once in the
+endnote, not in a warning block; a model's name stays beside each measured example, and
+a conceptual diagram's prospective status is carried by its own paragraph and the
+Sources note. The engine's `../patientwords-engine/tests/test_start_here_page.py`
 and the `start-here/index.html` entries of its claims manifest check the steps, the
 diagrams, the interactions and the recorded values.
 

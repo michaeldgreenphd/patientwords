@@ -225,7 +225,6 @@
   <section id="word">
   <h2 class="view-head">Swap the word</h2>
   <p class="explainer">A single phrase swapped — “asthma flares” vs. “chest gets all tight” — as two stacked traces. Clinical wording gives inhaler at 68%; under patient wording it drops out of the model’s top five entirely — the top guess becomes “shirt” (20%).</p>
-  <span class="stat penalty">Wording gap: inhaler 0.68 under clinical wording → below the top-five readout floor under patient wording</span>
   <p class="lead-caveat" id="word-caveat" hidden></p>
   <details class="trace-fold">
     <summary>Trace details</summary>
@@ -240,7 +239,7 @@
     <iframe class="live" src="../modes/simulated/featured_sim85/index_01.html" loading="lazy"
             title="Live attribution-graph comparison: asthma flares vs. chest gets all tight"></iframe>
   </div>
-  <p class="embed-caption">Live trace: clinical wording reaches “ inhaler” at 68%; the patient phrasing top word is “ shirt” (20%), with “ inhaler” below the trace’s top-five readout floor (scenario 85). Two panels on one scale — clinical above, patient below: green clinical features stack over the swapped word and feed the continuation.</p>
+  <p class="embed-caption">Live trace on gemma-2-2b (scenario 85). Two panels on one scale: green clinical features stack over the swapped word and feed the continuation.</p>
   </section>
 
   <section id="grammar">

@@ -121,12 +121,12 @@
     text-transform:uppercase;color:var(--muted);text-align:left;padding:0 14px 8px 0;
     border-bottom:1px solid var(--ink);vertical-align:bottom;
     overflow-wrap:normal;word-break:keep-all;hyphens:none}
-  .router th:nth-child(1){width:32%}
-  .router th:nth-child(2){width:14%}
-  .router th:nth-child(3),.router th:nth-child(4){width:27%;min-width:92px}
+  .router th:nth-child(1){width:34%}
+  .router th:nth-child(2),.router th:nth-child(3){width:33%}
   .router td{padding:10px 14px 10px 0;border-bottom:1px solid var(--hairline);
     font-size:14.5px;line-height:1.5;vertical-align:top}
-  .router td.num{font-family:var(--mono);font-size:12.5px;white-space:nowrap}
+  /* cells wrap: a no-wrap cell ran past its column and widened the page on a phone */
+  .router td.num{font-family:var(--mono);font-size:12.5px}
   .router .queued{color:var(--muted);font-style:italic}
   .explainer{font-size:17px;line-height:1.66;margin:0 0 14px}
   .me-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:22px 0 12px}
@@ -373,6 +373,10 @@
       <span class="pend">figure pending: the lens readouts have not loaded</span>
     </div>
     <p class="cap" id="cap-traj"></p>
+    <details class="fold" id="traj-source" hidden>
+      <summary>Source pair</summary>
+      <p class="cap" id="traj-source-text"></p>
+    </details>
   </section>
 
   <section id="application">
@@ -381,11 +385,11 @@
     <p>The rest of this site measures the end: the final answer and its
       probability. The lens opens the middle. Three questions become
       askable.</p>
-    <h3>Did the right answer ever exist inside the model?</h3>
+    <h3>Did the clinical answer ever form inside the model?</h3>
     <p>If patient wording merely weakens the answer, it should still form at
       some depth. If the wording redirects the computation entirely, the answer
       should never appear. These are different failures with different repairs.</p>
-    <h3>When the model gets it wrong, was the answer captured or hijacked?</h3>
+    <h3>When the clinical answer is missing at the output, was it captured or hijacked?</h3>
     <p>Two failure shapes:</p>
     <dl class="defs">
       <div><dt><b>Capture</b></dt><dd>the everyday reading owns the trajectory from the start and the clinical answer never enters the window.</dd></div>
@@ -428,6 +432,10 @@
           <div class="jsout jsout-ok">antacid</div>
         </div>
       </div>
+      <details class="fold" id="jspace-note" hidden>
+        <summary>How this pair was chosen and read</summary>
+        <p class="cap" id="jspace-note-text"></p>
+      </details>
     </figure>
     <script>
     (function(){
@@ -460,10 +468,15 @@
           var out=panel.querySelector('.jsout');
           if(out&&p.output){out.textContent=p.output;out.className='jsout '+(off?'jsout-off':'jsout-ok');}
         });
+        // measured state: the label says so and the caption keeps the model and the visual key. The model is fixed
+        // text (data/jspace.json has no model field; the engine's claims manifest checks it against the file's
+        // note). The exporter's note (source pair, selection rule, token filter, method credit) goes in the fold.
         var cap=fig.querySelector('.jspace-cap');
         if(cap){cap.textContent='';var b=document.createElement('b');
           b.textContent='Empirical J-lens residual stream readout at middle layers.';cap.appendChild(b);
-          if(d.note)cap.appendChild(document.createTextNode(' '+d.note));}
+          cap.appendChild(document.createTextNode(' gemma-2-2b · one measured pair. Pills: the top words the lens reads at the middle layers. Box: the top word at the final layer, the output. Green: the output is the pair’s clinical target. Red: it is not.'));}
+        var noteBox=document.getElementById('jspace-note');
+        if(noteBox&&d.note){document.getElementById('jspace-note-text').textContent=d.note;noteBox.hidden=false;}
       }).catch(function(){});
     })();
     </script>
@@ -494,7 +507,7 @@
     </div>
     <div id="tr-readout" aria-live="polite"></div>
     <p class="stat-line" id="dd-tr-census"></p>
-    <p class="cap" id="cap-transport">exploratory · hosted Jacobian lens, top-8 readout at every position × layer · a shaded cell = the pair’s clinical answer is in the top-8 there (hover for its layer and rank); darker = higher rank · a blank cell is measured, not missing: the answer is simply not in the top-8 window there · the table below reads out the model’s actual top words per layer at the answer position (open vocabulary, not just the target) · coverage limited to runs saved with raw responses</p>
+    <p class="cap" id="cap-transport">hosted Jacobian lens · top-8 readout at every token position and layer</p>
 
     <h3>The census, set by set</h3>
     <p></p>
@@ -504,9 +517,8 @@
       <div><dt class="cls cls-absent">never formed</dt><dd>the answer is not readable at any layer.</dd></div>
     </dl>
     <div id="ad-blocks"><span class="pend">figure pending: the depth census has not loaded</span></div>
-    <p class="cap">hover a square for its clinical target · the generated sets live in the
-      <a href="../simulated-scenarios/">scenario gallery</a>; the reviewed downgrade set is
-      separate · per-pair depth classes:
+    <p class="cap">one square per pair · hover a square for its clinical target · the generated sets are in the
+      <a href="../simulated-scenarios/">scenario gallery</a> · per-pair depth classes:
       <a href="https://github.com/michaeldgreenphd/patientwords/blob/main/data/jlens_depth.json" rel="noopener">jlens_depth.json</a></p>
     <details class="fold">
       <summary>Every pair: depth class and care-urgency tiers regained by translation, where measured (owner-reviewed v1 tiers, domain review pending)</summary>
@@ -522,19 +534,25 @@
     </details>
 
     <h3>Read the failure, pick the fix</h3>
-    <p>Translation recovery is already measurable by failure depth. The steering
-      column fills when the per-pair steering verdicts are joined to the lens
-      classes.</p>
+    <p>Two repairs, split by the lens depth class of the everyday wording. Translation is
+      scored by mean recovery: the expected care-urgency tier of the translated wording
+      minus that of the everyday wording. Steering is scored by rank-1 restoration: the
+      pairs where swapping the clinical answer in for the winning word at one layer puts
+      the clinical answer at rank 1. The two columns are measured on different sets
+      of pairs, so each cell gives its own count.</p>
     <table class="router" aria-describedby="cap-router">
       <thead><tr>
-        <th scope="col">Failure depth</th>
-        <th scope="col" class="num">Pairs</th>
-        <th scope="col" class="num">Translation regains</th>
-        <th scope="col" class="num">Steering regains</th>
+        <th scope="col">Lens depth class</th>
+        <th scope="col" class="num">Translation: mean recovery</th>
+        <th scope="col" class="num">Steering swap: rank-1 restoration</th>
       </tr></thead>
       <tbody id="router-body"></tbody>
     </table>
-    <p class="cap" id="cap-router">care-urgency tiers regained per pair (Michael D. Green-reviewed, clinician review pending) · translation column from the joined translated panels · steering column queued: per-pair steering verdicts against the same lens classes · the depth classes are observational lens readouts; causal verification is interventional — steering (feature ablation) here, and the activation-patching lane on the methods page</p>
+    <p class="cap" id="cap-router">exploratory · care-urgency tiers owner-reviewed v1, clinician review pending · steering column: pilot</p>
+    <details class="fold" id="router-notes">
+      <summary>Selection rules and registration</summary>
+      <p class="cap" id="router-rules">Translation: recovery is probability-weighted and joined per pair, on the lens-measured sets whose rows carry a translated wording. Steering: a pair counts as restored when the clinical answer reads at rank 1 after the swap at either of the two fixed layers. Amendment 4 (adopted July 17) registers the confirmatory version of the steering comparison. The depth classes are observational lens readouts; the swap is an intervention, and the activation-patching lane is on the methods page.</p>
+    </details>
 
     <details class="fold">
       <summary>Does tuning move the depth?</summary>
@@ -554,7 +572,7 @@
         <span class="pend">figure pending: the logit-lens arm has not loaded</span>
       </div>
       <p class="stat-line" id="dd-ll-stat"></p>
-      <p class="cap" id="cap-loglens">exploratory · gemma-2-2b · pairs whose answer never forms counted at right · coverage limited to pairs measured under both lenses</p>
+      <p class="cap" id="cap-loglens">gemma-2-2b · one dot per pair: the layer where the answer forms under patient wording · never: pairs whose answer never forms</p>
     </details>
 
 
@@ -563,7 +581,7 @@
   <section id="models">
     <p class="part">Part 4 · Across models</p>
     <h2><span id="me-count-h">Ten</span> models, one measurement.</h2>
-    <p class="explainer">The  models here are
+    <p class="explainer">The models here are
       the measured subjects; the stimuli they read are written by Claude models and
       audited on the <a href="../methods.html#generation-eval">methods page</a>.</p>
 
@@ -572,7 +590,7 @@
       clinical answer loses when the sentence is worded the way an everyday
       patient would say it, as opposed to standard medical terms. The thick band is
       each model's own 95% interval; the hairline is the stricter simultaneous
-      interval, sized for reading all ten at once.
+      interval, sized for reading all the models at once.
       <span id="forest-sim"></span></p>
     <div id="forest"></div>
     <p class="me-caption" id="forest-cap"></p>
@@ -580,9 +598,7 @@
     <details class="fold">
       <summary>How confidence accumulated: each model's estimate, batch by batch</summary>
       <p style="font-size:15px;line-height:1.6">
-        Each panel follows one model as it reads more phrase pairs. The red line is the
-        average wording gap; the band around it starts wide and narrows as
-        hundreds of phrases accumulate.
+        Each panel follows one model as it reads more phrase pairs.
       </p>
       <div class="conv-grid" id="conv-grid" aria-describedby="conv-caption"></div>
       <details class="fold" id="conv-more" hidden>
@@ -590,10 +606,10 @@
         <div class="conv-grid" id="conv-grid-more" aria-describedby="conv-caption"></div>
       </details>
       <div class="conv-xlab" aria-hidden="true">phrases tested →</div>
-      <p class="conv-cap" id="conv-caption">Mean wording gap per model as
-        measurement accumulates. Shaded band: bootstrap 95% confidence
+      <p class="conv-cap" id="conv-caption">Red line: mean wording gap as phrases
+        accumulate. Shaded band: bootstrap 95% confidence
         interval (Tier B exploration split only). Grey hairline:
-        zero wording gap. Drawn at load time from <a href="https://github.com/michaeldgreenphd/patientwords/blob/main/data/convergence.json">the convergence data file on GitHub</a>.</p>
+        zero wording gap. Data: <a href="https://github.com/michaeldgreenphd/patientwords/blob/main/data/convergence.json">the convergence data file on GitHub</a>.</p>
       <details class="conv-table"><summary>Data table (every point)</summary>
         <div id="conv-table-wrap"></div></details>
     </details>
@@ -612,7 +628,7 @@
       often never forms under casual phrasing (absence, not suppression), and the tier shifts survive when
       the question explicitly asks what to do.</p>
 
-    <h3>When the answer changes, it goes down the care ladder</h3>
+    <h3>When the top prediction changes, its care-urgency tier drops more often than it rises</h3>
     <p>Among phrases where the top prediction changes under patient wording,
       <span id="asym-line">downgrades outnumber upgrades in most models</span>. Asterisks mark asymmetry that
       survives multiple-comparison correction within the model's registration
@@ -664,8 +680,8 @@
       circuit measurements, so it appears in none of the figures above.</p>
 
     <h3>The integrity panel</h3>
-    <p>The checks that keep this study honest, gathered in one place. Each value is
-      read from the corresponding published data file when this page loads.</p>
+    <p>The study's integrity checks. Each value is read from its published data file
+      when this page loads; the backend cross-check has no published value yet.</p>
     <p class="scroll-hint" aria-hidden="true">table scrolls sideways &rarr;</p>
     <div class="rigor-scroll">
       <table class="rigor" id="rigor">
@@ -680,7 +696,6 @@
         </tbody>
       </table>
     </div>
-    <p class="me-caption">Assembled from the same data files the figures above read; nothing on this panel is hand-entered.</p>
 
 
   </section>
@@ -990,7 +1005,7 @@
       Built with the <a href="https://github.com/michaeldgreenphd/patientwords-engine">patientwords-engine</a> pipeline
       on <a href="https://neuronpedia.org">Neuronpedia</a> ·
       attribution graphs by <a href="https://github.com/safety-research/circuit-tracer">circuit-tracer</a> ·
-      every number on this page traces to a data file <a href="https://github.com/michaeldgreenphd/patientwords/tree/main/data">in this repository</a>
+      <a href="https://github.com/michaeldgreenphd/patientwords/tree/main/data">data files</a>
     </footer>
     <a class="back" href="../">Back home →</a>
   </div>
@@ -1208,13 +1223,20 @@
           endWord(patEnd,s.top_patient,'patient');
         })();
         mount('fig-traj',svg);
+        // caption: the model, the measured state and the visual key (the two lines carry their own labels). The
+        // pair's batch, index and lens class go in the fold under it, with the data file its layer ranks come
+        // from: the worked examples in jlens_depth.json when the rule above picked one, else jlens_insights.json.
         var capT=document.getElementById('cap-traj');
-        capT.textContent=
-          'one real measured pair (pair '+ex.index+' of the '+pwBatch(ex.dataset)+', class: '+ex['class']+') · rank of the clinical answer in the top-8 window, by layer · green: clinical wording · dark: patient wording · a break or stop in a line means the answer left the window there · the arrowed word at each line’s end is that wording’s measured top next word (hover for its probability) · observational: the lens reads the residual stream, it does not intervene · source: ';
+        capT.textContent=(d.model?d.model+' · ':'')+
+          'one measured pair · rank of the clinical answer in the lens’s top-8 readout, by layer · a break or stop in a line: the answer left the top 8 there · the arrowed word at each line’s end: that wording’s measured top next word (hover for its probability)';
+        var srcT=document.getElementById('traj-source-text');
+        var srcFile=(flipEx&&ex===flipEx)?'jlens_depth.json':'jlens_insights.json';
+        srcT.textContent='pair '+ex.index+' of the '+pwBatch(ex.dataset)+' · lens class: '+ex['class']+' · layer ranks: ';
         var capA=document.createElement('a');
-        capA.href='https://github.com/michaeldgreenphd/patientwords/blob/main/data/jlens_insights.json';
-        capA.rel='noopener';capA.textContent='jlens_insights.json';
-        capT.appendChild(capA);
+        capA.href='https://github.com/michaeldgreenphd/patientwords/blob/main/data/'+srcFile;
+        capA.rel='noopener';capA.textContent=srcFile;
+        srcT.appendChild(capA);
+        document.getElementById('traj-source').hidden=false;
         // verbatim sentences above the chart, pivot words lit, with a trace link —
         // populated once the exemplar carries prompts (graceful no-op until then)
         (function(){
@@ -1337,7 +1359,9 @@
           ' and is pushed out near the end'+(lockMed!=null?(', the winner locking in around layer '+lockMed):'')+'.'+compare+winNote;
       })();
 
-      /* Fig 4: router table */
+      /* Fig 4: router table. Each repair keeps its own metric and its own count: translation's mean recovery over
+         the pairs with a translated wording (translation.by_class), steering's rank-1 restoration over the swap
+         pilot's pairs (steering.by_class). They are different sets of pairs, so no column of counts is shared. */
       (function(){
         fetch('../data/jlens_depth.json',{cache:'no-cache'})
           .then(function(r){return r.ok?r.json():null;})
@@ -1353,27 +1377,27 @@
               var tr=document.createElement('tr');
               function td(s,cls){var c=document.createElement('td');if(cls)c.className=cls;c.textContent=s;tr.appendChild(c);}
               td(label[k]||k);
-              td(String(bc[k].n),'num');
-              if(bc[k].n<3){small.push(label[k]||k);td('held back until n reaches 3','num queued');}
-              else{td((bc[k].mean_recovery>0?'+':'')+bc[k].mean_recovery.toFixed(2)+' tiers','num');}
+              if(bc[k].n<3){small.push(label[k]||k);td('held back · n = '+bc[k].n,'num queued');}
+              else{td((bc[k].mean_recovery>0?'+':'')+bc[k].mean_recovery.toFixed(2)+' tiers · n = '+bc[k].n,'num');}
               if(st&&st[k]&&st[k].n>0){
-                td('rank 1 back in '+st[k].restored+' of '+st[k].n+' (pilot)','num');
+                td(st[k].restored+' of '+st[k].n+' pairs','num');
               }else if(st&&k==='retained'){td('not swap-eligible','num queued');}
               else{td('queued','num queued');}
               body.appendChild(tr);
             });
+            // caption: the model, read from the file. The rules that hold a mean back, exclude pairs or leave
+            // pairs out of the table go in the fold under it, each counted from the file.
+            var cap=document.getElementById('cap-router');
+            if(cap&&j.model)cap.textContent=j.model+' · '+cap.textContent;
+            var rules=document.getElementById('router-rules'),extra=[];
+            if(small.length)extra.push('A class mean is held back below n = 3: '+small.join(', ')+'.');
             if(st){
-              var cap0=document.getElementById('cap-router');
-              if(cap0)cap0.textContent=cap0.textContent.replace(
-                'steering column queued: per-pair steering verdicts against the same lens classes',
-                'steering column: exploratory swap pilot, target back at rank 1 at either frozen layer; '+
-                ((st.absent&&st.absent.unresolvable)||0)+' capture pairs excluded as multi-wordpiece; '+
-                'Amendment 4 (adopted July 17) registers the confirmatory version');
+              var unres=order.filter(function(k){return st[k]&&st[k].unresolvable>0;})
+                .map(function(k){return st[k].unresolvable+' '+(label[k]||k);});
+              if(unres.length)extra.push('Excluded before the steering comparison, because the clinical answer is more than one wordpiece: '+unres.join(', ')+'.');
+              if(st.unknown&&st.unknown.n>0)extra.push(st.unknown.n+' pilot pairs carry no depth class and are not in the table.');
             }
-            if(small.length){
-              var cap=document.getElementById('cap-router');
-              if(cap)cap.textContent+=' · means held back under n = 3: '+small.join(', ');
-            }
+            if(rules&&extra.length)rules.textContent+=' '+extra.join(' ');
           }).catch(function(){});
       })();
 
@@ -1403,9 +1427,9 @@
         });
         mount('fig-it',svg);
         var nDiff=it.pairs.filter(function(p){return p.base!==p.it;}).length;
+        // visual key only: the counts and the re-measurement date are in the paragraph above the figure
         document.getElementById('cap-it').textContent=
-          'patient-side formation layer for the '+it.n_paired+' phrases read under both model ids · '
-          +nDiff+' of '+it.n_paired+' pairs differ · both ids re-measured under a single host state on 2026-08-21';
+          'one hairline per phrase, joining the layer where the answer forms under the base id to the layer under the instruction-tuned id · patient wording';
         var bm=it.base_median&&it.base_median.median,im=it.it_median&&it.it_median.median;
         document.getElementById('dd-it-text').textContent=
           'The '+it.n_paired+' phrases read under both the gemma-2-2b and gemma-2-2b-it ids returned identical readouts until 2026-07-31, when Neuronpedia’s two hosts separated. Re-measured under a single host state on 2026-08-21, the ids differ on '+nDiff+' of '+it.n_paired+' pairs'
@@ -1466,13 +1490,12 @@
         var host=document.getElementById('tr-readout'); if(!host)return;
         host.textContent='';
         var leg=document.createElement('div'); leg.className='ro-legend';
-        leg.textContent='Two traces per answer row. The shaded cells track the clinical answer “'+
-          (ex.target||'target')+'”: shaded where it is in the model’s top-8 at that position and '+
-          'layer, darker = higher rank (hover any cell for the exact rank); the green “forms” tick '+
-          'marks where it first enters the top-8. Separately, “→ top” is the model’s actual top '+
-          'prediction at the answer, and the small grey “was …” below the row names the top word '+
-          'earlier in depth, before it settled. When the clinical answer never enters the top-8 '+
-          'here, the row says so.';
+        // the figure's visual key, once (the caption under the count line keeps only the method)
+        leg.textContent='Shaded cell: the clinical answer “'+(ex.target||'target')+'” is in the lens’s top 8 '+
+          'at that token position and layer; darker = higher rank (hover a cell for the rank). '+
+          'Blank cell: measured, and the answer is not in the top 8 there. “forms”: where it first '+
+          'enters the top 8 on the answer row. “→ top”: the model’s top prediction at the answer '+
+          'position. “was …”: the top word at an earlier layer, before it settled.';
         if(ex.render){
           leg.appendChild(document.createTextNode(' '));
           var ta=document.createElement('a');
@@ -1773,7 +1796,7 @@
     document.getElementById('forest').appendChild(svg);
     document.getElementById('forest-cap').textContent=
       '−5 pp ≈ the clinical answer’s probability dropping from, say, 20% to 15% · '+
-      'phrase-deduped bootstrap, seed '+d.seed+' × '+d.boot+' · hairline: simultaneous (Bonferroni) interval · source: the per-model statistics file';
+      'phrase-deduped bootstrap, seed '+d.seed+' × '+d.boot+' · hairline: simultaneous (Bonferroni) interval';
 
     var maxC=0; ids.forEach(function(id){var s=per[id].sign_test;maxC=Math.max(maxC,s.downgrades,s.upgrades);});
     // asymmetry comparative computed from the loaded stats (owner D2, 2026-07-30):
@@ -1952,7 +1975,8 @@
       }
       groups.forEach(function(g){
         var wrap=h('div','ucensus-group');
-        wrap.appendChild(h('p','block-label',g.label));
+        // a set named by its batch stem reads as its kind and date; the stem stays in each square's hover text
+        wrap.appendChild(h('p','block-label',pwBatch(g.label)||g.label));
         CLASSES.forEach(function(cls){
           var members=g.pairs.filter(function(u){return u['class']===cls[0];});
           var rowEl=h('div','ucensus-row');
@@ -2231,13 +2255,13 @@
           :overlap?'It does not: the two intervals overlap.'
           :'The intervals separate \u2014 read the exact values below.';
         var tc=document.getElementById('twin-cap');
-        if(tc)tc.textContent='open marker = medical fine-tune \u00b7 base '+pp(base.penalty.mean)+' pp vs fine-tune '+pp(med.penalty.mean)+' pp \u00b7 same statistics file as the figure above';
+        if(tc)tc.textContent='open marker = medical fine-tune \u00b7 line: 95% interval \u00b7 base '+pp(base.penalty.mean)+' pp vs fine-tune '+pp(med.penalty.mean)+' pp';
       }
       var m3=per['meditron3-8b'],ap=per['apertus-8b-meditronfo'];
       var to=document.getElementById('twin-others');
       if(to&&m3&&ap){
         to.textContent='The two 8B medical fine-tunes tell the same story from the other side: '
-          +'meditron3-8b downgrades '+m3.sign_test.downgrades+' care-urgency tiers against '
+          +'meditron3-8b has '+m3.sign_test.downgrades+' downgrades against '
           +m3.sign_test.upgrades+' upgrades, apertus-8b-meditronfo '+ap.sign_test.downgrades
           +' against '+ap.sign_test.upgrades+'. Training on medical text changes what a model '
           +'knows; it does not change what it does when the patient speaks casually.';

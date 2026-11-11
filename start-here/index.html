@@ -242,7 +242,6 @@
       <text x="290" y="63" class="sv-a" fill="#0f766e">antacid</text>
     </svg>
     </div>
-    <p class="cap">Illustration · interpretation absorbs the wording</p>
   </section>
 
   <section>
@@ -295,9 +294,7 @@
       <text x="284" y="113" class="sv-a" fill="#b45309" data-rec="s2-formal">“apple”</text>
     </svg>
     </div>
-    <p class="cap">Gemma 2 2B · model-generated prompts · clinical review pending · sentences shortened; the
-      formal-term row is one case, from a different sentence and run · the model predicts word pieces:
-      &ldquo;ant&rdquo; begins &ldquo;antacid&rdquo;</p>
+    <p class="cap">Gemma 2 2B · sentences shortened; the third example comes from a separate run</p>
   </section>
 
   <section>
@@ -313,9 +310,8 @@
       <div class="bar-head" aria-hidden="true">probability of each next word</div>
       <div id="tg-bars" aria-live="polite"></div>
     </div>
-    <p class="cap">Gemma 2 2B · model-generated prompts · clinical review pending · a hand-picked pair with one of the
-      largest differences · &ldquo;inhaler&rdquo; is recorded as its first piece, &ldquo;inhal&rdquo; ·
-      <a href="../modes/simulated/pairs_20260707T171223Z/index_49.html">open scenario 85’s full trace</a> · <a href="../simulated-scenarios/">browse all scenarios</a></p>
+    <p class="cap">Gemma 2 2B · one of the largest differences · &ldquo;inhal&rdquo; is the first piece of &ldquo;inhaler&rdquo; ·
+      <a href="../modes/simulated/pairs_20260707T171223Z/index_49.html">View trace</a></p>
   </section>
 
   <section>
@@ -323,7 +319,7 @@
     <h2>Two numbers per sentence pair</h2>
     <p><b>How far the target word&rsquo;s probability falls</b> when the wording turns everyday, and <b>whether the most likely next word changes</b>. When it changes to a word lower on our draft care-urgency ladder (like &ldquo;inhaler&rdquo; becoming &ldquo;shirt&rdquo; in step&nbsp;3), we count an urgency downgrade.</p>
     <div class="ladder-fig" id="care-ladder"><span class="ladder-pend">figure pending: the urgency measurements have not loaded</span></div>
-    <p class="cap" id="ladder-cap" hidden></p>
+    <p class="cap" id="ladder-cap" hidden>Draft urgency scale</p>
   </section>
 
   <section>
@@ -417,8 +413,7 @@
       </g>
     </svg>
     </div>
-    <p class="cap">Illustration of a trace&rsquo;s layout · larger node = stronger influence · faint = barely fired · the recorded traces of this pair <span data-rec="s5-counts">hold 732 and 787 features and share 465</span>; the sketch draws a few</p>
-    <p>Most figures on PatientWords are circuit traces like this sketch.</p>
+    <p class="cap">Schematic · larger dots indicate stronger influence</p>
   </section>
 
   <section>
@@ -488,8 +483,7 @@
       <text x="220" y="254" class="sv-a" fill="#0f766e" text-anchor="middle" data-rec="s6-trans">“ant” 31%</text>
     </svg>
     </div>
-    <p class="cap">Gemma 2 2B · one recorded case, sentences shortened · the dashed path was not measured ·
-      in other reviewed cases the rewrite did not restore the prediction</p>
+    <p class="cap">Gemma 2 2B · one measured rewrite · sentences shortened · dashed path not measured</p>
     <p><a href="../translation/">See the live translation traces</a>.</p>
   </section>
 
@@ -531,7 +525,6 @@
       <text x="38" y="273" class="sv-a" style="font-size:11.5px" fill="#b45309">See human doctor.</text>
     </svg>
     </div>
-    <p class="cap">Research direction · illustration</p>
   </section>
 
   <section>
@@ -579,7 +572,7 @@
         </text>
       </svg>
     </div>
-    <p class="cap cyc-hint">Illustration of the method · select a stage to read its steps</p>
+    <p class="cap cyc-hint">Select a stage</p>
     <div class="cycle">
       <div class="cyc-panel" id="panel-measure" role="tabpanel" aria-labelledby="tab-measure">
         <ul>
@@ -647,7 +640,6 @@
       <text x="38" y="196" class="sv-a" style="font-size:11.5px" fill="#0f766e">S: “Patient reports acute dyspepsia…”</text>
     </svg>
     </div>
-    <p class="cap">Research direction · illustration</p>
   </section>
 
   <div class="src">
@@ -657,11 +649,11 @@
     The clinician, orchestration, cycle and mended-system panels (1, 7, 8, 9) are illustrations. Limitations and definitions are on the <a href="../methods.html#limitations">methods page</a>.
   </div>
   <div class="endnote" style="border-top:1px solid var(--ink);margin-top:42px;padding-top:14px">
-    <p style="font-family:var(--mono);font-size:12px;line-height:1.8;color:var(--muted);margin:0 0 10px">SIMULATED DATA: the sentence pairs measured across this site are written by an LLM and checked automatically.</p>
+    <p style="font-family:var(--mono);font-size:12px;line-height:1.8;color:var(--muted);margin:0 0 10px">Examples on this page use model-generated prompts; their clinical equivalence has not yet been reviewed.</p>
     <footer style="font-family:var(--mono);font-size:11px;line-height:1.9;color:var(--muted)">
       Built with the <a href="https://github.com/michaeldgreenphd/patientwords-engine">patientwords-engine</a> pipeline
       on <a href="https://neuronpedia.org">Neuronpedia</a> ·
-      attribution graphs by <a href="https://github.com/safety-research/circuit-tracer">circuit-tracer</a> ·
+      attribution graphs by <a href="https://github.com/safety-research/circuit-tracer">circuit-tracer</a>
     </footer>
   </div>
 </main>
@@ -751,7 +743,7 @@
 (function(){
   // Care ladder: measured redirects drawn on the urgency tiers. Two pair
   // references; each names the model it was measured on. Words,
-  // probabilities, tiers, and counts all come from the fetched data.
+  // probabilities and tiers all come from the fetched data.
   var NS='http://www.w3.org/2000/svg';
   var PAIRS=[
     {batch:'pairs_20260707T215921Z',idx:54,model:'gemma-2-2b',x:330},
@@ -791,11 +783,6 @@
     if(!sc)return;
     if(tok(sc.top_clinical))rec('s2-clin',tok(sc.top_clinical));
     if(tok(sc.top_patient))rec('s2-pat',tok(sc.top_patient));
-    var cd=sc.circuit_diff;
-    if(cd&&num(cd.shared_features)&&num(cd.unique_to_a)&&num(cd.unique_to_b)){
-      rec('s5-counts','hold '+(cd.shared_features+cd.unique_to_a)+' and '+(cd.shared_features+cd.unique_to_b)+
-        ' features and share '+cd.shared_features);
-    }
   }
   function bindProvenance(prov){
     var ladder=prov.ladder_digestive;
@@ -903,13 +890,8 @@
     });
     var fig=document.getElementById('care-ladder');
     fig.textContent='';fig.appendChild(sent);fig.appendChild(svg);
-    var cap=document.getElementById('ladder-cap');
-    var pm=((u.summary||{}).per_model_deduped||{})['gemma-2-2b'];
-    var counts=pm?pm.downgrades+' of '+pm.n_phrases+' measured phrases slide down the ladder on gemma-2-2b, '+pm.upgrades+' move up (each phrase counted once) · ':'';
-    var distinct={};resolved.forEach(function(i){distinct[i.ref.model]=1;});
-    var modelNote=Object.keys(distinct).length>1?'each example names its model':'measured on '+Object.keys(distinct)[0];
-    cap.textContent='the same complaint, said two ways, lands on different rungs · '+modelNote+' · model-generated prompts · '+counts+'ladder: '+(u.vocabulary_status||'draft pending domain review');
-    cap.hidden=false;
+    /* the caption is fixed text in the markup; it is shown with the figure, not with the pending notice */
+    document.getElementById('ladder-cap').hidden=false;
   }).catch(function(){/* pending state stays */});
 })();
 </script>
