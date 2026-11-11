@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Results catalogue — PatientWords</title>
-<meta name="description" content="Every measured run in the PatientWords engine, with its run status, evidence class, clinical-review status, restrictions and whether an analysis includes it. A listing, not a sample and not a claim.">
+<meta name="description" content="Every measured run in the PatientWords engine: the experiment, the model, how many pairs moved in each direction, run status, evidence class, clinical-review status and whether an analysis includes it.">
 <link rel="canonical" href="https://michaeldgreenphd.github.io/patientwords/results/">
 <meta name="theme-color" content="#faf9f5">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23faf9f5'/%3E%3Crect x='9' y='9' width='30' height='30' fill='%23111827'/%3E%3Crect x='25' y='25' width='30' height='30' fill='%2315803d'/%3E%3C/svg%3E">
@@ -343,16 +343,16 @@
 </header>
 <main id="main">
   <h1>Results catalogue</h1>
-  <p class="subtitle">Every run the engine has measured, with its status and what it may be used for. A listing, not a sample and not a claim.</p>
+  <p class="subtitle">Browse every measured run: the experiment, the model, how many pairs moved lower, stayed equal or moved higher, and whether an analysis includes the run. Open a run for its rows, sources and files.</p>
   <p class="shared" id="cat-review" hidden></p>
   <p class="traced" id="cat-inv"><span class="tp">Inventory: loading</span></p>
   <div class="lead-links">
     <details class="meth" id="about">
       <summary>About this catalogue</summary>
       <div class="about">
-        <p>This is the full list of measured runs. It is not a sample and it is not a claim. A run is listed whether its effect is negative, zero or positive, whether it finished or stopped part-way, and whether or not any analysis includes it.</p>
-        <p><b>What is measured.</b> Target-token probability: the next-token probability of the first encoded target token, on a scale from 0 to 1. It is one token after one sentence-completion prompt. It does not measure whether an answer is correct, how risky a reply is or what a patient understands, and it is not a score of a whole answer. Each row is one measurement; the files carry no interval and no effect estimate. Nothing here is medical advice.</p>
-        <p><b>The stimuli.</b> The phrasings are test stimuli written by a model or by hand. They are not statements from patients. The two wordings of a pair are meant to describe one clinical situation; whether they do is what clinical review decides. Clinical review status of the stimuli: <span id="about-review">not loaded</span>.</p>
+        <p>The catalogue lists every measured run whatever its result: negative, zero or positive, finished or stopped part-way, included in an analysis or not. Being listed is not a claim.</p>
+        <p><b>What is measured.</b> Target-token probability: the next-token probability of the first encoded target token, from 0 to 1, after one sentence-completion prompt. It is a measurement of one token, not a score of a whole answer, and nothing here is medical advice. Each row is one measurement; the files carry no interval and no effect estimate.</p>
+        <p><b>The stimuli.</b> The phrasings are test stimuli written by a model or by hand, not statements from patients. The two wordings of a pair are meant to describe one clinical situation; clinical review decides whether they do. Review status: <span id="about-review">not loaded</span>. A row in the table states its review status only where it differs from the most common one.</p>
         <p><b>Evidence class.</b> It differs between runs and is stated on each row: <span id="about-evidence">not loaded</span>. Whether an analysis includes a run is a separate fact, decided by a named rule in <a href="#methods-source">Methods &amp; source</a>.</p>
       </div>
     </details>
@@ -750,12 +750,10 @@
       // Shared status, in one place. A row repeats none of it; it states its own review status only where
       // that differs from the status most runs record.
       flag.textContent='';
-      flag.appendChild(el('b','','Shared by the runs listed here. '));
       var said='Simulated stimuli: test phrasings written by a model or by hand, not statements from patients. '+
         'Clinical review of the stimuli is pending for '+
         (pending===RUNS.length?'all '+fmtInt(RUNS.length)+' runs':fmtInt(pending)+' of '+fmtInt(RUNS.length)+' runs')+'.';
       order.forEach(function(k){if(!reviewPending(k))said+=' '+human(k)+': '+plural(counts[k],'run','runs')+'.';});
-      if(order.length>1)said+=' A row states its review status only where it is not "'+human(SHARED_REVIEW)+'".';
       flag.appendChild(document.createTextNode(said));
       flag.title=order.map(function(k){return 'clinical_review: '+k+' ('+plural(counts[k],'run','runs')+')';}).join('; ');
       flag.hidden=false;
@@ -779,10 +777,10 @@
       inv.appendChild(el('b','',value));
       inv.appendChild(el('span','tp',' '+label));
     }
-    inv.appendChild(el('span','tp','Inventory, not estimates: '));
+    inv.appendChild(el('span','tp','Inventory: '));
     seg(fmtInt(t.runs),'runs');
     seg(fmtInt(t.rows_public),'public rows');
-    seg(fmtInt(t.rows_withheld_sealed),'sealed rows, counted and never shown');
+    seg(fmtInt(t.rows_withheld_sealed),'sealed rows (counted, never shown)');
     var restricted=RUNS.filter(function(r){return r.visibility==='restricted';}).length;
     if(restricted)seg(fmtInt(restricted),'runs restricted');
     var day=str(prov.generated_utc).slice(0,10);
@@ -1308,7 +1306,6 @@
     lab.appendChild(badge('clinical review: '+human(r.clinical_review),'','clinical_review: '+(str(r.clinical_review)||'not recorded')));
     var smp=badge('sampling: '+human(r.sampling),'',schemaTitle('sampling',str(r.sampling)));
     lab.appendChild(smp);
-    lab.appendChild(badge('a listing, not a claim','','being listed in the catalogue places this run in no analysis and makes no claim'));
     box.appendChild(lab);
 
     var c=obj(r.counts),dl=el('dl','kv');
@@ -1390,10 +1387,9 @@
       }
       dlp.style.marginTop='12px';
       links.appendChild(dlp);
-      links.appendChild(el('p','det-foot','Values are target-token probabilities on a scale from 0 to 1 (About this catalogue). '+
+      links.appendChild(el('p','det-foot','Target-token probabilities, from 0 to 1. '+
         'A difference is the everyday wording’s value minus the medical wording’s, in probability: 0.01 is one percentage point. '+
-        'Each row is one measurement; the files carry no interval. Values are displayed to four decimal places; the files carry the stored values. '+
-        'Prompts are shown verbatim, including intentional misspellings.'));
+        'Each row is one measurement; the files carry no interval. Values are shown to four decimal places and prompts verbatim, including intentional misspellings.'));
       if(stim.failed){
         var warn=el('div','det-status is-fail');
         warn.setAttribute('data-state','stimuli-fail');

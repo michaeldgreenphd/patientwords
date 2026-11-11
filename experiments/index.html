@@ -346,7 +346,7 @@
 
     <section id="methods" aria-labelledby="h-methods">
       <div class="section-head"><h2 id="h-methods">Run status</h2><span class="meta" id="exp-methods-count"></span></div>
-      <p class="note">Every method the protocol planned, including those that did not run. <b>Run status</b> is the schema's execution state. A planned task with no recorded state reads <b>state not recorded</b>; it is never read as completed.</p>
+      <p class="note">Every method the protocol planned, including those that did not run. A planned task with no recorded state reads <b>state not recorded</b>; it is never read as completed.</p>
       <dl class="states" id="exp-state-key" aria-label="What each run status means">
         <dt><span class="bdg bdg-completed">completed</span></dt><dd>The task finished and its result is recorded. A zero or an opposite-direction result is also completed.</dd>
         <dt><span class="bdg bdg-unsupported">unsupported</span></dt><dd>The capability matrix says this combination of method and model cannot run.</dd>
@@ -396,7 +396,7 @@
 
       <section class="sub" id="endpoint" aria-labelledby="h-endpoint">
         <h4 id="h-endpoint">What the primary output is</h4>
-        <p class="note" id="exp-guide"><b>Target-token probability</b> is the model's next-token probability of the first encoded token of the target, over the full vocabulary. A target that encodes to several tokens is scored on its first token only, so the value is not the probability of the whole word. It is not answer accuracy, not a clinical risk and not a measure of patient understanding. A difference between two wordings is given in probability, as the first wording minus the second; 0.01 is one percentage point. <span id="exp-endpoint-unit"></span></p>
+        <p class="note" id="exp-guide"><b>Target-token probability</b> is the model's next-token probability of the first encoded token of the target, over the full vocabulary. A target that encodes to several tokens is scored on its first token only, so the value is not the probability of the whole word. A difference between two wordings is given in probability, as the first wording minus the second; 0.01 is one percentage point. <span id="exp-endpoint-unit"></span></p>
         <details class="fold" id="exp-guide-more">
           <summary>How to read the ranks and the internal measurements</summary>
           <dl class="guide">
@@ -1000,7 +1000,7 @@
     var tx=fam&&isObj(fam.target_text_export)?fam.target_text_export:null;
     if(vs.some(function(v){return isStr(v.prompt);})) kids.push(el('p',{cls:'note','data-kind':'text-basis'},[
       'Prompt text exported by the engine because the protocol marks this case as approved for publication'+
-      (ex&&isStr(ex.marker)?' ('+ex.marker+')':'')+'.'+(isSynthetic(b)?' It is placeholder text of a synthetic fixture.':'')]));
+      (ex&&isStr(ex.marker)?' ('+ex.marker+')':'')+'.']));
     if(fam&&isObj(fam.target_text)) kids.push(el('p',{cls:'note','data-kind':'target-basis'},[
       'Target text exported by the engine because the protocol also marks this case for it'+
       (tx&&isStr(tx.marker)?' ('+tx.marker+')':'')+'. It is copied from the protocol and is never derived from a token id.']));
@@ -1730,7 +1730,7 @@
     fixture.hidden=!isSynthetic(b);
     if(isSynthetic(b)){
       fixture.appendChild(synTag());
-      fixture.appendChild(el('span',{text:' · hand-written numbers · no model was loaded · nothing here is a finding'}));
+      fixture.appendChild(el('span',{text:' · hand-written numbers · no model was run'}));
     }
     $('exp-families-count').textContent=b.comparisons.length+' of '+b.protocol.families.length+' cases in the protocol summary';
     $('exp-methods-count').textContent=parts.methods.status.length+' methods planned';

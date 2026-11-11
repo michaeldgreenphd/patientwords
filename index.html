@@ -198,11 +198,12 @@
 </header>
 <main id="main">
   <h1>Does wording change what AI predicts?</h1>
-  <p class="lede">PatientWords writes the same intended clinical situation twice, once in everyday patient wording and once in medical wording, and records for <span id="scope-models">gemma-2-2b and other small open-weight language models</span> one endpoint: the probability that the next token is the first token of a chosen target word.</p>
+  <p class="lede">PatientWords writes the same clinical situation twice, in everyday wording and in medical wording, and measures how a language model’s next-token prediction differs. If models respond less well to everyday words, the people affected are those who describe symptoms in their own language.</p>
+  <p class="meta" id="scope"><span id="scope-models">gemma-2-2b and other models</span> · small open-weight language models · endpoint: the probability that the next token is the first token of a chosen target word</p>
 
   <section id="example" aria-labelledby="h-example">
     <h2 id="h-example">One pair and its recorded result</h2>
-    <p class="meta" id="ex-label">Example pair · simulated stimulus, written by a language model · measured on <span id="ex-model">gemma-2-2b</span> · clinical review of the pair is pending</p>
+    <p class="meta" id="ex-label">Example pair · <span id="ex-model">gemma-2-2b</span> · model-generated prompts · clinical review pending</p>
     <div class="words" id="home-tg" role="table" aria-label="The example pair">
       <div class="word" role="row" data-kind="example-pair" data-variant="clinical">
         <span class="word-n" role="rowheader"><span class="sw sw-clinical" aria-hidden="true"></span>Medical wording</span>
@@ -220,7 +221,7 @@
     <p class="meta" id="ex-top" hidden></p>
     <noscript><p class="meta">The recorded values load with JavaScript. They are also on <a href="simulated-scenarios/">the scenario pages</a> and in <a href="https://github.com/michaeldgreenphd/patientwords/blob/main/data/simulated_scenarios.json">the data file</a>.</p></noscript>
 
-    <p id="ex-why">This pair was chosen by hand as an illustration. The choice is recorded as an editorial pin in <a href="https://github.com/michaeldgreenphd/patientwords-engine/blob/main/data/editorial_pins.json">the engine's pins file</a>; no rule picked it. <span id="ex-rank">Its difference is among the largest in the published file, so it is not a typical pair.</span></p>
+    <p id="ex-why">Chosen by hand as an illustration (<a href="https://github.com/michaeldgreenphd/patientwords-engine/blob/main/data/editorial_pins.json">editorial pin</a>). <span id="ex-rank">Its difference is among the largest in the published file; it is not a typical pair.</span></p>
     <p data-kind="aggregate" id="hero-caveat" hidden></p>
     <p class="inline-routes">
       <a id="ex-record" href="simulated-scenarios/">Open this pair's record</a>
@@ -231,13 +232,13 @@
   </section>
 
   <section class="ruled" id="limits" aria-labelledby="h-limits">
-    <h2 id="h-limits">What this evidence does not establish</h2>
-    <p>The endpoint is the probability of one token after an unfinished sentence. It is not a score of a whole answer, not a judgement of the clinical quality of an answer, and not a measurement of any effect on patients. The pairs were written and checked by language models, and whether the two wordings of a pair are clinically equivalent has not been reviewed: clinical review is pending. Everyday wording is not defective language; the question is whether models and instruments handle it as they handle medical wording.</p>
+    <h2 id="h-limits">What is measured</h2>
+    <p>One token’s probability after an unfinished sentence: a small, repeatable measurement of a model, not an assistant’s reply, its clinical quality or an effect on patients. <a href="llm/">Whole replies</a> are measured separately. Whether the two wordings of a pair are clinically equivalent has not yet been reviewed. Everyday wording is not defective language; the question is whether models and instruments handle it as well as medical wording.</p>
   </section>
 
   <section class="ruled" id="internal" aria-labelledby="h-internal">
     <h2 id="h-internal">Internal measurements</h2>
-    <p>An attribution graph is computed for one prompt. It lists features that an instrument (a transcoder trained on gemma-2-2b) finds in the model's activations, and estimates how much each contributed to the predicted token. It is a readout from that instrument. A difference between the graphs of two wordings is not by itself a causal explanation; the <a href="methods.html#reading-layers">methods page</a> describes the intervention checks.</p>
+    <p>An attribution graph is computed for one prompt. It lists the features an instrument (a transcoder trained on gemma-2-2b) finds in the model's activations and estimates how much each contributed to the predicted token. It is a readout from that instrument: a difference between two wordings’ graphs is not by itself a causal explanation. The <a href="methods.html#reading-layers">methods page</a> describes the intervention checks.</p>
 
     <figure class="fig" id="fig-pair">
       <figcaption>
@@ -264,7 +265,7 @@
     <figure class="fig" id="fig-translation">
       <figcaption>
         <h3>A rewritten sentence, traced</h3>
-        <p>A language model rewrote an everyday sentence in medical terms, and the rewrite was traced in the same way. Recorded target-token probability in this case: <span id="tr-claim">0.45 after translation (clinical baseline 0.26) · July 7 trace</span>. It is one traced case. The Translation page gives the outcome of every reviewed case, including those where the probability did not return.</p>
+        <p>A language model rewrote an everyday sentence in medical terms, and the rewrite was traced in the same way. Recorded target-token probability in this case: <span id="tr-claim">0.45 after translation (clinical baseline 0.26) · July 7 trace</span>. One traced case; the Translation page gives every reviewed case, including those where the probability did not return.</p>
       </figcaption>
       <div class="fig-media">
         <div class="embed preview"><div class="frame">
@@ -300,7 +301,7 @@
   <section class="ruled" id="methods-source" aria-labelledby="h-source">
     <h2 id="h-source">Methods and source</h2>
     <p>The <a href="methods.html">methods page</a> describes the pipeline step by step, with its <a href="methods.html#limitations">limitations</a>. The example pair and the summary on this page are read, when the page loads, from <a href="https://github.com/michaeldgreenphd/patientwords/blob/main/data/simulated_scenarios.json">the scenario measurements file</a>; the paraphrase comparison is read from <a href="https://github.com/michaeldgreenphd/patientwords/blob/main/data/provenance.json">the provenance file</a>.</p>
-    <p><strong>Simulated data.</strong> The sentence pairs measured across this site are written by a language model and checked by a language model. The clinical scenarios are model-generated; the tracing and the next-token predictions are recorded model behaviour. The phrase dataset is the exception: its pairs were assembled by Michael D. Green directly through testing on Neuronpedia. The team is interviewing patients about how they use language models and what they ask them.</p>
+    <p><strong>Simulated data.</strong> The sentence pairs across this site are written and checked by language models; the predictions and traces are recorded model behaviour. The phrase dataset is the exception: Michael D. Green assembled its pairs by hand on Neuronpedia. The team is interviewing patients about how they use language models and what they ask them.</p>
     <footer>
       Built with the <a href="https://github.com/michaeldgreenphd/patientwords-engine">patientwords-engine</a> pipeline
       on <a href="https://neuronpedia.org">Neuronpedia</a> ·
@@ -389,9 +390,7 @@
     /* everyday minus medical: the file's own difference when it stores one, and the same subtraction otherwise */
     var d=isNum(stored)?stored:everyday-medical, p=$('ex-diff');
     p.textContent='';
-    p.appendChild(document.createTextNode('Difference, everyday '+MINUS+' medical: '));
-    p.appendChild(el('span','num',signed(d,3)));
-    p.appendChild(document.createTextNode(' in probability, which is '));
+    p.appendChild(document.createTextNode('Difference (everyday '+MINUS+' medical): '));
     p.appendChild(el('span','num',pp(d)));
     p.appendChild(document.createTextNode(' percentage points.'));
     p.hidden=false;
@@ -448,8 +447,8 @@
       var lower=scored.filter(function(s){return s.language_penalty<sc.language_penalty;}).length;
       var higher=scored.filter(function(s){return s.language_penalty>sc.language_penalty;}).length;
       $('ex-rank').textContent=sc.language_penalty<0
-        ?'Its difference is the '+ordinal(lower+1)+' largest decrease among the '+count(scored.length)+' scored pairs in the published file, so it is not a typical pair.'
-        :'Its difference is the '+ordinal(higher+1)+' largest increase among the '+count(scored.length)+' scored pairs in the published file, so it is not a typical pair.';
+        ?'Its difference is the '+ordinal(lower+1)+' largest decrease among the '+count(scored.length)+' scored pairs; it is not a typical pair.'
+        :'Its difference is the '+ordinal(higher+1)+' largest increase among the '+count(scored.length)+' scored pairs; it is not a typical pair.';
     }
     if(typeof sc.index==='number'){
       $('ex-record').href='simulated-scenarios/scenario.html?sim='+sc.index;
@@ -460,25 +459,24 @@
   function context(payload,prov,scored){
     /* the models the scope sentence names */
     var models=Array.isArray(payload.models_meta)?payload.models_meta.filter(function(m){return m&&m.available!==false&&typeof m.id==='string';}).map(function(m){return m.id;}):[];
-    if(models.length>1)$('scope-models').textContent=models.slice(0,-1).join(', ')+' and '+models[models.length-1]+', which are small open-weight language models,';
+    if(models.length>1)$('scope-models').textContent=models.slice(0,-1).join(', ')+' and '+models[models.length-1];
 
     /* aggregate context, stated once: the engine's phrase-deduplicated summary of the published file, and the
        size of the change that rewording alone produces */
     var sum=payload.summary||{}, pen=sum.penalty||{}, box=$('hero-caveat');
     var text='';
     if(isNum(pen.mean_phrase_deduped)&&isNum(pen.n_phrases)){
-      text='Across the '+count(pen.n_phrases)+' distinct scored phrases in the published file, the mean difference (everyday '+MINUS+' medical) on '+
+      text='Across all '+count(pen.n_phrases)+' distinct scored phrases, the mean difference (everyday '+MINUS+' medical) on '+
         String(sum.model||'the reference model')+' is '+pp(pen.mean_phrase_deduped)+' percentage points';
       if(Array.isArray(pen.ci95)&&isNum(pen.ci95[0])&&isNum(pen.ci95[1])){
         text+=' (95% bootstrap interval over phrases: '+pp(pen.ci95[0])+' to '+pp(pen.ci95[1])+')';
       }
-      text+='. The population is the pairs published in this site’s data file'+(pen.population?' (the file labels it '+String(pen.population).replace(/_/g,' ')+')':'')+
-        '; the registered per-model estimates use another population and are on the ';
+      text+='. Registered per-model estimates use a different population; see the ';
     }else if(scored.length){
       /* an older file without the summary block: the plain mean over scored rows, with no interval */
       var mean=scored.reduce(function(a,s){return a+s.language_penalty;},0)/scored.length;
-      text='Across the '+count(scored.length)+' scored pairs in the published file, the mean difference (everyday '+MINUS+' medical) is '+pp(mean)+
-        ' percentage points; this file carries no interval. The registered per-model estimates are on the ';
+      text='Across all '+count(scored.length)+' scored pairs, the mean difference (everyday '+MINUS+' medical) is '+pp(mean)+
+        ' percentage points; this file carries no interval. Registered per-model estimates are on the ';
     }
     if(text){
       box.textContent='';
@@ -488,7 +486,7 @@
       var floorRec=prov&&(prov.paraphrase_robustness_floor_v2||prov.paraphrase_robustness);
       var floor=floorRec&&floorRec.mean_abs_delta_vs_baseline;
       if(isNum(floor)){
-        box.appendChild(document.createTextNode(' For scale: rewording a sentence with its term held fixed, without changing its meaning or its register, moved this probability by '+
+        box.appendChild(document.createTextNode(' For scale: rewording a sentence while keeping its term and its register moved this probability by '+
           (floor*100).toFixed(1)+' percentage points on average (mean absolute change).'));
       }
       box.hidden=false;
