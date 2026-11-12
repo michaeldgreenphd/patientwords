@@ -106,8 +106,10 @@ engine API.
   `CLAUDE.md` imports it for Claude Code and adds the owner's writing
   conventions, a section kept identical to the one in the engine's `CLAUDE.md`.
 
-A case is one paired stimulus: a clinical wording and an everyday wording of one
-situation. Where each step happens:
+The pages list **comparison pairs**: a clinical wording and an everyday wording of one
+clinical situation, measured against each other. A **case family** is the unit of the
+engine's experiment protocols: one situation with its reference facts and all of its
+wordings, of which a protocol compares named pairs. Where each step happens:
 
 - **Authored, reviewed, measured:** in the engine. Its
   [case lifecycle table](https://github.com/michaeldgreenphd/patientwords-engine/blob/main/docs/start_here.md#case-lifecycle)
