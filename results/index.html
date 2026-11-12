@@ -352,7 +352,7 @@
     <details class="meth" id="about">
       <summary>About this catalogue</summary>
       <div class="about">
-        <p>The catalogue lists every measured run whatever its result: negative, zero or positive, finished or stopped part-way, included in an analysis or not. Being listed is not a claim.</p>
+        <p>The catalogue lists every measured run whatever its result: negative, zero or positive, finished or stopped part-way, eligible for an analysis or not. Being listed is not a claim.</p>
         <p><b>What is measured.</b> Target-token probability: the next-token probability of the first encoded target token, from 0 to 1, after one sentence-completion prompt. It is a measurement of one token, not a score of a whole answer, and nothing here is medical advice. Each row is one measurement; the files carry no interval and no effect estimate.</p>
         <p><b>The stimuli.</b> The phrasings are test stimuli written by a model or by hand, not statements from patients. The two wordings of a pair are meant to describe one clinical situation; clinical review decides whether they do. Review status: <span id="about-review">not loaded</span>. A row in the table states its review status only where it differs from the most common one.</p>
         <p><b>Evidence class.</b> It differs between runs and is stated on each row: <span id="about-evidence">not loaded</span>. Whether an analysis includes a run is a separate fact, decided by a named rule in <a href="#methods-source">Methods &amp; source</a>.</p>
@@ -382,7 +382,7 @@
             <select class="flt-sel" id="f-evidence"><option value="">all</option></select>
           </div>
           <div class="flt-g">
-            <label class="flt-lbl" for="f-membership">Included in analysis</label>
+            <label class="flt-lbl" for="f-membership">Analysis eligibility</label>
             <select class="flt-sel" id="f-membership"><option value="">all</option></select>
           </div>
           <div class="flt-g">
@@ -438,7 +438,7 @@
             <th scope="col" role="columnheader" class="c-model">Model</th>
             <th scope="col" role="columnheader" class="c-meas">Measurements <small>public rows; lower, equal, higher: the everyday wording against the medical</small></th>
             <th scope="col" role="columnheader" class="c-status">Run status</th>
-            <th scope="col" role="columnheader" class="c-ctx">Study context <small>evidence class; analysis</small></th>
+            <th scope="col" role="columnheader" class="c-ctx">Study context <small>evidence class; analysis eligibility</small></th>
           </tr></thead>
           <tbody id="cat-body" role="rowgroup"></tbody>
         </table>
@@ -474,7 +474,7 @@
           <dt>screening_status</dt>
           <dd>the screening record of the row, when the run recorded one</dd>
           <dt>part_state · analysis_memberships</dt>
-          <dd>the Run status of the row's part (execution_state) and the analyses that include the part (Included in analysis)</dd>
+          <dd>the Run status of the row's part (execution_state) and the analysis rules that admit the part (Analysis eligibility)</dd>
         </dl>
         <h3>Label values</h3>
         <div class="legend" id="legend-body"></div>
@@ -508,7 +508,7 @@
       </section>
 
       <section id="memberships" aria-labelledby="h-mem">
-        <h3 id="h-mem">Included in analysis: the rules</h3>
+        <h3 id="h-mem">Analysis eligibility: the rules</h3>
         <table class="tbl stack" role="table" aria-labelledby="h-mem">
           <thead role="rowgroup"><tr role="row">
             <th scope="col" role="columnheader">Rule (membership)</th>
@@ -519,7 +519,7 @@
           </tr></thead>
           <tbody id="tot-mem" role="rowgroup"></tbody>
         </table>
-        <p class="note">A membership is a named rule that decides which parts may enter an analysis. Being listed in this catalogue does not place a run in any analysis. Each run's Methods &amp; source gives the reason for every part outside a rule.</p>
+        <p class="note">A membership is a named rule that decides which parts may enter an analysis. A part a rule admits is eligible; a published statistic may use fewer, because each collector keeps the stimulus families it analyses. Being listed in this catalogue does not place a run in any analysis. Each run's Methods &amp; source gives the reason for every part outside a rule.</p>
         <div class="pin" id="pin">
           <h3>Study version</h3>
           <p id="pin-lead"></p>
@@ -644,6 +644,10 @@
   // SUFFIX_LABEL names a part of a run id that stands between the stimulus set name and the instrument.
   var SUFFIX_LABEL={"lenspairs":"lens reader pairs","context":"context-inoculation pairs"};
   var RULE_LABEL={"study-interim/1":"interim study analysis","exploratory-open/1":"exploratory analysis"};
+  // RULE_BADGE is the short wording of a rule in a badge. A rule admits parts; it does not show that a part
+  // entered a published result (the engine's collectors each keep the stimulus families they analyse), so a
+  // badge says "eligible", never "in" an analysis.
+  var RULE_BADGE={"study-interim/1":"study-eligible","exploratory-open/1":"exploratory-eligible"};
   // The label of a stimulus set whose family and stimulus class both have no entry above.
   var CLASS_OTHER="Stimulus set";
   var AXIS_LABEL={execution_state:'Run status',artifact_integrity:'Artifact integrity',evidence_class:'Evidence class',
@@ -763,10 +767,11 @@
   function modelSortKey(r){
     return (str(r.model)||(str(r.instrument)?'instrument: '+r.instrument:'not recorded')).toLowerCase();
   }
-  function ruleLabel(m){return has(RULE_LABEL,m)?RULE_LABEL[m]:m;}
-  // The study version in a badge, in the fewest words: "study analysis". Its full name (RULE_LABEL) is in the
-  // filter option and in the open run's line, and its id is in the badge's title.
-  function studyBadgeText(){return 'study analysis';}
+  // A rule in a badge, in the fewest words: its RULE_BADGE entry, or "eligible under <id>" for a rule with no
+  // entry. The rule's full name (RULE_LABEL) is in the filter option and in the open run's line, and its id and
+  // recorded label are in the badge's title.
+  function ruleBadge(m){return has(RULE_BADGE,m)?RULE_BADGE[m]:'eligible under '+m;}
+  function studyBadgeText(){return ruleBadge(DEFAULT_M);}
   // In a run's row the evidence class leaves out the words the experiment title already gives. Each entry:
   // evidence class -> [the stimulus class whose label carries those words, the words the row keeps]. It applies
   // only where the run has that stimulus class and its title starts with that class's label; any other run prints
@@ -845,15 +850,15 @@
   }
   function memberTitle(m){
     var label=str(obj(MEMBERS[m]).label);
-    return 'Included in analysis: '+m+(label?' ('+label+')':'');
+    return 'Eligible under analysis rule '+m+(label?' ('+label+')':'')+'; a published statistic may use fewer runs';
   }
-  // "Included in analysis" for a run: the study version first, then any other analysis rule.
+  // Analysis eligibility of a run: the study version first, then any other analysis rule.
   function inclusionBadge(r){
     var parts=obj(r.analysis_parts),n=int(r.n_parts),k=DEFAULT_M?int(parts[DEFAULT_M]):0;
     if(k>0)return badge(studyBadgeText()+(k<n?' ('+k+' of '+n+' parts)':''),'',memberTitle(DEFAULT_M));
     var other=ANALYSIS_IDS.filter(function(m){return m!==DEFAULT_M&&int(parts[m])>0;});
-    if(other.length)return badge(other.map(ruleLabel).join(', ')+' only','',other.map(memberTitle).join('; '));
-    return badge('no analysis','dim','no analysis rule includes a part of this run');
+    if(other.length)return badge(other.map(ruleBadge).join(', ')+' only','',other.map(memberTitle).join('; '));
+    return badge('not eligible','dim','no analysis rule admits a part of this run');
   }
   // Part counts per analysis rule. With ids: the rule ids, for Methods & source. Without: each rule's entry in
   // RULE_LABEL, for the open run; a rule with no entry is shown by its id, as in Methods & source.
@@ -1099,8 +1104,8 @@
     // the study version by its entry in RULE_LABEL; a rule with no entry keeps its id in the option
     var m=has(RULE_LABEL,DEFAULT_M)?'the '+RULE_LABEL[DEFAULT_M]:'the study analysis, '+(DEFAULT_M||'the default membership');
     var inside=RUNS.filter(function(r){return int(obj(r.analysis_parts)[DEFAULT_M])>0;}).length;
-    fillSelect('f-membership',[['inside','in '+m+' (at least one part) · '+fmtInt(inside)],
-                               ['outside','not in '+m+' (no part) · '+fmtInt(RUNS.length-inside)]]);
+    fillSelect('f-membership',[['inside','eligible for '+m+' (at least one part) · '+fmtInt(inside)],
+                               ['outside','not eligible for '+m+' (no part) · '+fmtInt(RUNS.length-inside)]]);
 
     // Quick views: the records a default list could bury. Each one sets a single filter that "More filters" also shows.
     var noRows=RUNS.filter(function(r){return !(int(obj(r.counts).rows_public)>0);}).length;
@@ -1158,10 +1163,10 @@
   }
   function stateLabel(k){return labelOf(STATE_LABEL,k);}
   // Identifiers stay searchable: the run id, the stimulus set name, the model id and the instrument code are in
-  // the text beside the labels a row shows.
+  // the text beside the labels a row shows, the second line of its Model cell among them.
   function searchText(r){
     var x=experiment(r);
-    return (str(r.run_dir)+' '+str(r.stem)+' '+str(r.model)+' '+str(r.instrument)+' '+x.title+' '+
+    return (str(r.run_dir)+' '+str(r.stem)+' '+str(r.model)+' '+str(r.instrument)+' '+x.title+' '+x.second+' '+
       (str(r.instrument)?instrumentLabel(r):'')+' '+labelOf(EVIDENCE_LABEL,r.evidence_class)+' '+
       Object.keys(obj(r.execution_states)).map(stateLabel).join(' ')).toLowerCase();
   }
@@ -1417,7 +1422,7 @@
     kvCode(dl,'Clinical review','',r.clinical_review,'');
     kvCode(dl,'Sampling','',r.sampling,legendText('sampling',str(r.sampling))?' · '+legendText('sampling',str(r.sampling)):'');
     kv(dl,'Visibility',str(r.visibility)+(arr(r.restriction_reasons).length?' · '+arr(r.restriction_reasons).join(', '):''));
-    kv(dl,'Included in analysis',inclusionText(r,true));
+    kv(dl,'Analysis eligibility',inclusionText(r,true));
     if(int(c.rows_duplicate_index)||int(c.rows_own_prompts)){
       kv(dl,'Row notes',fmtInt(c.rows_duplicate_index)+' rows repeat an index already listed in this run · '+
         fmtInt(c.rows_own_prompts)+' rows were traced with prompt text that differs from the stimulus set entry');
@@ -1437,7 +1442,7 @@
       t.setAttribute('aria-label','File parts of run '+str(r.run_dir));
       var head=document.createElement('thead');head.setAttribute('role','rowgroup');
       var hr=tr('');
-      [['Part',''],['File and sha256',''],['Run status',''],['Integrity',''],['Results','num'],['Included in analysis','']]
+      [['Part',''],['File and sha256',''],['Run status',''],['Integrity',''],['Results','num'],['Analysis eligibility','']]
         .forEach(function(h){var th=el('th',h[1],h[0]);th.scope='col';th.setAttribute('role','columnheader');hr.appendChild(th);});
       head.appendChild(hr);t.appendChild(head);
       var tb=document.createElement('tbody');tb.setAttribute('role','rowgroup');
@@ -1496,7 +1501,7 @@
     var c=obj(r.counts),dl=el('dl','kv');
     kv(dl,'Rows',fmtInt(c.rows_public)+' public · '+fmtInt(c.rows_withheld_sealed)+' withheld by the Tier B seal (counted, never shown) · '+
       fmtInt(c.rows_screened_out)+' screened out · '+fmtInt(c.rows_flipped)+' flipped');
-    kv(dl,'Included in analysis',inclusionText(r,false));
+    kv(dl,'Analysis eligibility',inclusionText(r,false));
     dl.lastChild.title=inclusionText(r,true);
     box.appendChild(dl);
 
@@ -1721,8 +1726,8 @@
       var inside=rp&&Array.isArray(rp.analysis_memberships)?rp.analysis_memberships:
         arr(m['in']).filter(function(x){return ANALYSIS_IDS.indexOf(x)>=0;});
       if(DEFAULT_M&&inside.indexOf(DEFAULT_M)>=0)line.appendChild(badge(studyBadgeText(),'',memberTitle(DEFAULT_M)));
-      else if(inside.length)line.appendChild(badge(inside.map(ruleLabel).join(', ')+' only','',inside.map(memberTitle).join('; ')));
-      else line.appendChild(badge('no analysis','','no analysis rule includes this part; the reason is in Methods & source'));
+      else if(inside.length)line.appendChild(badge(inside.map(ruleBadge).join(', ')+' only','',inside.map(memberTitle).join('; ')));
+      else line.appendChild(badge('not eligible','','no analysis rule admits this part; the reason is in Methods & source'));
       if(resultsText(m,'results recorded','pairs requested'))line.appendChild(badge(resultsText(m,'results recorded','pairs requested'),'dim',''));
       sec.appendChild(line);
       if(str(m.integrity_detail))sec.appendChild(el('p','part-out','Integrity detail: '+m.integrity_detail));

@@ -705,7 +705,7 @@
     </p>
     <p>
       <b>To test whether the patient&rsquo;s wording caused
-      the failure, we patch the model by injecting the translated clinical sentence
+      the failure, we patch the model by injecting the clinical run&rsquo;s state
       at specific layers, to see if the correct medical answer recovers.</b> If the clinical
       state brings the answer back, the wording, not a gap in the model&rsquo;s knowledge, was
       the problem.
@@ -1253,9 +1253,11 @@
       if(ex.translated_sentence)
         txt(svg,LEFT,probTop-30,'translated: “'+ex.translated_sentence+'”',
           {'font-size':9,fill:'#8a8a84','font-family':'ui-monospace,SF Mono,Menlo,Consolas,monospace'});
-      txt(svg,0,probTop-18,'patch: inject',{'font-size':11,fill:'#1c1c19',
+      // the patch source is the pair's clinical run (engine export_jlens_depth.py: clean = clinical wording),
+      // not a translation run
+      txt(svg,0,probTop-18,'patch from',{'font-size':11,fill:'#1c1c19',
         'font-family':'Iowan Old Style,Palatino,Georgia,serif'});
-      txt(svg,0,probTop-6,'clinical translation',{'font-size':8.5,fill:'#6d6c66'});
+      txt(svg,0,probTop-6,'clinical run',{'font-size':8.5,fill:'#6d6c66'});
       // best recovery layer: argmax over the patch bars EXCLUDING the output
       // layer (l < L−1) — injecting the clinical state at the read-out layer
       // recovers the answer trivially and must not headline; a leading null
