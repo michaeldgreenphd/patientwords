@@ -108,7 +108,7 @@
   .er-heads{margin:10px 0 2px}
   .er-h{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;font-weight:600}
   .er-row{border-top:1px solid var(--hairline);padding:7px 0 6px}
-  .er-m{font-family:var(--mono);font-size:11px;font-weight:600;margin:0}
+  .er-m{font-family:var(--mono);font-size:11px;font-weight:600;margin:0;overflow-wrap:anywhere}
   .er-q{font-size:12.5px;font-style:italic;line-height:1.45;margin:0;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
   .er-c{border-left:2px solid var(--clinical);padding-left:8px}
   .er-p{border-left:2px solid var(--patient);padding-left:8px}
@@ -427,10 +427,21 @@
   // questions and 74 natural questions" for one set of 74, and "74 of its registered
   // 75" for a file that published 25 of 75. Each file's registration and any
   // shortfall are in Provenance (famFileCounts, "stimulus sets").
+  //
+  // Display words are looked up, never built from a stored key. Each map below is keyed on the exact stored value.
+  // A family key with no entry has no word: the scenario header and the note leave the word out, and Provenance
+  // ("stimulus sets") prints the key as stored. A tier key with no entry is printed as stored.
+  var FAMILY_WORDS={natural_questions:['natural question','natural questions'],
+                    sentence_completions:['sentence completion','sentence completions']};
+  var TIER_WORDS={self_care:'self-care',routine:'routine',urgent:'urgent',emergency:'emergency'};
+  function mapped(map,key){return Object.prototype.hasOwnProperty.call(map,key)?map[key]:null;}
   function famLabel(f,n){
-    return f==='natural_questions'?(n===1?'natural question':'natural questions'):
-      f==='sentence_completions'?(n===1?'sentence completion':'sentence completions'):
-      String(f).replace(/_/g,' ');
+    var w=mapped(FAMILY_WORDS,f);
+    return w?w[n===1?0:1]:null;
+  }
+  function tierWord(t){
+    var w=mapped(TIER_WORDS,t);
+    return w===null?t:w;
   }
   function famCounts(d){
     var order=[],n={};
@@ -445,9 +456,15 @@
     var fc=famCounts(d);
     if(fc.order.length<2)return;
     var words=['zero','one','two','three','four','five','six'];
+    // a family the page has no word for is counted without one, in a single closing count
+    var named=[],unnamed=0;
+    fc.order.forEach(function(f){
+      var w=famLabel(f,fc.n[f]);
+      if(w)named.push(fc.n[f]+' '+w);else unnamed+=fc.n[f];
+    });
+    if(unnamed)named.push(unnamed+' other');
     var text='This page pools '+(words[fc.order.length]||fc.order.length)+
-      ' stimulus families in one scenario list and one set of figures: '+
-      fc.order.map(function(f){return fc.n[f]+' '+famLabel(f,fc.n[f]);}).join(' and ')+'.';
+      ' stimulus families in one scenario list and one set of figures: '+named.join(' and ')+'.';
     if(fc.n.natural_questions&&fc.n.sentence_completions){
       text+=' Natural questions ask each situation as a complete, human-sounding question in one of eight '+
         'registered syntax styles; sentence completions use the original open-ended frame.';
@@ -488,7 +505,11 @@
   // the calibrated classifier's gradings (data/jev_calibration.json), keyed by scenario, wording, attempt and model;
   // a case is shown only when its id's hash suffix equals the first 8 hex digits of the cell text's sha256, so a
   // response the classifier did not read is never decorated as if it had been
-  var JV=null, JV_TIERS=null, JV_FLAGS=[['safety_netting','safety netting'],['clarifying_question','clarifying question'],
+  // The classifier's name, by the exact model string the file records (engine medlang_circuits/jev_client.py: Jev is
+  // typesafe/jev-1.13; the dated string is the one the provider served). A string with no entry is shown as
+  // recorded. The Multi-turn and Methods pages use the same map.
+  var CLASSIFIER_NAME={'typesafe/jev-1.13':'Jev','typesafe/jev-1.13-20260917':'Jev'};
+  var JV=null, JV_TIERS=null, JV_SERVED=null, JV_FLAGS=[['safety_netting','safety netting'],['clarifying_question','clarifying question'],
     ['professional_referral','referral']];
   var JV_ID=/^(.+?#\d+)_([a-z]+)_(\d+)_(.+)_([0-9a-f]{8})$/;
   function jvLoad(){
@@ -502,8 +523,9 @@
           map[m[1]+'|'+m[2]+'|'+m[3]+'|'+m[4]]={hash:m[5],c:j.cases_summary[id]};n++;
         });
         JV=map;JV_TIERS=j.tier_order;
-        var nm=document.getElementById('jv-note-model');
-        if(j.models_served&&j.models_served.length)nm.textContent=j.models_served.join(', ');
+        // the model strings the classifier was served under go to Provenance; the sentence under Limitations then
+        // names the classifier (jvName). A file that records none leaves the name in the markup.
+        if(j.models_served&&j.models_served.length){JV_SERVED=j.models_served.map(String);provClassifier();jvName();}
         document.getElementById('jv-note-n').textContent=n.toLocaleString();
         document.getElementById('jv-note').hidden=false;
       })
@@ -519,18 +541,18 @@
     var box=el('div','jv');
     var probs=c.tier_probabilities||{};
     var top=el('div','jv-line');
-    var lab=el('span',null,'classifier: ');lab.appendChild(el('b',null,c.pred_tier||'\u2014'));top.appendChild(lab);
+    var lab=el('span',null,'classifier: ');lab.appendChild(el('b',null,tierWord(c.pred_tier)||'\u2014'));top.appendChild(lab);
     top.appendChild(el('span',null,'draft tiers, pending domain review'));
     if(c.tier_confidence!=null)top.appendChild(el('span',null,'confidence '+Math.round(c.tier_confidence*100)+'%'));
     box.appendChild(top);
     var bar=el('div','jv-bar'),ticks=el('div','jv-ticks');
     bar.setAttribute('role','img');
     bar.setAttribute('aria-label','classifier tier probabilities (draft tiers, pending domain review): '+JV_TIERS.map(function(t){
-      return t.replace('_','-')+' '+Math.round((probs[t]||0)*100)+'%';}).join(', '));
+      return tierWord(t)+' '+Math.round((probs[t]||0)*100)+'%';}).join(', '));
     JV_TIERS.forEach(function(t,i){
       var w=Math.max(0,probs[t]||0)*100;
       var seg=el('span','t'+Math.min(i,3));seg.style.width=w+'%';bar.appendChild(seg);
-      var tk=el('span',null,w>=12?t.replace('_','-')+' '+Math.round(w)+'%':'');tk.style.width=w+'%';ticks.appendChild(tk);
+      var tk=el('span',null,w>=12?tierWord(t)+' '+Math.round(w)+'%':'');tk.style.width=w+'%';ticks.appendChild(tk);
     });
     box.appendChild(bar);box.appendChild(ticks);
     var pills=el('div','jv-pills');
@@ -786,7 +808,7 @@
           ar.setAttribute('aria-hidden','true');
           pt.tierEl.appendChild(ar);
           pt.tierEl.appendChild(el('span','vh',' downgrade: coded less urgent than the clinical response'));
-          pt.tierEl.title='coded less urgent than the clinical response ('+c.sample.tier+' \u2192 '+pt.sample.tier+')';
+          pt.tierEl.title='coded less urgent than the clinical response ('+tierWord(c.sample.tier)+' \u2192 '+tierWord(pt.sample.tier)+')';
         }
       }
     }
@@ -868,7 +890,7 @@
     for(var i=0;i<samples.length;i++){if(samples[i].k===attempt){s=samples[i];break;}}
     out.sample=s;
     var head=null;
-    if(s&&s.tier){head=el('div','resp-head');var t=el('span','resp-tier');t.appendChild(document.createTextNode('coded tier: '));var b=el('b',null,s.tier);t.appendChild(b);head.appendChild(t);out.tierEl=t;}
+    if(s&&s.tier){head=el('div','resp-head');var t=el('span','resp-tier');t.appendChild(document.createTextNode('coded tier: '));var b=el('b',null,tierWord(s.tier));t.appendChild(b);head.appendChild(t);out.tierEl=t;}
     if(s&&s.refusal){if(!head)head=el('div','resp-head');head.appendChild(el('span','resp-refusal','refusal'));}
     if(head)wrap.appendChild(head);
     if(JV&&s&&typeof s.text==='string'&&s.text&&data&&data.scenarios[current]){
@@ -890,10 +912,63 @@
     var bits=[];
     if(maxK>1)bits.push('attempt '+attempt); // visible confirmation the switcher changed this cell
     var served=(s&&s.model_returned)||mb.model_returned;
-    if(served)bits.push('served as '+served);
-    if(s&&s.sent_utc)bits.push(String(s.sent_utc).slice(0,10));
-    if(bits.length)wrap.appendChild(el('p','resp-foot',bits.join(' · ')));
+    var sent=(s&&s.sent_utc)?String(s.sent_utc).slice(0,10):null;
+    // The served name is printed where it tells cells apart: when the payload holds more than one for this model.
+    // Otherwise it is in Provenance ("models") and in this line's title. With no other line to carry it, it is printed.
+    var servedShown=!!served&&(servedNameCount(mb.model)>1||(!bits.length&&!sent));
+    if(servedShown)bits.push('served as '+served);
+    if(sent)bits.push(sent);
+    if(bits.length){
+      var foot=el('p','resp-foot',bits.join(' · '));
+      if(served&&!servedShown)foot.title='served as '+served;
+      wrap.appendChild(foot);
+    }
     return out;
+  }
+
+  // How many names one model spec was served under, counted over the loaded payload: every sample, every response
+  // block and the run's build list (the lines of Provenance, "models").
+  var servedBySpec=null;
+  function servedNameCount(spec){
+    if(!servedBySpec){
+      var by=servedBySpec={};
+      var add=function(sp,name){if(name)(by[String(sp)]=by[String(sp)]||{})[String(name)]=1;};
+      (data.scenarios||[]).forEach(function(sc){
+        ['clinical','patient','translated'].forEach(function(a){
+          ((sc[a]||{}).responses||[]).forEach(function(mb){
+            add(mb.model,mb.model_returned);
+            (mb.samples||[]).forEach(function(sm){add(mb.model,sm.model_returned);});
+          });
+        });
+      });
+      ((data.run||{}).models||[]).forEach(function(m){
+        add(m.spec,m.model_returned);
+        (m.builds||[]).forEach(function(b){add(m.spec,b.model_returned);});
+      });
+    }
+    return Object.keys(servedBySpec[String(spec)]||{}).length;
+  }
+
+  // The engine file a source batch is in. A scenario id is "<batch>#<n>" and names no directory. The payload's
+  // selection paths do (families[].selection.paths): the path whose file name is the batch's is used. A batch no
+  // path names is under data/simulated/ (the sentence-completion batches are not listed there).
+  function batchPath(batch){
+    var hit=null;
+    (data.families||[]).forEach(function(f){
+      ((f.selection&&f.selection.paths)||[]).forEach(function(raw){
+        var p=String(raw).replace(/^\.\//,'');
+        // a path that leaves the engine repository is not one of its files
+        if(!hit&&!/^\.\.\/|^\//.test(p)&&p.split('/').pop()===batch+'.json')hit=p;
+      });
+    });
+    return hit||('data/simulated/'+batch+'.json');
+  }
+  function batchLink(text,batch){
+    var path=batchPath(batch);
+    var a=el('a',null,text);
+    a.href='https://github.com/michaeldgreenphd/patientwords-engine/blob/main/'+path;
+    a.target='_blank';a.rel='noopener';a.title=path;
+    return a;
   }
 
   // where this scenario's text came from: generator model (provenance sidecar copy),
@@ -908,10 +983,8 @@
     node.appendChild(document.createTextNode(
       (gen?('Both wordings were written by '+gen):'Both wordings were generated')+
       ' as one stress pair, archived in '));
-    var ba=el('a',null,batch);
-    ba.href='https://github.com/michaeldgreenphd/patientwords-engine/blob/main/data/simulated/'+batch+'.json';
-    ba.target='_blank';ba.rel='noopener';
-    node.appendChild(ba);
+    // the batch is named in Provenance ("scenario id") and in this link's target
+    node.appendChild(batchLink('its source batch',batch));
     node.appendChild(document.createTextNode('. '));
     // how the pair was selected and how the traced sentence became a full question.
     // Field-less payloads predate the exporter fields; the fallbacks state the
@@ -968,18 +1041,17 @@
     node.hidden=false;
   }
 
-  // "pairs_20260706T201750Z#1" + position -> "Scenario 1 — Run on July 6, 2026 at 8:17 PM";
-  // anything unparseable falls back to the raw id. The numeral is the page-wide scenario
-  // number (pager, map, hash, and strips all count the same way); the batch's own #index
-  // repeats across batches and stays one hover away in the raw id.
-  function prettyId(id,num){
-    var m=/(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})Z#(\d+)$/.exec(String(id||''));
-    if(!m)return null;
-    var months=['January','February','March','April','May','June','July','August','September','October','November','December'];
-    var mo=months[parseInt(m[2],10)-1];
-    if(!mo)return null;
-    var h=parseInt(m[4],10),ap=h>=12?'PM':'AM',h12=h%12||12;
-    return 'Scenario '+num+' — Run on '+mo+' '+parseInt(m[3],10)+', '+m[1]+' at '+h12+':'+m[5]+' '+ap;
+  // Provenance row for the scenario on screen: its archive id, linked to its source batch. render() refreshes it.
+  // The id is "<batch>#<n>"; n is the batch's own index and repeats across batches, and the stamp in a batch
+  // name is when the stimulus batch was generated, not when the models were asked ("queries ran").
+  function provScenario(){
+    var dd=document.getElementById('prov-scenario');
+    if(!dd||!data)return;
+    var s=data.scenarios[current];
+    var id=(s.id==null||s.id==='')?null:String(s.id);
+    var m=id?/^(.+)#\d+$/.exec(id):null;
+    dd.textContent='scenario '+(current+1)+' · '+(m?'':dash(id));
+    if(m)dd.appendChild(batchLink(id,m[1]));
   }
 
   function render(){
@@ -988,13 +1060,15 @@
     renderPager(document.getElementById('sc-pager2'));
     var meta=document.getElementById('sc-meta');
     meta.textContent='';
-    var pid=prettyId(s.id,current+1);
-    var idNode=el('b',null,pid||dash(s.id));
-    if(pid)idNode.title=String(s.id); // raw archive id stays one hover away
+    // the heading is the page-wide scenario number (pager, map, hash and strips all count the same way);
+    // the archive id is in the heading's title and is printed in Provenance ("scenario id")
+    var idNode=el('b',null,'Scenario '+(current+1));
+    if(s.id!=null&&s.id!=='')idNode.title=String(s.id);
     meta.appendChild(idNode);
     if(s.topic)meta.appendChild(document.createTextNode(' · topic: '+s.topic));
-    if(s.family)meta.appendChild(document.createTextNode(
-      ' · '+(s.family==='natural_questions'?'natural question':'sentence completion')));
+    var famWord=famLabel(s.family,1);
+    if(famWord)meta.appendChild(document.createTextNode(' · '+famWord));
+    provScenario();
     renderGen(s);
     var body=document.getElementById('sc-body');
     body.textContent='';
@@ -1011,7 +1085,9 @@
       body.appendChild(el('p','resp-text missing span-all','— no responses archived yet'));
     }
     models.forEach(function(m){
-      var mrow=el('p','model-row'+(isPreview(m)?' preview':''),m);
+      // the row prints the model's name; the provider:route spec is in the title and in Provenance ("models")
+      var mrow=el('p','model-row'+(isPreview(m)?' preview':''),rowName(m));
+      mrow.title=m;
       if(isPreview(m)){
         mrow.appendChild(document.createTextNode(' '));
         mrow.appendChild(el('span','prev-tag','† anonymous preview'));
@@ -1071,11 +1147,50 @@
     return a;
   }
 
+  // Names of the measured models, keyed on the exact stored spec. The figures print them through shortName(),
+  // the answer rows through rowName(), so a row and a figure give one model one name. A spec with no entry is
+  // printed as stored, in a row and in a figure. A figure's label gutter is fixed, so a stored spec wider than
+  // its gutter is drawn narrowed to it (fitLabel): the whole spec, never a part of it.
+  var MODEL_NAMES={
+    'anthropic:claude-haiku-4-5':'claude-haiku-4-5',
+    'anthropic:claude-sonnet-5':'claude-sonnet-5',
+    'openai:openai/gpt-5.5':'gpt-5.5',
+    'openai:openai/gpt-5.4-mini':'gpt-5.4-mini',
+    'xai:x-ai/grok-4.3':'grok-4.3',
+    'deepseek:deepseek/deepseek-v4-flash':'deepseek-v4-flash',
+    'moonshot:moonshotai/kimi-k2.5':'kimi-k2.5',
+    'openrouter:stealth/ox-alpha':'ox-alpha'
+  };
+  function rowName(spec){
+    var n=mapped(MODEL_NAMES,spec);
+    return n===null?String(spec):n;
+  }
   function shortName(spec){
-    var m=String(spec).split(':').pop();
-    var i=m.lastIndexOf('/');
-    m=i>=0?m.slice(i+1):m;
+    var m=mapped(MODEL_NAMES,spec);
+    if(m===null)m=String(spec);
     return isPreview(spec)?m+'†':m;  // display label only, never a join key
+  }
+  // The shorter names of the narrow figure gutters (64px), keyed on the exact stored spec; a spec with no entry is
+  // printed as stored. They are the names these figures printed for the eight measured models before the map existed.
+  var TINY_NAMES={
+    'anthropic:claude-haiku-4-5':'haiku',
+    'anthropic:claude-sonnet-5':'sonnet',
+    'openai:openai/gpt-5.5':'gpt-5.5',
+    'openai:openai/gpt-5.4-mini':'mini',
+    'xai:x-ai/grok-4.3':'grok',
+    'deepseek:deepseek/deepseek-v4-flash':'deepseek',
+    'moonshot:moonshotai/kimi-k2.5':'kimi',
+    'openrouter:stealth/ox-alpha':'ox'
+  };
+  // An SVG label of a spec that has no name entry, kept inside its gutter: when the stored spec is wider than the
+  // gutter (est: its estimated width in the figure's units), the text is narrowed to fit. A named model's label is
+  // never touched.
+  function fitLabel(node,spec,table,gutter,est){
+    if(spec!=null&&mapped(table,spec)===null&&est>gutter){
+      node.setAttribute('textLength',gutter);
+      node.setAttribute('lengthAdjust','spacingAndGlyphs');
+    }
+    return node;
   }
 
   // anonymous preview arm: every rendering of this spec carries a dagger that
@@ -1148,7 +1263,7 @@
         ts.textContent=' '+r.note;
         lbl.appendChild(ts);
       }
-      svg.appendChild(lbl);
+      svg.appendChild(fitLabel(lbl,r.spec,MODEL_NAMES,LW-8,String(r.label).length*7.2+(r.note?(r.note.length+1)*6:0)));
     });
     panels.forEach(function(p,pi){
       var x0=LW+pi*(PW+GAP);
@@ -1205,12 +1320,9 @@
   // one panel: per model, two thin bars (clinical green / patient ink), values at the ends;
   // opts.inner names a second rate drawn as a darker segment inside each bar
   function tinyName(spec){
-    if(isPreview(spec))return 'ox†';   // dagger travels into figure labels too
-    var m=shortName(spec);
-    // 'mini' before 'gpt': the two OpenAI arms stay distinguishable in 64px
-    var fam=['haiku','sonnet','gemini','grok','deepseek','kimi','mini','gpt'];
-    for(var i=0;i<fam.length;i++)if(m.indexOf(fam[i])>=0)return fam[i]==='gpt'?m:fam[i];
-    return m;
+    var m=mapped(TINY_NAMES,spec);
+    if(m===null)m=String(spec);
+    return isPreview(spec)?m+'†':m;   // dagger travels into figure labels too
   }
 
   function svgBarsPanel(rows,opts){
@@ -1224,7 +1336,8 @@
       y+=rowH+(r.gapBefore?GAP:0);
       // provider grouping is carried by the family gap alone (gapBefore);
       // the company names were non-data ink and are gone (owner 2026-07-30)
-      svg.appendChild(svgNode('text',{x:0,y:y+14,'font-family':'ui-monospace,monospace','font-size':'10.5px',fill:'var(--ink,#1c1c19)'},r.label));
+      svg.appendChild(fitLabel(svgNode('text',{x:0,y:y+14,'font-family':'ui-monospace,monospace','font-size':'10.5px',fill:'var(--ink,#1c1c19)'},r.label),
+        r.spec,TINY_NAMES,L-4,String(r.label).length*6.3));
       [['a','var(--clinical,#15803d)',4],['b','var(--patient,#111827)',14]].forEach(function(sp){
         var v=r[sp[0]];
         if(v==null)return;
@@ -1294,8 +1407,8 @@
       var t=by[m.spec];
       var tp=el('p','er-t');
       if(t){
-        tp.appendChild(el('span','er-tbase',t.clinical));
-        tp.appendChild(el('span',t.downgrade?'er-down':null,' → '+t.patient));
+        tp.appendChild(el('span','er-tbase',tierWord(t.clinical)));
+        tp.appendChild(el('span',t.downgrade?'er-down':null,' → '+tierWord(t.patient)));
         if(t.downgrade)tp.title='downgrade: the patient wording is coded less urgent than the clinical wording';
       }else{tp.textContent='—';}
       row.appendChild(tp);
@@ -1369,14 +1482,15 @@
     to.forEach(function(t,i){
       svg.appendChild(svgNode('line',{x1:x(i),y1:top-4,x2:x(i),y2:H-4,
         stroke:'var(--hairline,#dcdad2)','stroke-width':0.7}));
-      svg.appendChild(svgNode('text',{x:x(i),y:10,'text-anchor':'middle','font-family':'ui-monospace,monospace','font-size':'9px',fill:'var(--muted,#6d6c66)'},t));
+      svg.appendChild(svgNode('text',{x:x(i),y:10,'text-anchor':'middle','font-family':'ui-monospace,monospace','font-size':'9px',fill:'var(--muted,#6d6c66)'},tierWord(t)));
     });
     var yCur=top;
     bands.forEach(function(b){
       var t=by[b.sp];
       var mid=yCur+b.h/2;
-      svg.appendChild(svgNode('text',{x:0,y:mid+3.5,'font-family':'ui-monospace,monospace','font-size':'10.5px',
-        fill:(t&&t.downgrade)?'var(--penalty,#b4483d)':'var(--ink,#1c1c19)'},tinyName(b.sp)+((t&&t.downgrade)?' ↓':'')));
+      var bandLabel=tinyName(b.sp)+((t&&t.downgrade)?' ↓':'');
+      svg.appendChild(fitLabel(svgNode('text',{x:0,y:mid+3.5,'font-family':'ui-monospace,monospace','font-size':'10.5px',
+        fill:(t&&t.downgrade)?'var(--penalty,#b4483d)':'var(--ink,#1c1c19)'},bandLabel),b.sp,TINY_NAMES,AX0-8,bandLabel.length*6.3));
       b.ks.forEach(function(k,ki){
         var cy=yCur+pad/2+(ki+0.5)*sub;
         var ci=b.ck[k]!=null?to.indexOf(b.ck[k]):-1;
@@ -1388,7 +1502,7 @@
           stroke:'var(--patient,#111827)','stroke-width':1.2}));
         if(ci>=0)svg.appendChild(svgNode('circle',{cx:x(ci),cy:cy,r:2.4,fill:'var(--clinical,#15803d)'}));
         var hit=svgNode('rect',{x:AX0-14,y:cy-sub/2,width:AX1-AX0+28,height:sub,fill:'transparent'});
-        hit.appendChild(svgNode('title',{},tinyName(b.sp)+' · attempt '+k+': clinical '+(b.ck[k]||'—')+' → patient '+(b.pk[k]||'—')));
+        hit.appendChild(svgNode('title',{},tinyName(b.sp)+' · attempt '+k+': clinical '+(tierWord(b.ck[k])||'—')+' → patient '+(tierWord(b.pk[k])||'—')));
         svg.appendChild(hit);
       });
       yCur+=b.h;
@@ -1408,7 +1522,8 @@
     var svg=svgNode('svg',{viewBox:'0 0 '+W+' '+H,role:'img','aria-label':'Tier-change map: one mark per scenario per model; filled marks are downgrades, marginals count both directions per model'});
     models.forEach(function(m,mi){
       var y=top+mi*(cell+gap);
-      svg.appendChild(svgNode('text',{x:0,y:y+cell-3,'font-family':'ui-monospace,monospace','font-size':'10.5px',fill:'var(--ink,#1c1c19)'},m.label));
+      svg.appendChild(fitLabel(svgNode('text',{x:0,y:y+cell-3,'font-family':'ui-monospace,monospace','font-size':'10.5px',fill:'var(--ink,#1c1c19)'},m.label),
+        m.spec,MODEL_NAMES,L-6,String(m.label).length*6.3));
       var graded=scen.filter(function(s){return (s.byModel||{})[m.spec];}).length;
       var nDown=scen.filter(function(s){var d=(s.byModel||{})[m.spec];return d&&d.downgrade;}).length;
       var rkm={};(data.tier_order||[]).forEach(function(t,i){rkm[t]=i;});
@@ -1435,7 +1550,7 @@
         attrs.cursor='pointer';
         var rc=svgNode('rect',attrs);
         rc.addEventListener('click',function(){goAndShowModel(si,m.spec);});
-        var t=svgNode('title',{},'scenario '+(si+1)+(d?(': '+d.clinical+' → '+d.patient):': not graded')
+        var t=svgNode('title',{},'scenario '+(si+1)+(d?(': '+tierWord(d.clinical)+' → '+tierWord(d.patient)):': not graded')
           +' — open '+m.label+'’s answers');
         rc.appendChild(t);
         svg.appendChild(rc);
@@ -1489,7 +1604,7 @@
       panels.forEach(function(p){
         var rows=gms.map(function(g){
           var m=g.m,c=(m.clinical||{}).flag_rates,q=(m.patient||{}).flag_rates;
-          return {label:tinyName(m.model),provider:g.provider,gapBefore:g.gapBefore,
+          return {label:tinyName(m.model),spec:m.model,provider:g.provider,gapBefore:g.gapBefore,
             a:c?(c[p.key]||0):null,b:q?(q[p.key]||0):null,
             a_inner:p.inner&&c?(c[p.inner]||0):null,b_inner:p.inner&&q?(q[p.inner]||0):null};
         });
@@ -1603,7 +1718,7 @@
         var c=m.clinical||{},p=m.patient||{},notes=[];
         if(!wUniform&&(c.n!=null||p.n!=null))notes.push('n='+((c.n===p.n)?c.n:(dash(c.n)+'·'+dash(p.n))));
         if(!sUniform&&m.similarity&&m.similarity.n_stimuli!=null)notes.push('overlap n='+m.similarity.n_stimuli);
-        return {label:shortName(m.model),note:notes.join(' ')||null,gapBefore:grows[i].gapBefore};
+        return {label:shortName(m.model),spec:m.model,note:notes.join(' ')||null,gapBefore:grows[i].gapBefore};
       });
       var panels=[],subBits=[];
       var to=data.tier_order;
@@ -1614,8 +1729,8 @@
       if(to&&trows.some(function(r){return r.a!=null||r.b!=null;})){
         panels.push({title:'care-urgency',rows:trows,min:1,max:to.length,decimals:1,
           aColor:'var(--clinical,#15803d)',bColor:'var(--patient,#111827)',aLabel:'clinical',bLabel:'patient'});
-        subBits.push('urgency: mean coded tier, 1='+to[0]+' … '+to.length+'='+to[to.length-1]);
-        if(data.rubric_version)subBits.push('rubric '+data.rubric_version);
+        subBits.push('urgency: mean coded tier, 1='+tierWord(to[0])+' … '+to.length+'='+tierWord(to[to.length-1]));
+        // the rubric version is in Provenance ("tier rubric"); it still decides whether the provisional note is shown
         if(/draft/i.test(String(data.rubric_version||'')))subBits.push('machine-coded, provisional until clinician review');
         document.getElementById('fig-tiers-pending').hidden=true;
       }
@@ -1655,6 +1770,32 @@
     list.appendChild(dd);
   }
 
+  // Provenance row "classifier model": the model strings the classifier was served under, as recorded
+  // (data/jev_calibration.json, models_served). Added once, when both the list and the gradings exist. The heading
+  // is the one the Methods page's Source line and the Multi-turn page's Provenance use for the same strings.
+  var provClassAfter=null;
+  function provClassifier(){
+    if(!JV_SERVED||!provClassAfter||document.getElementById('prov-classifier'))return;
+    var list=provClassAfter.parentNode;
+    var dd=el('dd',null,JV_SERVED.join(', '));
+    dd.id='prov-classifier';
+    list.insertBefore(dd,provClassAfter.nextSibling);
+    list.insertBefore(el('dt',null,'classifier model'),dd);
+    jvName();
+  }
+  // The Limitations sentence names the classifier from CLASSIFIER_NAME only when Provenance carries its model
+  // strings; a string with no entry, or any string while Provenance has no row for it, is printed as recorded.
+  function jvName(){
+    if(!JV_SERVED)return;
+    var inProv=!!document.getElementById('prov-classifier'),names=[];
+    JV_SERVED.forEach(function(m){
+      var nm=inProv?mapped(CLASSIFIER_NAME,m):null;
+      if(nm===null)nm=m;
+      if(names.indexOf(nm)<0)names.push(nm);
+    });
+    document.getElementById('jv-note-model').textContent=names.join(', ');
+  }
+
   // "2026-07-22T00:13:46Z" -> "July 22, 2026 at 12:13 AM" (UTC, matching the archive);
   // anything unparseable passes through unchanged
   function fmtStamp(iso){
@@ -1682,13 +1823,18 @@
     }
     provRow(list,'queries ran',win);
     provRow(list,'scenarios shown',String(data.scenarios.length));
+    // the scenario on screen: its archive id and source batch (provScenario)
+    provRow(list,'scenario id','');
+    list.lastChild.id='prov-scenario';
+    provScenario();
     // the stimulus sets behind the scenario list: one line per stimulus file, with how many of its registered
     // stimuli are published here (the note under the page title gives the family totals only)
     var fams=data.families||[];
     if(fams.length){
       var perFile=famFileCounts(data), sbox=el('div','prov-mline');
       fams.forEach(function(f,i){
-        var reg=f.n_items_registered, pub=perFile[i], bits=famLabel(f.family,2);
+        // a family key the page has no word for is printed here as stored, and nowhere else
+        var reg=f.n_items_registered, pub=perFile[i], bits=famLabel(f.family,2)||String(f.family);
         if(pub!=null&&reg)bits+=' · '+pub+' of '+reg+' registered stimuli published';
         else if(reg)bits+=' · '+reg+' stimuli registered';
         if(pub!=null&&reg&&pub<reg)bits+=' (owner-directed stop, logged as a pre-registration deviation 2026-07-29)';
@@ -1773,6 +1919,9 @@
     // "stimulus sets" above already links each stimuli file when the payload carries its families block
     if(!fams.length)artRow('stimuli file',repoLink(srcInfo.stimuli_file));
     if(srcInfo.judgments_file)artRow('tier codings',repoLink(srcInfo.judgments_file));
+    // the classifier's row follows the graders' files; it is added when its gradings have loaded (jvLoad)
+    provClassAfter=list.lastChild;
+    provClassifier();
     if(data.chain_head){
       var ch=el('span',null,String(data.chain_head).slice(0,16)+'…');
       ch.title=data.chain_head;

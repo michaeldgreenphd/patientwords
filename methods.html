@@ -543,6 +543,7 @@
         are drawn from that same readout. When a committed readout for this worked example
         lands, the pills render the measured tokens and the figure relabels itself; until
         then the caption above marks the schematic illustrative.</p>
+      <p id="jspace-note" hidden></p>
     </details>
     <script>
     (function(){
@@ -556,7 +557,8 @@
       // and the measured label is built below from the panels as displayed. When
       // the file is absent, does not load, is not empirical or leaves a panel
       // incomplete, the panels, the caption and the label all stay the
-      // illustrative ones. The Technical page's three-panel figure does the same.
+      // illustrative ones, and the note paragraph in the fold under the figure
+      // (#jspace-note) stays hidden. The Technical page's three-panel figure does the same.
       fetch('data/jspace.json',{cache:'no-cache'}).then(function(r){return r.ok?r.json():null;}).then(function(d){
         if(!d||!d.empirical||!d.panels)return;
         var fig=document.querySelector('.jspace'); if(!fig)return;
@@ -587,27 +589,39 @@
           var out=panel.querySelector('.jsout');
           if(out&&p.output){out.textContent=p.output;out.className='jsout '+(off?'jsout-off':'jsout-ok');}
         });
+        // measured state: the label says so and the caption keeps the model, the selection rule and the visual key.
+        // The model is fixed text (data/jspace.json has no model field; the exporter's note in the fold names it).
+        // The selection rule is the exporter's own clause, printed only when the file's note holds it word for
+        // word: a note that words the rule another way leaves the caption without one, and the note itself is in
+        // the fold. The exporter's whole note (source pair, selection rule, token filter, method credit) and the
+        // source line go, word for word, in the fold under the figure.
+        var SELECTED='chosen by scanning every committed census pair for a triple whose final-layer readouts carry the story at top-1';
         var cap=fig.querySelector('.jspace-cap');
         if(cap){cap.textContent='';var b=document.createElement('b');
           b.textContent='Empirical J-lens residual stream readout at middle layers.';cap.appendChild(b);
-          if(d.note)cap.appendChild(document.createTextNode(' '+d.note));
+          var selected=(typeof d.note==='string'&&d.note.indexOf(SELECTED)>=0)?', '+SELECTED:'';
+          cap.appendChild(document.createTextNode(' gemma-2-2b · one measured pair'+selected+'. Pills: the top words the lens reads at the middle layers. Box: the top word at the final layer, the output. Green: the output is the pair’s clinical target. Red: it is not.'));}
+        var noteP=document.getElementById('jspace-note');
+        if(noteP){noteP.textContent='';
+          if(d.note)noteP.appendChild(document.createTextNode(d.note+' '));
           // source citation built from the payload's machine-readable source block
           // (never hardcoded here, so it tracks the exporter's chosen exemplar)
-          cap.appendChild(document.createTextNode(' Source data: '));
+          noteP.appendChild(document.createTextNode('Source data: '));
           var a1=document.createElement('a');
           a1.href='https://github.com/michaeldgreenphd/patientwords/blob/main/data/jspace.json';
           a1.rel='noopener';a1.textContent='jspace.json';
-          cap.appendChild(a1);
+          noteP.appendChild(a1);
           var src=d.source||{};
           if(src.stem&&src.index!=null){
-            cap.appendChild(document.createTextNode(' · pair '+src.stem+'#'+src.index+' ('));
+            noteP.appendChild(document.createTextNode(' · pair '+src.stem+'#'+src.index+' ('));
             var a2=document.createElement('a');
             a2.href='https://github.com/michaeldgreenphd/patientwords-engine/blob/main/data/simulated/'+src.stem+'.json';
             a2.rel='noopener';a2.textContent='archived batch';
-            cap.appendChild(a2);
-            cap.appendChild(document.createTextNode(')'));
+            noteP.appendChild(a2);
+            noteP.appendChild(document.createTextNode(')'));
           }
-          cap.appendChild(document.createTextNode('.'));
+          noteP.appendChild(document.createTextNode('.'));
+          noteP.hidden=false;
         }
         // The text alternative, from what each panel now displays: its heading, its sentence, its pills, its output
         // box, and whether that box is the green one (the output is the pair's clinical target) or the red one.
@@ -691,7 +705,7 @@
     </p>
     <p>
       <b>To test whether the patient&rsquo;s wording caused
-      the failure, we patch the model by injecting the translated clinical sentence
+      the failure, we patch the model by injecting the clinical run&rsquo;s state
       at specific layers, to see if the correct medical answer recovers.</b> If the clinical
       state brings the answer back, the wording, not a gap in the model&rsquo;s knowledge, was
       the problem.
@@ -989,7 +1003,19 @@
       .then(function(d){
         var h=d.headline_metrics,div=h.tier_divergence;
         if(d.is_mock||!d.confusion_matrix||!d.confusion_matrix.length||!div)return;
-        if(d.models_served&&d.models_served.length)document.getElementById('jv-model').textContent=d.models_served.join(', ');
+        // The classifier's name, by the exact model string the file records (engine medlang_circuits/jev_client.py:
+        // Jev is typesafe/jev-1.13; the dated string is the one the provider served). The paragraph above and the
+        // matrix header below print the name of a listed string and print any other string as recorded; the
+        // Multi-turn and LLM pages use the same map. The recorded strings (models_served) are in the Source line
+        // under the tables either way. A file that records none leaves the name in the markup.
+        var CLASSIFIER_NAME={'typesafe/jev-1.13':'Jev','typesafe/jev-1.13-20260917':'Jev'};
+        if(d.models_served&&d.models_served.length){
+          var jvNames=[];
+          d.models_served.forEach(function(m){
+            var nm=Object.prototype.hasOwnProperty.call(CLASSIFIER_NAME,m)?CLASSIFIER_NAME[m]:String(m);
+            if(jvNames.indexOf(nm)<0)jvNames.push(nm);});
+          document.getElementById('jv-model').textContent=jvNames.join(', ');
+        }
         if(d.judge_model)document.getElementById('jv-judge').textContent=d.judge_model;
         var sum=document.getElementById('jv-summary');sum.textContent='';
         sum.appendChild(document.createTextNode('n = '+h.total_advice_cases.toLocaleString()+' responses graded by both \u00b7 '));
@@ -1080,6 +1106,7 @@
         pv.textContent='Source: Jev audit report '+String(d.source_report_sha256).slice(0,12)
           +' \u00b7 rubric '+(p.rubric?p.rubric.path:'\u2014')
           +' \u00b7 responses '+(p.advice_archive?p.advice_archive.path:'\u2014')
+          +(d.models_served&&d.models_served.length?' \u00b7 classifier model '+d.models_served.join(', '):'')
           +' \u00b7 classifier '+String(p.classifier_sha256||'\u2014').slice(0,12)
           +(sp2.cost_usd==null?'':' \u00b7 classifier spend $'+sp2.cost_usd.toFixed(4)+' over '+sp2.calls.toLocaleString()+' calls');
         pv.hidden=false;
@@ -1219,14 +1246,18 @@
       }
       var PMAX=Math.max(ex.clean_prob*1.2,Math.max.apply(null,ex.patched.filter(function(v){return v!=null;}))*1.08);
       function py(p){return probTop+PLOT_H*(1-p/PMAX);}
-      // name what the patch actually injects — the clinical translation of the pair —
-      // and rename the axis to state the mechanism (falls back to the clinical
-      // wording until the backend adds a dedicated translated_sentence)
-      txt(svg,LEFT,probTop-30,'translated: “'+(ex.translated_sentence||ex.labels.clinical||'')+'”',
-        {'font-size':9,fill:'#8a8a84','font-family':'ui-monospace,SF Mono,Menlo,Consolas,monospace'});
-      txt(svg,0,probTop-18,'patch: inject',{'font-size':11,fill:'#1c1c19',
+      // name the sentence the patch injects only when the file carries a dedicated
+      // translated_sentence. The committed file has none (the engine's export_jlens_depth.py
+      // does not write the field), so no line is drawn: a line labelled "translated" must not
+      // print the clinical wording, which the clinical lane above already shows under its own label.
+      if(ex.translated_sentence)
+        txt(svg,LEFT,probTop-30,'translated: “'+ex.translated_sentence+'”',
+          {'font-size':9,fill:'#8a8a84','font-family':'ui-monospace,SF Mono,Menlo,Consolas,monospace'});
+      // the patch source is the pair's clinical run (engine export_jlens_depth.py: clean = clinical wording),
+      // not a translation run
+      txt(svg,0,probTop-18,'patch from',{'font-size':11,fill:'#1c1c19',
         'font-family':'Iowan Old Style,Palatino,Georgia,serif'});
-      txt(svg,0,probTop-6,'clinical translation',{'font-size':8.5,fill:'#6d6c66'});
+      txt(svg,0,probTop-6,'clinical run',{'font-size':8.5,fill:'#6d6c66'});
       // best recovery layer: argmax over the patch bars EXCLUDING the output
       // layer (l < L−1) — injecting the clinical state at the read-out layer
       // recovers the answer trivially and must not headline; a leading null

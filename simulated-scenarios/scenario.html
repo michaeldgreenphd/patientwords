@@ -475,17 +475,20 @@
           +(tgt?' · target “'+tgt+'”':'')+tgtNote));
         card.appendChild(no);
 
+        // with no target token there is nothing to put inside prob( ): name
+        // the quantity in words
+        var probLabel=tgt.trim()?'prob('+tgt.trim()+')':'target probability';
         var grid=el('div','sim-prompts');
         var pc=el('div');
         pc.appendChild(el('span','sim-side','clinical phrasing'));
         pc.appendChild(el('p','sim-prompt sim-c',s.clinical_prompt));
-        pc.appendChild(spreadDetails('prob('+tgt.trim()+')',m.prob_clinical,m.top_clinical,m.spread_clinical,m.target_token));
+        pc.appendChild(spreadDetails(probLabel,m.prob_clinical,m.top_clinical,m.spread_clinical,m.target_token));
         var mc=massLine((m.clinical_mass||{}).clinical);
         if(mc)pc.appendChild(mc);
         var pp=el('div');
         pp.appendChild(el('span','sim-side','patient phrasing (simulated)'));
         pp.appendChild(el('p','sim-prompt sim-p',s.patient_prompt));
-        pp.appendChild(spreadDetails('prob('+tgt.trim()+')',m.prob_patient,m.top_patient,m.spread_patient,m.target_token));
+        pp.appendChild(spreadDetails(probLabel,m.prob_patient,m.top_patient,m.spread_patient,m.target_token));
         var mp=massLine((m.clinical_mass||{}).patient);
         if(mp)pp.appendChild(mp);
         grid.appendChild(pc);grid.appendChild(pp);
@@ -539,8 +542,8 @@
             pn.appendChild(document.createTextNode(
               'this phrase wasn’t traced on '+currentModel+'; pick another model above. '+
               'the full render set is not published on this site; the scenario’s complete '+
-              'measurements across traced models are downloadable at '));
-            var mx=el('a',null,'data/simulated_archive.csv');
+              'measurements across traced models are downloadable in '));
+            var mx=el('a',null,'the scenario archive (CSV)');
             mx.href='../data/simulated_archive.csv';
             pn.appendChild(mx);
           }else if(m.screening&&m.screening.status==='screened_out'){
@@ -555,8 +558,8 @@
               'this scenario’s full circuit render isn’t in the public demonstration set '+
               '(the site keeps the largest-effect scenarios: prediction flips first, then '+
               'largest wording gap). the full render set is not published on this site; '+
-              'the scenario’s complete measurements are shown above and downloadable at '));
-            var cx=el('a',null,'data/simulated_archive.csv');
+              'the scenario’s complete measurements are shown above and downloadable in '));
+            var cx=el('a',null,'the scenario archive (CSV)');
             cx.href='../data/simulated_archive.csv';
             pn.appendChild(cx);
             // engine-stamped link to this scenario's hosted render on the

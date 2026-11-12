@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Results catalogue — PatientWords</title>
-<meta name="description" content="Every measured run in the PatientWords engine: the experiment, the model, how many pairs moved in each direction, run status, evidence class, clinical-review status and whether an analysis includes it.">
+<meta name="description" content="Every measured run in the PatientWords engine: the experiment, the model, how many pairs moved in each direction, run status, evidence class, clinical-review status and analysis eligibility.">
 <link rel="canonical" href="https://michaeldgreenphd.github.io/patientwords/results/">
 <meta name="theme-color" content="#faf9f5">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23faf9f5'/%3E%3Crect x='9' y='9' width='30' height='30' fill='%23111827'/%3E%3Crect x='25' y='25' width='30' height='30' fill='%2315803d'/%3E%3C/svg%3E">
@@ -32,6 +32,8 @@
     outline:2px solid var(--clinical);outline-offset:2px}
   ::selection{background:#dbe9df}
   code,.id{font-family:var(--mono);font-size:var(--t-meta);overflow-wrap:anywhere}
+  /* a schema value breaks after an underscore, and inside a word only where a line cannot hold the word */
+  code.schema{overflow-wrap:break-word}
   .skip{position:absolute;left:-9999px;top:0;background:var(--paper);color:var(--ink);
     padding:var(--s2) var(--s4);border:1px solid var(--ink);z-index:30}
   .skip:focus{left:var(--s2)}
@@ -343,17 +345,17 @@
 </header>
 <main id="main">
   <h1>Results catalogue</h1>
-  <p class="subtitle">Browse every measured run: the experiment, the model, how many pairs moved lower, stayed equal or moved higher, and whether an analysis includes the run. Open a run for its rows, sources and files.</p>
+  <p class="subtitle">Browse every measured run: the experiment, the model, how many pairs moved lower, stayed equal or moved higher, and its analysis eligibility. Open a run for its rows, sources and files.</p>
   <p class="shared" id="cat-review" hidden></p>
   <p class="traced" id="cat-inv"><span class="tp">Inventory: loading</span></p>
   <div class="lead-links">
     <details class="meth" id="about">
       <summary>About this catalogue</summary>
       <div class="about">
-        <p>The catalogue lists every measured run whatever its result: negative, zero or positive, finished or stopped part-way, included in an analysis or not. Being listed is not a claim.</p>
+        <p>The catalogue lists every measured run whatever its result: negative, zero or positive, finished or stopped part-way, eligible for an analysis or not. Being listed is not a claim.</p>
         <p><b>What is measured.</b> Target-token probability: the next-token probability of the first encoded target token, from 0 to 1, after one sentence-completion prompt. It is a measurement of one token, not a score of a whole answer, and nothing here is medical advice. Each row is one measurement; the files carry no interval and no effect estimate.</p>
         <p><b>The stimuli.</b> The phrasings are test stimuli written by a model or by hand, not statements from patients. The two wordings of a pair are meant to describe one clinical situation; clinical review decides whether they do. Review status: <span id="about-review">not loaded</span>. A row in the table states its review status only where it differs from the most common one.</p>
-        <p><b>Evidence class.</b> It differs between runs and is stated on each row: <span id="about-evidence">not loaded</span>. Whether an analysis includes a run is a separate fact, decided by a named rule in <a href="#methods-source">Methods &amp; source</a>.</p>
+        <p><b>Evidence class.</b> It differs between runs and is stated on each row: <span id="about-evidence">not loaded</span>. Eligibility is determined by the rules in <a href="#methods-source">Methods &amp; source</a>.</p>
       </div>
     </details>
     <p class="jump"><a href="#downloads">Downloads and field definitions</a> · <a href="#methods-source">Methods &amp; source</a></p>
@@ -380,7 +382,7 @@
             <select class="flt-sel" id="f-evidence"><option value="">all</option></select>
           </div>
           <div class="flt-g">
-            <label class="flt-lbl" for="f-membership">Included in analysis</label>
+            <label class="flt-lbl" for="f-membership">Analysis eligibility</label>
             <select class="flt-sel" id="f-membership"><option value="">all</option></select>
           </div>
           <div class="flt-g">
@@ -436,7 +438,7 @@
             <th scope="col" role="columnheader" class="c-model">Model</th>
             <th scope="col" role="columnheader" class="c-meas">Measurements <small>public rows; lower, equal, higher: the everyday wording against the medical</small></th>
             <th scope="col" role="columnheader" class="c-status">Run status</th>
-            <th scope="col" role="columnheader" class="c-ctx">Study context <small>evidence class; inclusion in an analysis</small></th>
+            <th scope="col" role="columnheader" class="c-ctx">Study context <small>evidence class; analysis eligibility</small></th>
           </tr></thead>
           <tbody id="cat-body" role="rowgroup"></tbody>
         </table>
@@ -472,7 +474,7 @@
           <dt>screening_status</dt>
           <dd>the screening record of the row, when the run recorded one</dd>
           <dt>part_state · analysis_memberships</dt>
-          <dd>the Run status of the row's part (execution_state) and the analyses that include the part (Included in analysis)</dd>
+          <dd>the Run status of the row's part (execution_state) and the analysis rules that admit the part (Analysis eligibility)</dd>
         </dl>
         <h3>Label values</h3>
         <div class="legend" id="legend-body"></div>
@@ -506,7 +508,7 @@
       </section>
 
       <section id="memberships" aria-labelledby="h-mem">
-        <h3 id="h-mem">Included in analysis: the rules</h3>
+        <h3 id="h-mem">Analysis eligibility: the rules</h3>
         <table class="tbl stack" role="table" aria-labelledby="h-mem">
           <thead role="rowgroup"><tr role="row">
             <th scope="col" role="columnheader">Rule (membership)</th>
@@ -517,7 +519,7 @@
           </tr></thead>
           <tbody id="tot-mem" role="rowgroup"></tbody>
         </table>
-        <p class="note">A membership is a named rule that decides which parts may enter an analysis. Being listed in this catalogue does not place a run in any analysis. Each run's Methods &amp; source gives the reason for every part outside a rule.</p>
+        <p class="note">A membership is a named rule that decides which parts may enter an analysis. A part a rule admits is eligible; a published statistic may use fewer, because each collector keeps the stimulus families it analyses. Being listed in this catalogue does not place a run in any analysis. Each run's Methods &amp; source gives the reason for every part outside a rule.</p>
         <div class="pin" id="pin">
           <h3>Study version</h3>
           <p id="pin-lead"></p>
@@ -569,11 +571,87 @@
   var ROWS_RE=/^rows\/[A-Za-z0-9._-]+\.json$/;
   var STIM_RE=/^stimuli\/[A-Za-z0-9._-]+\.json$/;
   var DASH='—';
-  // Display labels only. The schema values stay in titles, in the field definitions and in Methods & source.
-  var CLASS_LABEL={study_batch:'Study batch',hand_authored_exploratory:'Hand-authored set',
-    redistribution_limited_text:'Third-party text set'};
+  // Display labels only. Each table below is keyed on the exact stored value and written as one JSON object, so
+  // that the engine's scripts/check_results_page.py reads the same copy from this file. A value with no entry is
+  // printed as stored: no label is made from an identifier. The stored values stay in titles, in the field
+  // definitions and in Methods & source.
+  var CLASS_LABEL={"study_batch":"Study batch","hand_authored_exploratory":"Hand-authored set",
+    "redistribution_limited_text":"Third-party text set","unclassified":"Unclassified stimulus set"};
+  // FAMILY_LABEL is keyed on the stimulus set name (stem) with its date stamp removed.
+  var FAMILY_LABEL={
+    "pairs":"Study batch",
+    "pairs_txopus":"Study batch alias for the Opus translator arm",
+    "pairs_txplacebo":"Study batch alias for the translation placebo arm",
+    "agscen":"Hand-authored set",
+    "agscen_commas":"Hand-authored set, comma test",
+    "agscen_scale":"Hand-authored set, scale round",
+    "agscen_r5":"Hand-authored set, round 5",
+    "agscen_r6":"Hand-authored set, round 6",
+    "agscen_r7":"Hand-authored set, round 7",
+    "agscen_r7b":"Hand-authored set, round 7b",
+    "pabharvest":"Third-party text set",
+    "dialects":"Variant set around a fixed term",
+    "quadrants":"Four-quadrant batch, syntax by terminology",
+    "drift_sentinel":"Drift sentinel",
+    "depth_drift_sentinel":"Logit-lens depth probe on the drift sentinel pairs",
+    "depth_pairs":"Logit-lens depth probe on a study batch",
+    "depth_k200_pairs":"Logit-lens depth probe on a study batch, top-k 200",
+    "urgency_downgrades":"Reviewed downgrade set",
+    "urgency_downgrades_steer":"Reviewed downgrade set, steering pass",
+    "urgency_downgrades_boostgrid":"Reviewed downgrade set, steering-grid subset",
+    "urgency_downgrades2":"Multi-tier downgrade set, version 2",
+    "urgency_lostlate":"Lost-late pair set",
+    "downgrades_txhaiku":"Reviewed downgrade set, Haiku translator arm",
+    "grandma_r2":"Reviewed downgrade set, pair 17 re-render",
+    "boostgrid_s2p5":"Steering grid, strength 2.5",
+    "boostgrid_s5":"Steering grid, strength 5",
+    "boostgrid_s20":"Steering grid, strength 20",
+    "boostgrid_lowrank":"Steering grid, strength 10, rank offset 5",
+    "boostgrid_lowrank_r2":"Steering grid, strength 10, rank offset 5, rerun",
+    "titration_fresh_s2p5":"Steering titration on fresh pairs, strength 2.5",
+    "titration_fresh_s5":"Steering titration on fresh pairs, strength 5",
+    "titration_fresh_s10":"Steering titration on fresh pairs, strength 10",
+    "titration_fresh_s20":"Steering titration on fresh pairs, strength 20",
+    "txcorpus":"Translated corpus",
+    "featured_sim85":"Key example re-render",
+    "featured_sim85_r2":"Key example re-render",
+    "featured_sim85_r3":"Key example re-render, target tokens forced",
+    "imported_pairs":"Hand-measured pairs",
+    "ci_pairs_2panel":"Committed sample pairs",
+    "repeatability_r1":"Repeatability sample, run 1",
+    "repeatability_r2":"Repeatability sample, run 2",
+    "repeatability_r3":"Repeatability sample, run 3",
+    "steer_pilot_spec":"Lens steering pilot",
+    "steer_lowdose_spec":"Lens steering, low-dose extension",
+    "steer_spec_100":"Lens steering, 100 items",
+    "verify_pairs":"Third-implementation probability check",
+    "verify_control_identity":"Negative control, identical prompts",
+    "verify_control_qualified":"Negative control, qualifier inserted"
+  };
+  var EVIDENCE_LABEL={"registered_cohort":"registered cohort","exploratory_post_registration":"exploratory, post-registration",
+    "exploratory_hand_authored":"exploratory, hand-authored","exploratory_third_party_source":"exploratory, third-party source",
+    "unclassified":"unclassified"};
+  var STATE_LABEL={"completed":"completed","partial":"partial","empty":"empty",
+    "completion_not_recorded":"completion not recorded","unreadable":"unreadable"};
+  var REVIEW_LABEL={"domain_review_pending":"domain review pending",
+    "owner_read_equivalence_and_domain_review_pending":"owner-read, equivalence and domain review pending"};
+  var SAMPLING_LABEL={"observational":"observational","outcome_selected":"outcome-selected","other":"other stimulus family"};
+  var SCREENING_LABEL={"passed":"passed","screened_out":"screened out"};
+  var RESTRICTION_LABEL={"sealed_holdout":"Sealed holdout","redistribution_limited_text":"Redistribution-limited text",
+    "artifact_integrity":"Artifact integrity","uncalibrated_clinical_mass":"Uncalibrated clinical-feature mass"};
+  var INSTRUMENT_LABEL={"jlens":"Jacobian-lens readout","loglens":"Logit-lens readout","jsteer":"Lens steering-swap check",
+    "patch":"Activation patching","context":"Context-inoculation pairs"};
+  // SUFFIX_LABEL names a part of a run id that stands between the stimulus set name and the instrument.
+  var SUFFIX_LABEL={"lenspairs":"lens reader pairs","context":"context-inoculation pairs"};
+  var RULE_LABEL={"study-interim/1":"interim study analysis","exploratory-open/1":"exploratory analysis"};
+  // RULE_BADGE is the short wording of a rule in a badge. A rule admits parts; it does not show that a part
+  // entered a published result (the engine's collectors each keep the stimulus families they analyse), so a
+  // badge says "eligible", never "in" an analysis.
+  var RULE_BADGE={"study-interim/1":"study-eligible","exploratory-open/1":"exploratory-eligible"};
+  // The label of a stimulus set whose family and stimulus class both have no entry above.
+  var CLASS_OTHER="Stimulus set";
   var AXIS_LABEL={execution_state:'Run status',artifact_integrity:'Artifact integrity',evidence_class:'Evidence class',
-    sampling:'Sampling'};
+    sampling:'Sampling',clinical_review:'Clinical review',stimulus_class:'Stimulus class'};
   var SORT_TEXT={'':'run id, A to Z','date':'batch date, newest first','model':'model, A to Z'};
 
   function $(id){return document.getElementById(id);}
@@ -590,7 +668,9 @@
   function isNum(v){return typeof v==='number'&&isFinite(v);}
   function int(v){return isNum(v)?v:0;}
   function fmtInt(v){return isNum(v)?v.toLocaleString('en-US'):DASH;}
-  function human(v){return typeof v==='string'&&v?v.replace(/_/g,' '):DASH;}
+  function has(map,key){return typeof key==='string'&&Object.prototype.hasOwnProperty.call(map,key);}
+  // The label of a stored value: its entry in the table, else the value as stored, else a dash for a missing value.
+  function labelOf(map,v){return typeof v==='string'&&v?(has(map,v)?map[v]:v):DASH;}
   function plural(n,one,many){return fmtInt(n)+' '+(n===1?one:many);}
   // Display only: four decimal places. The stored value stays in the title and in the downloads.
   function fmtNum(v){
@@ -615,6 +695,14 @@
   // ---------------------------------------------------------------- state
   var INDEX=null,RUNS=[],BYDIR=Object.create(null),ORDER=Object.create(null),EXP=Object.create(null);
   var LEGEND={},MEMBERS={},RESTR={},DEFAULT_M='',ANALYSIS_IDS=[],DISPLAY_IDS=[];
+  // every model id the index lists; an instrument run's model is shown only when its run id names one of these
+  var MODEL_IDS=Object.create(null);
+  // experiment title -> the stimulus set names (stems) that carry it. Two sets made in the same minute share one.
+  var TITLE_STEMS=Object.create(null);
+  // open-run heading (experiment title and model) -> how many runs of the index carry it. Two runs can share one:
+  // sets made in the same minute, or one set measured on one model by two backends.
+  var HEADING_RUNS=Object.create(null);
+  function runHeading(r){return experiment(r).title+' · '+modelLabel(r);}
   // the clinical-review status most runs record: stated once above the list, and in a row only where it differs
   var SHARED_REVIEW='';
   var F={q:'',evidence:'',stimulus:'',state:'',visibility:'',membership:'',review:'',rows:'',sort:'',issue:false};
@@ -631,33 +719,73 @@
     return axis+': '+(key||'not recorded')+(t?' ('+t+')':'');
   }
 
-  // ---------------------------------------------------------------- derived labels
-  // The experiment label is derived from the stimulus set name (stem) and the stimulus class already in the
-  // index: the family, and the batch date the stem carries. Nothing is looked up elsewhere.
+  // ---------------------------------------------------------------- experiment and model labels
+  // The experiment label: the entry of FAMILY_LABEL for the stimulus set's family (the stem with its date stamp
+  // removed), then the batch date the stem carries. A family with no entry gets the label of its stimulus class,
+  // and its row keeps the stem under the title (labelled is false). No word of a label is made from a stem.
   function experiment(r){
     var key=r.run_dir;
     if(EXP[key])return EXP[key];
-    var stem=str(r.stem)||key,date='',sortKey='',rest=stem;
+    var stem=str(r.stem)||key,date='',sortKey='',family=stem;
     var m=/(?:^|_)(\d{4})(\d{2})(\d{2})(T\d*Z?)?(?=_|$)/.exec(stem);
     if(m&&+m[1]>=2000&&+m[1]<2100&&+m[2]>=1&&+m[2]<=12&&+m[3]>=1&&+m[3]<=31){
       date=m[1]+'-'+m[2]+'-'+m[3];sortKey=m[1]+m[2]+m[3];
       var t=/^T(\d{2})(\d{2})(\d{2})Z$/.exec(m[4]||'');
       if(t&&+t[1]<24&&+t[2]<60){date+=' '+t[1]+':'+t[2]+' UTC';sortKey+=t[1]+t[2]+t[3];}
       else sortKey+='000000';
-      rest=stem.slice(0,m.index)+'_'+stem.slice(m.index+m[0].length);
+      family=(stem.slice(0,m.index)+'_'+stem.slice(m.index+m[0].length)).split('_').filter(function(x){return x;}).join('_');
     }
-    var tokens=rest.split('_').filter(function(x){return x;});
-    var known=CLASS_LABEL[str(r.stimulus_class)]||'',name;
-    if(known)name=known+(tokens.length>1?' '+tokens.slice(1).join(' '):'');
-    else{name=tokens.join(' ')||stem;name=name.charAt(0).toUpperCase()+name.slice(1);}
-    var suffix=key.indexOf(stem+'__')===0?key.slice(stem.length+2):'';
-    EXP[key]={name:name,date:date,title:name+(date?' · '+date:''),sortKey:sortKey,stem:stem,
-      suffix:suffix&&suffix!==str(r.model)?suffix.split('__').join(' · '):''};
+    var labelled=has(FAMILY_LABEL,family);
+    var name=labelled?FAMILY_LABEL[family]:(has(CLASS_LABEL,r.stimulus_class)?CLASS_LABEL[r.stimulus_class]:CLASS_OTHER);
+    // The rest of the run id after the stimulus set name. For an instrument run it names the instrument and, in
+    // most runs, a model: the model is read from it only when that text equals a model id the index lists.
+    var suffix=key.indexOf(stem+'__')===0?key.slice(stem.length+2):'',inst=str(r.instrument),model='',rest=[];
+    if(suffix&&suffix!==str(r.model)){
+      suffix.split('__').forEach(function(seg){
+        if(!seg||(inst&&seg===inst))return;               // the instrument alone: the first line names it
+        var after=inst&&seg.indexOf(inst+'_')===0?seg.slice(inst.length+1):'';
+        if(after&&!model&&MODEL_IDS[after]){model=after;return;}
+        rest.push(labelOf(SUFFIX_LABEL,seg));
+      });
+    }
+    EXP[key]={name:name,date:date,title:name+(date?' · '+date:''),sortKey:sortKey,stem:stem,family:family,
+      labelled:labelled,model:model,suffix:suffix,second:(model?[model]:[]).concat(rest).join(' · ')};
     return EXP[key];
   }
-  function modelLabel(r){
-    return str(r.model)||(str(r.instrument)?'instrument: '+r.instrument:'not recorded');
+  // An instrument run records no model. Its first line names the instrument: the entry of INSTRUMENT_LABEL, or the
+  // stored code for an instrument with no entry.
+  function instrumentLabel(r){
+    return has(INSTRUMENT_LABEL,r.instrument)?INSTRUMENT_LABEL[r.instrument]:'instrument: '+r.instrument;
   }
+  function modelLabel(r){
+    if(str(r.model))return r.model;
+    if(!str(r.instrument))return 'not recorded';
+    var named=experiment(r).model;
+    return instrumentLabel(r)+(named?' · '+named:'');
+  }
+  // the order "model, A to Z" keeps its key: the model id, or the stored instrument code
+  function modelSortKey(r){
+    return (str(r.model)||(str(r.instrument)?'instrument: '+r.instrument:'not recorded')).toLowerCase();
+  }
+  // A rule in a badge, in the fewest words: its RULE_BADGE entry, or "eligible under <id>" for a rule with no
+  // entry. The rule's full name (RULE_LABEL) is in the filter option and in the open run's line, and its id and
+  // recorded label are in the badge's title.
+  function ruleBadge(m){return has(RULE_BADGE,m)?RULE_BADGE[m]:'eligible under '+m;}
+  function studyBadgeText(){return ruleBadge(DEFAULT_M);}
+  // In a run's row the evidence class leaves out the words the experiment title already gives. Each entry:
+  // evidence class -> [the stimulus class whose label carries those words, the words the row keeps]. It applies
+  // only where the run has that stimulus class and its title starts with that class's label; any other run prints
+  // the whole EVIDENCE_LABEL entry. The whole label is in the Evidence class filter and in the open run, and the
+  // stored value and its definition are in the badge's title.
+  var EVIDENCE_IN_ROW={"exploratory_hand_authored":["hand_authored_exploratory","exploratory"],
+    "exploratory_third_party_source":["redistribution_limited_text","exploratory"]};
+  function rowEvidenceBadge(r,x){
+    var v=str(r.evidence_class),e=has(EVIDENCE_IN_ROW,v)?EVIDENCE_IN_ROW[v]:null;
+    if(e&&r.stimulus_class===e[0]&&has(CLASS_LABEL,e[0])&&x.name.indexOf(CLASS_LABEL[e[0]])===0)
+      return badge(e[1],'',schemaTitle('evidence_class',v));
+    return evidenceClassBadge(v);
+  }
+  function stemLineShown(x){return !x.labelled||Object.keys(obj(TITLE_STEMS[x.title])).length>1;}
   function reviewPending(v){return /pending$/.test(str(v));}
   function hasIssue(r){
     var st=obj(r.execution_states);
@@ -677,10 +805,20 @@
     return b;
   }
   function evidenceClassBadge(v,prefix){
-    return badge((prefix||'')+human(v),'',schemaTitle('evidence_class',v));
+    return badge((prefix||'')+labelOf(EVIDENCE_LABEL,v),'',schemaTitle('evidence_class',v));
   }
   function statusBadge(k,count,showCount){
-    return badge(human(k)+(showCount?' ×'+fmtInt(count):''),'',schemaTitle('execution_state',k));
+    return badge(labelOf(STATE_LABEL,k)+(showCount?' ×'+fmtInt(count):''),'',schemaTitle('execution_state',k));
+  }
+  // A stored schema value, printed as code in Methods & source. The text is the value exactly as stored; a line
+  // may break after an underscore.
+  function code(v){
+    var c=el('code','schema'),bits=(typeof v==='string'&&v?v:'not recorded').split('_');
+    bits.forEach(function(b,i){
+      c.appendChild(document.createTextNode(b+(i<bits.length-1?'_':'')));
+      if(i<bits.length-1)c.appendChild(document.createElement('wbr'));
+    });
+    return c;
   }
   function td(label,cls){
     var c=el('td',cls||'');
@@ -701,22 +839,34 @@
     dl.appendChild(el('dt','',key));
     dl.appendChild(el('dd','',value==null||value===''?DASH:value));
   }
+  // a Methods & source row whose value starts with a stored schema value, then plain text
+  function kvCode(dl,key,before,stored,after){
+    dl.appendChild(el('dt','',key));
+    var dd=el('dd','');
+    if(before)dd.appendChild(document.createTextNode(before));
+    dd.appendChild(code(stored));
+    if(after)dd.appendChild(document.createTextNode(after));
+    dl.appendChild(dd);
+  }
   function memberTitle(m){
     var label=str(obj(MEMBERS[m]).label);
-    return 'Included in analysis: '+m+(label?' ('+label+')':'');
+    return 'Eligible under analysis rule '+m+(label?' ('+label+')':'')+'; a published statistic may use fewer runs';
   }
-  // "Included in analysis" for a run: the study version first, then any other analysis rule.
-  function inclusionBadge(r){
+  // Analysis eligibility of a run: the study version first, then any other analysis rule.
+  function eligibilityBadge(r){
     var parts=obj(r.analysis_parts),n=int(r.n_parts),k=DEFAULT_M?int(parts[DEFAULT_M]):0;
-    if(k>0)return badge('in study analysis'+(k<n?' ('+k+' of '+n+' parts)':''),'',memberTitle(DEFAULT_M));
+    if(k>0)return badge(studyBadgeText()+(k<n?' ('+k+' of '+n+' parts)':''),'',memberTitle(DEFAULT_M));
     var other=ANALYSIS_IDS.filter(function(m){return m!==DEFAULT_M&&int(parts[m])>0;});
-    if(other.length)return badge('in '+other.join(', ')+' only','',other.map(memberTitle).join('; '));
-    return badge('in no analysis','dim','no analysis rule includes a part of this run');
+    if(other.length)return badge(other.map(ruleBadge).join(', ')+' only','',other.map(memberTitle).join('; '));
+    return badge('not eligible','dim','no analysis rule admits a part of this run');
   }
-  function inclusionText(r){
+  // Part counts per analysis rule. With ids: the rule ids, for Methods & source. Without: each rule's entry in
+  // RULE_LABEL, for the open run; a rule with no entry is shown by its id, as in Methods & source.
+  function eligibilityText(r,ids){
     var parts=obj(r.analysis_parts),n=int(r.n_parts);
     var bits=ANALYSIS_IDS.map(function(m){
-      return (m===DEFAULT_M?'study version ':'')+m+': '+fmtInt(int(parts[m]))+' of '+fmtInt(n)+' parts';
+      var name=!ids&&has(RULE_LABEL,m)?RULE_LABEL[m]:(m===DEFAULT_M?'study version ':'')+m;
+      return name+': '+fmtInt(int(parts[m]))+' of '+fmtInt(n)+' parts';
     });
     return bits.length?bits.join(' · '):'no analysis rule is recorded';
   }
@@ -753,13 +903,14 @@
       var said='Simulated stimuli: test phrasings written by a model or by hand, not statements from patients. '+
         'Clinical review of the stimuli is pending for '+
         (pending===RUNS.length?'all '+fmtInt(RUNS.length)+' runs':fmtInt(pending)+' of '+fmtInt(RUNS.length)+' runs')+'.';
-      order.forEach(function(k){if(!reviewPending(k))said+=' '+human(k)+': '+plural(counts[k],'run','runs')+'.';});
+      order.forEach(function(k){if(!reviewPending(k))said+=' '+labelOf(REVIEW_LABEL,k)+': '+plural(counts[k],'run','runs')+'.';});
       flag.appendChild(document.createTextNode(said));
       flag.title=order.map(function(k){return 'clinical_review: '+k+' ('+plural(counts[k],'run','runs')+')';}).join('; ');
       flag.hidden=false;
     }
     $('about-review').textContent=order.length?order.map(function(k){
-      return human(k)+' ('+plural(counts[k],'run','runs')+')';}).join('; '):'not recorded';
+      return labelOf(REVIEW_LABEL,k)+' ('+plural(counts[k],'run','runs')+')';}).join('; '):'not recorded';
+    $('about-review').title=flag.title;
 
     var ev={},evKeys=[];
     RUNS.forEach(function(r){var k=str(r.evidence_class);if(!(k in ev)){ev[k]=0;evKeys.push(k);}ev[k]++;});
@@ -842,7 +993,7 @@
     var ex=$('tot-ex');ex.textContent='';
     var st=obj(t.execution_state),sk=Object.keys(st).sort();
     sk.forEach(function(k){
-      var r=plainRow([{text:human(k)},{cls:'num',text:fmtInt(st[k])}]);
+      var r=plainRow([{text:labelOf(STATE_LABEL,k)},{cls:'num',text:fmtInt(st[k])}]);
       r.firstChild.title=schemaTitle('execution_state',k);
       ex.appendChild(r);
     });
@@ -884,7 +1035,11 @@
     var body=$('restr-body');body.textContent='';
     Object.keys(RESTR).forEach(function(name){
       var info=obj(RESTR[name]),r=tr(''),c;
-      c=td('Restriction');c.appendChild(el('b','',human(name)));r.appendChild(c);
+      c=td('Restriction');
+      var rn=el('span','');
+      rn.appendChild(el('b','ln',labelOf(RESTRICTION_LABEL,name)));
+      if(has(RESTRICTION_LABEL,name)){var sn=code(name);sn.className+=' ln';rn.appendChild(sn);}   // the stored name, under its label
+      c.appendChild(rn);r.appendChild(c);
       c=td('Count','num');c.appendChild(el('span','',fmtInt(info.count)+(str(info.count_unit)?' '+str(info.count_unit):'')));r.appendChild(c);
       c=td('Scope');c.appendChild(el('span','',str(info.scope)||DASH));r.appendChild(c);
       c=td('Responsible');c.appendChild(el('span','',str(info.responsible_role)||DASH));r.appendChild(c);
@@ -895,17 +1050,28 @@
   }
   function renderLegend(){
     var box=$('legend-body');box.textContent='';
+    function group(axis,keys,define){
+      var d=document.createElement('div');
+      var h=el('h3','',has(AXIS_LABEL,axis)?AXIS_LABEL[axis]+' ':'');
+      h.appendChild(el('code','',axis));
+      d.appendChild(h);
+      var dl=document.createElement('dl');
+      keys.forEach(function(k){dl.appendChild(el('dt','',k));dl.appendChild(el('dd','',define(k)));});
+      d.appendChild(dl);box.appendChild(d);
+    }
     var first=['execution_state','artifact_integrity','evidence_class','sampling'];
     first.concat(Object.keys(LEGEND).filter(function(k){return first.indexOf(k)<0;})).forEach(function(axis){
       var entries=obj(LEGEND[axis]),keys=Object.keys(entries);
       if(!keys.length)return;
-      var d=document.createElement('div');
-      var h=el('h3','',(AXIS_LABEL[axis]||human(axis))+' ');
-      h.appendChild(el('code','',axis));
-      d.appendChild(h);
-      var dl=document.createElement('dl');
-      keys.forEach(function(k){dl.appendChild(el('dt','',k));dl.appendChild(el('dd','',str(entries[k])));});
-      d.appendChild(dl);box.appendChild(d);
+      group(axis,keys,function(k){return str(entries[k]);});
+    });
+    // The index defines no values for these two fields. Each stored value its runs record is listed with the
+    // label this page shows for it.
+    [['clinical_review',REVIEW_LABEL],['stimulus_class',CLASS_LABEL]].forEach(function(a){
+      if(isObj(LEGEND[a[0]])&&Object.keys(LEGEND[a[0]]).length)return;
+      var keys=Object.keys(countBy(function(r){return [str(r[a[0]])];})).filter(function(k){return k;}).sort();
+      if(!keys.length)return;
+      group(a[0],keys,function(k){return has(a[1],k)?'shown on this page as: '+a[1][k]:'shown on this page as stored';});
     });
     if(!box.firstChild)box.appendChild(el('p','note','No label definition is recorded in this index.'));
   }
@@ -922,22 +1088,24 @@
     pairs.forEach(function(p){var o=el('option','',p[1]);o.value=p[0];sel.appendChild(o);});
   }
   function buildFilters(){
-    function opts(counts){
-      return Object.keys(counts).sort().map(function(k){return [k,human(k)+' · '+fmtInt(counts[k])];});
+    // an option's value is the stored value; its text is that value's label, or the value as stored
+    function opts(counts,map){
+      return Object.keys(counts).sort().map(function(k){return [k,labelOf(map,k)+' · '+fmtInt(counts[k])];});
     }
-    fillSelect('f-evidence',opts(countBy(function(r){return [str(r.evidence_class)];})));
-    fillSelect('f-stimulus',opts(countBy(function(r){return [str(r.stimulus_class)];})));
-    fillSelect('f-review',opts(countBy(function(r){return [str(r.clinical_review)];})));
+    fillSelect('f-evidence',opts(countBy(function(r){return [str(r.evidence_class)];}),EVIDENCE_LABEL));
+    fillSelect('f-stimulus',opts(countBy(function(r){return [str(r.stimulus_class)];}),CLASS_LABEL));
+    fillSelect('f-review',opts(countBy(function(r){return [str(r.clinical_review)];}),REVIEW_LABEL));
     var states=countBy(function(r){return Object.keys(obj(r.execution_states));});
-    var st=opts(states);
+    var st=opts(states,STATE_LABEL);
     var none=RUNS.filter(function(r){return !Object.keys(obj(r.execution_states)).length;}).length;
     if(none)st.push(['none','no summary part · '+fmtInt(none)]);
     fillSelect('f-state',st);
-    fillSelect('f-visibility',opts(countBy(function(r){return [str(r.visibility)];})));
-    var m=DEFAULT_M||'the default membership';
+    fillSelect('f-visibility',opts(countBy(function(r){return [str(r.visibility)];}),{}));
+    // the study version by its entry in RULE_LABEL; a rule with no entry keeps its id in the option
+    var m=has(RULE_LABEL,DEFAULT_M)?'the '+RULE_LABEL[DEFAULT_M]:'the study analysis, '+(DEFAULT_M||'the default membership');
     var inside=RUNS.filter(function(r){return int(obj(r.analysis_parts)[DEFAULT_M])>0;}).length;
-    fillSelect('f-membership',[['inside','in the study analysis, '+m+' (at least one part) · '+fmtInt(inside)],
-                               ['outside','not in the study analysis (no part) · '+fmtInt(RUNS.length-inside)]]);
+    fillSelect('f-membership',[['inside','eligible for '+m+' (at least one part) · '+fmtInt(inside)],
+                               ['outside','not eligible for '+m+' (no part) · '+fmtInt(RUNS.length-inside)]]);
 
     // Quick views: the records a default list could bury. Each one sets a single filter that "More filters" also shows.
     var noRows=RUNS.filter(function(r){return !(int(obj(r.counts).rows_public)>0);}).length;
@@ -993,10 +1161,14 @@
   function clearFilters(){
     F.q='';MORE_KEYS.forEach(function(k){F[k]='';});F.issue=false;
   }
+  function stateLabel(k){return labelOf(STATE_LABEL,k);}
+  // Identifiers stay searchable: the run id, the stimulus set name, the model id and the instrument code are in
+  // the text beside the labels a row shows, the second line of its Model cell among them.
   function searchText(r){
     var x=experiment(r);
-    return (str(r.run_dir)+' '+str(r.stem)+' '+str(r.model)+' '+str(r.instrument)+' '+x.title+' '+
-      human(r.evidence_class)+' '+Object.keys(obj(r.execution_states)).map(human).join(' ')).toLowerCase();
+    return (str(r.run_dir)+' '+str(r.stem)+' '+str(r.model)+' '+str(r.instrument)+' '+x.title+' '+x.second+' '+
+      (str(r.instrument)?instrumentLabel(r):'')+' '+labelOf(EVIDENCE_LABEL,r.evidence_class)+' '+
+      Object.keys(obj(r.execution_states)).map(stateLabel).join(' ')).toLowerCase();
   }
   function matches(r){
     if(F.q){
@@ -1035,7 +1207,7 @@
     }
     if(F.sort==='model'){
       return list.slice().sort(function(a,b){
-        var x=modelLabel(a).toLowerCase(),y=modelLabel(b).toLowerCase();
+        var x=modelSortKey(a),y=modelSortKey(b);
         if(x!==y)return x<y?-1:1;
         return ORDER[a.run_dir]-ORDER[b.run_dir];
       });
@@ -1067,6 +1239,15 @@
   }
 
   // ---------------------------------------------------------------- run table
+  // Why a run lists no rows, in a few words, chosen from the run's recorded fields in the order the engine decides
+  // the recorded reason (rows_reason). The recorded sentence, with any release condition, is the cell's title and
+  // is printed in the open run. A case these fields do not settle prints the recorded sentence as stored.
+  function noRowsWhy(r){
+    if(int(r.n_parts)===0)return str(r.instrument)?'instrument run':'no batch summary part';
+    if(r.stimulus_class==='unclassified')return 'rows not exported for this stimulus family';
+    if(str(r.instrument))return 'instrument run';
+    return str(r.rows_reason);
+  }
   function runRow(r){
     var c=obj(r.counts),row=tr('cat-run'),cell,name=str(r.run_dir),x=experiment(r),wrap;
     row.setAttribute('data-run',name);
@@ -1081,17 +1262,25 @@
     b.appendChild(el('span','',x.title));
     b.addEventListener('click',function(){toggle(r,row,b);});
     cell.appendChild(b);
-    var set=el('span','x-set',x.stem);
-    set.title='stimulus set (stem). The full run id is in this run’s Methods & source.';
-    cell.appendChild(set);
+    // The stimulus set name stands under the title only where the title does not identify the set: the family
+    // has no label, or another set of the index has the same label and date. There it is what tells two rows
+    // apart. Every run's Methods & source gives the run id and the stimulus set name.
+    if(stemLineShown(x)){
+      var set=el('span','x-set',x.stem);
+      set.title='stimulus set (stem). The full run id is in this run’s Methods & source.';
+      cell.appendChild(set);
+    }
     row.appendChild(cell);
 
     cell=td('Model','c-model');
     wrap=el('span','');
-    wrap.appendChild(el('span',str(r.model)||str(r.instrument)?'ln':'ln dim',modelLabel(r)));
-    if(x.suffix){
-      var sx=el('span','ln dim',x.suffix);
-      sx.title='the rest of the run id after the stimulus set name';
+    var ml=el('span',str(r.model)||str(r.instrument)?'ln':'ln dim',
+      str(r.model)||(str(r.instrument)?instrumentLabel(r):'not recorded'));
+    if(!str(r.model)&&str(r.instrument))ml.title='instrument: '+r.instrument;
+    wrap.appendChild(ml);
+    if(x.second){
+      var sx=el('span','ln dim',x.second);
+      sx.title='the rest of the run id after the stimulus set name: '+x.suffix;
       wrap.appendChild(sx);
     }
     cell.appendChild(wrap);row.appendChild(cell);
@@ -1137,7 +1326,7 @@
       }
     }else{
       wrap.appendChild(el('span','ln dim','no rows listed'));
-      var why=str(r.rows_reason).split(/[;:]|\.\s/)[0];
+      var why=noRowsWhy(r);
       if(why){var ws=el('span','ln dim',why);ws.title=str(r.rows_reason);wrap.appendChild(ws);}
     }
     cell.appendChild(wrap);row.appendChild(cell);
@@ -1151,11 +1340,11 @@
 
     cell=td('Context','c-ctx');
     wrap=el('span','');
-    var l1=el('span','ln');l1.appendChild(evidenceClassBadge(str(r.evidence_class)));wrap.appendChild(l1);
-    var l2=el('span','ln');l2.appendChild(inclusionBadge(r));wrap.appendChild(l2);
+    var l1=el('span','ln');l1.appendChild(rowEvidenceBadge(r,x));wrap.appendChild(l1);
+    var l2=el('span','ln');l2.appendChild(eligibilityBadge(r));wrap.appendChild(l2);
     // the review status is stated once above the list; a row gives its own only where it differs
     if((str(r.clinical_review)||'not recorded')!==SHARED_REVIEW){
-      var rv=el('span','ln','review: '+human(r.clinical_review));
+      var rv=el('span','ln',labelOf(REVIEW_LABEL,r.clinical_review));
       rv.setAttribute('data-exception','review');
       rv.title='clinical_review: '+(str(r.clinical_review)||'not recorded');
       wrap.appendChild(rv);
@@ -1216,7 +1405,8 @@
 
   // ---------------------------------------------------------------- expanded run
   // Methods & source for one run: the full run id, the engine path, every part with its file name, sha256,
-  // integrity and the reason it is outside each analysis rule.
+  // integrity and the reason it is outside each analysis rule. Schema values are printed here as stored, in code
+  // form, and analysis rules by their ids; the labels are in the rows above.
   function sourceBlock(r,open){
     var d=el('details','meth det-src');
     d.open=!!open;
@@ -1225,20 +1415,20 @@
     dl.appendChild(el('dt','','Run id'));
     var idd=el('dd','src-id id');idd.appendChild(wrapId(r.run_dir));dl.appendChild(idd);
     kv(dl,'Engine source',str(r.source));
-    kv(dl,'Stimulus set',str(r.stem)+' · stimulus class '+human(r.stimulus_class));
+    kvCode(dl,'Stimulus set',str(r.stem)+' · stimulus class ',r.stimulus_class,'');
     kv(dl,'Model',str(r.model)?r.model+(str(r.model_cohort)?' · cohort '+r.model_cohort:''):(str(r.instrument)?'instrument: '+r.instrument:'not recorded'));
     kv(dl,'Backends',arr(r.backends).length?arr(r.backends).join(', '):'none recorded');
-    kv(dl,'Evidence class',human(r.evidence_class)+(legendText('evidence_class',str(r.evidence_class))?' · '+legendText('evidence_class',str(r.evidence_class)):''));
-    kv(dl,'Clinical review',human(r.clinical_review));
-    kv(dl,'Sampling',human(r.sampling)+(legendText('sampling',str(r.sampling))?' · '+legendText('sampling',str(r.sampling)):''));
+    kvCode(dl,'Evidence class','',r.evidence_class,legendText('evidence_class',str(r.evidence_class))?' · '+legendText('evidence_class',str(r.evidence_class)):'');
+    kvCode(dl,'Clinical review','',r.clinical_review,'');
+    kvCode(dl,'Sampling','',r.sampling,legendText('sampling',str(r.sampling))?' · '+legendText('sampling',str(r.sampling)):'');
     kv(dl,'Visibility',str(r.visibility)+(arr(r.restriction_reasons).length?' · '+arr(r.restriction_reasons).join(', '):''));
-    kv(dl,'Included in analysis',inclusionText(r));
+    kv(dl,'Analysis eligibility',eligibilityText(r,true));
     if(int(c.rows_duplicate_index)||int(c.rows_own_prompts)){
       kv(dl,'Row notes',fmtInt(c.rows_duplicate_index)+' rows repeat an index already listed in this run · '+
         fmtInt(c.rows_own_prompts)+' rows were traced with prompt text that differs from the stimulus set entry');
     }
     var other=obj(r.other_artifacts),ok=Object.keys(other);
-    if(ok.length)kv(dl,'Other artifacts',ok.map(function(k){return human(k)+' ×'+fmtInt(other[k]);}).join(', ')+' (not row results; not shown here)');
+    if(ok.length)kv(dl,'Other artifacts',ok.map(function(k){return k+' ×'+fmtInt(other[k]);}).join(', ')+' (not row results; not shown here)');
     if(str(r.rows_file))kv(dl,'Rows file',str(r.rows_file));
     if(str(r.stimuli_file))kv(dl,'Prompt-pair file',str(r.stimuli_file));
     inner.appendChild(dl);
@@ -1252,7 +1442,7 @@
       t.setAttribute('aria-label','File parts of run '+str(r.run_dir));
       var head=document.createElement('thead');head.setAttribute('role','rowgroup');
       var hr=tr('');
-      [['Part',''],['File and sha256',''],['Run status',''],['Integrity',''],['Results','num'],['Included in analysis','']]
+      [['Part',''],['File and sha256',''],['Run status',''],['Integrity',''],['Results','num'],['Analysis eligibility','']]
         .forEach(function(h){var th=el('th',h[1],h[0]);th.scope='col';th.setAttribute('role','columnheader');hr.appendChild(th);});
       head.appendChild(hr);t.appendChild(head);
       var tb=document.createElement('tbody');tb.setAttribute('role','rowgroup');
@@ -1266,19 +1456,25 @@
         w.appendChild(hash);
         if(str(m.backend))w.appendChild(el('span','ln dim','backend '+m.backend));
         cell.appendChild(w);row.appendChild(cell);
-        cell=td('Status');w=el('span','',human(m.execution_state));w.title=schemaTitle('execution_state',str(m.execution_state));
+        cell=td('Status');w=code(m.execution_state);w.title=schemaTitle('execution_state',str(m.execution_state));
         cell.appendChild(w);row.appendChild(cell);
         cell=td('Integrity');w=el('span','');
-        var ig=el('span','ln',human(m.artifact_integrity));ig.title=schemaTitle('artifact_integrity',str(m.artifact_integrity));
+        var ig=code(m.artifact_integrity);ig.className+=' ln';ig.title=schemaTitle('artifact_integrity',str(m.artifact_integrity));
         w.appendChild(ig);
         if(str(m.integrity_detail))w.appendChild(el('span','ln dim',m.integrity_detail));
         cell.appendChild(w);row.appendChild(cell);
         cell=td('Results','num');
         cell.appendChild(el('span','',resultsText(m,'recorded','requested')||DASH));
         row.appendChild(cell);
-        cell=td('Included');w=el('span','');
+        cell=td('Eligibility');w=el('span','');
         var inside=arr(m['in']);
-        w.appendChild(el('span','ln',inside.length?'in: '+inside.join(', '):'in no rule'));
+        // The rules that admit the part, by id. An analysis rule states eligibility for an analysis, not use in a
+        // result. Any other rule (the display rule) is listed under its recorded purpose, so that a part no
+        // analysis rule admits does not read as eligible.
+        var elig=inside.filter(function(x){return ANALYSIS_IDS.indexOf(x)>=0;});
+        w.appendChild(el('span','ln',elig.length?'eligible under: '+elig.join(', '):'not eligible under any analysis rule'));
+        inside.filter(function(x){return ANALYSIS_IDS.indexOf(x)<0;}).forEach(function(x){
+          w.appendChild(el('span','ln',(str(obj(MEMBERS[x]).purpose)||'rule')+': '+x));});
         var outside=obj(m.outside);
         Object.keys(outside).forEach(function(k){w.appendChild(el('span','ln dim','outside '+k+': '+String(outside[k])));});
         cell.appendChild(w);row.appendChild(cell);
@@ -1303,15 +1499,16 @@
     lab.appendChild(document.createTextNode('This run: '));
     lab.appendChild(badge('simulated stimuli','','test phrasings written by a model or by hand; not statements from patients'));
     lab.appendChild(evidenceClassBadge(str(r.evidence_class),'evidence: '));
-    lab.appendChild(badge('clinical review: '+human(r.clinical_review),'','clinical_review: '+(str(r.clinical_review)||'not recorded')));
-    var smp=badge('sampling: '+human(r.sampling),'',schemaTitle('sampling',str(r.sampling)));
+    lab.appendChild(badge('clinical review: '+labelOf(REVIEW_LABEL,r.clinical_review),'','clinical_review: '+(str(r.clinical_review)||'not recorded')));
+    var smp=badge('sampling: '+labelOf(SAMPLING_LABEL,r.sampling),'',schemaTitle('sampling',str(r.sampling)));
     lab.appendChild(smp);
     box.appendChild(lab);
 
     var c=obj(r.counts),dl=el('dl','kv');
     kv(dl,'Rows',fmtInt(c.rows_public)+' public · '+fmtInt(c.rows_withheld_sealed)+' withheld by the Tier B seal (counted, never shown) · '+
       fmtInt(c.rows_screened_out)+' screened out · '+fmtInt(c.rows_flipped)+' flipped');
-    kv(dl,'Included in analysis',inclusionText(r));
+    kv(dl,'Analysis eligibility',eligibilityText(r,false));
+    dl.lastChild.title=eligibilityText(r,true);
     box.appendChild(dl);
 
     var status=el('div','det-status');status.setAttribute('role','status');
@@ -1339,7 +1536,9 @@
       var ul=document.createElement('ul');
       arr(r.restriction_reasons).forEach(function(reason){
         var info=obj(RESTR[String(reason).split(':')[0]]),li=el('li','');
-        li.appendChild(el('b','',human(reason)));
+        var rb=el('b','',labelOf(RESTRICTION_LABEL,reason));
+        rb.title='restriction: '+String(reason);
+        li.appendChild(rb);
         if(str(info.responsible_role)||str(info.release_condition)){
           li.appendChild(document.createTextNode('Responsible role: '+(str(info.responsible_role)||'not recorded')+
             '. Release condition: '+(str(info.release_condition)||'not recorded')+'.'));
@@ -1380,10 +1579,12 @@
       body.textContent='';links.textContent='';
       var dlp=el('p','sum-dl');
       dlp.appendChild(document.createTextNode('Download this run: '));
-      var a=el('a','',r.rows_file);a.href=BASE+r.rows_file;a.setAttribute('download','');dlp.appendChild(a);
+      // the link text names what the file holds; the path is the link's target and title, and both paths are in
+      // this run's Methods & source
+      var a=el('a','','rows (JSON)');a.href=BASE+r.rows_file;a.title=r.rows_file;a.setAttribute('download','');dlp.appendChild(a);
       if(STIM_RE.test(stimFile)){
-        dlp.appendChild(document.createTextNode(' · prompt pairs: '));
-        var a2=el('a','',stimFile);a2.href=BASE+stimFile;a2.setAttribute('download','');dlp.appendChild(a2);
+        dlp.appendChild(document.createTextNode(' · '));
+        var a2=el('a','','prompt pairs (JSON)');a2.href=BASE+stimFile;a2.title=stimFile;a2.setAttribute('download','');dlp.appendChild(a2);
       }
       dlp.style.marginTop='12px';
       links.appendChild(dlp);
@@ -1464,9 +1665,15 @@
       (row.flipped===false?'not flipped: same top token':'flip not determined')));
     if(isObj(row.screening)){
       var sc=row.screening;
-      notes.appendChild(el('span','','screening: '+human(sc.status)+(str(sc.reason)?' · '+sc.reason:'')));
+      var scn=el('span','','screening: '+labelOf(SCREENING_LABEL,sc.status)+(str(sc.reason)?' · '+sc.reason:''));
+      scn.title='screening status: '+(str(sc.status)||'not recorded');
+      notes.appendChild(scn);
     }
-    if(str(row.sampling))notes.appendChild(el('span','','sampling: '+human(row.sampling)));
+    if(str(row.sampling)){
+      var rsm=el('span','','sampling: '+labelOf(SAMPLING_LABEL,row.sampling));
+      rsm.title=schemaTitle('sampling',row.sampling);
+      notes.appendChild(rsm);
+    }
     if(own)notes.appendChild(el('span','','traced with its own prompt text, which differs from the stimulus set entry'));
     if(isObj(row.clinical_mass)){
       notes.appendChild(el('span','dim','clinical-feature mass: medical wording '+(fmtNum(row.clinical_mass.clinical)||DASH)+
@@ -1509,7 +1716,10 @@
         ' and no rows on this page. Each part is listed in Methods & source above with its file name, sha256 and run status.'));
       return;
     }
-    var pairs=stim?stim.pairs:null,n=list.length;
+    var pairs=stim?stim.pairs:null,n=list.length,heading=runHeading(r);
+    // a rows table is named with the words of the visible headings. Where another run of the index has the same
+    // heading, the name also gives the run id, as each row button's name does, so two open tables are not named alike.
+    var tableName=heading+(HEADING_RUNS[heading]>1?', run '+r.run_dir:'');
     list.forEach(function(item,i){
       var m=item.meta,rp=item.rows,sec=el('section','part');
       sec.setAttribute('data-part',str(m.name));
@@ -1521,9 +1731,9 @@
       line.appendChild(statusBadge(state,0,false));
       var inside=rp&&Array.isArray(rp.analysis_memberships)?rp.analysis_memberships:
         arr(m['in']).filter(function(x){return ANALYSIS_IDS.indexOf(x)>=0;});
-      if(DEFAULT_M&&inside.indexOf(DEFAULT_M)>=0)line.appendChild(badge('in study analysis','',memberTitle(DEFAULT_M)));
-      else if(inside.length)line.appendChild(badge('in '+inside.join(', ')+' only','',inside.map(memberTitle).join('; ')));
-      else line.appendChild(badge('in no analysis','','no analysis rule includes this part; the reason is in Methods & source'));
+      if(DEFAULT_M&&inside.indexOf(DEFAULT_M)>=0)line.appendChild(badge(studyBadgeText(),'',memberTitle(DEFAULT_M)));
+      else if(inside.length)line.appendChild(badge(inside.map(ruleBadge).join(', ')+' only','',inside.map(memberTitle).join('; ')));
+      else line.appendChild(badge('not eligible','','no analysis rule admits this part; the reason is in Methods & source'));
       if(resultsText(m,'results recorded','pairs requested'))line.appendChild(badge(resultsText(m,'results recorded','pairs requested'),'dim',''));
       sec.appendChild(line);
       if(str(m.integrity_detail))sec.appendChild(el('p','part-out','Integrity detail: '+m.integrity_detail));
@@ -1531,7 +1741,8 @@
       var rows=rp?arr(rp.rows):[],outside=obj(m.outside);
       if(rp&&str(rp.clinical_mass))sec.appendChild(el('p','part-mass','Clinical-feature mass: '+rp.clinical_mass));
       if(rows.length){
-        sec.appendChild(rowsTable(rows,pairs,!!stim,'Rows of '+str(m.name)+' in run '+str(r.run_dir)));
+        // named with the words of the visible headings: the part, the experiment and the model
+        sec.appendChild(rowsTable(rows,pairs,!!stim,(n>1?'Rows, part '+(i+1)+' of '+n:'Rows')+', '+tableName));
       }else{
         var why,displayOut=null;
         DISPLAY_IDS.forEach(function(d){if(typeof outside[d]==='string')displayOut=d+' ('+outside[d]+')';});
@@ -1599,7 +1810,12 @@
     }
     INDEX=data;
     RUNS=data.runs.filter(function(r){return isObj(r)&&typeof r.run_dir==='string'&&r.run_dir;});
-    RUNS.forEach(function(r,i){BYDIR[r.run_dir]=r;ORDER[r.run_dir]=i;});
+    RUNS.forEach(function(r,i){BYDIR[r.run_dir]=r;ORDER[r.run_dir]=i;if(str(r.model))MODEL_IDS[r.model]=true;});
+    RUNS.forEach(function(r){
+      var x=experiment(r);
+      (TITLE_STEMS[x.title]=TITLE_STEMS[x.title]||Object.create(null))[x.stem]=true;
+    });
+    RUNS.forEach(function(r){var k=runHeading(r);HEADING_RUNS[k]=(HEADING_RUNS[k]||0)+1;});
     LEGEND=obj(data.legend);MEMBERS=obj(data.memberships);RESTR=obj(data.restrictions);
     DEFAULT_M=str(obj(data.policy).default_membership);
     Object.keys(MEMBERS).forEach(function(m){

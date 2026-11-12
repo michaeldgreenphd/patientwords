@@ -549,7 +549,7 @@
     <div id="ad-blocks"><span class="pend" data-state="loading">Loading the figure…</span></div>
     <p class="cap">one square per pair · hover a square for its clinical target · the generated sets are in the
       <a href="../simulated-scenarios/">scenario gallery</a> · per-pair depth classes:
-      <a href="https://github.com/michaeldgreenphd/patientwords/blob/main/data/jlens_depth.json" rel="noopener">jlens_depth.json</a></p>
+      <a href="https://github.com/michaeldgreenphd/patientwords/blob/main/data/jlens_depth.json" rel="noopener">the depth data file</a></p>
     <details class="fold">
       <summary>Every pair: depth class and care-urgency tiers regained by translation, where measured (owner-reviewed v1 tiers, domain review pending)</summary>
       <div class="scroll" id="ad-pairs"></div>
@@ -2109,11 +2109,14 @@
     fill:'#4b5563'},attrs||{}),parent);t.textContent=str;return t;}
   function h(tag,cls,text){var e=document.createElement(tag);if(cls)e.className=cls;
     if(text!=null)e.textContent=text;return e;}
-  // batch stems follow the engine convention '<kind>_YYYYMMDD[THHMM…]' (UTC),
-  // kind ∈ {pairs, dialects, urgency_downgrades, drift_sentinel}; short=true →
-  // 'Jul 6 20:17', else the full labelled date. Unknown stems pass through verbatim.
+  // batch stems follow the engine convention '<kind>_YYYYMMDDTHHMMSSZ' (UTC) or
+  // '<kind>_YYYYMMDDT<n>', kind ∈ {pairs, dialects, urgency_downgrades, drift_sentinel};
+  // short=true → 'Jul 6 20:17', else the full labelled date. The whole stem must have
+  // that form: any other stem, including one that extends a batch's stem with a suffix
+  // ('…Z_txopus'), is a different set and passes through verbatim. This block's labels
+  // (the census set labels, each square's hover text, the per-pair fold) use this copy.
   function pwBatch(stem,short){
-    var m=/^(pairs|dialects|urgency_downgrades|drift_sentinel)_(\d{4})(\d{2})(\d{2})T(\d{2})?(\d{2})?/.exec(stem||'');
+    var m=/^(pairs|dialects|urgency_downgrades|drift_sentinel)_(\d{4})(\d{2})(\d{2})T(?:(\d{2})(\d{2})\d{2}Z|\d{1,2})$/.exec(stem||'');
     if(!m)return stem||'';
     var mo=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][+m[3]-1];
     if(short)return mo+' '+(+m[4])+((m[5]&&m[6])?(' '+m[5]+':'+m[6]):'');
@@ -2164,7 +2167,10 @@
       }
       groups.forEach(function(g){
         var wrap=h('div','ucensus-group');
-        // a set named by its batch stem reads as its kind and date; the stem stays in each square's hover text
+        // a set named by its batch stem reads as its kind and date. Each square's hover text names its pair in the
+        // wording of the 'Source pair' fold in Part 1 ("pair N of the <label>"), built by pwBatch: a stem outside
+        // its kind map is printed as stored. The stem itself is the link target and part of the title of each set
+        // cell in the fold 'Every pair' below.
         wrap.appendChild(h('p','block-label',pwBatch(g.label)||g.label));
         CLASSES.forEach(function(cls){
           var members=g.pairs.filter(function(u){return u['class']===cls[0];});
@@ -2178,7 +2184,8 @@
           members.forEach(function(u){
             var sq=h('i','ucensus-sq');
             sq.style.background=cls[1];
-            sq.title=(u.target||'—')+' · '+u.set.replace(/^batch of\s+/i,'')+' #'+u.index;
+            var setName=pwBatch(u.set);
+            sq.title=(u.target||'—')+' · pair '+u.index+(setName?' of the '+setName:'');
             sqwrap.appendChild(sq);
           });
           rowEl.appendChild(sqwrap);
@@ -2209,7 +2216,7 @@
       });
       pth.appendChild(phr);pt.appendChild(pth);
       var ptb=h('tbody');
-      // collect every pair once; the SET label is abbreviated in-cell, full name on hover
+      // collect every pair once; the SET label is abbreviated in-cell, full name and stem on hover
       var rowsData=[];
       blocks.forEach(function(b){
         b.pairs.forEach(function(u){
@@ -2221,11 +2228,12 @@
       function buildRow(r){
         var row=h('tr');
         // human-readable batch tag (date identity, the sitewide convention),
-        // linked to the archived batch data on GitHub; full name on hover
+        // linked to the archived batch data on GitHub; full name and batch stem on hover
+        // (the stem is what the census squares' hover text no longer prints)
         var setTd=h('td');
         var sa=h('a',null,r.setShort);
         sa.href='https://github.com/michaeldgreenphd/patientwords-engine/blob/main/data/simulated/'+r.setId+'.json';
-        sa.title=r.setFull+' — archived batch data on GitHub';
+        sa.title=r.setFull+(r.setFull!==r.setId?' ('+r.setId+')':'')+' — archived batch data on GitHub';
         sa.target='_blank';sa.rel='noopener';
         setTd.appendChild(sa);row.appendChild(setTd);
         // pair number expands to the pair's verbatim base sentence when one is committed
