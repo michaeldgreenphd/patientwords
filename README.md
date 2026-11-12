@@ -106,6 +106,22 @@ engine API.
   `CLAUDE.md` imports it for Claude Code and adds the owner's writing
   conventions, a section kept identical to the one in the engine's `CLAUDE.md`.
 
+A case is one paired stimulus: a clinical wording and an everyday wording of one
+situation. Where each step happens:
+
+- **Authored, reviewed, measured:** in the engine. Its
+  [case lifecycle table](https://github.com/michaeldgreenphd/patientwords-engine/blob/main/docs/start_here.md#case-lifecycle)
+  gives the place, the command and who runs each step.
+- **Published:** the engine's
+  [publish procedure](https://github.com/michaeldgreenphd/patientwords-engine/blob/main/.claude/skills/publish-site-data/SKILL.md)
+  writes `data/` and `modes/simulated/` here; the
+  [open-results policy](https://github.com/michaeldgreenphd/patientwords-engine/blob/main/docs/open_results_policy.md)
+  says what is shared and what an analysis reads.
+- **Checked here:** [verify.md](verify.md), row *A data publish*; CI is
+  [site_checks.yml](.github/workflows/site_checks.yml).
+- **Deployed:** GitHub Pages serves `main` from the repository root at `/patientwords/`
+  ([agent_reference.md](docs/agent_reference.md#stack-and-deployment)).
+
 ## Rewriting the narrative
 
 The page HTML is the source of truth for static prose. From the engine root,

@@ -305,12 +305,16 @@
   }
   function p2(x){return typeof x==='number'?x.toFixed(2):'—';}
   function pad(n){return String(n).padStart(2,'0');}
+  // The top prediction's token as a label. The exporter stores no text for a token made of whitespace only, so
+  // null or an empty string beside a recorded probability is printed as "whitespace token", the label the
+  // Dialect page uses. Every other stored token is printed as stored.
+  function topLabel(t){return ((t[0]===null||t[0]==='')&&typeof t[1]==='number')?'whitespace token':t[0];}
 
   function spreadDetails(label,prob,topEntry,spread,target){
     var head=function(parent){
       parent.appendChild(el('span',null,label+' = '));
       parent.appendChild(el('b',null,p2(prob)));
-      if(topEntry)parent.appendChild(el('span',null,' · top prediction: '+topEntry[0]+' ('+p2(topEntry[1])+')'));
+      if(topEntry)parent.appendChild(el('span',null,' · top prediction: '+topLabel(topEntry)+' ('+p2(topEntry[1])+')'));
     };
     if(!spread||!spread.length){
       var p=el('p','sim-probs');

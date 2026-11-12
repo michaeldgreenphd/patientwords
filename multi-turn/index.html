@@ -433,7 +433,7 @@
         <h3>Method</h3>
         <!-- The model names and the temperature below are filled from summary.provenance.models (a dash when absent). -->
     <!-- OWNER-SIGNOFF --><p class="note">Each wording is a separate conversation with <span class="v-target">&mdash;</span>, sampled at temperature <span id="m-temp">&mdash;</span>. A grader, <span id="m-also" hidden>also </span><span id="m-judge">&mdash;</span>, codes each reply.</p>
-        <!-- OWNER-SIGNOFF --><p class="note">A conversation triple is one scenario, one run and one speaker, with its three conversations. D compares the urgency tier of each reply alone, ranked self care, routine, urgent, emergency.</p>
+        <!-- OWNER-SIGNOFF --><p class="note">A conversation triple is one scenario, one run and one speaker, with its three conversations. D compares the urgency tier of each reply alone, ranked self-care, routine, urgent, emergency.</p>
         <!-- OWNER-SIGNOFF --><p class="note">The main test is an exact sign test on D across triples. A second test gives each scenario equal weight.</p>
       </div>
       <div id="sec-limits">
@@ -498,10 +498,10 @@
   // no/yes of data/petri/multiturn_measures.json. A cell text has at most 3 characters, and no two values of one
   // measure share one. The cell texts are the ones the strip printed before this table existed, so the key under
   // it is no longer than it was, with one exception: "not addressed" is "UA", because "NA" stood beside "n/a" (the
-  // engine's outcome_dimensions.draft.json reads not_addressed as "unaddressed"). "self care" has no hyphen here,
-  // as in the Method sentence.
+  // engine's outcome_dimensions.draft.json reads not_addressed as "unaddressed"). The label of self_care is
+  // "self-care", as in the Method sentence, on the LLM and Methods pages and in the rubric's label.
   var VALUE={
-    self_care:['SC','self care'],routine:['rou','routine'],urgent:['urg','urgent'],emergency:['eme','emergency'],
+    self_care:['SC','self-care'],routine:['rou','routine'],urgent:['urg','urgent'],emergency:['eme','emergency'],
     absent:['abs','absent'],generic:['gen','generic'],specific:['spe','specific'],
     none:['non','none'],generic_deferral:['GD','generic deferral'],
     unspecified:['uns','unspecified'],generalist:['gen','generalist'],specialist:['spe','specialist'],

@@ -510,6 +510,10 @@
   function mag(x){return Math.round(Math.abs(x)*100)+'%';}  // unsigned magnitude for directional columns
   function p2(x){return typeof x==='number'?x.toFixed(2):'—';}
   function pad(n){return String(n).padStart(2,'0');}
+  // The top prediction's token as a label. The exporter stores no text for a token made of whitespace only, so
+  // null or an empty string beside a recorded probability is printed as "whitespace token", the label the
+  // Dialect page uses. Every other stored token is printed as stored.
+  function topLabel(t){return ((t[0]===null||t[0]==='')&&typeof t[1]==='number')?'whitespace token':t[0];}
   var rowsPerPage=10;   // dynamic: 10 / 25 / 50, chosen via the Show: toggle
 
   // Med-circuit meter: share of feature attribution on clinical-tagged
@@ -1061,8 +1065,8 @@
           flip.appendChild(el('span','stat neutral','not traced on '+currentModel));
         }else{
           var screened=m.screening&&m.screening.status==='screened_out';
-          var tc=m.top_clinical?m.top_clinical[0]:'—';
-          var tp=m.top_patient?m.top_patient[0]:'—';
+          var tc=m.top_clinical?topLabel(m.top_clinical):'—';
+          var tp=m.top_patient?topLabel(m.top_patient):'—';
           if(screened){
             flip.appendChild(el('span','stat neutral','screened out · unmeasurable'));
           }else{
@@ -1123,7 +1127,7 @@
             var m=cur(s);
             return [s.clinical_prompt,s.patient_prompt,s.patient_term,s.clinical_term,
                     m.target_token,s.intended_target,s.topic,
-                    m.top_clinical&&m.top_clinical[0],m.top_patient&&m.top_patient[0],
+                    m.top_clinical&&topLabel(m.top_clinical),m.top_patient&&topLabel(m.top_patient),
                     s.rationale]
               .join(' ').toLowerCase().indexOf(q)>=0;
           });
