@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Results catalogue — PatientWords</title>
-<meta name="description" content="Every measured run in the PatientWords engine: the experiment, the model, how many pairs moved in each direction, run status, evidence class, clinical-review status and whether an analysis includes it.">
+<meta name="description" content="Every measured run in the PatientWords engine: the experiment, the model, how many pairs moved in each direction, run status, evidence class, clinical-review status and analysis eligibility.">
 <link rel="canonical" href="https://michaeldgreenphd.github.io/patientwords/results/">
 <meta name="theme-color" content="#faf9f5">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23faf9f5'/%3E%3Crect x='9' y='9' width='30' height='30' fill='%23111827'/%3E%3Crect x='25' y='25' width='30' height='30' fill='%2315803d'/%3E%3C/svg%3E">
@@ -345,7 +345,7 @@
 </header>
 <main id="main">
   <h1>Results catalogue</h1>
-  <p class="subtitle">Browse every measured run: the experiment, the model, how many pairs moved lower, stayed equal or moved higher, and whether an analysis includes the run. Open a run for its rows, sources and files.</p>
+  <p class="subtitle">Browse every measured run: the experiment, the model, how many pairs moved lower, stayed equal or moved higher, and its analysis eligibility. Open a run for its rows, sources and files.</p>
   <p class="shared" id="cat-review" hidden></p>
   <p class="traced" id="cat-inv"><span class="tp">Inventory: loading</span></p>
   <div class="lead-links">
@@ -355,7 +355,7 @@
         <p>The catalogue lists every measured run whatever its result: negative, zero or positive, finished or stopped part-way, eligible for an analysis or not. Being listed is not a claim.</p>
         <p><b>What is measured.</b> Target-token probability: the next-token probability of the first encoded target token, from 0 to 1, after one sentence-completion prompt. It is a measurement of one token, not a score of a whole answer, and nothing here is medical advice. Each row is one measurement; the files carry no interval and no effect estimate.</p>
         <p><b>The stimuli.</b> The phrasings are test stimuli written by a model or by hand, not statements from patients. The two wordings of a pair are meant to describe one clinical situation; clinical review decides whether they do. Review status: <span id="about-review">not loaded</span>. A row in the table states its review status only where it differs from the most common one.</p>
-        <p><b>Evidence class.</b> It differs between runs and is stated on each row: <span id="about-evidence">not loaded</span>. Whether an analysis includes a run is a separate fact, decided by a named rule in <a href="#methods-source">Methods &amp; source</a>.</p>
+        <p><b>Evidence class.</b> It differs between runs and is stated on each row: <span id="about-evidence">not loaded</span>. Eligibility is determined by the rules in <a href="#methods-source">Methods &amp; source</a>.</p>
       </div>
     </details>
     <p class="jump"><a href="#downloads">Downloads and field definitions</a> · <a href="#methods-source">Methods &amp; source</a></p>
@@ -853,7 +853,7 @@
     return 'Eligible under analysis rule '+m+(label?' ('+label+')':'')+'; a published statistic may use fewer runs';
   }
   // Analysis eligibility of a run: the study version first, then any other analysis rule.
-  function inclusionBadge(r){
+  function eligibilityBadge(r){
     var parts=obj(r.analysis_parts),n=int(r.n_parts),k=DEFAULT_M?int(parts[DEFAULT_M]):0;
     if(k>0)return badge(studyBadgeText()+(k<n?' ('+k+' of '+n+' parts)':''),'',memberTitle(DEFAULT_M));
     var other=ANALYSIS_IDS.filter(function(m){return m!==DEFAULT_M&&int(parts[m])>0;});
@@ -862,7 +862,7 @@
   }
   // Part counts per analysis rule. With ids: the rule ids, for Methods & source. Without: each rule's entry in
   // RULE_LABEL, for the open run; a rule with no entry is shown by its id, as in Methods & source.
-  function inclusionText(r,ids){
+  function eligibilityText(r,ids){
     var parts=obj(r.analysis_parts),n=int(r.n_parts);
     var bits=ANALYSIS_IDS.map(function(m){
       var name=!ids&&has(RULE_LABEL,m)?RULE_LABEL[m]:(m===DEFAULT_M?'study version ':'')+m;
@@ -1341,7 +1341,7 @@
     cell=td('Context','c-ctx');
     wrap=el('span','');
     var l1=el('span','ln');l1.appendChild(rowEvidenceBadge(r,x));wrap.appendChild(l1);
-    var l2=el('span','ln');l2.appendChild(inclusionBadge(r));wrap.appendChild(l2);
+    var l2=el('span','ln');l2.appendChild(eligibilityBadge(r));wrap.appendChild(l2);
     // the review status is stated once above the list; a row gives its own only where it differs
     if((str(r.clinical_review)||'not recorded')!==SHARED_REVIEW){
       var rv=el('span','ln',labelOf(REVIEW_LABEL,r.clinical_review));
@@ -1422,7 +1422,7 @@
     kvCode(dl,'Clinical review','',r.clinical_review,'');
     kvCode(dl,'Sampling','',r.sampling,legendText('sampling',str(r.sampling))?' · '+legendText('sampling',str(r.sampling)):'');
     kv(dl,'Visibility',str(r.visibility)+(arr(r.restriction_reasons).length?' · '+arr(r.restriction_reasons).join(', '):''));
-    kv(dl,'Analysis eligibility',inclusionText(r,true));
+    kv(dl,'Analysis eligibility',eligibilityText(r,true));
     if(int(c.rows_duplicate_index)||int(c.rows_own_prompts)){
       kv(dl,'Row notes',fmtInt(c.rows_duplicate_index)+' rows repeat an index already listed in this run · '+
         fmtInt(c.rows_own_prompts)+' rows were traced with prompt text that differs from the stimulus set entry');
@@ -1466,7 +1466,7 @@
         cell=td('Results','num');
         cell.appendChild(el('span','',resultsText(m,'recorded','requested')||DASH));
         row.appendChild(cell);
-        cell=td('Included');w=el('span','');
+        cell=td('Eligibility');w=el('span','');
         var inside=arr(m['in']);
         w.appendChild(el('span','ln',inside.length?'in: '+inside.join(', '):'in no rule'));
         var outside=obj(m.outside);
@@ -1501,8 +1501,8 @@
     var c=obj(r.counts),dl=el('dl','kv');
     kv(dl,'Rows',fmtInt(c.rows_public)+' public · '+fmtInt(c.rows_withheld_sealed)+' withheld by the Tier B seal (counted, never shown) · '+
       fmtInt(c.rows_screened_out)+' screened out · '+fmtInt(c.rows_flipped)+' flipped');
-    kv(dl,'Analysis eligibility',inclusionText(r,false));
-    dl.lastChild.title=inclusionText(r,true);
+    kv(dl,'Analysis eligibility',eligibilityText(r,false));
+    dl.lastChild.title=eligibilityText(r,true);
     box.appendChild(dl);
 
     var status=el('div','det-status');status.setAttribute('role','status');
