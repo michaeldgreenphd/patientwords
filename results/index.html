@@ -1468,7 +1468,13 @@
         row.appendChild(cell);
         cell=td('Eligibility');w=el('span','');
         var inside=arr(m['in']);
-        w.appendChild(el('span','ln',inside.length?'in: '+inside.join(', '):'in no rule'));
+        // The rules that admit the part, by id. An analysis rule states eligibility for an analysis, not use in a
+        // result. Any other rule (the display rule) is listed under its recorded purpose, so that a part no
+        // analysis rule admits does not read as eligible.
+        var elig=inside.filter(function(x){return ANALYSIS_IDS.indexOf(x)>=0;});
+        w.appendChild(el('span','ln',elig.length?'eligible under: '+elig.join(', '):'not eligible under any analysis rule'));
+        inside.filter(function(x){return ANALYSIS_IDS.indexOf(x)<0;}).forEach(function(x){
+          w.appendChild(el('span','ln',(str(obj(MEMBERS[x]).purpose)||'rule')+': '+x));});
         var outside=obj(m.outside);
         Object.keys(outside).forEach(function(k){w.appendChild(el('span','ln dim','outside '+k+': '+String(outside[k])));});
         cell.appendChild(w);row.appendChild(cell);
