@@ -438,7 +438,7 @@
             <th scope="col" role="columnheader" class="c-model">Model</th>
             <th scope="col" role="columnheader" class="c-meas">Measurements <small>public rows; lower, equal, higher: the everyday wording against the medical</small></th>
             <th scope="col" role="columnheader" class="c-status">Run status</th>
-            <th scope="col" role="columnheader" class="c-ctx">Study context <small>evidence class; inclusion in an analysis</small></th>
+            <th scope="col" role="columnheader" class="c-ctx">Study context <small>evidence class; analysis</small></th>
           </tr></thead>
           <tbody id="cat-body" role="rowgroup"></tbody>
         </table>
@@ -576,12 +576,12 @@
   // printed as stored: no label is made from an identifier. The stored values stay in titles, in the field
   // definitions and in Methods & source.
   var CLASS_LABEL={"study_batch":"Study batch","hand_authored_exploratory":"Hand-authored set",
-    "redistribution_limited_text":"Third-party text set"};
+    "redistribution_limited_text":"Third-party text set","unclassified":"Unclassified stimulus set"};
   // FAMILY_LABEL is keyed on the stimulus set name (stem) with its date stamp removed.
   var FAMILY_LABEL={
     "pairs":"Study batch",
-    "pairs_txopus":"Translation arm, Opus translator",
-    "pairs_txplacebo":"Translation placebo arm",
+    "pairs_txopus":"Study batch alias for the Opus translator arm",
+    "pairs_txplacebo":"Study batch alias for the translation placebo arm",
     "agscen":"Hand-authored set",
     "agscen_commas":"Hand-authored set, comma test",
     "agscen_scale":"Hand-authored set, scale round",
@@ -590,12 +590,12 @@
     "agscen_r7":"Hand-authored set, round 7",
     "agscen_r7b":"Hand-authored set, round 7b",
     "pabharvest":"Third-party text set",
-    "dialects":"Dialect framings batch",
+    "dialects":"Variant set around a fixed term",
     "quadrants":"Four-quadrant batch, syntax by terminology",
     "drift_sentinel":"Drift sentinel",
-    "depth_drift_sentinel":"Depth probe on the drift sentinel pairs",
-    "depth_pairs":"Depth probe on a study batch",
-    "depth_k200_pairs":"Depth probe on a study batch, top-k 200",
+    "depth_drift_sentinel":"Logit-lens depth probe on the drift sentinel pairs",
+    "depth_pairs":"Logit-lens depth probe on a study batch",
+    "depth_k200_pairs":"Logit-lens depth probe on a study batch, top-k 200",
     "urgency_downgrades":"Reviewed downgrade set",
     "urgency_downgrades_steer":"Reviewed downgrade set, steering pass",
     "urgency_downgrades_boostgrid":"Reviewed downgrade set, steering-grid subset",
@@ -607,14 +607,14 @@
     "boostgrid_s5":"Steering grid, strength 5",
     "boostgrid_s20":"Steering grid, strength 20",
     "boostgrid_lowrank":"Steering grid, strength 10, rank offset 5",
-    "boostgrid_lowrank_r2":"Steering grid, strength 10, rank offset 5, second run",
+    "boostgrid_lowrank_r2":"Steering grid, strength 10, rank offset 5, rerun",
     "titration_fresh_s2p5":"Steering titration on fresh pairs, strength 2.5",
     "titration_fresh_s5":"Steering titration on fresh pairs, strength 5",
     "titration_fresh_s10":"Steering titration on fresh pairs, strength 10",
     "titration_fresh_s20":"Steering titration on fresh pairs, strength 20",
     "txcorpus":"Translated corpus",
     "featured_sim85":"Key example re-render",
-    "featured_sim85_r2":"Key example re-render, second run",
+    "featured_sim85_r2":"Key example re-render",
     "featured_sim85_r3":"Key example re-render, target tokens forced",
     "imported_pairs":"Hand-measured pairs",
     "ci_pairs_2panel":"Committed sample pairs",
@@ -645,7 +645,7 @@
   var SUFFIX_LABEL={"lenspairs":"lens reader pairs","context":"context-inoculation pairs"};
   var RULE_LABEL={"study-interim/1":"interim study analysis","exploratory-open/1":"exploratory analysis"};
   // The label of a stimulus set whose family and stimulus class both have no entry above.
-  var CLASS_OTHER="Other stimulus set";
+  var CLASS_OTHER="Stimulus set";
   var AXIS_LABEL={execution_state:'Run status',artifact_integrity:'Artifact integrity',evidence_class:'Evidence class',
     sampling:'Sampling',clinical_review:'Clinical review',stimulus_class:'Stimulus class'};
   var SORT_TEXT={'':'run id, A to Z','date':'batch date, newest first','model':'model, A to Z'};
@@ -764,9 +764,22 @@
     return (str(r.model)||(str(r.instrument)?'instrument: '+r.instrument:'not recorded')).toLowerCase();
   }
   function ruleLabel(m){return has(RULE_LABEL,m)?RULE_LABEL[m]:m;}
-  // The study version in a badge: its entry in RULE_LABEL, the words the filter option and the open run's line use
-  // for it. A study version with no entry keeps the badge's plain words; its id is in the badge's title.
-  function studyBadgeText(){return 'in '+(has(RULE_LABEL,DEFAULT_M)?RULE_LABEL[DEFAULT_M]:'study analysis');}
+  // The study version in a badge, in the fewest words: "study analysis". Its full name (RULE_LABEL) is in the
+  // filter option and in the open run's line, and its id is in the badge's title.
+  function studyBadgeText(){return 'study analysis';}
+  // In a run's row the evidence class leaves out the words the experiment title already gives. Each entry:
+  // evidence class -> [the stimulus class whose label carries those words, the words the row keeps]. It applies
+  // only where the run has that stimulus class and its title starts with that class's label; any other run prints
+  // the whole EVIDENCE_LABEL entry. The whole label is in the Evidence class filter and in the open run, and the
+  // stored value and its definition are in the badge's title.
+  var EVIDENCE_IN_ROW={"exploratory_hand_authored":["hand_authored_exploratory","exploratory"],
+    "exploratory_third_party_source":["redistribution_limited_text","exploratory"]};
+  function rowEvidenceBadge(r,x){
+    var v=str(r.evidence_class),e=has(EVIDENCE_IN_ROW,v)?EVIDENCE_IN_ROW[v]:null;
+    if(e&&r.stimulus_class===e[0]&&has(CLASS_LABEL,e[0])&&x.name.indexOf(CLASS_LABEL[e[0]])===0)
+      return badge(e[1],'',schemaTitle('evidence_class',v));
+    return evidenceClassBadge(v);
+  }
   function stemLineShown(x){return !x.labelled||Object.keys(obj(TITLE_STEMS[x.title])).length>1;}
   function reviewPending(v){return /pending$/.test(str(v));}
   function hasIssue(r){
@@ -839,8 +852,8 @@
     var parts=obj(r.analysis_parts),n=int(r.n_parts),k=DEFAULT_M?int(parts[DEFAULT_M]):0;
     if(k>0)return badge(studyBadgeText()+(k<n?' ('+k+' of '+n+' parts)':''),'',memberTitle(DEFAULT_M));
     var other=ANALYSIS_IDS.filter(function(m){return m!==DEFAULT_M&&int(parts[m])>0;});
-    if(other.length)return badge('in '+other.map(ruleLabel).join(', ')+' only','',other.map(memberTitle).join('; '));
-    return badge('in no analysis','dim','no analysis rule includes a part of this run');
+    if(other.length)return badge(other.map(ruleLabel).join(', ')+' only','',other.map(memberTitle).join('; '));
+    return badge('no analysis','dim','no analysis rule includes a part of this run');
   }
   // Part counts per analysis rule. With ids: the rule ids, for Methods & source. Without: each rule's entry in
   // RULE_LABEL, for the open run; a rule with no entry is shown by its id, as in Methods & source.
@@ -1225,7 +1238,7 @@
   // the recorded reason (rows_reason). The recorded sentence, with any release condition, is the cell's title and
   // is printed in the open run. A case these fields do not settle prints the recorded sentence as stored.
   function noRowsWhy(r){
-    if(int(r.n_parts)===0)return str(r.instrument)?'instrument run':'no summary part';
+    if(int(r.n_parts)===0)return str(r.instrument)?'instrument run':'no batch summary part';
     if(r.stimulus_class==='unclassified')return 'rows not exported for this stimulus family';
     if(str(r.instrument))return 'instrument run';
     return str(r.rows_reason);
@@ -1322,11 +1335,11 @@
 
     cell=td('Context','c-ctx');
     wrap=el('span','');
-    var l1=el('span','ln');l1.appendChild(evidenceClassBadge(str(r.evidence_class)));wrap.appendChild(l1);
+    var l1=el('span','ln');l1.appendChild(rowEvidenceBadge(r,x));wrap.appendChild(l1);
     var l2=el('span','ln');l2.appendChild(inclusionBadge(r));wrap.appendChild(l2);
     // the review status is stated once above the list; a row gives its own only where it differs
     if((str(r.clinical_review)||'not recorded')!==SHARED_REVIEW){
-      var rv=el('span','ln','review: '+labelOf(REVIEW_LABEL,r.clinical_review));
+      var rv=el('span','ln',labelOf(REVIEW_LABEL,r.clinical_review));
       rv.setAttribute('data-exception','review');
       rv.title='clinical_review: '+(str(r.clinical_review)||'not recorded');
       wrap.appendChild(rv);
@@ -1708,8 +1721,8 @@
       var inside=rp&&Array.isArray(rp.analysis_memberships)?rp.analysis_memberships:
         arr(m['in']).filter(function(x){return ANALYSIS_IDS.indexOf(x)>=0;});
       if(DEFAULT_M&&inside.indexOf(DEFAULT_M)>=0)line.appendChild(badge(studyBadgeText(),'',memberTitle(DEFAULT_M)));
-      else if(inside.length)line.appendChild(badge('in '+inside.map(ruleLabel).join(', ')+' only','',inside.map(memberTitle).join('; ')));
-      else line.appendChild(badge('in no analysis','','no analysis rule includes this part; the reason is in Methods & source'));
+      else if(inside.length)line.appendChild(badge(inside.map(ruleLabel).join(', ')+' only','',inside.map(memberTitle).join('; ')));
+      else line.appendChild(badge('no analysis','','no analysis rule includes this part; the reason is in Methods & source'));
       if(resultsText(m,'results recorded','pairs requested'))line.appendChild(badge(resultsText(m,'results recorded','pairs requested'),'dim',''));
       sec.appendChild(line);
       if(str(m.integrity_detail))sec.appendChild(el('p','part-out','Integrity detail: '+m.integrity_detail));
