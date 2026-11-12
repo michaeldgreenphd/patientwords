@@ -78,6 +78,7 @@
   @media (max-width:700px){.hero{grid-template-columns:1fr;gap:22px}.lean{border-left:0;padding-left:0;border-top:1px solid var(--hairline);padding-top:18px}}
   .fig{border:1px solid var(--hairline);background:#fff;padding:18px 20px 14px;margin:18px 0}
   .fig .figlab{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  .fig .figlab a{white-space:nowrap}
   .fig .cap{font-size:13.5px;color:var(--muted);margin-top:10px;line-height:1.5;max-width:none}
   .fig .cap b{color:var(--ink)}
   .vig{display:grid;grid-template-columns:1fr 1fr;gap:0;border-top:1px solid var(--hairline);margin-top:10px}
@@ -367,7 +368,16 @@
       }
       bars('vig-cl-sb',s.spread_clinical);
       bars('vig-pt-sb',s.spread_patient);
-      document.getElementById('vig-lab').textContent='live trace · '+VIG_MODEL+' · batch '+s.batch+' #'+(s.batch_index||s.index);
+      // The label names the pair by its number in the scenario series and links the pair's record, as the homepage
+      // does for its example. The number is scenario.index, which is display order: it is read here, never written
+      // into the page. The batch stem and the pair's index in its batch, which is how the page finds the pair, stay
+      // in the label's title. A scenario without a numeric index gets no number and no link.
+      var lab=document.getElementById('vig-lab'); lab.textContent='live trace · '+VIG_MODEL;
+      lab.title='batch '+s.batch+', pair '+(s.batch_index||s.index);
+      if(typeof s.index==='number'){
+        var rec=el('a',null,'scenario '+s.index); rec.href='../simulated-scenarios/scenario.html?sim='+s.index;
+        lab.appendChild(document.createTextNode(' · ')); lab.appendChild(rec);
+      }
       shownPair=s;
       tierLine();
     })

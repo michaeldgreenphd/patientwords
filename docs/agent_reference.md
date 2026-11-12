@@ -154,6 +154,12 @@ checks file shapes, not who reads them.
 - Vocabulary used across flip displays: the model *hedges* (top prediction holds, loses
   probability) vs. *redirects* (top prediction changes); a redirect that drops a
   care-urgency tier is a *downgrade*.
+- Display labels (2026-11-11): a label comes from an explicit map keyed on the exact stored
+  value. A value with no entry is printed as stored and is never transformed, and no title
+  is built from a file stem. Identifiers, versions and file names taken out of the main
+  interface stay readable, word for word, in an existing Details, Provenance or Source
+  section, or, where the page has no such section for them, in a title attribute or a
+  link target. The engine's `tests/test_site_display_labels.py` checks this in a browser.
 
 ### Start here (owner's standing preference, 2026-11-11)
 

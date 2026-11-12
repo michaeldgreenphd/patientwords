@@ -381,8 +381,12 @@
           'clinical answer gains under the translated sentence versus the patient one; helped is the '+
           'share of phrases where it gains at all; the top columns count phrases whose top prediction '+
           'returned to the clinical answer, or left it.';
-        document.getElementById('tx-scale-cap').textContent=
-          'translated sentences measured by CPU next-word inference · exploratory, grows with the nightly cycle · source: data/translation_scale.json';
+        // the caption links the file the table is read from; the file's name is the link's target
+        var cap=document.getElementById('tx-scale-cap');
+        cap.textContent='translated sentences measured by CPU next-word inference · exploratory, grows with the nightly cycle · ';
+        var file=document.createElement('a');file.textContent='data file';
+        file.href='https://github.com/michaeldgreenphd/patientwords/blob/main/data/translation_scale.json';
+        cap.appendChild(file);
         var lr=d.lens_recovery||{};
         if(lr.n_paired){
           var line=document.getElementById('tx-lens-line');

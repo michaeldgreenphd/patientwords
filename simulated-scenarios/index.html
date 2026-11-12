@@ -407,14 +407,14 @@
   <p class="subtitle">Stress scenarios authored by an LLM, validated, traced live on gemma-2-2b, and kept apart from the hand-measured set.</p>
   <details class="meth">
     <summary>View generation methodology</summary>
-  <p class="explainer">This section adds simulated scenarios to the <a href="../phrase-dataset/">hand-measured dataset</a>. Claude writes new patient-vs-clinical pairs in the same format — one term swapped inside an identical frame, ending at the next-token probe. Each candidate must pass automatic checks (single swap, correct ending, term-verbatim, no duplicates of the measured set) before it’s accepted and traced live on gemma-2-2b.</p>
+  <p class="explainer">This section adds simulated scenarios to the <a href="../phrase-dataset/">hand-measured dataset</a>. Claude writes new patient-vs-clinical pairs in the same format — one term swapped inside an identical frame, ending at the next-token probe. Each candidate must pass automatic checks (single swap, correct ending, term-verbatim, no duplicates of the measured set) before it’s accepted and traced live on gemma-2-2b<span id="sim-source-set"></span>.</p>
   <p class="explainer">Each scenario shows the two phrasings, the traced probabilities with the wording gap, and the generator’s reason the swap should matter.</p>
   </details>
   <p class="explainer">Wording gap: the percentage points of next-word probability the clinical answer loses when the sentence is worded the way an everyday patient would say it, as opposed to standard medical terms.</p>
   <p class="explainer">In the table, the model <em>hedges</em> (top answer holds, loses probability) or <em>redirects</em>; the urgency column marks a redirect down the care ladder as a <em>downgrade</em>.</p>
   <p class="explainer">This page shows the scenarios and models the study statistics read. Every measured run, including models added after registration, hand-written example sets and runs no analysis includes, is listed in the <a href="../results/">results catalogue</a>.</p>
   <p class="traced" id="sim-traced" hidden>
-    <span class="tm"><b>traced model:</b> <span id="sim-traced-model">gemma-2-2b · gemma scope transcoders</span></span>
+    <span class="tm"><b>traced model:</b> <span id="sim-traced-model">gemma-2-2b · Gemma Scope transcoders</span></span>
     <span class="tp">→ prob = target-token probability read from the live trace · wording gap = patient − clinical</span>
   </p>
 
@@ -579,7 +579,9 @@
       d2.setAttribute('class','dot-p');
       svg.appendChild(d2);
       var t=document.createElementNS(NS,'title');
-      t.textContent='prob('+((s.target_token||'')+'').trim()+'): clinical '+p2(pc)
+      // a row with no target token names the quantity in words, as the scenario page does ("target probability")
+      var tok=((s.target_token||'')+'').trim();
+      t.textContent=(tok?'prob('+tok+')':'target probability')+': clinical '+p2(pc)
         +' → patient '+(known?p2(pp):'below the traced spread');
       svg.appendChild(t);
     }
@@ -896,6 +898,16 @@
       var currentPage=1,pageCount=1,totalRows=0;
       var sortKey=null,sortDir=-1,filterText='',filterTopic='',filterStatus='';
       var filterSpec='',filterSub='',subRowReset=function(){};
+      // Display names for the six code-shaped topic values in the payload,
+      // keyed on the exact stored value; every other topic is printed as
+      // stored. The condition filter compares displayed names, so the two
+      // spellings of "mental health" and "night sweats" are one option each.
+      var TOPIC_NAMES={'infectious_skin':'infectious skin','mental_health':'mental health',
+        'night_sweats':'night sweats','systemic_symptoms':'systemic symptoms',
+        'ear-nose-throat':'ear, nose and throat','general-systemic':'general systemic'};
+      function topicName(t){
+        return Object.prototype.hasOwnProperty.call(TOPIC_NAMES,t)?TOPIC_NAMES[t]:t;
+      }
       // screened-out rows (failed the measurement screen) hidden by default
       // (owner direction 2026-07-30); the chip toggle shows them, and choosing
       // outcome = "screened out" always overrides the hide
@@ -918,17 +930,29 @@
       // "—" instead of silently borrowing the base model's numbers.
       function view(s){return hasModel(s)?cur(s):{};}
       function activeHasFeatures(){return metaFor(currentModel).features!==false;}
+      // Display names for feature source sets, keyed on the exact recorded id.
+      // A set with no entry is printed as recorded. The id itself stays
+      // readable in the methodology fold (#sim-source-set, filled below).
+      var SOURCE_SET_NAMES={'gemmascope-transcoder-16k':'Gemma Scope transcoders'};
       function sourceSetFor(m){
-        var ss=metaFor(m).source_set;
-        if(ss)return ss;
-        return m===baseModel?'gemma scope transcoders'
-                            :'no transcoder source set · features via null-fetcher';
+        var mm=metaFor(m),ss=mm.source_set;
+        if(ss)return Object.prototype.hasOwnProperty.call(SOURCE_SET_NAMES,ss)?SOURCE_SET_NAMES[ss]:ss;
+        if(m===baseModel)return 'Gemma Scope transcoders';
+        // No source set recorded. graphs:false is the next-token lane, which
+        // has no attribution graph; otherwise the payload names no set.
+        return mm.graphs===false?'next-token probabilities only, no attribution graph'
+                                :'no transcoder source set recorded';
       }
       function setTracedLabel(){
         var lbl=document.getElementById('sim-traced-model');
         if(lbl)lbl.textContent=currentModel+' · '+sourceSetFor(currentModel);
       }
       setTracedLabel();
+      (function(){
+        var note=document.getElementById('sim-source-set');
+        var baseSet=metaFor(baseModel).source_set;
+        if(note&&baseSet)note.textContent=' (source set '+baseSet+')';
+      })();
 
       // SIM-column expander: build (once) and toggle a detail row with the two
       // full prompts, revealed directly beneath the row. Lazily inserted so the
@@ -998,7 +1022,7 @@
         });
         // the swapped wording is the phrase itself - identical across models
         tr.appendChild(el('td','sum-swap','“'+(s.patient_term||'—')+'” → “'+(s.clinical_term||'—')+'”'));
-        tr.appendChild(el('td','mono','“'+(m.target_token||'—')+'”'+(m.anchor_fallback?' *':'')));
+        tr.appendChild(el('td','mono',(m.target_token?'“'+m.target_token+'”':'—')+(m.anchor_fallback?' *':'')));
         // Likelihood shift: the slopegraph glyph plus the two numbers inline
         var shift=slopeCell(m);
         var nums=el('div','shift-nums',
@@ -1074,7 +1098,7 @@
         var list=scenarios.slice();
         if(filterSpec)list=list.filter(function(s){return specOf(s)[0]===filterSpec;});
         if(filterSub)list=list.filter(function(s){return specOf(s)[1]===filterSub;});
-        if(filterTopic)list=list.filter(function(s){return (s.topic||'')===filterTopic;});
+        if(filterTopic)list=list.filter(function(s){return topicName(s.topic||'')===filterTopic;});
         if(filterStatus)list=list.filter(function(s){
           var m=hasModel(s)?cur(s):{};
           var scr=m.screening&&m.screening.status==='screened_out';
@@ -1230,7 +1254,10 @@
         var wrap=document.getElementById('sim-chips');
         if(!wrap)return;
         var topics=[];
-        scenarios.forEach(function(s){if(s.topic&&topics.indexOf(s.topic)<0)topics.push(s.topic);});
+        scenarios.forEach(function(s){
+          var t=s.topic&&topicName(s.topic);
+          if(t&&topics.indexOf(t)<0)topics.push(t);
+        });
         topics.sort();
         function group(label,items,get,set,parent){
           var g=el('div','sel-g'), id='sim-fsel-'+label.replace(/[^a-z]/gi,'');

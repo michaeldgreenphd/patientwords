@@ -143,6 +143,7 @@
   .view-sub{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.03em;
     margin:4px 0 10px}
   .dlm th,.dlm td{white-space:nowrap}
+  .dlm thead th{vertical-align:bottom} /* one header has two lines; the others stay on the rule */
   .dlm{min-width:1100px}
   .dlm td.spark svg{display:block;margin-left:auto}
   /* sortable matrix headers: the button inherits the header look; the caret is
@@ -401,19 +402,28 @@
   function el(tag,cls,txt){var e=document.createElement(tag);if(cls)e.className=cls;
     if(txt!=null)e.textContent=txt;return e;}
   function pct(p){return Math.round(p*100)+'%';}
+  // Short names of the framings, keyed on the exact instruction string the file records (items[].variants[].dialect).
+  // They are the names the page printed for these nine instructions before the map existed. An instruction with
+  // no entry is printed as recorded.
+  var FRAMING_NAMES={'Southern US English':'Southern US','African American Vernacular English':'AAVE',
+    'New England US English':'New England US','Irish English':'Irish','British English':'British',
+    'Caribbean English':'Caribbean','ESL-influenced English':'ESL','texting/informal register':'texting',
+    'elaborated formal register':'formal'};
   function shortName(d){
-    if(/african american/i.test(d))return 'AAVE';
-    if(/texting/i.test(d))return 'texting';
-    if(/elaborated|formal/i.test(d))return 'formal';
-    if(/esl/i.test(d))return 'ESL';
-    if(/caribbean/i.test(d))return 'Caribbean';
-    if(/southern/i.test(d))return 'Southern US';
-    return d.replace(/ English$/,'');
+    return Object.prototype.hasOwnProperty.call(FRAMING_NAMES,d)?FRAMING_NAMES[d]:d;
   }
   function fmtD(x){if(x==null)return String.fromCharCode(8212);
     var v=Math.abs(x)*100;
     var s=v>=9.5?String(Math.round(v)):v.toFixed(1).replace(/\.0$/,'');
     return (x>0?'+':(x<0?String.fromCharCode(8722):''))+s+'%';}
+  // The top prediction as a label. The exporter stores the token with its whitespace stripped (engine
+  // scripts/export_dialect_matrix.py, bare()), so an empty string beside a recorded probability is a token
+  // made of whitespace only. With no token and no probability, no top prediction was recorded: an em dash.
+  var DASH=String.fromCharCode(8212);
+  function topLabel(v){
+    if(v.top_token)return v.top_token;
+    return (v.top_token===''&&typeof v.top_p==='number')?'whitespace token':DASH;
+  }
   fetch('../data/dialects.json',{cache:'no-cache'})
     .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
     .then(function(data){
@@ -445,7 +455,13 @@
         if(key){
           t.setAttribute('data-key',key);
           var b=document.createElement('button');
-          b.type='button';b.textContent=txt;
+          b.type='button';
+          // a label given as a list is drawn one line per entry; the space keeps the words apart in the button's text
+          [].concat(txt).forEach(function(line,i,all){
+            var more=i<all.length-1;
+            b.appendChild(document.createTextNode(line+(more?' ':'')));
+            if(more)b.appendChild(document.createElement('br'));
+          });
           if(ttl)b.title=ttl;
           b.addEventListener('click',function(){clickSort(key);});
           t.appendChild(b);
@@ -456,8 +472,12 @@
       tr.appendChild(hth('num','baseline p','baseline'));
       dialects.forEach(function(d){
         tr.appendChild(hth('num',shortName(d),'d:'+d,'LLM instruction: '+d));});
-      tr.appendChild(hth('num','core','core',
-        'clinical features surviving every framing / clinical features in the baseline trace'));
+      // the last column is the item's `core` field (engine scripts/dialect_invariant_core.py); its header is the
+      // page's own term for that count ("the dialect-invariant core", in the fold below), on two lines so the
+      // column stays narrow; the definition stays in the title, which also names the field, since no fold on this
+      // page lists the file's fields
+      tr.appendChild(hth('num',['invariant','core'],'core',
+        'clinical features surviving every framing / clinical features in the baseline trace (field: core)'));
       tr.appendChild(hth(null,''));
       head.appendChild(tr);
       // rows whose target is a function word measure sentence frame, not the
@@ -517,7 +537,7 @@
           c.appendChild(spark(it.baseline_p,v));
           // the exact numbers live here: the framed sentence, its top prediction,
           // and baseline → framing p(target) with the signed change
-          var tip=String.fromCharCode(8220)+v.prompt+String.fromCharCode(8221)+' '+String.fromCharCode(8594)+' top: '+(v.top_token||'?')+
+          var tip=String.fromCharCode(8220)+v.prompt+String.fromCharCode(8221)+' '+String.fromCharCode(8594)+' top: '+topLabel(v)+
             (v.top_p!=null?' ('+pct(v.top_p)+')':'')+
             ' '+String.fromCharCode(183)+' p(target) '+(it.baseline_p!=null?pct(it.baseline_p):String.fromCharCode(8212))+
             ' '+String.fromCharCode(8594)+' '+(v.p!=null?pct(v.p):String.fromCharCode(8212))+
@@ -706,7 +726,10 @@
         return td;
       }
       var openAcc=null;
-      function wireAccordion(row,label){
+      // label: the row's name, for the button. panel: the label the engine render prints on that row's
+      // panel (medlang_circuits/batch_eval.py: 'Baseline (standard phrasing)' on the baseline panel, the
+      // instruction string v.dialect on a framing's panel), so the caption names a label the figure shows.
+      function wireAccordion(row,label,panel){
         // the tr must stay a row for table semantics; a real <button> in the
         // chevron cell carries focus, aria-expanded, and Enter/Space natively
         var c=el('td','chev-c');
@@ -728,10 +751,10 @@
           var td=el('td');td.colSpan=6;
           var f=document.createElement('iframe');
           f.src='../modes/dialect/sweep/'+(feat.render||'index_01.html');
-          f.title='Circuit trace for '+feat.term+' - panel per framing; find '+label+' by its panel label';
+          f.title='Circuit trace for '+feat.term+' - panel per framing; find '+panel+' by its panel label';
           td.appendChild(f);
           td.appendChild(el('div','acc-cap','all framings of this term, one panel each - '
-            +label+' is the panel with the matching label; hover nodes for details'));
+            +panel+' is the panel with the matching label; hover nodes for details'));
           tr.appendChild(td);
           row.after(tr);
           row.classList.add('acc-open');
@@ -748,7 +771,7 @@
       var bd=el('td','num','baseline');baseRow.appendChild(bd);
       var bt=el('td');bt.appendChild(el('span','stay',(feat.target_token||'?')+' '+String.fromCharCode(183)+' '+(feat.baseline_p!=null?pct(feat.baseline_p):'?')));
       baseRow.appendChild(bt);
-      wireAccordion(baseRow,'Standard English (baseline)');
+      wireAccordion(baseRow,'Standard English (baseline)','Baseline (standard phrasing)');
       fb.appendChild(baseRow);
       feat.variants.slice().sort(function(a,b){return (b.p||0)-(a.p||0);}).forEach(function(v){
         var row=el('tr');
@@ -758,12 +781,12 @@
         var dd=el('td','num');
         dd.appendChild(el('span',v.delta>0?'dpos':'dneg',fmtD(v.delta)));
         row.appendChild(dd);
-        var tp=el('td');
+        var tp=el('td'), tl=topLabel(v);
         tp.appendChild(el('span',v.flip?'flip':'stay',
-          (v.top_token||'?')+' '+String.fromCharCode(183)+' '+(v.top_p!=null?pct(v.top_p):'?')+
+          ((tl===DASH&&v.top_p==null)?DASH:tl+' '+String.fromCharCode(183)+' '+(v.top_p!=null?pct(v.top_p):'?'))+
           (v.flip?' '+String.fromCharCode(8592)+' flip':'')));
         row.appendChild(tp);
-        wireAccordion(row,shortName(v.dialect));
+        wireAccordion(row,shortName(v.dialect),v.dialect);
         fb.appendChild(row);
       });
       document.getElementById('dl-featured').hidden=false;

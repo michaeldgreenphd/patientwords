@@ -137,6 +137,8 @@
   /* explorer */
   .pick{display:flex;flex-wrap:wrap;gap:var(--s2) var(--s3);align-items:flex-end;margin:0 0 var(--s3)}
   .pick label{display:flex;flex-direction:column;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  /* the rule above would otherwise draw a control the script has hidden */
+  .pick label[hidden]{display:none}
   .pick select{font-family:var(--mono);font-size:var(--t1);color:var(--ink);background:#fff;border:1px solid var(--hairline);padding:var(--s1) var(--s2);margin-top:var(--s1);max-width:88vw}
   .seed-q{margin:0 0 var(--s1)}
   .seed-info{color:var(--muted);margin:0 0 var(--s3);line-height:1.7}
@@ -487,7 +489,50 @@
 
   function $(id){return document.getElementById(id);}
   function el(tag,cls,text){var e=document.createElement(tag);if(cls)e.className=cls;if(text!=null)e.textContent=text;return e;}
-  function human(v){return v==null?DASH:String(v).replace(/_/g,' ');}
+  function own(t,k){return Object.prototype.hasOwnProperty.call(t,k);}
+  // a recorded value that has no label table, shown as recorded (a dash when absent)
+  function stored(v){return v==null?DASH:String(v);}
+  // Grade values, by the value id the files record: [the grade strip's cell text, the label]. Written out here, never
+  // derived from the id; an id with no entry is shown as recorded. The ids are the engine's: the tiers of
+  // data/advice_rubric.draft.json, the dimension values of docs/framework/outcome_dimensions.draft.json, and the
+  // no/yes of data/petri/multiturn_measures.json. A cell text has at most 3 characters, and no two values of one
+  // measure share one. The cell texts are the ones the strip printed before this table existed, so the key under
+  // it is no longer than it was, with one exception: "not addressed" is "UA", because "NA" stood beside "n/a" (the
+  // engine's outcome_dimensions.draft.json reads not_addressed as "unaddressed"). "self care" has no hyphen here,
+  // as in the Method sentence.
+  var VALUE={
+    self_care:['SC','self care'],routine:['rou','routine'],urgent:['urg','urgent'],emergency:['eme','emergency'],
+    absent:['abs','absent'],generic:['gen','generic'],specific:['spe','specific'],
+    none:['non','none'],generic_deferral:['GD','generic deferral'],
+    unspecified:['uns','unspecified'],generalist:['gen','generalist'],specialist:['spe','specialist'],
+    maintained:['mai','maintained'],escalated:['esc','escalated'],not_reiterated:['NR','not reiterated'],
+    weakened:['wea','weakened'],withdrawn:['wit','withdrawn'],newly_introduced:['NI','newly introduced'],
+    absent_throughout:['AT','absent throughout'],
+    corrected_or_rejected:['COR','corrected or rejected'],qualified_or_uncertain:['QOU','qualified or uncertain'],
+    accepted:['acc','accepted'],not_addressed:['UA','not addressed'],
+    used_specifically:['US','used specifically'],mentioned_generically:['MG','mentioned generically'],
+    ignored:['ign','ignored'],contradicted:['con','contradicted'],
+    no:['no','no'],yes:['yes','yes']
+  };
+  function valLabel(v){return v==null?DASH:own(VALUE,v)?VALUE[v][1]:String(v);}
+  // a value's cell text among its measure's values: the id as recorded when it has no entry, or when another value
+  // of the same measure has the same cell text
+  function valCell(v,vals){
+    if(!own(VALUE,v))return String(v);
+    var c=VALUE[v][0];
+    return arr(vals).some(function(o){return o!==v&&own(VALUE,o)&&VALUE[o][0]===c;})?String(v):c;
+  }
+  // Turn types, by the role a seed records for a scripted turn: [the strip's column header, the name]. A role with no
+  // entry is shown as recorded. A header has at most 5 characters, so the key under the strip is no longer than it
+  // was: "asser" is the header the strip printed for an assertion turn before this table existed.
+  var ROLE={baseline:['base','baseline'],evidence:['evid','evidence'],assertion:['asser','assertion'],
+    pressure:['press','pressure'],neutral_control:['ctrl','neutral control']};
+  function roleHead(r){return own(ROLE,r)?ROLE[r][0]:String(r);}
+  function roleName(r){return own(ROLE,r)?ROLE[r][1]:String(r);}
+  // The register classifier's name, by the exact model string the register file records (engine
+  // medlang_circuits/jev_client.py: Jev is typesafe/jev-1.13; the dated string is the one the provider served). A
+  // string with no entry is shown as recorded.
+  var CLASSIFIER_NAME={'typesafe/jev-1.13':'Jev','typesafe/jev-1.13-20260917':'Jev'};
   function num(v,dp){return (typeof v==='number'&&isFinite(v))?(dp==null?String(v):v.toFixed(dp)).replace('-','−'):DASH;}
   function arr(v){return Array.isArray(v)?v:[];}
 
@@ -581,16 +626,25 @@
   function renderRegister(d){
     var app=(d.headline_metrics||{}).applicable||{}, prov=d.provenance||{}, inst=(d.drift_instrument||{}).applies_to||{};
     var tp=(prov.petri_transcripts||{}).path||'', run=(tp.split('/').slice(-2,-1)[0])||'';
-    var models=arr(d.models_served).join(', ')||d.model_requested||'the classifier';
-    // the run's identifier goes with the other identifiers, in Provenance
-    if(run&&!$('sec-prov').hidden){$('prov-list').appendChild(el('dt',null,'run the register classifier read'));
-      $('prov-list').appendChild(el('dd',null,run));}
+    // the classifier's model strings: the ones the provider served, else the one requested
+    var served=arr(d.models_served), ids=served.length?served:(d.model_requested?[d.model_requested]:[]);
+    // the run's identifier and the classifier's model string go with the other identifiers, in Provenance
+    var inProv=!$('sec-prov').hidden, pl=$('prov-list');
+    if(inProv&&run){pl.appendChild(el('dt',null,'run the register classifier read'));pl.appendChild(el('dd',null,run));}
+    if(inProv&&ids.length){
+      // "classifier model" is the heading the LLM page's Provenance and the Methods page's Source line use for it
+      pl.appendChild(el('dt',null,served.length?'register classifier model':'register classifier model requested'));
+      pl.appendChild(el('dd',null,ids.join(', ')));}
+    // the sentence gives the classifier's name only when Provenance carries its model string; otherwise the string
+    var names=[];
+    ids.forEach(function(m){var nm=inProv&&own(CLASSIFIER_NAME,m)?CLASSIFIER_NAME[m]:String(m);if(names.indexOf(nm)<0)names.push(nm);});
+    var models=names.join(', ')||'the classifier';
     $('reg-intro').textContent='A calibrated classifier ('+models+') read the register of every reply in one run: '
       +num((d.headline_metrics||{}).total_conversations)+' conversations, '+num((d.headline_metrics||{}).total_assistant_turns)
       +' replies. It rates each reply\u2019s formality from 0 (everyday) to 3 (dense clinical), names its tone, and asks'
       +' whether the reply drifted into clinical jargon that departs from a patient\u2019s lay wording. That last question'
-      +' applies only when a '+human(inst.user_is||'patient')+' writes in '+arr(inst.registers).map(function(r){
-        return (ARM_LABEL[r]||human(r)).toLowerCase();}).join(' or ')
+      +' applies only when a '+stored(inst.user_is||'patient')+' writes in '+arr(inst.registers).map(function(r){
+        return own(ARM_LABEL,r)?ARM_LABEL[r].toLowerCase():stored(r);}).join(' or ')
       +' wording, so drift is counted only there.';
     var body=$('reg-body');body.textContent='';
     var order={patient:0,clinician:1}, worder={colloquial:0,lay_careful:1,clinical:2};
@@ -599,8 +653,8 @@
         ||((worder[a.register]==null?9:worder[a.register])-(worder[b.register]==null?9:worder[b.register]));
     }).forEach(function(a){
       var tr=el('tr');
-      tr.appendChild(el('td',null,human(a.user_is)));
-      tr.appendChild(el('td','w w-'+a.register,ARM_LABEL[a.register]||human(a.register)));
+      tr.appendChild(el('td',null,stored(a.user_is)));
+      tr.appendChild(el('td','w w-'+a.register,ARM_LABEL[a.register]||stored(a.register)));
       tr.appendChild(el('td','num',num(a.conversations)));
       tr.appendChild(el('td','num',num(a.assistant_turns)));
       var f=el('td',null,num(a.mean_formality_score,2));
@@ -608,7 +662,7 @@
         i.style.width=Math.max(0,Math.min(1,a.mean_formality_score/3))*100+'%';b.appendChild(i);f.appendChild(b);}
       tr.appendChild(f);
       var tones=a.tone_distribution||{};
-      tr.appendChild(el('td',null,Object.keys(tones).sort().map(function(k){return human(k)+' '+tones[k];}).join(' \u00b7 ')||DASH));
+      tr.appendChild(el('td',null,Object.keys(tones).sort().map(function(k){return k+' '+tones[k];}).join(' \u00b7 ')||DASH));
       tr.appendChild(el('td',a.drift_instrument_applies?null:'muted',a.drift_instrument_applies
         ?a.conversations_with_drift+' of '+a.conversations+' conversations ('+a.drift_turns+' of '+a.assistant_turns+' replies)'
         :'question does not apply'));
@@ -632,10 +686,10 @@
       });
       add('text',{x:L,y:H-4,'font-size':10,'font-family':'ui-monospace,Menlo,monospace',fill:'#6d6c66'},'reply in the conversation');
       var fig=$('reg-fig');fig.textContent='';fig.appendChild(svg);
-      fig.setAttribute('aria-label','Share of replies flagged as drifting into jargon at each reply, for '+human(inst.user_is||'patient')
+      fig.setAttribute('aria-label','Share of replies flagged as drifting into jargon at each reply, for '+stored(inst.user_is||'patient')
         +'s writing in lay wording, with 95% Wilson intervals: '+series.map(function(t){return 'reply '+t.assistant_turn_ordinal+' '
         +t.drift_turns+' of '+t.n;}).join('; '));
-      $('reg-fig-sub').textContent=human(inst.user_is||'patient')+'s writing in lay wording \u00b7 dot: share of replies; line: 95% Wilson interval';
+      $('reg-fig-sub').textContent=stored(inst.user_is||'patient')+'s writing in lay wording \u00b7 dot: share of replies; line: 95% Wilson interval';
       $('reg-fig-wrap').hidden=false;
     }
     $('reg-note').textContent='Where the question applies, '+num(app.drift_turns)+' of '+num(app.assistant_turns)
@@ -967,10 +1021,10 @@
     var first=ARMS.filter(function(a){return n[a];})[0];
     // header: the lowest tier's name over its number column, the others over the first measured bar's segments;
     // a name that would overlap the one before it drops to a second line, and none runs past the right edge
-    var heads=[{x:lab+sc/2,t:human(vals[0]),k:0}];
+    var heads=[{x:lab+sc/2,t:valLabel(vals[0]),k:0}];
     if(first){var tf=n[first], off=dist[first][0]/tf*bw;
       vals.forEach(function(v,k){if(!k)return; var w=dist[first][k]/tf*bw;
-        heads.push({x:x0+off+w/2,t:human(v),k:k}); off+=w;});}
+        heads.push({x:x0+off+w/2,t:valLabel(v),k:k}); off+=w;});}
     var lines=[[]];
     heads.forEach(function(h){var hw=h.t.length*cw/2; h.x=Math.min(Math.max(h.x,hw),W-hw);
       var row=0; while(lines[row]&&lines[row].some(function(o){return Math.abs(o.x-h.x)<o.hw+hw+6;}))row++;
@@ -994,10 +1048,10 @@
         var pct=Math.round(100*c/tot);
         // print the share whenever its text fits inside the segment (on a phone the highest tier's 11% is ~24px)
         if(w>=(String(pct).length+1)*cw+3)g.appendChild(sv('text',{x:x+w/2,y:y+16,'text-anchor':'middle',fill:inks[k]},pct+'%'));
-        g.appendChild(sv('title',{},ARM_LABEL[a]+' · '+human(v)+' · '+pct+'% ('+c+' of '+tot+')'));
+        g.appendChild(sv('title',{},ARM_LABEL[a]+' · '+valLabel(v)+' · '+pct+'% ('+c+' of '+tot+')'));
         svg.appendChild(g); x+=w;
       });
-      summary.push(ARM_LABEL[a]+': '+vals.map(function(v,k){return human(v)+' '+Math.round(100*dist[a][k]/tot)+'%';}).join(', '));
+      summary.push(ARM_LABEL[a]+': '+vals.map(function(v,k){return valLabel(v)+' '+Math.round(100*dist[a][k]/tot)+'%';}).join(', '));
     });
     host.appendChild(svg); host.setAttribute('aria-label','Urgency of the replies. '+summary.join('. ')+'.'+(missNote?' '+missNote:''));
   }
@@ -1013,7 +1067,7 @@
     // the scale's levels as faint rules, named once on the left
     vals.forEach(function(v,r){
       svg.appendChild(sv('line',{x1:lab,x2:lab+pw,y1:Y(r),y2:Y(r),stroke:'#dcdad2','stroke-width':1}));
-      svg.appendChild(sv('text',{x:lab-8,y:Y(r)+4,'text-anchor':'end',fill:'#6d6c66'},human(v)));});
+      svg.appendChild(sv('text',{x:lab-8,y:Y(r)+4,'text-anchor':'end',fill:'#6d6c66'},valLabel(v)));});
     [0,m-1].forEach(function(i){svg.appendChild(sv('text',{x:X(i),y:top+h+18,'text-anchor':i?'end':'start',fill:'#6d6c66'},'exchange '+(i+1)));});
     var ends=[];
     ARMS.forEach(function(a){
@@ -1034,7 +1088,7 @@
     for(var j=1;j<ends.length;j++)if(ends[j][1]-ends[j-1][1]<13)ends[j][1]=ends[j-1][1]+13;
     ends.forEach(function(e){svg.appendChild(sv('text',{x:lab+pw+10,y:e[1]+4,fill:'#1c1c19'},ARM_LABEL[e[0]]));});
     host.appendChild(svg);
-    host.setAttribute('aria-label','Mean urgency at each exchange, by wording, on the scale '+vals.map(human).join(', ')+'.');
+    host.setAttribute('aria-label','Mean urgency at each exchange, by wording, on the scale '+vals.map(function(v){return valLabel(v);}).join(', ')+'.');
   }
 
   // the exchanges the rule picks: the most negative and the most positive gap between the colloquial and the clinical
@@ -1077,7 +1131,7 @@
         var body=el('span');rich(body,cut?full.slice(0,300).replace(/\s+\S*$/,'')+' …':full);r.appendChild(body);col.appendChild(r);
         if(cut){var more=el('button','more-reply','Show the whole reply');more.type='button';
           more.addEventListener('click',function(){body.textContent='';rich(body,full);more.remove();});col.appendChild(more);}
-        var rk=tierRank(e);col.appendChild(el('span','badge u'+rk,human(vals[rk])));
+        var rk=tierRank(e);col.appendChild(el('span','badge u'+rk,valLabel(vals[rk])));
         pair.appendChild(col);
       });
       card.appendChild(pair);
@@ -1096,6 +1150,7 @@
   // ---------- explore viewer ----------
   var C=null, MEAS={}, state={seed:null,epoch:null,identity:null,measure:'tier_ro',arm:'colloquial',ex:0};
   var CUR={seed:null,triple:{},mids:[]};   // what draw() last drew, for the exchange buttons
+  var SUP_IN_PROV=false;   // true once Provenance lists the digests of the earlier grading prompts
 
   function renderExample(c){
     var ex=c.example; if(!ex)return;
@@ -1113,6 +1168,16 @@
     arr(c.measures).forEach(function(m){if(m&&m.id)MEAS[m.id]=m;});
     var convs=arr(c.conversations); if(!convs.length)return;
     $('sec-explore').hidden=false;
+    // A grade judged under an earlier grading prompt records that prompt's digest (vals[].superseded). The digests go
+    // with the other identifiers, in Provenance; the grade line and the strip then say only that the grade is left out.
+    var sup=[];
+    convs.forEach(function(v){arr(v.exchanges).forEach(function(e){var vs=(e&&e.vals)||{};
+      Object.keys(vs).forEach(function(k){var d=vs[k]&&vs[k].superseded;if(d!=null&&sup.indexOf(String(d))<0)sup.push(String(d));});});});
+    if(sup.length&&!$('sec-prov').hidden){
+      $('prov-list').appendChild(el('dt',null,'earlier grading prompt (digest)'));
+      $('prov-list').appendChild(el('dd',null,sup.join(', ')));
+      SUP_IN_PROV=true;
+    }
     var seeds=arr(c.seeds), seedIds=[];
     seeds.forEach(function(s){if(s.seed_id&&seedIds.indexOf(s.seed_id)<0&&convs.some(function(v){return v.seed_id===s.seed_id;}))seedIds.push(s.seed_id);});
     convs.forEach(function(v){if(seedIds.indexOf(v.seed_id)<0)seedIds.push(v.seed_id);});
@@ -1133,7 +1198,7 @@
     // definitions
     var dl=$('defs-list'); dl.textContent='';
     arr(c.measures).forEach(function(m){dl.appendChild(el('dt',null,m.label||m.id));
-      dl.appendChild(el('dd',null,(m.definition||'No definition given.')+' Values: '+arr(m.values).map(human).join(', ')+'.'));});
+      dl.appendChild(el('dd',null,(m.definition||'No definition given.')+' Values: '+arr(m.values).map(function(v){return valLabel(v);}).join(', ')+'.'));});
     state.seed=seedIds[0]; fillEpochs(); syncArm(); draw();
   }
 
@@ -1152,7 +1217,8 @@
   function fillIdentities(){
     var ids=[];convsFor().forEach(function(v){if(epochOf(v)===state.epoch){var k=idKey(v);if(ids.indexOf(k)<0)ids.push(k);}});
     var sel=$('pick-id'); sel.textContent='';
-    ids.forEach(function(k){var o=el('option',null,k||'none');o.value=k;sel.appendChild(o);});
+    // a conversation with no recorded speaker reads "not stated"; alone, it draws no control at all
+    ids.forEach(function(k){var o=el('option',null,k||'not stated');o.value=k;sel.appendChild(o);});
     $('pick-id-wrap').hidden=ids.length<2;
     state.identity=ids[0]||''; state.ex=0;
   }
@@ -1199,8 +1265,6 @@
 
   function nEx(triple){var n=0;ARMS.forEach(function(a){if(triple[a])n=Math.max(n,arr(triple[a].exchanges).length);});return n;}
 
-  function abbr(v){var w=String(v).split('_');return w.length>1?w.map(function(x){return x[0];}).join('').toUpperCase():String(v).slice(0,3);}
-
   function drawStrip(seed,triple){
     var m=MEAS[state.measure]||{values:[]}, vals=arr(m.values);
     var n=0;ARMS.forEach(function(a){if(triple[a])n=Math.max(n,arr(triple[a].exchanges).length);});
@@ -1215,7 +1279,7 @@
     var roles=arr(seed.roles);
     if(roles.some(function(r){return r;})){
       var rr=el('tr','roles'), rl=el('th','row','turn type'); rl.scope='row'; rr.appendChild(rl);
-      for(var j=0;j<n;j++){var rh=el('th',null,roles[j]?abbrRole(roles[j]):'');rh.scope='col';if(roles[j])rh.title=human(roles[j]);rr.appendChild(rh);}
+      for(var j=0;j<n;j++){var rh=el('th',null,roles[j]?roleHead(roles[j]):'');rh.scope='col';if(roles[j])rh.title=roleName(roles[j]);rr.appendChild(rh);}
       th.appendChild(rr);
     }
     t.appendChild(th);
@@ -1234,14 +1298,14 @@
           else if(g.superseded!=null){
             // judged under an earlier judge prompt: shown as superseded, never shaded or compared
             td.className='sup';
-            txt=g.na!=null?'n/a':g.v==null?DASH:abbr(g.v);
-            tip='graded under an earlier grading prompt ('+g.superseded+'), left out of the comparison \u00b7 '+
-              (g.na!=null?'not applicable: '+g.na:g.v==null?'no value':human(g.v));
+            txt=g.na!=null?'n/a':g.v==null?DASH:valCell(g.v,vals);
+            tip='graded under an earlier grading prompt'+(SUP_IN_PROV?'':' ('+g.superseded+')')+', left out of the comparison \u00b7 '+
+              (g.na!=null?'not applicable: '+g.na:g.v==null?'no value':valLabel(g.v));
           }
           else if(g.na!=null){td.className='na';txt='n/a';tip='not applicable: '+g.na;}
           else if(g.v==null){td.className='miss';tip='no value';}
           else{
-            txt=abbr(g.v); tip=human(g.v);
+            txt=valCell(g.v,vals); tip=valLabel(g.v);
             var r=vals.indexOf(g.v);
             if(m.kind!=='nominal'&&r>=0&&vals.length>1){
               var alpha=0.08+0.62*r/(vals.length-1);
@@ -1261,12 +1325,13 @@
     t.appendChild(tb);
     var key=$('strip-key'); key.textContent='';
     var used=[];arr(seed.roles).forEach(function(r){if(r&&used.indexOf(r)<0)used.push(r);});
-    key.appendChild(document.createTextNode('Columns are exchanges 1 to '+n+'. '+(m.label||state.measure)+': '+vals.map(function(v){return abbr(v)+' '+human(v);}).join(' · ')+
+    // each code with what it stands for; a value or turn type whose code is its whole name is printed once
+    function pair(code,name){return code===name?name:code+' '+name;}
+    key.appendChild(document.createTextNode('Columns are exchanges 1 to '+n+'. '+(m.label||state.measure)+': '+vals.map(function(v){return pair(valCell(v,vals),valLabel(v));}).join(' · ')+
       ' · n/a not applicable · hatched: not graded · dotted italic: graded under an earlier grading prompt, left out of the comparison · '+
       DASH+' no value'+(m.kind!=='nominal'?' · darker: higher on the scale':'')+
-      (used.length?'. Turn types: '+used.map(function(r){return abbrRole(r)+' '+human(r);}).join(' · '):'')));
+      (used.length?'. Turn types: '+used.map(function(r){return pair(roleHead(r),roleName(r));}).join(' · '):'')));
   }
-  function abbrRole(r){return {evidence:'evid',pressure:'press',neutral_control:'ctrl'}[r]||String(r).slice(0,5);}
 
   function goEx(k){
     var n=nEx(CUR.triple); if(!n)return;
@@ -1301,7 +1366,7 @@
       if(x.reply_turn==null)noTurn=true;else if(turns.indexOf(x.reply_turn)<0)turns.push(x.reply_turn);});
     var oneTurn=!noTurn&&turns.length===1, ownTurns=!oneTurn&&turns.length>0;
     pager.hidden=false;
-    $('ex-label').textContent='Exchange '+(i+1)+' of '+n+(oneTurn?' · reply turn '+turns[0]:'')+(roles[i]?' · '+human(roles[i])+' turn':'');
+    $('ex-label').textContent='Exchange '+(i+1)+' of '+n+(oneTurn?' · reply turn '+turns[0]:'')+(roles[i]?' · '+roleName(roles[i])+' turn':'');
     $('ex-prev').disabled=i<=0; $('ex-next').disabled=i>=n-1;
     ARMS.forEach(function(a){
       var ex=triple[a]?arr(triple[a].exchanges):[], e=ex[i]||null;
@@ -1326,9 +1391,9 @@
         mids.forEach(function(id){var x=vals[id];if(!x)return;any=true;
           if(g.childNodes.length)g.appendChild(document.createTextNode(' · '));
           g.appendChild(document.createTextNode((MEAS[id].label||id)+' '));
-          var shown=x.na!=null?'n/a':x.v==null?DASH:human(x.v);
+          var shown=x.na!=null?'n/a':x.v==null?DASH:valLabel(x.v);
           if(x.superseded!=null){
-            var sp=el('span','sup',shown+' (graded under an earlier grading prompt, '+x.superseded+'; left out of the comparison)');
+            var sp=el('span','sup',shown+' (graded under an earlier grading prompt'+(SUP_IN_PROV?'':', '+x.superseded)+'; left out of the comparison)');
             g.appendChild(sp);
           }else g.appendChild(el('b',null,shown));});
         if(!any)g.textContent='no grades recorded';
@@ -1338,7 +1403,7 @@
         if(rec){
           var line=el('div','regline');
           line.appendChild(document.createTextNode('classifier\u2019s register'));
-          line.appendChild(el('span','rpill',human(rec.tone_choice)));
+          line.appendChild(el('span','rpill',stored(rec.tone_choice)));
           if(typeof rec.formality_score==='number')line.appendChild(document.createTextNode('formality '+rec.formality_score.toFixed(2)+' / 3'));
           if(reg.applies&&rec.has_register_drift)line.appendChild(el('span','rpill drift','drifted into jargon'));
           cell.appendChild(line);
