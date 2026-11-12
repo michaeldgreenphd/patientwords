@@ -420,7 +420,7 @@
           <dt>Compare methods</dt><dd>A method-comparison bundle: one file of schema <code>patientwords.experiment-bundle/1</code>, written by the engine's experiment interface.</dd>
           <dt>Cases</dt><dd>Case families: <code>protocol.families</code> and <code>comparisons[].family_id</code>. One family is one case in several wordings (variants).</dd>
           <dt>Run status</dt><dd>Execution state: <code>execution.by_state</code> and <code>methods_not_run[].states</code>.</dd>
-          <dt>Included in analysis</dt><dd>Analysis membership: <code>evidence.analysis_memberships</code>. Being listed here is separate from being in a statistic.</dd>
+          <dt>Analysis eligibility</dt><dd>Analysis membership: <code>evidence.analysis_memberships</code>, the analysis rules the protocol declares. A declared rule states eligibility, not use in a statistic.</dd>
           <dt>Study version</dt><dd>The analysis pin: <code>protocol.id</code>, <code>protocol.version</code> and <code>protocol.sha256</code>, the hash every task of the run is bound to.</dd>
           <dt>Methods &amp; source</dt><dd>Provenance: <code>provenance</code>, <code>plan_totals</code> and <code>execution</code>.</dd>
         </dl>
@@ -698,7 +698,7 @@
         ' · '+(isInt(c.cases)?c.cases+(c.cases===1?' case':' cases'):'case count not recorded')+
         (Array.isArray(c.methods)&&c.methods.length?' · methods '+c.methods.join(', '):'')}));
       li.appendChild(el('span',{cls:'meta',text:'evidence class '+words(c.evidence_class)+' · clinical review '+words(c.clinical_review)+
-        ' · included in analysis: '+(Array.isArray(c.analysis_memberships)&&c.analysis_memberships.length?c.analysis_memberships.join(', '):'no')}));
+        (Array.isArray(c.analysis_memberships)&&c.analysis_memberships.length?' · analysis eligibility declared: '+c.analysis_memberships.join(', '):' · no analysis eligibility declared')}));
       list.appendChild(li);
     });
     var shown=list.children.length;
@@ -773,7 +773,7 @@
       ctxItem('Model',isStr(m.hf_id)?m.hf_id:null,'protocol.model.hf_id','model'),
       ctxItem('Evidence class',e.evidence_class,'evidence.evidence_class','evidence_class'),
       ctxItem('Clinical review',e.clinical_review,'evidence.clinical_review','clinical_review'),
-      ctxItem('Included in analysis',members===null?miss('not recorded'):(members.length?'yes: '+members.join(', '):'no'),
+      ctxItem('Analysis eligibility',members===null?miss('not recorded'):(members.length?'declared: '+members.join(', '):'none declared'),
         'analysis membership, evidence.analysis_memberships','analysis_memberships'),
       ctxItem('Study version',p.id+' · version '+p.version,'analysis pin: protocol.id, protocol.version, protocol.sha256','study_version'),
       /* visibility is shown beside the labels only when it is not plain "public"; the fold always has it */
