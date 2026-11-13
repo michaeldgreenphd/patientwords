@@ -1078,7 +1078,8 @@
       var keys=Object.keys(countBy(function(r){return [str(r[a[0]])];})).filter(function(k){return k;}).sort();
       if(!keys.length)return;
       group(a[0],keys,function(k){
-        var row=a[1]===REVIEW_LABEL&&has(REVIEW_IN_ROW,k)?'; in the run list: '+REVIEW_IN_ROW[k]:'';
+        // the row's words are given only for a status a row prints: the shared status has no line in any row
+        var row=a[1]===REVIEW_LABEL&&has(REVIEW_IN_ROW,k)&&k!==SHARED_REVIEW?'; in the run list: '+REVIEW_IN_ROW[k]:'';
         return (has(a[1],k)?'shown on this page as: '+a[1][k]:'shown on this page as stored')+row;});
     });
     if(!box.firstChild)box.appendChild(el('p','note','No label definition is recorded in this index.'));

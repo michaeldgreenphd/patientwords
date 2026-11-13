@@ -196,8 +196,9 @@ not one of them: it keeps its own serif-and-monospace design and palette (above)
   ("Methods and source" on the homepage). A status that every item shares is stated
   once; an item repeats it only where it differs (the results catalogue's rows state a
   review status only where it is not the shared one, in the short words the page's
-  `REVIEW_IN_ROW` table lists for that stored value; the whole label stays in the
-  line's title, the Clinical review filter, the open run, About and Label values).
+  `REVIEW_IN_ROW` table lists for that stored value, and whole where the table has no
+  entry; the whole label stays in the line's title, the Clinical review filter, the
+  open run, About and Label values).
 - Type. Serif for headings and prose; the system sans-serif for tables, controls and
   labels, with `font-variant-numeric: tabular-nums` on numbers; monospace only for code
   and identifiers (file paths, run ids, hashes, variant names). Sentence case, no
