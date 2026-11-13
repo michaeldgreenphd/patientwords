@@ -637,6 +637,10 @@
     "completion_not_recorded":"completion not recorded","unreadable":"unreadable"};
   var REVIEW_LABEL={"domain_review_pending":"domain review pending",
     "owner_read_equivalence_and_domain_review_pending":"owner-read, equivalence and domain review pending"};
+  // review status -> the words a row keeps for it. A status with no entry prints its whole REVIEW_LABEL entry.
+  // The whole label is in the Clinical review filter, the open run, About and Label values, and in the title
+  // of the row's line beside the stored value.
+  var REVIEW_IN_ROW={"owner_read_equivalence_and_domain_review_pending":"owner-read only"};
   var SAMPLING_LABEL={"observational":"observational","outcome_selected":"outcome-selected","other":"other stimulus family"};
   var SCREENING_LABEL={"passed":"passed","screened_out":"screened out"};
   var RESTRICTION_LABEL={"sealed_holdout":"Sealed holdout","redistribution_limited_text":"Redistribution-limited text",
@@ -1073,7 +1077,10 @@
       if(isObj(LEGEND[a[0]])&&Object.keys(LEGEND[a[0]]).length)return;
       var keys=Object.keys(countBy(function(r){return [str(r[a[0]])];})).filter(function(k){return k;}).sort();
       if(!keys.length)return;
-      group(a[0],keys,function(k){return has(a[1],k)?'shown on this page as: '+a[1][k]:'shown on this page as stored';});
+      group(a[0],keys,function(k){
+        // the row's words are given only for a status a row prints: the shared status has no line in any row
+        var row=a[1]===REVIEW_LABEL&&has(REVIEW_IN_ROW,k)&&k!==SHARED_REVIEW?'; in the run list: '+REVIEW_IN_ROW[k]:'';
+        return (has(a[1],k)?'shown on this page as: '+a[1][k]:'shown on this page as stored')+row;});
     });
     if(!box.firstChild)box.appendChild(el('p','note','No label definition is recorded in this index.'));
   }
@@ -1346,9 +1353,10 @@
     var l2=el('span','ln');l2.appendChild(eligibilityBadge(r));wrap.appendChild(l2);
     // the review status is stated once above the list; a row gives its own only where it differs
     if((str(r.clinical_review)||'not recorded')!==SHARED_REVIEW){
-      var rv=el('span','ln',labelOf(REVIEW_LABEL,r.clinical_review));
+      var rk=str(r.clinical_review),rs=has(REVIEW_IN_ROW,rk);
+      var rv=el('span','ln',rs?REVIEW_IN_ROW[rk]:labelOf(REVIEW_LABEL,r.clinical_review));
       rv.setAttribute('data-exception','review');
-      rv.title='clinical_review: '+(str(r.clinical_review)||'not recorded');
+      rv.title='clinical_review: '+(rk||'not recorded')+(rs?' ('+labelOf(REVIEW_LABEL,rk)+')':'');
       wrap.appendChild(rv);
     }
     cell.appendChild(wrap);row.appendChild(cell);
