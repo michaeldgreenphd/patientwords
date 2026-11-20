@@ -754,7 +754,7 @@
       (10/10); their own clinical rewrite dropped 0&ndash;2 items (haiku none), so
       <em>translating patient words into clinical words can lose information</em>.
     </p>
-    <p id="advice-arm-note"><b>The advice arm, briefly.</b> The LLM-responses page queries nine deployed
+    <p id="advice-arm-note"><b>The advice arm, briefly.</b> The LLM-responses page queries eight deployed
       assistants over the same scenarios (single-turn API calls, three attempts per phrasing; one arm is an
       anonymous preview model, dagger-marked there with its provenance). Care-urgency
       tiers are coded by <code>claude-haiku-4-5</code> against a draft rubric (v1.1, clinician review
@@ -1143,7 +1143,7 @@
       <li><b>Attribution graphs are an interpretive tool.</b> They reconstruct the model’s computation through features and prune heavily; error nodes absorb what’s missed.</li>
       <li><b>Feature labels are machine-generated.</b> The clinical / off-target categories come from keyword-matching (description in GitHub).</li>
       <li id="instrument-question"><b>The instruments are untested across wordings.</b> A transcoder and its feature labels may describe everyday wording less faithfully than medical wording. If they do, a difference between two graphs can come from the instrument, from the model, or from both. An experiment with matched wordings and control conditions is drafted to test this (<a href="https://github.com/michaeldgreenphd/patientwords-engine/blob/main/docs/protocols/instrument_register_experiment_20261111.md">protocol draft</a>); it has not been run.</li>
-      <li><b>Measurements are a point in time.</b> The probabilities were observed on specific dates against a hosted service. The <span id="lim-rt-n">&mdash;</span> pairs re-traced so far reproduce the same top word in every case; recorded probabilities moved by at most 0.027. A re-trace can move a probability slightly, and a value near zero can fall below what the trace resolves.</li>
+      <li><b>Measurements are a point in time.</b> The probabilities were observed on specific dates against a hosted service. Of the <span id="lim-rt-n">&mdash;</span> pairs re-traced so far, <span id="lim-rt-stable">&mdash;</span> reproduce the same top word; recorded probabilities moved by at most <span id="lim-rt-max">&mdash;</span>. A re-trace can move a probability slightly, and a value near zero can fall below what the trace resolves.</li>
       <li><b>Translation can fail.</b> The fix in the Translation figure is itself an LLM step.</li>
       <li><b>The stimuli are constructed.</b> Most phrase pairs were written by a language model and checked automatically, not collected from patients. We are currently interviewing patients about their LLM use.</li>
     </ul>
@@ -1314,6 +1314,10 @@
       if(lists)lists.textContent=(d.spread_lists_identical_pairs!=null?d.spread_lists_identical_pairs:'—')+' of '+d.pairs_retraced;
       var limN=document.getElementById('lim-rt-n');
       if(limN)limN.textContent=String(d.pairs_retraced);
+      var limS=document.getElementById('lim-rt-stable');
+      if(limS)limS.textContent=String(d.top_word_stable_pairs);
+      var limM=document.getElementById('lim-rt-max');
+      if(limM)limM.textContent=String(d.prob_spread_max);
       var fold=document.getElementById('retrace-fold');
       if(fold)fold.hidden=false;
     }).catch(function(){});

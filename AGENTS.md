@@ -53,7 +53,7 @@ technical terms, no marketing.
   `../patientwords-engine/data/specialty_map.draft.json`).
   The reference's writer table defines ownership, including owner-run exports.
 - Every published number traces to committed data, a figure or runtime computation.
-  Keep synthetic scenarios, real measured traces and real-patient-language dataset
+  Keep synthetic scenarios, real measured traces and the hand-built phrase dataset's
   provenance distinct. Keep sample notices, draft/domain-review labels, intentional
   misspellings and the provenance/acknowledgments footer.
 - Preserve stable `(batch, batch_index)` identities, per-model metadata and the

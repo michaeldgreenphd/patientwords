@@ -316,7 +316,7 @@ Every number must trace to a data field, generated figure or computation from fe
 data. Retired hand-authored demonstration renders were removed at the owner's request
 (2026-07-08); a demonstration that returns must disclose that provenance in visible
 labels and metadata. LLM-written scenarios with measured traces are distinct from
-the hand-built real-patient-language phrase dataset. Draft urgency vocabulary stays
+the hand-built phrase dataset, whose phrases the owner wrote. Draft urgency vocabulary stays
 "draft pending domain review" until the engine's `../patientwords-engine/docs/tier_review_checklist.md`
 records approval. Preserve source acknowledgments and intentional misspellings.
 
