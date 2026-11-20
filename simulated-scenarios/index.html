@@ -1457,7 +1457,8 @@
       if(!d.pairs_retraced)return;
       var txt=document.getElementById('retrace-text');
       txt.textContent=d.top_word_stable_pairs+' of '+d.pairs_retraced+
-        ' phrases traced more than once reproduce the same top word and top-five list; '+
+        ' phrases traced more than once reproduce the same top word; '+
+        (d.spread_lists_identical_pairs!=null?d.spread_lists_identical_pairs+' of '+d.pairs_retraced+' also reproduce the same top-five list; ':'')+
         'probabilities move by at most '+d.prob_spread_max+' · ';
       var a=document.createElement('a');
       a.href='https://github.com/michaeldgreenphd/patientwords/blob/main/data/retrace_consistency.json';

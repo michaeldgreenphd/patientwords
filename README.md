@@ -47,7 +47,7 @@ links (Start here, Scenarios, Results, Methods); the other pages are under "More
 | [Compare methods](https://michaeldgreenphd.github.io/patientwords/experiments/) | Experiment comparisons exported by the engine's experiment interface: per case the paired wording and the recorded model output first, then the internal measurements, run status, and methods and source. None is published yet; the page lists what `data/experiments/index.json` names and says so when the list is empty. Not in the navigation and marked `noindex` |
 | [LLM](https://michaeldgreenphd.github.io/patientwords/llm/) | The advice arm: verbatim assistant responses to both wordings |
 | [Multi-turn](https://michaeldgreenphd.github.io/patientwords/multi-turn/) | Scripted multi-turn conversations in three wordings, each reply graded (Claude Haiku 4.5, pilot of eight scenarios) |
-| [Phrase Dataset](https://michaeldgreenphd.github.io/patientwords/phrase-dataset/) | The hand-built set from real patient language, measured by hand |
+| [Phrase Dataset](https://michaeldgreenphd.github.io/patientwords/phrase-dataset/) | The hand-built set, written by the project owner and measured by hand |
 
 Two provenances appear throughout and are always labeled: LLM-written
 scenarios with real live traces, and the hand-built phrase dataset from real
