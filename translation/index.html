@@ -338,18 +338,25 @@
     // At-scale block: every number rendered from the fetched file, so the
     // section updates as the nightly cycle measures more of the corpus and
     // stays hidden until the data file first publishes.
-    // What the file's fields measure (corrected 2026-11-20; the file's own names and note say otherwise):
-    // each txcorpus pair is the source pair's original medical sentence (top_prompt) and the rewrite of its
-    // everyday sentence (bottom_prompt), so mean_recovery / median_recovery = p(target | medical) -
-    // p(target | rewrite), share_recovery_positive = share of phrases with that gap above zero,
-    // top_restored = target is the top prediction after the medical sentence only, top_lost = after the
-    // rewrite only. The everyday sentence is not in these runs. lens_recovery is a separate join and does
-    // compare the rewrite with the everyday sentence.
+    // The same field names hold one of two comparisons, and the wording below follows the file.
+    // 1. A file with no `coverage` block (the engine's translation_scale.py before 2026-11-20; the file
+    //    published since 2026-08-29). Each txcorpus pair is the source pair's original medical sentence
+    //    (top_prompt) and the rewrite of its everyday sentence (bottom_prompt), and the script subtracted
+    //    within that one run: mean_recovery / median_recovery = p(target | medical) - p(target | rewrite),
+    //    share_recovery_positive = share of phrases with that gap above zero, top_restored = target is the
+    //    top prediction after the medical sentence only, top_lost = after the rewrite only. The everyday
+    //    sentence is not in these runs. The file's own names and note say otherwise.
+    // 2. A file with a `coverage` block (the corrected script). mean_recovery / median_recovery =
+    //    p(target | rewrite) - p(target | everyday), the everyday value taken from the source pair's own
+    //    run of the same model; n counts the pairs with both values; top_restored / top_lost compare the
+    //    rewrite with the everyday sentence.
+    // lens_recovery compares the rewrite with the everyday sentence in both.
     fetch('../data/translation_scale.json',{cache:'no-cache'})
       .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
       .then(function(d){
         var per=d.per_model||{}; var ids=Object.keys(per).sort();
         if(!ids.length)return;
+        var joined=!!(d.coverage&&typeof d.coverage==='object');
         function pp(v){return (v>=0?'+':'−')+Math.abs(v*100).toFixed(1)+' pp';}
         var body=document.getElementById('tx-scale-body');
         var maxN=0;
@@ -368,10 +375,13 @@
         // family-aware, data-driven summary; names only measured models, states
         // medical models only when present, every number from d.per_model at runtime.
         function famIds(f){return ids.filter(function(id){return (per[id].family||'other')===f;});}
-        function say(id){var s=per[id];return id+' '+pp(s.mean_recovery)+' (median '+pp(s.median_recovery)
-          +', rewrite lower in '+Math.round(s.share_recovery_positive*100)+'% of phrases, n='+s.n+')';}
+        function say(id){var s=per[id],share=Math.round(s.share_recovery_positive*100);
+          return id+' '+pp(s.mean_recovery)+' (median '+pp(s.median_recovery)+', '
+            +(joined?share+'% helped':'rewrite lower in '+share+'% of phrases')+', n='+s.n+')';}
         var baseIds=famIds('base'), itIds=famIds('instruction-tuned'), medIds=famIds('medical');
-        var parts=['Measured across the translated corpus (exploratory), the rewrite is compared with the pair’s original medical wording. A positive gap means the target word was less probable after the rewrite.'];
+        var parts=[joined
+          ?'Measured across the translated corpus (exploratory), the rewrite is compared with the everyday wording it was written from. A positive value means the target word was more probable after the rewrite.'
+          :'Measured across the translated corpus (exploratory), the rewrite is compared with the pair’s original medical wording. A positive gap means the target word was less probable after the rewrite.'];
         if(baseIds.length) parts.push('Base models — '+baseIds.map(say).join('; ')+'.');
         if(itIds.length){
           var it='Instruction-tuned models — '+itIds.map(say).join('; ')+'.';
@@ -382,13 +392,22 @@
             :itIds.every(function(id){return per[id].mean_recovery>0&&Math.abs(per[id].median_recovery)<0.01;});
           if(minorityLift)
             it='Instruction-tuned models — '+itIds.map(say).join('; ')
-              +' — the mean gap is positive but the median is near zero, so the gap comes from a minority of phrases rather than from the corpus as a whole.';
+              +(joined
+                ?' — the mean lift is positive but the median is near zero, so it concentrates in a minority of phrases rather than shifting the corpus.'
+                :' — the mean gap is positive but the median is near zero, so the gap comes from a minority of phrases rather than from the corpus as a whole.');
           parts.push(it);
         }
         if(medIds.length) parts.push('Medically tuned models — '+medIds.map(say).join('; ')+'.');
         document.getElementById('tx-scale-finding').textContent=parts.join(' ');
-        document.getElementById('tx-scale-text').textContent=
-          'The same LLM translation, applied to every measured phrase ('+maxN+
+        document.getElementById('tx-scale-text').textContent=joined
+          ?'The same LLM rewrite, scored by next-word probability on each model. The rewrite’s probability '+
+          'comes from the run of the translated corpus; the everyday wording’s probability comes from the '+
+          'source pair’s own run on the same model. Phrases counts the pairs for which both were measured. '+
+          'Mean recovery is the target word’s probability after the rewrite minus its probability after '+
+          'the everyday wording. Helped is the share of pairs where that difference is above zero. Top '+
+          'restored counts pairs where the target word was the top prediction after the rewrite and not '+
+          'after the everyday wording; Top lost counts the reverse.'
+          :'The same LLM translation, applied to every measured phrase ('+maxN+
           ' so far) and scored by next-word probability on each model. Each run measures two sentences: '+
           'the pair’s original medical wording and the rewrite of its everyday wording. The everyday '+
           'wording itself is not measured in these runs, so this table does not show what the rewrite '+
@@ -396,6 +415,15 @@
           'probability after the rewrite. Rewrite lower is the share of phrases where that gap is above '+
           'zero. The last two columns count phrases where the target word was the top prediction after '+
           'only one of the two sentences.';
+        if(joined){
+          // the static headers and note describe the file with no `coverage` block
+          var heads=document.querySelectorAll('#tx-scale-table thead th');
+          ['Mean recovery','Helped','Top restored','Top lost'].forEach(function(t,i){if(heads[i+2])heads[i+2].textContent=t;});
+          document.getElementById('tx-scale-note').textContent='Corrected November 20, 2026. Until the data '+
+            'file was regenerated, this table compared the rewrite with the pair’s original medical wording, '+
+            'not with the everyday wording. The numbers shown now come from the corrected comparison and '+
+            'differ from the earlier ones.';
+        }
         // the caption links the file the table is read from; the file's name is the link's target
         var cap=document.getElementById('tx-scale-cap');
         cap.textContent='translated sentences measured by CPU next-word inference · exploratory, grows with the nightly cycle · ';
@@ -414,9 +442,11 @@
           line.hidden=false;
         }
         // live caveat beside the single-case "41%" lead: the same model's mean gap between
-        // the rewrite and the original medical wording, so the showcase case isn't read as typical
+        // the rewrite and the original medical wording, so the showcase case isn't read as typical.
+        // Not shown for a file with a `coverage` block: a sentence about that file's scale result
+        // waits for the owner's wording.
         var g=per['gemma-2-2b'];
-        if(g&&typeof g.mean_recovery==='number'){
+        if(!joined&&g&&typeof g.mean_recovery==='number'){
           var cav=document.getElementById('tx-lead-caveat');
           var rel=function(v){return Math.abs(v*100).toFixed(1)+' pp '+(v>=0?'less':'more');};
           cav.textContent='That 41% is one of the hardest cases. At scale ('

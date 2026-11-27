@@ -264,6 +264,12 @@ silently breaks a published page:
 * **Compatibility path:** older payloads exist. Pages must keep degrading to
   their pending/em-dash states when `models_meta`, `models`, or `archive` are
   absent, and a change that assumes a new field is present needs a fallback.
+  `translation_scale.json` holds one of two comparisons under the same field names.
+  A file with no `coverage` block compares the rewrite with the pair's original medical
+  wording; a file with one (the engine's corrected `translation_scale.py`) compares the
+  rewrite with the everyday wording. `translation/index.html` words its at-scale table by
+  that block. The engine's `../patientwords-engine/docs/corrections/translation_scale_20261120.md`
+  records the correction and the owner's open decisions.
 * **Claims are load-bearing:** every number on a page must trace to a source in
   this repo, provenance labels must stay accurate, and draft labels on
   urgency-tier content stay until the vocabulary is approved. Weakening any of
