@@ -79,7 +79,8 @@
   .stat{font-family:var(--mono);font-size:13px;font-weight:600;letter-spacing:.01em}
   .stat.penalty{color:var(--penalty)}
   .stat.recovery{color:var(--clinical)}
-  /* live at-scale caveat beside the single-case recovery lead */
+  /* live at-scale caveat beside the single-case recovery lead: the same model's mean gap between the
+     rewrite and the pair's original medical wording */
   .lead-caveat{font-family:var(--mono);font-size:11.5px;color:var(--muted);margin:6px 0 14px;max-width:640px;line-height:1.7}
 
   .traced{margin:12px 0 0;font-family:var(--mono);font-size:11px;letter-spacing:.03em;
@@ -260,14 +261,18 @@
     <h2>At scale</h2>
     <p class="explainer" id="tx-scale-finding"></p>
     <p class="explainer" id="tx-scale-text"></p>
+    <p class="explainer" id="tx-scale-note">Corrected November 20, 2026. Until then these columns were
+      headed Mean recovery, Helped, Top restored and Top lost, and described as the rewrite compared with
+      the patient sentence. The numbers are unchanged; the comparison they make is the one stated above.
+      The data file keeps its earlier field names and note.</p>
     <div class="txs-wrap"><table class="txs" id="tx-scale-table" aria-describedby="tx-scale-cap">
       <thead><tr>
         <th scope="col">Model</th>
         <th scope="col" class="num">Phrases</th>
-        <th scope="col" class="num">Mean recovery</th>
-        <th scope="col" class="num">Helped</th>
-        <th scope="col" class="num">Top restored</th>
-        <th scope="col" class="num">Top lost</th>
+        <th scope="col" class="num">Mean gap</th>
+        <th scope="col" class="num">Rewrite lower</th>
+        <th scope="col" class="num">Top: medical only</th>
+        <th scope="col" class="num">Top: rewrite only</th>
       </tr></thead>
       <tbody id="tx-scale-body"></tbody>
     </table></div>
@@ -333,6 +338,13 @@
     // At-scale block: every number rendered from the fetched file, so the
     // section updates as the nightly cycle measures more of the corpus and
     // stays hidden until the data file first publishes.
+    // What the file's fields measure (corrected 2026-11-20; the file's own names and note say otherwise):
+    // each txcorpus pair is the source pair's original medical sentence (top_prompt) and the rewrite of its
+    // everyday sentence (bottom_prompt), so mean_recovery / median_recovery = p(target | medical) -
+    // p(target | rewrite), share_recovery_positive = share of phrases with that gap above zero,
+    // top_restored = target is the top prediction after the medical sentence only, top_lost = after the
+    // rewrite only. The everyday sentence is not in these runs. lens_recovery is a separate join and does
+    // compare the rewrite with the everyday sentence.
     fetch('../data/translation_scale.json',{cache:'no-cache'})
       .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
       .then(function(d){
@@ -357,9 +369,9 @@
         // medical models only when present, every number from d.per_model at runtime.
         function famIds(f){return ids.filter(function(id){return (per[id].family||'other')===f;});}
         function say(id){var s=per[id];return id+' '+pp(s.mean_recovery)+' (median '+pp(s.median_recovery)
-          +', '+Math.round(s.share_recovery_positive*100)+'% helped, n='+s.n+')';}
+          +', rewrite lower in '+Math.round(s.share_recovery_positive*100)+'% of phrases, n='+s.n+')';}
         var baseIds=famIds('base'), itIds=famIds('instruction-tuned'), medIds=famIds('medical');
-        var parts=['Measured across the translated corpus (exploratory), the same rewrite produces a small average lift that varies by model.'];
+        var parts=['Measured across the translated corpus (exploratory), the rewrite is compared with the pair’s original medical wording. A positive gap means the target word was less probable after the rewrite.'];
         if(baseIds.length) parts.push('Base models — '+baseIds.map(say).join('; ')+'.');
         if(itIds.length){
           var it='Instruction-tuned models — '+itIds.map(say).join('; ')+'.';
@@ -370,17 +382,20 @@
             :itIds.every(function(id){return per[id].mean_recovery>0&&Math.abs(per[id].median_recovery)<0.01;});
           if(minorityLift)
             it='Instruction-tuned models — '+itIds.map(say).join('; ')
-              +' — the mean lift is positive but the median is near zero, so it concentrates in a minority of phrases rather than shifting the corpus.';
+              +' — the mean gap is positive but the median is near zero, so the gap comes from a minority of phrases rather than from the corpus as a whole.';
           parts.push(it);
         }
         if(medIds.length) parts.push('Medically tuned models — '+medIds.map(say).join('; ')+'.');
         document.getElementById('tx-scale-finding').textContent=parts.join(' ');
         document.getElementById('tx-scale-text').textContent=
           'The same LLM translation, applied to every measured phrase ('+maxN+
-          ' so far) and scored by next-word probability on each model. Mean recovery is what the '+
-          'clinical answer gains under the translated sentence versus the patient one; helped is the '+
-          'share of phrases where it gains at all; the top columns count phrases whose top prediction '+
-          'returned to the clinical answer, or left it.';
+          ' so far) and scored by next-word probability on each model. Each run measures two sentences: '+
+          'the pair’s original medical wording and the rewrite of its everyday wording. The everyday '+
+          'wording itself is not measured in these runs, so this table does not show what the rewrite '+
+          'gains over it. Mean gap is the target word’s probability after the medical wording minus its '+
+          'probability after the rewrite. Rewrite lower is the share of phrases where that gap is above '+
+          'zero. The last two columns count phrases where the target word was the top prediction after '+
+          'only one of the two sentences.';
         // the caption links the file the table is read from; the file's name is the link's target
         var cap=document.getElementById('tx-scale-cap');
         cap.textContent='translated sentences measured by CPU next-word inference · exploratory, grows with the nightly cycle · ';
@@ -398,14 +413,16 @@
           line.appendChild(a);line.appendChild(document.createTextNode('.'));
           line.hidden=false;
         }
-        // live caveat beside the single-case "41%" lead: the same model's
-        // corpus-average lift, so the showcase case isn't read as typical
+        // live caveat beside the single-case "41%" lead: the same model's mean gap between
+        // the rewrite and the original medical wording, so the showcase case isn't read as typical
         var g=per['gemma-2-2b'];
         if(g&&typeof g.mean_recovery==='number'){
           var cav=document.getElementById('tx-lead-caveat');
+          var rel=function(v){return Math.abs(v*100).toFixed(1)+' pp '+(v>=0?'less':'more');};
           cav.textContent='That 41% is one of the hardest cases. At scale ('
-            +g.n+' cases) translation lifts the clinical answer’s probability by a mean of '+pp(g.mean_recovery)
-            +(typeof g.median_recovery==='number'?' (median '+pp(g.median_recovery)+')':'')+'.';
+            +g.n+' phrases) the target word is on average '+rel(g.mean_recovery)
+            +' probable after the rewrite than after the pair’s original medical wording'
+            +(typeof g.median_recovery==='number'?' (median '+rel(g.median_recovery)+')':'')+'.';
           cav.hidden=false;
         }
         document.getElementById('tx-scale').hidden=false;
